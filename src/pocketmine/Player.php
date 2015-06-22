@@ -2118,7 +2118,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($target instanceof Entity and $this->getGamemode() !== Player::VIEW and $this->dead !== \true and $target->dead !== \true){
 					if($target instanceof DroppedItem or $target instanceof Arrow){
 						$this->kick("Attempting to attack an invalid entity");
-						$this->server->getLogger()->warning($this->getServer()->getLanguage()->translateString("pocketmine.player.invalidEntity", [$this->getName()]));
 						return;
 					}
 
@@ -2356,7 +2355,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							}else{
 								$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $ev->getMessage()));
 								if(!$ev->isCancelled()){
-									$this->server->broadcastMessage($this->getServer()->getLanguage()->translateString($ev->getFormat(), [$ev->getPlayer()->getDisplayName(), $ev->getMessage()]), $ev->getRecipients());
+									$this->server->broadcastMessage("<".$ev->getPlayer()->getDisplayName()."> ".$ev->getMessage(), $ev->getRecipients());
 								}
 							}
 						}
