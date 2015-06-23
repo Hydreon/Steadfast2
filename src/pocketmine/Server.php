@@ -806,6 +806,9 @@ class Server{
 			\unlink($path . "$name.yml");
 		}
 
+        if($this->getConfigBoolean("save-playerdata", true)) {
+            $this->saveOfflinePlayerData($name, $nbt);
+        }
 		return $nbt;
 
 	}

@@ -17,6 +17,8 @@ settings:
  #Number of AsyncTask workers
  #WARNING: This will increase global memory usage, but it won't be listed in the total.
  async-workers: 1
+ #Save playerdata
+ save-playerdata: true
 
 debug:
  #If > 1, it will show debug messages in the console
