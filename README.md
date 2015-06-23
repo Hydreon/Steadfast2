@@ -16,6 +16,5 @@ Known bugs:
 Things you'll want to change on your plugins:
    - Players don't fall out of the world naturally, you'll want to handle PlayerMoveEvent as needed to kill them
    - AsyncTasks need to reference $this->postURL and $this->getURL to communicate with ourside servers instead of the Utils class (loader problem)
-   - You'll need to call Server->getNetwork()->setCount($player_count) at least once to show a valid ping on the server list
 
 To build, run the server with DevTools installed then run /makeserver. It'll drop a phar file in it's plugin directory.
