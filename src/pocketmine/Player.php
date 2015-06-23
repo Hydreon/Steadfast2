@@ -2819,13 +2819,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$message = $this->getName() . " fell out of the world";
 				break;
 			case EntityDamageEvent::CAUSE_FALL:
-				if($ev instanceof EntityDamageEvent){
-					if($ev->getFinalDamage() > 2){
-						$message = $this->getName() . " fell from a high place";
-						break;
-					}
-				}
-				$message = $this->getName() . " hit the ground too hard";
+                $message = $this->getName() . " fell from a high place";
 				break;
 
 			case EntityDamageEvent::CAUSE_SUFFOCATION:
