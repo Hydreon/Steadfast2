@@ -87,7 +87,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		}
 
 		$this->count = count($this->server->getOnlinePlayers());
-		$this->name = $this->getServer->getMotd();
+		$this->name = $this->server->getMotd();
 		
 		$this->interface->sendOption("name",
 		"MCPE;".addcslashes($this->name, ";") .";".
