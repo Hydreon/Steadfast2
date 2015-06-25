@@ -83,10 +83,10 @@ auto-report:
  host: crash.pocketmine.net
 
 auto-updater:
- enabled: true
+ enabled: false
  on-update:
-  warn-console: true
-  warn-ops: true
+  warn-console: false
+  warn-ops: false
  host: www.pocketmine.net
 
 aliases:
