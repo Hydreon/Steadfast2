@@ -26,6 +26,15 @@ debug:
  #Enables /status
  commands: true
 
+# When the server is full, where should we send players?
+forwarding:
+ enabled: false
+
+ # Can be a domain or a valid IPv4 address (x.x.x.x)
+ ip: ""
+
+ port: 19132
+
 level-settings:
  #The default format that levels will use when created
  default-format: mcregion

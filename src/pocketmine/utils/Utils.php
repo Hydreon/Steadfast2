@@ -97,6 +97,23 @@ class Utils{
 		return \hash("md5", $machine, $raw) . \hash("sha512", $data, $raw);
 	}
 
+	public static function randomUUID(){
+		return Utils::toUUID(Binary::writeInt(time()) . Binary::writeShort(getmypid()) . Binary::writeShort(getmyuid()) . Binary::writeInt(mt_rand(-0x7fffffff, 0x7fffffff)) . Binary::writeInt(mt_rand(-0x7fffffff, 0x7fffffff)), 2);
+	}
+
+	public static function dataToUUID(...$params){
+		return Utils::toUUID(hash("md5", implode($params), true), 3);
+	}
+
+	public static function toUUID($data, $version = 2, $fixed = "8"){
+		if(strlen($data) !== 16){
+			throw new \InvalidArgumentException("Data must be 16 bytes");
+		}
+		$hex = bin2hex($data);
+		//xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx 8-4-4-12
+		return substr($hex, 0, 8) . "-" . substr($hex, 8, 4) . "-" . hexdec($version) . substr($hex, 13, 3) . "-" . $fixed{0} . substr($hex, 17, 3) . "-" . substr($hex, 20, 12);
+	}
+
 	/**
 	 * Gets the External IP using an external service, it is cached
 	 *

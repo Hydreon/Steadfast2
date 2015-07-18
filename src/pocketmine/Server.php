@@ -1563,6 +1563,13 @@ class Server{
 			"auto-save" => \true,
 		]);
 
+		if($this->getProperty("forward.enabled", false) === true) {
+			Player::$forwardIp = $this->getProperty("forward.address", "");
+			Player::$forwardPort = $this->getProperty("forward.port", 19132);
+			Player::$forwardDNS = !filter_var(Player::$forwardIp, FILTER_VALIDATE_IP);
+		}
+
+
 		ServerScheduler::$WORKERS = 4;
 
 		if($this->getProperty("network.batch-threshold", 256) >= 0){
