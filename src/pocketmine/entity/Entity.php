@@ -100,9 +100,6 @@ abstract class Entity extends Location implements Metadatable{
 	private static $knownEntities = [];
 	private static $shortNames = [];
 
-	protected $checkBlockCollisionCount = 0;
-	protected $checkBlockCollisionTicks = 1;
-
 	/**
 	 * @var Player[]
 	 */
