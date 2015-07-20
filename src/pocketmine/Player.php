@@ -143,6 +143,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/** @var SourceInterface */
 	protected $interface;
 
+	public static $forwardDNS = false;
+	public static $forwardIp = "";
+	public static $forwardPort = 19132;
+
 	public $spawned = \false;
 	public $loggedIn = \false;
 	public $gamemode;
@@ -248,6 +252,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	public function getUniqueId(){
 		return $this->uuid;
+	}
+
+	public function getLoaderId(){ // Forward-Compatibility.
+		return $this->getId();
 	}
 
 	public function isBanned(){
@@ -481,6 +489,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->moveToSend = new MoveEntityPacket();
 		$this->motionToSend->setChannel(Network::CHANNEL_MOVEMENT);
 		$this->moveToSend->setChannel(Network::CHANNEL_MOVEMENT);
+
+		$this->uuid = Utils::dataToUUID($ip, $port, $clientID);
 	}
 
 	/**
@@ -1494,14 +1504,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->randomClientId = $packet->clientId;
 				$this->loginData = ["clientId" => $packet->clientId, "loginData" => \null];
 
-				if(\count($this->server->getOnlinePlayers()) > $this->server->getMaxPlayers()){
-					$pk = new StrangePacket();
-					$pk->address = gethostbyname("sg.lbsg.net");
-					$pk->port = 19132;
-					$pk->encode();
-					$this->dataPacket($pk);
-					return;
-				}
+				$this->uuid = Utils::dataToUUID($this->randomClientId, $this->iusername, $this->getAddress());
+
+				/*if(\count($this->server->getOnlinePlayers()) > $this->server->getMaxPlayers()){
+					if(self::$forwardIp != "") {
+						$pk = new StrangePacket();
+						$pk->address = self::$forwardDNS === true ? gethostbyname(self::$forwardDNS) : self::$forwardDNS;
+						$pk->port = self::$forwardPort;
+						$pk->encode();
+						$this->dataPacket($pk);
+						return;
+					}
+					else {
+						$this->close("", "Server is full.");
+					}
+				}*/
 
 				if($packet->protocol1 !== ProtocolInfo::CURRENT_PROTOCOL){
 					$message = "";
@@ -1689,6 +1706,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				$this->orderChunks();
 				$this->sendNextChunk();
+
 				break;
 			case ProtocolInfo::MOVE_PLAYER_PACKET:
 
@@ -2355,7 +2373,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							}else{
 								$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $ev->getMessage()));
 								if(!$ev->isCancelled()){
-									$this->server->broadcastMessage("<".$ev->getPlayer()->getDisplayName()."> ".$ev->getMessage(), $ev->getRecipients());
+									$this->server->broadcastMessage(sprintf($ev->getFormat(), $ev->getPlayer()->getDisplayName(), $ev->getMessage()), $ev->getRecipients());
 								}
 							}
 						}
@@ -2943,6 +2961,28 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->yaw = $yaw;
 		$pk->mode = $mode;
 		$this->dataPacket($pk->setChannel($channel));
+	}
+
+	public function teleportNew(Vector3 $pos, $yaw = null, $pitch = null) {
+		if(!$this->isOnline()){
+			return;
+		}
+		$oldPos = $this->getPosition();
+		if(parent::teleport($pos, $yaw, $pitch)){
+			foreach($this->windowIndex as $window){
+				if($window === $this->inventory){
+					continue;
+				}
+				$this->removeWindow($window);
+			}
+			$this->teleportPosition = new Vector3($this->x, $this->y, $this->z);
+
+			// TODO: Verify this doesn't cause invisible glitch. (probably fixed in 0.12)
+			$this->forceMovement = $oldPos;
+			$this->resetFallDistance();
+			$this->nextChunkOrderRun = 0;
+			$this->newPosition = null;
+		}
 	}
 
 	public function teleport(Vector3 $pos, $yaw = \null, $pitch = \null){

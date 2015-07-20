@@ -61,16 +61,18 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	private $interface;
 
 	public $count = 0;
+	public $maxcount = 20;
 	public $name = "Steadfast Server";
 
-	public function setCount($count = 0, $maxcount = 31010) {
+	public function setCount($count = 0, $maxcount = 20) {
 		$this->count = $count;
+		$this->maxcount = $maxcount;
 
 		$this->interface->sendOption("name",
 		"MCPE;".addcslashes($this->name, ";") .";".
 		Info::CURRENT_PROTOCOL.";".
 		\pocketmine\MINECRAFT_VERSION_NETWORK.";".
-		$this->count.";".$maxcount
+		$this->count.";".$this->maxcount
 		);
 	}
 
