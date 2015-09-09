@@ -38,7 +38,6 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 	 * @param int            $x
 	 * @param int            $z
 	 * @param ChunkSection[] $sections
-	 * @param string         $biomeIds
 	 * @param int[]          $biomeColors
 	 * @param int[]          $heightMap
 	 * @param Compound[]     $entities
@@ -62,23 +61,23 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 			}
 		}
 
-		if(\count($biomeColors) === 256){
+		if(count($biomeColors) === 256){
 			$this->biomeColors = $biomeColors;
 		}else{
-			$this->biomeColors = array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a"));
+			$this->biomeColors = array_fill(0, 256, Binary::readInt("\xff\x00\x00\x00"));
 		}
 
-		if(\count($heightMap) === 256){
+		if(count($heightMap) === 256){
 			$this->heightMap = $heightMap;
 		}else{
-			$this->heightMap = \array_fill(0, 256, 127);
+			$this->heightMap = array_fill(0, 256, 127);
 		}
 
 		$this->NBTtiles = $tiles;
 		$this->NBTentities = $entities;
 	}
 
-	public function getBlock($x, $y, $z, &$blockId, &$meta = \null){
+	public function getBlock($x, $y, $z, &$blockId, &$meta = null){
 		$full = $this->sections[$y >> 4]->getFullBlock($x, $y & 0x0f, $z);
 		$blockId = $full >> 4;
 		$meta = $full & 0x0f;
@@ -88,9 +87,9 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 		return $this->sections[$y >> 4]->getFullBlock($x, $y & 0x0f, $z);
 	}
 
-	public function setBlock($x, $y, $z, $blockId = \null, $meta = \null){
+	public function setBlock($x, $y, $z, $blockId = null, $meta = null){
 		try{
-			$this->hasChanged = \true;
+			$this->hasChanged = true;
 			return $this->sections[$y >> 4]->setBlock($x, $y & 0x0f, $z, $blockId & 0xff, $meta & 0x0f);
 		}catch(ChunkException $e){
 			$level = $this->getProvider();
@@ -106,7 +105,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 	public function setBlockId($x, $y, $z, $id){
 		try{
 			$this->sections[$y >> 4]->setBlockId($x, $y & 0x0f, $z, $id);
-			$this->hasChanged = \true;
+			$this->hasChanged = true;
 		}catch(ChunkException $e){
 			$level = $this->getProvider();
 			$this->setInternalSection($Y = $y >> 4, $level::createChunkSection($Y));
@@ -121,7 +120,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 	public function setBlockData($x, $y, $z, $data){
 		try{
 			$this->sections[$y >> 4]->setBlockData($x, $y & 0x0f, $z, $data);
-			$this->hasChanged = \true;
+			$this->hasChanged = true;
 		}catch(ChunkException $e){
 			$level = $this->getProvider();
 			$this->setInternalSection($Y = $y >> 4, $level::createChunkSection($Y));

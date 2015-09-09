@@ -95,6 +95,7 @@ use pocketmine\nbt\tag\Double;
 use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\Float;
 use pocketmine\nbt\tag\Int;
+use pocketmine\nbt\tag\Long;
 use pocketmine\nbt\tag\Short;
 use pocketmine\nbt\tag\String;
 use pocketmine\network\Network;
@@ -173,16 +174,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $motionToSend;
 
 	/** @var Vector3 */
-	public $speed = \null;
+	public $speed = null;
 
-	public $blocked = \false;
+	public $blocked = false;
 	public $achievements = [];
 	public $lastCorrect;
 	/** @var SimpleTransactionGroup */
-	protected $currentTransaction = \null;
+	protected $currentTransaction = null;
 	public $craftingType = 0; //0 = 2x2 crafting, 1 = 3x3 crafting, 2 = stonecutter
 
-	protected $isCrafting = \false;
+	protected $isCrafting = false;
 
 	/**
 	 * @deprecated
@@ -196,18 +197,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	protected $lastMovement = 0;
 	/** @var Vector3 */
-	protected $forceMovement = \null;
-	protected $connected = \true;
+	protected $forceMovement = null;
+	/** @var Vector3 */
+	protected $teleportPosition = null;
+	protected $connected = true;
 	protected $ip;
-	protected $removeFormat = \true;
+	protected $removeFormat = true;
 	protected $port;
 	protected $username;
 	protected $iusername;
 	protected $displayName;
 	protected $startAction = -1;
 	/** @var Vector3 */
-	protected $sleeping = \null;
-	protected $clientID = \null;
+	protected $sleeping = null;
+	protected $clientID = null;
 
 	protected $stepHeight = 0.6;
 
@@ -250,12 +253,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $tasks = [];
 
 	/** @var PermissibleBase */
-	private $perm = \null;
+	private $perm = null;
 
 	public function getLeaveMessage(){
 		return "";
 	}
 
+	/**
+	 * This might disappear in the future.
+	 * Please use getUniqueId() instead (IP + clientId + name combo, in the future it'll change to real UUID for online auth)
+	 *
+	 * @deprecated
+	 *
+	 */
 	public function getClientId(){
 		return $this->randomClientId;
 	}
@@ -265,12 +275,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function isBanned(){
-		return $this->server->getNameBans()->isBanned(\strtolower($this->getName()));
+		return $this->server->getNameBans()->isBanned(strtolower($this->getName()));
 	}
 
 	public function setBanned($value){
-		if($value === \true){
-			$this->server->getNameBans()->addBan($this->getName(), \null, \null, \null);
+		if($value === true){
+			$this->server->getNameBans()->addBan($this->getName(), null, null, null);
 			$this->kick("You have been banned");
 		}else{
 			$this->server->getNameBans()->remove($this->getName());
@@ -278,14 +288,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function isWhitelisted(){
-		return $this->server->isWhitelisted(\strtolower($this->getName()));
+		return $this->server->isWhitelisted(strtolower($this->getName()));
 	}
 
 	public function setWhitelisted($value){
-		if($value === \true){
-			$this->server->addWhitelist(\strtolower($this->getName()));
+		if($value === true){
+			$this->server->addWhitelist(strtolower($this->getName()));
 		}else{
-			$this->server->removeWhitelist(\strtolower($this->getName()));
+			$this->server->removeWhitelist(strtolower($this->getName()));
 		}
 	}
 
@@ -294,11 +304,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function getFirstPlayed(){
-		return $this->namedtag instanceof Compound ? $this->namedtag["firstPlayed"] : \null;
+		return $this->namedtag instanceof Compound ? $this->namedtag["firstPlayed"] : null;
 	}
 
 	public function getLastPlayed(){
-		return $this->namedtag instanceof Compound ? $this->namedtag["lastPlayed"] : \null;
+		return $this->namedtag instanceof Compound ? $this->namedtag["lastPlayed"] : null;
 	}
 
 	public function hasPlayedBefore(){
@@ -349,7 +359,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/**
 	 * @param bool $remove
 	 */
-	public function setRemoveFormat($remove = \true){
+	public function setRemoveFormat($remove = true){
 		$this->removeFormat = (bool) $remove;
 	}
 
@@ -417,7 +427,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 
-		if($value === \true){
+		if($value === true){
 			$this->server->addOp($this->getName());
 		}else{
 			$this->server->removeOp($this->getName());
@@ -465,6 +475,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function recalculatePermissions(){
 		$this->server->getPluginManager()->unsubscribeFromPermission(Server::BROADCAST_CHANNEL_USERS, $this);
 		$this->server->getPluginManager()->unsubscribeFromPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, $this);
+
+		if($this->perm === null){
+			return;
+		}
 
 		$this->perm->recalculatePermissions();
 
@@ -1046,21 +1060,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if(isset(Achievement::$list[$achievementId]) and !$this->hasAchievement($achievementId)){
 			foreach(Achievement::$list[$achievementId]["requires"] as $requerimentId){
 				if(!$this->hasAchievement($requerimentId)){
-					return \false;
+					return false;
 				}
 			}
 			$this->server->getPluginManager()->callEvent($ev = new PlayerAchievementAwardedEvent($this, $achievementId));
 			if(!$ev->isCancelled()){
-				$this->achievements[$achievementId] = \true;
+				$this->achievements[$achievementId] = true;
 				Achievement::broadcast($this, $achievementId);
 
-				return \true;
+				return true;
 			}else{
-				return \false;
+				return false;
 			}
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**
@@ -1079,23 +1093,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 */
 	public function setGamemode($gm){
 		if($gm < 0 or $gm > 3 or $this->gamemode === $gm){
-			return \false;
+			return false;
 		}
 
 		$this->server->getPluginManager()->callEvent($ev = new PlayerGameModeChangeEvent($this, (int) $gm));
 		if($ev->isCancelled()){
-			return \false;
+			return false;
 		}
 
-		if(($this->gamemode & 0x01) === ($gm & 0x01)){
-			$this->gamemode = $gm;
-		}else{
-			$this->gamemode = $gm;
-			$this->inventory->clearAll();
-			$this->inventory->sendContents($this);
-			$this->inventory->sendContents($this->getViewers());
-			$this->inventory->sendHeldItem($this->hasSpawned);
-		}
+
+		$this->gamemode = $gm;
+
+		$this->allowFlight = $this->isCreative();
 
 		if($this->isSpectator()){
 			$this->despawnFromAll();
@@ -1134,7 +1143,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->dataPacket($pk);
 		}
 
-		return \true;
+		$this->inventory->sendContents($this);
+		$this->inventory->sendContents($this->getViewers());
+		$this->inventory->sendHeldItem($this->hasSpawned);
+
+		return true;
 	}
 
 	/**
@@ -1726,6 +1739,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->gamemode = $this->server->getGamemode();
 					$nbt->playerGameType = new Int("playerGameType", $this->gamemode);
 				}
+
+				$this->allowFlight = $this->isCreative();
+
+
 				if(($level = $this->server->getLevelByName($nbt["Level"])) === \null){
 					$this->setLevel($this->server->getDefaultLevel(), \true);
 					$nbt["Level"] = $this->level->getName();
@@ -1749,7 +1766,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->achievements[$achievement->getName()] = $achievement->getValue() > 0 ? \true : \false;
 				}
 
-				$nbt["lastPlayed"] = \floor(\microtime(\true) * 1000);
+				$nbt->lastPlayed = new Long("lastPlayed", floor(microtime(true) * 1000));
 				$this->server->saveOfflinePlayerData($this->username, $nbt);
 				parent::__construct($this->level->getChunk($nbt["Pos"][0] >> 4, $nbt["Pos"][2] >> 4, \true), $nbt);
 				$this->loggedIn = \true;
@@ -1765,10 +1782,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($this->isCreative()){
 					$this->inventory->setHeldItemSlot(0);
 				}else{
-					$this->inventory->setHeldItemSlot(0);
+					$this->inventory->setHeldItemSlot($this->inventory->getHotbarSlotIndex(0));
 				}
 
-				$this->sendData($this);
 				$pk = new PlayStatusPacket();
 				$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
 				$this->dataPacket($pk->setChannel(Network::CHANNEL_PRIORITY));

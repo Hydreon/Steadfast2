@@ -24,6 +24,7 @@
  */
 namespace pocketmine\nbt;
 
+use pocketmine\item\Item;
 use pocketmine\nbt\tag\Byte;
 use pocketmine\nbt\tag\ByteArray;
 use pocketmine\nbt\tag\Compound;
@@ -81,9 +82,9 @@ class NBT{
 	 */
 	public static function putItemHelper(Item $item, $slot = null){
 		$tag = new Compound(null, [
-			"id" => new Short("id", $item->getId()),
-			"Count" => new Byte("Count", $item->getCount()),
-			"Damage" => new Short("Damage", $item->getDamage())
+		"id" => new Short("id", $item->getId()),
+		"Count" => new Byte("Count", $item->getCount()),
+		"Damage" => new Short("Damage", $item->getDamage())
 		]);
 
 		if($slot !== null){
@@ -502,7 +503,7 @@ class NBT{
 	}
 
 	public function readTag(){
-		switch(\ord($this->get(1))){
+		switch($this->getByte()){
 			case NBT::TAG_Byte:
 				$tag = new Byte($this->getString());
 				$tag->read($this);
@@ -557,7 +558,7 @@ class NBT{
 	}
 
 	public function writeTag(Tag $tag){
-		$this->buffer .= \chr($tag->getType());
+		$this->putByte($tag->getType());
 		if($tag instanceof NamedTAG){
 			$this->putString($tag->getName());
 		}
@@ -565,27 +566,27 @@ class NBT{
 	}
 
 	public function getByte(){
-		return \ord($this->get(1));
+		return Binary::readByte($this->get(1));
 	}
 
 	public function putByte($v){
-		$this->buffer .= \chr($v);
+		$this->buffer .= Binary::writeByte($v);
 	}
 
 	public function getShort(){
-		return $this->endianness === self::BIG_ENDIAN ? \unpack("n", $this->get(2))[1] : \unpack("v", $this->get(2))[1];
+		return $this->endianness === self::BIG_ENDIAN ? Binary::readShort($this->get(2)) : Binary::readLShort($this->get(2));
 	}
 
 	public function putShort($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? \pack("n", $v) : \pack("v", $v);
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? Binary::writeShort($v) : Binary::writeLShort($v);
 	}
 
 	public function getInt(){
-		return $this->endianness === self::BIG_ENDIAN ? (\PHP_INT_SIZE === 8 ? \unpack("N", $this->get(4))[1] << 32 >> 32 : \unpack("N", $this->get(4))[1]) : (\PHP_INT_SIZE === 8 ? \unpack("V", $this->get(4))[1] << 32 >> 32 : \unpack("V", $this->get(4))[1]);
+		return $this->endianness === self::BIG_ENDIAN ? Binary::readInt($this->get(4)) : Binary::readLInt($this->get(4));
 	}
 
 	public function putInt($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? \pack("N", $v) : \pack("V", $v);
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? Binary::writeInt($v) : Binary::writeLInt($v);
 	}
 
 	public function getLong(){
@@ -597,81 +598,88 @@ class NBT{
 	}
 
 	public function getFloat(){
-		return $this->endianness === self::BIG_ENDIAN ? (\ENDIANNESS === 0 ? \unpack("f", $this->get(4))[1] : \unpack("f", \strrev($this->get(4)))[1]) : (\ENDIANNESS === 0 ? \unpack("f", \strrev($this->get(4)))[1] : \unpack("f", $this->get(4))[1]);
+		return $this->endianness === self::BIG_ENDIAN ? Binary::readFloat($this->get(4)) : Binary::readLFloat($this->get(4));
 	}
 
 	public function putFloat($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? (\ENDIANNESS === 0 ? \pack("f", $v) : \strrev(\pack("f", $v))) : (\ENDIANNESS === 0 ? \strrev(\pack("f", $v)) : \pack("f", $v));
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? Binary::writeFloat($v) : Binary::writeLFloat($v);
 	}
 
 	public function getDouble(){
-		return $this->endianness === self::BIG_ENDIAN ? (\ENDIANNESS === 0 ? \unpack("d", $this->get(8))[1] : \unpack("d", \strrev($this->get(8)))[1]) : (\ENDIANNESS === 0 ? \unpack("d", \strrev($this->get(8)))[1] : \unpack("d", $this->get(8))[1]);
+		return $this->endianness === self::BIG_ENDIAN ? Binary::readDouble($this->get(8)) : Binary::readLDouble($this->get(8));
 	}
 
 	public function putDouble($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? (\ENDIANNESS === 0 ? \pack("d", $v) : \strrev(\pack("d", $v))) : (\ENDIANNESS === 0 ? \strrev(\pack("d", $v)) : \pack("d", $v));
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? Binary::writeDouble($v) : Binary::writeLDouble($v);
 	}
 
 	public function getString(){
-		return $this->get($this->endianness === 1 ? \unpack("n", $this->get(2))[1] : \unpack("v", $this->get(2))[1]);
+		return $this->get($this->getShort());
 	}
 
 	public function putString($v){
-		$this->buffer .= $this->endianness === 1 ? \pack("n", \strlen($v)) : \pack("v", \strlen($v));
+		$this->putShort(strlen($v));
 		$this->buffer .= $v;
 	}
 
 	public function getArray(){
 		$data = [];
-		$this->toArray($data, $this->data);
+		self::toArray($data, $this->data);
 	}
 
-	private function toArray(array &$data, Tag $tag){
+	private static function toArray(array &$data, Tag $tag){
 		/** @var Compound[]|Enum[]|IntArray[] $tag */
 		foreach($tag as $key => $value){
 			if($value instanceof Compound or $value instanceof Enum or $value instanceof IntArray){
 				$data[$key] = [];
-				$this->toArray($data[$key], $value);
+				self::toArray($data[$key], $value);
 			}else{
 				$data[$key] = $value->getValue();
 			}
 		}
 	}
 
-	private function fromArray(Tag $tag, array $data){
+	public static function fromArrayGuesser($key, $value){
+		if(is_int($value)){
+			return new Int($key, $value);
+		}elseif(is_float($value)){
+			return new Float($key, $value);
+		}elseif(is_string($value)){
+			return new String($key, $value);
+		}elseif(is_bool($value)){
+			return new Byte($key, $value ? 1 : 0);
+		}
+
+		return null;
+	}
+
+	private static function fromArray(Tag $tag, array $data, callable $guesser){
 		foreach($data as $key => $value){
-			if(\is_array($value)){
-				$isNumeric = \true;
-				$isIntArray = \true;
+			if(is_array($value)){
+				$isNumeric = true;
+				$isIntArray = true;
 				foreach($value as $k => $v){
-					if(!\is_numeric($k)){
-						$isNumeric = \false;
+					if(!is_numeric($k)){
+						$isNumeric = false;
 						break;
-					}elseif(!\is_int($v)){
-						$isIntArray = \false;
+					}elseif(!is_int($v)){
+						$isIntArray = false;
 					}
 				}
 				$tag{$key} = $isNumeric ? ($isIntArray ? new IntArray($key, []) : new Enum($key, [])) : new Compound($key, []);
-				$this->fromArray($tag->{$key}, $value);
-			}elseif(\is_int($value)){
-				$tag{$key} = new Int($key, $value);
-			}elseif(\is_float($value)){
-				$tag{$key} = new Float($key, $value);
-			}elseif(\is_string($value)){
-				if(Utils::printable($value) !== $value){
-					$tag{$key} = new ByteArray($key, $value);
-				}else{
-					$tag{$key} = new String($key, $value);
+				self::fromArray($tag->{$key}, $value, $guesser);
+			}else{
+				$v = call_user_func($guesser, $key, $value);
+				if($v instanceof Tag){
+					$tag{$key} = $v;
 				}
-			}elseif(\is_bool($value)){
-				$tag{$key} = new Byte($key, $value ? 1 : 0);
 			}
 		}
 	}
 
-	public function setArray(array $data){
-		$this->data = new Compound(\null, []);
-		$this->fromArray($this->data, $data);
+	public function setArray(array $data, callable $guesser = null){
+		$this->data = new Compound("", []);
+		self::fromArray($this->data, $data, $guesser === null ? [self::class, "fromArrayGuesser"] : $guesser);
 	}
 
 	/**
@@ -684,7 +692,7 @@ class NBT{
 	/**
 	 * @param Compound|array $data
 	 */
-	public function setData(Compound $data){
+	public function setData($data){
 		$this->data = $data;
 	}
 

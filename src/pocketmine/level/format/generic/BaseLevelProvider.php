@@ -42,11 +42,11 @@ abstract class BaseLevelProvider implements LevelProvider{
 	public function __construct(Level $level, $path){
 		$this->level = $level;
 		$this->path = $path;
-		if(!\file_exists($this->path)){
-			\mkdir($this->path, 0777, \true);
+		if(!file_exists($this->path)){
+			mkdir($this->path, 0777, true);
 		}
 		$nbt = new NBT(NBT::BIG_ENDIAN);
-		$nbt->readCompressed(\file_get_contents($this->getPath() . "level.dat"));
+		$nbt->readCompressed(file_get_contents($this->getPath() . "level.dat"));
 		$levelData = $nbt->getData();
 		if($levelData->Data instanceof Compound){
 			$this->levelData = $levelData->Data;
@@ -118,11 +118,11 @@ abstract class BaseLevelProvider implements LevelProvider{
 
 	public function saveLevelData(){
 		$nbt = new NBT(NBT::BIG_ENDIAN);
-		$nbt->setData(new Compound(\null, [
+		$nbt->setData(new Compound("", [
 			"Data" => $this->levelData
 		]));
 		$buffer = $nbt->writeCompressed();
-		\file_put_contents($this->getPath() . "level.dat", $buffer);
+		file_put_contents($this->getPath() . "level.dat", $buffer);
 	}
 
 

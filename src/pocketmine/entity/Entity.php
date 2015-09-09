@@ -91,6 +91,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_ONFIRE = 0;
 	const DATA_FLAG_SNEAKING = 1;
 	const DATA_FLAG_RIDING = 2;
+	const DATA_FLAG_SPRINTING = 3;
 	const DATA_FLAG_ACTION = 4;
 	const DATA_FLAG_INVISIBLE = 5;
 
@@ -117,11 +118,11 @@ abstract class Entity extends Location implements Metadatable{
 		self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""],
 		self::DATA_SHOW_NAMETAG => [self::DATA_TYPE_BYTE, 1],
 		self::DATA_SILENT => [self::DATA_TYPE_BYTE, 0],
-		self::DATA_NO_AI => [self::DATA_TYPE_BYTE, 0]
+		self::DATA_NO_AI => [self::DATA_TYPE_BYTE, 0],
 	];
 
-	public $passenger = \null;
-	public $vehicle = \null;
+	public $passenger = null;
+	public $vehicle = null;
 
 	/** @var int */
 	public $chunkX;
@@ -280,11 +281,42 @@ abstract class Entity extends Location implements Metadatable{
 	public function getNameTag(){
 		return $this->getDataProperty(self::DATA_NAMETAG);
 	}
+
+	/**
+	 * @return bool
+	 */
+	public function isNameTagVisible(){
+		return $this->getDataProperty(self::DATA_SHOW_NAMETAG) > 0;
+	}
+
 	/**
 	 * @param string $name
 	 */
 	public function setNameTag($name){
 		$this->setDataProperty(self::DATA_NAMETAG, self::DATA_TYPE_STRING, $name);
+	}
+
+	/**
+	 * @param bool $value
+	 */
+	public function setNameTagVisible($value = true){
+		$this->setDataProperty(self::DATA_SHOW_NAMETAG, self::DATA_TYPE_BYTE, $value ? 1 : 0);
+	}
+
+	public function isSneaking(){
+		return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SNEAKING);
+	}
+
+	public function setSneaking($value = true){
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SNEAKING, (bool) $value);
+	}
+
+	public function isSprinting(){
+		return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SPRINTING);
+	}
+
+	public function setSprinting($value = true){
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SPRINTING, (bool) $value);
 	}
 
 	/**
@@ -311,7 +343,7 @@ abstract class Entity extends Location implements Metadatable{
 	}
 
 	public function getEffect($effectId){
-		return isset($this->effects[$effectId]) ? $this->effects[$effectId] : \null;
+		return isset($this->effects[$effectId]) ? $this->effects[$effectId] : null;
 	}
 
 	public function hasEffect($effectId){
@@ -322,15 +354,15 @@ abstract class Entity extends Location implements Metadatable{
 		if(isset($this->effects[$effect->getId()])){
 			$oldEffect = $this->effects[$effect->getId()];
 			if(
-				\abs($effect->getAmplifier()) <= ($oldEffect->getAmplifier())
-				or (\abs($effect->getAmplifier()) === \abs($oldEffect->getAmplifier())
+				abs($effect->getAmplifier()) <= ($oldEffect->getAmplifier())
+				or (abs($effect->getAmplifier()) === abs($oldEffect->getAmplifier())
 					and $effect->getDuration() < $oldEffect->getDuration())
 			){
 				return;
 			}
-			$effect->add($this, \true);
+			$effect->add($this, true);
 		}else{
-			$effect->add($this, \false);
+			$effect->add($this, false);
 		}
 
 		$this->effects[$effect->getId()] = $effect;
@@ -345,7 +377,7 @@ abstract class Entity extends Location implements Metadatable{
 	protected function recalculateEffectColor(){
 		$color = [0, 0, 0]; //RGB
 		$count = 0;
-		$ambient = \true;
+		$ambient = true;
 		foreach($this->effects as $effect){
 			if($effect->isVisible()){
 				$c = $effect->getColor();
@@ -354,7 +386,7 @@ abstract class Entity extends Location implements Metadatable{
 				$color[2] += $c[2] * ($effect->getAmplifier() + 1);
 				$count += $effect->getAmplifier() + 1;
 				if(!$effect->isAmbient()){
-					$ambient = \false;
+					$ambient = false;
 				}
 			}
 		}
@@ -365,10 +397,10 @@ abstract class Entity extends Location implements Metadatable{
 			$b = ($color[2] / $count) & 0xff;
 
 			$this->setDataProperty(Entity::DATA_POTION_COLOR, Entity::DATA_TYPE_INT, ($r << 16) + ($g << 8) + $b);
-			$this->setDataProperty(Entity::DATA_POTION_VISIBLE, Entity::DATA_TYPE_BYTE, $ambient ? 1 : 0);
+			$this->setDataProperty(Entity::DATA_POTION_AMBIENT, Entity::DATA_TYPE_BYTE, $ambient ? 1 : 0);
 		}else{
 			$this->setDataProperty(Entity::DATA_POTION_COLOR, Entity::DATA_TYPE_INT, 0);
-			$this->setDataProperty(Entity::DATA_POTION_VISIBLE, Entity::DATA_TYPE_BYTE, 0);
+			$this->setDataProperty(Entity::DATA_POTION_AMBIENT, Entity::DATA_TYPE_BYTE, 0);
 		}
 	}
 
@@ -386,24 +418,24 @@ abstract class Entity extends Location implements Metadatable{
 			return new $class($chunk, $nbt, ...$args);
 		}
 
-		return \null;
+		return null;
 	}
 
-	public static function registerEntity($className, $force = \false){
+	public static function registerEntity($className, $force = false){
 		$class = new \ReflectionClass($className);
-		if(\is_a($className, Entity::class, \true) and !$class->isAbstract()){
+		if(is_a($className, Entity::class, true) and !$class->isAbstract()){
 			if($className::NETWORK_ID !== -1){
 				self::$knownEntities[$className::NETWORK_ID] = $className;
 			}elseif(!$force){
-				return \false;
+				return false;
 			}
 
 			self::$knownEntities[$class->getShortName()] = $className;
 			self::$shortNames[$className] = $class->getShortName();
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**
@@ -418,6 +450,13 @@ abstract class Entity extends Location implements Metadatable{
 	public function saveNBT(){
 		if(!($this instanceof Player)){
 			$this->namedtag->id = new String("id", $this->getSaveId());
+			if($this->getNameTag() !== ""){
+				$this->namedtag->CustomName = new String("CustomName", $this->getNameTag());
+				$this->namedtag->CustomNameVisible = new String("CustomNameVisible", $this->isNameTagVisible());
+			}else{
+				unset($this->namedtag->CustomName);
+				unset($this->namedtag->CustomNameVisible);
+			}
 		}
 
 		$this->namedtag->Pos = new Enum("Pos", [
@@ -440,10 +479,10 @@ abstract class Entity extends Location implements Metadatable{
 		$this->namedtag->FallDistance = new Float("FallDistance", $this->fallDistance);
 		$this->namedtag->Fire = new Short("Fire", $this->fireTicks);
 		$this->namedtag->Air = new Short("Air", $this->getDataProperty(self::DATA_AIR));
-		$this->namedtag->OnGround = new Byte("OnGround", $this->onGround == \true ? 1 : 0);
-		$this->namedtag->Invulnerable = new Byte("Invulnerable", $this->invulnerable == \true ? 1 : 0);
+		$this->namedtag->OnGround = new Byte("OnGround", $this->onGround == true ? 1 : 0);
+		$this->namedtag->Invulnerable = new Byte("Invulnerable", $this->invulnerable == true ? 1 : 0);
 
-		if(\count($this->effects) > 0){
+		if(count($this->effects) > 0){
 			$effects = [];
 			foreach($this->effects as $effect){
 				$effects[$effect->getId()] = new Compound($effect->getId(), [
@@ -465,7 +504,7 @@ abstract class Entity extends Location implements Metadatable{
 		if(isset($this->namedtag->ActiveEffects)){
 			foreach($this->namedtag->ActiveEffects->getValue() as $e){
 				$effect = Effect::getEffect($e["Id"]);
-				if($effect === \null){
+				if($effect === null){
 					continue;
 				}
 
@@ -474,6 +513,16 @@ abstract class Entity extends Location implements Metadatable{
 				$this->addEffect($effect);
 			}
 		}
+
+
+		if(isset($this->namedtag->CustomName)){
+			$this->setNameTag($this->namedtag["CustomName"]);
+			if(isset($this->namedtag->CustomNameVisible)){
+				$this->setNameTagVisible($this->namedtag["CustomNameVisible"] > 0);
+			}
+		}
+
+		$this->scheduleUpdate();
 	}
 
 	/**
@@ -495,14 +544,14 @@ abstract class Entity extends Location implements Metadatable{
 	public function sendPotionEffects(Player $player){
 		foreach($this->effects as $effect){
 			$pk = new MobEffectPacket();
-			$pk->eid = $this->getId();
+			$pk->eid = 0;
 			$pk->effectId = $effect->getId();
 			$pk->amplifier = $effect->getAmplifier();
 			$pk->particles = $effect->isVisible();
 			$pk->duration = $effect->getDuration();
 			$pk->eventId = MobEffectPacket::EVENT_ADD;
 
-			$player->dataPacket($pk->setChannel(Network::CHANNEL_WORLD_EVENTS));
+			$player->dataPacket($pk);
 		}
 	}
 
@@ -581,6 +630,10 @@ abstract class Entity extends Location implements Metadatable{
 	 */
 	public function getHealth(){
 		return $this->health;
+	}
+
+	public function isAlive(){
+		return $this->health > 0;
 	}
 
 	/**

@@ -247,6 +247,15 @@ class Chunk extends BaseFullChunk{
 		return substr($this->blockLight, ($x << 10) + ($z << 6), 64);
 	}
 
+	public function isLightPopulated(){
+		return $this->nbt["LightPopulated"] > 0;
+	}
+
+	public function setLightPopulated($value = 1){
+		$this->nbt->LightPopulated = new Byte("LightPopulated", $value ? 1 : 0);
+		$this->hasChanged = true;
+	}
+
 	/**
 	 * @return bool
 	 */

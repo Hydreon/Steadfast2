@@ -63,29 +63,29 @@ class EmptyChunkSection implements ChunkSection{
 		return 0;
 	}
 
-	final public function getBlock($x, $y, $z, &$id = \null, &$meta = \null){
+	final public function getBlock($x, $y, $z, &$id = null, &$meta = null){
 		$id = 0;
 		$meta = 0;
 	}
 
-	final public function setBlock($x, $y, $z, $id = \null, $meta = \null){
+	final public function setBlock($x, $y, $z, $id = null, $meta = null){
 		throw new ChunkException("Tried to modify an empty Chunk");
 	}
 
 	public function getIdArray(){
-		return \str_repeat("\x00", 4096);
+		return str_repeat("\x00", 4096);
 	}
 
 	public function getDataArray(){
-		return \str_repeat("\x00", 2048);
+		return str_repeat("\x00", 2048);
 	}
 
 	public function getSkyLightArray(){
-		return \str_repeat("\xff", 2048);
+		return str_repeat("\xff", 2048);
 	}
 
 	public function getLightArray(){
-		return \str_repeat("\x00", 2048);
+		return str_repeat("\x00", 2048);
 	}
 
 	final public function setBlockId($x, $y, $z, $id){
@@ -109,7 +109,7 @@ class EmptyChunkSection implements ChunkSection{
 	}
 
 	final public function getBlockSkyLight($x, $y, $z){
-		return 0;
+		return 15;
 	}
 
 	final public function setBlockSkyLight($x, $y, $z, $level){
