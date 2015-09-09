@@ -14,7 +14,7 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
-
+ * @link http://www.pocketmine.net/
  *
  *
 */
@@ -31,7 +31,7 @@ use pocketmine\utils\PluginException;
 use pocketmine\utils\ReversePriorityQueue;
 
 class ServerScheduler{
-	public static $WORKERS = 1;
+	public static $WORKERS = 2;
 	/**
 	 * @var ReversePriorityQueue<Task>
 	 */
@@ -113,7 +113,7 @@ class ServerScheduler{
 	 * @param int $taskId
 	 */
 	public function cancelTask($taskId){
-		if($taskId !== \null and isset($this->tasks[$taskId])){
+		if($taskId !== null and isset($this->tasks[$taskId])){
 			$this->tasks[$taskId]->cancel();
 			unset($this->tasks[$taskId]);
 		}
@@ -163,7 +163,7 @@ class ServerScheduler{
 	private function addTask(Task $task, $delay, $period){
 		if($task instanceof PluginTask){
 			if(!($task->getOwner() instanceof Plugin)){
-				throw new PluginException("Invalid owner of PluginTask " . \get_class($task));
+				throw new PluginException("Invalid owner of PluginTask " . get_class($task));
 			}elseif(!$task->getOwner()->isEnabled()){
 				throw new PluginException("Plugin '" . $task->getOwner()->getName() . "' attempted to register a task while disabled");
 			}
@@ -248,7 +248,7 @@ class ServerScheduler{
 	}
 
 	private function isReady($currentTicks){
-		return \count($this->tasks) > 0 and $this->queue->current()->getNextRun() <= $currentTicks;
+		return count($this->tasks) > 0 and $this->queue->current()->getNextRun() <= $currentTicks;
 	}
 
 	/**

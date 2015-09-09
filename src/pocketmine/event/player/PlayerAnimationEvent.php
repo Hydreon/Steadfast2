@@ -28,7 +28,7 @@ use pocketmine\Player;
  * Called when a player does an animation
  */
 class PlayerAnimationEvent extends PlayerEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	const ARM_SWING = 1;
 

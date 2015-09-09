@@ -24,14 +24,6 @@ namespace pocketmine\network\protocol;
 use pocketmine\utils\Binary;
 
 
-
-
-
-
-
-
-
-
 class LoginPacket extends DataPacket{
 	public static $pool = [];
 	public static $next = 0;
@@ -41,8 +33,12 @@ class LoginPacket extends DataPacket{
 	public $protocol2;
 	public $clientId;
 
-	public $slim = \false;
-	public $skin = \null;
+	public $clientUUID;
+	public $serverAddress;
+	public $clientSecret;
+
+	public $slim = false;
+	public $skin = null;
 
 	public function pid(){
 		return Info::LOGIN_PACKET;
@@ -52,11 +48,15 @@ class LoginPacket extends DataPacket{
 		$this->username = $this->getString();
 		$this->protocol1 = $this->getInt();
 		$this->protocol2 = $this->getInt();
-		$this->clientId = $this->getInt();
-		if($this->protocol1 < 21){ //New fields!
+		if($this->protocol1 < Info::CURRENT_PROTOCOL){ //New fields!
 			$this->setBuffer(null, 0); //Skip batch packet handling
 			return;
 		}
+		$this->clientId = $this->getLong();
+		$this->clientUUID = $this->getUUID();
+		$this->serverAddress = $this->getString();
+		$this->clientSecret = $this->getString();
+
 		$this->slim = $this->getByte() > 0;
 		$this->skin = $this->getString();
 	}

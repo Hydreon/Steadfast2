@@ -38,7 +38,7 @@ class Bucket extends Item{
 	}
 
 	public function canBeActivated(){
-		return \true;
+		return true;
 	}
 
 	public function onActivate(Level $level, Player $player, Block $block, Block $target, $face, $fx, $fy, $fz){
@@ -50,11 +50,11 @@ class Bucket extends Item{
 				$result->setDamage($target->getId());
 				$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $block, $face, $this, $result));
 				if(!$ev->isCancelled()){
-					$player->getLevel()->setBlock($target, new Air(), \true, \true);
+					$player->getLevel()->setBlock($target, new Air(), true, true);
 					if($player->isSurvival()){
 						$player->getInventory()->setItemInHand($ev->getItem(), $player);
 					}
-					return \true;
+					return true;
 				}else{
 					$player->getInventory()->sendContents($player);
 				}
@@ -64,16 +64,16 @@ class Bucket extends Item{
 			$result->setDamage(0);
 			$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $block, $face, $this, $result));
 			if(!$ev->isCancelled()){
-				$player->getLevel()->setBlock($block, $targetBlock, \true, \true);
+				$player->getLevel()->setBlock($block, $targetBlock, true, true);
 				if($player->isSurvival()){
 					$player->getInventory()->setItemInHand($ev->getItem(), $player);
 				}
-				return \true;
+				return true;
 			}else{
 				$player->getInventory()->sendContents($player);
 			}
 		}
 
-		return \false;
+		return false;
 	}
 }

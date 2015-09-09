@@ -21,46 +21,32 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
-
-
-
-
-
-
-
-
-class PlayerEquipmentPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
-
+class MobArmorEquipmentPacket extends DataPacket{
 	public $eid;
-	public $item;
-	public $meta;
-	public $slot;
-	public $selectedSlot;
+	public $slots = [];
 
-	public function pid(){
-		return Info::PLAYER_EQUIPMENT_PACKET;
+	public function pid() {
+		return Info::MOB_ARMOR_EQUIPMENT_PACKET;
 	}
 
 	public function decode(){
 		$this->eid = $this->getLong();
-		$this->item = $this->getShort();
-		$this->meta = $this->getShort();
-		$this->slot = $this->getByte();
-		$this->selectedSlot = $this->getByte();
+		$this->slots[0] = $this->getSlot();
+		$this->slots[1] = $this->getSlot();
+		$this->slots[2] = $this->getSlot();
+		$this->slots[3] = $this->getSlot();
 	}
 
 	public function encode(){
 		$this->reset();
 		$this->putLong($this->eid);
-		$this->putShort($this->item);
-		$this->putShort($this->meta);
-		$this->putByte($this->slot);
-		$this->putByte($this->selectedSlot);
+		$this->putSlot($this->slots[0]);
+		$this->putSlot($this->slots[1]);
+		$this->putSlot($this->slots[2]);
+		$this->putSlot($this->slots[3]);
 	}
 
 }

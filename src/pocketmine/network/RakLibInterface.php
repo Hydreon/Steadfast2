@@ -61,10 +61,10 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	private $interface;
 
 	public $count = 0;
-	public $maxcount = 20;
-	public $name = "Steadfast Server";
+	public $maxcount = 31360;
+	public $name = "Lifeboat Network";
 
-	public function setCount($count = 0, $maxcount = 20) {
+	public function setCount($count, $maxcount) {
 		$this->count = $count;
 		$this->maxcount = $maxcount;
 
@@ -72,7 +72,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		"MCPE;".addcslashes($this->name, ";") .";".
 		Info::CURRENT_PROTOCOL.";".
 		\pocketmine\MINECRAFT_VERSION_NETWORK.";".
-		$this->count.";".$this->maxcount
+		$this->count.";".$maxcount
 		);
 	}
 
@@ -88,15 +88,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$this->channelCounts[$i] = 0;
 		}
 
-		$this->count = count($this->server->getOnlinePlayers());
-		$this->name = $this->server->getMotd();
-		
-		$this->interface->sendOption("name",
-		"MCPE;".addcslashes($this->name, ";") .";".
-		Info::CURRENT_PROTOCOL.";".
-		\pocketmine\MINECRAFT_VERSION_NETWORK.";".
-		$this->count.";".$this->server->getMaxPlayers()
-		);
+		$this->setCount(count($this->server->getOnlinePlayers()), $this->server->getMaxPlayers());
 	}
 
 	public function setNetwork(Network $network){

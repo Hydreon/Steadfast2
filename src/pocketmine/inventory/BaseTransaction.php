@@ -46,7 +46,7 @@ class BaseTransaction implements Transaction{
 		$this->slot = (int) $slot;
 		$this->sourceItem = clone $sourceItem;
 		$this->targetItem = clone $targetItem;
-		$this->creationTime = \microtime(\true);
+		$this->creationTime = microtime(true);
 	}
 
 	public function getCreationTime(){

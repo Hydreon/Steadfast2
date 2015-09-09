@@ -34,7 +34,7 @@ class Random{
 	 */
 	public function __construct($seed = -1){
 		if($seed == -1){
-			$seed = \time();
+			$seed = time();
 		}
 
 		$this->setSeed($seed);
@@ -44,7 +44,7 @@ class Random{
 	 * @param int $seed Integer to be used as seed.
 	 */
 	public function setSeed($seed){
-		$this->seed = \crc32(\pack("N", $seed));
+		$this->seed = crc32(pack("N", $seed));
 	}
 
 	/**
@@ -63,7 +63,7 @@ class Random{
 	 */
 	public function nextSignedInt(){
 		$t = ((($this->seed * 65535) + 31337) >> 8) + 1337;
-		if(\PHP_INT_SIZE === 8){
+		if(PHP_INT_SIZE === 8){
 			$t = $t << 32 >> 32;
 		}
 		$this->seed ^= $t;

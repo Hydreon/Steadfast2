@@ -14,7 +14,7 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
-
+ * @link http://www.pocketmine.net/
  *
  *
 */
@@ -41,12 +41,12 @@ class TaskHandler{
 	protected $nextRun;
 
 	/** @var bool */
-	protected $cancelled = \false;
+	protected $cancelled = false;
 
 	/** @var \pocketmine\event\TimingsHandler */
 	public $timings;
 
-	public $timingName = \null;
+	public $timingName = null;
 
 	/**
 	 * @param string $timingName
@@ -60,7 +60,7 @@ class TaskHandler{
 		$this->taskId = $taskId;
 		$this->delay = $delay;
 		$this->period = $period;
-		$this->timingName = $timingName === \null ? "Unknown" : $timingName;
+		$this->timingName = $timingName === null ? "Unknown" : $timingName;
 		$this->timings = Timings::getPluginTaskTimings($this, $period);
 	}
 
@@ -68,7 +68,7 @@ class TaskHandler{
 	 * @return bool
 	 */
 	public function isCancelled(){
-		return $this->cancelled === \true;
+		return $this->cancelled === true;
 	}
 
 	/**
@@ -139,8 +139,8 @@ class TaskHandler{
 	}
 
 	public function remove(){
-		$this->cancelled = \true;
-		$this->task->setHandler(\null);
+		$this->cancelled = true;
+		$this->task->setHandler(null);
 	}
 
 	/**
@@ -154,10 +154,10 @@ class TaskHandler{
 	 * @return string
 	 */
 	public function getTaskName(){
-		if($this->timingName !== \null){
+		if($this->timingName !== null){
 			return $this->timingName;
 		}
 
-		return \get_class($this->task);
+		return get_class($this->task);
 	}
 }

@@ -72,11 +72,11 @@ namespace pocketmine {
 	use pocketmine\utils\Utils;
 	use pocketmine\wizard\Installer;
 
-	const VERSION = '1.5-hybrid';
+	const VERSION = '1.5.1-hybrid';
 	const API_VERSION = "1.12.0";
 	const CODENAME = "ハイエナ (Hyena)";
-	const MINECRAFT_VERSION = "v0.11.0 alpha";
-	const MINECRAFT_VERSION_NETWORK = "0.11.0";
+	const MINECRAFT_VERSION = "v0.12.0 alpha";
+	const MINECRAFT_VERSION_NETWORK = "0.12.0";
 
 	/*
 	 * Startup code. Do not look at it, it may harm you.

@@ -159,7 +159,7 @@ abstract class Entity extends Location implements Metadatable{
 
 	public $height;
 
-	public $eyeHeight = \null;
+	public $eyeHeight = null;
 
 	public $width;
 	public $length;
@@ -833,6 +833,12 @@ abstract class Entity extends Location implements Metadatable{
 			$this->lastMotionX = $this->motionX;
 			$this->lastMotionY = $this->motionY;
 			$this->lastMotionZ = $this->motionZ;
+
+			if($this instanceof Player){
+				$this->motionX = 0;
+				$this->motionY = 0;
+				$this->motionZ = 0;
+			}
 
 			foreach($this->hasSpawned as $player){
 				$player->addEntityMotion($this->id, $this->motionX, $this->motionY, $this->motionZ);

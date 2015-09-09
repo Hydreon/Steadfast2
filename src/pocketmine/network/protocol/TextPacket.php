@@ -24,14 +24,6 @@ namespace pocketmine\network\protocol;
 use pocketmine\utils\Binary;
 
 
-
-
-
-
-
-
-
-
 class TextPacket extends DataPacket{
 	public static $pool = [];
 	public static $next = 0;
@@ -41,6 +33,7 @@ class TextPacket extends DataPacket{
 	const TYPE_TRANSLATION = 2;
 	const TYPE_POPUP = 3;
 	const TYPE_TIP = 4;
+	const TYPE_SYSTEM = 5;
 
 	public $type;
 	public $source;
@@ -54,11 +47,12 @@ class TextPacket extends DataPacket{
 	public function decode(){
 		$this->type = $this->getByte();
 		switch($this->type){
+			case self::TYPE_POPUP:
 			case self::TYPE_CHAT:
 				$this->source = $this->getString();
 			case self::TYPE_RAW:
-			case self::TYPE_POPUP:
 			case self::TYPE_TIP:
+			case self::TYPE_SYSTEM:
 				$this->message = $this->getString();
 				break;
 
@@ -75,11 +69,12 @@ class TextPacket extends DataPacket{
 		$this->reset();
 		$this->putByte($this->type);
 		switch($this->type){
+			case self::TYPE_POPUP:
 			case self::TYPE_CHAT:
 				$this->putString($this->source);
 			case self::TYPE_RAW:
-			case self::TYPE_POPUP:
 			case self::TYPE_TIP:
+			case self::TYPE_SYSTEM:
 				$this->putString($this->message);
 				break;
 

@@ -37,7 +37,7 @@ class RemovePlayerPacket extends DataPacket{
 	public static $next = 0;
 
 	public $eid;
-	public $clientID;
+	public $clientId;
 
 	public function pid(){
 		return Info::REMOVE_PLAYER_PACKET;
@@ -50,7 +50,7 @@ class RemovePlayerPacket extends DataPacket{
 	public function encode(){
 		$this->reset();
 		$this->putLong($this->eid);
-		$this->putLong($this->clientID);
+		$this->putUUID($this->clientId);
 	}
 
 }

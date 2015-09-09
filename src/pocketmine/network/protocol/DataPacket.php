@@ -33,6 +33,7 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\item\Item;
+use pocketmine\utils\UUID;
 
 
 abstract class DataPacket extends \stdClass{
@@ -84,6 +85,14 @@ abstract class DataPacket extends \stdClass{
 		}
 
 		return $len === 1 ? $this->buffer{$this->offset++} : \substr($this->buffer, ($this->offset += $len) - $len, $len);
+	}
+
+	public function getUUID(){
+		return UUID::fromBinary($this->get(16));
+	}
+
+	public function putUUID(UUID $uuid){
+		$this->put($uuid->toBinary());
 	}
 
 	protected function put($str){

@@ -24,14 +24,6 @@ namespace pocketmine\network\protocol;
 use pocketmine\utils\Binary;
 
 
-
-
-
-
-
-
-
-
 class TakeItemEntityPacket extends DataPacket{
 	public static $pool = [];
 	public static $next = 0;

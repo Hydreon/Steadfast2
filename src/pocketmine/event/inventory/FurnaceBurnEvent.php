@@ -27,12 +27,12 @@ use pocketmine\item\Item;
 use pocketmine\tile\Furnace;
 
 class FurnaceBurnEvent extends BlockEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	private $furnace;
 	private $fuel;
 	private $burnTime;
-	private $burning = \true;
+	private $burning = true;
 
 	public function __construct(Furnace $furnace, Item $fuel, $burnTime){
 		parent::__construct($furnace->getBlock());

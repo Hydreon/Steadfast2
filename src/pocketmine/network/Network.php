@@ -36,6 +36,8 @@ use pocketmine\network\protocol\ContainerOpenPacket;
 use pocketmine\network\protocol\ContainerSetContentPacket;
 use pocketmine\network\protocol\ContainerSetDataPacket;
 use pocketmine\network\protocol\ContainerSetSlotPacket;
+use pocketmine\network\protocol\CraftingDataPacket;
+use pocketmine\network\protocol\CraftingEventPacket;
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\DropItemPacket;
 use pocketmine\network\protocol\FullChunkDataPacket;
@@ -55,8 +57,8 @@ use pocketmine\network\protocol\TextPacket;
 use pocketmine\network\protocol\MoveEntityPacket;
 use pocketmine\network\protocol\MovePlayerPacket;
 use pocketmine\network\protocol\PlayerActionPacket;
-use pocketmine\network\protocol\PlayerArmorEquipmentPacket;
-use pocketmine\network\protocol\PlayerEquipmentPacket;
+use pocketmine\network\protocol\MobArmorEquipmentPacket;
+use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\network\protocol\RemoveBlockPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\RemovePlayerPacket;
@@ -72,6 +74,7 @@ use pocketmine\network\protocol\TakeItemEntityPacket;
 use pocketmine\network\protocol\TileEventPacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
 use pocketmine\network\protocol\UseItemPacket;
+use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\MainLogger;
@@ -81,13 +84,21 @@ class Network {
 	public static $BATCH_THRESHOLD = 512;
 
 	const CHANNEL_NONE = 0;
+	/** @deprecated */
 	const CHANNEL_PRIORITY = 1; //Priority channel, only to be used when it matters
+	/** @deprecated */
 	const CHANNEL_WORLD_CHUNKS = 2; //Chunk sending
+	/** @deprecated */
 	const CHANNEL_MOVEMENT = 3; //Movement sending
+	/** @deprecated */
 	const CHANNEL_BLOCKS = 4; //Block updates or explosions
+	/** @deprecated */
 	const CHANNEL_WORLD_EVENTS = 5; //Entity, level or tile entity events
+	/** @deprecated */
 	const CHANNEL_ENTITY_SPAWNING = 6; //Entity spawn/despawn channel
+	/** @deprecated */
 	const CHANNEL_TEXT = 7; //Chat and other text stuff
+	/** @deprecated */
 	const CHANNEL_END = 31;
 
 	/** @var \SplFixedArray */
@@ -107,27 +118,28 @@ class Network {
 
 	private $name;
 
-	public function __construct(Server $server) {
+	public function __construct(Server $server){
 
 		$this->registerPackets();
 
 		$this->server = $server;
+
 	}
 
-	public function addStatistics($upload, $download) {
+	public function addStatistics($upload, $download){
 		$this->upload += $upload;
 		$this->download += $download;
 	}
 
-	public function getUpload() {
+	public function getUpload(){
 		return $this->upload;
 	}
 
-	public function getDownload() {
+	public function getDownload(){
 		return $this->download;
 	}
 
-	public function resetStatistics() {
+	public function resetStatistics(){
 		$this->upload = 0;
 		$this->download = 0;
 	}
@@ -135,14 +147,11 @@ class Network {
 	/**
 	 * @return SourceInterface[]
 	 */
-	public function getInterfaces() {
+	public function getInterfaces(){
 		return $this->interfaces;
 	}
 
-	public function setCount($count, $maxcount = 0) {
-		if($maxcount === 0) {
-			$maxcount = $this->server->getMaxPlayers();
-		}
+	public function setCount($count, $maxcount = 31360) {
 		$this->server->mainInterface->setCount($count, $maxcount);
 	}
 
@@ -150,10 +159,10 @@ class Network {
 		foreach($this->interfaces as $interface) {
 			try {
 				$interface->process();
-			} catch(\Exception $e) {
+			}catch(\Exception $e){
 				$logger = $this->server->getLogger();
-				if(\pocketmine\DEBUG > 1) {
-					if($logger instanceof MainLogger) {
+				if(\pocketmine\DEBUG > 1){
+					if($logger instanceof MainLogger){
 						$logger->logException($e);
 					}
 				}
@@ -292,6 +301,7 @@ class Network {
 		$this->registerPacket(ProtocolInfo::LOGIN_PACKET, LoginPacket::class);
 		$this->registerPacket(ProtocolInfo::PLAY_STATUS_PACKET, PlayStatusPacket::class);
 		$this->registerPacket(ProtocolInfo::DISCONNECT_PACKET, DisconnectPacket::class);
+		$this->registerPacket(ProtocolInfo::BATCH_PACKET, BatchPacket::class);
 		$this->registerPacket(ProtocolInfo::TEXT_PACKET, TextPacket::class);
 		$this->registerPacket(ProtocolInfo::SET_TIME_PACKET, SetTimePacket::class);
 		$this->registerPacket(ProtocolInfo::START_GAME_PACKET, StartGamePacket::class);
@@ -310,8 +320,8 @@ class Network {
 		$this->registerPacket(ProtocolInfo::LEVEL_EVENT_PACKET, LevelEventPacket::class);
 		$this->registerPacket(ProtocolInfo::TILE_EVENT_PACKET, TileEventPacket::class);
 		$this->registerPacket(ProtocolInfo::ENTITY_EVENT_PACKET, EntityEventPacket::class);
-		$this->registerPacket(ProtocolInfo::PLAYER_EQUIPMENT_PACKET, PlayerEquipmentPacket::class);
-		$this->registerPacket(ProtocolInfo::PLAYER_ARMOR_EQUIPMENT_PACKET, PlayerArmorEquipmentPacket::class);
+		$this->registerPacket(ProtocolInfo::MOB_EQUIPMENT_PACKET, MobEquipmentPacket::class);
+		$this->registerPacket(ProtocolInfo::MOB_ARMOR_EQUIPMENT_PACKET, MobArmorEquipmentPacket::class);
 		$this->registerPacket(ProtocolInfo::INTERACT_PACKET, InteractPacket::class);
 		$this->registerPacket(ProtocolInfo::USE_ITEM_PACKET, UseItemPacket::class);
 		$this->registerPacket(ProtocolInfo::PLAYER_ACTION_PACKET, PlayerActionPacket::class);
@@ -329,10 +339,12 @@ class Network {
 		$this->registerPacket(ProtocolInfo::CONTAINER_SET_SLOT_PACKET, ContainerSetSlotPacket::class);
 		$this->registerPacket(ProtocolInfo::CONTAINER_SET_DATA_PACKET, ContainerSetDataPacket::class);
 		$this->registerPacket(ProtocolInfo::CONTAINER_SET_CONTENT_PACKET, ContainerSetContentPacket::class);
+		$this->registerPacket(ProtocolInfo::CRAFTING_DATA_PACKET, CraftingDataPacket::class);
+		$this->registerPacket(ProtocolInfo::CRAFTING_EVENT_PACKET, CraftingEventPacket::class);
 		$this->registerPacket(ProtocolInfo::ADVENTURE_SETTINGS_PACKET, AdventureSettingsPacket::class);
 		$this->registerPacket(ProtocolInfo::TILE_ENTITY_DATA_PACKET, TileEntityDataPacket::class);
 		$this->registerPacket(ProtocolInfo::FULL_CHUNK_DATA_PACKET, FullChunkDataPacket::class);
 		$this->registerPacket(ProtocolInfo::SET_DIFFICULTY_PACKET, SetDifficultyPacket::class);
-		$this->registerPacket(ProtocolInfo::BATCH_PACKET, BatchPacket::class);
+		$this->registerPacket(ProtocolInfo::PLAYER_LIST_PACKET, PlayerListPacket::class);
 	}
 }

@@ -27,7 +27,7 @@ use pocketmine\network\protocol\DataPacket;
 use pocketmine\Player;
 
 class DataPacketSendEvent extends ServerEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	private $packet;
 	private $player;

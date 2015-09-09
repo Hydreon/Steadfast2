@@ -36,13 +36,13 @@ class BlockIterator implements \Iterator{
 
 	private static $gridSize = 16777216; //1 << 24
 
-	private $end = \false;
+	private $end = false;
 
 	/** @var \SplFixedArray<Block>[3] */
 	private $blockQueue;
 	private $currentBlock = 0;
 	/** @var Block */
-	private $currentBlockObject = \null;
+	private $currentBlockObject = null;
 	private $currentDistance = 0;
 	private $maxDistanceInt = 0;
 
@@ -75,7 +75,7 @@ class BlockIterator implements \Iterator{
 		$thirdPosition = 0;
 
 		$pos = new Vector3($startClone->x, $startClone->y, $startClone->z);
-		$startBlock = $this->level->getBlock($pos->floor());
+		$startBlock = $this->level->getBlock(new Vector3(floor($pos->x), floor($pos->y), floor($pos->z)));
 
 		if($this->getXLength($direction) > $mainDirection){
 			$this->mainFace = $this->getXFace($direction);
@@ -121,10 +121,10 @@ class BlockIterator implements \Iterator{
 		$secondd = $secondPosition - $secondDirection * $d;
 		$thirdd = $thirdPosition - $thirdDirection * $d;
 
-		$this->secondError = \floor($secondd * self::$gridSize);
-		$this->secondStep = \round($secondDirection / $mainDirection * self::$gridSize);
-		$this->thirdError = \floor($thirdd * self::$gridSize);
-		$this->thirdStep = \round($thirdDirection / $mainDirection * self::$gridSize);
+		$this->secondError = floor($secondd * self::$gridSize);
+		$this->secondStep = round($secondDirection / $mainDirection * self::$gridSize);
+		$this->thirdError = floor($thirdd * self::$gridSize);
+		$this->thirdStep = round($thirdDirection / $mainDirection * self::$gridSize);
 
 		if($this->secondError + $this->secondStep <= 0){
 			$this->secondError = -$this->secondStep + 1;
@@ -155,12 +155,12 @@ class BlockIterator implements \Iterator{
 
 		$this->scan();
 
-		$startBlockFound = \false;
+		$startBlockFound = false;
 
 		for($cnt = $this->currentBlock; $cnt >= 0; --$cnt){
 			if($this->blockEquals($this->blockQueue[$cnt], $startBlock)){
 				$this->currentBlock = $cnt;
-				$startBlockFound = \true;
+				$startBlockFound = true;
 				break;
 			}
 		}
@@ -169,7 +169,7 @@ class BlockIterator implements \Iterator{
 			throw new \InvalidStateException("Start block missed in BlockIterator");
 		}
 
-		$this->maxDistanceInt = \round($maxDistance / (\sqrt($mainDirection ** 2 + $secondDirection ** 2 + $thirdDirection ** 2) / $mainDirection));
+		$this->maxDistanceInt = round($maxDistance / (sqrt($mainDirection ** 2 + $secondDirection ** 2 + $thirdDirection ** 2) / $mainDirection));
 	}
 
 	private function blockEquals(Block $a, Block $b){
@@ -189,15 +189,15 @@ class BlockIterator implements \Iterator{
 	}
 
 	private function getXLength(Vector3 $direction){
-		return \abs($direction->x);
+		return abs($direction->x);
 	}
 
 	private function getYLength(Vector3 $direction){
-		return \abs($direction->y);
+		return abs($direction->y);
 	}
 
 	private function getZLength(Vector3 $direction){
-		return \abs($direction->z);
+		return abs($direction->z);
 	}
 
 	private function getPosition($direction, $position, $blockPosition){
@@ -232,7 +232,7 @@ class BlockIterator implements \Iterator{
 	 * @throws \OutOfBoundsException
 	 */
 	public function current(){
-		if($this->currentBlockObject === \null){
+		if($this->currentBlockObject === null){
 			throw new \OutOfBoundsException;
 		}
 		return $this->currentBlockObject;
@@ -257,7 +257,7 @@ class BlockIterator implements \Iterator{
 		}
 
 		if($this->maxDistance !== 0 and $this->currentDistance > $this->maxDistanceInt){
-			$this->end = \true;
+			$this->end = true;
 			return;
 		}
 
@@ -273,7 +273,7 @@ class BlockIterator implements \Iterator{
 		if($this->secondError > 0 and $this->thirdError > 0){
 			$this->blockQueue[2] = $this->blockQueue[0]->getSide($this->mainFace);
 
-			if($this->secondStep * $this->thirdError < $this->thirdStep * $this->secondError){
+			if(($this->secondStep * $this->thirdError) < ($this->thirdStep * $this->secondError)){
 				$this->blockQueue[1] = $this->blockQueue[2]->getSide($this->secondFace);
 				$this->blockQueue[0] = $this->blockQueue[1]->getSide($this->thirdFace);
 			}else{
@@ -286,12 +286,12 @@ class BlockIterator implements \Iterator{
 			$this->currentBlock = 2;
 		}elseif($this->secondError > 0){
 			$this->blockQueue[1] = $this->blockQueue[0]->getSide($this->mainFace);
-			$this->blockQueue[0] = $this->blockQueue[1]->getSide($this->thirdFace);
+			$this->blockQueue[0] = $this->blockQueue[1]->getSide($this->secondFace);
 			$this->secondError -= self::$gridSize;
 			$this->currentBlock = 1;
 		}elseif($this->thirdError > 0){
 			$this->blockQueue[1] = $this->blockQueue[0]->getSide($this->mainFace);
-			$this->blockQueue[0] = $this->blockQueue[1]->getSide($this->secondFace);
+			$this->blockQueue[0] = $this->blockQueue[1]->getSide($this->thirdFace);
 			$this->thirdError -= self::$gridSize;
 			$this->currentBlock = 1;
 		}else{

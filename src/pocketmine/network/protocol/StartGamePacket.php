@@ -24,19 +24,12 @@ namespace pocketmine\network\protocol;
 use pocketmine\utils\Binary;
 
 
-
-
-
-
-
-
-
-
 class StartGamePacket extends DataPacket{
 	public static $pool = [];
 	public static $next = 0;
 
 	public $seed;
+	public $dimension;
 	public $generator;
 	public $gamemode;
 	public $eid;
@@ -58,6 +51,7 @@ class StartGamePacket extends DataPacket{
 	public function encode(){
 		$this->reset();
 		$this->putInt($this->seed);
+		$this->putByte($this->dimension);
 		$this->putInt($this->generator);
 		$this->putInt($this->gamemode);
 		$this->putLong($this->eid);
@@ -67,6 +61,7 @@ class StartGamePacket extends DataPacket{
 		$this->putFloat($this->x);
 		$this->putFloat($this->y);
 		$this->putFloat($this->z);
+		$this->putByte(0);
 	}
 
 }

@@ -37,8 +37,8 @@ class SetSpawnPositionPacket extends DataPacket{
 	public static $next = 0;
 
 	public $x;
-	public $z;
 	public $y;
+	public $z;
 
 	public function pid(){
 		return Info::SET_SPAWN_POSITION_PACKET;
@@ -51,8 +51,8 @@ class SetSpawnPositionPacket extends DataPacket{
 	public function encode(){
 		$this->reset();
 		$this->putInt($this->x);
+		$this->putInt($this->y);
 		$this->putInt($this->z);
-		$this->putByte($this->y);
 	}
 
 }

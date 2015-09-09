@@ -32,6 +32,7 @@ use pocketmine\command\ConsoleCommandSender;
 use pocketmine\command\PluginIdentifiableCommand;
 use pocketmine\command\SimpleCommandMap;
 use pocketmine\entity\Arrow;
+use pocketmine\entity\Attribute;
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
 use pocketmine\entity\FallingSand;
@@ -52,6 +53,9 @@ use pocketmine\event\TimingsHandler;
 use pocketmine\inventory\CraftingManager;
 use pocketmine\inventory\InventoryType;
 use pocketmine\inventory\Recipe;
+use pocketmine\inventory\ShapedRecipe;
+use pocketmine\inventory\ShapelessRecipe;
+use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\level\format\anvil\Anvil;
 use pocketmine\level\format\leveldb\LevelDB;
@@ -79,7 +83,9 @@ use pocketmine\nbt\tag\String;
 use pocketmine\network\CompressBatchedTask;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\BatchPacket;
+use pocketmine\network\protocol\CraftingDataPacket;
 use pocketmine\network\protocol\DataPacket;
+use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\network\query\QueryHandler;
 use pocketmine\network\RakLibInterface;
 use pocketmine\network\rcon\RCON;
@@ -96,6 +102,7 @@ use pocketmine\scheduler\GarbageCollectionTask;
 use pocketmine\scheduler\SendUsageTask;
 use pocketmine\scheduler\ServerScheduler;
 use pocketmine\tile\Chest;
+use pocketmine\tile\EnchantTable;
 use pocketmine\tile\Furnace;
 use pocketmine\tile\Sign;
 use pocketmine\tile\Tile;
@@ -110,6 +117,7 @@ use pocketmine\utils\Terminal;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\TextWrapper;
 use pocketmine\utils\Utils;
+use pocketmine\utils\UUID;
 use pocketmine\utils\VersionString;
 
 /**
@@ -230,6 +238,9 @@ class Server{
 
 	/** @var Player[] */
 	private $players = [];
+
+	/** @var Player[] */
+	private $playerList = [];
 
 	private $identifiers = [];
 
@@ -672,7 +683,7 @@ class Server{
 	 * @return Player[]
 	 */
 	public function getOnlinePlayers(){
-		return $this->players;
+		return $this->playerList;
 	}
 
 	public function addRecipe(Recipe $recipe){
@@ -806,9 +817,6 @@ class Server{
 			\unlink($path . "$name.yml");
 		}
 
-        if($this->getConfigBoolean("save-playerdata", true)) {
-            $this->saveOfflinePlayerData($name, $nbt);
-        }
 		return $nbt;
 
 	}
@@ -1032,100 +1040,6 @@ class Server{
 		$level->initLevel();
 
 		$this->getPluginManager()->callEvent(new LevelLoadEvent($level));
-
-		/*foreach($entities->getAll() as $entity){
-			if(!isset($entity["id"])){
-				break;
-			}
-			if($entity["id"] === 64){ //Item Drop
-				$e = $this->server->api->entity->add($this->levels[$name], ENTITY_ITEM, $entity["Item"]["id"], array(
-					"meta" => $entity["Item"]["Damage"],
-					"stack" => $entity["Item"]["Count"],
-					"x" => $entity["Pos"][0],
-					"y" => $entity["Pos"][1],
-					"z" => $entity["Pos"][2],
-					"yaw" => $entity["Rotation"][0],
-					"pitch" => $entity["Rotation"][1],
-				));
-			}elseif($entity["id"] === FALLING_SAND){
-				$e = $this->server->api->entity->add($this->levels[$name], ENTITY_FALLING, $entity["id"], $entity);
-				$e->setPosition(new Vector3($entity["Pos"][0], $entity["Pos"][1], $entity["Pos"][2]), $entity["Rotation"][0], $entity["Rotation"][1]);
-				$e->setHealth($entity["Health"]);
-			}elseif($entity["id"] === OBJECT_PAINTING or $entity["id"] === OBJECT_ARROW){ //Painting
-				$e = $this->server->api->entity->add($this->levels[$name], ENTITY_OBJECT, $entity["id"], $entity);
-				$e->setPosition(new Vector3($entity["Pos"][0], $entity["Pos"][1], $entity["Pos"][2]), $entity["Rotation"][0], $entity["Rotation"][1]);
-				$e->setHealth(1);
-			}else{
-				$e = $this->server->api->entity->add($this->levels[$name], ENTITY_MOB, $entity["id"], $entity);
-				$e->setPosition(new Vector3($entity["Pos"][0], $entity["Pos"][1], $entity["Pos"][2]), $entity["Rotation"][0], $entity["Rotation"][1]);
-				$e->setHealth($entity["Health"]);
-			}
-		}*/
-
-		/*if(file_exists($path . "tiles.yml")){
-			$tiles = new Config($path . "tiles.yml", Config::YAML);
-			foreach($tiles->getAll() as $tile){
-				if(!isset($tile["id"])){
-					continue;
-				}
-				$level->loadChunk($tile["x"] >> 4, $tile["z"] >> 4);
-
-				$nbt = new Compound(false, []);
-				foreach($tile as $index => $data){
-					switch($index){
-						case "Items":
-							$tag = new Enum("Items", []);
-							$tag->setTagType(NBT::TAG_Compound);
-							foreach($data as $slot => $fields){
-								$tag[(int) $slot] = new Compound(false, array(
-									"Count" => new Byte("Count", $fields["Count"]),
-									"Slot" => new Short("Slot", $fields["Slot"]),
-									"Damage" => new Short("Damage", $fields["Damage"]),
-									"id" => new String("id", $fields["id"])
-								));
-							}
-							$nbt["Items"] = $tag;
-							break;
-
-						case "id":
-						case "Text1":
-						case "Text2":
-						case "Text3":
-						case "Text4":
-							$nbt[$index] = new String($index, $data);
-							break;
-
-						case "x":
-						case "y":
-						case "z":
-						case "pairx":
-						case "pairz":
-							$nbt[$index] = new Int($index, $data);
-							break;
-
-						case "BurnTime":
-						case "CookTime":
-						case "MaxTime":
-							$nbt[$index] = new Short($index, $data);
-							break;
-					}
-				}
-				switch($tile["id"]){
-					case Tile::FURNACE:
-						new Furnace($level, $nbt);
-						break;
-					case Tile::CHEST:
-						new Chest($level, $nbt);
-						break;
-					case Tile::SIGN:
-						new Sign($level, $nbt);
-						break;
-				}
-			}
-			unlink($path . "tiles.yml");
-			$level->save(true, true);
-		}*/
-
 		return \true;
 	}
 
@@ -1563,13 +1477,6 @@ class Server{
 			"auto-save" => \true,
 		]);
 
-		if($this->getProperty("forward.enabled", false) === true) {
-			Player::$forwardIp = $this->getProperty("forward.address", "");
-			Player::$forwardPort = $this->getProperty("forward.port", 19132);
-			Player::$forwardDNS = !filter_var(Player::$forwardIp, FILTER_VALIDATE_IP);
-		}
-
-
 		ServerScheduler::$WORKERS = 4;
 
 		if($this->getProperty("network.batch-threshold", 256) >= 0){
@@ -1638,7 +1545,7 @@ class Server{
 
 		$this->logger->info("Starting Minecraft PE server on " . ($this->getIp() === "" ? "*" : $this->getIp()) . ":" . $this->getPort());
 		\define("BOOTUP_RANDOM", @Utils::getRandomBytes(16));
-		$this->serverID = Binary::readLong(\substr(Utils::getUniqueID(\true, $this->getIp() . $this->getPort()), 0, 8));
+		$this->serverID = Utils::getMachineUniqueId($this->getIp() . $this->getPort());
 
 		$this->addInterface($this->mainInterface = new RakLibInterface($this));
 
@@ -2243,6 +2150,66 @@ class Server{
 			$this->tick();
 			\usleep((int) \max(1, ($this->nextTick - \microtime(\true)) * 1000000));
 		}
+	}
+
+	public function addOnlinePlayer(Player $player){
+		$this->playerList[$player->getRawUniqueId()] = $player;
+
+		$this->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getDisplayName(), $player->isSkinSlim(), $player->getSkinData());
+	}
+
+	public function removeOnlinePlayer(Player $player){
+		if(isset($this->playerList[$player->getRawUniqueId()])){
+			unset($this->playerList[$player->getRawUniqueId()]);
+
+			$pk = new PlayerListPacket();
+			$pk->type = PlayerListPacket::TYPE_REMOVE;
+			$pk->entries[] = [$player->getUniqueId()];
+			Server::broadcastPacket($this->playerList, $pk);
+		}
+	}
+
+	public function updatePlayerListData(UUID $uuid, $entityId, $name, $isSlim, $skinData, array $players = null){
+		$pk = new PlayerListPacket();
+		$pk->type = PlayerListPacket::TYPE_ADD;
+		$pk->entries[] = [$uuid, $entityId, $name, $isSlim, $skinData];
+		Server::broadcastPacket($players === null ? $this->playerList : $players, $pk);
+	}
+
+	public function removePlayerListData(UUID $uuid, array $players = null){
+		$pk = new PlayerListPacket();
+		$pk->type = PlayerListPacket::TYPE_REMOVE;
+		$pk->entries[] = [$uuid];
+		Server::broadcastPacket($players === null ? $this->playerList : $players, $pk);
+	}
+
+	public function sendFullPlayerListData(Player $p){
+		$pk = new PlayerListPacket();
+		$pk->type = PlayerListPacket::TYPE_ADD;
+		foreach($this->playerList as $player){
+			$pk->entries[] = [$player->getUniqueId(), $player->getId(), $player->getDisplayName(), $player->isSkinSlim(), $player->getSkinData()];
+		}
+
+		$p->dataPacket($pk);
+	}
+
+	public function sendRecipeList(Player $p){
+		$pk = new CraftingDataPacket();
+		$pk->cleanRecipes = true;
+
+		foreach($this->getCraftingManager()->getRecipes() as $recipe){
+			if($recipe instanceof ShapedRecipe){
+				$pk->addShapedRecipe($recipe);
+			}elseif($recipe instanceof ShapelessRecipe){
+				$pk->addShapelessRecipe($recipe);
+			}
+		}
+
+		foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
+			$pk->addFurnaceRecipe($recipe);
+		}
+
+		$p->dataPacket($pk);
 	}
 
 	public function addPlayer($identifier, Player $player){

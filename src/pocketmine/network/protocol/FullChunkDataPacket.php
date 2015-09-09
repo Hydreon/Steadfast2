@@ -23,21 +23,16 @@ namespace pocketmine\network\protocol;
 
 use pocketmine\utils\Binary;
 
-
-
-
-
-
-
-
-
-
 class FullChunkDataPacket extends DataPacket{
 	public static $pool = [];
 	public static $next = 0;
 
+	const ORDER_COLUMNS = 0;
+	const ORDER_LAYERED = 1;
+
 	public $chunkX;
 	public $chunkZ;
+	public $order = self::ORDER_COLUMNS;
 	public $data;
 
 	public function pid(){
@@ -52,6 +47,7 @@ class FullChunkDataPacket extends DataPacket{
 		$this->reset();
         $this->putInt($this->chunkX);
         $this->putInt($this->chunkZ);
+        $this->putByte($this->order);
 		$this->putInt(strlen($this->data));
 		$this->put($this->data);
 	}

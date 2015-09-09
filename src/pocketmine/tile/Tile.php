@@ -39,6 +39,11 @@ abstract class Tile extends Position{
 	const SIGN = "Sign";
 	const CHEST = "Chest";
 	const FURNACE = "Furnace";
+	const FLOWER_POT = "FlowerPot";
+	const MOB_SPAWNER = "MobSpawner";
+	const SKULL = "Skull";
+	const BREWING_STAND = "Cauldron";
+	const ENCHANT_TABLE = "EnchantTable";
 
 	public static $tileCount = 1;
 
@@ -54,7 +59,7 @@ abstract class Tile extends Position{
 	public $z;
 	public $attach;
 	public $metadata;
-	public $closed = \false;
+	public $closed = false;
 	public $namedtag;
 	protected $lastUpdate;
 	protected $server;
@@ -77,7 +82,7 @@ abstract class Tile extends Position{
 			return new $class($chunk, $nbt, ...$args);
 		}
 
-		return \null;
+		return null;
 	}
 
 	/**
@@ -87,13 +92,13 @@ abstract class Tile extends Position{
 	 */
 	public static function registerTile($className){
 		$class = new \ReflectionClass($className);
-		if(\is_a($className, Tile::class, \true) and !$class->isAbstract()){
+		if(is_a($className, Tile::class, true) and !$class->isAbstract()){
 			self::$knownTiles[$class->getShortName()] = $className;
 			self::$shortNames[$className] = $class->getShortName();
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**
@@ -106,7 +111,7 @@ abstract class Tile extends Position{
 	}
 
 	public function __construct(FullChunk $chunk, Compound $nbt){
-		if($chunk === \null or $chunk->getProvider() === \null){
+		if($chunk === null or $chunk->getProvider() === null){
 			throw new ChunkException("Invalid garbage Chunk given to Tile");
 		}
 
@@ -117,7 +122,7 @@ abstract class Tile extends Position{
 		$this->setLevel($chunk->getProvider()->getLevel());
 		$this->namedtag = $nbt;
 		$this->name = "";
-		$this->lastUpdate = \microtime(\true);
+		$this->lastUpdate = microtime(true);
 		$this->id = Tile::$tileCount++;
 		$this->x = (int) $this->namedtag["x"];
 		$this->y = (int) $this->namedtag["y"];
@@ -147,7 +152,7 @@ abstract class Tile extends Position{
 	}
 
 	public function onUpdate(){
-		return \false;
+		return false;
 	}
 
 	public final function scheduleUpdate(){
@@ -160,7 +165,7 @@ abstract class Tile extends Position{
 
 	public function close(){
 		if(!$this->closed){
-			$this->closed = \true;
+			$this->closed = true;
 			unset($this->level->updateTiles[$this->id]);
 			if($this->chunk instanceof FullChunk){
 				$this->chunk->removeTile($this);
@@ -168,7 +173,7 @@ abstract class Tile extends Position{
 			if(($level = $this->getLevel()) instanceof Level){
 				$level->removeTile($this);
 			}
-			$this->level = \null;
+			$this->level = null;
 		}
 	}
 

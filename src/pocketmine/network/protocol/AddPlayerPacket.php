@@ -38,7 +38,7 @@ class AddPlayerPacket extends DataPacket{
 
 
 
-	public $clientID;
+	public $uuid;
 	public $username;
 	public $eid;
 	public $x;
@@ -66,7 +66,7 @@ class AddPlayerPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putLong($this->clientID);
+		$this->putUUID($this->uuid);
 		$this->putString($this->username);
 		$this->putLong($this->eid);
 		$this->putFloat($this->x);
@@ -78,10 +78,8 @@ class AddPlayerPacket extends DataPacket{
 		$this->putFloat($this->yaw);
 		$this->putFloat($this->yaw); //TODO headrot
 		$this->putFloat($this->pitch);
-		$this->putShort($this->item);
-		$this->putShort($this->meta);
-		$this->putByte($this->slim ? 1 : 0);
-		$this->putString($this->skin);
+		$this->putSlot($this->item);
+
 		$meta = Binary::writeMetadata($this->metadata);
 		$this->put($meta);
 	}

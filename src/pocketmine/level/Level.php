@@ -628,14 +628,14 @@ class Level implements ChunkManager, Metadatable{
 			Level::getXZ($index, $chunkX, $chunkZ);
 			$pk = new MoveEntityPacket();
 			$pk->entities = $entry;
-			Server::broadcastPacket($this->getUsingChunk($chunkX, $chunkZ), $pk->setChannel(Network::CHANNEL_MOVEMENT));
+			Server::broadcastPacket($this->getChunkPlayers($chunkX, $chunkZ), $pk->setChannel(Network::CHANNEL_MOVEMENT));
 		}
 		$this->moveToSend = [];
 		foreach($this->motionToSend as $index => $entry){
 			Level::getXZ($index, $chunkX, $chunkZ);
 			$pk = new SetEntityMotionPacket();
 			$pk->entities = $entry;
-			Server::broadcastPacket($this->getUsingChunk($chunkX, $chunkZ), $pk->setChannel(Network::CHANNEL_MOVEMENT));
+			Server::broadcastPacket($this->getChunkPlayers($chunkX, $chunkZ), $pk->setChannel(Network::CHANNEL_MOVEMENT));
 		}
 		$this->motionToSend = [];
 

@@ -25,9 +25,9 @@ use raklib\protocol\EncapsulatedPacket;
 
 class CachedEncapsulatedPacket extends EncapsulatedPacket{
 
-	private $internalData = \null;
+	private $internalData = null;
 
-	public function toBinary($internal = \false){
-		return $this->internalData === \null ? ($this->internalData = parent::toBinary($internal)) : $this->internalData;
+	public function toBinary($internal = false){
+		return $this->internalData === null ? ($this->internalData = parent::toBinary($internal)) : $this->internalData;
 	}
 }

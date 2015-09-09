@@ -17,23 +17,12 @@ settings:
  #Number of AsyncTask workers
  #WARNING: This will increase global memory usage, but it won't be listed in the total.
  async-workers: 1
- #Save playerdata
- save-playerdata: true
 
 debug:
  #If > 1, it will show debug messages in the console
  level: 1
  #Enables /status
  commands: true
-
-# When the server is full, where should we send players?
-forwarding:
- enabled: false
-
- # Can be a domain or a valid IPv4 address (x.x.x.x)
- ip: ""
-
- port: 19132
 
 level-settings:
  #The default format that levels will use when created
@@ -92,10 +81,10 @@ auto-report:
  host: crash.pocketmine.net
 
 auto-updater:
- enabled: false
+ enabled: true
  on-update:
-  warn-console: false
-  warn-ops: false
+  warn-console: true
+  warn-ops: true
  host: www.pocketmine.net
 
 aliases:

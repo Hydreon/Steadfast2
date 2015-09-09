@@ -24,14 +24,6 @@ namespace pocketmine\network\protocol;
 use pocketmine\utils\Binary;
 
 
-
-
-
-
-
-
-
-
 class EntityEventPacket extends DataPacket{
 	public static $pool = [];
 	public static $next = 0;
@@ -51,6 +43,8 @@ class EntityEventPacket extends DataPacket{
 	const SQUID_INK_CLOUD = 15;
 	const AMBIENT_SOUND = 16;
 	const RESPAWN = 17;
+
+	//TODO add new events
 
 	public $eid;
 	public $event;

@@ -24,14 +24,6 @@ namespace pocketmine\network\protocol;
 use pocketmine\utils\Binary;
 
 
-
-
-
-
-
-
-
-
 class UseItemPacket extends DataPacket{
 	public static $pool = [];
 	public static $next = 0;
@@ -41,8 +33,6 @@ class UseItemPacket extends DataPacket{
 	public $z;
 	public $face;
 	public $item;
-	public $meta;
-	public $eid;
 	public $fx;
 	public $fy;
 	public $fz;
@@ -59,15 +49,14 @@ class UseItemPacket extends DataPacket{
 		$this->y = $this->getInt();
 		$this->z = $this->getInt();
 		$this->face = $this->getByte();
-		$this->item = $this->getShort();
-		$this->meta = $this->getShort();
-		$this->eid = $this->getLong();
 		$this->fx = $this->getFloat();
 		$this->fy = $this->getFloat();
 		$this->fz = $this->getFloat();
 		$this->posX = $this->getFloat();
 		$this->posY = $this->getFloat();
 		$this->posZ = $this->getFloat();
+
+		$this->item = $this->getSlot();
 	}
 
 	public function encode(){
