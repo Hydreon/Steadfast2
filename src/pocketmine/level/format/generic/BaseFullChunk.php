@@ -228,6 +228,35 @@ abstract class BaseFullChunk implements FullChunk{
 		$this->heightMap[($z << 4) + $x] = $value;
 	}
 
+	public function getBlockExtraData($x, $y, $z){
+		return 0;
+	}
+
+	public function setBlockExtraData($x, $y, $z, $data){
+		return 0;
+	}
+
+	public function populateSkyLight(){
+		for($z = 0; $z < 16; ++$z){
+			for($x = 0; $x < 16; ++$x){
+				$top = $this->getHeightMap($x, $z);
+				for($y = 127; $y > $top; --$y){
+					$this->setBlockSkyLight($x, $y, $z, 15);
+				}
+
+				for($y = $top; $y >= 0; --$y){
+					if(Block::$solid[$this->getBlockId($x, $y, $z)]){
+						break;
+					}
+
+					$this->setBlockSkyLight($x, $y, $z, 15);
+				}
+
+				$this->setHeightMap($x, $z, $this->getHighestBlockAt($x, $z, false));
+			}
+		}
+	}
+
 	public function getHighestBlockAt($x, $z){
 		$column = $this->getBlockIdColumn($x, $z);
 		for($y = 127; $y >= 0; --$y){
@@ -237,6 +266,10 @@ abstract class BaseFullChunk implements FullChunk{
 		}
 
 		return 0;
+	}
+
+	public function recalculateHeightMap() {
+
 	}
 
 	public function addEntity(Entity $entity){

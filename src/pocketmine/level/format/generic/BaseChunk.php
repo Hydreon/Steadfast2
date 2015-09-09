@@ -135,7 +135,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 	public function setBlockSkyLight($x, $y, $z, $data){
 		try{
 			$this->sections[$y >> 4]->getBlockSkyLight($x, $y & 0x0f, $z, $data);
-			$this->hasChanged = \true;
+			$this->hasChanged = true;
 		}catch(ChunkException $e){
 			$level = $this->getProvider();
 			$this->setInternalSection($Y = $y >> 4, $level::createChunkSection($Y));
@@ -203,21 +203,21 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 	}
 
 	public function setSection($fY, ChunkSection $section){
-		if(\substr_count($section->getIdArray(), "\x00") === 4096 and \substr_count($section->getDataArray(), "\x00") === 2048){
+		if(substr_count($section->getIdArray(), "\x00") === 4096 and substr_count($section->getDataArray(), "\x00") === 2048){
 			$this->sections[(int) $fY] = new EmptyChunkSection($fY);
 		}else{
 			$this->sections[(int) $fY] = $section;
 		}
-		$this->hasChanged = \true;
+		$this->hasChanged = true;
 	}
 
 	private function setInternalSection($fY, ChunkSection $section){
 		$this->sections[(int) $fY] = $section;
-		$this->hasChanged = \true;
+		$this->hasChanged = true;
 	}
 
-	public function load($generate = \true){
-		return $this->getProvider() === \null ? \false : $this->getProvider()->getChunk($this->getX(), $this->getZ(), \true) instanceof Chunk;
+	public function load($generate = true){
+		return $this->getProvider() === null ? false : $this->getProvider()->getChunk($this->getX(), $this->getZ(), true) instanceof Chunk;
 	}
 
 	public function getBlockIdArray(){
