@@ -33,7 +33,6 @@ use pocketmine\nbt\tag\Int;
 use pocketmine\nbt\tag\IntArray;
 use pocketmine\Player;
 use pocketmine\utils\Binary;
-use pocketmine\utils\BinaryStream;
 
 class Chunk extends BaseChunk{
 
@@ -90,31 +89,9 @@ class Chunk extends BaseChunk{
 			}
 		}
 
-		$extraData = [];
+		parent::__construct($level, (int) $this->nbt["xPos"], (int) $this->nbt["zPos"], $sections, $this->nbt->Biomes->getValue(), $this->nbt->BiomeColors->getValue(), $this->nbt->HeightMap->getValue(), $this->nbt->Entities->getValue(), $this->nbt->TileEntities->getValue());
 
-		if(!isset($this->nbt->ExtraData) or !($this->nbt->ExtraData instanceof ByteArray)){
-			$this->nbt->ExtraData = new ByteArray("ExtraData", Binary::writeInt(0));
-		}else{
-			$stream = new BinaryStream($this->nbt->ExtraData->getValue());
-			$count = $stream->getInt();
-			for($i = 0; $i < $count; ++$i){
-				$key = $stream->getInt();
-				$extraData[$key] = $stream->getShort(false);
-			}
-		}
-
-		parent::__construct($level, (int) $this->nbt["xPos"], (int) $this->nbt["zPos"], $sections, $this->nbt->BiomeColors->getValue(), $this->nbt->HeightMap->getValue(), $this->nbt->Entities->getValue(), $this->nbt->TileEntities->getValue(), $extraData);
-
-		unset($this->nbt->Sections, $this->nbt->ExtraData);
-	}
-
-	public function isLightPopulated(){
-		return $this->nbt["LightPopulated"] > 0;
-	}
-
-	public function setLightPopulated($value = 1){
-		$this->nbt->LightPopulated = new Byte("LightPopulated", $value);
-		$this->hasChanged = true;
+		unset($this->nbt->Sections);
 	}
 
 	/**

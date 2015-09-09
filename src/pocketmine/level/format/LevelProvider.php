@@ -108,7 +108,7 @@ interface LevelProvider{
 	 *
 	 * @return FullChunk|Chunk
 	 */
-	public function getChunk($X, $Z, $create = false);
+	public function getChunk($X, $Z, $create = \false);
 
 	/**
 	 * @param $Y 0-7
@@ -134,7 +134,7 @@ interface LevelProvider{
 	 *
 	 * @return bool
 	 */
-	public function loadChunk($X, $Z, $create = false);
+	public function loadChunk($X, $Z, $create = \false);
 
 	/**
 	 * @param int  $X
@@ -143,7 +143,7 @@ interface LevelProvider{
 	 *
 	 * @return bool
 	 */
-	public function unloadChunk($X, $Z, $safe = true);
+	public function unloadChunk($X, $Z, $safe = \true);
 
 	/**
 	 * @param int $X

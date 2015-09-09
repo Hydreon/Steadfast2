@@ -62,7 +62,7 @@ interface FullChunk{
 	 * @param int &$blockId
 	 * @param int &$meta
 	 */
-	public function getBlock($x, $y, $z, &$blockId, &$meta = null);
+	public function getBlock($x, $y, $z, &$blockId, &$meta = \null);
 
 	/**
 	 * Gets block and meta in one go
@@ -83,7 +83,7 @@ interface FullChunk{
 	 * @param int $meta    0-15, if null, do not change
 	 *
 	 */
-	public function setBlock($x, $y, $z, $blockId = null, $meta = null);
+	public function setBlock($x, $y, $z, $blockId = \null, $meta = \null);
 
 	/**
 	 * @param int $x 0-15
@@ -118,23 +118,6 @@ interface FullChunk{
 	 * @param int $data 0-15
 	 */
 	public function setBlockData($x, $y, $z, $data);
-
-	/**
-	 * @param int $x 0-15
-	 * @param int $y 0-127
-	 * @param int $z 0-15
-	 *
-	 * @return int (16-bit)
-	 */
-	public function getBlockExtraData($x, $y, $z);
-
-	/**
-	 * @param int $x    0-15
-	 * @param int $y    0-127
-	 * @param int $z    0-15
-	 * @param int $data (16-bit)
-	 */
-	public function setBlockExtraData($x, $y, $z, $data);
 
 	/**
 	 * @param int $x 0-15
@@ -193,10 +176,6 @@ interface FullChunk{
 	 */
 	public function setHeightMap($x, $z, $value);
 
-	public function recalculateHeightMap();
-
-	public function populateSkyLight();
-
 	/**
 	 * @param int $x 0-15
 	 * @param int $z 0-15
@@ -236,10 +215,6 @@ interface FullChunk{
 	 * @param int $B 0-255
 	 */
 	public function setBiomeColor($x, $z, $R, $G, $B);
-
-	public function isLightPopulated();
-
-	public function setLightPopulated($value = 1);
 
 	public function isPopulated();
 
@@ -298,7 +273,7 @@ interface FullChunk{
 	 *
 	 * @return bool
 	 */
-	public function load($generate = true);
+	public function load($generate = \true);
 
 	/**
 	 * @param bool $save
@@ -306,7 +281,7 @@ interface FullChunk{
 	 *
 	 * @return bool
 	 */
-	public function unload($save = true, $safe = true);
+	public function unload($save = \true, $safe = \true);
 
 	public function initChunk();
 
@@ -337,8 +312,6 @@ interface FullChunk{
 
 	public function toBinary();
 
-	public function toFastBinary();
-
 	/**
 	 * @return boolean
 	 */
@@ -347,7 +320,7 @@ interface FullChunk{
 	/**
 	 * @param bool $changed
 	 */
-	public function setChanged($changed = true);
+	public function setChanged($changed = \true);
 
 	/**
 	 * @param string        $data
@@ -355,23 +328,6 @@ interface FullChunk{
 	 *
 	 * @return FullChunk
 	 */
-	public static function fromBinary($data, LevelProvider $provider = null);
-
-	/**
-	 * @param string        $data
-	 * @param LevelProvider $provider
-	 *
-	 * @return FullChunk
-	 */
-	public static function fromFastBinary($data, LevelProvider $provider = null);
-
-	/**
-	 * @param int           $chunkX
-	 * @param int           $chunkZ
-	 * @param LevelProvider $provider
-	 *
-	 * @return FullChunk
-	 */
-	public static function getEmptyChunk($chunkX, $chunkZ, LevelProvider $provider = null);
+	public static function fromBinary($data, LevelProvider $provider = \null);
 
 }

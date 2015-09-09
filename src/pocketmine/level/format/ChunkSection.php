@@ -73,7 +73,7 @@ interface ChunkSection{
 	 * @param int &$blockId
 	 * @param int &$meta
 	 */
-	public function getBlock($x, $y, $z, &$blockId, &$meta = null);
+	public function getBlock($x, $y, $z, &$blockId, &$meta = \null);
 
 	/**
 	 * Gets block and meta in one go
@@ -95,7 +95,7 @@ interface ChunkSection{
 	 *
 	 * @return bool
 	 */
-	public function setBlock($x, $y, $z, $blockId = null, $meta = null);
+	public function setBlock($x, $y, $z, $blockId = \null, $meta = \null);
 
 	/**
 	 * @param int $x 0-15

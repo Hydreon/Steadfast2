@@ -14,8 +14,8 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
-
- * 
+ * @link http://www.pocketmine.net/
+ *
  *
 */
 
@@ -112,10 +112,10 @@ abstract class Achievement{
 				$player->sendMessage("You have just earned the achievement " . TextFormat::GREEN . Achievement::$list[$achievementId]["name"]);
 			}
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 	public static function add($achievementId, $achievementName, array $requires = []){
@@ -125,10 +125,10 @@ abstract class Achievement{
 				"requires" => $requires,
 			];
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 

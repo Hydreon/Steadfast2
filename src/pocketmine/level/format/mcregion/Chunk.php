@@ -46,7 +46,7 @@ class Chunk extends BaseFullChunk{
 			$this->nbt = new Compound("Level", []);
 			return;
 		}
-		
+
 		$this->nbt = $nbt;
 
 		if(isset($this->nbt->Entities) and $this->nbt->Entities instanceof Enum){
@@ -101,13 +101,7 @@ class Chunk extends BaseFullChunk{
 			}
 		}
 
-		parent::__construct($level, $this->nbt["xPos"], $this->nbt["zPos"], $this->nbt->Blocks->getValue(), $this->nbt->Data->getValue(), $this->nbt->SkyLight->getValue(), $this->nbt->BlockLight->getValue(), $this->nbt->BiomeColors->getValue(), $this->nbt->HeightMap->getValue(), $this->nbt->Entities->getValue(), $this->nbt->TileEntities->getValue(), $extraData);
-
-		if(isset($this->nbt->Biomes)){
-			$this->checkOldBiomes($this->nbt->Biomes->getValue());
-			unset($this->nbt->Biomes);
-		}
-
+		parent::__construct($level, $this->nbt["xPos"], $this->nbt["zPos"], $this->nbt->Blocks->getValue(), $this->nbt->Data->getValue(), $this->nbt->SkyLight->getValue(), $this->nbt->BlockLight->getValue(), $this->nbt->BiomeColors->getValue(), $this->nbt->HeightMap->getValue(), $this->nbt->Entities->getValue(), $this->nbt->TileEntities->getValue());
 		unset($this->nbt->Blocks);
 		unset($this->nbt->Data);
 		unset($this->nbt->SkyLight);
@@ -253,48 +247,32 @@ class Chunk extends BaseFullChunk{
 		return substr($this->blockLight, ($x << 10) + ($z << 6), 64);
 	}
 
-	public function isLightPopulated(){
-		return $this->nbt["LightPopulated"] > 0;
-	}
-
-	public function setLightPopulated($value = 1){
-		$this->nbt->LightPopulated = new Byte("LightPopulated", $value ? 1 : 0);
-		$this->hasChanged = true;
-	}
-
 	/**
 	 * @return bool
 	 */
 	public function isPopulated(){
-		return isset($this->nbt->TerrainPopulated) and $this->nbt->TerrainPopulated->getValue() > 0;
+		return $this->nbt["TerrainPopulated"] > 0;
 	}
 
 	/**
 	 * @param int $value
 	 */
 	public function setPopulated($value = 1){
-		$this->nbt->TerrainPopulated = new Byte("TerrainPopulated", $value ? 1 : 0);
-		$this->hasChanged = true;
+		$this->nbt->TerrainPopulated = new Byte("TerrainPopulated", $value);
 	}
 
 	/**
 	 * @return bool
 	 */
 	public function isGenerated(){
-		if(isset($this->nbt->TerrainGenerated)){
-			return $this->nbt->TerrainGenerated->getValue() > 0;
-		}elseif(isset($this->nbt->TerrainPopulated)){
-			return $this->nbt->TerrainPopulated->getValue() > 0;
-		}
-		return false;
+		return $this->nbt["TerrainPopulated"] > 0 or (isset($this->nbt->TerrainGenerated) and $this->nbt["TerrainGenerated"] > 0);
 	}
 
 	/**
 	 * @param int $value
 	 */
 	public function setGenerated($value = 1){
-		$this->nbt->TerrainGenerated = new Byte("TerrainGenerated", (int) $value);
-		$this->hasChanged = true;
+		$this->nbt->TerrainGenerated = new Byte("TerrainGenerated", $value);
 	}
 
 	/**
@@ -303,7 +281,7 @@ class Chunk extends BaseFullChunk{
 	 *
 	 * @return Chunk
 	 */
-	public static function fromBinary($data, LevelProvider $provider = null){
+	public static function fromBinary($data, LevelProvider $provider = \null){
 		$nbt = new NBT(NBT::BIG_ENDIAN);
 
 		try{
@@ -311,15 +289,15 @@ class Chunk extends BaseFullChunk{
 			$chunk = $nbt->getData();
 
 			if(!isset($chunk->Level) or !($chunk->Level instanceof Compound)){
-				return null;
+				return \null;
 			}
 
 			return new Chunk($provider instanceof LevelProvider ? $provider : McRegion::class, $chunk->Level);
 		}catch(\Exception $e){
-			return null;
+			return \null;
 		}
 	}
-	
+
 	public static function fromFastBinary($data, LevelProvider $provider = null){
 
 		try{
@@ -357,7 +335,7 @@ class Chunk extends BaseFullChunk{
 			return null;
 		}
 	}
-	
+
 	public function toFastBinary(){
 		return
 			Binary::writeInt($this->x) .
@@ -368,7 +346,7 @@ class Chunk extends BaseFullChunk{
 			$this->getBlockLightArray() .
 			pack("C*", ...$this->getHeightMapArray()) .
 			pack("N*", ...$this->getBiomeColorArray()) .
-			chr(($this->isLightPopulated() ? 1 << 2 : 0) + ($this->isPopulated() ? 1 << 1 : 0) + ($this->isGenerated() ? 1 : 0));
+			chr(($this->isPopulated() ? 1 << 1 : 0) + ($this->isGenerated() ? 1 : 0));
 	}
 
 	public function toBinary(){
@@ -431,38 +409,5 @@ class Chunk extends BaseFullChunk{
 	 */
 	public function getNBT(){
 		return $this->nbt;
-	}
-
-	/**
-	 * @param int           $chunkX
-	 * @param int           $chunkZ
-	 * @param LevelProvider $provider
-	 *
-	 * @return Chunk
-	 */
-	public static function getEmptyChunk($chunkX, $chunkZ, LevelProvider $provider = null){
-		try{
-			$chunk = new Chunk($provider instanceof LevelProvider ? $provider : McRegion::class, null);
-			$chunk->x = $chunkX;
-			$chunk->z = $chunkZ;
-
-			$chunk->data = str_repeat("\x00", 16384);
-			$chunk->blocks = $chunk->data . $chunk->data;
-			$chunk->skyLight = str_repeat("\xff", 16384);
-			$chunk->blockLight = $chunk->data;
-
-			$chunk->heightMap = array_fill(0, 256, 0);
-			$chunk->biomeColors = array_fill(0, 256, 0);
-
-			$chunk->nbt->V = new Byte("V", 1);
-			$chunk->nbt->InhabitedTime = new Long("InhabitedTime", 0);
-			$chunk->nbt->TerrainGenerated = new Byte("TerrainGenerated", 0);
-			$chunk->nbt->TerrainPopulated = new Byte("TerrainPopulated", 0);
-			$chunk->nbt->LightPopulated = new Byte("LightPopulated", 0);
-
-			return $chunk;
-		}catch(\Exception $e){
-			return null;
-		}
 	}
 }
