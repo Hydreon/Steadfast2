@@ -2302,10 +2302,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$tile->spawnTo($this);
 				}
 				break;
-
-			case ProtocolInfo::PLAYER_ARMOR_EQUIPMENT_PACKET:
-				break;
-
 			case ProtocolInfo::INTERACT_PACKET:
 				if($this->spawned === \false or $this->dead === \true or $this->blocked){
 					break;
@@ -2549,12 +2545,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					foreach(explode("\n", $packet->message) as $message){
 						if(trim($message) != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){
 							$ev = new PlayerCommandPreprocessEvent($this, $message);
-
 							if(mb_strlen($ev->getMessage(), "UTF-8") > 320){
 								$ev->setCancelled();
 							}
 							$this->server->getPluginManager()->callEvent($ev);
-
 							if($ev->isCancelled()){
 								break;
 							}
@@ -2565,7 +2559,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							}else{
 								$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $ev->getMessage()));
 								if(!$ev->isCancelled()){
-									$this->server->broadcastMessage($this->getServer()->getLanguage()->translateString($ev->getFormat(), [$ev->getPlayer()->getDisplayName(), $ev->getMessage()]), $ev->getRecipients());
+									$this->server->broadcastMessage(sprintf($ev->getFormat(), $ev->getPlayer()->getDisplayName(), $ev->getMessage()), $ev->getRecipients());
 								}
 							}
 						}
