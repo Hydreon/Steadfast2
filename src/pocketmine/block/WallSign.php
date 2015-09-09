@@ -31,6 +31,6 @@ class WallSign extends SignPost{
 	}
 
 	public function onUpdate($type){
-		return \false;
+		return false;
 	}
 }

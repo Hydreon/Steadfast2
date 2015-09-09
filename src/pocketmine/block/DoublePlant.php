@@ -33,7 +33,7 @@ class DoublePlant extends Flowable{
 	}
 
 	public function canBeReplaced(){
-		return \true;
+		return true;
 	}
 
 	public function getName(){
@@ -51,14 +51,14 @@ class DoublePlant extends Flowable{
 
 	public function onUpdate($type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if($this->getSide(0)->isTransparent() === \true){ //Replace with common break method
-				$this->getLevel()->setBlock($this, new Air(), \false, \false, \true);
+			if($this->getSide(0)->isTransparent() === true){ //Replace with common break method
+				$this->getLevel()->setBlock($this, new Air(), false, false, true);
 
 				return Level::BLOCK_UPDATE_NORMAL;
 			}
 		}
 
-		return \false;
+		return false;
 	}
 
 	public function getDrops(Item $item){

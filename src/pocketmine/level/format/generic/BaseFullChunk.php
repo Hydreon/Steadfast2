@@ -60,6 +60,8 @@ abstract class BaseFullChunk implements FullChunk{
 
 	protected $NBTentities;
 
+	protected $extraData = [];
+
 	/** @var LevelProvider */
 	protected $provider;
 
@@ -270,6 +272,10 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function getTiles(){
 		return $this->tiles;
+	}
+
+	public function getBlockExtraDataArray(){
+		return $this->extraData;
 	}
 
 	public function getTile($x, $y, $z){

@@ -22,6 +22,7 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
 
@@ -38,18 +39,22 @@ class FenceGate extends Transparent{
 	}
 
 	public function getHardness(){
-		return 15;
+		return 2;
 	}
 
 	public function canBeActivated(){
-		return \true;
+		return true;
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_AXE;
 	}
 
 
 	protected function recalculateBoundingBox(){
 
 		if(($this->getDamage() & 0x04) > 0){
-			return \null;
+			return null;
 		}
 
 		$i = ($this->getDamage() & 0x03);
@@ -74,7 +79,7 @@ class FenceGate extends Transparent{
 		}
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		$faces = [
 			0 => 3,
 			1 => 0,
@@ -82,9 +87,9 @@ class FenceGate extends Transparent{
 			3 => 2,
 		];
 		$this->meta = $faces[$player instanceof Player ? $player->getDirection() : 0] & 0x03;
-		$this->getLevel()->setBlock($block, $this, \true, \true);
+		$this->getLevel()->setBlock($block, $this, true, true);
 
-		return \true;
+		return true;
 	}
 
 	public function getDrops(Item $item){
@@ -93,7 +98,7 @@ class FenceGate extends Transparent{
 		];
 	}
 
-	public function onActivate(Item $item, Player $player = \null){
+	public function onActivate(Item $item, Player $player = null){
 		$faces = [
 			0 => 3,
 			1 => 0,
@@ -101,8 +106,8 @@ class FenceGate extends Transparent{
 			3 => 2,
 		];
 		$this->meta = ($faces[$player instanceof Player ? $player->getDirection() : 0] & 0x03) | ((~$this->meta) & 0x04);
-		$this->getLevel()->setBlock($this, $this, \true);
-
-		return \true;
+		$this->getLevel()->setBlock($this, $this, true);
+		$this->level->addSound(new DoorSound($this));
+		return true;
 	}
 }

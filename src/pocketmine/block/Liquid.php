@@ -30,22 +30,22 @@ use pocketmine\math\Vector3;
 abstract class Liquid extends Transparent{
 
 	/** @var Vector3 */
-	private $temporalVector = \null;
+	private $temporalVector = null;
 
 	public function hasEntityCollision(){
-		return \true;
+		return true;
 	}
 
 	public function isBreakable(Item $item){
-		return \false;
+		return false;
 	}
 
 	public function canBeReplaced(){
-		return \true;
+		return true;
 	}
 
 	public function isSolid(){
-		return \false;
+		return false;
 	}
 
 	public $adjacentSources = 0;
@@ -94,7 +94,7 @@ abstract class Liquid extends Transparent{
 	public function getFlowVector(){
 		$vector = new Vector3(0, 0, 0);
 
-		if($this->temporalVector === \null){
+		if($this->temporalVector === null){
 			$this->temporalVector = new Vector3(0, 0, 0);
 		}
 
@@ -142,24 +142,24 @@ abstract class Liquid extends Transparent{
 		}
 
 		if($this->getDamage() >= 8){
-			$falling = \false;
+			$falling = false;
 
 			if(!$this->getLevel()->getBlock($this->temporalVector->setComponents($this->x, $this->y, $this->z - 1))->canBeFlowedInto()){
-				$falling = \true;
+				$falling = true;
 			}elseif(!$this->getLevel()->getBlock($this->temporalVector->setComponents($this->x, $this->y, $this->z + 1))->canBeFlowedInto()){
-				$falling = \true;
+				$falling = true;
 			}elseif(!$this->getLevel()->getBlock($this->temporalVector->setComponents($this->x - 1, $this->y, $this->z))->canBeFlowedInto()){
-				$falling = \true;
+				$falling = true;
 			}elseif(!$this->getLevel()->getBlock($this->temporalVector->setComponents($this->x + 1, $this->y, $this->z))->canBeFlowedInto()){
-				$falling = \true;
+				$falling = true;
 			}elseif(!$this->getLevel()->getBlock($this->temporalVector->setComponents($this->x, $this->y + 1, $this->z - 1))->canBeFlowedInto()){
-				$falling = \true;
+				$falling = true;
 			}elseif(!$this->getLevel()->getBlock($this->temporalVector->setComponents($this->x, $this->y + 1, $this->z + 1))->canBeFlowedInto()){
-				$falling = \true;
+				$falling = true;
 			}elseif(!$this->getLevel()->getBlock($this->temporalVector->setComponents($this->x - 1, $this->y + 1, $this->z))->canBeFlowedInto()){
-				$falling = \true;
+				$falling = true;
 			}elseif(!$this->getLevel()->getBlock($this->temporalVector->setComponents($this->x + 1, $this->y + 1, $this->z))->canBeFlowedInto()){
-				$falling = \true;
+				$falling = true;
 			}
 
 			if($falling){
@@ -192,14 +192,14 @@ abstract class Liquid extends Transparent{
 			$this->checkForHarden();
 			$this->getLevel()->scheduleUpdate($this, $this->tickRate());
 		}elseif($type === Level::BLOCK_UPDATE_SCHEDULED){
-			if($this->temporalVector === \null){
+			if($this->temporalVector === null){
 				$this->temporalVector = new Vector3(0, 0, 0);
 			}
 
 			$decay = $this->getFlowDecay($this);
 			$multiplier = $this instanceof Lava ? 2 : 1;
 
-			$flag = \true;
+			$flag = true;
 
 			if($decay > 0){
 				$smallestFlowDecay = -100;
@@ -232,17 +232,17 @@ abstract class Liquid extends Transparent{
 					}
 				}
 
-				if($this instanceof Lava and $decay < 8 and $k < 8 and $k > 1 and \mt_rand(0, 4) !== 0){
+				if($this instanceof Lava and $decay < 8 and $k < 8 and $k > 1 and mt_rand(0, 4) !== 0){
 					$k = $decay;
-					$flag = \false;
+					$flag = false;
 				}
 
 				if($k !== $decay){
 					$decay = $k;
 					if($decay < 0){
-						$this->getLevel()->setBlock($this, new Air(), \true);
+						$this->getLevel()->setBlock($this, new Air(), true);
 					}else{
-						$this->getLevel()->setBlock($this, Block::get($this->id, $decay), \true);
+						$this->getLevel()->setBlock($this, Block::get($this->id, $decay), true);
 						$this->getLevel()->scheduleUpdate($this, $this->tickRate());
 					}
 				}elseif($flag){
@@ -257,15 +257,15 @@ abstract class Liquid extends Transparent{
 
 			if($bottomBlock->canBeFlowedInto() or $bottomBlock instanceof Liquid){
 				if($this instanceof Lava and $bottomBlock instanceof Water){
-					$this->getLevel()->setBlock($bottomBlock, Block::get(Item::STONE), \true);
+					$this->getLevel()->setBlock($bottomBlock, Block::get(Item::STONE), true);
 					return;
 				}
 
 				if($decay >= 8){
-					$this->getLevel()->setBlock($bottomBlock, Block::get($this->id, $decay), \true);
+					$this->getLevel()->setBlock($bottomBlock, Block::get($this->id, $decay), true);
 					$this->getLevel()->scheduleUpdate($bottomBlock, $this->tickRate());
 				}else{
-					$this->getLevel()->setBlock($bottomBlock, Block::get($this->id, $decay + 8), \true);
+					$this->getLevel()->setBlock($bottomBlock, Block::get($this->id, $decay + 8), true);
 					$this->getLevel()->scheduleUpdate($bottomBlock, $this->tickRate());
 				}
 			}elseif($decay >= 0 and ($decay === 0 or !$bottomBlock->canBeFlowedInto())){
@@ -310,7 +310,7 @@ abstract class Liquid extends Transparent{
 				$this->getLevel()->useBreakOn($block);
 			}
 
-			$this->getLevel()->setBlock($block, Block::get($this->id, $newFlowDecay), \true);
+			$this->getLevel()->setBlock($block, Block::get($this->getId(), $newFlowDecay), true);
 			$this->getLevel()->scheduleUpdate($block, $this->tickRate());
 		}
 	}
@@ -363,8 +363,12 @@ abstract class Liquid extends Transparent{
 		return $cost;
 	}
 
+	public function getHardness(){
+		return 100;
+	}
+
 	private function getOptimalFlowDirections(){
-		if($this->temporalVector === \null){
+		if($this->temporalVector === null){
 			$this->temporalVector = new Vector3(0, 0, 0);
 		}
 
@@ -428,22 +432,26 @@ abstract class Liquid extends Transparent{
 
 	private function checkForHarden(){
 		if($this instanceof Lava){
-			$colliding = \false;
+			$colliding = false;
 			for($side = 0; $side <= 5 and !$colliding; ++$side){
 				$colliding = $this->getSide($side) instanceof Water;
 			}
 
 			if($colliding){
 				if($this->getDamage() === 0){
-					$this->getLevel()->setBlock($this, Block::get(Item::OBSIDIAN), \true);
+					$this->getLevel()->setBlock($this, Block::get(Item::OBSIDIAN), true);
 				}elseif($this->getDamage() <= 4){
-					$this->getLevel()->setBlock($this, Block::get(Item::COBBLESTONE), \true);
+					$this->getLevel()->setBlock($this, Block::get(Item::COBBLESTONE), true);
 				}
 			}
 		}
 	}
 
 	public function getBoundingBox(){
-		return \null;
+		return null;
+	}
+
+	public function getDrops(Item $item){
+		return [];
 	}
 }

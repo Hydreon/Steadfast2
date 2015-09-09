@@ -22,6 +22,7 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 use pocketmine\level\Level;
 use pocketmine\Player;
 
@@ -34,11 +35,11 @@ class SignPost extends Transparent{
 	}
 
 	public function getHardness(){
-		return 5;
+		return 1;
 	}
 
 	public function isSolid(){
-		return \false;
+		return false;
 	}
 
 	public function getName(){
@@ -46,11 +47,11 @@ class SignPost extends Transparent{
 	}
 
 	public function getBoundingBox(){
-		return \null;
+		return null;
 	}
 
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		if($face !== 0){
 			$faces = [
 				2 => 2,
@@ -59,19 +60,19 @@ class SignPost extends Transparent{
 				5 => 5,
 			];
 			if(!isset($faces[$face])){
-				$this->meta = \floor((($player->yaw + 180) * 16 / 360) + 0.5) & 0x0F;
-				$this->getLevel()->setBlock($block, Block::get(Item::SIGN_POST, $this->meta), \true);
+				$this->meta = floor((($player->yaw + 180) * 16 / 360) + 0.5) & 0x0F;
+				$this->getLevel()->setBlock($block, Block::get(Item::SIGN_POST, $this->meta), true);
 
-				return \true;
+				return true;
 			}else{
 				$this->meta = $faces[$face];
-				$this->getLevel()->setBlock($block, Block::get(Item::WALL_SIGN, $this->meta), \true);
+				$this->getLevel()->setBlock($block, Block::get(Item::WALL_SIGN, $this->meta), true);
 
-				return \true;
+				return true;
 			}
 		}
 
-		return \false;
+		return false;
 	}
 
 	public function onUpdate($type){
@@ -83,18 +84,22 @@ class SignPost extends Transparent{
 			}
 		}
 
-		return \false;
+		return false;
 	}
 
 	public function onBreak(Item $item){
-		$this->getLevel()->setBlock($this, new Air(), \true, \true, \true);
+		$this->getLevel()->setBlock($this, new Air(), true, true, true);
 
-		return \true;
+		return true;
 	}
 
 	public function getDrops(Item $item){
 		return [
 			[Item::SIGN, 0, 1],
 		];
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_AXE;
 	}
 }

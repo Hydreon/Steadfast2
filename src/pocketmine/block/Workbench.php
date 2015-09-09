@@ -22,6 +22,7 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 use pocketmine\Player;
 
 //TODO: check orientation
@@ -34,23 +35,27 @@ class Workbench extends Solid{
 	}
 
 	public function canBeActivated(){
-		return \true;
+		return true;
 	}
 
 	public function getHardness(){
-		return 15;
+		return 2.5;
 	}
 
 	public function getName(){
 		return "Crafting Table";
 	}
 
-	public function onActivate(Item $item, Player $player = \null){
+	public function getToolType(){
+		return Tool::TYPE_AXE;
+	}
+
+	public function onActivate(Item $item, Player $player = null){
 		if($player instanceof Player){
 			$player->craftingType = 1;
 		}
 
-		return \true;
+		return true;
 	}
 
 	public function getDrops(Item $item){

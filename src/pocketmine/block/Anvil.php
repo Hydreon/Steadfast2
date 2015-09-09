@@ -21,43 +21,62 @@
 
 namespace pocketmine\block;
 
+use pocketmine\inventory\AnvilInventory;
 use pocketmine\item\Item;
-use pocketmine\level\Level;
+use pocketmine\item\Tool;
 use pocketmine\Player;
 
-class Poppy extends Flowable{
+class Anvil extends Fallable{
 
-	protected $id = self::POPPY;
+	protected $id = self::ANVIL;
+
+	public function isSolid(){
+		return false;
+	}
 
 	public function __construct($meta = 0){
 		$this->meta = $meta;
 	}
 
+	public function canBeActivated(){
+		return true;
+	}
+
+	public function getHardness(){
+		return 5;
+	}
+
+	public function getResistance(){
+		return 6000;
+	}
+
 	public function getName(){
-		return "Poppy";
+		return "Anvil";
 	}
 
-
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
-		$down = $this->getSide(0);
-		if($down->getId() === 2 or $down->getId() === 3 or $down->getId() === 60){
-			$this->getLevel()->setBlock($block, $this, \true, \true);
-
-			return \true;
-		}
-
-		return \false;
+	public function getToolType(){
+		return Tool::TYPE_PICKAXE;
 	}
 
-	public function onUpdate($type){
-		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if($this->getSide(0)->isTransparent() === \true){
-				$this->getLevel()->useBreakOn($this);
-
-				return Level::BLOCK_UPDATE_NORMAL;
+	public function onActivate(Item $item, Player $player = null){
+		if($player instanceof Player){
+			if($player->isCreative()){
+				return true;
 			}
+
+			$player->addWindow(new AnvilInventory($this));
 		}
 
-		return \false;
+		return true;
+	}
+
+	public function getDrops(Item $item){
+		if($item->isPickaxe() >= 1){
+			return [
+				[$this->id, 0, 1], //TODO break level
+			];
+		}else{
+			return [];
+		}
 	}
 }

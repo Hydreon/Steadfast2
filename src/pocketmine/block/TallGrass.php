@@ -34,7 +34,7 @@ class TallGrass extends Flowable{
 	}
 
 	public function canBeReplaced(){
-		return \true;
+		return true;
 	}
 
 	public function getName(){
@@ -46,33 +46,33 @@ class TallGrass extends Flowable{
 		];
 		return $names[$this->meta & 0x03];
 	}
-
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
+	
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		$down = $this->getSide(0);
 		if($down->getId() === self::GRASS){
-			$this->getLevel()->setBlock($block, $this, \true);
+			$this->getLevel()->setBlock($block, $this, true);
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 
 	public function onUpdate($type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if($this->getSide(0)->isTransparent() === \true){ //Replace with common break method
-				$this->getLevel()->setBlock($this, new Air(), \false, \false, \true);
+			if($this->getSide(0)->isTransparent() === true){ //Replace with common break method
+				$this->getLevel()->setBlock($this, new Air(), false, false, true);
 
 				return Level::BLOCK_UPDATE_NORMAL;
 			}
 		}
 
-		return \false;
+		return false;
 	}
 
 	public function getDrops(Item $item){
-		if(\mt_rand(0, 15) === 0){
+		if(mt_rand(0, 15) === 0){
 			return [Item::WHEAT_SEEDS, 0, 1];
 		}
 

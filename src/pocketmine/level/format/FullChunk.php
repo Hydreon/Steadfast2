@@ -304,6 +304,8 @@ interface FullChunk{
 
 	public function getBlockDataArray();
 
+	public function getBlockExtraDataArray();
+
 	public function getBlockSkyLightArray();
 
 	public function getBlockLightArray();

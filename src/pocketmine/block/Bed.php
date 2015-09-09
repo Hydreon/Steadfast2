@@ -36,11 +36,11 @@ class Bed extends Transparent{
 	}
 
 	public function canBeActivated(){
-		return \true;
+		return true;
 	}
 
 	public function getHardness(){
-		return 1;
+		return 0.2;
 	}
 
 	public function getName(){
@@ -58,7 +58,7 @@ class Bed extends Transparent{
 		);
 	}
 
-	public function onActivate(Item $item, Player $player = \null){
+	public function onActivate(Item $item, Player $player = null){
 
 		$time = $this->getLevel()->getTime() % Level::TIME_FULL;
 
@@ -66,7 +66,7 @@ class Bed extends Transparent{
 
 		if($player instanceof Player and !$isNight){
 			$player->sendMessage(TextFormat::GRAY . "You can only sleep at night");
-			return \true;
+			return true;
 		}
 
 		$blockNorth = $this->getSide(2); //Gets the blocks around them
@@ -89,20 +89,20 @@ class Bed extends Transparent{
 					$player->sendMessage(TextFormat::GRAY . "This bed is incomplete");
 				}
 
-				return \true;
+				return true;
 			}
 		}
 
-		if($player instanceof Player and $player->sleepOn($b) === \false){
+		if($player instanceof Player and $player->sleepOn($b) === false){
 			$player->sendMessage(TextFormat::GRAY . "This bed is occupied");
 		}
 
-		return \true;
+		return true;
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		$down = $this->getSide(0);
-		if($down->isTransparent() === \false){
+		if($down->isTransparent() === false){
 			$faces = [
 				0 => 3,
 				1 => 4,
@@ -112,16 +112,16 @@ class Bed extends Transparent{
 			$d = $player instanceof Player ? $player->getDirection() : 0;
 			$next = $this->getSide($faces[(($d + 3) % 4)]);
 			$downNext = $this->getSide(0);
-			if($next->canBeReplaced() === \true and $downNext->isTransparent() === \false){
+			if($next->canBeReplaced() === true and $downNext->isTransparent() === false){
 				$meta = (($d + 3) % 4) & 0x03;
-				$this->getLevel()->setBlock($block, Block::get($this->id, $meta), \true, \true);
-				$this->getLevel()->setBlock($next, Block::get($this->id, $meta | 0x08), \true, \true);
+				$this->getLevel()->setBlock($block, Block::get($this->id, $meta), true, true);
+				$this->getLevel()->setBlock($next, Block::get($this->id, $meta | 0x08), true, true);
 
-				return \true;
+				return true;
 			}
 		}
 
-		return \false;
+		return false;
 	}
 
 	public function onBreak(Item $item){
@@ -132,28 +132,28 @@ class Bed extends Transparent{
 
 		if(($this->meta & 0x08) === 0x08){ //This is the Top part of bed
 			if($blockNorth->getId() === $this->id and $blockNorth->meta !== 0x08){ //Checks if the block ID and meta are right
-				$this->getLevel()->setBlock($blockNorth, new Air(), \true, \true);
+				$this->getLevel()->setBlock($blockNorth, new Air(), true, true);
 			}elseif($blockSouth->getId() === $this->id and $blockSouth->meta !== 0x08){
-				$this->getLevel()->setBlock($blockSouth, new Air(), \true, \true);
+				$this->getLevel()->setBlock($blockSouth, new Air(), true, true);
 			}elseif($blockEast->getId() === $this->id and $blockEast->meta !== 0x08){
-				$this->getLevel()->setBlock($blockEast, new Air(), \true, \true);
+				$this->getLevel()->setBlock($blockEast, new Air(), true, true);
 			}elseif($blockWest->getId() === $this->id and $blockWest->meta !== 0x08){
-				$this->getLevel()->setBlock($blockWest, new Air(), \true, \true);
+				$this->getLevel()->setBlock($blockWest, new Air(), true, true);
 			}
 		}else{ //Bottom Part of Bed
 			if($blockNorth->getId() === $this->id and ($blockNorth->meta & 0x08) === 0x08){
-				$this->getLevel()->setBlock($blockNorth, new Air(), \true, \true);
+				$this->getLevel()->setBlock($blockNorth, new Air(), true, true);
 			}elseif($blockSouth->getId() === $this->id and ($blockSouth->meta & 0x08) === 0x08){
-				$this->getLevel()->setBlock($blockSouth, new Air(), \true, \true);
+				$this->getLevel()->setBlock($blockSouth, new Air(), true, true);
 			}elseif($blockEast->getId() === $this->id and ($blockEast->meta & 0x08) === 0x08){
-				$this->getLevel()->setBlock($blockEast, new Air(), \true, \true);
+				$this->getLevel()->setBlock($blockEast, new Air(), true, true);
 			}elseif($blockWest->getId() === $this->id and ($blockWest->meta & 0x08) === 0x08){
-				$this->getLevel()->setBlock($blockWest, new Air(), \true, \true);
+				$this->getLevel()->setBlock($blockWest, new Air(), true, true);
 			}
 		}
-		$this->getLevel()->setBlock($this, new Air(), \true, \true);
+		$this->getLevel()->setBlock($this, new Air(), true, true);
 
-		return \true;
+		return true;
 	}
 
 	public function getDrops(Item $item){

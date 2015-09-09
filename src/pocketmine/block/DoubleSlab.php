@@ -22,6 +22,7 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 
 class DoubleSlab extends Solid{
 
@@ -32,7 +33,11 @@ class DoubleSlab extends Solid{
 	}
 
 	public function getHardness(){
-		return 30;
+		return 2;
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_PICKAXE;
 	}
 
 	public function getName(){
@@ -47,23 +52,6 @@ class DoubleSlab extends Solid{
 			7 => "",
 		];
 		return "Double " . $names[$this->meta & 0x07] . " Slab";
-	}
-
-	public function getBreakTime(Item $item){
-		switch($item->isPickaxe()){
-			case 5:
-				return 0.4;
-			case 4:
-				return 0.5;
-			case 3:
-				return 0.75;
-			case 2:
-				return 0.25;
-			case 1:
-				return 1.5;
-			default:
-				return 10;
-		}
 	}
 
 	public function getDrops(Item $item){

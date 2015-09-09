@@ -2271,7 +2271,7 @@ class Server{
 
 		$version = new VersionString();
 		$this->lastSendUsage = new SendUsageTask("http://stats.pocketmine.net/usage.php", [
-			"serverid" => $this->serverID,
+			"serverid" => 0, // todo: fix for real
 			"port" => $this->getPort(),
 			"os" => Utils::getOS(),
 			"name" => $this->getName(),

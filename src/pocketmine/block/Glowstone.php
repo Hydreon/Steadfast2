@@ -22,6 +22,7 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 
 class Glowstone extends Transparent{
 
@@ -36,7 +37,11 @@ class Glowstone extends Transparent{
 	}
 
 	public function getHardness(){
-		return 1.5;
+		return 0.3;
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_PICKAXE;
 	}
 
 	public function getLightLevel(){
@@ -45,7 +50,7 @@ class Glowstone extends Transparent{
 
 	public function getDrops(Item $item){
 		return [
-			[Item::GLOWSTONE_DUST, 0, \mt_rand(2, 4)],
+			[Item::GLOWSTONE_DUST, 0, mt_rand(2, 4)],
 		];
 	}
 }

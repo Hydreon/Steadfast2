@@ -22,6 +22,7 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Enum;
@@ -44,18 +45,22 @@ class BurningFurnace extends Solid{
 	}
 
 	public function canBeActivated(){
-		return \true;
+		return true;
 	}
 
 	public function getHardness(){
-		return 17.5;
+		return 3.5;
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_PICKAXE;
 	}
 
 	public function getLightLevel(){
 		return 13;
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		$faces = [
 			0 => 4,
 			1 => 2,
@@ -63,8 +68,8 @@ class BurningFurnace extends Solid{
 			3 => 3,
 		];
 		$this->meta = $faces[$player instanceof Player ? $player->getDirection() : 0];
-		$this->getLevel()->setBlock($block, $this, \true, \true);
-		$nbt = new Compound(\false, [
+		$this->getLevel()->setBlock($block, $this, true, true);
+		$nbt = new Compound("", [
 			new Enum("Items", []),
 			new String("id", Tile::FURNACE),
 			new Int("x", $this->x),
@@ -72,25 +77,36 @@ class BurningFurnace extends Solid{
 			new Int("z", $this->z)
 		]);
 		$nbt->Items->setTagType(NBT::TAG_Compound);
+
+		if($item->hasCustomName()){
+			$nbt->CustomName = new String("CustomName", $item->getCustomName());
+		}
+
+		if($item->hasCustomBlockData()){
+			foreach($item->getCustomBlockData() as $key => $v){
+				$nbt->{$key} = $v;
+			}
+		}
+
 		Tile::createTile("Furnace", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
 
-		return \true;
+		return true;
 	}
 
 	public function onBreak(Item $item){
-		$this->getLevel()->setBlock($this, new Air(), \true, \true);
+		$this->getLevel()->setBlock($this, new Air(), true, true);
 
-		return \true;
+		return true;
 	}
 
-	public function onActivate(Item $item, Player $player = \null){
+	public function onActivate(Item $item, Player $player = null){
 		if($player instanceof Player){
 			$t = $this->getLevel()->getTile($this);
-			$furnace = \false;
+			$furnace = false;
 			if($t instanceof Furnace){
 				$furnace = $t;
 			}else{
-				$nbt = new Compound(\false, [
+				$nbt = new Compound("", [
 					new Enum("Items", []),
 					new String("id", Tile::FURNACE),
 					new Int("x", $this->x),
@@ -101,31 +117,20 @@ class BurningFurnace extends Solid{
 				$furnace = Tile::createTile("Furnace", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
 			}
 
-			if(($player->getGamemode() & 0x01) === 0x01){
-				return \true;
+			if(isset($furnace->namedtag->Lock) and $furnace->namedtag->Lock instanceof String){
+				if($furnace->namedtag->Lock->getValue() !== $item->getCustomName()){
+					return true;
+				}
+			}
+
+			if($player->isCreative()){
+				return true;
 			}
 
 			$player->addWindow($furnace->getInventory());
 		}
 
-		return \true;
-	}
-
-	public function getBreakTime(Item $item){
-		switch($item->isPickaxe()){
-			case 5:
-				return 0.7;
-			case 4:
-				return 0.9;
-			case 3:
-				return 1.35;
-			case 2:
-				return 0.45;
-			case 1:
-				return 2.65;
-			default:
-				return 17.5;
-		}
+		return true;
 	}
 
 	public function getDrops(Item $item){

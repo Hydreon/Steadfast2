@@ -22,6 +22,7 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 
 class DiamondOre extends Solid{
 
@@ -32,22 +33,15 @@ class DiamondOre extends Solid{
 	}
 
 	public function getHardness(){
-		return 15;
+		return 3;
 	}
 
 	public function getName(){
 		return "Diamond Ore";
 	}
 
-	public function getBreakTime(Item $item){
-		switch($item->isPickaxe()){
-			case 5:
-				return 0.6;
-			case 4:
-				return 0.75;
-			default:
-				return 15;
-		}
+	public function getToolType(){
+		return Tool::TYPE_PICKAXE;
 	}
 
 	public function getDrops(Item $item){

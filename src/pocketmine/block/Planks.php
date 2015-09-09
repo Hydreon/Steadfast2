@@ -22,6 +22,8 @@
 namespace pocketmine\block;
 
 
+use pocketmine\item\Tool;
+
 class Planks extends Solid{
 	const OAK = 0;
 	const SPRUCE = 1;
@@ -37,7 +39,11 @@ class Planks extends Solid{
 	}
 
 	public function getHardness(){
-		return 15;
+		return 2;
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_AXE;
 	}
 
 	public function getName(){

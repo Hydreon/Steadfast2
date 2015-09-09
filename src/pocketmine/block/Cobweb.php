@@ -23,6 +23,7 @@ namespace pocketmine\block;
 
 use pocketmine\entity\Entity;
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 
 class Cobweb extends Flowable{
 
@@ -33,7 +34,7 @@ class Cobweb extends Flowable{
 	}
 
 	public function hasEntityCollision(){
-		return \true;
+		return true;
 	}
 
 	public function getName(){
@@ -41,7 +42,11 @@ class Cobweb extends Flowable{
 	}
 
 	public function getHardness(){
-		return 25;
+		return 4;
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_SWORD;
 	}
 
 	public function onEntityCollide(Entity $entity){

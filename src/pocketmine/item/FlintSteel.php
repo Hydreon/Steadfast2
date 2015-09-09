@@ -33,7 +33,7 @@ class FlintSteel extends Tool{
 	}
 
 	public function canBeActivated(){
-		return \true;
+		return true;
 	}
 
 	public function onActivate(Level $level, Player $player, Block $block, Block $target, $face, $fx, $fy, $fz){
@@ -42,11 +42,11 @@ class FlintSteel extends Tool{
 		}
 
 		if($block->getId() === self::AIR and ($target instanceof Solid)){
-			$level->setBlock($block, new Fire(), \true);
+			$level->setBlock($block, new Fire(), true);
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 }

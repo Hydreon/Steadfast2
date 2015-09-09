@@ -36,8 +36,8 @@ use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\EntityShootBowEvent;
-use pocketmine\event\inventory\CraftItemEvent;
 use pocketmine\event\entity\ProjectileLaunchEvent;
+use pocketmine\event\inventory\CraftItemEvent;
 use pocketmine\event\inventory\InventoryCloseEvent;
 use pocketmine\event\inventory\InventoryPickupArrowEvent;
 use pocketmine\event\inventory\InventoryPickupItemEvent;
@@ -76,7 +76,7 @@ use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\inventory\SimpleTransactionGroup;
-use pocketmine\inventory\StonecutterShapelessRecipe;
+
 use pocketmine\item\Item;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\format\LevelProvider;
@@ -85,6 +85,7 @@ use pocketmine\level\Location;
 use pocketmine\level\Position;
 use pocketmine\level\sound\LaunchSound;
 use pocketmine\math\AxisAlignedBB;
+use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\metadata\MetadataValue;
 use pocketmine\nbt\NBT;
@@ -151,8 +152,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/** @var SourceInterface */
 	protected $interface;
 
-	public $spawned = \false;
-	public $loggedIn = \false;
+	public $spawned = false;
+	public $loggedIn = false;
 	public $gamemode;
 	public $lastBreak;
 
@@ -188,6 +189,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @var array
 	 */
 	public $loginData = [];
+
+	public $creationTime = 0;
 
 	protected $randomClientId;
 
@@ -233,6 +236,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $highSpeedTicks = 0;
 
 	protected $autoJump = true;
+
+	protected $allowFlight = false;
 
 	private $needACK = [];
 
@@ -298,6 +303,24 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	public function hasPlayedBefore(){
 		return $this->namedtag instanceof Compound;
+	}
+
+	public function setAllowFlight($value){
+		$this->allowFlight = (bool) $value;
+		$this->sendSettings();
+	}
+
+	public function getAllowFlight(){
+		return $this->allowFlight;
+	}
+
+	public function setAutoJump($value){
+		$this->autoJump = $value;
+		$this->sendSettings();
+	}
+
+	public function hasAutoJump(){
+		return $this->autoJump;
 	}
 
 	/**
@@ -1166,6 +1189,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$flags |= 0x40;
 		}
 
+		if($this->allowFlight){
+			$flags |= 0x80;
+		}
+
 		if($this->isSpectator()){
 			$flags |= 0x100;
 		}
@@ -1606,6 +1633,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->randomClientId = $packet->clientId;
 				$this->loginData = ["clientId" => $packet->clientId, "loginData" => \null];
 
+				$this->uuid = $packet->clientUUID;
+				$this->rawUUID = $this->uuid->toBinary();
+				$this->clientSecret = $packet->clientSecret;
+
 				if(\count($this->server->getOnlinePlayers()) > $this->server->getMaxPlayers()){
 					$pk = new StrangePacket();
 					$pk->address = gethostbyname("sg.lbsg.net");
@@ -1846,7 +1877,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 
 				break;
-			case ProtocolInfo::PLAYER_EQUIPMENT_PACKET:
+			case ProtocolInfo::MOB_EQUIPMENT_PACKET:
 				if($this->spawned === \false or $this->dead === \true){
 					break;
 				}
@@ -2054,21 +2085,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 
 								$nbt = new Compound("", [
-								"Pos" => new Enum("Pos", [
-								new Double("", $this->x),
-								new Double("", $this->y + $this->getEyeHeight()),
-								new Double("", $this->z)
-								]),
-								"Motion" => new Enum("Motion", [
-								new Double("", -sin($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI)),
-								new Double("", -sin($this->pitch / 180 * M_PI)),
-								new Double("", cos($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI))
-								]),
-								"Rotation" => new Enum("Rotation", [
-								new Float("", $this->yaw),
-								new Float("", $this->pitch)
-								]),
-								"Fire" => new Short("Fire", $this->isOnFire() ? 45 * 60 : 0)
+									"Pos" => new Enum("Pos", [
+										new Double("", $this->x),
+										new Double("", $this->y + $this->getEyeHeight()),
+										new Double("", $this->z)
+									]),
+									"Motion" => new Enum("Motion", [
+										new Double("", -sin($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI)),
+										new Double("", -sin($this->pitch / 180 * M_PI)),
+										new Double("", cos($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI))
+									]),
+									"Rotation" => new Enum("Rotation", [
+										new Float("", $this->yaw),
+										new Float("", $this->pitch)
+									]),
+									"Fire" => new Short("Fire", $this->isOnFire() ? 45 * 60 : 0)
 								]);
 
 								$diff = ($this->server->getTick() - $this->startAction);

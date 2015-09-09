@@ -42,7 +42,7 @@ class Sapling extends Flowable{
 	}
 
 	public function canBeActivated(){
-		return \true;
+		return true;
 	}
 
 	public function getName(){
@@ -60,45 +60,45 @@ class Sapling extends Flowable{
 	}
 
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		$down = $this->getSide(0);
 		if($down->getId() === self::GRASS or $down->getId() === self::DIRT or $down->getId() === self::FARMLAND){
-			$this->getLevel()->setBlock($block, $this, \true, \true);
+			$this->getLevel()->setBlock($block, $this, true, true);
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
-	public function onActivate(Item $item, Player $player = \null){
+	public function onActivate(Item $item, Player $player = null){
 		if($item->getId() === Item::DYE and $item->getDamage() === 0x0F){ //Bonemeal
 			//TODO: change log type
-			Tree::growTree($this->getLevel(), $this->x, $this->y, $this->z, new Random(\mt_rand()), $this->meta & 0x07);
+			Tree::growTree($this->getLevel(), $this->x, $this->y, $this->z, new Random(mt_rand()), $this->meta & 0x07);
 			if(($player->gamemode & 0x01) === 0){
 				$item->count--;
 			}
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 	public function onUpdate($type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if($this->getSide(0)->isTransparent() === \true){
+			if($this->getSide(0)->isTransparent() === true){
 				$this->getLevel()->useBreakOn($this);
 
 				return Level::BLOCK_UPDATE_NORMAL;
 			}
 		}elseif($type === Level::BLOCK_UPDATE_RANDOM){ //Growth
-			if(\mt_rand(1, 7) === 1){
+			if(mt_rand(1, 7) === 1){
 				if(($this->meta & 0x08) === 0x08){
-					Tree::growTree($this->getLevel(), $this->x, $this->y, $this->z, new Random(\mt_rand()), $this->meta & 0x07);
+					Tree::growTree($this->getLevel(), $this->x, $this->y, $this->z, new Random(mt_rand()), $this->meta & 0x07);
 				}else{
 					$this->meta |= 0x08;
-					$this->getLevel()->setBlock($this, $this, \true);
+					$this->getLevel()->setBlock($this, $this, true);
 
 					return Level::BLOCK_UPDATE_RANDOM;
 				}
@@ -107,7 +107,7 @@ class Sapling extends Flowable{
 			}
 		}
 
-		return \false;
+		return false;
 	}
 
 	public function getDrops(Item $item){

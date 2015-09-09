@@ -41,11 +41,11 @@ class Cactus extends Transparent{
 	}
 
 	public function getHardness(){
-		return 2;
+		return 0.4;
 	}
 
 	public function hasEntityCollision(){
-		return \true;
+		return true;
 	}
 
 	public function getName(){
@@ -56,10 +56,10 @@ class Cactus extends Transparent{
 
 		return new AxisAlignedBB(
 			$this->x + 0.0625,
-			$this->y,
+			$this->y + 0.0625,
 			$this->z + 0.0625,
 			$this->x + 0.9375,
-			$this->y + 1,
+			$this->y + 0.9375,
 			$this->z + 0.9375
 		);
 	}
@@ -90,7 +90,7 @@ class Cactus extends Transparent{
 						if($b->getId() === self::AIR){
 							Server::getInstance()->getPluginManager()->callEvent($ev = new BlockGrowEvent($b, new Cactus()));
 							if(!$ev->isCancelled()){
-								$this->getLevel()->setBlock($b, $ev->getNewState(), \true);
+								$this->getLevel()->setBlock($b, $ev->getNewState(), true);
 							}
 						}
 					}
@@ -103,24 +103,24 @@ class Cactus extends Transparent{
 			}
 		}
 
-		return \false;
+		return false;
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		$down = $this->getSide(0);
 		if($down->getId() === self::SAND or $down->getId() === self::CACTUS){
 			$block0 = $this->getSide(2);
 			$block1 = $this->getSide(3);
 			$block2 = $this->getSide(4);
 			$block3 = $this->getSide(5);
-			if($block0->isTransparent() === \true and $block1->isTransparent() === \true and $block2->isTransparent() === \true and $block3->isTransparent() === \true){
-				$this->getLevel()->setBlock($this, $this, \true);
+			if($block0->isTransparent() === true and $block1->isTransparent() === true and $block2->isTransparent() === true and $block3->isTransparent() === true){
+				$this->getLevel()->setBlock($this, $this, true);
 
-				return \true;
+				return true;
 			}
 		}
 
-		return \false;
+		return false;
 	}
 
 	public function getDrops(Item $item){
