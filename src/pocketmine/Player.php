@@ -754,10 +754,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->spawnToAll();
 
-			if($this->server->getUpdater()->hasUpdate() and $this->hasPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE)){
-				$this->server->getUpdater()->showPlayerUpdate($this);
-			}
-
 			if($this->getHealth() <= 0){
 				$pk = new RespawnPacket();
 				$pos = $this->getSpawn();

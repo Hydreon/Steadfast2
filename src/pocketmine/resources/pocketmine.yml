@@ -80,13 +80,6 @@ auto-report:
  send-phpinfo: false
  host: crash.pocketmine.net
 
-auto-updater:
- enabled: true
- on-update:
-  warn-console: true
-  warn-ops: true
- host: www.pocketmine.net
-
 aliases:
  #Examples:
  #showtheversion: version
