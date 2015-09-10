@@ -31,9 +31,9 @@ class SmallTree extends Tree{
 	private static $leavesHeight = 4; // All trees appear to be 4 tall
 	private static $leafRadii = [1, 1.41, 2.83, 2.24];
 
-	private $addLeavesVines = \false;
-	private $addLogVines = \false;
-	private $addCocoaPlants = \false;
+	private $addLeavesVines = false;
+	private $addLogVines = false;
+	private $addCocoaPlants = false;
 
 	public function canPlaceObject(ChunkManager $level, $x, $y, $z, Random $random){
 		$radiusToCheck = 0;
@@ -44,13 +44,13 @@ class SmallTree extends Tree{
 			for($xx = -$radiusToCheck; $xx < ($radiusToCheck + 1); ++$xx){
 				for($zz = -$radiusToCheck; $zz < ($radiusToCheck + 1); ++$zz){
 					if(!isset($this->overridable[$level->getBlockIdAt($x + $xx, $y + $yy, $z + $zz)])){
-						return \false;
+						return false;
 					}
 				}
 			}
 		}
 
-		return \true;
+		return true;
 	}
 
 	public function placeObject(ChunkManager $level, $x, $y, $z, Random $random){
@@ -63,7 +63,7 @@ class SmallTree extends Tree{
 		//    - max=6 (top leaves are within ground-level whacking range
 		//             on all small trees)
 		$heightPre = $random->nextRange(-14, 11);
-		$this->trunkHeight = \intval($heightPre / 8) + 5;
+		$this->trunkHeight = intval($heightPre / 8) + 5;
 
 		// Adjust the starting leaf density using the trunk height as a
 		// starting position (tall trees with skimpy leaves don't look
@@ -79,7 +79,7 @@ class SmallTree extends Tree{
 				$bRadius = 3;
 				for($xx = -$bRadius; $xx <= $bRadius; ++$xx){
 					for($zz = -$bRadius; $zz <= $bRadius; ++$zz){
-						if(\sqrt($xx ** 2 + $zz ** 2) <= $radius){
+						if(sqrt($xx ** 2 + $zz ** 2) <= $radius){
 							$level->setBlockIdAt($x + $xx, $y + $yy, $z + $zz, Block::LEAVES);
 							$level->setBlockDataAt($x + $xx, $y + $yy, $z + $zz, $this->type);
 						}

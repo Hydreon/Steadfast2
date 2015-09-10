@@ -114,9 +114,9 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	}
 
 	public function process(){
-		$work = \false;
+		$work = false;
 		if($this->interface->handlePacket()){
-			$work = \true;
+			$work = true;
 			while($this->interface->handlePacket()){
 			}
 		}
@@ -156,7 +156,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	}
 
 	public function openSession($identifier, $address, $port, $clientID){
-		$ev = new PlayerCreationEvent($this, Player::class, Player::class, \null, $address, $port);
+		$ev = new PlayerCreationEvent($this, Player::class, Player::class, null, $address, $port);
 		$this->server->getPluginManager()->callEvent($ev);
 		$class = $ev->getPlayerClass();
 
@@ -179,7 +179,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				if(\pocketmine\DEBUG > 1 and isset($pk)){
 					$logger = $this->server->getLogger();
 					if($logger instanceof MainLogger){
-						$logger->debug("Packet " . \get_class($pk) . " 0x" . \bin2hex($packet->buffer));
+						$logger->debug("Packet " . get_class($pk) . " 0x" . bin2hex($packet->buffer));
 						$logger->logException($e);
 					}
 				}
@@ -221,68 +221,56 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 
 	public function handleOption($name, $value){
 		if($name === "bandwidth"){
-			$v = \unserialize($value);
+			$v = unserialize($value);
 			$this->network->addStatistics($v["up"], $v["down"]);
 		}
 	}
 
-	public function putPacket(Player $player, DataPacket $packet, $needACK = \false, $immediate = \false){
+	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
 		if(isset($this->identifiers[$player])){
 			$identifier = $this->identifiers[$player];
-			$pk = \null;
+			$pk = null;
 			if(!$packet->isEncoded){
 				$packet->encode();
 			}elseif(!$needACK){
 				if(!isset($packet->__encapsulatedPacket)){
 					$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
-					$packet->__encapsulatedPacket->identifierACK = \null;
+					$packet->__encapsulatedPacket->identifierACK = null;
 					$packet->__encapsulatedPacket->buffer = $packet->buffer;
-					if($packet->getChannel() !== 0){
-						$packet->__encapsulatedPacket->reliability = 3;
-						$packet->__encapsulatedPacket->orderChannel = $packet->getChannel();
-						$packet->__encapsulatedPacket->orderIndex = 0;
-					}else{
-						$packet->__encapsulatedPacket->reliability = 2;
-					}
+					$packet->__encapsulatedPacket->reliability = 2;
 				}
 				$pk = $packet->__encapsulatedPacket;
 			}
 
 			if(!$immediate and !$needACK and $packet->pid() !== ProtocolInfo::BATCH_PACKET
 				and Network::$BATCH_THRESHOLD >= 0
-				and \strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
-				$this->server->batchPackets([$player], [$packet], \true, $packet->getChannel());
-				return \null;
+				and strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
+				$this->server->batchPackets([$player], [$packet], true);
+				return null;
 			}
 
-			if($pk === \null){
+			if($pk === null){
 				$pk = new EncapsulatedPacket();
 				$pk->buffer = $packet->buffer;
-				if($packet->getChannel() !== 0){
-					$packet->reliability = 3;
-					$packet->orderChannel = $packet->getChannel();
-					$packet->orderIndex = 0;
-				}else{
-					$packet->reliability = 2;
-				}
+				$packet->reliability = 2;
 
-				if($needACK === \true){
+				if($needACK === true){
 					$pk->identifierACK = $this->identifiersACK[$identifier]++;
 				}
 			}
 
-			$this->interface->sendEncapsulated($identifier, $pk, ($needACK === \true ? RakLib::FLAG_NEED_ACK : 0) | ($immediate === \true ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL));
+			$this->interface->sendEncapsulated($identifier, $pk, ($needACK === true ? RakLib::FLAG_NEED_ACK : 0) | ($immediate === true ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL));
 
 			return $pk->identifierACK;
 		}
 
-		return \null;
+		return null;
 	}
 
 	private function getPacket($buffer){
-		$pid = \ord($buffer{0});
+		$pid = ord($buffer{0});
 
-		if(($data = $this->network->getPacket($pid)) === \null){
+		if(($data = $this->network->getPacket($pid)) === null){
 			$data = new UnknownPacket();
 			$data->packetID = $pid;
 		}

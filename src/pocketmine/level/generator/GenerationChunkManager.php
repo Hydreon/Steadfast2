@@ -45,7 +45,7 @@ class GenerationChunkManager implements ChunkManager{
 	protected $changes = [];
 
 	public function __construct(GenerationManager $manager, $levelID, $seed, $class, array $options){
-		if(!\class_exists($class, \true) or !\is_subclass_of($class, Generator::class)){
+		if(!class_exists($class, true) or !is_subclass_of($class, Generator::class)){
 			throw new \InvalidStateException("Class $class does not exists or is not a subclass of Generator");
 		}
 
@@ -79,9 +79,9 @@ class GenerationChunkManager implements ChunkManager{
 	 * @throws ChunkException
 	 */
 	public function getChunk($chunkX, $chunkZ){
-		$index = \PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ);
+		$index = PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ);
 		$chunk = !isset($this->chunks[$index]) ? $this->requestChunk($chunkX, $chunkZ) : $this->chunks[$index];
-		if($chunk === \null){
+		if($chunk === null){
 			throw new ChunkException("null Chunk received");
 		}
 
@@ -147,7 +147,7 @@ class GenerationChunkManager implements ChunkManager{
 		try{
 			return $this->getChunk($chunkX, $chunkZ)->isGenerated();
 		}catch(\Exception $e){
-			return \false;
+			return false;
 		}
 	}
 
@@ -155,15 +155,15 @@ class GenerationChunkManager implements ChunkManager{
 		try{
 			return $this->getChunk($chunkX, $chunkZ)->isPopulated();
 		}catch(\Exception $e){
-			return \false;
+			return false;
 		}
 	}
 
 	public function setChunkGenerated($chunkX, $chunkZ){
 		try{
 			$chunk = $this->getChunk($chunkX, $chunkZ);
-			$chunk->setGenerated(\true);
-			$this->changes[\PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)] = $chunk;
+			$chunk->setGenerated(true);
+			$this->changes[PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)] = $chunk;
 		}catch(\Exception $e){
 		}
 	}
@@ -171,15 +171,15 @@ class GenerationChunkManager implements ChunkManager{
 	public function setChunkPopulated($chunkX, $chunkZ){
 		try{
 			$chunk = $this->getChunk($chunkX, $chunkZ);
-			$chunk->setPopulated(\true);
-			$this->changes[\PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)] = $chunk;
+			$chunk->setPopulated(true);
+			$this->changes[PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)] = $chunk;
 		}catch(\Exception $e){
 		}
 	}
 
 	protected function requestChunk($chunkX, $chunkZ){
 		$chunk = $this->manager->requestChunk($this->levelID, $chunkX, $chunkZ);
-		$this->chunks[\PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)] = $chunk;
+		$this->chunks[PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)] = $chunk;
 
 		return $chunk;
 	}
@@ -190,7 +190,7 @@ class GenerationChunkManager implements ChunkManager{
 	 * @param FullChunk $chunk
 	 */
 	public function setChunk($chunkX, $chunkZ, FullChunk $chunk){
-		$this->chunks[$index = \PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)] = $chunk;
+		$this->chunks[$index = PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)] = $chunk;
 		$this->changes[$index] = $chunk;
 		if($chunk->isPopulated()){
 			//TODO: Queue to be sent

@@ -66,8 +66,8 @@ class Simplex extends Perlin{
 	public function __construct(Random $random, $octaves, $frequency, $amplitude){
 		parent::__construct($random, $octaves, $frequency, $amplitude);
 		$this->offsetW = $random->nextFloat() * 256;
-		self::$SQRT_3 = \sqrt(3);
-		self::$SQRT_5 = \sqrt(5);
+		self::$SQRT_3 = sqrt(3);
+		self::$SQRT_5 = sqrt(5);
 		self::$F2 = 0.5 * (self::$SQRT_3 - 1);
 		self::$G2 = (3 - self::$SQRT_3) / 6;
 		self::$G22 = self::$G2 * 2.0 - 1;
@@ -99,9 +99,9 @@ class Simplex extends Perlin{
 
 		// Skew the input space to determine which simplex cell we're in
 		$s = ($x + $y + $z) * self::$F3; // Very nice and simple skew factor for 3D
-		$i = (int) \floor($x + $s);
-		$j = (int) \floor($y + $s);
-		$k = (int) \floor($z + $s);
+		$i = (int) floor($x + $s);
+		$j = (int) floor($y + $s);
+		$k = (int) floor($z + $s);
 		$t = ($i + $j + $k) * self::$G3;
 		$X0 = $i - $t; // Unskew the cell origin back to (x,y,z) space
 		$Y0 = $j - $t;
@@ -234,8 +234,8 @@ class Simplex extends Perlin{
 
 		// Skew the input space to determine which simplex cell we're in
 		$s = ($x + $y) * self::$F2; // Hairy factor for 2D
-		$i = (int) \floor($x + $s);
-		$j = (int) \floor($y + $s);
+		$i = (int) floor($x + $s);
+		$j = (int) floor($y + $s);
 		$t = ($i + $j) * self::$G2;
 		$X0 = $i - $t; // Unskew the cell origin back to (x,y) space
 		$Y0 = $j - $t;

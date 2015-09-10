@@ -40,13 +40,13 @@ class GiveCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) < 2){
+		if(count($args) < 2){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \false;
+			return false;
 		}
 
 		$player = $sender->getServer()->getPlayer($args[0]);
@@ -62,12 +62,12 @@ class GiveCommand extends VanillaCommand{
 			if(($player->getGamemode() & 0x01) === 0x01){
 				$sender->sendMessage(TextFormat::RED . "Player is in creative mode");
 
-				return \true;
+				return true;
 			}
 			if($item->getId() == 0){
 				$sender->sendMessage(TextFormat::RED . "There is no item called " . $args[1] . ".");
 
-				return \true;
+				return true;
 			}
 
 			//TODO: overflow
@@ -75,11 +75,11 @@ class GiveCommand extends VanillaCommand{
 		}else{
 			$sender->sendMessage(TextFormat::RED . "Can't find player " . $args[0]);
 
-			return \true;
+			return true;
 		}
 
 		Command::broadcastCommandMessage($sender, "Gave " . $player->getName() . " " . $item->getCount() . " of " . $item->getName() . " (" . $item->getId() . ":" . $item->getDamage() . ")");
 
-		return \true;
+		return true;
 	}
 }

@@ -38,19 +38,19 @@ class PardonCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) !== 1){
+		if(count($args) !== 1){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \false;
+			return false;
 		}
 
 		$sender->getServer()->getNameBans()->remove($args[0]);
 
 		Command::broadcastCommandMessage($sender, "Pardoned " . $args[0]);
 
-		return \true;
+		return true;
 	}
 }

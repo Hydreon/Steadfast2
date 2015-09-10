@@ -57,7 +57,7 @@ class Sign extends Spawnable{
 		$this->namedtag->Text4 = new String("Text4", $line4);
 		$this->spawnToAll();
 
-		return \true;
+		return true;
 	}
 
 	public function getText(){

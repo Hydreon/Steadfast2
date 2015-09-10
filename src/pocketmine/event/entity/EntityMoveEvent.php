@@ -30,7 +30,7 @@ use pocketmine\math\Vector3;
  * @deprecated
  */
 class EntityMoveEvent extends EntityEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	/** @var \pocketmine\math\Vector3 */
 	private $pos;

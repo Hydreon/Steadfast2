@@ -27,7 +27,7 @@ use pocketmine\event\Cancellable;
 use pocketmine\math\Vector3;
 
 class EntityMotionEvent extends EntityEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	private $mot;
 

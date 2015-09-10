@@ -40,13 +40,13 @@ class GamemodeCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) === 0){
+		if(count($args) === 0){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \false;
+			return false;
 		}
 
 		$gameMode = Server::getGamemodeFromString($args[0]);
@@ -54,21 +54,21 @@ class GamemodeCommand extends VanillaCommand{
 		if($gameMode === -1){
 			$sender->sendMessage("Unknown game mode");
 
-			return \true;
+			return true;
 		}
 
 		$target = $sender;
 		if(isset($args[1])){
 			$target = $sender->getServer()->getPlayer($args[1]);
-			if($target === \null){
+			if($target === null){
 				$sender->sendMessage("Can't find player " . $args[1]);
 
-				return \true;
+				return true;
 			}
 		}elseif(!($sender instanceof Player)){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \true;
+			return true;
 		}
 
 		if($gameMode !== $target->getGamemode()){
@@ -77,17 +77,17 @@ class GamemodeCommand extends VanillaCommand{
 				$sender->sendMessage("Game mode change for " . $target->getName() . " failed!");
 			}else{
 				if($target === $sender){
-					Command::broadcastCommandMessage($sender, "Set own gamemode to " . \strtolower(Server::getGamemodeString($gameMode)) . " mode");
+					Command::broadcastCommandMessage($sender, "Set own gamemode to " . strtolower(Server::getGamemodeString($gameMode)) . " mode");
 				}else{
-					Command::broadcastCommandMessage($sender, "Set " . $target->getName() . "'s gamemode to " . \strtolower(Server::getGamemodeString($gameMode)) . " mode");
+					Command::broadcastCommandMessage($sender, "Set " . $target->getName() . "'s gamemode to " . strtolower(Server::getGamemodeString($gameMode)) . " mode");
 				}
 			}
 		}else{
-			$sender->sendMessage($target->getName() . " already has game mode " . \strtolower(Server::getGamemodeString($gameMode)));
+			$sender->sendMessage($target->getName() . " already has game mode " . strtolower(Server::getGamemodeString($gameMode)));
 
-			return \true;
+			return true;
 		}
 
-		return \true;
+		return true;
 	}
 }

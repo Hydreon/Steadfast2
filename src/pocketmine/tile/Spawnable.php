@@ -63,7 +63,7 @@ abstract class Spawnable extends Tile{
 		}
 
 		foreach($this->getLevel()->getUsingChunk($this->chunk->getX(), $this->chunk->getZ()) as $player){
-			if($player->spawned === \true){
+			if($player->spawned === true){
 				$this->spawnTo($player);
 			}
 		}

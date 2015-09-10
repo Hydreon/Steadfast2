@@ -40,8 +40,7 @@ abstract class DataPacket extends \stdClass{
 
 	private $offset = 0;
 	public $buffer = "";
-	public $isEncoded = \false;
-	private $channel = 0;
+	public $isEncoded = false;
 
 	abstract public function pid();
 
@@ -50,20 +49,11 @@ abstract class DataPacket extends \stdClass{
 	abstract public function decode();
 
 	protected function reset(){
-		$this->buffer = \chr($this->pid());
+		$this->buffer = chr($this->pid());
 		$this->offset = 0;
 	}
 
-	public function setChannel($channel){
-		$this->channel = (int) $channel;
-		return $this;
-	}
-
-	public function getChannel(){
-		return $this->channel;
-	}
-
-	public function setBuffer($buffer = \null, $offset = 0){
+	public function setBuffer($buffer = null, $offset = 0){
 		$this->buffer = $buffer;
 		$this->offset = (int) $offset;
 	}
@@ -78,13 +68,13 @@ abstract class DataPacket extends \stdClass{
 
 	protected function get($len){
 		if($len < 0){
-			$this->offset = \strlen($this->buffer) - 1;
+			$this->offset = strlen($this->buffer) - 1;
 			return "";
-		}elseif($len === \true){
-			return \substr($this->buffer, $this->offset);
+		}elseif($len === true){
+			return substr($this->buffer, $this->offset);
 		}
 
-		return $len === 1 ? $this->buffer{$this->offset++} : \substr($this->buffer, ($this->offset += $len) - $len, $len);
+		return $len === 1 ? $this->buffer{$this->offset++} : substr($this->buffer, ($this->offset += $len) - $len, $len);
 	}
 
 	public function getUUID(){

@@ -39,14 +39,14 @@ abstract class Projectile extends Entity{
 	const DATA_SHOOTER_ID = 17;
 
 	/** @var Entity */
-	public $shootingEntity = \null;
+	public $shootingEntity = null;
 	protected $damage = 0;
 
-	public $hadCollision = \false;
+	public $hadCollision = false;
 
-	public function __construct(FullChunk $chunk, Compound $nbt, Entity $shootingEntity = \null){
+	public function __construct(FullChunk $chunk, Compound $nbt, Entity $shootingEntity = null){
 		$this->shootingEntity = $shootingEntity;
-		if($shootingEntity !== \null){
+		if($shootingEntity !== null){
 			$this->setDataProperty(self::DATA_SHOOTER_ID, self::DATA_TYPE_LONG, $shootingEntity->getId());
 		}
 		parent::__construct($chunk, $nbt);
@@ -79,7 +79,7 @@ abstract class Projectile extends Entity{
 
 	public function onUpdate($currentTick){
 		if($this->closed){
-			return \false;
+			return false;
 		}
 
 
@@ -90,7 +90,7 @@ abstract class Projectile extends Entity{
 
 		if(!$this->dead){
 
-			$movingObjectPosition = \null;
+			$movingObjectPosition = null;
 
 			if(!$this->isCollided){
 				$this->motionY -= $this->gravity;
@@ -102,8 +102,8 @@ abstract class Projectile extends Entity{
 
 			$list = $this->getLevel()->getCollidingEntities($this->boundingBox->addCoord($this->motionX, $this->motionY, $this->motionZ)->expand(1, 1, 1), $this);
 
-			$nearDistance = \PHP_INT_MAX;
-			$nearEntity = \null;
+			$nearDistance = PHP_INT_MAX;
+			$nearEntity = null;
 
 			foreach($list as $entity){
 				if(/*!$entity->canCollideWith($this) or */
@@ -115,7 +115,7 @@ abstract class Projectile extends Entity{
 				$axisalignedbb = $entity->boundingBox->grow(0.3, 0.3, 0.3);
 				$ob = $axisalignedbb->calculateIntercept($this, $moveVector);
 
-				if($ob === \null){
+				if($ob === null){
 					continue;
 				}
 
@@ -127,23 +127,23 @@ abstract class Projectile extends Entity{
 				}
 			}
 
-			if($nearEntity !== \null){
+			if($nearEntity !== null){
 				$movingObjectPosition = MovingObjectPosition::fromEntity($nearEntity);
 			}
 
-			if($movingObjectPosition !== \null){
-				if($movingObjectPosition->entityHit !== \null){
+			if($movingObjectPosition !== null){
+				if($movingObjectPosition->entityHit !== null){
 
 					$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
 
-					$motion = \sqrt($this->motionX ** 2 + $this->motionY ** 2 + $this->motionZ ** 2);
-					$damage = \ceil($motion * $this->damage);
+					$motion = sqrt($this->motionX ** 2 + $this->motionY ** 2 + $this->motionZ ** 2);
+					$damage = ceil($motion * $this->damage);
 
 					if($this instanceof Arrow and $this->isCritical){
-						$damage += \mt_rand(0, (int) ($damage / 2) + 1);
+						$damage += mt_rand(0, (int) ($damage / 2) + 1);
 					}
 
-					if($this->shootingEntity === \null){
+					if($this->shootingEntity === null){
 						$ev = new EntityDamageByEntityEvent($this, $movingObjectPosition->entityHit, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
 					}else{
 						$ev = new EntityDamageByChildEntityEvent($this->shootingEntity, $this, $movingObjectPosition->entityHit, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
@@ -151,7 +151,7 @@ abstract class Projectile extends Entity{
 
 					$movingObjectPosition->entityHit->attack($ev->getFinalDamage(), $ev);
 
-					$this->hadCollision = \true;
+					$this->hadCollision = true;
 
 					if($this->fireTicks > 0){
 						$ev = new EntityCombustByEntityEvent($this, $movingObjectPosition->entityHit, 5);
@@ -162,14 +162,14 @@ abstract class Projectile extends Entity{
 					}
 
 					$this->kill();
-					return \true;
+					return true;
 				}
 			}
 
 			$this->move($this->motionX, $this->motionY, $this->motionZ);
 
 			if($this->isCollided and !$this->hadCollision){
-				$this->hadCollision = \true;
+				$this->hadCollision = true;
 
 				$this->motionX = 0;
 				$this->motionY = 0;
@@ -177,14 +177,14 @@ abstract class Projectile extends Entity{
 
 				$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
 			}elseif(!$this->isCollided and $this->hadCollision){
-				$this->hadCollision = \false;
+				$this->hadCollision = false;
 			}
 
 			if(!$this->onGround or $this->motionX != 0 or $this->motionY != 0 or $this->motionZ != 0){
-				$f = \sqrt(($this->motionX ** 2) + ($this->motionZ ** 2));
-				$this->yaw = (\atan2($this->motionX, $this->motionZ) * 180 / M_PI);
-				$this->pitch = (\atan2($this->motionY, $f) * 180 / M_PI);
-				$hasUpdate = \true;
+				$f = sqrt(($this->motionX ** 2) + ($this->motionZ ** 2));
+				$this->yaw = (atan2($this->motionX, $this->motionZ) * 180 / M_PI);
+				$this->pitch = (atan2($this->motionY, $f) * 180 / M_PI);
+				$hasUpdate = true;
 			}
 
 			$this->updateMovement();

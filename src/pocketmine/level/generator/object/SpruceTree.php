@@ -41,13 +41,13 @@ class SpruceTree extends Tree{
 			for($xx = -$checkRadius; $xx < ($checkRadius + 1); ++$xx){
 				for($zz = -$checkRadius; $zz < ($checkRadius + 1); ++$zz){
 					if(!isset($this->overridable[$level->getBlockIdAt($x + $xx, $y + $yy, $z + $zz)])){
-						return \false;
+						return false;
 					}
 				}
 			}
 		}
 
-		return \true;
+		return true;
 	}
 
 	private function findRandomLeavesSize(Random $random){
@@ -65,7 +65,7 @@ class SpruceTree extends Tree{
 		for($yy = $this->totalHeight; $yy >= $this->leavesBottomY; --$yy){
 			for($xx = -$leavesRadius; $xx <= $leavesRadius; ++$xx){
 				for($zz = -$leavesRadius; $zz <= $leavesRadius; ++$zz){
-					if(\abs($xx) != $leavesRadius or \abs($zz) != $leavesRadius or $leavesRadius <= 0){
+					if(abs($xx) != $leavesRadius or abs($zz) != $leavesRadius or $leavesRadius <= 0){
 						$level->setBlockIdAt($x + $xx, $y + $yy, $z + $zz, Block::LEAVES);
 						$level->setBlockDataAt($x + $xx, $y + $yy, $z + $zz, $this->type);
 					}

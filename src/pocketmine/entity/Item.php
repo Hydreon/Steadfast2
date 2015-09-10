@@ -38,8 +38,8 @@ use pocketmine\Player;
 class Item extends Entity{
 	const NETWORK_ID = 64;
 
-	protected $owner = \null;
-	protected $thrower = \null;
+	protected $owner = null;
+	protected $thrower = null;
 	protected $pickupDelay = 0;
 	/** @var ItemItem */
 	protected $item;
@@ -50,7 +50,7 @@ class Item extends Entity{
 	protected $gravity = 0.04;
 	protected $drag = 0.02;
 
-	public $canCollide = \false;
+	public $canCollide = false;
 
 	protected function initEntity(){
 		parent::initEntity();
@@ -77,14 +77,19 @@ class Item extends Entity{
 
 
 	public function attack($damage, EntityDamageEvent $source){
-		if($source->getCause() === EntityDamageEvent::CAUSE_FIRE_TICK){
+		if(
+			$source->getCause() === EntityDamageEvent::CAUSE_VOID or
+			$source->getCause() === EntityDamageEvent::CAUSE_FIRE_TICK or
+			$source->getCause() === EntityDamageEvent::CAUSE_ENTITY_EXPLOSION or
+			$source->getCause() === EntityDamageEvent::CAUSE_BLOCK_EXPLOSION
+		){
 			parent::attack($damage, $source);
 		}
 	}
 
 	public function onUpdate($currentTick){
-		if($this->closed !== \false){
-			return \false;
+		if($this->closed){
+			return false;
 		}
 
 		$tickDiff = \max(1, $currentTick - $this->lastUpdate);
@@ -127,7 +132,7 @@ class Item extends Entity{
 					$this->age = 0;
 				}else{
 					$this->kill();
-					$hasUpdate = \true;
+					$hasUpdate = true;
 				}
 			}
 
@@ -148,10 +153,10 @@ class Item extends Entity{
 		$this->namedtag->Health = new Short("Health", $this->getHealth());
 		$this->namedtag->Age = new Short("Age", $this->age);
 		$this->namedtag->PickupDelay = new Short("PickupDelay", $this->pickupDelay);
-		if($this->owner !== \null){
+		if($this->owner !== null){
 			$this->namedtag->Owner = new String("Owner", $this->owner);
 		}
-		if($this->thrower !== \null){
+		if($this->thrower !== null){
 			$this->namedtag->Thrower = new String("Thrower", $this->thrower);
 		}
 	}
@@ -164,7 +169,7 @@ class Item extends Entity{
 	}
 
 	public function canCollideWith(Entity $entity){
-		return \false;
+		return false;
 	}
 
 	/**
@@ -219,7 +224,7 @@ class Item extends Entity{
 		$pk->speedY = $this->motionY;
 		$pk->speedZ = $this->motionZ;
 		$pk->item = $this->getItem();
-		$player->dataPacket($pk->setChannel(Network::CHANNEL_ENTITY_SPAWNING));
+		$player->dataPacket($pk);
 
 		$this->sendData($player);
 

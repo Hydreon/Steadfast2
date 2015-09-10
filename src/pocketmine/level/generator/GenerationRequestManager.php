@@ -53,8 +53,8 @@ class GenerationRequestManager{
 	 * @param array  $options
 	 */
 	public function openLevel(Level $level, $generator, array $options = []){
-		$buffer = \chr(GenerationManager::PACKET_OPEN_LEVEL) . \pack("N", $level->getId()) . \pack("N", $level->getSeed()) .
-			\pack("n", \strlen($generator)) . $generator . \serialize($options);
+		$buffer = chr(GenerationManager::PACKET_OPEN_LEVEL) . pack("N", $level->getId()) . pack("N", $level->getSeed()) .
+			pack("n", strlen($generator)) . $generator . serialize($options);
 
 		$this->generationThread->pushMainToThreadPacket($buffer);
 	}
@@ -63,35 +63,35 @@ class GenerationRequestManager{
 	 * @param Level $level
 	 */
 	public function closeLevel(Level $level){
-		$buffer = \chr(GenerationManager::PACKET_CLOSE_LEVEL) . \pack("N", $level->getId());
+		$buffer = chr(GenerationManager::PACKET_CLOSE_LEVEL) . pack("N", $level->getId());
 		$this->generationThread->pushMainToThreadPacket($buffer);
 	}
 
 	public function addNamespace($namespace, $path){
-		$buffer = \chr(GenerationManager::PACKET_ADD_NAMESPACE) . \pack("n", \strlen($namespace)) . $namespace . $path;
+		$buffer = chr(GenerationManager::PACKET_ADD_NAMESPACE) . pack("n", strlen($namespace)) . $namespace . $path;
 		$this->generationThread->pushMainToThreadPacket($buffer);
 	}
 
 	protected function sendChunk($levelID, FullChunk $chunk){
-		$buffer = \chr(GenerationManager::PACKET_SEND_CHUNK) . \pack("N", $levelID) . \chr(\strlen($class = \get_class($chunk))) . $class . $chunk->toBinary();
+		$buffer = chr(GenerationManager::PACKET_SEND_CHUNK) . pack("N", $levelID) . chr(strlen($class = get_class($chunk))) . $class . $chunk->toBinary();
 		$this->generationThread->pushMainToThreadPacket($buffer);
 	}
 
 	public function requestChunk(Level $level, $chunkX, $chunkZ){
-		$buffer = \chr(GenerationManager::PACKET_REQUEST_CHUNK) . \pack("N", $level->getId()) . \pack("N", $chunkX) . \pack("N", $chunkZ);
+		$buffer = chr(GenerationManager::PACKET_REQUEST_CHUNK) . pack("N", $level->getId()) . pack("N", $chunkX) . pack("N", $chunkZ);
 		$this->generationThread->pushMainToThreadPacket($buffer);
 	}
 
 	protected function handleRequest($levelID, $chunkX, $chunkZ){
 		if(($level = $this->server->getLevel($levelID)) instanceof Level){
-			$chunk = $level->getChunk($chunkX, $chunkZ, \true);
+			$chunk = $level->getChunk($chunkX, $chunkZ, true);
 			if($chunk instanceof FullChunk){
 				$this->sendChunk($levelID, $chunk);
 			}else{
 				throw new ChunkException("Invalid Chunk given");
 			}
 		}else{
-			$buffer = \chr(GenerationManager::PACKET_CLOSE_LEVEL) . \pack("N", $levelID);
+			$buffer = chr(GenerationManager::PACKET_CLOSE_LEVEL) . pack("N", $levelID);
 			$this->generationThread->pushMainToThreadPacket($buffer);
 		}
 	}
@@ -100,7 +100,7 @@ class GenerationRequestManager{
 		if(($level = $this->server->getLevel($levelID)) instanceof Level){
 			$level->generateChunkCallback($chunk->getX(), $chunk->getZ(), $chunk);
 		}else{
-			$buffer = \chr(GenerationManager::PACKET_CLOSE_LEVEL) . \pack("N", $levelID);
+			$buffer = chr(GenerationManager::PACKET_CLOSE_LEVEL) . pack("N", $levelID);
 			$this->generationThread->pushMainToThreadPacket($buffer);
 		}
 	}
@@ -110,27 +110,27 @@ class GenerationRequestManager{
 	}
 
 	public function handlePackets(){
-		while(\strlen($packet = $this->generationThread->readThreadToMainPacket()) > 0){
-			$pid = \ord($packet{0});
+		while(strlen($packet = $this->generationThread->readThreadToMainPacket()) > 0){
+			$pid = ord($packet{0});
 			$offset = 1;
 
 			if($pid === GenerationManager::PACKET_REQUEST_CHUNK){
-				$levelID = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+				$levelID = (PHP_INT_SIZE === 8 ? unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32 : unpack("N", substr($packet, $offset, 4))[1]);
 				$offset += 4;
-				$chunkX = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+				$chunkX = (PHP_INT_SIZE === 8 ? unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32 : unpack("N", substr($packet, $offset, 4))[1]);
 				$offset += 4;
-				$chunkZ = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+				$chunkZ = (PHP_INT_SIZE === 8 ? unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32 : unpack("N", substr($packet, $offset, 4))[1]);
 				$this->handleRequest($levelID, $chunkX, $chunkZ);
 			}elseif($pid === GenerationManager::PACKET_SEND_CHUNK){
-				$levelID = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+				$levelID = (PHP_INT_SIZE === 8 ? unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32 : unpack("N", substr($packet, $offset, 4))[1]);
 				$offset += 4;
-				$len = \ord($packet{$offset++});
+				$len = ord($packet{$offset++});
 				/** @var FullChunk $class */
-				$class = \substr($packet, $offset, $len);
+				$class = substr($packet, $offset, $len);
 				$offset += $len;
 				$level = $this->server->getLevel($levelID);
 				if($level instanceof Level){
-					$chunk = $class::fromBinary(\substr($packet, $offset), $level->getProvider());
+					$chunk = $class::fromBinary(substr($packet, $offset), $level->getProvider());
 					$this->receiveChunk($levelID, $chunk);
 				}
 			}
@@ -138,7 +138,7 @@ class GenerationRequestManager{
 	}
 
 	public function shutdown(){
-		$buffer = \chr(GenerationManager::PACKET_SHUTDOWN);
+		$buffer = chr(GenerationManager::PACKET_SHUTDOWN);
 		$this->generationThread->pushMainToThreadPacket($buffer);
 	}
 

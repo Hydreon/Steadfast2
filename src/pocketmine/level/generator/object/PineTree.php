@@ -41,13 +41,13 @@ class PineTree extends Tree{
 			for($xx = -$checkRadius; $xx < ($checkRadius + 1); ++$xx){
 				for($zz = -$checkRadius; $zz < ($checkRadius + 1); ++$zz){
 					if(!isset($this->overridable[$level->getBlockIdAt($x + $xx, $y + $yy, $z + $zz)])){
-						return \false;
+						return false;
 					}
 				}
 			}
 		}
 
-		return \true;
+		return true;
 	}
 
 	private function findRandomLeavesSize(Random $random){
@@ -64,12 +64,12 @@ class PineTree extends Tree{
 		$leavesRadius = 0;
 		$leavesMaxRadius = 1;
 		$leavesBottomY = $this->totalHeight - $this->leavesSizeY;
-		$firstMaxedRadius = \false;
+		$firstMaxedRadius = false;
 		for($leavesY = 0; $leavesY <= $leavesBottomY; ++$leavesY){
 			$yy = $this->totalHeight - $leavesY;
 			for($xx = -$leavesRadius; $xx <= $leavesRadius; ++$xx){
 				for($zz = -$leavesRadius; $zz <= $leavesRadius; ++$zz){
-					if(\abs($xx) != $leavesRadius or \abs($zz) != $leavesRadius or $leavesRadius <= 0){
+					if(abs($xx) != $leavesRadius or abs($zz) != $leavesRadius or $leavesRadius <= 0){
 						$level->setBlockIdAt($x + $xx, $y + $yy, $z + $zz, Block::LEAVES);
 						$level->setBlockDataAt($x + $xx, $y + $yy, $z + $zz, $this->type);
 					}
@@ -77,7 +77,7 @@ class PineTree extends Tree{
 			}
 			if($leavesRadius >= $leavesMaxRadius){
 				$leavesRadius = $firstMaxedRadius ? 1 : 0;
-				$firstMaxedRadius = \true;
+				$firstMaxedRadius = true;
 				if(++$leavesMaxRadius > $this->leavesAbsoluteMaxRadius){
 					$leavesMaxRadius = $this->leavesAbsoluteMaxRadius;
 				}

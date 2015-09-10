@@ -37,7 +37,7 @@ class StatusCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
 		$server = $sender->getServer();
@@ -47,8 +47,8 @@ class StatusCommand extends VanillaCommand{
 		//TODO: implement network speed
 		//$sender->sendMessage(TextFormat::GOLD . "Upload: " . TextFormat::WHITE . round($server->getNetwork()->getUploadSpeed() / 1024, 2) . " kB/s");
 		//$sender->sendMessage(TextFormat::GOLD . "Download: " . TextFormat::WHITE . round($server->getNetwork()->getDownloadSpeed() / 1024, 2) . " kB/s");
-		$sender->sendMessage(TextFormat::GOLD . "Memory: " . TextFormat::WHITE . \round((\memory_get_usage() / 1024) / 1024, 2) . TextFormat::YELLOW . "/" . TextFormat::WHITE . \round((\memory_get_usage(\true) / 1024) / 1024, 2) . " MB");
+		$sender->sendMessage(TextFormat::GOLD . "Memory: " . TextFormat::WHITE . round((memory_get_usage() / 1024) / 1024, 2) . TextFormat::YELLOW . "/" . TextFormat::WHITE . round((memory_get_usage(true) / 1024) / 1024, 2) . " MB");
 
-		return \true;
+		return true;
 	}
 }

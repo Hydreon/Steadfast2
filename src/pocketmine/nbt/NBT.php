@@ -82,9 +82,9 @@ class NBT{
 	 */
 	public static function putItemHelper(Item $item, $slot = null){
 		$tag = new Compound(null, [
-		"id" => new Short("id", $item->getId()),
-		"Count" => new Byte("Count", $item->getCount()),
-		"Damage" => new Short("Damage", $item->getDamage())
+			"id" => new Short("id", $item->getId()),
+			"Count" => new Byte("Count", $item->getCount()),
+			"Damage" => new Short("Damage", $item->getDamage())
 		]);
 
 		if($slot !== null){

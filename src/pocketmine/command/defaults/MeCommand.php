@@ -38,13 +38,13 @@ class MeCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) === 0){
+		if(count($args) === 0){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \false;
+			return false;
 		}
 
 		$message = "* ";
@@ -54,8 +54,8 @@ class MeCommand extends VanillaCommand{
 			$message .= $sender->getName();
 		}
 
-		$sender->getServer()->broadcastMessage($message . " " . \implode(" ", $args));
+		$sender->getServer()->broadcastMessage($message . " " . implode(" ", $args));
 
-		return \true;
+		return true;
 	}
 }

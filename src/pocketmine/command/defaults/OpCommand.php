@@ -39,24 +39,24 @@ class OpCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) === 0){
+		if(count($args) === 0){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \false;
+			return false;
 		}
 
-		$name = \array_shift($args);
+		$name = array_shift($args);
 
 		$player = $sender->getServer()->getOfflinePlayer($name);
 		Command::broadcastCommandMessage($sender, "Opped " . $player->getName());
 		if($player instanceof Player){
 			$player->sendMessage("You are now op!");
 		}
-		$player->setOp(\true);
+		$player->setOp(true);
 
-		return \true;
+		return true;
 	}
 }

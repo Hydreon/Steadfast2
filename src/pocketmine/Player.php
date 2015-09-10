@@ -155,6 +155,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	public $spawned = false;
 	public $loggedIn = false;
+	public $dead = false;
 	public $gamemode;
 	public $lastBreak;
 
@@ -526,8 +527,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->motionToSend = new SetEntityMotionPacket();
 		$this->moveToSend = new MoveEntityPacket();
-		$this->motionToSend->setChannel(Network::CHANNEL_MOVEMENT);
-		$this->moveToSend->setChannel(Network::CHANNEL_MOVEMENT);
 
 		$this->uuid = null;
 		$this->rawUUID = null;
@@ -667,15 +666,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->chunkZ = $z;
 		$pk->order = $ordering;
 		$pk->data = $payload;
-		$pk->setChannel(Network::CHANNEL_WORLD_CHUNKS);
 		$pk->encode();
 
 		$bt = new BatchPacket();
 
 		$str = $pk->buffer;
 
-		$bt->setChannel(Network::CHANNEL_WORLD_CHUNKS);
-		$bt->payload = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 6);
+		$bt->payload = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
 		$bt->encode();
 		$bt->isEncoded = true;
 
@@ -685,53 +682,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			foreach($this->level->getChunkEntities($x, $z) as $entity){
 				if($entity !== $this and !$entity->closed and !$entity->dead){
 					$entity->spawnTo($this);
-				}
-			}
-		}
-	}
-
-	public function sendChunks($data = array()){
-		if($this->connected === \false){
-			return;
-		}
-		$bt = new BatchPacket();
-		$str = "";
-
-		foreach($data as $set) {
-			$x = $set["x"];
-			$z = $set["z"];
-			$payload = $set["payload"];
-
-			$this->usedChunks[Level::chunkHash($x, $z)] = true;
-			$this->chunkLoadCount++;
-
-			$pk = new FullChunkDataPacket();
-			$pk->chunkX = $x;
-			$pk->chunkZ = $z;
-			$pk->data = $payload;
-			$pk->setChannel(Network::CHANNEL_WORLD_CHUNKS);
-			$pk->encode();
-
-			$str .= $pk->buffer;
-		}
-
-		$bt->setChannel($this->spawned ? Network::CHANNEL_WORLD_CHUNKS : Network::CHANNEL_PRIORITY);
-		$bt->payload = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 6);
-		$bt->encode();
-		$bt->isEncoded = true;
-
-		$this->dataPacket($bt);
-
-		foreach($data as $set) {
-			$x = $set["x"];
-			$z = $set["z"];
-			$payload = $set["payload"];
-
-			if($this->spawned) {
-				foreach($this->level->getChunkEntities($x, $z) as $entity) {
-					if($entity !== $this and !$entity->closed and !$entity->dead) {
-						$entity->spawnTo($this);
-					}
 				}
 			}
 		}
@@ -1763,13 +1713,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				/** @var Byte $achievement */
 				foreach($nbt->Achievements as $achievement){
-					$this->achievements[$achievement->getName()] = $achievement->getValue() > 0 ? \true : \false;
+					$this->achievements[$achievement->getName()] = $achievement->getValue() > 0 ? true : false;
 				}
 
 				$nbt->lastPlayed = new Long("lastPlayed", floor(microtime(true) * 1000));
-				$this->server->saveOfflinePlayerData($this->username, $nbt);
-				parent::__construct($this->level->getChunk($nbt["Pos"][0] >> 4, $nbt["Pos"][2] >> 4, \true), $nbt);
-				$this->loggedIn = \true;
+				parent::__construct($this->level->getChunk($nbt["Pos"][0] >> 4, $nbt["Pos"][2] >> 4, true), $nbt);
+				$this->loggedIn = true;
 				$this->server->addOnlinePlayer($this);
 
 				$this->server->getPluginManager()->callEvent($ev = new PlayerLoginEvent($this, "Plugin reason"));
@@ -1802,8 +1751,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				$spawnPosition = $this->getSpawn();
 
-				$this->dead = \false;
-
 				$pk = new StartGamePacket();
 				$pk->seed = -1;
 				$pk->x = $this->x;
@@ -1814,8 +1761,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->spawnZ = (int) $spawnPosition->z;
 				$pk->generator = 1; //0 old, 1 infinite, 2 flat
 				$pk->gamemode = $this->gamemode & 0x01;
-				$pk->eid = $this->getId(); //Always use EntityID as zero for the actual player
-				$this->dataPacket($pk->setChannel(Network::CHANNEL_PRIORITY));
+				$pk->eid = 0; //Always use EntityID as zero for the actual player
+				$this->dataPacket($pk);
 
 				$pk = new SetTimePacket();
 				$pk->time = $this->level->getTime();
@@ -2302,6 +2249,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$tile->spawnTo($this);
 				}
 				break;
+
+			case ProtocolInfo::PLAYER_ARMOR_EQUIPMENT_PACKET:
+				break;
+
 			case ProtocolInfo::INTERACT_PACKET:
 				if($this->spawned === \false or $this->dead === \true or $this->blocked){
 					break;
@@ -2545,10 +2496,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					foreach(explode("\n", $packet->message) as $message){
 						if(trim($message) != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){
 							$ev = new PlayerCommandPreprocessEvent($this, $message);
+
 							if(mb_strlen($ev->getMessage(), "UTF-8") > 320){
 								$ev->setCancelled();
 							}
 							$this->server->getPluginManager()->callEvent($ev);
+
 							if($ev->isCancelled()){
 								break;
 							}
@@ -2559,7 +2512,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							}else{
 								$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $ev->getMessage()));
 								if(!$ev->isCancelled()){
-									$this->server->broadcastMessage(sprintf($ev->getFormat(), $ev->getPlayer()->getDisplayName(), $ev->getMessage()), $ev->getRecipients());
+									$this->server->broadcastMessage($this->getServer()->getLanguage()->translateString($ev->getFormat(), [$ev->getPlayer()->getDisplayName(), $ev->getMessage()]), $ev->getRecipients());
 								}
 							}
 						}

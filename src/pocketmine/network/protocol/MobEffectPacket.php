@@ -44,7 +44,7 @@ class MobEffectPacket extends DataPacket{
 	public $eventId;
 	public $effectId;
 	public $amplifier;
-	public $particles = \true;
+	public $particles = true;
 	public $duration;
 
 	public function pid(){

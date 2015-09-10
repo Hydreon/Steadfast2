@@ -31,7 +31,7 @@ class PlayerDeathEvent extends EntityDeathEvent{
 
 	/** @var TextContainer|string */
 	private $deathMessage;
-	private $keepInventory = \false;
+	private $keepInventory = false;
 
 	/**
 	 * @param Player $entity

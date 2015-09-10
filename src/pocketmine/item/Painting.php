@@ -32,11 +32,11 @@ class Painting extends Item{
 	}
 
 	public function canBeActivated(){
-		return \true;
+		return true;
 	}
 
 	public function onActivate(Level $level, Player $player, Block $block, Block $target, $face, $fx, $fy, $fz){
-		if($target->isTransparent() === \false and $face > 1 and $block->isSolid() === \false){
+		if($target->isTransparent() === false and $face > 1 and $block->isSolid() === false){
 			$faces = [
 				2 => 1,
 				3 => 3,
@@ -73,7 +73,7 @@ class Painting extends Item{
 				["Pigscene", 4, 4],
 				["Flaming Skull", 4, 4],
 			];
-			$motive = $motives[\mt_rand(0, \count($motives) - 1)];
+			$motive = $motives[mt_rand(0, count($motives) - 1)];
 			$data = [
 				"x" => $target->x,
 				"y" => $target->y,
@@ -88,10 +88,10 @@ class Painting extends Item{
 				$player->removeItem(Item::get($this->getId(), $this->getDamage(), 1));
 			}*/
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 }

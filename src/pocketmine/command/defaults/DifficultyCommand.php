@@ -41,13 +41,13 @@ class DifficultyCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) !== 1){
+		if(count($args) !== 1){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \false;
+			return false;
 		}
 
 		$difficulty = Server::getDifficultyFromString($args[0]);
@@ -61,13 +61,13 @@ class DifficultyCommand extends VanillaCommand{
 
 			$pk = new SetDifficultyPacket();
 			$pk->difficulty = $sender->getServer()->getDifficulty();
-			Server::broadcastPacket($sender->getServer()->getOnlinePlayers(), $pk->setChannel(Network::CHANNEL_WORLD_EVENTS));
+			Server::broadcastPacket($sender->getServer()->getOnlinePlayers(), $pk);
 
 			$sender->sendMessage("Set difficulty to " . $difficulty);
 		}else{
 			$sender->sendMessage("Unknown difficulty");
 		}
 
-		return \true;
+		return true;
 	}
 }

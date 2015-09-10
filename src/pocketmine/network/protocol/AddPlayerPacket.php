@@ -53,8 +53,8 @@ class AddPlayerPacket extends DataPacket{
 	public $meta;
 	public $metadata;
 
-	public $slim = \false;
-	public $skin = \null;
+	public $slim = false;
+	public $skin = null;
 
 	public function pid(){
 		return Info::ADD_PLAYER_PACKET;

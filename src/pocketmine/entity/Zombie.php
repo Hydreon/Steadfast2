@@ -52,7 +52,7 @@ class Zombie extends Monster{
 		$pk->yaw = $this->yaw;
 		$pk->pitch = $this->pitch;
 		$pk->metadata = $this->dataProperties;
-		$player->dataPacket($pk->setChannel(Network::CHANNEL_ENTITY_SPAWNING));
+		$player->dataPacket($pk);
 
 		$player->addEntityMotion($this->getId(), $this->motionX, $this->motionY, $this->motionZ);
 
@@ -64,8 +64,8 @@ class Zombie extends Monster{
 			ItemItem::get(ItemItem::FEATHER, 0, 1)
 		];
 		if($this->lastDamageCause instanceof EntityDamageByEntityEvent and $this->lastDamageCause->getEntity() instanceof Player){
-			if(\mt_rand(0, 199) < 5){
-				switch(\mt_rand(0, 2)){
+			if(mt_rand(0, 199) < 5){
+				switch(mt_rand(0, 2)){
 					case 0:
 						$drops[] = ItemItem::get(ItemItem::IRON_INGOT, 0, 1);
 						break;

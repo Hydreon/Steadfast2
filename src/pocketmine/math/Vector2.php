@@ -75,11 +75,11 @@ class Vector2{
 	}
 
 	public function round(){
-		return new Vector2(\round($this->x), \round($this->y));
+		return new Vector2(round($this->x), round($this->y));
 	}
 
 	public function abs(){
-		return new Vector2(\abs($this->x), \abs($this->y));
+		return new Vector2(abs($this->x), abs($this->y));
 	}
 
 	public function multiply($number){
@@ -92,9 +92,9 @@ class Vector2{
 
 	public function distance($x, $y = 0){
 		if($x instanceof Vector2){
-			return \sqrt($this->distanceSquared($x->x, $x->y));
+			return sqrt($this->distanceSquared($x->x, $x->y));
 		}else{
-			return \sqrt($this->distanceSquared($x, $y));
+			return sqrt($this->distanceSquared($x, $y));
 		}
 	}
 
@@ -102,12 +102,12 @@ class Vector2{
 		if($x instanceof Vector2){
 			return $this->distanceSquared($x->x, $x->y);
 		}else{
-			return \pow($this->x - $x, 2) + \pow($this->y - $y, 2);
+			return pow($this->x - $x, 2) + pow($this->y - $y, 2);
 		}
 	}
 
 	public function length(){
-		return \sqrt($this->lengthSquared());
+		return sqrt($this->lengthSquared());
 	}
 
 	public function lengthSquared(){

@@ -83,24 +83,6 @@ class Network {
 
 	public static $BATCH_THRESHOLD = 512;
 
-	const CHANNEL_NONE = 0;
-	/** @deprecated */
-	const CHANNEL_PRIORITY = 1; //Priority channel, only to be used when it matters
-	/** @deprecated */
-	const CHANNEL_WORLD_CHUNKS = 2; //Chunk sending
-	/** @deprecated */
-	const CHANNEL_MOVEMENT = 3; //Movement sending
-	/** @deprecated */
-	const CHANNEL_BLOCKS = 4; //Block updates or explosions
-	/** @deprecated */
-	const CHANNEL_WORLD_EVENTS = 5; //Entity, level or tile entity events
-	/** @deprecated */
-	const CHANNEL_ENTITY_SPAWNING = 6; //Entity spawn/despawn channel
-	/** @deprecated */
-	const CHANNEL_TEXT = 7; //Chat and other text stuff
-	/** @deprecated */
-	const CHANNEL_END = 31;
-
 	/** @var \SplFixedArray */
 	private $packetPool;
 
@@ -229,11 +211,11 @@ class Network {
 
 	public function processBatch(BatchPacket $packet, Player $p){
 		$str = \zlib_decode($packet->payload, 1024 * 1024 * 64); //Max 64MB
-		$len = \strlen($str);
+		$len = strlen($str);
 		$offset = 0;
 		try{
 			while($offset < $len){
-				if(($pk = $this->getPacket(\ord($str{$offset++}))) !== \null){
+				if(($pk = $this->getPacket(ord($str{$offset++}))) !== null){
 					if($pk->pid() === Info::BATCH_PACKET){
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
 					}
@@ -250,7 +232,7 @@ class Network {
 			if(\pocketmine\DEBUG > 1){
 				$logger = $this->server->getLogger();
 				if($logger instanceof MainLogger){
-					$logger->debug("BatchPacket " . " 0x" . \bin2hex($packet->payload));
+					$logger->debug("BatchPacket " . " 0x" . bin2hex($packet->payload));
 					$logger->logException($e);
 				}
 			}
@@ -265,10 +247,10 @@ class Network {
 	public function getPacket($id){
 		/** @var DataPacket $class */
 		$class = $this->packetPool[$id];
-		if($class !== \null){
+		if($class !== null){
 			return clone $class;
 		}
-		return \null;
+		return null;
 	}
 
 

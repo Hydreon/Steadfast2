@@ -26,7 +26,7 @@ use pocketmine\entity\Entity;
 use pocketmine\event\Cancellable;
 
 class EntityDamageEvent extends EntityEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	const MODIFIER_BASE = 0;
 	const MODIFIER_ARMOR = 1;
@@ -67,7 +67,7 @@ class EntityDamageEvent extends EntityEvent implements Cancellable{
 	public function __construct(Entity $entity, $cause, $damage){
 		$this->entity = $entity;
 		$this->cause = $cause;
-		if(\is_array($damage)){
+		if(is_array($damage)){
 			$this->modifiers = $damage;
 		}else{
 			$this->modifiers = [

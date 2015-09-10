@@ -33,7 +33,7 @@ abstract class Thread extends \Thread{
 			return parent::start($options);
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**

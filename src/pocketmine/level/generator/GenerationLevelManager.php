@@ -73,18 +73,18 @@ class GenerationLevelManager extends GenerationManager{
 	}
 
 	public function process(){
-		if(\count($this->requestQueue) > 0){
+		if(count($this->requestQueue) > 0){
 			$count = 0;
 			foreach($this->requestQueue as $levelID => $chunks){
 				if($count >= $this->maxCount){
 					break;
 				}
 
-				if(\count($chunks) === 0){
+				if(count($chunks) === 0){
 					unset($this->requestQueue[$levelID]);
 				}else{
-					$key = \key($chunks);
-					if(\PHP_INT_SIZE === 8){ $chunkX = ($key >> 32) << 32 >> 32;  $chunkZ = ($key & 0xFFFFFFFF) << 32 >> 32;}else{list( $chunkX,  $chunkZ) = \explode(":", $key);  $chunkX = (int)  $chunkX;  $chunkZ = (int)  $chunkZ;};
+					$key = key($chunks);
+					if(PHP_INT_SIZE === 8){ $chunkX = ($key >> 32) << 32 >> 32;  $chunkZ = ($key & 0xFFFFFFFF) << 32 >> 32;}else{list( $chunkX,  $chunkZ) = explode(":", $key);  $chunkX = (int)  $chunkX;  $chunkZ = (int)  $chunkZ;};
 					unset($this->requestQueue[$levelID][$key]);
 					$this->generateChunk($levelID, $chunkX, $chunkZ);
 					++$count;
@@ -111,11 +111,11 @@ class GenerationLevelManager extends GenerationManager{
 		if(!isset($this->requestQueue[$levelID])){
 			$this->requestQueue[$levelID] = [];
 		}
-		if(!isset($this->requestQueue[$levelID][$index = \PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)])){
+		if(!isset($this->requestQueue[$levelID][$index = PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)])){
 			$this->requestQueue[$levelID][$index] = 1;
 		}else{
 			$this->requestQueue[$levelID][$index]++;
-			\arsort($this->requestQueue[$levelID]);
+			arsort($this->requestQueue[$levelID]);
 		}
 	}
 

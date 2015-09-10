@@ -669,7 +669,7 @@ class PluginManager{
 			try{
 				$registration->callEvent($event);
 			}catch(\Exception $e){
-				$this->server->getLogger()->critical("Could not pass event " . $event->getEventName() . " to " . $registration->getPlugin()->getDescription()->getFullName() . ": " . $e->getMessage() . " on " . \get_class($registration->getListener()));
+				$this->server->getLogger()->critical("Could not pass event " . $event->getEventName() . " to " . $registration->getPlugin()->getDescription()->getFullName() . ": " . $e->getMessage() . " on " . get_class($registration->getListener()));
 				$logger = $this->server->getLogger();
 				if($logger instanceof MainLogger){
 					$logger->logException($e);
@@ -716,7 +716,7 @@ class PluginManager{
 					$class = $parameters[0]->getClass()->getName();
 					$reflection = new \ReflectionClass($class);
 					if(strpos((string) $reflection->getDocComment(), "@deprecated") !== false and $this->server->getProperty("settings.deprecated-verbose", true)){
-						$this->server->getLogger()->warning('Plugin ' . $plugin->getName() . ' has registered a listener for ' . $class . ' on method ' . \get_class($listener) . '->' . $method->getName() . '(), but the event is Deprecated.');
+						$this->server->getLogger()->warning('Plugin ' . $plugin->getName() . ' has registered a listener for ' . $class . ' on method ' . get_class($listener) . '->' . $method->getName() . '(), but the event is Deprecated.');
 					}
 					$this->registerEvent($class, $listener, $priority, new MethodEventExecutor($method->getName()), $plugin, $ignoreCancelled);
 				}

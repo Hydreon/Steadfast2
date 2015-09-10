@@ -27,12 +27,12 @@ use pocketmine\utils\Random;
 
 class Tree{
 	public $overridable = [
-		0 => \true,
-		2 => \true,
-		3 => \true,
-		6 => \true,
-		17 => \true,
-		18 => \true,
+		0 => true,
+		2 => true,
+		3 => true,
+		6 => true,
+		17 => true,
+		18 => true,
 	];
 
 	public static function growTree(ChunkManager $level, $x, $y, $z, Random $random, $type = 0){

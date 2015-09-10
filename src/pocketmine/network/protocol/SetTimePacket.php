@@ -39,7 +39,7 @@ class SetTimePacket extends DataPacket{
 	public static $next = 0;
 
 	public $time;
-	public $started = \true;
+	public $started = true;
 
 	public function pid(){
 		return Info::SET_TIME_PACKET;

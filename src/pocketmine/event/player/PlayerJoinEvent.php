@@ -27,7 +27,7 @@ use pocketmine\Player;
  * Called when a player joins the server, after sending all the spawn packets
  */
 class PlayerJoinEvent extends PlayerEvent{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	/** @var string|TextContainer */
 	protected $joinMessage;

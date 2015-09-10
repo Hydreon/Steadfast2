@@ -28,45 +28,45 @@ use pocketmine\utils\Utils;
 
 abstract class UPnP{
 	public static function PortForward($port){
-		if(Utils::$online === \false){
-			return \false;
+		if(Utils::$online === false){
+			return false;
 		}
-		if(Utils::getOS() != "win" or !\class_exists("COM")){
-			return \false;
+		if(Utils::getOS() != "win" or !class_exists("COM")){
+			return false;
 		}
 		$port = (int) $port;
-		$myLocalIP = \gethostbyname(\trim(`hostname`));
+		$myLocalIP = gethostbyname(trim(`hostname`));
 		try{
 			$com = new \COM("HNetCfg.NATUPnP");
-			if($com === \false or !\is_object($com->StaticPortMappingCollection)){
-				return \false;
+			if($com === false or !is_object($com->StaticPortMappingCollection)){
+				return false;
 			}
-			$com->StaticPortMappingCollection->Add($port, "UDP", $port, $myLocalIP, \true, "PocketMine-MP");
+			$com->StaticPortMappingCollection->Add($port, "UDP", $port, $myLocalIP, true, "PocketMine-MP");
 		}catch(\Exception $e){
-			return \false;
+			return false;
 		}
 
-		return \true;
+		return true;
 	}
 
 	public static function RemovePortForward($port){
-		if(Utils::$online === \false){
-			return \false;
+		if(Utils::$online === false){
+			return false;
 		}
-		if(Utils::getOS() != "win" or !\class_exists("COM")){
-			return \false;
+		if(Utils::getOS() != "win" or !class_exists("COM")){
+			return false;
 		}
 		$port = (int) $port;
 		try{
-			$com = new \COM("HNetCfg.NATUPnP") or \false;
-			if($com === \false or !\is_object($com->StaticPortMappingCollection)){
-				return \false;
+			$com = new \COM("HNetCfg.NATUPnP") or false;
+			if($com === false or !is_object($com->StaticPortMappingCollection)){
+				return false;
 			}
 			$com->StaticPortMappingCollection->Remove($port, "UDP");
 		}catch(\Exception $e){
-			return \false;
+			return false;
 		}
 
-		return \true;
+		return true;
 	}
 }

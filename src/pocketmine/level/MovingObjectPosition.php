@@ -43,7 +43,7 @@ class MovingObjectPosition{
 	public $hitVector;
 
 	/** @var Entity */
-	public $entityHit = \null;
+	public $entityHit = null;
 
 	protected function __construct(){
 

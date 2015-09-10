@@ -58,7 +58,7 @@ class AsyncPool{
 
 		$this->tasks[$task->getTaskId()] = $task;
 
-		$selectedWorker = \mt_rand(0, $this->size - 1);
+		$selectedWorker = mt_rand(0, $this->size - 1);
 		$selectedTasks = $this->workerUsage[$selectedWorker];
 		for($i = 0; $i < $this->size; ++$i){
 			if($this->workerUsage[$i] < $selectedTasks){

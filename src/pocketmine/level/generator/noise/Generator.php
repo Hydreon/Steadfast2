@@ -61,7 +61,7 @@ abstract class Generator{
 
 	abstract public function getNoise3D($x, $y, $z);
 
-	public function noise2D($x, $z, $normalized = \false){
+	public function noise2D($x, $z, $normalized = false){
 		$result = 0;
 		$amp = 1;
 		$freq = 1;
@@ -73,14 +73,14 @@ abstract class Generator{
 			$freq *= $this->frequency;
 			$amp *= $this->amplitude;
 		}
-		if($normalized === \true){
+		if($normalized === true){
 			$result /= $max;
 		}
 
 		return $result;
 	}
 
-	public function noise3D($x, $y, $z, $normalized = \false){
+	public function noise3D($x, $y, $z, $normalized = false){
 		$result = 0;
 		$amp = 1;
 		$freq = 1;
@@ -92,7 +92,7 @@ abstract class Generator{
 			$freq *= $this->frequency;
 			$amp *= $this->amplitude;
 		}
-		if($normalized === \true){
+		if($normalized === true){
 			$result /= $max;
 		}
 

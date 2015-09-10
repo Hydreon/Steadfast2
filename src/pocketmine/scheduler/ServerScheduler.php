@@ -181,9 +181,9 @@ class ServerScheduler{
 
 		if($task instanceof CallbackTask){
 			$callable = $task->getCallable();
-			if(\is_array($callable)){
-				if(\is_object($callable[0])){
-					$taskName = "Callback#" . \get_class($callable[0]) . "::" . $callable[1];
+			if(is_array($callable)){
+				if(is_object($callable[0])){
+					$taskName = "Callback#" . get_class($callable[0]) . "::" . $callable[1];
 				}else{
 					$taskName = "Callback#" . $callable[0] . "::" . $callable[1];
 				}
@@ -191,7 +191,7 @@ class ServerScheduler{
 				$taskName = "Callback#" . $callable;
 			}
 		}else{
-			$taskName = \get_class($task);
+			$taskName = get_class($task);
 		}
 
 		return $this->handle(new TaskHandler($taskName, $task, $this->nextId(), $delay, $period));

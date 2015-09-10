@@ -30,17 +30,17 @@ abstract class Generator{
 	private static $list = [];
 
 	public static function addGenerator($object, $name){
-		if(\is_subclass_of($object, Generator::class) and !isset(Generator::$list[$name = \strtolower($name)])){
+		if(is_subclass_of($object, Generator::class) and !isset(Generator::$list[$name = strtolower($name)])){
 			Generator::$list[$name] = $object;
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 	public static function getGenerator($name){
-		if(isset(Generator::$list[$name = \strtolower($name)])){
+		if(isset(Generator::$list[$name = strtolower($name)])){
 			return Generator::$list[$name];
 		}
 

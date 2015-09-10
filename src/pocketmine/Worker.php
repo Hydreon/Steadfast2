@@ -33,7 +33,7 @@ abstract class Worker extends \Worker{
 			return parent::start($options);
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**

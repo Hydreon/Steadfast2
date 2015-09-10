@@ -40,31 +40,31 @@ class SetWorldSpawnCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) === 0){
+		if(count($args) === 0){
 			if($sender instanceof Player){
 				$level = $sender->getLevel();
 				$pos = (new Vector3($sender->x, $sender->y, $sender->z))->round();
 			}else{
 				$sender->sendMessage(TextFormat::RED . "You can only perform this command as a player");
 
-				return \true;
+				return true;
 			}
-		}elseif(\count($args) === 3){
+		}elseif(count($args) === 3){
 			$level = $sender->getServer()->getDefaultLevel();
 			$pos = new Vector3($this->getInteger($sender, $args[0]), $this->getInteger($sender, $args[1]), $this->getInteger($sender, $args[2]));
 		}else{
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \true;
+			return true;
 		}
 
 		$level->setSpawnLocation($pos);
 
 		Command::broadcastCommandMessage($sender, "Set world " . $level->getName() . "'s spawnpoint to " . $pos->x . ", " . $pos->y . ", " . $pos->z);
 
-		return \true;
+		return true;
 	}
 }

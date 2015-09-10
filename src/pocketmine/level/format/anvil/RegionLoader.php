@@ -40,44 +40,44 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		$this->z = $regionZ;
 		$this->levelProvider = $level;
 		$this->filePath = $this->levelProvider->getPath() . "region/r.$regionX.$regionZ.mca";
-		$exists = \file_exists($this->filePath);
-		\touch($this->filePath);
-		$this->filePointer = \fopen($this->filePath, "r+b");
-		\stream_set_read_buffer($this->filePointer, 1024 * 16); //16KB
-		\stream_set_write_buffer($this->filePointer, 1024 * 16); //16KB
+		$exists = file_exists($this->filePath);
+		touch($this->filePath);
+		$this->filePointer = fopen($this->filePath, "r+b");
+		stream_set_read_buffer($this->filePointer, 1024 * 16); //16KB
+		stream_set_write_buffer($this->filePointer, 1024 * 16); //16KB
 		if(!$exists){
 			$this->createBlank();
 		}else{
 			$this->loadLocationTable();
 		}
 
-		$this->lastUsed = \time();
+		$this->lastUsed = time();
 	}
 
-	public function readChunk($x, $z, $generate = \true, $forward = \false){
+	public function readChunk($x, $z, $generate = true, $forward = false){
 		$index = self::getChunkOffset($x, $z);
 		if($index < 0 or $index >= 4096){
-			return \null;
+			return null;
 		}
 
-		$this->lastUsed = \time();
+		$this->lastUsed = time();
 
 		if(!$this->isChunkGenerated($index)){
-			if($generate === \true){
+			if($generate === true){
 				//Allocate space
 				$this->locationTable[$index][0] = ++$this->lastSector;
 				$this->locationTable[$index][1] = 1;
-				\fseek($this->filePointer, $this->locationTable[$index][0] << 12);
-				\fwrite($this->filePointer, \str_pad(\pack("N", -1) . \chr(self::COMPRESSION_ZLIB), 4096, "\x00", STR_PAD_RIGHT));
+				fseek($this->filePointer, $this->locationTable[$index][0] << 12);
+				fwrite($this->filePointer, str_pad(pack("N", -1) . chr(self::COMPRESSION_ZLIB), 4096, "\x00", STR_PAD_RIGHT));
 				$this->writeLocationIndex($index);
 			}else{
-				return \null;
+				return null;
 			}
 		}
 
-		\fseek($this->filePointer, $this->locationTable[$index][0] << 12);
-		$length = (\PHP_INT_SIZE === 8 ? \unpack("N", \fread($this->filePointer, 4))[1] << 32 >> 32 : \unpack("N", \fread($this->filePointer, 4))[1]);
-		$compression = \ord(\fgetc($this->filePointer));
+		fseek($this->filePointer, $this->locationTable[$index][0] << 12);
+		$length = (PHP_INT_SIZE === 8 ? unpack("N", fread($this->filePointer, 4))[1] << 32 >> 32 : unpack("N", fread($this->filePointer, 4))[1]);
+		$compression = ord(fgetc($this->filePointer));
 
 		if($length <= 0 or $length >= self::MAX_SECTOR_LENGTH){ //Not yet generated / corrupted
 			if($length >= self::MAX_SECTOR_LENGTH){
@@ -86,9 +86,9 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 				MainLogger::getLogger()->error("Corrupted chunk header detected");
 			}
 			$this->generateChunk($x, $z);
-			\fseek($this->filePointer, $this->locationTable[$index][0] << 12);
-			$length = (\PHP_INT_SIZE === 8 ? \unpack("N", \fread($this->filePointer, 4))[1] << 32 >> 32 : \unpack("N", \fread($this->filePointer, 4))[1]);
-			$compression = \ord(\fgetc($this->filePointer));
+			fseek($this->filePointer, $this->locationTable[$index][0] << 12);
+			$length = (PHP_INT_SIZE === 8 ? unpack("N", fread($this->filePointer, 4))[1] << 32 >> 32 : unpack("N", fread($this->filePointer, 4))[1]);
+			$compression = ord(fgetc($this->filePointer));
 		}
 
 		if($length > ($this->locationTable[$index][1] << 12)){ //Invalid chunk, bigger than defined number of sectors
@@ -98,19 +98,19 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		}elseif($compression !== self::COMPRESSION_ZLIB and $compression !== self::COMPRESSION_GZIP){
 			MainLogger::getLogger()->error("Invalid compression type");
 
-			return \null;
+			return null;
 		}
 
-		$chunk = Chunk::fromBinary(\fread($this->filePointer, $length - 1), $this->levelProvider);
+		$chunk = Chunk::fromBinary(fread($this->filePointer, $length - 1), $this->levelProvider);
 		if($chunk instanceof Chunk){
 			return $chunk;
-		}elseif($forward === \false){
+		}elseif($forward === false){
 			MainLogger::getLogger()->error("Corrupted chunk detected");
 			$this->generateChunk($x, $z);
 
-			return $this->readChunk($x, $z, $generate, \true);
+			return $this->readChunk($x, $z, $generate, true);
 		}else{
-			return \null;
+			return null;
 		}
 	}
 
@@ -123,9 +123,9 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		$nbt->TerrainPopulated = new Byte("TerrainPopulated", 0);
 		$nbt->V = new Byte("V", self::VERSION);
 		$nbt->InhabitedTime = new Long("InhabitedTime", 0);
-		$nbt->Biomes = new ByteArray("Biomes", \str_repeat(\chr(-1), 256));
-		$nbt->BiomeColors = new IntArray("BiomeColors", \array_fill(0, 156, (\PHP_INT_SIZE === 8 ? \unpack("N", "\x00\x85\xb2\x4a")[1] << 32 >> 32 : \unpack("N", "\x00\x85\xb2\x4a")[1])));
-		$nbt->HeightMap = new IntArray("HeightMap", \array_fill(0, 256, 127));
+		$nbt->Biomes = new ByteArray("Biomes", str_repeat(chr(-1), 256));
+		$nbt->BiomeColors = new IntArray("BiomeColors", array_fill(0, 156, (PHP_INT_SIZE === 8 ? unpack("N", "\x00\x85\xb2\x4a")[1] << 32 >> 32 : unpack("N", "\x00\x85\xb2\x4a")[1])));
+		$nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, 127));
 		$nbt->Sections = new Enum("Sections", []);
 		$nbt->Sections->setTagType(NBT::TAG_Compound);
 		$nbt->Entities = new Enum("Entities", []);

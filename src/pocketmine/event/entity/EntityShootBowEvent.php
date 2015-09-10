@@ -28,7 +28,7 @@ use pocketmine\event\Cancellable;
 use pocketmine\item\Item;
 
 class EntityShootBowEvent extends EntityEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	/** @var Item */
 	private $bow;
@@ -76,7 +76,7 @@ class EntityShootBowEvent extends EntityEvent implements Cancellable{
 	 */
 	public function setProjectile(Entity $projectile){
 		if($projectile !== $this->projectile){
-			if(\count($this->projectile->getViewers()) === 0){
+			if(count($this->projectile->getViewers()) === 0){
 				$this->projectile->kill();
 				$this->projectile->close();
 			}

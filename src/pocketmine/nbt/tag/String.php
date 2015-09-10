@@ -23,21 +23,7 @@ namespace pocketmine\nbt\tag;
 
 use pocketmine\nbt\NBT;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#include <rules/NBT.h>
 
 class String extends NamedTag{
 
@@ -46,11 +32,11 @@ class String extends NamedTag{
 	}
 
 	public function read(NBT $nbt){
-		$this->value = $nbt->get($nbt->endianness === 1 ? \unpack("n", $nbt->get(2))[1] : \unpack("v", $nbt->get(2))[1]);
+		$this->value = $nbt->get($nbt->getShort());
 	}
 
 	public function write(NBT $nbt){
-		$nbt->buffer .= $nbt->endianness === 1 ? \pack("n", \strlen($this->value)) : \pack("v", \strlen($this->value));
-		$nbt->buffer .= $this->value;
+		$nbt->putShort(strlen($this->value));
+		$nbt->put($this->value);
 	}
 }

@@ -106,7 +106,7 @@ class GenerationManager{
 	/** @var array */
 	protected $needsChunk = [];
 
-	protected $shutdown = \false;
+	protected $shutdown = false;
 
 	/**
 	 * @param GenerationThread $thread
@@ -117,17 +117,17 @@ class GenerationManager{
 		$this->thread = $thread;
 		$this->logger = $logger;
 		$this->loader = $loader;
-		$chunkX = $chunkZ = \null;
+		$chunkX = $chunkZ = null;
 
-		while($this->shutdown !== \true){
+		while($this->shutdown !== true){
 			try{
-				if(\count($this->requestQueue) > 0){
+				if(count($this->requestQueue) > 0){
 					foreach($this->requestQueue as $levelID => $chunks){
-						if(\count($chunks) === 0){
+						if(count($chunks) === 0){
 							unset($this->requestQueue[$levelID]);
 						}else{
-							$key = \key($chunks);
-							if(\PHP_INT_SIZE === 8){ $chunkX = ($key >> 32) << 32 >> 32;  $chunkZ = ($key & 0xFFFFFFFF) << 32 >> 32;}else{list( $chunkX,  $chunkZ) = \explode(":", $key);  $chunkX = (int)  $chunkX;  $chunkZ = (int)  $chunkZ;};
+							$key = key($chunks);
+							if(PHP_INT_SIZE === 8){ $chunkX = ($key >> 32) << 32 >> 32;  $chunkZ = ($key & 0xFFFFFFFF) << 32 >> 32;}else{list( $chunkX,  $chunkZ) = explode(":", $key);  $chunkX = (int)  $chunkX;  $chunkZ = (int)  $chunkZ;};
 							unset($this->requestQueue[$levelID][$key]);
 							$this->generateChunk($levelID, $chunkX, $chunkZ);
 						}
@@ -175,16 +175,16 @@ class GenerationManager{
 		if(!isset($this->requestQueue[$levelID])){
 			$this->requestQueue[$levelID] = [];
 		}
-		if(!isset($this->requestQueue[$levelID][$index = \PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)])){
+		if(!isset($this->requestQueue[$levelID][$index = PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)])){
 			$this->requestQueue[$levelID][$index] = 1;
 		}else{
 			$this->requestQueue[$levelID][$index]++;
-			\arsort($this->requestQueue[$levelID]);
+			arsort($this->requestQueue[$levelID]);
 		}
 	}
 
 	protected function receiveChunk($levelID, FullChunk $chunk){
-		if($this->needsChunk[$levelID] !== \null){
+		if($this->needsChunk[$levelID] !== null){
 			if($this->needsChunk[$levelID][0] === $chunk->getX() and $this->needsChunk[$levelID][1] === $chunk->getZ()){
 				$this->needsChunk[$levelID] = $chunk;
 			}
@@ -201,67 +201,67 @@ class GenerationManager{
 	 */
 	public function requestChunk($levelID, $chunkX, $chunkZ){
 		$this->needsChunk[$levelID] = [$chunkX, $chunkZ];
-		$binary = \chr(self::PACKET_REQUEST_CHUNK) . \pack("N", $levelID) . \pack("N", $chunkX) . \pack("N", $chunkZ);
+		$binary = chr(self::PACKET_REQUEST_CHUNK) . pack("N", $levelID) . pack("N", $chunkX) . pack("N", $chunkZ);
 		$this->thread->pushThreadToMainPacket($binary);
 
 		do{
 			$this->readPacket();
-		}while($this->shutdown !== \true and !($this->needsChunk[$levelID] instanceof FullChunk));
+		}while($this->shutdown !== true and !($this->needsChunk[$levelID] instanceof FullChunk));
 
 		$chunk = $this->needsChunk[$levelID];
-		$this->needsChunk[$levelID] = \null;
+		$this->needsChunk[$levelID] = null;
 		if($chunk instanceof FullChunk){
 			return $chunk;
 		}else{
-			return \null;
+			return null;
 		}
 	}
 
 	public function sendChunk($levelID, FullChunk $chunk){
-		$binary = \chr(self::PACKET_SEND_CHUNK) . \pack("N", $levelID) . \chr(\strlen($class = \get_class($chunk))) . $class . $chunk->toBinary();
+		$binary = chr(self::PACKET_SEND_CHUNK) . pack("N", $levelID) . chr(strlen($class = get_class($chunk))) . $class . $chunk->toBinary();
 		$this->thread->pushThreadToMainPacket($binary);
 	}
 
 	protected function readPacket(){
-		if(\strlen($packet = $this->thread->readMainToThreadPacket()) > 0){
-			$pid = \ord($packet{0});
+		if(strlen($packet = $this->thread->readMainToThreadPacket()) > 0){
+			$pid = ord($packet{0});
 			$offset = 1;
 			if($pid === self::PACKET_REQUEST_CHUNK){
-				$levelID = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+				$levelID = (PHP_INT_SIZE === 8 ? unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32 : unpack("N", substr($packet, $offset, 4))[1]);
 				$offset += 4;
-				$chunkX = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+				$chunkX = (PHP_INT_SIZE === 8 ? unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32 : unpack("N", substr($packet, $offset, 4))[1]);
 				$offset += 4;
-				$chunkZ = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+				$chunkZ = (PHP_INT_SIZE === 8 ? unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32 : unpack("N", substr($packet, $offset, 4))[1]);
 				$this->enqueueChunk($levelID, $chunkX, $chunkZ);
 			}elseif($pid === self::PACKET_SEND_CHUNK){
-				$levelID = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+				$levelID = (PHP_INT_SIZE === 8 ? unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32 : unpack("N", substr($packet, $offset, 4))[1]);
 				$offset += 4;
-				$len = \ord($packet{$offset++});
+				$len = ord($packet{$offset++});
 				/** @var FullChunk $class */
-				$class = \substr($packet, $offset, $len);
+				$class = substr($packet, $offset, $len);
 				$offset += $len;
-				$chunk = $class::fromBinary(\substr($packet, $offset));
+				$chunk = $class::fromBinary(substr($packet, $offset));
 				$this->receiveChunk($levelID, $chunk);
 			}elseif($pid === self::PACKET_OPEN_LEVEL){
-				$levelID = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+				$levelID = (PHP_INT_SIZE === 8 ? unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32 : unpack("N", substr($packet, $offset, 4))[1]);
 				$offset += 4;
-				$seed = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+				$seed = (PHP_INT_SIZE === 8 ? unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32 : unpack("N", substr($packet, $offset, 4))[1]);
 				$offset += 4;
-				$len = \unpack("n", \substr($packet, $offset, 2))[1];
+				$len = unpack("n", substr($packet, $offset, 2))[1];
 				$offset += 2;
-				$class = \substr($packet, $offset, $len);
+				$class = substr($packet, $offset, $len);
 				$offset += $len;
-				$options = \unserialize(\substr($packet, $offset));
+				$options = unserialize(substr($packet, $offset));
 				$this->openLevel($levelID, $seed, $class, $options);
 			}elseif($pid === self::PACKET_CLOSE_LEVEL){
-				$levelID = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+				$levelID = (PHP_INT_SIZE === 8 ? unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32 : unpack("N", substr($packet, $offset, 4))[1]);
 				$this->closeLevel($levelID);
 			}elseif($pid === self::PACKET_ADD_NAMESPACE){
-				$len = \unpack("n", \substr($packet, $offset, 2))[1];
+				$len = unpack("n", substr($packet, $offset, 2))[1];
 				$offset += 2;
-				$namespace = \substr($packet, $offset, $len);
+				$namespace = substr($packet, $offset, $len);
 				$offset += $len;
-				$path = \substr($packet, $offset);
+				$path = substr($packet, $offset);
 				$this->loader->addPath($path);
 			}elseif($pid === self::PACKET_SHUTDOWN){
 				foreach($this->levels as $level){
@@ -269,9 +269,9 @@ class GenerationManager{
 				}
 				$this->levels = [];
 
-				$this->shutdown = \true;
+				$this->shutdown = true;
 			}
-		}elseif(\count($this->thread->getInternalQueue()) === 0){
+		}elseif(count($this->thread->getInternalQueue()) === 0){
 			$this->thread->synchronized(function (){
 				$this->thread->wait(50000);
 			});

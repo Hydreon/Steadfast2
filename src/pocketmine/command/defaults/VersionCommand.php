@@ -40,31 +40,31 @@ class VersionCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) === 0){
+		if(count($args) === 0){
 			$output = "This server is running " . $sender->getServer()->getName() . " version " . $sender->getServer()->getPocketMineVersion() . " 「" . $sender->getServer()->getCodename() . "」 (Implementing API version " . $sender->getServer()->getApiVersion() . " for Minecraft: PE " . $sender->getServer()->getVersion() . " protocol version " . Info::CURRENT_PROTOCOL . ")";
-			if(\pocketmine\GIT_COMMIT !== \str_repeat("00", 20)){
+			if(\pocketmine\GIT_COMMIT !== str_repeat("00", 20)){
 				$output .= " [git " . \pocketmine\GIT_COMMIT . "]";
 			}
 			$sender->sendMessage($output);
 		}else{
-			$pluginName = \implode(" ", $args);
+			$pluginName = implode(" ", $args);
 			$exactPlugin = $sender->getServer()->getPluginManager()->getPlugin($pluginName);
 
 			if($exactPlugin instanceof Plugin){
 				$this->describeToSender($exactPlugin, $sender);
 
-				return \true;
+				return true;
 			}
 
-			$found = \false;
-			$pluginName = \strtolower($pluginName);
+			$found = false;
+			$pluginName = strtolower($pluginName);
 			foreach($sender->getServer()->getPluginManager()->getPlugins() as $plugin){
-				if(\stripos($plugin->getName(), $pluginName) !== \false){
+				if(stripos($plugin->getName(), $pluginName) !== false){
 					$this->describeToSender($plugin, $sender);
-					$found = \true;
+					$found = true;
 				}
 			}
 
@@ -73,26 +73,26 @@ class VersionCommand extends VanillaCommand{
 			}
 		}
 
-		return \true;
+		return true;
 	}
 
 	private function describeToSender(Plugin $plugin, CommandSender $sender){
 		$desc = $plugin->getDescription();
 		$sender->sendMessage(TextFormat::DARK_GREEN . $desc->getName() . TextFormat::WHITE . " version " . TextFormat::DARK_GREEN . $desc->getVersion());
 
-		if($desc->getDescription() != \null){
+		if($desc->getDescription() != null){
 			$sender->sendMessage($desc->getDescription());
 		}
 
-		if($desc->getWebsite() != \null){
+		if($desc->getWebsite() != null){
 			$sender->sendMessage("Website: " . $desc->getWebsite());
 		}
 
-		if(\count($authors = $desc->getAuthors()) > 0){
-			if(\count($authors) === 1){
-				$sender->sendMessage("Author: " . \implode(", ", $authors));
+		if(count($authors = $desc->getAuthors()) > 0){
+			if(count($authors) === 1){
+				$sender->sendMessage("Author: " . implode(", ", $authors));
 			}else{
-				$sender->sendMessage("Authors: " . \implode(", ", $authors));
+				$sender->sendMessage("Authors: " . implode(", ", $authors));
 			}
 		}
 	}

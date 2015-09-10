@@ -38,12 +38,12 @@ class StopCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
 		Command::broadcastCommandMessage($sender, "Stopping the server...");
 
-		$reason = \implode(" ", $args);
+		$reason = implode(" ", $args);
 		if($reason !== ""){
 			foreach($sender->getServer()->getOnlinePlayers() as $player){
 				$player->kick($reason);
@@ -52,6 +52,6 @@ class StopCommand extends VanillaCommand{
 
 		$sender->getServer()->shutdown();
 
-		return \true;
+		return true;
 	}
 }

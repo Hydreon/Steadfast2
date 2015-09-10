@@ -82,7 +82,7 @@ class GenerationThread extends Thread{
 		$this->logger = $logger;
 		$loadPaths = [];
 		$this->addDependency($loadPaths, new \ReflectionClass($this->loader));
-		$this->loadPaths = \array_reverse($loadPaths);
+		$this->loadPaths = array_reverse($loadPaths);
 
 		$this->externalQueue = $internalThreaded;
 		$this->internalQueue = $externalThreaded;
@@ -91,7 +91,7 @@ class GenerationThread extends Thread{
 	}
 
 	protected function addDependency(array &$loadPaths, \ReflectionClass $dep){
-		if($dep->getFileName() !== \false){
+		if($dep->getFileName() !== false){
 			$loadPaths[$dep->getName()] = $dep->getFileName();
 		}
 
@@ -105,11 +105,11 @@ class GenerationThread extends Thread{
 	}
 
 	public function run(){
-		\error_reporting(-1);
+		error_reporting(-1);
 		\gc_enable();
 		//Load removed dependencies, can't use require_once()
 		foreach($this->loadPaths as $name => $path){
-			if(!\class_exists($name, \false) and !\interface_exists($name, \false)){
+			if(!class_exists($name, false) and !\interface_exists($name, false)){
 				require($path);
 			}
 		}

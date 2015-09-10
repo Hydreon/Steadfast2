@@ -75,7 +75,7 @@ class GenerationInstanceManager extends GenerationRequestManager{
 
 	public function getChunk($levelID, $chunkX, $chunkZ){
 		if(($level = $this->server->getLevel($levelID)) instanceof Level){
-			$chunk = $level->getChunk($chunkX, $chunkZ, \true);
+			$chunk = $level->getChunk($chunkX, $chunkZ, true);
 			if($chunk instanceof FullChunk){
 				return $chunk;
 			}else{
@@ -83,7 +83,7 @@ class GenerationInstanceManager extends GenerationRequestManager{
 			}
 		}else{
 			$this->generationManager->closeLevel($levelID);
-			return \null;
+			return null;
 		}
 	}
 

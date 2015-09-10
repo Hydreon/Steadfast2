@@ -53,6 +53,7 @@ use pocketmine\nbt\tag\Short;
 use pocketmine\nbt\tag\String;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\MobEffectPacket;
+use pocketmine\network\protocol\MoveEntityPacket;
 use pocketmine\network\protocol\MovePlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\SetEntityDataPacket;
@@ -134,9 +135,9 @@ abstract class Entity extends Location implements Metadatable{
 
 	protected $lastDamageCause = \null;
 
-	public $lastX = \null;
-	public $lastY = \null;
-	public $lastZ = \null;
+	public $lastX = null;
+	public $lastY = null;
+	public $lastZ = null;
 
 	public $motionX;
 	public $motionY;
@@ -151,7 +152,7 @@ abstract class Entity extends Location implements Metadatable{
 	/** @var AxisAlignedBB */
 	public $boundingBox;
 	public $onGround;
-	public $inBlock = \false;
+	public $inBlock = false;
 	public $positionChanged;
 	public $motionChanged;
 	public $dead;
@@ -256,12 +257,12 @@ abstract class Entity extends Location implements Metadatable{
 		if(!isset($this->namedtag->OnGround)){
 			$this->namedtag->OnGround = new Byte("OnGround", 0);
 		}
-		$this->onGround = $this->namedtag["OnGround"] > 0 ? \true : \false;
+		$this->onGround = $this->namedtag["OnGround"] > 0 ? true : false;
 
 		if(!isset($this->namedtag->Invulnerable)){
 			$this->namedtag->Invulnerable = new Byte("Invulnerable", 0);
 		}
-		$this->invulnerable = $this->namedtag["Invulnerable"] > 0 ? \true : \false;
+		$this->invulnerable = $this->namedtag["Invulnerable"] > 0 ? true : false;
 
 		$this->chunk->addEntity($this);
 		$this->level->addEntity($this);
@@ -582,8 +583,8 @@ abstract class Entity extends Location implements Metadatable{
 	public function despawnFrom(Player $player){
 		if(isset($this->hasSpawned[$player->getId()])){
 			$pk = new RemoveEntityPacket();
-			$pk->eid = $this->id;
-			$player->dataPacket($pk->setChannel(Network::CHANNEL_ENTITY_SPAWNING));
+			$pk->eid = $this->getId();
+			$player->dataPacket($pk);
 			unset($this->hasSpawned[$player->getId()]);
 		}
 	}
@@ -740,18 +741,18 @@ abstract class Entity extends Location implements Metadatable{
 				$direction = 5;
 			}
 
-			$force = \lcg_value() * 0.2 + 0.1;
+			$force = lcg_value() * 0.2 + 0.1;
 
 			if($direction === 0){
 				$this->motionX = -$force;
 
-				return \true;
+				return true;
 			}
 
 			if($direction === 1){
 				$this->motionX = $force;
 
-				return \true;
+				return true;
 			}
 
 			//No direction 2
@@ -793,10 +794,10 @@ abstract class Entity extends Location implements Metadatable{
 			}
 
 			Timings::$tickEntityTimer->stopTiming();
-			return \false;
+			return false;
 		}
 
-		if(\count($this->effects) > 0){
+		if(count($this->effects) > 0){
 			foreach($this->effects as $effect){
 				if($effect->canTick()){
 					$effect->applyEffect($this);
@@ -808,14 +809,14 @@ abstract class Entity extends Location implements Metadatable{
 			}
 		}
 
-		$hasUpdate = \false;
+		$hasUpdate = false;
 
 		$this->checkBlockCollision();
 
 		if($this->y <= -16 and $this->dead !== \true){
 			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_VOID, 10);
 			$this->attack($ev->getFinalDamage(), $ev);
-			$hasUpdate = \true;
+			$hasUpdate = true;
 		}
 
 		if($this->fireTicks > 0){
@@ -835,8 +836,8 @@ abstract class Entity extends Location implements Metadatable{
 			if($this->fireTicks <= 0){
 				$this->extinguish();
 			}else{
-				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ONFIRE, \true);
-				$hasUpdate = \true;
+				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ONFIRE, true);
+				$hasUpdate = true;
 			}
 		}
 
@@ -865,7 +866,7 @@ abstract class Entity extends Location implements Metadatable{
 			$this->lastPitch = $this->pitch;
 
 			if($this instanceof Human){
-				$pk = new MovePlayerPacket();
+				$pk = new MoveEntityPacket();
 				$pk->eid = $this->id;
 				$pk->x = $this->x;
 				$pk->y = $this->y;
@@ -1598,7 +1599,7 @@ abstract class Entity extends Location implements Metadatable{
 	 * @return mixed
 	 */
 	public function getDataProperty($id){
-		return isset($this->dataProperties[$id]) ? $this->dataProperties[$id][1] : \null;
+		return isset($this->dataProperties[$id]) ? $this->dataProperties[$id][1] : null;
 	}
 
 	/**
@@ -1607,7 +1608,7 @@ abstract class Entity extends Location implements Metadatable{
 	 * @return int
 	 */
 	public function getDataPropertyType($id){
-		return isset($this->dataProperties[$id]) ? $this->dataProperties[$id][0] : \null;
+		return isset($this->dataProperties[$id]) ? $this->dataProperties[$id][0] : null;
 	}
 
 	/**
@@ -1615,7 +1616,7 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param int  $id
 	 * @param bool $value
 	 */
-	public function setDataFlag($propertyId, $id, $value = \true, $type = self::DATA_TYPE_BYTE){
+	public function setDataFlag($propertyId, $id, $value = true, $type = self::DATA_TYPE_BYTE){
 		if($this->getDataFlag($propertyId, $id) !== $value){
 			$flags = (int) $this->getDataProperty($propertyId);
 			$flags ^= 1 << $id;

@@ -52,7 +52,7 @@ class frmMain extends \wxFrame {
 		$dlg->ShowModal();
 	}
 
-	function __construct($parent = \Null) {
+	function __construct($parent = null) {
 		parent::__construct($parent, wxID_ANY, "PocketMine-MP {VERSION} server", wxDefaultPosition, new \wxSize( 800,480 ), wxCAPTION|wxCLOSE_BOX|wxMINIMIZE_BOX|wxSYSTEM_MENU|wxTAB_TRAVERSAL );
 
 		$this->SetIcon(new \wxIcon("./images/app.png", wxBITMAP_TYPE_PNG));
@@ -169,7 +169,7 @@ class frmMain extends \wxFrame {
 	function __destruct() {}
 	
 	function onMenulbPlayers($event){
-		if(\stripos($this->lbPlayers->GetString($this->lbPlayers->GetSelection()), "@") !== \false) {
+		if(stripos($this->lbPlayers->GetString($this->lbPlayers->GetSelection()), "@") !== false) {
 			$this->menulbPlayersOp->SetText("Deop");
 		} else {
 			$this->menulbPlayersOp->SetText("Op");
@@ -180,7 +180,7 @@ class frmMain extends \wxFrame {
 
 class frmProperties extends \wxDialog {
 	
-	function __construct( $parent=\null ){
+	function __construct( $parent=null ){
 		parent::__construct ($parent, wxID_ANY, "server.properties", wxDefaultPosition, new \wxSize( 500,300 ), wxDEFAULT_DIALOG_STYLE);
 		
 		$this->SetSizeHints(wxDefaultSize, wxDefaultSize);
@@ -190,20 +190,20 @@ class frmProperties extends \wxDialog {
 		$this->gridProp = new \wxGrid($this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0);
 
 		$this->gridProp->CreateGrid(25, 1);
-		$this->gridProp->EnableEditing(\true);
-		$this->gridProp->EnableGridLines(\true);
-		$this->gridProp->EnableDragGridSize(\false);
+		$this->gridProp->EnableEditing(true);
+		$this->gridProp->EnableGridLines(true);
+		$this->gridProp->EnableDragGridSize(false);
 		$this->gridProp->SetMargins(0, 0);
 
 		$this->gridProp->SetColSize(0, 267);
-		$this->gridProp->EnableDragColMove(\false);
-		$this->gridProp->EnableDragColSize(\false);
+		$this->gridProp->EnableDragColMove(false);
+		$this->gridProp->EnableDragColSize(false);
 		$this->gridProp->SetColLabelSize(30);
 		$this->gridProp->SetColLabelValue(0, "Values");
 		$this->gridProp->SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
 
 		$this->gridProp->AutoSizeRows();
-		$this->gridProp->EnableDragRowSize(\false);
+		$this->gridProp->EnableDragRowSize(false);
 		$this->gridProp->SetRowLabelSize(200);
 		$this->gridProp->SetRowLabelValue(0, "server-name");
 		$this->gridProp->SetRowLabelValue(1, "server-port");
@@ -273,11 +273,11 @@ class PocketMineGui extends \wxApp {
 		wxInitAllImageHandlers();
 		$this->mf = new frmMain();
 		$this->mf->Show();
-		return \true;
+		return true;
 	}
 	function OnExit(){
 		//TODO: call normal server stop procedure
-		return \false;
+		return false;
 	}
 }
 

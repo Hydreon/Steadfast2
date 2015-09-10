@@ -24,7 +24,7 @@ namespace pocketmine;
 class ThreadManager extends \Threaded{
 
 	/** @var ThreadManager */
-	private static $instance = \null;
+	private static $instance = null;
 
 	public static function init(){
 		self::$instance = new ThreadManager();
@@ -42,7 +42,7 @@ class ThreadManager extends \Threaded{
 	 */
 	public function add($thread){
 		if($thread instanceof Thread or $thread instanceof Worker){
-			$this->{\spl_object_hash($thread)} = $thread;
+			$this->{spl_object_hash($thread)} = $thread;
 		}
 	}
 
@@ -51,7 +51,7 @@ class ThreadManager extends \Threaded{
 	 */
 	public function remove($thread){
 		if($thread instanceof Thread or $thread instanceof Worker){
-			unset($this->{\spl_object_hash($thread)});
+			unset($this->{spl_object_hash($thread)});
 		}
 	}
 

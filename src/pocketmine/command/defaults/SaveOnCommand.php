@@ -38,13 +38,13 @@ class SaveOnCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		$sender->getServer()->setAutoSave(\true);
+		$sender->getServer()->setAutoSave(true);
 
 		Command::broadcastCommandMessage($sender, "Enabled level saving");
 
-		return \true;
+		return true;
 	}
 }

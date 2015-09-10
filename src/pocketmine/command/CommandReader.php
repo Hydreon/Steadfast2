@@ -39,9 +39,9 @@ class CommandReader extends Thread{
 
 	private function readLine(){
 		if(!$this->readline){
-			$line = \trim(\fgets(\fopen("php://stdin", "r")));
+			$line = trim(fgets(fopen("php://stdin", "r")));
 		}else{
-			$line = \trim(readline("> "));
+			$line = trim(readline("> "));
 			if($line != ""){
 				readline_add_history($line);
 			}
@@ -62,28 +62,28 @@ class CommandReader extends Thread{
 			});
 		}
 
-		return \null;
+		return null;
 	}
 
 	public function run(){
-		$opts = \getopt("", ["disable-readline"]);
-		if(\extension_loaded("readline") and !isset($opts["disable-readline"])){
-			$this->readline = \true;
+		$opts = getopt("", ["disable-readline"]);
+		if(extension_loaded("readline") and !isset($opts["disable-readline"])){
+			$this->readline = true;
 		}else{
-			$this->readline = \false;
+			$this->readline = false;
 		}
 
-		$lastLine = \microtime(\true);
-		while(\true){
+		$lastLine = microtime(true);
+		while(true){
 			if(($line = $this->readLine()) !== ""){
 				$this->buffer->synchronized(function (\Threaded $buffer, $line){
-					$buffer[] = \preg_replace("#\\x1b\\x5b([^\\x1b]*\\x7e|[\\x40-\\x50])#", "", $line);
+					$buffer[] = preg_replace("#\\x1b\\x5b([^\\x1b]*\\x7e|[\\x40-\\x50])#", "", $line);
 				}, $this->buffer, $line);
-			}elseif((\microtime(\true) - $lastLine) <= 0.1){ //Non blocking! Sleep to save CPU
-				\usleep(40000);
+			}elseif((microtime(true) - $lastLine) <= 0.1){ //Non blocking! Sleep to save CPU
+				usleep(40000);
 			}
 
-			$lastLine = \microtime(\true);
+			$lastLine = microtime(true);
 		}
 	}
 }

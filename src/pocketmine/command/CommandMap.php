@@ -35,7 +35,7 @@ interface CommandMap{
 	 * @param Command $command
 	 * @param string  $label
 	 */
-	public function register($fallbackPrefix, Command $command, $label = \null);
+	public function register($fallbackPrefix, Command $command, $label = null);
 
 	/**
 	 * @param CommandSender $sender

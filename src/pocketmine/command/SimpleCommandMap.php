@@ -111,7 +111,7 @@ class SimpleCommandMap implements CommandMap{
 		$this->register("pocketmine", new TimingsCommand("timings"));
 		$this->register("pocketmine", new ReloadCommand("reload"));
 
-		if($this->server->getProperty("debug.commands", \false) === \true){
+		if($this->server->getProperty("debug.commands", false) === true){
 			$this->register("pocketmine", new StatusCommand("status"));
 		}
 	}
@@ -123,18 +123,18 @@ class SimpleCommandMap implements CommandMap{
 		}
 	}
 
-	public function register($fallbackPrefix, Command $command, $label = \null){
-		if($label === \null){
+	public function register($fallbackPrefix, Command $command, $label = null){
+		if($label === null){
 			$label = $command->getName();
 		}
-		$label = \strtolower(\trim($label));
-		$fallbackPrefix = \strtolower(\trim($fallbackPrefix));
+		$label = strtolower(trim($label));
+		$fallbackPrefix = strtolower(trim($fallbackPrefix));
 
-		$registered = $this->registerAlias($command, \false, $fallbackPrefix, $label);
+		$registered = $this->registerAlias($command, false, $fallbackPrefix, $label);
 
 		$aliases = $command->getAliases();
 		foreach($aliases as $index => $alias){
-			if(!$this->registerAlias($command, \true, $fallbackPrefix, $alias)){
+			if(!$this->registerAlias($command, true, $fallbackPrefix, $alias)){
 				unset($aliases[$index]);
 			}
 		}
@@ -152,11 +152,11 @@ class SimpleCommandMap implements CommandMap{
 	private function registerAlias(Command $command, $isAlias, $fallbackPrefix, $label){
 		$this->knownCommands[$fallbackPrefix . ":" . $label] = $command;
 		if(($command instanceof VanillaCommand or $isAlias) and isset($this->knownCommands[$label])){
-			return \false;
+			return false;
 		}
 
-		if(isset($this->knownCommands[$label]) and $this->knownCommands[$label]->getLabel() !== \null and $this->knownCommands[$label]->getLabel() === $label){
-			return \false;
+		if(isset($this->knownCommands[$label]) and $this->knownCommands[$label]->getLabel() !== null and $this->knownCommands[$label]->getLabel() === $label){
+			return false;
 		}
 
 		if(!$isAlias){
@@ -165,21 +165,21 @@ class SimpleCommandMap implements CommandMap{
 
 		$this->knownCommands[$label] = $command;
 
-		return \true;
+		return true;
 	}
 
 	public function dispatch(CommandSender $sender, $commandLine){
-		$args = \explode(" ", $commandLine);
+		$args = explode(" ", $commandLine);
 
-		if(\count($args) === 0){
-			return \false;
+		if(count($args) === 0){
+			return false;
 		}
 
-		$sentCommandLabel = \strtolower(\array_shift($args));
+		$sentCommandLabel = strtolower(array_shift($args));
 		$target = $this->getCommand($sentCommandLabel);
 
-		if($target === \null){
-			return \false;
+		if($target === null){
+			return false;
 		}
 
 		$target->timings->startTiming();
@@ -194,7 +194,7 @@ class SimpleCommandMap implements CommandMap{
 		}
 		$target->timings->stopTiming();
 
-		return \true;
+		return true;
 	}
 
 	public function clearCommands(){
@@ -210,7 +210,7 @@ class SimpleCommandMap implements CommandMap{
 			return $this->knownCommands[$name];
 		}
 
-		return \null;
+		return null;
 	}
 
 	/**
@@ -228,7 +228,7 @@ class SimpleCommandMap implements CommandMap{
 		$values = $this->server->getCommandAliases();
 
 		foreach($values as $alias => $commandStrings){
-			if(\strpos($alias, ":") !== \false or \strpos($alias, " ") !== \false){
+			if(strpos($alias, ":") !== false or strpos($alias, " ") !== false){
 				$this->server->getLogger()->warning("Could not register alias " . $alias . " because it contains illegal characters");
 				continue;
 			}
@@ -237,11 +237,11 @@ class SimpleCommandMap implements CommandMap{
 
 			$bad = "";
 			foreach($commandStrings as $commandString){
-				$args = \explode(" ", $commandString);
+				$args = explode(" ", $commandString);
 				$command = $this->getCommand($args[0]);
 
-				if($command === \null){
-					if(\strlen($bad) > 0){
+				if($command === null){
+					if(strlen($bad) > 0){
 						$bad .= ", ";
 					}
 					$bad .= $commandString;
@@ -250,16 +250,16 @@ class SimpleCommandMap implements CommandMap{
 				}
 			}
 
-			if(\strlen($bad) > 0){
+			if(strlen($bad) > 0){
 				$this->server->getLogger()->warning("Could not register alias " . $alias . " because it contains commands that do not exist: " . $bad);
 				continue;
 			}
 
 			//These registered commands have absolute priority
-			if(\count($targets) > 0){
-				$this->knownCommands[\strtolower($alias)] = new FormattedCommandAlias(\strtolower($alias), $targets);
+			if(count($targets) > 0){
+				$this->knownCommands[strtolower($alias)] = new FormattedCommandAlias(strtolower($alias), $targets);
 			}else{
-				unset($this->knownCommands[\strtolower($alias)]);
+				unset($this->knownCommands[strtolower($alias)]);
 			}
 
 		}

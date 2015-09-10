@@ -28,7 +28,7 @@ use pocketmine\Player;
  * Called when a player joins, after things have been correctly set up (you can change anything now)
  */
 class PlayerLoginEvent extends PlayerEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	/** @var string */
 	protected $kickMessage;

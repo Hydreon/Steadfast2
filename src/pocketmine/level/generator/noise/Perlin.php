@@ -63,9 +63,9 @@ class Perlin extends Generator{
 		$y += $this->offsetY;
 		$z += $this->offsetZ;
 
-		$floorX = (int) \floor($x);
-		$floorY = (int) \floor($y);
-		$floorZ = (int) \floor($z);
+		$floorX = (int) floor($x);
+		$floorY = (int) floor($y);
+		$floorZ = (int) floor($z);
 
 		$X = $floorX & 0xFF;
 		$Y = $floorY & 0xFF;

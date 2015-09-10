@@ -27,7 +27,7 @@ use pocketmine\item\Item;
 use pocketmine\Player;
 
 class BlockBreakEvent extends BlockEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	/** @var \pocketmine\Player */
 	protected $player;
@@ -36,9 +36,9 @@ class BlockBreakEvent extends BlockEvent implements Cancellable{
 	protected $item;
 
 	/** @var bool */
-	protected $instaBreak = \false;
+	protected $instaBreak = false;
 
-	public function __construct(Player $player, Block $block, Item $item, $instaBreak = \false){
+	public function __construct(Player $player, Block $block, Item $item, $instaBreak = false){
 		$this->block = $block;
 		$this->item = $item;
 		$this->player = $player;

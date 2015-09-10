@@ -61,7 +61,6 @@ abstract class Living extends Entity implements Damageable{
 		$this->setHealth($this->namedtag["Health"]);
 	}
 
-
 	public function setHealth($amount){
 		$wasAlive = !$this->dead;
 		parent::setHealth($amount);
@@ -69,7 +68,7 @@ abstract class Living extends Entity implements Damageable{
 			$pk = new EntityEventPacket();
 			$pk->eid = $this->getId();
 			$pk->event = EntityEventPacket::RESPAWN;
-			Server::broadcastPacket($this->hasSpawned, $pk->setChannel(Network::CHANNEL_WORLD_EVENTS));
+			Server::broadcastPacket($this->hasSpawned, $pk);
 		}
 	}
 
@@ -82,7 +81,7 @@ abstract class Living extends Entity implements Damageable{
 
 	public function hasLineOfSight(Entity $entity){
 		//TODO: head height
-		return \true;
+		return true;
 		//return $this->getLevel()->rayTraceBlocks(Vector3::createVector($this->x, $this->y + $this->height, $this->z), Vector3::createVector($entity->x, $entity->y + $entity->height, $entity->z)) === null;
 	}
 
@@ -98,7 +97,7 @@ abstract class Living extends Entity implements Damageable{
 	public function attack($damage, EntityDamageEvent $source){
 		if($this->attackTime > 0 or $this->noDamageTicks > 0){
 			$lastCause = $this->getLastDamageCause();
-			if($lastCause !== \null and $lastCause->getDamage() >= $damage){
+			if($lastCause !== null and $lastCause->getDamage() >= $damage){
                 $source->setCancelled();
 			}
 		}
@@ -124,7 +123,7 @@ abstract class Living extends Entity implements Damageable{
 		$pk = new EntityEventPacket();
 		$pk->eid = $this->getId();
 		$pk->event = $this->getHealth() <= 0 ? EntityEventPacket::DEATH_ANIMATION : EntityEventPacket::HURT_ANIMATION; //Ouch!
-		Server::broadcastPacket($this->hasSpawned, $pk->setChannel(Network::CHANNEL_WORLD_EVENTS));
+		Server::broadcastPacket($this->hasSpawned, $pk);
 
 		$this->attackTime = 10; //0.5 seconds cooldown
 	}
@@ -246,8 +245,8 @@ abstract class Living extends Entity implements Damageable{
 			$maxDistance = 120;
 		}
 
-		if(\count($transparent) === 0){
-			$transparent = \null;
+		if(count($transparent) === 0){
+			$transparent = null;
 		}
 
 		$blocks = [];
@@ -260,14 +259,14 @@ abstract class Living extends Entity implements Damageable{
 			$block = $itr->current();
 			$blocks[$nextIndex++] = $block;
 
-			if($maxLength !== 0 and \count($blocks) > $maxLength){
-				\array_shift($blocks);
+			if($maxLength !== 0 and count($blocks) > $maxLength){
+				array_shift($blocks);
 				--$nextIndex;
 			}
 
 			$id = $block->getId();
 
-			if($transparent === \null){
+			if($transparent === null){
 				if($id !== 0){
 					break;
 				}
@@ -297,6 +296,6 @@ abstract class Living extends Entity implements Damageable{
 
 		}
 
-		return \null;
+		return null;
 	}
 }

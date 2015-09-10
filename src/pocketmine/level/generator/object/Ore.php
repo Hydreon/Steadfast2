@@ -56,7 +56,7 @@ class Ore{
 			$seedX = $x1 + ($x2 - $x1) * $count / $clusterSize;
 			$seedY = $y1 + ($y2 - $y1) * $count / $clusterSize;
 			$seedZ = $z1 + ($z2 - $z1) * $count / $clusterSize;
-			$size = ((\sin($count * (M_PI / $clusterSize)) + 1) * $this->random->nextFloat() * $clusterSize / 16 + 1) / 2;
+			$size = ((sin($count * (M_PI / $clusterSize)) + 1) * $this->random->nextFloat() * $clusterSize / 16 + 1) / 2;
 
 			$startX = (int) ($seedX - $size);
 			$startY = (int) ($seedY - $size);

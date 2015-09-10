@@ -32,7 +32,7 @@ class CraftingTransactionGroup extends SimpleTransactionGroup{
 	protected $output = [];
 
 	/** @var Recipe */
-	protected $recipe = \null;
+	protected $recipe = null;
 
 	public function __construct(SimpleTransactionGroup $group){
 		parent::__construct();
@@ -63,14 +63,14 @@ class CraftingTransactionGroup extends SimpleTransactionGroup{
 	 * @return Item
 	 */
 	public function getResult(){
-		\reset($this->output);
+		reset($this->output);
 
-		return \current($this->output);
+		return current($this->output);
 	}
 
 	public function canExecute(){
-		if(\count($this->output) !== 1 or \count($this->input) === 0){
-			return \false;
+		if(count($this->output) !== 1 or count($this->input) === 0){
+			return false;
 		}
 
 		return $this->getMatchingRecipe() instanceof Recipe;
@@ -80,7 +80,7 @@ class CraftingTransactionGroup extends SimpleTransactionGroup{
 	 * @return Recipe
 	 */
 	public function getMatchingRecipe(){
-		if($this->recipe === \null){
+		if($this->recipe === null){
 			$this->recipe = Server::getInstance()->getCraftingManager()->matchTransaction($this);
 		}
 
@@ -89,7 +89,7 @@ class CraftingTransactionGroup extends SimpleTransactionGroup{
 
 	public function execute(){
 		if($this->hasExecuted() or !$this->canExecute()){
-			return \false;
+			return false;
 		}
 
 		Server::getInstance()->getPluginManager()->callEvent($ev = new CraftItemEvent($this, $this->getMatchingRecipe()));
@@ -98,14 +98,14 @@ class CraftingTransactionGroup extends SimpleTransactionGroup{
 				$inventory->sendContents($inventory->getViewers());
 			}
 
-			return \false;
+			return false;
 		}
 
 		foreach($this->transactions as $transaction){
 			$transaction->getInventory()->setItem($transaction->getSlot(), $transaction->getTargetItem(), $this->getSource());
 		}
-		$this->hasExecuted = \true;
+		$this->hasExecuted = true;
 
-		return \true;
+		return true;
 	}
 }

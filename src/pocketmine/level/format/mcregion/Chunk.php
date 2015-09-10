@@ -281,7 +281,7 @@ class Chunk extends BaseFullChunk{
 	 *
 	 * @return Chunk
 	 */
-	public static function fromBinary($data, LevelProvider $provider = \null){
+	public static function fromBinary($data, LevelProvider $provider = null){
 		$nbt = new NBT(NBT::BIG_ENDIAN);
 
 		try{
@@ -289,12 +289,12 @@ class Chunk extends BaseFullChunk{
 			$chunk = $nbt->getData();
 
 			if(!isset($chunk->Level) or !($chunk->Level instanceof Compound)){
-				return \null;
+				return null;
 			}
 
 			return new Chunk($provider instanceof LevelProvider ? $provider : McRegion::class, $chunk->Level);
 		}catch(\Exception $e){
-			return \null;
+			return null;
 		}
 	}
 

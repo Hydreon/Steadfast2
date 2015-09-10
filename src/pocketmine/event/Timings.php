@@ -134,9 +134,9 @@ abstract class Timings{
 	 */
 	public static function getPluginTaskTimings(TaskHandler $task, $period){
 		$ftask = $task->getTask();
-		if($ftask instanceof PluginTask and $ftask->getOwner() !== \null){
+		if($ftask instanceof PluginTask and $ftask->getOwner() !== null){
 			$plugin = $ftask->getOwner()->getDescription()->getFullName();
-		}elseif($task->timingName !== \null){
+		}elseif($task->timingName !== null){
 			$plugin = "Scheduler";
 		}else{
 			$plugin = "Unknown";

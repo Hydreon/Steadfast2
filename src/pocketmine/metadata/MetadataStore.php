@@ -42,7 +42,7 @@ abstract class MetadataStore{
 	 */
 	public function setMetadata($subject, $metadataKey, MetadataValue $newMetadataValue){
 		$owningPlugin = $newMetadataValue->getOwningPlugin();
-		if($owningPlugin === \null){
+		if($owningPlugin === null){
 			throw new PluginException("Plugin cannot be null");
 		}
 

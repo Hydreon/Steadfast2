@@ -70,12 +70,12 @@ class HandlerList{
 
 	public function __construct(){
 		$this->handlerSlots = [
-		EventPriority::LOWEST => [],
-		EventPriority::LOW => [],
-		EventPriority::NORMAL => [],
-		EventPriority::HIGH => [],
-		EventPriority::HIGHEST => [],
-		EventPriority::MONITOR => []
+			EventPriority::LOWEST => [],
+			EventPriority::LOW => [],
+			EventPriority::NORMAL => [],
+			EventPriority::HIGH => [],
+			EventPriority::HIGHEST => [],
+			EventPriority::MONITOR => []
 		];
 		self::$allLists[] = $this;
 	}
@@ -114,7 +114,7 @@ class HandlerList{
 			foreach($this->handlerSlots as $priority => $list){
 				foreach($list as $hash => $listener){
 					if(($object instanceof Plugin and $listener->getPlugin() === $object)
-					   or ($object instanceof Listener and $listener->getListener() === $object)
+						or ($object instanceof Listener and $listener->getListener() === $object)
 					){
 						unset($this->handlerSlots[$priority][$hash]);
 						$changed = true;

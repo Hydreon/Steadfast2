@@ -63,7 +63,7 @@ class Chunk extends BaseChunk{
 		}
 
 		if(!isset($this->nbt->Biomes) or !($this->nbt->Biomes instanceof ByteArray)){
-			$this->nbt->Biomes = new ByteArray("Biomes", \str_repeat("\x01", 256));
+			$this->nbt->Biomes = new ByteArray("Biomes", str_repeat("\x01", 256));
 		}
 
 		if(!isset($this->nbt->BiomeColors) or !($this->nbt->BiomeColors instanceof IntArray)){
@@ -71,7 +71,7 @@ class Chunk extends BaseChunk{
 		}
 
 		if(!isset($this->nbt->HeightMap) or !($this->nbt->HeightMap instanceof IntArray)){
-			$this->nbt->HeightMap = new IntArray("HeightMap", \array_fill(0, 256, 127));
+			$this->nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, 127));
 		}
 
 		$sections = [];
@@ -135,7 +135,7 @@ class Chunk extends BaseChunk{
 	 *
 	 * @return Chunk
 	 */
-	public static function fromBinary($data, LevelProvider $provider = \null){
+	public static function fromBinary($data, LevelProvider $provider = null){
 		$nbt = new NBT(NBT::BIG_ENDIAN);
 
 		try{
@@ -143,12 +143,12 @@ class Chunk extends BaseChunk{
 			$chunk = $nbt->getData();
 
 			if(!isset($chunk->Level) or !($chunk->Level instanceof Compound)){
-				return \null;
+				return null;
 			}
 
 			return new Chunk($provider instanceof LevelProvider ? $provider : Anvil::class, $chunk->Level);
 		}catch(\Exception $e){
-			return \null;
+			return null;
 		}
 	}
 
@@ -164,7 +164,7 @@ class Chunk extends BaseChunk{
 			if($section instanceof EmptyChunkSection){
 				continue;
 			}
-			$nbt->Sections[$section->getY()] = new Compound(\null, [
+			$nbt->Sections[$section->getY()] = new Compound(null, [
 				"Y" => new Byte("Y", $section->getY()),
 				"Blocks" => new ByteArray("Blocks", $section->getIdArray()),
 				"Data" => new ByteArray("Data", $section->getDataArray()),
