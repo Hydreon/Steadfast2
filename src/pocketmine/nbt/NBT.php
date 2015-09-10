@@ -109,7 +109,7 @@ class NBT{
 		}
 
 		$item = Item::get($tag->id->getValue(), !isset($tag->Damage) ? 0 : $tag->Damage->getValue(), $tag->Count->getValue());
-
+		
 		if(isset($tag->tag) and $tag->tag instanceof Compound){
 			$item->setNamedTag($tag->tag);
 		}

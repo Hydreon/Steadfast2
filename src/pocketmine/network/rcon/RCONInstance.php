@@ -50,11 +50,11 @@ class RCONInstance extends Thread{
 	}
 
 	private function writePacket($client, $requestID, $packetType, $payload){
-		$pk = pack("V", (int) $requestID)
-			. pack("V", (int) $packetType)
+		$pk = Binary::writeLInt((int) $requestID)
+			. Binary::writeLInt((int) $packetType)
 			. $payload
 			. "\x00\x00"; //Terminate payload and packet
-		return socket_write($client, pack("V", strlen($pk)) . $pk);
+		return socket_write($client, Binary::writeLInt(strlen($pk)) . $pk);
 	}
 
 	private function readPacket($client, &$size, &$requestID, &$packetType, &$payload){
@@ -68,12 +68,12 @@ class RCONInstance extends Thread{
 			return false;
 		}
 		socket_set_block($client);
-		$size = (PHP_INT_SIZE === 8 ? unpack("V", $d)[1] << 32 >> 32 : unpack("V", $d)[1]);
+		$size = Binary::readLInt($d);
 		if($size < 0 or $size > 65535){
 			return false;
 		}
-		$requestID = (PHP_INT_SIZE === 8 ? unpack("V", socket_read($client, 4))[1] << 32 >> 32 : unpack("V", socket_read($client, 4))[1]);
-		$packetType = (PHP_INT_SIZE === 8 ? unpack("V", socket_read($client, 4))[1] << 32 >> 32 : unpack("V", socket_read($client, 4))[1]);
+		$requestID = Binary::readLInt(socket_read($client, 4));
+		$packetType = Binary::readLInt(socket_read($client, 4));
 		$payload = rtrim(socket_read($client, $size + 2)); //Strip two null bytes
 		return true;
 	}
@@ -177,5 +177,9 @@ class RCONInstance extends Thread{
 		}
 		unset($this->socket, $this->cmd, $this->response, $this->stop);
 		exit(0);
+	}
+
+	public function getThreadName(){
+		return "RCON";
 	}
 }
