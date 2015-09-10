@@ -21,22 +21,17 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class TileEventPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::TILE_EVENT_PACKET;
 
 	public $x;
 	public $y;
 	public $z;
 	public $case1;
 	public $case2;
-
-	public function pid(){
-		return Info::TILE_EVENT_PACKET;
-	}
 
 	public function decode(){
 

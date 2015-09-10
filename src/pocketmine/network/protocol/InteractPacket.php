@@ -21,20 +21,15 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class InteractPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::INTERACT_PACKET;
 
 	public $action;
 	public $eid;
 	public $target;
-
-	public function pid(){
-		return Info::INTERACT_PACKET;
-	}
 
 	public function decode(){
 		$this->action = $this->getByte();

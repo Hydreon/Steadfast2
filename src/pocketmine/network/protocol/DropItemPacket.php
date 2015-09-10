@@ -21,14 +21,14 @@
 
 namespace pocketmine\network\protocol;
 
+#include <rules/DataPacket.h>
+
+
 class DropItemPacket extends DataPacket{
+	const NETWORK_ID = Info::DROP_ITEM_PACKET;
 
 	public $type;
 	public $item;
-
-	public function pid() {
-		return Info::DROP_ITEM_PACKET;
-	}
 
 	public function decode(){
 		$this->type = $this->getByte();

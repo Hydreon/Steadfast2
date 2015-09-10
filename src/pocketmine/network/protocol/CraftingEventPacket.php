@@ -25,15 +25,13 @@ namespace pocketmine\network\protocol;
 
 
 class CraftingEventPacket extends DataPacket{
+	const NETWORK_ID = Info::CRAFTING_EVENT_PACKET;
+
 	public $windowId;
 	public $type;
 	public $id;
 	public $input = [];
 	public $output = [];
-
-	public function pid() {
-		return Info::CRAFTING_EVENT_PACKET;
-	}
 
 	public function clean(){
 		$this->input = [];

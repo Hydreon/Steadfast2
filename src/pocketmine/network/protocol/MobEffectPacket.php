@@ -21,20 +21,11 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 class MobEffectPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::MOB_EFFECT_PACKET;
 
 	const EVENT_ADD = 1;
 	const EVENT_MODIFY = 2;
@@ -46,10 +37,6 @@ class MobEffectPacket extends DataPacket{
 	public $amplifier;
 	public $particles = true;
 	public $duration;
-
-	public function pid(){
-		return Info::MOB_EFFECT_PACKET;
-	}
 
 	public function decode(){
 

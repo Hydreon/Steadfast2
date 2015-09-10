@@ -21,21 +21,16 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class SetEntityMotionPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::SET_ENTITY_MOTION_PACKET;
 
 
 	// eid, motX, motY, motZ
 	/** @var array[] */
 	public $entities = [];
-
-	public function pid(){
-		return Info::SET_ENTITY_MOTION_PACKET;
-	}
 
 	public function clean(){
 		$this->entities = [];

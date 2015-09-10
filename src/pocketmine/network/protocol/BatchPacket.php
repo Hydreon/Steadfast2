@@ -21,18 +21,13 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class BatchPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::BATCH_PACKET;
 
 	public $payload;
-
-	public function pid(){
-		return Info::BATCH_PACKET;
-	}
 
 	public function decode(){
 		$size = $this->getInt();

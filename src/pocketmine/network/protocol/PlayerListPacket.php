@@ -25,6 +25,8 @@ namespace pocketmine\network\protocol;
 
 
 class PlayerListPacket extends DataPacket{
+	const NETWORK_ID = Info::PLAYER_LIST_PACKET;
+
 	const TYPE_ADD = 0;
 	const TYPE_REMOVE = 1;
 
@@ -32,10 +34,6 @@ class PlayerListPacket extends DataPacket{
 	/** @var array[] */
 	public $entries = [];
 	public $type;
-
-	public function pid() {
-		return Info::PLAYER_LIST_PACKET;
-	}
 
 	public function clean(){
 		$this->entries = [];

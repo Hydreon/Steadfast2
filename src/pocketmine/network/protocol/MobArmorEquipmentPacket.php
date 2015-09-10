@@ -25,12 +25,10 @@ namespace pocketmine\network\protocol;
 
 
 class MobArmorEquipmentPacket extends DataPacket{
+	const NETWORK_ID = Info::MOB_ARMOR_EQUIPMENT_PACKET;
+
 	public $eid;
 	public $slots = [];
-
-	public function pid() {
-		return Info::MOB_ARMOR_EQUIPMENT_PACKET;
-	}
 
 	public function decode(){
 		$this->eid = $this->getLong();

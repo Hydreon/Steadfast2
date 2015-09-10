@@ -21,18 +21,12 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 class PlayerActionPacket extends DataPacket{
+	const NETWORK_ID = Info::PLAYER_ACTION_PACKET;
+
 	const ACTION_START_BREAK = 0;
 	const ACTION_ABORT_BREAK = 1;
 	const ACTION_STOP_BREAK = 2;
@@ -48,19 +42,12 @@ class PlayerActionPacket extends DataPacket{
 	const ACTION_STOP_SNEAK = 12;
 	const ACTION_DIMENSION_CHANGE = 13;
 
-	public static $pool = [];
-	public static $next = 0;
-
 	public $eid;
 	public $action;
 	public $x;
 	public $y;
 	public $z;
 	public $face;
-
-	public function pid(){
-		return Info::PLAYER_ACTION_PACKET;
-	}
 
 	public function decode(){
 		$this->eid = $this->getLong();

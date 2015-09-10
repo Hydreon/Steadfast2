@@ -21,18 +21,13 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class DisconnectPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::DISCONNECT_PACKET;
 
 	public $message;
-
-	public function pid(){
-		return Info::DISCONNECT_PACKET;
-	}
 
 	public function decode(){
 		$this->message = $this->getString();

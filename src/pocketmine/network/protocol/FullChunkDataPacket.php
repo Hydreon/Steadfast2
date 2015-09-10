@@ -21,12 +21,12 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
+
 
 class FullChunkDataPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
-
+	const NETWORK_ID = Info::FULL_CHUNK_DATA_PACKET;
+	
 	const ORDER_COLUMNS = 0;
 	const ORDER_LAYERED = 1;
 
@@ -34,10 +34,6 @@ class FullChunkDataPacket extends DataPacket{
 	public $chunkZ;
 	public $order = self::ORDER_COLUMNS;
 	public $data;
-
-	public function pid(){
-		return Info::FULL_CHUNK_DATA_PACKET;
-	}
 
 	public function decode(){
 

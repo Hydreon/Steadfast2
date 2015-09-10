@@ -92,7 +92,7 @@ class Item extends Entity{
 			return false;
 		}
 
-		$tickDiff = \max(1, $currentTick - $this->lastUpdate);
+		$tickDiff = max(1, $currentTick - $this->lastUpdate);
 		$this->lastUpdate = $currentTick;
 
 		$this->timings->startTiming();

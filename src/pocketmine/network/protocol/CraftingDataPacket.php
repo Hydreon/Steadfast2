@@ -32,6 +32,8 @@ use pocketmine\item\enchantment\EnchantmentList;
 use pocketmine\utils\BinaryStream;
 
 class CraftingDataPacket extends DataPacket{
+	const NETWORK_ID = Info::CRAFTING_DATA_PACKET;
+
 	const ENTRY_SHAPELESS = 0;
 	const ENTRY_SHAPED = 1;
 	const ENTRY_FURNACE = 2;
@@ -41,10 +43,6 @@ class CraftingDataPacket extends DataPacket{
 	/** @var object[] */
 	public $entries = [];
 	public $cleanRecipes = false;
-
-	public function pid() {
-		return Info::CRAFTING_DATA_PACKET;
-	}
 
 	private static function writeEntry($entry, BinaryStream $stream){
 		if($entry instanceof ShapelessRecipe){

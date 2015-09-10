@@ -38,14 +38,14 @@ class Arrow extends Projectile{
 
 	protected $damage = 6;
 
-	public function __construct(FullChunk $chunk, Compound $nbt, Entity $shootingEntity = \null){
+	public function __construct(FullChunk $chunk, Compound $nbt, Entity $shootingEntity = null){
 		$this->shootingEntity = $shootingEntity;
 		parent::__construct($chunk, $nbt);
 	}
 
 	public function onUpdate($currentTick){
 		if($this->closed){
-			return \false;
+			return false;
 		}
 
 		$this->timings->startTiming();
@@ -54,7 +54,7 @@ class Arrow extends Projectile{
 
 		if($this->age > 1200){
 			$this->kill();
-			$hasUpdate = \true;
+			$hasUpdate = true;
 		}
 
 		$this->timings->stopTiming();

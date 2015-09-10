@@ -21,19 +21,14 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class TakeItemEntityPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::TAKE_ITEM_ENTITY_PACKET;
 
 	public $target;
 	public $eid;
-
-	public function pid(){
-		return Info::TAKE_ITEM_ENTITY_PACKET;
-	}
 
 	public function decode(){
 

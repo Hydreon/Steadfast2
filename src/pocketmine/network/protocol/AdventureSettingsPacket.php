@@ -21,26 +21,13 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 class AdventureSettingsPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::ADVENTURE_SETTINGS_PACKET;
 
 	public $flags;
-
-	public function pid(){
-		return Info::ADVENTURE_SETTINGS_PACKET;
-	}
 
 	public function decode(){
 

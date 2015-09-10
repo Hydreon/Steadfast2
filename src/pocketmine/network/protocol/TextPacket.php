@@ -21,12 +21,11 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class TextPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::TEXT_PACKET;
 
 	const TYPE_RAW = 0;
 	const TYPE_CHAT = 1;
@@ -39,10 +38,6 @@ class TextPacket extends DataPacket{
 	public $source;
 	public $message;
 	public $parameters = [];
-
-	public function pid(){
-		return Info::TEXT_PACKET;
-	}
 
 	public function decode(){
 		$this->type = $this->getByte();

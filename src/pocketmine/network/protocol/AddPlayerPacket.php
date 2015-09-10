@@ -21,22 +21,15 @@
 
 namespace pocketmine\network\protocol;
 
+#include <rules/DataPacket.h>
+
+#ifndef COMPILE
 use pocketmine\utils\Binary;
 
-
-
-
-
-
-
-
-
+#endif
 
 class AddPlayerPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
-
-
+	const NETWORK_ID = Info::ADD_PLAYER_PACKET;
 
 	public $uuid;
 	public $username;
@@ -50,15 +43,7 @@ class AddPlayerPacket extends DataPacket{
 	public $pitch;
 	public $yaw;
 	public $item;
-	public $meta;
 	public $metadata;
-
-	public $slim = false;
-	public $skin = null;
-
-	public function pid(){
-		return Info::ADD_PLAYER_PACKET;
-	}
 
 	public function decode(){
 

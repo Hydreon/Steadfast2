@@ -21,20 +21,11 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 class LevelEventPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::LEVEL_EVENT_PACKET;
 
 	const EVENT_SOUND_CLICK = 1000;
 	const EVENT_SOUND_CLICK_FAIL = 1001;
@@ -80,10 +71,6 @@ class LevelEventPacket extends DataPacket{
 	public $y;
 	public $z;
 	public $data;
-
-	public function pid(){
-		return Info::LEVEL_EVENT_PACKET;
-	}
 
 	public function decode(){
 

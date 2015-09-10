@@ -43,7 +43,7 @@ class PrimedTNT extends Entity implements Explosive{
 
 	protected $fuse;
 
-	public $canCollide = \false;
+	public $canCollide = false;
 
 
 	public function attack($damage, EntityDamageEvent $source){
@@ -62,7 +62,7 @@ class PrimedTNT extends Entity implements Explosive{
 
 
 	public function canCollideWith(Entity $entity){
-		return \false;
+		return false;
 	}
 
 	public function saveNBT(){
@@ -73,12 +73,12 @@ class PrimedTNT extends Entity implements Explosive{
 	public function onUpdate($currentTick){
 
 		if($this->closed){
-			return \false;
+			return false;
 		}
 
 		$this->timings->startTiming();
 
-		$tickDiff = \max(1, $currentTick - $this->lastUpdate);
+		$tickDiff = max(1, $currentTick - $this->lastUpdate);
 		$this->lastUpdate = $currentTick;
 
 		$hasUpdate = $this->entityBaseTick($tickDiff);

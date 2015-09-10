@@ -50,7 +50,7 @@ class FallingSand extends Entity{
 	protected $blockId = 0;
 	protected $damage;
 
-	public $canCollide = \false;
+	public $canCollide = false;
 
 	protected function initEntity(){
 		parent::initEntity();
@@ -74,7 +74,7 @@ class FallingSand extends Entity{
 	}
 
 	public function canCollideWith(Entity $entity){
-		return \false;
+		return false;
 	}
 
 	public function attack($damage, EntityDamageEvent $source){
@@ -84,12 +84,12 @@ class FallingSand extends Entity{
 	public function onUpdate($currentTick){
 
 		if($this->closed){
-			return \false;
+			return false;
 		}
 
 		$this->timings->startTiming();
 
-		$tickDiff = \max(1, $currentTick - $this->lastUpdate);
+		$tickDiff = max(1, $currentTick - $this->lastUpdate);
 		$this->lastUpdate = $currentTick;
 
 		$hasUpdate = $this->entityBaseTick($tickDiff);
@@ -99,9 +99,9 @@ class FallingSand extends Entity{
 				$block = $this->level->getBlock($pos = (new Vector3($this->x, $this->y, $this->z))->floor());
 				if($block->getId() != $this->blockId){
 					$this->kill();
-					return \true;
+					return true;
 				}
-				$this->level->setBlock($pos, Block::get(0), \true);
+				$this->level->setBlock($pos, Block::get(0), true);
 
 			}
 
@@ -125,10 +125,10 @@ class FallingSand extends Entity{
 				}else{
 					$this->server->getPluginManager()->callEvent($ev = new EntityBlockChangeEvent($this, $block, Block::get($this->getBlock(), $this->getDamage())));
 					if(!$ev->isCancelled()){
-						$this->getLevel()->setBlock($pos, $ev->getTo(), \true);
+						$this->getLevel()->setBlock($pos, $ev->getTo(), true);
 					}
 				}
-				$hasUpdate = \true;
+				$hasUpdate = true;
 			}
 
 			$this->updateMovement();

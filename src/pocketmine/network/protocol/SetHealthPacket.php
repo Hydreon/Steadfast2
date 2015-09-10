@@ -21,18 +21,13 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class SetHealthPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::SET_HEALTH_PACKET;
 
 	public $health;
-
-	public function pid(){
-		return Info::SET_HEALTH_PACKET;
-	}
 
 	public function decode(){
 		$this->health = $this->getInt();

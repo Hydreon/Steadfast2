@@ -21,20 +21,15 @@
 
 namespace pocketmine\network\protocol;
 
+#include <rules/DataPacket.h>
+
+#ifndef COMPILE
 use pocketmine\utils\Binary;
 
-
-
-
-
-
-
-
-
+#endif
 
 class AddEntityPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::ADD_ENTITY_PACKET;
 
 	public $eid;
 	public $type;
@@ -48,10 +43,6 @@ class AddEntityPacket extends DataPacket{
 	public $pitch;
 	public $metadata;
 	public $links = [];
-
-	public function pid(){
-		return Info::ADD_ENTITY_PACKET;
-	}
 
 	public function decode(){
 

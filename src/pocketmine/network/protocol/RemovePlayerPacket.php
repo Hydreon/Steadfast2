@@ -21,27 +21,14 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 class RemovePlayerPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::REMOVE_PLAYER_PACKET;
 
 	public $eid;
 	public $clientId;
-
-	public function pid(){
-		return Info::REMOVE_PLAYER_PACKET;
-	}
 
 	public function decode(){
 

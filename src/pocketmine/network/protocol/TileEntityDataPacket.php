@@ -21,21 +21,16 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class TileEntityDataPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::TILE_ENTITY_DATA_PACKET;
 
 	public $x;
 	public $y;
 	public $z;
 	public $namedtag;
-
-	public function pid(){
-		return Info::TILE_ENTITY_DATA_PACKET;
-	}
 
 	public function decode(){
 		$this->x = $this->getInt();

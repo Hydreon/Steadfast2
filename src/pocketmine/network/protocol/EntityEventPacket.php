@@ -21,12 +21,11 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class EntityEventPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::ENTITY_EVENT_PACKET;
 
 	const HURT_ANIMATION = 2;
 	const DEATH_ANIMATION = 3;
@@ -48,10 +47,6 @@ class EntityEventPacket extends DataPacket{
 
 	public $eid;
 	public $event;
-
-	public function pid(){
-		return Info::ENTITY_EVENT_PACKET;
-	}
 
 	public function decode(){
 		$this->eid = $this->getLong();

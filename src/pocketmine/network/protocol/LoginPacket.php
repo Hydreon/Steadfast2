@@ -21,12 +21,11 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class LoginPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::LOGIN_PACKET;
 
 	public $username;
 	public $protocol1;
@@ -39,10 +38,6 @@ class LoginPacket extends DataPacket{
 
 	public $slim = false;
 	public $skin = null;
-
-	public function pid(){
-		return Info::LOGIN_PACKET;
-	}
 
 	public function decode(){
 		$this->username = $this->getString();

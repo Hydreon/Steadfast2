@@ -25,14 +25,12 @@ namespace pocketmine\network\protocol;
 
 
 class MobEquipmentPacket extends DataPacket{
+	const NETWORK_ID = Info::MOB_EQUIPMENT_PACKET;
+
 	public $eid;
 	public $item;
 	public $slot;
 	public $selectedSlot;
-
-	public function pid() {
-		return Info::MOB_EQUIPMENT_PACKET;
-	}
 
 	public function decode(){
 		$this->eid = $this->getLong();

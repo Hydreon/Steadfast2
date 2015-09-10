@@ -21,20 +21,15 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class ContainerSetDataPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::CONTAINER_SET_DATA_PACKET;
 
 	public $windowid;
 	public $property;
 	public $value;
-
-	public function pid(){
-		return Info::CONTAINER_SET_DATA_PACKET;
-	}
 
 	public function decode(){
 

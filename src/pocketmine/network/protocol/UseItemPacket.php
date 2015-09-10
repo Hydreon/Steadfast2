@@ -21,12 +21,11 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
 
 
 class UseItemPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::USE_ITEM_PACKET;
 
 	public $x;
 	public $y;
@@ -39,10 +38,6 @@ class UseItemPacket extends DataPacket{
 	public $posX;
 	public $posY;
 	public $posZ;
-
-	public function pid(){
-		return Info::USE_ITEM_PACKET;
-	}
 
 	public function decode(){
 		$this->x = $this->getInt();
