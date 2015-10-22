@@ -410,4 +410,37 @@ class Chunk extends BaseFullChunk{
 	public function getNBT(){
 		return $this->nbt;
 	}
+
+	/**
+	 * @param int           $chunkX
+	 * @param int           $chunkZ
+	 * @param LevelProvider $provider
+	 *
+	 * @return Chunk
+	 */
+	public static function getEmptyChunk($chunkX, $chunkZ, LevelProvider $provider = null){
+		try{
+			$chunk = new Chunk($provider instanceof LevelProvider ? $provider : McRegion::class, null);
+			$chunk->x = $chunkX;
+			$chunk->z = $chunkZ;
+
+			$chunk->data = str_repeat("\x00", 16384);
+			$chunk->blocks = $chunk->data . $chunk->data;
+			$chunk->skyLight = str_repeat("\xff", 16384);
+			$chunk->blockLight = $chunk->data;
+
+			$chunk->heightMap = array_fill(0, 256, 0);
+			$chunk->biomeColors = array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a"));
+
+			$chunk->nbt->V = new Byte("V", 1);
+			$chunk->nbt->InhabitedTime = new Long("InhabitedTime", 0);
+			$chunk->nbt->TerrainGenerated = new Byte("TerrainGenerated", 0);
+			$chunk->nbt->TerrainPopulated = new Byte("TerrainPopulated", 0);
+			$chunk->nbt->LightPopulated = new Byte("LightPopulated", 0);
+
+			return $chunk;
+		}catch(\Exception $e){
+			return null;
+		}
+	}
 }

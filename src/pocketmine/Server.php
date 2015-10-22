@@ -58,14 +58,8 @@ use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\level\format\anvil\Anvil;
-use pocketmine\level\format\leveldb\LevelDB;
 use pocketmine\level\format\LevelProviderManager;
 use pocketmine\level\format\mcregion\McRegion;
-use pocketmine\level\generator\Flat;
-use pocketmine\level\generator\GenerationInstanceManager;
-use pocketmine\level\generator\GenerationRequestManager;
-use pocketmine\level\generator\Generator;
-use pocketmine\level\generator\Normal;
 use pocketmine\level\Level;
 use pocketmine\metadata\EntityMetadataStore;
 use pocketmine\metadata\LevelMetadataStore;
@@ -758,56 +752,6 @@ class Server{
 		$nbt->Motion->setTagType(NBT::TAG_Double);
 		$nbt->Rotation->setTagType(NBT::TAG_Float);
 
-		if(file_exists($path . "$name.yml")){ //Importing old PocketMine-MP files
-			$data = new Config($path . "$name.yml", Config::YAML, []);
-			$nbt["playerGameType"] = (int) $data->get("gamemode");
-			$nbt["Level"] = $data->get("position")["level"];
-			$nbt["Pos"][0] = $data->get("position")["x"];
-			$nbt["Pos"][1] = $data->get("position")["y"];
-			$nbt["Pos"][2] = $data->get("position")["z"];
-			$nbt["SpawnLevel"] = $data->get("spawn")["level"];
-			$nbt["SpawnX"] = (int) $data->get("spawn")["x"];
-			$nbt["SpawnY"] = (int) $data->get("spawn")["y"];
-			$nbt["SpawnZ"] = (int) $data->get("spawn")["z"];
-			$this->logger->notice("Old Player data found for \"" . $name . "\", upgrading profile");
-			foreach($data->get("inventory") as $slot => $item){
-				if(count($item) === 3){
-					$nbt->Inventory[$slot + 9] = new Compound("", [
-						new Short("id", $item[0]),
-						new Short("Damage", $item[1]),
-						new Byte("Count", $item[2]),
-						new Byte("Slot", $slot + 9),
-						new Byte("TrueSlot", $slot + 9)
-					]);
-				}
-			}
-			foreach($data->get("hotbar") as $slot => $itemSlot){
-				if(isset($nbt->Inventory[$itemSlot + 9])){
-					$item = $nbt->Inventory[$itemSlot + 9];
-					$nbt->Inventory[$slot] = new Compound("", [
-						new Short("id", $item["id"]),
-						new Short("Damage", $item["Damage"]),
-						new Byte("Count", $item["Count"]),
-						new Byte("Slot", $slot),
-						new Byte("TrueSlot", $item["TrueSlot"])
-					]);
-				}
-			}
-			foreach($data->get("armor") as $slot => $item){
-				if(count($item) === 2){
-					$nbt->Inventory[$slot + 100] = new Compound("", [
-						new Short("id", $item[0]),
-						new Short("Damage", $item[1]),
-						new Byte("Count", 1),
-						new Byte("Slot", $slot + 100)
-					]);
-				}
-			}
-			foreach($data->get("achievements") as $achievement => $status){
-				$nbt->Achievements[$achievement] = new Byte($achievement, $status == true ? 1 : 0);
-			}
-			unlink($path . "$name.yml");
-		}
 		// $this->saveOfflinePlayerData($name, $nbt);
 
 		return $nbt;
@@ -1041,24 +985,16 @@ class Server{
 	 *
 	 * @param string $name
 	 * @param int    $seed
-	 * @param string $generator Class name that extends pocketmine\level\generator\Generator
 	 * @param array  $options
 	 *
 	 * @return bool
 	 */
-	public function generateLevel($name, $seed = null, $generator = null, $options = []){
+	public function generateLevel($name, $seed = null, $options = []){
 		if(trim($name) === "" or $this->isLevelGenerated($name)){
 			return false;
 		}
 
 		$seed = $seed === null ? (PHP_INT_SIZE === 8 ? unpack("N", @Utils::getRandomBytes(4, false))[1] << 32 >> 32 : unpack("N", @Utils::getRandomBytes(4, false))[1]) : (int) $seed;
-
-		if($generator !== null and class_exists($generator) and is_subclass_of($generator, Generator::class)){
-			$generator = new $generator($options);
-		}else{
-			$options["preset"] = $this->getConfigString("generator-settings", "");
-			$generator = Generator::getGenerator($this->getLevelType());
-		}
 
 		if(($provider = LevelProviderManager::getProviderByName($providerName = $this->getProperty("level-settings.default-format", "mcregion"))) === null){
 			$provider = LevelProviderManager::getProviderByName($providerName = "mcregion");
@@ -1067,7 +1003,7 @@ class Server{
 		try{
 			$path = $this->getDataPath() . "worlds/" . $name . "/";
 			/** @var \pocketmine\level\format\LevelProvider $provider */
-			$provider::generate($path, $name, $seed, $generator, $options);
+			$provider::generate($path, $name, $seed, $options);
 
 			$level = new Level($this, $name, $path, $provider);
 			$this->levels[$level->getId()] = $level;
@@ -1085,29 +1021,25 @@ class Server{
 
 		$this->getPluginManager()->callEvent(new LevelLoadEvent($level));
 
-		$this->getLogger()->notice("Spawn terrain for level \"$name\" is being generated in the background");
-
 		$centerX = $level->getSpawnLocation()->getX() >> 4;
 		$centerZ = $level->getSpawnLocation()->getZ() >> 4;
 
 		$order = [];
 
-		for($X = -4; $X <= 4; ++$X){
-			for($Z = -4; $Z <= 4; ++$Z){
+		for($X = -3; $X <= 3; ++$X){
+			for($Z = -3; $Z <= 3; ++$Z){
 				$distance = $X ** 2 + $Z ** 2;
 				$chunkX = $X + $centerX;
 				$chunkZ = $Z + $centerZ;
-				$index = PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ);
+				$index = Level::chunkHash($chunkX, $chunkZ);
 				$order[$index] = $distance;
 			}
 		}
 
 		asort($order);
 
-		$chunkX = $chunkZ = null;
-
 		foreach($order as $index => $distance){
-			if(PHP_INT_SIZE === 8){ $chunkX = ($index >> 32) << 32 >> 32;  $chunkZ = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $chunkX,  $chunkZ) = explode(":", $index);  $chunkX = (int)  $chunkX;  $chunkZ = (int)  $chunkZ;};
+			Level::getXZ($index, $chunkX, $chunkZ);
 			$level->generateChunk($chunkX, $chunkZ, true);
 		}
 
@@ -1594,29 +1526,12 @@ class Server{
 
 		$this->enablePlugins(PluginLoadOrder::STARTUP);
 
-		if($this->getProperty("chunk-generation.use-async", true)){
-			$this->generationManager = new GenerationRequestManager($this);
-		}else{
-			$this->generationManager = new GenerationInstanceManager($this);
-		}
-
 		LevelProviderManager::addProvider($this, Anvil::class);
 		LevelProviderManager::addProvider($this, McRegion::class);
-		if(extension_loaded("leveldb")){
-			$this->logger->debug("Enabling LevelDB support");
-			LevelProviderManager::addProvider($this, LevelDB::class);
-		}
-
-
-		Generator::addGenerator(Flat::class, "flat");
-		Generator::addGenerator(Normal::class, "normal");
-		Generator::addGenerator(Normal::class, "default");
 
 		foreach((array) $this->getProperty("worlds", []) as $name => $worldSetting){
 			if($this->loadLevel($name) === false){
 				$seed = $this->getProperty("worlds.$name.seed", time());
-				$options = explode(":", $this->getProperty("worlds.$name.generator", Generator::getGenerator("default")));
-				$generator = Generator::getGenerator(array_shift($options));
 				if(count($options) > 0){
 					$options = [
 						"preset" => implode(":", $options),
@@ -1625,7 +1540,7 @@ class Server{
 					$options = [];
 				}
 
-				$this->generateLevel($name, $seed, $generator, $options);
+				$this->generateLevel($name, $seed, $options);
 			}
 		}
 
@@ -1945,10 +1860,6 @@ class Server{
 				$this->unloadLevel($level, true);
 			}
 
-			if($this->generationManager instanceof GenerationRequestManager){
-				$this->generationManager->shutdown();
-			}
-
 			HandlerList::unregisterAll();
 
 			$this->scheduler->cancelAllTasks();
@@ -1973,10 +1884,8 @@ class Server{
 	 * Starts the PocketMine-MP server and starts processing ticks and packets
 	 */
 	public function start(){
-
 		if($this->getConfigBoolean("enable-query", true) === true){
 			$this->queryHandler = new QueryHandler();
-
 		}
 
 		foreach($this->getIPBans()->getEntries() as $entry){
@@ -2354,16 +2263,6 @@ class Server{
 				}
 			}
 		}
-
-		Timings::$generationTimer->startTiming();
-		try{
-			$this->generationManager->process();
-		}catch(\Exception $e){
-			if($this->logger instanceof MainLogger){
-				$this->logger->logException($e);
-			}
-		}
-		Timings::$generationTimer->stopTiming();
 
 		if(($this->tickCounter % 100) === 0){
 			foreach($this->levels as $level){

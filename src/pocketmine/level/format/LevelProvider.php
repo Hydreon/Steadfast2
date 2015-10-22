@@ -81,22 +81,9 @@ interface LevelProvider{
 	 * @param string  $path
 	 * @param string  $name
 	 * @param int     $seed
-	 * @param string  $generator
 	 * @param array[] $options
 	 */
-	public static function generate($path, $name, $seed, $generator, array $options = []);
-
-	/**
-	 * Returns the generator name
-	 *
-	 * @return string
-	 */
-	public function getGenerator();
-
-	/**
-	 * @return array
-	 */
-	public function getGeneratorOptions();
+	public static function generate($path, $name, $seed, array $options = []);
 
 	/**
 	 * Gets the Chunk object

@@ -20,7 +20,7 @@
 */
 
 /**
- * All Level related classes are here, like Generators, Populators, Noise, ...
+ * All Level related classes are here
  */
 namespace pocketmine\level;
 
@@ -66,7 +66,6 @@ use pocketmine\level\format\FullChunk;
 use pocketmine\level\format\generic\BaseLevelProvider;
 use pocketmine\level\format\generic\EmptyChunkSection;
 use pocketmine\level\format\LevelProvider;
-use pocketmine\level\generator\Generator;
 use pocketmine\level\particle\Particle;
 use pocketmine\level\sound\Sound;
 use pocketmine\math\AxisAlignedBB;
@@ -179,8 +178,6 @@ class Level implements ChunkManager, Metadatable{
 	private $chunkSendQueue = [];
 	private $chunkSendTasks = [];
 
-	private $chunkGenerationQueue = [];
-
 	private $autoSave = true;
 
 	/** @var BlockMetadataStore */
@@ -228,7 +225,6 @@ class Level implements ChunkManager, Metadatable{
 	/** @var LevelTimings */
 	public $timings;
 
-	protected $generator;
 
 	/**
 	 * Returns the chunk unique hash/key
@@ -295,7 +291,6 @@ class Level implements ChunkManager, Metadatable{
 			throw new LevelException("Provider is not a subclass of LevelProvider");
 		}
 		$this->server->getLogger()->info("Preparing level \"" . $this->provider->getName() . "\"");
-		$this->generator = Generator::getGenerator($this->provider->getGenerator());
 
 		$this->blockOrder = $provider::getProviderOrder();
 		$this->useSections = $provider::usesChunkSection();
@@ -316,7 +311,6 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public function initLevel(){
-		$this->server->getGenerationManager()->openLevel($this, $this->generator, $this->provider->getGeneratorOptions());
 	}
 
 	/**
@@ -350,7 +344,6 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public function close(){
-
 		if($this->getAutoSave()){
 			$this->save();
 		}
@@ -359,7 +352,6 @@ class Level implements ChunkManager, Metadatable{
 			$this->unloadChunk($chunk->getX(), $chunk->getZ(), false);
 		}
 
-		$this->server->getGenerationManager()->closeLevel($this);
 		$this->provider->close();
 		$this->provider = null;
 		$this->blockMetadata = null;

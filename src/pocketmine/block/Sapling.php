@@ -22,8 +22,6 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\level\generator\object\Tree;
-use pocketmine\level\Level;
 use pocketmine\Player;
 use pocketmine\utils\Random;
 
@@ -72,41 +70,10 @@ class Sapling extends Flowable{
 	}
 
 	public function onActivate(Item $item, Player $player = null){
-		if($item->getId() === Item::DYE and $item->getDamage() === 0x0F){ //Bonemeal
-			//TODO: change log type
-			Tree::growTree($this->getLevel(), $this->x, $this->y, $this->z, new Random(mt_rand()), $this->meta & 0x07);
-			if(($player->gamemode & 0x01) === 0){
-				$item->count--;
-			}
-
-			return true;
-		}
-
 		return false;
 	}
 
 	public function onUpdate($type){
-		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if($this->getSide(0)->isTransparent() === true){
-				$this->getLevel()->useBreakOn($this);
-
-				return Level::BLOCK_UPDATE_NORMAL;
-			}
-		}elseif($type === Level::BLOCK_UPDATE_RANDOM){ //Growth
-			if(mt_rand(1, 7) === 1){
-				if(($this->meta & 0x08) === 0x08){
-					Tree::growTree($this->getLevel(), $this->x, $this->y, $this->z, new Random(mt_rand()), $this->meta & 0x07);
-				}else{
-					$this->meta |= 0x08;
-					$this->getLevel()->setBlock($this, $this, true);
-
-					return Level::BLOCK_UPDATE_RANDOM;
-				}
-			}else{
-				return Level::BLOCK_UPDATE_RANDOM;
-			}
-		}
-
 		return false;
 	}
 

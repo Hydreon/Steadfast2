@@ -22,7 +22,6 @@
 namespace pocketmine\level\format\generic;
 
 use pocketmine\level\format\LevelProvider;
-use pocketmine\level\generator\Generator;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\NBT;
@@ -52,14 +51,6 @@ abstract class BaseLevelProvider implements LevelProvider{
 			$this->levelData = $levelData->Data;
 		}else{
 			throw new LevelException("Invalid level.dat");
-		}
-
-		if(!isset($this->levelData->generatorName)){
-			$this->levelData->generatorName = new String("generatorName", Generator::getGenerator("DEFAULT"));
-		}
-
-		if(!isset($this->levelData->generatorOptions)){
-			$this->levelData->generatorOptions = new String("generatorOptions", "");
 		}
 	}
 
@@ -118,7 +109,7 @@ abstract class BaseLevelProvider implements LevelProvider{
 
 	public function saveLevelData(){
 		$nbt = new NBT(NBT::BIG_ENDIAN);
-		$nbt->setData(new Compound(null, [
+		$nbt->setData(new Compound("", [
 			"Data" => $this->levelData
 		]));
 		$buffer = $nbt->writeCompressed();
