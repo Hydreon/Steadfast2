@@ -668,15 +668,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->data = $payload;
 		$pk->encode();
 
-		$bt = new BatchPacket();
-
-		$str = $pk->buffer;
-
-		$bt->payload = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
-		$bt->encode();
-		$bt->isEncoded = true;
-
-		$this->dataPacket($bt);
+		$this->dataPacket($pk);
 
 		if($this->spawned){
 			foreach($this->level->getChunkEntities($x, $z) as $entity){
