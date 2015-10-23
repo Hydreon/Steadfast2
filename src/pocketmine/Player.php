@@ -666,9 +666,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->chunkZ = $z;
 		$pk->order = $ordering;
 		$pk->data = $payload;
-		$pk->encode();
-
-		$this->dataPacket($pk);
+		$this->batchDataPacket($pk);
 
 		if($this->spawned){
 			foreach($this->level->getChunkEntities($x, $z) as $entity){
@@ -2234,7 +2232,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				break;
 
-			case ProtocolInfo::PLAYER_ARMOR_EQUIPMENT_PACKET:
+			case ProtocolInfo::MOB_ARMOR_EQUIPMENT_PACKET:
 				break;
 
 			case ProtocolInfo::INTERACT_PACKET:

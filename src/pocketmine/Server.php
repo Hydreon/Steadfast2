@@ -577,13 +577,6 @@ class Server{
 	}
 
 	/**
-	 * @return GenerationRequestManager
-	 */
-	public function getGenerationManager(){
-		return $this->generationManager;
-	}
-
-	/**
 	 * @return int
 	 */
 	public function getTick(){
@@ -1590,8 +1583,8 @@ class Server{
 	}
 
 	/**
-	 * @param               $message
-	 * @param Player[]      $recipients
+	 * @param string        $message
+	 * @param Player[]|null $recipients
 	 *
 	 * @return int
 	 */
@@ -1604,6 +1597,60 @@ class Server{
 		foreach($recipients as $recipient){
 			$recipient->sendMessage($message);
 		}
+
+		return count($recipients);
+	}
+
+	/**
+	 * @param string        $tip
+	 * @param Player[]|null $recipients
+	 *
+	 * @return int
+	 */
+	public function broadcastTip($tip, $recipients = null){
+		if(!is_array($recipients)){
+			/** @var Player[] $recipients */
+			$recipients = [];
+
+			foreach($this->pluginManager->getPermissionSubscriptions(self::BROADCAST_CHANNEL_USERS) as $permissible){
+				if($permissible instanceof Player and $permissible->hasPermission(self::BROADCAST_CHANNEL_USERS)){
+					$recipients[spl_object_hash($permissible)] = $permissible; // do not send messages directly, or some might be repeated
+				}
+			}
+		}
+
+		/** @var Player[] $recipients */
+		foreach($recipients as $recipient){
+			$recipient->sendTip($tip);
+		}
+
+		return count($recipients);
+	}
+
+	/**
+	 * @param string        $popup
+	 * @param Player[]|null $recipients
+	 *
+	 * @return int
+	 */
+	public function broadcastPopup($popup, $recipients = null){
+		if(!is_array($recipients)){
+			/** @var Player[] $recipients */
+			$recipients = [];
+
+			foreach($this->pluginManager->getPermissionSubscriptions(self::BROADCAST_CHANNEL_USERS) as $permissible){
+				if($permissible instanceof Player and $permissible->hasPermission(self::BROADCAST_CHANNEL_USERS)){
+					$recipients[spl_object_hash($permissible)] = $permissible; // do not send messages directly, or some might be repeated
+				}
+			}
+		}
+
+		/** @var Player[] $recipients */
+		foreach($recipients as $recipient){
+			$recipient->sendPopup($popup);
+		}
+
+		return count($recipients);
 	}
 
 	/**
@@ -1667,9 +1714,9 @@ class Server{
 				if(!$p->isEncoded){
 					$p->encode();
 				}
-				$str .= $p->buffer;
+				$str .= Binary::writeInt(strlen($p->buffer)) . $p->buffer;
 			}else{
-				$str .= $p;
+				$str .= Binary::writeInt(strlen($p)) . $p;
 			}
 		}
 
