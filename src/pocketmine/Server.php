@@ -1654,7 +1654,7 @@ class Server{
 		foreach(explode(";", $permissions) as $permission){
 			foreach($this->pluginManager->getPermissionSubscriptions($permission) as $permissible){
 				if($permissible instanceof CommandSender and $permissible->hasPermission($permission)){
-					$recipients[\spl_object_hash($permissible)] = $permissible; // do not send messages directly, or some might be repeated
+					$recipients[spl_object_hash($permissible)] = $permissible; // do not send messages directly, or some might be repeated
 				}
 			}
 		}
@@ -1711,10 +1711,10 @@ class Server{
 
 		$targets = [];
 		foreach($players as $p){
-			$targets[] = $this->identifiers[\spl_object_hash($p)];
+			$targets[] = $this->identifiers[spl_object_hash($p)];
 		}
 
-		$this->broadcastPacketsCallback(\zlib_encode($str, ZLIB_ENCODING_DEFLATE, $this->networkCompressionLevel), $targets);
+		$this->broadcastPacketsCallback(zlib_encode($str, ZLIB_ENCODING_DEFLATE, $this->networkCompressionLevel), $targets);
 	}
 
 	public function broadcastPacketsCallback($data, array $identifiers){
@@ -2143,7 +2143,7 @@ class Server{
 
 	public function addPlayer($identifier, Player $player){
 		$this->players[$identifier] = $player;
-		$this->identifiers[\spl_object_hash($player)] = $identifier;
+		$this->identifiers[spl_object_hash($player)] = $identifier;
 	}
 
 	private function checkTickUpdates($currentTick){

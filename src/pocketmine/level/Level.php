@@ -1939,7 +1939,7 @@ class Level implements ChunkManager, Metadatable{
 			$this->chunkSendQueue[$index] = [];
 		}
 
-		$this->chunkSendQueue[$index][\spl_object_hash($player)] = $player;
+		$this->chunkSendQueue[$index][spl_object_hash($player)] = $player;
 	}
 
 	protected function processChunkRequest(){

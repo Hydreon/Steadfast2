@@ -321,9 +321,9 @@ class RegionLoader{
 
 	protected function writeLocationIndex($index){
 		fseek($this->filePointer, $index << 2);
-		\fwrite($this->filePointer, pack("N", ($this->locationTable[$index][0] << 8) | $this->locationTable[$index][1]), 4);
+		fwrite($this->filePointer, pack("N", ($this->locationTable[$index][0] << 8) | $this->locationTable[$index][1]), 4);
 		fseek($this->filePointer, 4096 + ($index << 2));
-		\fwrite($this->filePointer, pack("N", $this->locationTable[$index][2]), 4);
+		fwrite($this->filePointer, pack("N", $this->locationTable[$index][2]), 4);
 	}
 
 	protected function createBlank(){

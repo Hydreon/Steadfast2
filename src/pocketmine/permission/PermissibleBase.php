@@ -131,7 +131,7 @@ class PermissibleBase implements Permissible{
 		}
 
 		$result = new PermissionAttachment($plugin, $this->parent);
-		$this->attachments[\spl_object_hash($result)] = $result;
+		$this->attachments[spl_object_hash($result)] = $result;
 		if($name !== null and $value !== null){
 			$result->setPermission($name, $value);
 		}
@@ -151,8 +151,8 @@ class PermissibleBase implements Permissible{
 			throw new \InvalidStateException("Attachment cannot be null");
 		}
 
-		if(isset($this->attachments[\spl_object_hash($attachment)])){
-			unset($this->attachments[\spl_object_hash($attachment)]);
+		if(isset($this->attachments[spl_object_hash($attachment)])){
+			unset($this->attachments[spl_object_hash($attachment)]);
 			if(($ex = $attachment->getRemovalCallback()) !== null){
 				$ex->attachmentRemoved($attachment);
 			}

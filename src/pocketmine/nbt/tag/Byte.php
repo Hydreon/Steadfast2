@@ -32,10 +32,10 @@ class Byte extends NamedTag{
 	}
 
 	public function read(NBT $nbt){
-		$this->value = \ord($nbt->get(1));
+		$this->value = ord($nbt->get(1));
 	}
 
 	public function write(NBT $nbt){
-		$nbt->buffer .= \chr($this->value);
+		$nbt->buffer .= chr($this->value);
 	}
 }

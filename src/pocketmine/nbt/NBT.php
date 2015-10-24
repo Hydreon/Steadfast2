@@ -558,7 +558,7 @@ class NBT{
 	}
 
 	public function writeTag(Tag $tag){
-		$this->buffer .= \chr($tag->getType());
+		$this->buffer .= chr($tag->getType());
 		if($tag instanceof NamedTAG){
 			$this->putString($tag->getName());
 		}
@@ -566,27 +566,27 @@ class NBT{
 	}
 
 	public function getByte(){
-		return \ord($this->get(1));
+		return ord($this->get(1));
 	}
 
 	public function putByte($v){
-		$this->buffer .= \chr($v);
+		$this->buffer .= chr($v);
 	}
 
 	public function getShort(){
-		return $this->endianness === self::BIG_ENDIAN ? \unpack("n", $this->get(2))[1] : \unpack("v", $this->get(2))[1];
+		return $this->endianness === self::BIG_ENDIAN ? unpack("n", $this->get(2))[1] : unpack("v", $this->get(2))[1];
 	}
 
 	public function putShort($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? \pack("n", $v) : \pack("v", $v);
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? pack("n", $v) : pack("v", $v);
 	}
 
 	public function getInt(){
-		return $this->endianness === self::BIG_ENDIAN ? (\PHP_INT_SIZE === 8 ? \unpack("N", $this->get(4))[1] << 32 >> 32 : \unpack("N", $this->get(4))[1]) : (\PHP_INT_SIZE === 8 ? \unpack("V", $this->get(4))[1] << 32 >> 32 : \unpack("V", $this->get(4))[1]);
+		return $this->endianness === self::BIG_ENDIAN ? (PHP_INT_SIZE === 8 ? unpack("N", $this->get(4))[1] << 32 >> 32 : unpack("N", $this->get(4))[1]) : (PHP_INT_SIZE === 8 ? unpack("V", $this->get(4))[1] << 32 >> 32 : unpack("V", $this->get(4))[1]);
 	}
 
 	public function putInt($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? \pack("N", $v) : \pack("V", $v);
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? pack("N", $v) : pack("V", $v);
 	}
 
 	public function getLong(){
@@ -598,27 +598,27 @@ class NBT{
 	}
 
 	public function getFloat(){
-		return $this->endianness === self::BIG_ENDIAN ? (\ENDIANNESS === 0 ? \unpack("f", $this->get(4))[1] : \unpack("f", \strrev($this->get(4)))[1]) : (\ENDIANNESS === 0 ? \unpack("f", \strrev($this->get(4)))[1] : \unpack("f", $this->get(4))[1]);
+		return $this->endianness === self::BIG_ENDIAN ? (ENDIANNESS === 0 ? unpack("f", $this->get(4))[1] : unpack("f", strrev($this->get(4)))[1]) : (ENDIANNESS === 0 ? unpack("f", strrev($this->get(4)))[1] : unpack("f", $this->get(4))[1]);
 	}
 
 	public function putFloat($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? (\ENDIANNESS === 0 ? \pack("f", $v) : \strrev(\pack("f", $v))) : (\ENDIANNESS === 0 ? \strrev(\pack("f", $v)) : \pack("f", $v));
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? (ENDIANNESS === 0 ? pack("f", $v) : strrev(pack("f", $v))) : (ENDIANNESS === 0 ? strrev(pack("f", $v)) : pack("f", $v));
 	}
 
 	public function getDouble(){
-		return $this->endianness === self::BIG_ENDIAN ? (\ENDIANNESS === 0 ? \unpack("d", $this->get(8))[1] : \unpack("d", \strrev($this->get(8)))[1]) : (\ENDIANNESS === 0 ? \unpack("d", \strrev($this->get(8)))[1] : \unpack("d", $this->get(8))[1]);
+		return $this->endianness === self::BIG_ENDIAN ? (ENDIANNESS === 0 ? unpack("d", $this->get(8))[1] : unpack("d", strrev($this->get(8)))[1]) : (ENDIANNESS === 0 ? unpack("d", strrev($this->get(8)))[1] : unpack("d", $this->get(8))[1]);
 	}
 
 	public function putDouble($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? (\ENDIANNESS === 0 ? \pack("d", $v) : \strrev(\pack("d", $v))) : (\ENDIANNESS === 0 ? \strrev(\pack("d", $v)) : \pack("d", $v));
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? (ENDIANNESS === 0 ? pack("d", $v) : strrev(pack("d", $v))) : (ENDIANNESS === 0 ? strrev(pack("d", $v)) : pack("d", $v));
 	}
 
 	public function getString(){
-		return $this->get($this->endianness === 1 ? \unpack("n", $this->get(2))[1] : \unpack("v", $this->get(2))[1]);
+		return $this->get($this->endianness === 1 ? unpack("n", $this->get(2))[1] : unpack("v", $this->get(2))[1]);
 	}
 
 	public function putString($v){
-		$this->buffer .= $this->endianness === 1 ? \pack("n", \strlen($v)) : \pack("v", \strlen($v));
+		$this->buffer .= $this->endianness === 1 ? pack("n", strlen($v)) : pack("v", strlen($v));
 		$this->buffer .= $v;
 	}
 

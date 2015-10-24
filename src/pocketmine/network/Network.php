@@ -159,7 +159,7 @@ class Network {
 	 * @param SourceInterface $interface
 	 */
 	public function registerInterface(SourceInterface $interface) {
-		$this->interfaces[$hash = \spl_object_hash($interface)] = $interface;
+		$this->interfaces[$hash = spl_object_hash($interface)] = $interface;
 		if($interface instanceof AdvancedSourceInterface) {
 			$this->advancedInterfaces[$hash] = $interface;
 			$interface->setNetwork($this);
@@ -171,7 +171,7 @@ class Network {
 	 * @param SourceInterface $interface
 	 */
 	public function unregisterInterface(SourceInterface $interface) {
-		unset($this->interfaces[$hash = \spl_object_hash($interface)], $this->advancedInterfaces[$hash]);
+		unset($this->interfaces[$hash = spl_object_hash($interface)], $this->advancedInterfaces[$hash]);
 	}
 
 	/**
