@@ -321,9 +321,9 @@ class RegionLoader{
 
 	protected function writeLocationIndex($index){
 		fseek($this->filePointer, $index << 2);
-		fwrite($this->filePointer, Binary::writeInt(($this->locationTable[$index][0] << 8) | $this->locationTable[$index][1]), 4);
+		\fwrite($this->filePointer, pack("N", ($this->locationTable[$index][0] << 8) | $this->locationTable[$index][1]), 4);
 		fseek($this->filePointer, 4096 + ($index << 2));
-		fwrite($this->filePointer, Binary::writeInt($this->locationTable[$index][2]), 4);
+		\fwrite($this->filePointer, pack("N", $this->locationTable[$index][2]), 4);
 	}
 
 	protected function createBlank(){
@@ -333,13 +333,13 @@ class RegionLoader{
 		$table = "";
 		for($i = 0; $i < 1024; ++$i){
 			$this->locationTable[$i] = [0, 0];
-			$table .= Binary::writeInt(0);
+			$table .= pack("N", 0);
 		}
 
 		$time = time();
 		for($i = 0; $i < 1024; ++$i){
 			$this->locationTable[$i][2] = $time;
-			$table .= Binary::writeInt($time);
+			$table .= pack("N", $time);
 		}
 
 		fwrite($this->filePointer, $table, 4096 * 2);

@@ -202,9 +202,6 @@ class Server{
 	private $networkCompressionAsync = true;
 	public $networkCompressionLevel = 7;
 
-	private $autoTickRate = true;
-	private $forceLanguage = false;
-
 	private $serverID;
 
 	private $autoloader;
@@ -1397,14 +1394,6 @@ class Server{
 
 		ServerScheduler::$WORKERS = 4;
 
-		if($this->getProperty("network.batch-threshold", 256) >= 0){
-			Network::$BATCH_THRESHOLD = (int) $this->getProperty("network.batch-threshold", 256);
-		}else{
-			Network::$BATCH_THRESHOLD = -1;
-		}
-		$this->networkCompressionLevel = $this->getProperty("network.compression-level", 7);
-		$this->networkCompressionAsync = $this->getProperty("network.async-compression", true);
-
 		$this->scheduler = new ServerScheduler();
 
 		if($this->getConfigBoolean("enable-rcon", false) === true){
@@ -1706,7 +1695,7 @@ class Server{
 	 * @param DataPacket[]|string $packets
 	 * @param bool                 $forceSync
 	 */
-	public function batchPackets(array $players, array $packets, $forceSync = false){
+	public function batchPackets(array $players, array $packets, $forceSync = true){
 		$str = "";
 
 		foreach($packets as $p){
@@ -1725,12 +1714,7 @@ class Server{
 			$targets[] = $this->identifiers[\spl_object_hash($p)];
 		}
 
-		if(!$forceSync and $this->networkCompressionAsync){
-			$task = new CompressBatchedTask($str, $targets, $this->networkCompressionLevel);
-			$this->getScheduler()->scheduleAsyncTask($task);
-		}else{
-			$this->broadcastPacketsCallback(\zlib_encode($str, ZLIB_ENCODING_DEFLATE, $this->networkCompressionLevel), $targets);
-		}
+		$this->broadcastPacketsCallback(\zlib_encode($str, ZLIB_ENCODING_DEFLATE, $this->networkCompressionLevel), $targets);
 	}
 
 	public function broadcastPacketsCallback($data, array $identifiers){

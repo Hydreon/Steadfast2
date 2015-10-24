@@ -199,7 +199,7 @@ class Vector3{
 	}
 
 	public function lengthSquared(){
-		return $this->x * $this->x + $this->y * $this->y + $this->z * $this->z;
+		return $this->x ** 2 + $this->y ** 2 + $this->z ** 2;
 	}
 
 	/**
@@ -244,7 +244,7 @@ class Vector3{
 		$yDiff = $v->y - $this->y;
 		$zDiff = $v->z - $this->z;
 
-		if(($xDiff * $xDiff) < 0.0000001){
+		if(($xDiff ** 2) < 1){
 			return null;
 		}
 

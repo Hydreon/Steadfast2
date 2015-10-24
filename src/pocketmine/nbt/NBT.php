@@ -558,7 +558,7 @@ class NBT{
 	}
 
 	public function writeTag(Tag $tag){
-		$this->putByte($tag->getType());
+		$this->buffer .= \chr($tag->getType());
 		if($tag instanceof NamedTAG){
 			$this->putString($tag->getName());
 		}
@@ -566,27 +566,27 @@ class NBT{
 	}
 
 	public function getByte(){
-		return Binary::readByte($this->get(1));
+		return \ord($this->get(1));
 	}
 
 	public function putByte($v){
-		$this->buffer .= Binary::writeByte($v);
+		$this->buffer .= \chr($v);
 	}
 
 	public function getShort(){
-		return $this->endianness === self::BIG_ENDIAN ? Binary::readShort($this->get(2)) : Binary::readLShort($this->get(2));
+		return $this->endianness === self::BIG_ENDIAN ? \unpack("n", $this->get(2))[1] : \unpack("v", $this->get(2))[1];
 	}
 
 	public function putShort($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? Binary::writeShort($v) : Binary::writeLShort($v);
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? \pack("n", $v) : \pack("v", $v);
 	}
 
 	public function getInt(){
-		return $this->endianness === self::BIG_ENDIAN ? Binary::readInt($this->get(4)) : Binary::readLInt($this->get(4));
+		return $this->endianness === self::BIG_ENDIAN ? (\PHP_INT_SIZE === 8 ? \unpack("N", $this->get(4))[1] << 32 >> 32 : \unpack("N", $this->get(4))[1]) : (\PHP_INT_SIZE === 8 ? \unpack("V", $this->get(4))[1] << 32 >> 32 : \unpack("V", $this->get(4))[1]);
 	}
 
 	public function putInt($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? Binary::writeInt($v) : Binary::writeLInt($v);
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? \pack("N", $v) : \pack("V", $v);
 	}
 
 	public function getLong(){
@@ -598,27 +598,27 @@ class NBT{
 	}
 
 	public function getFloat(){
-		return $this->endianness === self::BIG_ENDIAN ? Binary::readFloat($this->get(4)) : Binary::readLFloat($this->get(4));
+		return $this->endianness === self::BIG_ENDIAN ? (\ENDIANNESS === 0 ? \unpack("f", $this->get(4))[1] : \unpack("f", \strrev($this->get(4)))[1]) : (\ENDIANNESS === 0 ? \unpack("f", \strrev($this->get(4)))[1] : \unpack("f", $this->get(4))[1]);
 	}
 
 	public function putFloat($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? Binary::writeFloat($v) : Binary::writeLFloat($v);
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? (\ENDIANNESS === 0 ? \pack("f", $v) : \strrev(\pack("f", $v))) : (\ENDIANNESS === 0 ? \strrev(\pack("f", $v)) : \pack("f", $v));
 	}
 
 	public function getDouble(){
-		return $this->endianness === self::BIG_ENDIAN ? Binary::readDouble($this->get(8)) : Binary::readLDouble($this->get(8));
+		return $this->endianness === self::BIG_ENDIAN ? (\ENDIANNESS === 0 ? \unpack("d", $this->get(8))[1] : \unpack("d", \strrev($this->get(8)))[1]) : (\ENDIANNESS === 0 ? \unpack("d", \strrev($this->get(8)))[1] : \unpack("d", $this->get(8))[1]);
 	}
 
 	public function putDouble($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? Binary::writeDouble($v) : Binary::writeLDouble($v);
+		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? (\ENDIANNESS === 0 ? \pack("d", $v) : \strrev(\pack("d", $v))) : (\ENDIANNESS === 0 ? \strrev(\pack("d", $v)) : \pack("d", $v));
 	}
 
 	public function getString(){
-		return $this->get($this->getShort());
+		return $this->get($this->endianness === 1 ? \unpack("n", $this->get(2))[1] : \unpack("v", $this->get(2))[1]);
 	}
 
 	public function putString($v){
-		$this->putShort(strlen($v));
+		$this->buffer .= $this->endianness === 1 ? \pack("n", \strlen($v)) : \pack("v", \strlen($v));
 		$this->buffer .= $v;
 	}
 
