@@ -643,7 +643,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
-	public function sendChunk($x, $z, $payload, $ordering = FullChunkDataPacket::ORDER_COLUMNS){
+	public function sendChunk($x, $z, $payload){
 		if($this->connected === false){
 			return;
 		}
@@ -651,12 +651,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->usedChunks[Level::chunkHash($x, $z)] = true;
 		$this->chunkLoadCount++;
 
-		$pk = new FullChunkDataPacket();
-		$pk->chunkX = $x;
-		$pk->chunkZ = $z;
-		$pk->order = $ordering;
-		$pk->data = $payload;
-		$this->batchDataPacket($pk);
+		$pk = new BatchPacket();
+		$pk->payload = $payload;
+		$pk->encode();
+		$pk->isEncoded = true;
+		$this->dataPacket($pk);
 
 		if($this->spawned){
 			foreach($this->level->getChunkEntities($x, $z) as $entity){

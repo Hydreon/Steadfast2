@@ -30,10 +30,12 @@ use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Int;
 use pocketmine\nbt\tag\Long;
 use pocketmine\nbt\tag\String;
+use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\tile\Spawnable;
 
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\ChunkException;
+use raklib\Binary;
 
 class McRegion extends BaseLevelProvider{
 
@@ -143,7 +145,16 @@ class McRegion extends BaseLevelProvider{
 			$extraData->getBuffer() .
 			$tiles;
 
-		$this->getLevel()->chunkRequestCallback($x, $z, $ordered);
+		$pk = new FullChunkDataPacket();
+		$pk->chunkX = $x;
+		$pk->chunkZ = $z;
+		$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
+		$pk->data = $ordered;
+		$pk->encode();
+		$str = "";
+		$str .= Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
+
+		$this->getLevel()->chunkRequestCallback($x, $z, zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7));
 
 		return null;
 	}
