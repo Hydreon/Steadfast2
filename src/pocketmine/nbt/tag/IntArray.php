@@ -32,19 +32,13 @@ class IntArray extends NamedTag{
 	}
 
 	public function read(NBT $nbt){
-		 [];
-		$size = $nbt->getInt();
-		$this->value = array_values(unpack($nbt->endianness === NBT::LITTLE_ENDIAN ? "V*" : "N*", $nbt->get($size * 4)));
+		$this->value = [];
+		$size = $nbt->endianness === 1 ? (\PHP_INT_SIZE === 8 ? \unpack("N", $nbt->get(4))[1] << 32 >> 32 : \unpack("N", $nbt->get(4))[1]) : (\PHP_INT_SIZE === 8 ? \unpack("V", $nbt->get(4))[1] << 32 >> 32 : \unpack("V", $nbt->get(4))[1]);
+		$this->value = \unpack($nbt->endianness === NBT::LITTLE_ENDIAN ? "V*" : "N*", $nbt->get($size * 4));
 	}
 
 	public function write(NBT $nbt){
-		$nbt->putInt(count($this->value));
-		$nbt->put(pack($nbt->endianness === NBT::LITTLE_ENDIAN ? "V*" : "N*", ...$this->value));
-	}
-
-	public function __toString(){
-		$str = get_class($this) . "{\n";
-		$str .= implode(", ", $this->value);
-		return $str . "}";
+		$nbt->buffer .= $nbt->endianness === 1 ? \pack("N", \count($this->value)) : \pack("V", \count($this->value));
+		$nbt->buffer .= \pack($nbt->endianness === NBT::LITTLE_ENDIAN ? "V*" : "N*", ...$this->value);
 	}
 }
