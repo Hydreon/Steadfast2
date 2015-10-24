@@ -1405,12 +1405,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->entityBaseTick(1);
 
+			/*
 			if($this->speed and $this->isSurvival()){
 				$speed = sqrt($this->speed->x ** 2 + $this->speed->z ** 2);
 				if($speed > 0.45){
 					$this->highSpeedTicks += $speed > 3 ? 2 : 1;
 					if($this->highSpeedTicks > 40 and !$this->server->getAllowFlight()){
-						$this->kick("Flying is not enabled on this server");
+						//$this->kick("Flying is not enabled on this server");
 						return false;
 					}elseif($this->highSpeedTicks >= 10 and $this->highSpeedTicks % 4 === 0){
 						$this->forceMovement = $this->getPosition();
@@ -1444,6 +1445,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				++$this->inAirTicks;
 			}
+
+			*/
 
             if($this->starvationTick >= 20) {
                 $ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_CUSTOM, 1);
