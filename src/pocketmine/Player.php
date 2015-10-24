@@ -1168,7 +1168,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function addEntityMovement($entityId, $x, $y, $z, $yaw, $pitch){
-		var_dump("hi i was called");
 		$this->moveToSend[$entityId] = [$entityId, $x, $y, $z, $yaw, $yaw, $pitch];
 	}
 
@@ -1280,7 +1279,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
 						$this->teleport($ev->getTo());
 					} else {
-						$this->level->addEntityMovement($this->x >> 4, $this->z >> 4, $this->getId(), $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+						$this->level->addEntityMovement($this->x >> 4, $this->z >> 4, $this->getId(), $this->x, $this->y, $this->z, $this->yaw, $this->pitch, $this->yaw);
 					}
 				}
 			}
@@ -1557,7 +1556,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->sendNextChunk();
 		}
 
-			$pk->entities = $this->moveToSend;
 		$this->lastUpdate = $currentTick;
 
 		$this->timings->stopTiming();
@@ -1883,7 +1881,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->sendNextChunk();
 				break;
 			case ProtocolInfo::MOVE_PLAYER_PACKET:
-
 				$newPos = new Vector3($packet->x, $packet->y, $packet->z);
 
 				$revert = false;
@@ -1893,6 +1890,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 
 				if($this->forceMovement instanceof Vector3 and (($dist = $newPos->distanceSquared($this->forceMovement)) > 0.04 or $revert)){
+					$this->sendPosition($this->forceMovement, $packet->yaw, $packet->pitch);
 				}else{
 					$packet->yaw %= 360;
 					$packet->pitch %= 360;
@@ -2223,6 +2221,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->noDamageTicks = 60;
 
 						$this->setHealth($this->getMaxHealth());
+						$this->setFood(20);
+						$this->getAttribute()->resetAll();
+						$this->starvationTick = 0;
+						$this->foodTick = 0;
+						$this->lastSentVitals = 10;
+						$this->foodUsageTime = 0;
 
 						$this->removeAllEffects();
 						$this->sendData($this);
@@ -3230,6 +3234,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
+	public function sendPosition(Vector3 $pos, $yaw = null, $pitch = null, $mode = 0, array $targets = null) {
 		$yaw = $yaw === null ? $this->yaw : $yaw;
 		$pitch = $pitch === null ? $this->pitch : $pitch;
 
@@ -3238,9 +3243,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->x = $pos->x;
 		$pk->y = $pos->y + $this->getEyeHeight();
 		$pk->z = $pos->z;
+		$pk->bodyYaw = $yaw;
 		$pk->pitch = $pitch;
 		$pk->yaw = $yaw;
 		$pk->mode = $mode;
+
+		if($targets !== null) {
+			Server::broadcastPacket($targets, $pk);
+		} else {
+			$pk->eid = 0;
+			$this->dataPacket($pk);
+		}
 	}
 
 	public function teleport(Vector3 $pos, $yaw = null, $pitch = null){
