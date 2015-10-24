@@ -199,6 +199,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastMovement = 0;
 	/** @var Vector3 */
 	protected $forceMovement = null;
+    /** @var Vector3 */
+    protected $teleportPosition = null;
 	protected $connected = true;
 	protected $ip;
 	protected $removeFormat = true;
@@ -1179,154 +1181,211 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return false;
 	}
 
-	protected function processMovement($currentTick) {
-		if($this->dead or !$this->spawned or !($this->newPosition instanceof Vector3)) {
-			$diff = ($currentTick - $this->lastSpeedTick);
-			if($diff >= 10) {
-				$this->speed = new Vector3(0, 0, 0);
-			} elseif($diff > 5 and $this->speedTicks < 20) {
-				++$this->speedTicks;
-			}
+    protected function checkNearEntities($tickDiff){
+        foreach($this->level->getNearbyEntities($this->boundingBox->grow(1, 0.5, 1), $this) as $entity){
+            $entity->scheduleUpdate();
+
+            if(!$entity->isAlive()){
+                continue;
+            }
+
+            if($entity instanceof Arrow and $entity->hadCollision){
+                $item = Item::get(Item::ARROW, 0, 1);
+                if($this->isSurvival() and !$this->inventory->canAddItem($item)){
+                    continue;
+                }
+
+                $this->server->getPluginManager()->callEvent($ev = new InventoryPickupArrowEvent($this->inventory, $entity));
+                if($ev->isCancelled()){
+                    continue;
+                }
+
+                $pk = new TakeItemEntityPacket();
+                $pk->eid = $this->getId();
+                $pk->target = $entity->getId();
+                Server::broadcastPacket($entity->getViewers(), $pk);
+
+                $pk = new TakeItemEntityPacket();
+                $pk->eid = 0;
+                $pk->target = $entity->getId();
+                $this->dataPacket($pk);
+
+                $this->inventory->addItem(clone $item);
+                $entity->kill();
+            }elseif($entity instanceof DroppedItem){
+                if($entity->getPickupDelay() <= 0){
+                    $item = $entity->getItem();
+
+                    if($item instanceof Item){
+                        if($this->isSurvival() and !$this->inventory->canAddItem($item)){
+                            continue;
+                        }
+
+                        $this->server->getPluginManager()->callEvent($ev = new InventoryPickupItemEvent($this->inventory, $entity));
+                        if($ev->isCancelled()){
+                            continue;
+                        }
+
+                        switch($item->getId()){
+                            case Item::WOOD:
+                                $this->awardAchievement("mineWood");
+                                break;
+                            case Item::DIAMOND:
+                                $this->awardAchievement("diamond");
+                                break;
+                        }
+
+                        $pk = new TakeItemEntityPacket();
+                        $pk->eid = $this->getId();
+                        $pk->target = $entity->getId();
+                        Server::broadcastPacket($entity->getViewers(), $pk);
+
+                        $pk = new TakeItemEntityPacket();
+                        $pk->eid = 0;
+                        $pk->target = $entity->getId();
+                        $this->dataPacket($pk);
+
+                        $this->inventory->addItem(clone $item);
+                        $entity->kill();
+                    }
+                }
+            }
+        }
+    }
+
+    protected function processMovement($tickDiff){
+        if(!$this->isAlive() or !$this->spawned or $this->newPosition === null or $this->teleportPosition !== null){
             $this->setMoving(false);
-			return;
-		}
+            return;
+        }
 
-		$distanceSquared = $this->newPosition->distanceSquared($this);
+        $newPos = $this->newPosition;
+        $distanceSquared = $newPos->distanceSquared($this);
 
-		$revert = false;
+        $revert = false;
 
-		if($distanceSquared > 100) {
-			$revert = true;
-		} else {
-			if($this->chunk === null or !$this->chunk->isGenerated()) {
-				$chunk = $this->level->getChunk($this->newPosition->x >> 4, $this->newPosition->z >> 4);
-				if(!($chunk instanceof FullChunk) or !$chunk->isGenerated()) {
-					$revert = true;
-					$this->nextChunkOrderRun = 0;
-				} else {
-					if($this->chunk instanceof FullChunk) {
-						$this->chunk->removeEntity($this);
-					}
-					$this->chunk = $chunk;
-				}
-			}
-		}
+        if(($distanceSquared / ($tickDiff ** 2)) > 100){
+            $revert = true;
+        }else{
+            if($this->chunk === null or !$this->chunk->isGenerated()){
+                $chunk = $this->level->getChunk($newPos->x >> 4, $newPos->z >> 4, false);
+                if($chunk === null or !$chunk->isGenerated()){
+                    $revert = true;
+                    $this->nextChunkOrderRun = 0;
+                }else{
+                    if($this->chunk !== null){
+                        $this->chunk->removeEntity($this);
+                    }
+                    $this->chunk = $chunk;
+                }
+            }
+        }
 
-		if(!$revert and $distanceSquared != 0) {
-			$dx = $this->newPosition->x - $this->x;
-			$dy = $this->newPosition->y - $this->y;
-			$dz = $this->newPosition->z - $this->z;
+        if(!$revert and $distanceSquared != 0){
+            $dx = $newPos->x - $this->x;
+            $dy = $newPos->y - $this->y;
+            $dz = $newPos->z - $this->z;
 
-			$this->fastMove($dx, $dy, $dz);
+            $this->move($dx, $dy, $dz);
 
-			$diffX = $this->x - $this->newPosition->x;
-			$diffY = $this->y - $this->newPosition->y;
-			$diffZ = $this->z - $this->newPosition->z;
+            $this->x = $newPos->x;
+            $this->y = $newPos->y;
+            $this->z = $newPos->z;
 
-			if($diffY > -0.5 or $diffY < 0.5) {
-				$diffY = 0;
-			}
+            /*
 
-			$diff = $diffX ** 2 + $diffY ** 2 + $diffZ ** 2;
+            $diffX = $this->x - $newPos->x;
+            $diffY = $this->y - $newPos->y;
+            $diffZ = $this->z - $newPos->z;
 
-			if($this->isSurvival()) {
-				if(!$revert and !$this->isSleeping()) {
-					if($diff > 0.0625 and $this->checkMovement) {
-						$revert = true;
-						$this->server->getLogger()->warning($this->getName() . " moved wrongly!");
-					} elseif($diff > 0 or !$this->checkMovement) {
-						$this->x = $this->newPosition->x;
-						$this->y = $this->newPosition->y;
-						$this->z = $this->newPosition->z;
-						$radius = $this->width / 2;
-						$this->boundingBox->setBounds($this->x - $radius, $this->y, $this->z - $radius, $this->x + $radius, $this->y + $this->height, $this->z + $radius);
-					}
-				}
-			} elseif($diff > 0) {
-				$this->x = $this->newPosition->x;
-				$this->y = $this->newPosition->y;
-				$this->z = $this->newPosition->z;
-				$radius = $this->width / 2;
-				$this->boundingBox->setBounds($this->x - $radius, $this->y + $this->ySize, $this->z - $radius, $this->x + $radius, $this->y + $this->height + $this->ySize, $this->z + $radius);
-			}
-		}
+            $yS = 0.5 + $this->ySize;
+            if($diffY >= -$yS or $diffY <= $yS){
+                $diffY = 0;
+            }
 
-		$from = new Location($this->lastX, $this->lastY, $this->lastZ, $this->lastYaw, $this->lastPitch, $this->level);
-		$to = $this->getLocation();
+            $diff = ($diffX ** 2 + $diffY ** 2 + $diffZ ** 2) / ($tickDiff ** 2);
 
-		$delta = pow($this->lastX - $to->x, 2) + pow($this->lastY - $to->y, 2) + pow($this->lastZ - $to->z, 2);
-		$deltaAngle = abs($this->lastYaw - $to->yaw) + abs($this->lastPitch - $to->pitch);
+            if($this->isSurvival()){
+                if(!$revert and !$this->isSleeping()){
+                    if($diff > 0.0625){
+                        $revert = true;
+                        $this->server->getLogger()->warning($this->getServer()->getLanguage()->translateString("pocketmine.player.invalidMove", [$this->getName()]));
+                    }
+                }
+            }
 
-		if(!$revert and ($delta > (1 / 16) or $deltaAngle > 10)){
 
-			$isFirst = ($this->lastX === null or $this->lastY === null or $this->lastZ === null);
 
-			$this->lastX = $to->x;
-			$this->lastY = $to->y;
-			$this->lastZ = $to->z;
+            if($diff > 0){
+                $radius = $this->width / 2;
+                $this->boundingBox->setBounds($this->x - $radius, $this->y, $this->z - $radius, $this->x + $radius, $this->y + $this->height, $this->z + $radius);
+            }
 
-			$this->lastYaw = $to->yaw;
-			$this->lastPitch = $to->pitch;
+            */
+        }
 
-			if(!$isFirst){
-				$ev = new PlayerMoveEvent($this, $from, $to);
+        $from = new Location($this->lastX, $this->lastY, $this->lastZ, $this->lastYaw, $this->lastPitch, $this->level);
+        $to = $this->getLocation();
+
+        $delta = pow($this->lastX - $to->x, 2) + pow($this->lastY - $to->y, 2) + pow($this->lastZ - $to->z, 2);
+        $deltaAngle = abs($this->lastYaw - $to->yaw) + abs($this->lastPitch - $to->pitch);
+
+        if(!$revert and ($delta > (1 / 16) or $deltaAngle > 10)){
+
+            $isFirst = ($this->lastX === null or $this->lastY === null or $this->lastZ === null);
+
+            $this->lastX = $to->x;
+            $this->lastY = $to->y;
+            $this->lastZ = $to->z;
+
+            $this->lastYaw = $to->yaw;
+            $this->lastPitch = $to->pitch;
+
+            if(!$isFirst){
+                $ev = new PlayerMoveEvent($this, $from, $to);
                 $this->setMoving(true);
 
-				$this->server->getPluginManager()->callEvent($ev);
+                $this->server->getPluginManager()->callEvent($ev);
 
-				if(!($revert = $ev->isCancelled())){ //Yes, this is intended
-					if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
-						$this->teleport($ev->getTo());
-					} else {
-						$this->level->addEntityMovement($this->x >> 4, $this->z >> 4, $this->getId(), $this->x, $this->y, $this->z, $this->yaw, $this->pitch, $this->yaw);
-					}
-				}
-			}
+                if(!($revert = $ev->isCancelled())){ //Yes, this is intended
+                    if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
+                        $this->teleport($ev->getTo());
+                    }else{
+                        $this->level->addEntityMovement($this->x >> 4, $this->z >> 4, $this->getId(), $this->x, $this->y, $this->z, $this->yaw, $this->pitch, $this->yaw);
+                    }
+                }
+            }
 
-			$ticks = min(20, $currentTick - $this->lastSpeedTick + 0.5);
-			if($this->speedTicks > 0) {
-				$ticks += $this->speedTicks;
-			}
-			$this->speed = $from->subtract($to)->divide($ticks);
-			$this->lastSpeedTick = $currentTick;
-		} elseif($distanceSquared == 0) {
-			$this->speed = new Vector3(0, 0, 0);
+            if(!$this->isSpectator()){
+                $this->checkNearEntities($tickDiff);
+            }
+            $this->speed = $from->subtract($to);
+
+        }elseif($distanceSquared == 0){
+            $this->speed = new Vector3(0, 0, 0);
             $this->setMoving(false);
-			$this->lastSpeedTick = $currentTick;
-		}
+        }
 
-		if($this->speedTicks > 0) {
-			--$this->speedTicks;
-		}
+        if($revert){
 
-		if($revert) {
-			$this->lastX = $from->x;
-			$this->lastY = $from->y;
-			$this->lastZ = $from->z;
+            $this->lastX = $from->x;
+            $this->lastY = $from->y;
+            $this->lastZ = $from->z;
 
-			$this->lastYaw = $from->yaw;
-			$this->lastPitch = $from->pitch;
+            $this->lastYaw = $from->yaw;
+            $this->lastPitch = $from->pitch;
 
-			$pk = new MovePlayerPacket();
-			$pk->eid = 0;
-			$pk->x = $from->x;
-			$pk->y = $from->y + $this->getEyeHeight();
-			$pk->z = $from->z;
-			$pk->bodyYaw = $from->yaw;
-			$pk->pitch = $from->pitch;
-			$pk->yaw = $from->yaw;
-			$pk->teleport = true;
-			$this->directDataPacket($pk);
-			$this->forceMovement = new Vector3($from->x, $from->y, $from->z);
-		}else{
-			$this->forceMovement = null;
-			if($distanceSquared != 0 and $this->nextChunkOrderRun > 20){
-				$this->nextChunkOrderRun = 20;
-			}
-		}
+            $this->sendPosition($from, $from->yaw, $from->pitch, 1);
+            $this->forceMovement = new Vector3($from->x, $from->y, $from->z);
+        }else{
+            $this->forceMovement = null;
+            if($distanceSquared != 0 and $this->nextChunkOrderRun > 20){
+                $this->nextChunkOrderRun = 20;
+            }
+        }
 
-		$this->newPosition = null;
-	}
+        $this->newPosition = null;
+    }
 
     protected $foodTick = 0;
 
@@ -1344,23 +1403,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         return $this->moving;
     }
 
-	public function setMotion(Vector3 $mot){
-		if(parent::setMotion($mot)){
-			if($this->chunk !== null){
-				$this->level->addEntityMotion($this->chunk->getX(), $this->chunk->getZ(), $this->getId(), $this->motionX, $this->motionY, $this->motionZ);
-				$pk = new SetEntityMotionPacket();
-				$pk->entities[] = [0, $mot->x, $mot->y, $mot->z];
-				$this->dataPacket($pk);
-			}
+    public function setMotion(Vector3 $mot){
+        if(parent::setMotion($mot)){
+            if($this->chunk !== null){
+                $this->level->addEntityMotion($this->chunk->getX(), $this->chunk->getZ(), $this->getId(), $this->motionX, $this->motionY, $this->motionZ);
+                $pk = new SetEntityMotionPacket();
+                $pk->entities[] = [0, $mot->x, $mot->y, $mot->z];
+                $this->dataPacket($pk);
+            }
 
-			if($this->motionY > 0){
-				$this->startAirTicks = (-(log($this->gravity / ($this->gravity + $this->drag * $this->motionY))) / $this->drag) * 2 + 5;
-			}
+            if($this->motionY > 0){
+                $this->startAirTicks = (-(log($this->gravity / ($this->gravity + $this->drag * $this->motionY))) / $this->drag) * 2 + 5;
+            }
 
-			return true;
-		}
-		return false;
-	}
+            return true;
+        }
+        return false;
+    }
 
 	public function onUpdate($currentTick){
 		if(!$this->loggedIn){
@@ -1556,6 +1615,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 
 		$this->lastUpdate = $currentTick;
+
+        $this->checkTeleportPosition();
 
 		$this->timings->stopTiming();
 
@@ -3254,39 +3315,60 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
-	public function teleport(Vector3 $pos, $yaw = null, $pitch = null){
-		if(parent::teleport($pos, $yaw, $pitch)){
+    protected function checkTeleportPosition(){
+        if($this->teleportPosition !== null){
+            $chunkX = $this->teleportPosition->x >> 4;
+            $chunkZ = $this->teleportPosition->z >> 4;
 
-			foreach($this->windowIndex as $window){
-				if($window === $this->inventory){
-					continue;
-				}
-				$this->removeWindow($window);
-			}
+            for($X = -1; $X <= 1; ++$X){
+                for($Z = -1; $Z <= 1; ++$Z){
+                    if(!isset($this->usedChunks[$index = Level::chunkHash($chunkX + $X, $chunkZ + $Z)]) or $this->usedChunks[$index] === false){
+                        return false;
+                    }
+                }
+            }
 
-			$this->airTicks = 300;
-			$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
+            $this->sendPosition($this, null, null, 1);
+            $this->spawnToAll();
+            $this->forceMovement = $this->teleportPosition;
+            $this->teleportPosition = null;
 
-			$pk = new MovePlayerPacket();
-			$pk->eid = $this->getId();
-			$pk->x = $this->x;
-			$pk->y = $this->y + $this->getEyeHeight();
-			$pk->z = $this->z;
-			$pk->bodyYaw = 0;
-			$pk->pitch = $this->pitch;
-			$pk->yaw = $this->yaw;
-			$pk->mode = 1;
-			$pk->teleport = 1;
-			$this->directDataPacket($pk);
+            return true;
+        }
 
-			$this->resetFallDistance();
-			$this->orderChunks();
-			$this->nextChunkOrderRun = 0;
-			$this->forceMovement = new Vector3($this->x, $this->y, $this->z);
-			$this->newPosition = null;
-		}
-	}
+        return true;
+    }
 
+    public function teleport(Vector3 $pos, $yaw = null, $pitch = null){
+        if(!$this->isOnline()){
+            return;
+        }
+
+        $oldPos = $this->getPosition();
+        if(parent::teleport($pos, $yaw, $pitch)){
+
+            foreach($this->windowIndex as $window){
+                if($window === $this->inventory){
+                    continue;
+                }
+                $this->removeWindow($window);
+            }
+
+            $this->teleportPosition = new Vector3($this->x, $this->y, $this->z);
+
+            if(!$this->checkTeleportPosition()){
+                $this->forceMovement = $oldPos;
+            }else{
+                $this->despawnFromAll();
+                $this->spawnToAll();
+            }
+
+
+            $this->resetFallDistance();
+            $this->nextChunkOrderRun = 0;
+            $this->newPosition = null;
+        }
+    }
 
 	/**
 	 * @param Inventory $inventory
