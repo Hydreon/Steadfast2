@@ -1299,6 +1299,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			--$this->speedTicks;
 		}
 
+		/*
 		if($revert) {
 			$this->lastX = $from->x;
 			$this->lastY = $from->y;
@@ -1318,12 +1319,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->teleport = true;
 			$this->directDataPacket($pk);
 			$this->forceMovement = new Vector3($from->x, $from->y, $from->z);
-		}else{
+		}else{*/
 			$this->forceMovement = null;
 			if($distanceSquared != 0 and $this->nextChunkOrderRun > 20){
 				$this->nextChunkOrderRun = 20;
 			}
-		}
+		//}
 
 		$this->newPosition = null;
 	}
@@ -1978,6 +1979,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->craftingType = 0;
 
 				if($packet->face >= 0 and $packet->face <= 5){ //Use Block, place
+					$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $this->level->getBlock($blockVector), $packet->face, PlayerInteractEvent::LEFT_CLICK_BLOCK);
+					$this->server->getPluginManager()->callEvent($ev);
 					$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 
 					if($blockVector->distance($this) > 10 or ($this->isCreative() and $this->isAdventure())){
