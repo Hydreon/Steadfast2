@@ -24,14 +24,14 @@ namespace pocketmine\nbt\tag;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\Enum as TagEnum;
 
-#include <rules/NBT.h>
+use pocketmine\utils\Binary;
 
 class Enum extends NamedTag implements \ArrayAccess, \Countable{
 
 	private $tagType;
 
 	public function __construct($name = "", $value = []){
-		$this->__name = $name;
+		$this->name = $name;
 		foreach($value as $k => $v){
 			$this->{$k} = $v;
 		}

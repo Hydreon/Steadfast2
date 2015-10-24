@@ -810,16 +810,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @return bool
 	 */
 	public function batchDataPacket(DataPacket $packet){
-		if($this->connected === false){
-			return false;
-		}
-		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
-		if($ev->isCancelled()){
-			return false;
-		}
-
 		$str = "";
-
 		if($packet instanceof DataPacket){
 			if(!$packet->isEncoded){
 				$packet->encode();
@@ -830,12 +821,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 
 		$pk = new BatchPacket();
-		$pk->payload = $str;
+		$pk->payload = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
 		$pk->encode();
 		$pk->isEncoded = true;
 		$this->dataPacket($pk);
-
-		return true;
 	}
 
 	/**
@@ -1461,7 +1450,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 $this->attack(1, $ev);
                 $this->starvationTick = 0;
             }
-            if($this->getHunger() <= 0) {
+            if($this->getFood() <= 0) {
                 $this->starvationTick++;
             }
 
@@ -1479,12 +1468,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             }
 
             if($this->foodTick >= 80) {
-                if($this->getHealth() < $this->getMaxHealth() && $this->getHunger() >= 18) {
+                if($this->getHealth() < $this->getMaxHealth() && $this->getFood() >= 18) {
                     $ev = new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_EATING);
                     $this->heal(1, $ev);
                     if($this->hungerDepletion >=2) {
                         $this->subtractFood(1);
-                        $this->foodDepletion = 0;
+                        $this->hungerDepletion = 0;
                     } else {
                         $this->hungerDepletion++;
                     }
@@ -3206,7 +3195,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
     protected $hungerEnabled = false;
 
-    public function setHungerEnabled($enabled) {
+    public function setFoodEnabled($enabled) {
         $this->hungerEnabled = $enabled;
     }
 
@@ -3214,7 +3203,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         return $this->hungerEnabled;
     }
 
-    public function setHunger($amount){
+    public function setFood($amount){
         if($this->spawned === true){
             $pk = new UpdateAttributesPacket();
             $pk->minValue = 0;
@@ -3226,15 +3215,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         $this->hunger = $amount;
     }
 
-    public function getHunger() {
+    public function getFood() {
         return $this->hunger;
     }
 
     public function subtractFood($amount){
-        if($this->getHunger()-$amount <= 6 && !($this->getHunger() <= 6)) {
+        if($this->getFood()-$amount <= 6 && !($this->getFood() <= 6)) {
             $this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, false);
             $this->removeEffect(Effect::SLOWNESS);
-        } elseif($this->getHunger()-$amount < 6 && !($this->getHunger() > 6)) {
+        } elseif($this->getFood()-$amount < 6 && !($this->getFood() > 6)) {
             $this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, true);
             $effect = Effect::getEffect(Effect::SLOWNESS);
             $effect->setDuration(0x7fffffff);
@@ -3243,7 +3232,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             $this->addEffect($effect);
         }
         if($this->hunger - $amount < 0) return;
-        $this->setHunger($this->getHunger() - $amount);
+        $this->setFood($this->getFood() - $amount);
     }
 
 	public function attack($damage, EntityDamageEvent $source){

@@ -24,7 +24,7 @@ namespace pocketmine\nbt\tag;
 
 abstract class NamedTag extends Tag{
 
-	protected $__name;
+	protected $name;
 
 	/**
 	 * @param string                                                      $name
