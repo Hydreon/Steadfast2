@@ -2312,10 +2312,7 @@ class Level implements ChunkManager, Metadatable{
 
 
 	public function generateChunk($x, $z){
-		if(!isset($this->chunkGenerationQueue[$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z)])){
-			$this->chunkGenerationQueue[$index] = true;
-			$this->server->getGenerationManager()->requestChunk($this, $x, $z);
-		}
+        $this->setChunk($x, $z, Chunk::getEmptyChunk($x, $z, $this->provider));
 	}
 
 	public function regenerateChunk($x, $z){

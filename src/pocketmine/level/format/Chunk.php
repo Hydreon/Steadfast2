@@ -53,4 +53,12 @@ interface Chunk extends FullChunk{
 	 */
 	public function getSections();
 
+    /**
+     * @param int           $chunkX
+     * @param int           $chunkZ
+     * @param LevelProvider $provider
+     *
+     * @return FullChunk
+     */
+    public static function getEmptyChunk($chunkX, $chunkZ, LevelProvider $provider = null);
 }
