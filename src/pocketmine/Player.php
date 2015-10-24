@@ -1168,7 +1168,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function addEntityMovement($entityId, $x, $y, $z, $yaw, $pitch){
-		$this->moveToSend[$entityId] = [$entityId, $x, $y, $z, $yaw, $pitch];
+		var_dump("hi i was called");
+		$this->moveToSend[$entityId] = [$entityId, $x, $y, $z, $yaw, $yaw, $pitch];
 	}
 
 	public function setDataProperty($id, $type, $value){
@@ -1279,16 +1280,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
 						$this->teleport($ev->getTo());
 					} else {
-						$pk = new MoveEntityPacket();
-						$pk->eid = $this->id;
-						$pk->x = $this->x;
-						$pk->y = $this->y;
-						$pk->z = $this->z;
-						$pk->yaw = $this->yaw;
-						$pk->pitch = $this->pitch;
-						$pk->bodyYaw = $this->yaw;
-
-						Server::broadcastPacket($this->hasSpawned, $pk);
+						$this->level->addEntityMovement($this->x >> 4, $this->z >> 4, $this->getId(), $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
 					}
 				}
 			}
@@ -1310,7 +1302,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 
 		if($revert) {
-
 			$this->lastX = $from->x;
 			$this->lastY = $from->y;
 			$this->lastZ = $from->z;
@@ -1318,7 +1309,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->lastYaw = $from->yaw;
 			$this->lastPitch = $from->pitch;
 
-			$pk = new MoveEntityPacket();
+			$pk = new MovePlayerPacket();
 			$pk->eid = 0;
 			$pk->x = $from->x;
 			$pk->y = $from->y + $this->getEyeHeight();

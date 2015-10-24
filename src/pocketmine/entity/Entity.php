@@ -867,13 +867,7 @@ abstract class Entity extends Location implements Metadatable{
 
 			if($this instanceof Human){
 				$pk = new MoveEntityPacket();
-				$pk->eid = $this->id;
-				$pk->x = $this->x;
-				$pk->y = $this->y;
-				$pk->z = $this->z;
-				$pk->yaw = $this->yaw;
-				$pk->pitch = $this->pitch;
-				$pk->bodyYaw = $this->yaw;
+				$pk->entities = [$this->id, $this->x, $this->y, $this->z, $this->yaw, $this->yaw, $this->pitch];
 				Server::broadcastPacket($this->hasSpawned, $pk);
 			}else{
 				foreach($this->hasSpawned as $player){

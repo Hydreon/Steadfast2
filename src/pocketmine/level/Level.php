@@ -2392,6 +2392,6 @@ class Level implements ChunkManager, Metadatable{
 		if(!isset($this->moveToSend[$index = Level::chunkHash($chunkX, $chunkZ)])){
 			$this->moveToSend[$index] = [];
 		}
-		$this->moveToSend[$index][$entityId] = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch];
+		$this->moveToSend[$index][$entityId] = [$entityId, $x, $y, $z, $yaw, $yaw, $pitch];
 	}
 }
