@@ -1243,7 +1243,9 @@ class Item{
 	final public function canBePlaced(){
 		return $this->block !== null and $this->block->canBePlaced();
 	}
-
+	final public function isPlaceable(){
+		return (($this->block instanceof Block) and $this->block->isPlaceable === true);
+	}
 	public function getBlock(){
 		if($this->block instanceof Block){
 			return clone $this->block;
