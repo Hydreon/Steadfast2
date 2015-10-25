@@ -190,7 +190,7 @@ abstract class Entity extends Location implements Metadatable{
 	public $isCollidedVertically = false;
 
 	public $noDamageTicks;
-	private $justCreated;
+	protected $justCreated;
 	protected $fireProof;
 	private $invulnerable;
 
