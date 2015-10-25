@@ -299,17 +299,6 @@ class SessionManager{
     }
 
     public function blockAddress($address, $timeout = 300){
-        $final = \microtime(\true) + $timeout;
-        if(!isset($this->block[$address]) or $timeout === -1){
-            if($timeout === -1){
-                $final = \PHP_INT_MAX;
-            }else{
-                $this->getLogger()->notice("[RakLib Thread #". \Thread::getCurrentThreadId() ."] Blocked $address for $timeout seconds");
-            }
-            $this->block[$address] = $final;
-        }elseif($this->block[$address] < $final){
-            $this->block[$address] = $final;
-        }
     }
 
     /**
