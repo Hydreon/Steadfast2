@@ -3225,7 +3225,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}elseif($this->getLastDamageCause() === $source and $this->spawned){
 			$pk = new EntityEventPacket();
-			$pk->eid = $this->getId();
+			$pk->eid = 0;
 			$pk->event = EntityEventPacket::HURT_ANIMATION;
 			$this->dataPacket($pk);
 		}

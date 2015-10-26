@@ -382,7 +382,6 @@ class PlayerInventory extends BaseInventory{
 		}
 
 		$pk = new ContainerSetContentPacket();
-		$pk;
 		$pk->slots = [];
 		for($i = 0; $i < $this->getSize(); ++$i){ //Do not send armor by error here
 			$pk->slots[$i] = $this->getItem($i);
@@ -415,7 +414,6 @@ class PlayerInventory extends BaseInventory{
 		}
 
 		$pk = new ContainerSetSlotPacket();
-		$pk;
 		$pk->slot = $index;
 		$pk->item = clone $this->getItem($index);
 
