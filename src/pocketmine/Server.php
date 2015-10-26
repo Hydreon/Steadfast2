@@ -2337,6 +2337,7 @@ class Server{
 		Tile::registerTile(Chest::class);
 		Tile::registerTile(Furnace::class);
 		Tile::registerTile(Sign::class);
+		Tile::registerTile(EnchantTable::class);
 	}
 
 	public function shufflePlayers(){
