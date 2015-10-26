@@ -115,9 +115,9 @@ class Vector2{
 	}
 
 	public function normalize(){
-		$len = $this->lengthSquared();
+		$len = $this->length();
 		if($len != 0){
-			return $this->divide(sqrt($len));
+			return $this->divide($len);
 		}
 
 		return new Vector2(0, 0);

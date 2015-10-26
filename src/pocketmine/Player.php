@@ -1972,6 +1972,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->craftingType = 0;
 
 				if($packet->face >= 0 and $packet->face <= 5){ //Use Block, place
+
 					$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $this->level->getBlock($blockVector), $packet->face, PlayerInteractEvent::LEFT_CLICK_BLOCK);
 					$this->server->getPluginManager()->callEvent($ev);
 					$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
@@ -1983,7 +1984,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						if($this->level->useItemOn($blockVector, $item, $packet->face, $packet->fx, $packet->fy, $packet->fz, $this) === true){
 							break;
 						}
-					}elseif($this->inventory->getItemInHand()->getId() !== $packet->item or (($damage = $this->inventory->getItemInHand()->getDamage()) !== $packet->meta and $damage !== null)){
+					}elseif($this->inventory->getItemInHand()->getId() !== $packet->item->getId() or (($damage = $this->inventory->getItemInHand()->getDamage()) !== $packet->item->getDamage() and $damage !== null)){
 						$this->inventory->sendHeldItem($this);
 					}else{
 						$item = $this->inventory->getItemInHand();

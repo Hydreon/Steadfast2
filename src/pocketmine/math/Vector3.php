@@ -123,15 +123,18 @@ class Vector3{
 	}
 
 	public function ceil(){
-		return new Vector3((int) ceil($this->x), (int) ceil($this->y), (int) ceil($this->z));
+		return new Vector3((int) ($this->x + 1), (int) ($this->y + 1), (int) ($this->z + 1));
 	}
 
 	public function floor(){
-		return new Vector3((int) floor($this->x), (int) floor($this->y), (int) floor($this->z));
+		$x = (int) $this->x;
+		$y = (int) $this->y;
+		$z = (int) $this->z;
+		return new Vector3($this->x >= $x ? $x : $x - 1, $this->y >= $y ? $y : $y - 1, $this->z >= $z ? $z : $z - 1);
 	}
 
 	public function round(){
-		return new Vector3((int) round($this->x), (int) round($this->y), (int) round($this->z));
+		return new Vector3(round($this->x), round($this->y), round($this->z));
 	}
 
 	public function abs(){
@@ -206,9 +209,9 @@ class Vector3{
 	 * @return Vector3
 	 */
 	public function normalize(){
-		$len = $this->lengthSquared();
-		if($len > 0){
-			return $this->divide(sqrt($len));
+		$len = $this->length();
+		if($len != 0){
+			return $this->divide($len);
 		}
 
 		return new Vector3(0, 0, 0);
@@ -271,7 +274,7 @@ class Vector3{
 		$yDiff = $v->y - $this->y;
 		$zDiff = $v->z - $this->z;
 
-		if(($yDiff * $yDiff) < 0.0000001){
+		if(($yDiff ** 2) < 1){
 			return null;
 		}
 
@@ -298,7 +301,7 @@ class Vector3{
 		$yDiff = $v->y - $this->y;
 		$zDiff = $v->z - $this->z;
 
-		if(($zDiff * $zDiff) < 0.0000001){
+		if(($zDiff ** 2) < 1){
 			return null;
 		}
 
