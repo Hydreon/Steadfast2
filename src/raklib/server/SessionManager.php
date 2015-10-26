@@ -299,6 +299,7 @@ class SessionManager{
     }
 
     public function blockAddress($address, $timeout = 300){
+        /*
         $final = \microtime(\true) + $timeout;
         if(!isset($this->block[$address]) or $timeout === -1){
             if($timeout === -1){
@@ -310,6 +311,7 @@ class SessionManager{
         }elseif($this->block[$address] < $final){
             $this->block[$address] = $final;
         }
+        */
     }
 
     /**
