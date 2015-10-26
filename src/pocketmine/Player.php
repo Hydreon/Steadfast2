@@ -1606,7 +1606,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 }
 
                 $pk = new EntityEventPacket();
-                $pk->eid = $this->getId();
+                $pk->eid = 0;
                 $pk->event = EntityEventPacket::USE_ITEM;
                 $this->dataPacket($pk);
                 Server::broadcastPacket($this->getViewers(), $pk);
