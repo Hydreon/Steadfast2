@@ -93,7 +93,6 @@ use pocketmine\plugin\PluginLoadOrder;
 use pocketmine\plugin\PluginManager;
 use pocketmine\scheduler\CallbackTask;
 use pocketmine\scheduler\GarbageCollectionTask;
-use pocketmine\scheduler\SendUsageTask;
 use pocketmine\scheduler\ServerScheduler;
 use pocketmine\tile\Chest;
 use pocketmine\tile\EnchantTable;
