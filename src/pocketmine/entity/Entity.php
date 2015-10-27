@@ -1348,6 +1348,35 @@ abstract class Entity extends Location implements Metadatable{
 		$this->scheduleUpdate();
 	}
 
+	protected function checkChunks(){
+		if($this->chunk === null or ($this->chunk->getX() !== ($this->x >> 4) or $this->chunk->getZ() !== ($this->z >> 4))){
+			if($this->chunk !== null){
+				$this->chunk->removeEntity($this);
+			}
+			$this->chunk = $this->level->getChunk($this->x >> 4, $this->z >> 4, true);
+
+			if(!$this->justCreated){
+				$newChunk = $this->level->getUsingChunk($this->x >> 4, $this->z >> 4);
+				foreach($this->hasSpawned as $player){
+                    if(!isset($newChunk[$player->getId()])){
+                        $this->despawnFrom($player);
+                    }else{
+                        unset($newChunk[$player->getId()]);
+                    }
+				}
+				foreach($newChunk as $player){
+					$this->spawnTo($player);
+				}
+			}
+
+			if($this->chunk === null){
+				return;
+			}
+
+			$this->chunk->addEntity($this);
+		}
+	}
+
 	public function setPosition(Vector3 $pos){
 		if($this->closed){
 			return false;
@@ -1366,32 +1395,7 @@ abstract class Entity extends Location implements Metadatable{
 		$radius = $this->width / 2;
 		$this->boundingBox->setBounds($pos->x - $radius, $pos->y, $pos->z - $radius, $pos->x + $radius, $pos->y + $this->height, $pos->z + $radius);
 
-
-		if($this->chunk === null or ($this->chunkX !== ($this->x >> 4) and $this->chunkZ !== ($this->z >> 4))){
-			if($this->chunk !== null){
-				$this->chunk->removeEntity($this);
-			}
-			$this->level->loadChunk($this->x >> 4, $this->z >> 4);
-			$this->chunk = $this->level->getChunk($this->x >> 4, $this->z >> 4, true);
-			$this->chunkX = $this->chunk->getX();
-			$this->chunkZ = $this->chunk->getZ();
-
-			if(!$this->justCreated){
-				$newChunk = $this->level->getUsingChunk($this->x >> 4, $this->z >> 4);
-				foreach($this->hasSpawned as $player){
-					if(!isset($newChunk[$player->getId()])){
-						$this->despawnFrom($player);
-					}else{
-						unset($newChunk[$player->getId()]);
-					}
-				}
-				foreach($newChunk as $player){
-					$this->spawnTo($player);
-				}
-			}
-
-			$this->chunk->addEntity($this);
-		}
+		$this->checkChunks();
 
 		return true;
 	}
@@ -1413,9 +1417,6 @@ abstract class Entity extends Location implements Metadatable{
 		$this->motionZ = $motion->z;
 
 		if(!$this->justCreated){
-			if($this instanceof Player){
-				$this->addEntityMotion($this->getId(), $this->motionX, $this->motionY, $this->motionZ);
-			}
 			$this->updateMovement();
 		}
 
@@ -1468,9 +1469,7 @@ abstract class Entity extends Location implements Metadatable{
 			$this->lastYaw = $this->yaw;
 			$this->lastPitch = $this->pitch;
 
-			foreach($this->hasSpawned as $player){
-				$player->addEntityMovement($this->getId(), $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
-			}
+			$this->updateMovement();
 
 			return true;
 		}
@@ -1482,8 +1481,17 @@ abstract class Entity extends Location implements Metadatable{
 		return $this->id;
 	}
 
+	public function respawnToAll(){
+		foreach($this->hasSpawned as $key => $player){
+			unset($this->hasSpawned[$key]);
+			$this->spawnTo($player);
+		}
+	}
+
 	public function spawnToAll(){
-		$this->despawnFromAll();
+		if($this->chunk === null or $this->closed){
+			return;
+		}
 		foreach($this->level->getUsingChunk($this->chunkX, $this->chunkZ) as $player){
 			if($player->loggedIn === true){
 				$this->spawnTo($player);
@@ -1501,13 +1509,13 @@ abstract class Entity extends Location implements Metadatable{
 		if(!$this->closed){
 			$this->server->getPluginManager()->callEvent(new EntityDespawnEvent($this));
 			$this->closed = true;
+			$this->despawnFromAll();
 			if($this->chunk !== null){
 				$this->chunk->removeEntity($this);
 			}
-			if($this->level instanceof Level){
+			if($this->level !== null){
 				$this->level->removeEntity($this);
 			}
-			$this->despawnFromAll();
 		}
 	}
 

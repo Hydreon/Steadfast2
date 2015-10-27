@@ -29,7 +29,7 @@ class StartGamePacket extends DataPacket{
 
 	public $seed;
 	public $dimension;
-	public $generator;
+	public $generator = 1;
 	public $gamemode;
 	public $eid;
 	public $spawnX;
