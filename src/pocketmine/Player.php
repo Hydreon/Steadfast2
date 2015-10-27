@@ -736,13 +736,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->spawnToAll();
 
 			if($this->getHealth() <= 0){
-//				$pk = new RespawnPacket();
-//				$pos = $this->getSpawn();
-//				$pk->x = $pos->x;
-//				$pk->y = $pos->y;
-//				$pk->z = $pos->z;
-//				$this->dataPacket($pk);
-                $this->kill();
+				$pk = new RespawnPacket();
+				$pos = $this->getSpawn();
+				$pk->x = $pos->x;
+				$pk->y = $pos->y;
+				$pk->z = $pos->z;
+				$this->dataPacket($pk);
 			}
 
 			$this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));
@@ -2218,7 +2217,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->extinguish();
 						$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
 						$this->deadTicks = 0;
-                                                $this->dead = false;
+                        $this->dead = false;
 						$this->noDamageTicks = 60;
 
 						$this->setHealth($this->getMaxHealth());
@@ -3148,44 +3147,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->y = $pos->y;
 			$pk->z = $pos->z;
 			$this->dataPacket($pk);
-           /* $this->sendTip($ev->getDeathMessage());
-
-            $this->craftingType = 0;
-
-            $this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
-
-            $this->teleport($ev->getRespawnPosition());
-
-            $this->setSprinting(false);
-            $this->setSneaking(false);
-
-            $this->extinguish();
-            $this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
-            $this->deadTicks = 0;
-            $this->noDamageTicks = 60;
-
-            $this->setHealth($this->getMaxHealth());
-            $this->setFood(20);
-
-            $this->starvationTick = 0;
-            $this->foodTick = 0;
-            $this->lastSentVitals = 10;
-            $this->foodUsageTime = 0;
-
-            $this->removeAllEffects();
-            $this->sendData($this);
-
-            $this->sendSettings();
-            $this->inventory->sendContents($this);
-            $this->inventory->sendArmorContents($this);*/
 		}
 	}
 
 	public function setHealth($amount){
-        /*if($amount <= 0) {
-            $amount = 1;
-            $this->kill();
-        }*/
 		parent::setHealth($amount);
 		if($this->spawned === true){
 			$pk = new UpdateAttributesPacket();
