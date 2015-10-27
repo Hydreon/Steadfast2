@@ -2218,6 +2218,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->extinguish();
 						$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
 						$this->deadTicks = 0;
+                                                $this->dead = false;
 						$this->noDamageTicks = 60;
 
 						$this->setHealth($this->getMaxHealth());
@@ -3120,7 +3121,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 
-//		Entity::kill();
+		Entity::kill();
 
 		$this->server->getPluginManager()->callEvent($ev = new PlayerDeathEvent($this, $this->getDrops(), $message));
 
@@ -3141,13 +3142,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($this->server->isHardcore()){
 			$this->setBanned(true);
 		}else{
-//			$pk = new RespawnPacket();
-//			$pos = $this->getSpawn();
-//			$pk->x = $pos->x;
-//			$pk->y = $pos->y;
-//			$pk->z = $pos->z;
-//			$this->dataPacket($pk);
-            $this->sendTip($ev->getDeathMessage());
+			$pk = new RespawnPacket();
+			$pos = $this->getSpawn();
+			$pk->x = $pos->x;
+			$pk->y = $pos->y;
+			$pk->z = $pos->z;
+			$this->dataPacket($pk);
+           /* $this->sendTip($ev->getDeathMessage());
 
             $this->craftingType = 0;
 
@@ -3176,15 +3177,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
             $this->sendSettings();
             $this->inventory->sendContents($this);
-            $this->inventory->sendArmorContents($this);
+            $this->inventory->sendArmorContents($this);*/
 		}
 	}
 
 	public function setHealth($amount){
-        if($amount <= 0) {
+        /*if($amount <= 0) {
             $amount = 1;
             $this->kill();
-        }
+        }*/
 		parent::setHealth($amount);
 		if($this->spawned === true){
 			$pk = new UpdateAttributesPacket();
@@ -3338,7 +3339,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 			}
 
-			$this->sendPosition($this, null, null, 1);
+                        $this->sendPosition($this, $this->pitch, $this->yaw, 1);
 			$this->spawnToAll();
 			$this->forceMovement = $this->teleportPosition;
 			$this->teleportPosition = null;
