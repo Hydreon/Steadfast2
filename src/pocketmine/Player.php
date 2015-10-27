@@ -3339,7 +3339,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 			}
 
-			$this->sendPosition($this, null, null, 1);
+                        $this->sendPosition($this, $this->pitch, $this->yaw, 1);
 			$this->spawnToAll();
 			$this->forceMovement = $this->teleportPosition;
 			$this->teleportPosition = null;
