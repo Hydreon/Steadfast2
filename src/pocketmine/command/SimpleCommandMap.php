@@ -149,7 +149,7 @@ class SimpleCommandMap implements CommandMap{
 		return $registered;
 	}
 
-	private function registerAlias(Command $command, $isAlias, $fallbackPrefix, $label){
+	public function registerAlias(Command $command, $isAlias, $fallbackPrefix, $label){
 		$this->knownCommands[$fallbackPrefix . ":" . $label] = $command;
 		if(($command instanceof VanillaCommand or $isAlias) and isset($this->knownCommands[$label])){
 			return false;
@@ -203,6 +203,13 @@ class SimpleCommandMap implements CommandMap{
 		}
 		$this->knownCommands = [];
 		$this->setDefaultCommands();
+	}
+
+	public function unregister(Command $command) {
+		unset($this->knownCommands[strtolower($command->getName())]);
+		foreach($command->getAliases() as $alias) {
+			unset($this->knownCommands[strtolower($alias)]);
+		}
 	}
 
 	public function getCommand($name){
