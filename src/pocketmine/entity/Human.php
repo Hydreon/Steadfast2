@@ -24,6 +24,7 @@ namespace pocketmine\entity;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\item\Item as ItemItem;
+use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\utils\UUID;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\Byte;
@@ -211,13 +212,18 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			$this->hasSpawned[$player->getId()] = $player;
 
 //			if(strlen($this->skin) < 64 * 32 * 4){
-//				throw new \InvalidStateException((new \ReflectionClass($this))->getShortName() . " must have a valid skin set");
+//				$this->server->getLogger()->info((new \ReflectionClass($this))->getShortName() . " must have a valid skin set");
 //			}
 
 
 			if(!($this instanceof Player)){
 				$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->isSlim, $this->skin, [$player]);
 			}
+
+			$pk = new PlayerListPacket();
+			$pk->type = PlayerListPacket::TYPE_ADD;
+			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->isSlim, $this->skin];
+			$player->dataPacket($pk);
 
 			$pk = new AddPlayerPacket();
 			$pk->uuid = $this->getUniqueId();
