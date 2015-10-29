@@ -21,7 +21,7 @@
 
 namespace pocketmine;
 
-class ThreadManager extends \Threaded{
+class ThreadManager extends \Volatile{
 
 	/** @var ThreadManager */
 	private static $instance = null;
@@ -51,10 +51,7 @@ class ThreadManager extends \Threaded{
 	 */
 	public function remove($thread){
 		if($thread instanceof Thread or $thread instanceof Worker){
-                        echo(spl_object_hash($thread));
-                        if(is_object($this->{spl_object_hash($thread)})){
-                            unset($this->{spl_object_hash($thread)});
-                        }
+			unset($this->{spl_object_hash($thread)});
 		}
 	}
 

@@ -28,6 +28,8 @@ abstract class Worker extends \Worker{
 
 	/** @var \ClassLoader */
 	protected $classLoader;
+	
+	protected $isKilled = false;
 
 	public function getClassLoader(){
 		return $this->classLoader;
@@ -68,21 +70,24 @@ abstract class Worker extends \Worker{
 	 * Stops the thread using the best way possible. Try to stop it yourself before calling this.
 	 */
 	public function quit(){
-		/*if($this->isRunning()){
+		$this->isKilled = true;
+
+		$this->notify();
+		
+		if($this->isRunning()){
+			$this->shutdown();
+			$this->notify();
 			$this->unstack();
-			$this->kill();
-			$this->detach();
 		}elseif(!$this->isJoined()){
 			if(!$this->isTerminated()){
 				$this->join();
-			}else{
-				$this->kill();
-				$this->detach();
 			}
-		}else{
-			$this->detach();
-		}*/
-                $this->shutdown();
+		}
+
 		ThreadManager::getInstance()->remove($this);
+	}
+
+	public function getThreadName(){
+		return (new \ReflectionClass($this))->getShortName();
 	}
 }
