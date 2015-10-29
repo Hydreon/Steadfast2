@@ -25,7 +25,7 @@ use pocketmine\nbt\NBT;
 
 #include <rules/NBT.h>
 
-class Double extends NamedTag{
+class DoubleTag extends NamedTag{
 
 	public function getType(){
 		return NBT::TAG_Double;

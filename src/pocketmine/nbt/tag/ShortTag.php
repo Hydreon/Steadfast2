@@ -25,7 +25,7 @@ use pocketmine\nbt\NBT;
 
 #include <rules/NBT.h>
 
-class Short extends NamedTag{
+class ShortTag extends NamedTag{
 
 	public function getType(){
 		return NBT::TAG_Short;

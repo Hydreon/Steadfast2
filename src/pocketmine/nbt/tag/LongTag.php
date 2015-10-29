@@ -25,7 +25,7 @@ use pocketmine\nbt\NBT;
 
 use pocketmine\utils\Binary;
 
-class Long extends NamedTag{
+class LongTag extends NamedTag{
 
 	public function getType(){
 		return NBT::TAG_Long;

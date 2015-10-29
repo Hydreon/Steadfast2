@@ -25,7 +25,7 @@ use pocketmine\nbt\NBT;
 
 #include <rules/NBT.h>
 
-class Int extends NamedTag{
+class IntTag extends NamedTag{
 
 	public function getType(){
 		return NBT::TAG_Int;
