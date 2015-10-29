@@ -26,7 +26,7 @@ use pocketmine\level\format\LevelProvider;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\ByteArray;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\EnumTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\IntArray;
@@ -43,7 +43,7 @@ class Chunk extends BaseFullChunk{
 	public function __construct($level, Compound $nbt = null){
 		if($nbt === null){
 			$this->provider = $level;
-			$this->nbt = new CompoundTag("Level", []);
+			$this->nbt = new Compound("Level", []);
 			return;
 		}
 
@@ -397,7 +397,7 @@ class Chunk extends BaseFullChunk{
 
 		$writer = new NBT(NBT::BIG_ENDIAN);
 		$nbt->setName("Level");
-		$writer->setData(new CompoundTag("", ["Level" => $nbt]));
+		$writer->setData(new Compound("", ["Level" => $nbt]));
 
 		return $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, RegionLoader::$COMPRESSION_LEVEL);
 	}

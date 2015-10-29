@@ -66,7 +66,7 @@ use pocketmine\metadata\LevelMetadataStore;
 use pocketmine\metadata\PlayerMetadataStore;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\EnumTag;
 use pocketmine\nbt\tag\FloatTag;
@@ -704,7 +704,7 @@ class Server{
 			$this->logger->notice("Player data not found for \"" . $name . "\", creating new profile");
 		}
 		$spawn = $this->getDefaultLevel()->getSafeSpawn();
-		$nbt = new CompoundTag("", [
+		$nbt = new Compound("", [
 			new LongTag("firstPlayed", floor(microtime(true) * 1000)),
 			new LongTag("lastPlayed", floor(microtime(true) * 1000)),
 			new EnumTag("Pos", [
@@ -719,7 +719,7 @@ class Server{
 			//new IntTag("SpawnZ", (int) $spawn->z),
 			//new ByteTag("SpawnForced", 1), //TODO
 			new EnumTag("Inventory", []),
-			new CompoundTag("Achievements", []),
+			new Compound("Achievements", []),
 			new IntTag("playerGameType", $this->getGamemode()),
 			new EnumTag("Motion", [
 				new DoubleTag(0, 0.0),
@@ -1898,7 +1898,8 @@ class Server{
 
 			$this->properties->save();
 
-			$this->console->kill();
+			$this->console->shutdown();
+			$this->console->notify();
 
 			foreach($this->network->getInterfaces() as $interface){
 				$interface->shutdown();
@@ -1970,7 +1971,7 @@ class Server{
 		}
 	}
 
-	public function exceptionHandler(\Exception $e, $trace = null){
+	public function exceptionHandler(\Throwable $e, $trace = null){
 		if($e === null){
 			return;
 		}
@@ -2074,10 +2075,19 @@ class Server{
 		return [];
 	}
 
-	private function tickProcessor(){
+       
+        private function tickProcessor(){
+		$this->nextTick = microtime(true);
 		while($this->isRunning){
 			$this->tick();
-			usleep((int) max(1, ($this->nextTick - microtime(true)) * 1000000));
+			$next = $this->nextTick - 0.0001;
+			if($next > microtime(true)){
+				try{
+					time_sleep_until($next);
+				}catch(\Throwable $e){
+					//Sometimes $next is less than the current time. High load?
+				}
+			}
 		}
 	}
 

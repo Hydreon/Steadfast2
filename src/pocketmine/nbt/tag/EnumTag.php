@@ -166,7 +166,7 @@ class EnumTag extends NamedTag implements \ArrayAccess, \Countable{
 					$this->{$i} = $tag;
 					break;
 				case NBT::TAG_Compound:
-					$tag = new CompoundTag("");
+					$tag = new Compound("");
 					$tag->read($nbt);
 					$this->{$i} = $tag;
 					break;

@@ -28,7 +28,7 @@ use pocketmine\event\entity\ItemSpawnEvent;
 use pocketmine\item\Item as ItemItem;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\Network;
@@ -145,7 +145,7 @@ class Item extends Entity{
 
 	public function saveNBT(){
 		parent::saveNBT();
-		$this->namedtag->Item = new CompoundTag("Item", [
+		$this->namedtag->Item = new Compound("Item", [
 			"id" => new ShortTag("id", $this->item->getId()),
 			"Damage" => new ShortTag("Damage", $this->item->getDamage()),
 			"Count" => new ByteTag("Count", $this->item->getCount())

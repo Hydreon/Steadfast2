@@ -26,7 +26,7 @@ namespace pocketmine;
  */
 abstract class Thread extends \Thread{
 
-	public function start($options = PTHREADS_INHERIT_ALL){
+	public function start(int $options = PTHREADS_INHERIT_ALL){
 		ThreadManager::getInstance()->add($this);
 
 		if(!$this->isRunning() and !$this->isJoined() and !$this->isTerminated()){
@@ -40,8 +40,8 @@ abstract class Thread extends \Thread{
 	 * Stops the thread using the best way possible. Try to stop it yourself before calling this.
 	 */
 	public function quit(){
-		if($this->isRunning()){
-			$this->kill();
+		/*if($this->isRunning()){
+			$this->shutdown();
 			$this->detach();
 		}elseif(!$this->isJoined()){
 			if(!$this->isTerminated()){
@@ -52,8 +52,9 @@ abstract class Thread extends \Thread{
 			}
 		}else{
 			$this->detach();
-		}
+		}*/
+                $this->shutdown();
 
 		ThreadManager::getInstance()->remove($this);
-	}
+	}        
 }

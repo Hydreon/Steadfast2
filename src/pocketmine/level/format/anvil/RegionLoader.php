@@ -25,7 +25,7 @@ use pocketmine\level\format\LevelProvider;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\ByteArray;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\EnumTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\IntArray;
@@ -115,7 +115,7 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 	}
 
 	public function generateChunk($x, $z){
-		$nbt = new CompoundTag("Level", []);
+		$nbt = new Compound("Level", []);
 		$nbt->xPos = new IntTag("xPos", ($this->getX() * 32) + $x);
 		$nbt->zPos = new IntTag("zPos", ($this->getZ() * 32) + $z);
 		$nbt->LastUpdate = new LongTag("LastUpdate", 0);
@@ -136,7 +136,7 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		$nbt->TileTicks->setTagType(NBT::TAG_Compound);
 		$writer = new NBT(NBT::BIG_ENDIAN);
 		$nbt->setName("Level");
-		$writer->setData(new CompoundTag("", ["Level" => $nbt]));
+		$writer->setData(new Compound("", ["Level" => $nbt]));
 		$chunkData = $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, RegionLoader::$COMPRESSION_LEVEL);
 		$this->saveChunk($x, $z, $chunkData);
 	}

@@ -25,7 +25,7 @@ use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\Level;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\EnumTag;
 use pocketmine\nbt\tag\FloatTag;
@@ -49,7 +49,7 @@ class SpawnEgg extends Item{
 			return false;
 		}
 
-		$nbt = new CompoundTag("", [
+		$nbt = new Compound("", [
 			"Pos" => new EnumTag("Pos", [
 				new DoubleTag("", $block->getX() + 0.5),
 				new DoubleTag("", $block->getY()),

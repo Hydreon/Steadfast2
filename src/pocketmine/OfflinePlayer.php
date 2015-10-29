@@ -23,7 +23,7 @@ namespace pocketmine;
 
 
 use pocketmine\metadata\MetadataValue;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\plugin\Plugin;
 
 class OfflinePlayer implements IPlayer{

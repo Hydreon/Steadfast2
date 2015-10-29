@@ -433,7 +433,7 @@ class PluginManager{
 		if(!isset($this->permSubs[$permission])){
 			$this->permSubs[$permission] = [];
 		}
-		$this->permSubs[$permission][spl_object_hash($permissible)] = new \WeakRef($permissible);
+		$this->permSubs[$permission][spl_object_hash($permissible)] = $permissible;
 	}
 
 	/**
@@ -454,13 +454,16 @@ class PluginManager{
 	 *
 	 * @return Permissible[]
 	 */
-	public function getPermissionSubscriptions($permission){
+	        
+        public function getPermissionSubscriptions($permission){
 		if(isset($this->permSubs[$permission])){
+			return $this->permSubs[$permission];
 			$subs = [];
 			foreach($this->permSubs[$permission] as $k => $perm){
 				/** @var \WeakRef $perm */
-				if($perm->valid()){
+				if($perm->acquire()){
 					$subs[] = $perm->get();
+					$perm->release();
 				}else{
 					unset($this->permSubs[$permission][$k]);
 				}
@@ -478,9 +481,9 @@ class PluginManager{
 	 */
 	public function subscribeToDefaultPerms($op, Permissible $permissible){
 		if($op === true){
-			$this->defSubsOp[spl_object_hash($permissible)] = new \WeakRef($permissible);
+			$this->defSubsOp[spl_object_hash($permissible)] = $permissible;
 		}else{
-			$this->defSubs[spl_object_hash($permissible)] = new \WeakRef($permissible);
+			$this->defSubs[spl_object_hash($permissible)] = $permissible;
 		}
 	}
 
@@ -505,19 +508,23 @@ class PluginManager{
 		$subs = [];
 
 		if($op === true){
+			return $this->defSubsOp;
 			foreach($this->defSubsOp as $k => $perm){
 				/** @var \WeakRef $perm */
-				if($perm->valid()){
+				if($perm->acquire()){
 					$subs[] = $perm->get();
+					$perm->release();
 				}else{
 					unset($this->defSubsOp[$k]);
 				}
 			}
 		}else{
+			return $this->defSubs;
 			foreach($this->defSubs as $k => $perm){
 				/** @var \WeakRef $perm */
-				if($perm->valid()){
+				if($perm->acquire()){
 					$subs[] = $perm->get();
+					$perm->release();
 				}else{
 					unset($this->defSubs[$k]);
 				}

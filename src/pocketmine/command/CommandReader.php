@@ -28,13 +28,18 @@ class CommandReader extends Thread{
 
 	/** @var \Threaded */
 	protected $buffer;
+        private $shutdown = false;
 
 	/**
 	 * @param \Threaded $threaded
 	 */
 	public function __construct(){
-		$this->buffer = \ThreadedFactory::create();
+		$this->buffer = new \Threaded;
 		$this->start();
+	}
+        
+        public function shutdown(){
+		$this->shutdown = true;
 	}
 
 	private function readLine(){
@@ -74,7 +79,7 @@ class CommandReader extends Thread{
 		}
 
 		$lastLine = microtime(true);
-		while(true){
+		while(!$this->shutdown){
 			if(($line = $this->readLine()) !== ""){
 				$this->buffer->synchronized(function (\Threaded $buffer, $line){
 					$buffer[] = preg_replace("#\\x1b\\x5b([^\\x1b]*\\x7e|[\\x40-\\x50])#", "", $line);

@@ -25,7 +25,7 @@ use pocketmine\nbt\NBT;
 
 #include <rules/NBT.h>
 
-class CompoundTag extends NamedTag implements \ArrayAccess{
+class Compound extends NamedTag implements \ArrayAccess{
 
 	/**
 	 * @param string     $name

@@ -21,7 +21,7 @@
 
 namespace pocketmine\level\format\anvil;
 
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 
 class ChunkSection implements \pocketmine\level\format\ChunkSection{
 

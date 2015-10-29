@@ -37,7 +37,7 @@ use pocketmine\nbt\tag\EnumTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\NBT;
 
 class Item{
@@ -48,7 +48,7 @@ class Item{
 	 * @param $tag
 	 * @return Compound
 	 */
-	private static function parseCompoundTag($tag){
+	private static function parseCompound($tag){
 		if(self::$cachedParser === null){
 			self::$cachedParser = new NBT(NBT::LITTLE_ENDIAN);
 		}
@@ -61,7 +61,7 @@ class Item{
 	 * @param Compound $tag
 	 * @return string
 	 */
-	private static function writeCompoundTag(Compound $tag){
+	private static function writeCompound(Compound $tag){
 		if(self::$cachedParser === null){
 			self::$cachedParser = new NBT(NBT::LITTLE_ENDIAN);
 		}
@@ -901,14 +901,14 @@ class Item{
 		try{
 			$class = self::$list[$id];
 			if($class === null){
-				return (new Item($id, $meta, $count))->setCompoundTag($tags);
+				return (new Item($id, $meta, $count))->setCompound($tags);
 			}elseif($id < 256){
-				return (new ItemBlock(new $class($meta), $meta, $count))->setCompoundTag($tags);
+				return (new ItemBlock(new $class($meta), $meta, $count))->setCompound($tags);
 			}else{
-				return (new $class($meta, $count))->setCompoundTag($tags);
+				return (new $class($meta, $count))->setCompound($tags);
 			}
 		}catch(\RuntimeException $e){
-			return (new Item($id, $meta, $count))->setCompoundTag($tags);
+			return (new Item($id, $meta, $count))->setCompound($tags);
 		}
 	}
 
@@ -952,7 +952,7 @@ class Item{
 		}
 	}
 
-	public function setCompoundTag($tags){
+	public function setCompound($tags){
 		if($tags instanceof Compound){
 			$this->setNamedTag($tags);
 		}else{
@@ -966,16 +966,16 @@ class Item{
 	/**
 	 * @return string
 	 */
-	public function getCompoundTag(){
+	public function getCompound(){
 		return $this->tags;
 	}
 
-	public function hasCompoundTag(){
+	public function hasCompound(){
 		return $this->tags !== "" and $this->tags !== null;
 	}
 
 	public function hasCustomBlockData(){
-		if(!$this->hasCompoundTag()){
+		if(!$this->hasCompound()){
 			return false;
 		}
 
@@ -988,7 +988,7 @@ class Item{
 	}
 
 	public function clearCustomBlockData(){
-		if(!$this->hasCompoundTag()){
+		if(!$this->hasCompound()){
 			return $this;
 		}
 		$tag = $this->getNamedTag();
@@ -1005,8 +1005,8 @@ class Item{
 		$tags = clone $compound;
 		$tags->setName("BlockEntityTag");
 
-		if(!$this->hasCompoundTag()){
-			$tag = new CompoundTag("", []);
+		if(!$this->hasCompound()){
+			$tag = new Compound("", []);
 		}else{
 			$tag = $this->getNamedTag();
 		}
@@ -1018,7 +1018,7 @@ class Item{
 	}
 
 	public function getCustomBlockData(){
-		if(!$this->hasCompoundTag()){
+		if(!$this->hasCompound()){
 			return null;
 		}
 
@@ -1031,7 +1031,7 @@ class Item{
 	}
 
 	public function hasEnchantments(){
-		if(!$this->hasCompoundTag()){
+		if(!$this->hasCompound()){
 			return false;
 		}
 
@@ -1070,8 +1070,8 @@ class Item{
 	 * @param Enchantment $ench
 	 */
 	public function addEnchantment(Enchantment $ench){
-		if(!$this->hasCompoundTag()){
-			$tag = new CompoundTag("", []);
+		if(!$this->hasCompound()){
+			$tag = new Compound("", []);
 		}else{
 			$tag = $this->getNamedTag();
 		}
@@ -1085,7 +1085,7 @@ class Item{
 
 		foreach($tag->ench as $k => $entry){
 			if($entry["id"] === $ench->getId()){
-				$tag->ench->{$k} = new CompoundTag("", [
+				$tag->ench->{$k} = new Compound("", [
 					"id" => new ShortTag("id", $ench->getId()),
 					"lvl" => new ShortTag("lvl", $ench->getLevel())
 				]);
@@ -1095,7 +1095,7 @@ class Item{
 		}
 
 		if(!$found){
-			$tag->ench->{count($tag->ench) + 1} = new CompoundTag("", [
+			$tag->ench->{count($tag->ench) + 1} = new Compound("", [
 				"id" => new ShortTag("id", $ench->getId()),
 				"lvl" => new ShortTag("lvl", $ench->getLevel())
 			]);
@@ -1124,7 +1124,7 @@ class Item{
 	}
 
 	public function hasCustomName(){
-		if(!$this->hasCompoundTag()){
+		if(!$this->hasCompound()){
 			return false;
 		}
 
@@ -1140,7 +1140,7 @@ class Item{
 	}
 
 	public function getCustomName(){
-		if(!$this->hasCompoundTag()){
+		if(!$this->hasCompound()){
 			return "";
 		}
 
@@ -1160,8 +1160,8 @@ class Item{
 			$this->clearCustomName();
 		}
 
-		if(!$this->hasCompoundTag()){
-			$tag = new CompoundTag("", []);
+		if(!$this->hasCompound()){
+			$tag = new Compound("", []);
 		}else{
 			$tag = $this->getNamedTag();
 		}
@@ -1169,7 +1169,7 @@ class Item{
 		if(isset($tag->display) and $tag->display instanceof Compound){
 			$tag->display->Name = new StringTag("Name", $name);
 		}else{
-			$tag->display = new CompoundTag("display", [
+			$tag->display = new Compound("display", [
 				"Name" => new StringTag("Name", $name)
 			]);
 		}
@@ -1178,7 +1178,7 @@ class Item{
 	}
 
 	public function clearCustomName(){
-		if(!$this->hasCompoundTag()){
+		if(!$this->hasCompound()){
 			return $this;
 		}
 		$tag = $this->getNamedTag();
@@ -1205,12 +1205,12 @@ class Item{
 	}
 
 	public function getNamedTag(){
-		if(!$this->hasCompoundTag()){
+		if(!$this->hasCompound()){
 			return null;
 		}elseif($this->cachedNBT !== null){
 			return $this->cachedNBT;
 		}
-		return $this->cachedNBT = self::parseCompoundTag($this->tags);
+		return $this->cachedNBT = self::parseCompound($this->tags);
 	}
 
 	public function setNamedTag(Compound $tag){
@@ -1219,13 +1219,13 @@ class Item{
 		}
 
 		$this->cachedNBT = $tag;
-		$this->tags = self::writeCompoundTag($tag);
+		$this->tags = self::writeCompound($tag);
 
 		return $this;
 	}
 
 	public function clearNamedTag(){
-		return $this->setCompoundTag("");
+		return $this->setCompound("");
 	}
 
 	public function getCount(){
@@ -1329,7 +1329,7 @@ class Item{
 	}
 
 	final public function __toString(){
-		return "Item " . $this->name . " (" . $this->id . ":" . ($this->meta === null ? "?" : $this->meta) . ")x" . $this->count . ($this->hasCompoundTag() ? " tags:0x".bin2hex($this->getCompoundTag()) : "");
+		return "Item " . $this->name . " (" . $this->id . ":" . ($this->meta === null ? "?" : $this->meta) . ")x" . $this->count . ($this->hasCompound() ? " tags:0x".bin2hex($this->getCompound()) : "");
 	}
 
 	public function getDestroySpeed(Block $block, Player $player){
@@ -1341,13 +1341,13 @@ class Item{
 	}
 
 	public final function equals(Item $item, $checkDamage = true, $checkCompound = true){
-		return $this->id === $item->getId() and ($checkDamage === false or $this->getDamage() === $item->getDamage()) and ($checkCompound === false or $this->getCompoundTag() === $item->getCompoundTag());
+		return $this->id === $item->getId() and ($checkDamage === false or $this->getDamage() === $item->getDamage()) and ($checkCompound === false or $this->getCompound() === $item->getCompound());
 	}
 
 	public final function deepEquals(Item $item, $checkDamage = true, $checkCompound = true){
 		if($item->equals($item, $checkDamage, $checkCompound)){
 			return true;
-		}elseif($item->hasCompoundTag() or $this->hasCompoundTag()){
+		}elseif($item->hasCompound() or $this->hasCompound()){
 			return NBT::matchTree($this->getNamedTag(), $item->getNamedTag());
 		}
 

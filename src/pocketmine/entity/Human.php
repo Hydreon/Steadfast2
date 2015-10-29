@@ -28,7 +28,7 @@ use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\utils\UUID;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\EnumTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
@@ -160,7 +160,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 				if($hotbarSlot !== -1){
 					$item = $this->inventory->getItem($hotbarSlot);
 					if($item->getId() !== 0 and $item->getCount() > 0){
-						$this->namedtag->Inventory[$slot] = new CompoundTag(false, [
+						$this->namedtag->Inventory[$slot] = new Compound(false, [
 							new ByteTag("Count", $item->getCount()),
 							new ShortTag("Damage", $item->getDamage()),
 							new ByteTag("Slot", $slot),
@@ -170,7 +170,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 						continue;
 					}
 				}
-				$this->namedtag->Inventory[$slot] = new CompoundTag(false, [
+				$this->namedtag->Inventory[$slot] = new Compound(false, [
 					new ByteTag("Count", 0),
 					new ShortTag("Damage", 0),
 					new ByteTag("Slot", $slot),
@@ -184,7 +184,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			//$slotCount = (($this instanceof Player and ($this->gamemode & 0x01) === 1) ? Player::CREATIVE_SLOTS : Player::SURVIVAL_SLOTS) + 9;
 			for($slot = 9; $slot < $slotCount; ++$slot){
 				$item = $this->inventory->getItem($slot - 9);
-				$this->namedtag->Inventory[$slot] = new CompoundTag(false, [
+				$this->namedtag->Inventory[$slot] = new Compound(false, [
 					new ByteTag("Count", $item->getCount()),
 					new ShortTag("Damage", $item->getDamage()),
 					new ByteTag("Slot", $slot),
@@ -196,7 +196,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			for($slot = 100; $slot < 104; ++$slot){
 				$item = $this->inventory->getItem($this->inventory->getSize() + $slot - 100);
 				if($item instanceof ItemItem and $item->getId() !== ItemItem::AIR){
-					$this->namedtag->Inventory[$slot] = new CompoundTag(false, [
+					$this->namedtag->Inventory[$slot] = new Compound(false, [
 						new ByteTag("Count", $item->getCount()),
 						new ShortTag("Damage", $item->getDamage()),
 						new ByteTag("Slot", $slot),

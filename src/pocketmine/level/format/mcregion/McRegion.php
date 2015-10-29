@@ -26,7 +26,7 @@ use pocketmine\level\format\generic\BaseLevelProvider;
 use pocketmine\level\Level;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\StringTag;
@@ -82,7 +82,7 @@ class McRegion extends BaseLevelProvider{
 			mkdir($path . "/region", 0777);
 		}
 		//TODO, add extra details
-		$levelData = new CompoundTag("Data", [
+		$levelData = new Compound("Data", [
 			"hardcore" => new ByteTag("hardcore", 0),
 			"initialized" => new ByteTag("initialized", 1),
 			"GameType" => new IntTag("GameType", 0),
@@ -99,10 +99,10 @@ class McRegion extends BaseLevelProvider{
 			"generatorName" => new StringTag("generatorName", "FLAT"),
 			"generatorOptions" => new StringTag("generatorOptions", isset($options["preset"]) ? $options["preset"] : ""),
 			"LevelName" => new StringTag("LevelName", $name),
-			"GameRules" => new CompoundTag("GameRules", [])
+			"GameRules" => new Compound("GameRules", [])
 		]);
 		$nbt = new NBT(NBT::BIG_ENDIAN);
-		$nbt->setData(new CompoundTag("", [
+		$nbt->setData(new Compound("", [
 			"Data" => $levelData
 		]));
 		$buffer = $nbt->writeCompressed();

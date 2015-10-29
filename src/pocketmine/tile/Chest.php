@@ -29,7 +29,7 @@ use pocketmine\level\format\FullChunk;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\NBT;
 
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\EnumTag;
 use pocketmine\nbt\tag\IntTag;
 
@@ -265,7 +265,7 @@ class Chest extends Spawnable implements InventoryHolder, Container, Nameable{
 
 	public function getSpawnCompound(){
 		if($this->isPaired()){
-			$c = new CompoundTag("", [
+			$c = new Compound("", [
 				new StringTag("id", Tile::CHEST),
 				new IntTag("x", (int) $this->x),
 				new IntTag("y", (int) $this->y),
@@ -274,7 +274,7 @@ class Chest extends Spawnable implements InventoryHolder, Container, Nameable{
 				new IntTag("pairz", (int) $this->namedtag["pairz"])
 			]);
 		}else{
-			$c = new CompoundTag("", [
+			$c = new Compound("", [
 				new StringTag("id", Tile::CHEST),
 				new IntTag("x", (int) $this->x),
 				new IntTag("y", (int) $this->y),

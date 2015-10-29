@@ -90,7 +90,7 @@ use pocketmine\math\Vector3;
 use pocketmine\metadata\MetadataValue;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\EnumTag;
 use pocketmine\nbt\tag\FloatTag;
@@ -502,7 +502,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->interface = $interface;
 		$this->windows = new \SplObjectStorage();
 		$this->perm = new PermissibleBase($this);
-		$this->namedtag = new CompoundTag();
+		$this->namedtag = new Compound();
 		$this->server = Server::getInstance();
 		$this->lastBreak = PHP_INT_MAX;
 		$this->ip = $ip;
@@ -2034,7 +2034,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 
 					if($item->getId() === Item::SNOWBALL){
-						$nbt = new CompoundTag("", [
+						$nbt = new Compound("", [
 							"Pos" => new EnumTag("Pos", [
 								new DoubleTag("", $this->x),
 								new DoubleTag("", $this->y + $this->getEyeHeight()),
@@ -2111,7 +2111,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								}
 
 
-								$nbt = new CompoundTag("", [
+								$nbt = new Compound("", [
 									"Pos" => new EnumTag("Pos", [
 										new DoubleTag("", $this->x),
 										new DoubleTag("", $this->y + $this->getEyeHeight()),
@@ -2580,7 +2580,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$item = $packet->input[$y * 3 + $x];
 							$ingredient = $recipe->getIngredient($x, $y);
 							if($item->getCount() > 0 and $item->getId() > 0){
-								if($ingredient === null or !$ingredient->deepEquals($item, $ingredient->getDamage() !== null, $ingredient->getCompoundTag() !== null)){
+								if($ingredient === null or !$ingredient->deepEquals($item, $ingredient->getDamage() !== null, $ingredient->getCompound() !== null)){
 									$canCraft = false;
 									break;
 								}
@@ -2599,7 +2599,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$item = clone $packet->input[$y * 3 + $x];
 
 							foreach($needed as $k => $n){
-								if($n === $item and $n->getDamage() !== null and $n->getCompoundTag() !== null) {
+								if($n === $item and $n->getDamage() !== null and $n->getCompound() !== null) {
 									$remove = min($n->getCount(), $item->getCount());
 									$n->setCount($n->getCount() - $remove);
 									$item->setCount($item->getCount() - $remove);
