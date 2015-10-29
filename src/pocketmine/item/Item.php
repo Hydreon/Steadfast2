@@ -33,11 +33,11 @@ use pocketmine\entity\Zombie;
 use pocketmine\inventory\Fuel;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\level\Level;
-use pocketmine\nbt\tag\Enum;
-use pocketmine\nbt\tag\Short;
-use pocketmine\nbt\tag\String;
+use pocketmine\nbt\tag\EnumTag;
+use pocketmine\nbt\tag\ShortTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\NBT;
 
 class Item{
@@ -1006,7 +1006,7 @@ class Item{
 		$tags->setName("BlockEntityTag");
 
 		if(!$this->hasCompoundTag()){
-			$tag = new Compound("", []);
+			$tag = new CompoundTag("", []);
 		}else{
 			$tag = $this->getNamedTag();
 		}
@@ -1071,13 +1071,13 @@ class Item{
 	 */
 	public function addEnchantment(Enchantment $ench){
 		if(!$this->hasCompoundTag()){
-			$tag = new Compound("", []);
+			$tag = new CompoundTag("", []);
 		}else{
 			$tag = $this->getNamedTag();
 		}
 
 		if(!isset($tag->ench)){
-			$tag->ench = new Enum("ench", []);
+			$tag->ench = new EnumTag("ench", []);
 			$tag->ench->setTagType(NBT::TAG_Compound);
 		}
 
@@ -1085,9 +1085,9 @@ class Item{
 
 		foreach($tag->ench as $k => $entry){
 			if($entry["id"] === $ench->getId()){
-				$tag->ench->{$k} = new Compound("", [
-					"id" => new Short("id", $ench->getId()),
-					"lvl" => new Short("lvl", $ench->getLevel())
+				$tag->ench->{$k} = new CompoundTag("", [
+					"id" => new ShortTag("id", $ench->getId()),
+					"lvl" => new ShortTag("lvl", $ench->getLevel())
 				]);
 				$found = true;
 				break;
@@ -1095,9 +1095,9 @@ class Item{
 		}
 
 		if(!$found){
-			$tag->ench->{count($tag->ench) + 1} = new Compound("", [
-				"id" => new Short("id", $ench->getId()),
-				"lvl" => new Short("lvl", $ench->getLevel())
+			$tag->ench->{count($tag->ench) + 1} = new CompoundTag("", [
+				"id" => new ShortTag("id", $ench->getId()),
+				"lvl" => new ShortTag("lvl", $ench->getLevel())
 			]);
 		}
 
@@ -1161,16 +1161,16 @@ class Item{
 		}
 
 		if(!$this->hasCompoundTag()){
-			$tag = new Compound("", []);
+			$tag = new CompoundTag("", []);
 		}else{
 			$tag = $this->getNamedTag();
 		}
 
 		if(isset($tag->display) and $tag->display instanceof Compound){
-			$tag->display->Name = new String("Name", $name);
+			$tag->display->Name = new StringTag("Name", $name);
 		}else{
-			$tag->display = new Compound("display", [
-				"Name" => new String("Name", $name)
+			$tag->display = new CompoundTag("display", [
+				"Name" => new StringTag("Name", $name)
 			]);
 		}
 

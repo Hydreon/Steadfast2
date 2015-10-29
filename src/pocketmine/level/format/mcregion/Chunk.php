@@ -24,13 +24,13 @@ namespace pocketmine\level\format\mcregion;
 use pocketmine\level\format\generic\BaseFullChunk;
 use pocketmine\level\format\LevelProvider;
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\Byte;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\ByteArray;
-use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Enum;
-use pocketmine\nbt\tag\Int;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\EnumTag;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\IntArray;
-use pocketmine\nbt\tag\Long;
+use pocketmine\nbt\tag\LongTag;
 use pocketmine\Player;
 use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryStream;
@@ -43,7 +43,7 @@ class Chunk extends BaseFullChunk{
 	public function __construct($level, Compound $nbt = null){
 		if($nbt === null){
 			$this->provider = $level;
-			$this->nbt = new Compound("Level", []);
+			$this->nbt = new CompoundTag("Level", []);
 			return;
 		}
 
@@ -52,21 +52,21 @@ class Chunk extends BaseFullChunk{
 		if(isset($this->nbt->Entities) and $this->nbt->Entities instanceof Enum){
 			$this->nbt->Entities->setTagType(NBT::TAG_Compound);
 		}else{
-			$this->nbt->Entities = new Enum("Entities", []);
+			$this->nbt->Entities = new EnumTag("Entities", []);
 			$this->nbt->Entities->setTagType(NBT::TAG_Compound);
 		}
 
 		if(isset($this->nbt->TileEntities) and $this->nbt->TileEntities instanceof Enum){
 			$this->nbt->TileEntities->setTagType(NBT::TAG_Compound);
 		}else{
-			$this->nbt->TileEntities = new Enum("TileEntities", []);
+			$this->nbt->TileEntities = new EnumTag("TileEntities", []);
 			$this->nbt->TileEntities->setTagType(NBT::TAG_Compound);
 		}
 
 		if(isset($this->nbt->TileTicks) and $this->nbt->TileTicks instanceof Enum){
 			$this->nbt->TileTicks->setTagType(NBT::TAG_Compound);
 		}else{
-			$this->nbt->TileTicks = new Enum("TileTicks", []);
+			$this->nbt->TileTicks = new EnumTag("TileTicks", []);
 			$this->nbt->TileTicks->setTagType(NBT::TAG_Compound);
 		}
 
@@ -256,7 +256,7 @@ class Chunk extends BaseFullChunk{
 	 * @param int $value
 	 */
 	public function setPopulated($value = 1){
-		$this->nbt->TerrainPopulated = new Byte("TerrainPopulated", $value);
+		$this->nbt->TerrainPopulated = new ByteTag("TerrainPopulated", $value);
 	}
 
 	/**
@@ -270,7 +270,7 @@ class Chunk extends BaseFullChunk{
 	 * @param int $value
 	 */
 	public function setGenerated($value = 1){
-		$this->nbt->TerrainGenerated = new Byte("TerrainGenerated", $value);
+		$this->nbt->TerrainGenerated = new ByteTag("TerrainGenerated", $value);
 	}
 
 	/**
@@ -324,9 +324,9 @@ class Chunk extends BaseFullChunk{
 
 			$flags = ord($data{$offset++});
 
-			$chunk->nbt->TerrainGenerated = new Byte("TerrainGenerated", $flags & 0b1);
-			$chunk->nbt->TerrainPopulated = new Byte("TerrainPopulated", ($flags >> 1) & 0b1);
-			$chunk->nbt->LightPopulated = new Byte("LightPopulated", ($flags >> 2) & 0b1);
+			$chunk->nbt->TerrainGenerated = new ByteTag("TerrainGenerated", $flags & 0b1);
+			$chunk->nbt->TerrainPopulated = new ByteTag("TerrainPopulated", ($flags >> 1) & 0b1);
+			$chunk->nbt->LightPopulated = new ByteTag("LightPopulated", ($flags >> 2) & 0b1);
 
 			return $chunk;
 		}catch(\Exception $e){
@@ -350,8 +350,8 @@ class Chunk extends BaseFullChunk{
 	public function toBinary(){
 		$nbt = clone $this->getNBT();
 
-		$nbt->xPos = new Int("xPos", $this->x);
-		$nbt->zPos = new Int("zPos", $this->z);
+		$nbt->xPos = new IntTag("xPos", $this->x);
+		$nbt->zPos = new IntTag("zPos", $this->z);
 
 		if($this->isGenerated()){
 			$nbt->Blocks = new ByteArray("Blocks", $this->getBlockIdArray());
@@ -373,7 +373,7 @@ class Chunk extends BaseFullChunk{
 			}
 		}
 
-		$nbt->Entities = new Enum("Entities", $entities);
+		$nbt->Entities = new EnumTag("Entities", $entities);
 		$nbt->Entities->setTagType(NBT::TAG_Compound);
 
 
@@ -383,7 +383,7 @@ class Chunk extends BaseFullChunk{
 			$tiles[] = $tile->namedtag;
 		}
 
-		$nbt->TileEntities = new Enum("TileEntities", $tiles);
+		$nbt->TileEntities = new EnumTag("TileEntities", $tiles);
 		$nbt->TileEntities->setTagType(NBT::TAG_Compound);
 
 		$extraData = new BinaryStream();
@@ -397,7 +397,7 @@ class Chunk extends BaseFullChunk{
 
 		$writer = new NBT(NBT::BIG_ENDIAN);
 		$nbt->setName("Level");
-		$writer->setData(new Compound("", ["Level" => $nbt]));
+		$writer->setData(new CompoundTag("", ["Level" => $nbt]));
 
 		return $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, RegionLoader::$COMPRESSION_LEVEL);
 	}
@@ -430,11 +430,11 @@ class Chunk extends BaseFullChunk{
 			$chunk->heightMap = array_fill(0, 256, 0);
 			$chunk->biomeColors = array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a"));
 
-			$chunk->nbt->V = new Byte("V", 1);
-			$chunk->nbt->InhabitedTime = new Long("InhabitedTime", 0);
-			$chunk->nbt->TerrainGenerated = new Byte("TerrainGenerated", 0);
-			$chunk->nbt->TerrainPopulated = new Byte("TerrainPopulated", 0);
-			$chunk->nbt->LightPopulated = new Byte("LightPopulated", 0);
+			$chunk->nbt->V = new ByteTag("V", 1);
+			$chunk->nbt->InhabitedTime = new LongTag("InhabitedTime", 0);
+			$chunk->nbt->TerrainGenerated = new ByteTag("TerrainGenerated", 0);
+			$chunk->nbt->TerrainPopulated = new ByteTag("TerrainPopulated", 0);
+			$chunk->nbt->LightPopulated = new ByteTag("LightPopulated", 0);
 
 			return $chunk;
 		}catch(\Exception $e){

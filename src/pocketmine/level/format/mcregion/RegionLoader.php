@@ -24,13 +24,13 @@ namespace pocketmine\level\format\mcregion;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\format\LevelProvider;
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\Byte;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\ByteArray;
-use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Enum;
-use pocketmine\nbt\tag\Int;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\EnumTag;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\IntArray;
-use pocketmine\nbt\tag\Long;
+use pocketmine\nbt\tag\LongTag;
 use pocketmine\utils\Binary;
 use pocketmine\utils\ChunkException;
 use pocketmine\utils\MainLogger;
@@ -138,14 +138,14 @@ class RegionLoader{
 	}
 
 	public function generateChunk($x, $z){
-		$nbt = new Compound("Level", []);
-		$nbt->xPos = new Int("xPos", ($this->getX() * 32) + $x);
-		$nbt->zPos = new Int("zPos", ($this->getZ() * 32) + $z);
-		$nbt->LastUpdate = new Long("LastUpdate", 0);
-		$nbt->LightPopulated = new Byte("LightPopulated", 0);
-		$nbt->TerrainPopulated = new Byte("TerrainPopulated", 0);
-		$nbt->V = new Byte("V", self::VERSION);
-		$nbt->InhabitedTime = new Long("InhabitedTime", 0);
+		$nbt = new CompoundTag("Level", []);
+		$nbt->xPos = new IntTag("xPos", ($this->getX() * 32) + $x);
+		$nbt->zPos = new IntTag("zPos", ($this->getZ() * 32) + $z);
+		$nbt->LastUpdate = new LongTag("LastUpdate", 0);
+		$nbt->LightPopulated = new ByteTag("LightPopulated", 0);
+		$nbt->TerrainPopulated = new ByteTag("TerrainPopulated", 0);
+		$nbt->V = new ByteTag("V", self::VERSION);
+		$nbt->InhabitedTime = new LongTag("InhabitedTime", 0);
 		$biomes = str_repeat(Binary::writeByte(-1), 256);
 		$nbt->Biomes = new ByteArray("Biomes", $biomes);
 		$nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, 127));
@@ -158,15 +158,15 @@ class RegionLoader{
 		$nbt->SkyLight = new ByteArray("SkyLight", str_repeat("\xff", 16384));
 		$nbt->BlockLight = new ByteArray("BlockLight", $half);
 
-		$nbt->Entities = new Enum("Entities", []);
+		$nbt->Entities = new EnumTag("Entities", []);
 		$nbt->Entities->setTagType(NBT::TAG_Compound);
-		$nbt->TileEntities = new Enum("TileEntities", []);
+		$nbt->TileEntities = new EnumTag("TileEntities", []);
 		$nbt->TileEntities->setTagType(NBT::TAG_Compound);
-		$nbt->TileTicks = new Enum("TileTicks", []);
+		$nbt->TileTicks = new EnumTag("TileTicks", []);
 		$nbt->TileTicks->setTagType(NBT::TAG_Compound);
 		$writer = new NBT(NBT::BIG_ENDIAN);
 		$nbt->setName("Level");
-		$writer->setData(new Compound("", ["Level" => $nbt]));
+		$writer->setData(new CompoundTag("", ["Level" => $nbt]));
 		$chunkData = $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, self::$COMPRESSION_LEVEL);
 
 		if($chunkData !== false){

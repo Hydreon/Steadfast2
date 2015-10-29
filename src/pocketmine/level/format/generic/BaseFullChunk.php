@@ -24,7 +24,7 @@ namespace pocketmine\level\format\generic;
 use pocketmine\entity\Entity;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\format\LevelProvider;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\Player;
 use pocketmine\tile\Tile;
 use pocketmine\utils\Binary;
