@@ -205,4 +205,29 @@ class Chunk extends BaseChunk{
 
 		return $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, RegionLoader::$COMPRESSION_LEVEL);
 	}
+        
+        public static function getEmptyChunk($chunkX, $chunkZ, LevelProvider $provider = null){
+		try{
+			$chunk = new Chunk($provider instanceof LevelProvider ? $provider : Anvil::class, null);
+			$chunk->x = $chunkX;
+			$chunk->z = $chunkZ;
+
+			for($y = 0; $y < 8; ++$y){
+				$chunk->sections[$y] = new EmptyChunkSection($y);
+			}
+
+			$chunk->heightMap = array_fill(0, 256, 0);
+			$chunk->biomeColors = array_fill(0, 256, 0);
+
+			$chunk->nbt->V = new ByteTag("V", 1);
+			$chunk->nbt->InhabitedTime = new LongTag("InhabitedTime", 0);
+			$chunk->nbt->TerrainGenerated = new ByteTag("TerrainGenerated", 0);
+			$chunk->nbt->TerrainPopulated = new ByteTag("TerrainPopulated", 0);
+			$chunk->nbt->LightPopulated = new ByteTag("LightPopulated", 0);
+
+			return $chunk;
+		}catch(\Throwable $e){
+			return null;
+		}
+	}
 }
