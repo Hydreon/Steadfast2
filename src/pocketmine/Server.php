@@ -689,7 +689,7 @@ class Server{
 	 */
 	public function getOfflinePlayerData($name){
 		$name = strtolower($name);
-		$path = $this->getDataPath() . "players/";
+	/*	$path = $this->getDataPath() . "players/";
 		if(file_exists($path . "$name.dat")){
 			try{
 				$nbt = new NBT(NBT::BIG_ENDIAN);
@@ -702,7 +702,7 @@ class Server{
 			}
 		}else{
 			$this->logger->notice("Player data not found for \"" . $name . "\", creating new profile");
-		}
+		} */
 		$spawn = $this->getDefaultLevel()->getSafeSpawn();
 		$nbt = new Compound("", [
 			new Long("firstPlayed", floor(microtime(true) * 1000)),
