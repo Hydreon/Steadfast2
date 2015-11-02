@@ -90,7 +90,7 @@ class EnchantingTable extends Transparent{
 				return true;
 			}
 
-			$player->addWindow(new EnchantInventory($this));
+//			$player->addWindow(new EnchantInventory($this));
 		}
 
 		return true;
