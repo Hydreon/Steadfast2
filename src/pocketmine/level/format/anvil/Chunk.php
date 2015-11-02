@@ -28,7 +28,7 @@ use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\ByteArray;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\EnumTag;
+use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\IntArray;
 use pocketmine\Player;
@@ -43,22 +43,22 @@ class Chunk extends BaseChunk{
 		$this->nbt = $nbt;
 
 		if(!isset($this->nbt->Entities) or !($this->nbt->Entities instanceof Enum)){
-			$this->nbt->Entities = new EnumTag("Entities", []);
+			$this->nbt->Entities = new Enum("Entities", []);
 			$this->nbt->Entities->setTagType(NBT::TAG_Compound);
 		}
 
 		if(!isset($this->nbt->TileEntities) or !($this->nbt->TileEntities instanceof Enum)){
-			$this->nbt->TileEntities = new EnumTag("TileEntities", []);
+			$this->nbt->TileEntities = new Enum("TileEntities", []);
 			$this->nbt->TileEntities->setTagType(NBT::TAG_Compound);
 		}
 
 		if(!isset($this->nbt->TileTicks) or !($this->nbt->TileTicks instanceof Enum)){
-			$this->nbt->TileTicks = new EnumTag("TileTicks", []);
+			$this->nbt->TileTicks = new Enum("TileTicks", []);
 			$this->nbt->TileTicks->setTagType(NBT::TAG_Compound);
 		}
 
 		if(!isset($this->nbt->Sections) or !($this->nbt->Sections instanceof Enum)){
-			$this->nbt->Sections = new EnumTag("Sections", []);
+			$this->nbt->Sections = new Enum("Sections", []);
 			$this->nbt->Sections->setTagType(NBT::TAG_Compound);
 		}
 
@@ -158,7 +158,7 @@ class Chunk extends BaseChunk{
 		$nbt->xPos = new IntTag("xPos", $this->x);
 		$nbt->zPos = new IntTag("zPos", $this->z);
 
-		$nbt->Sections = new EnumTag("Sections", []);
+		$nbt->Sections = new Enum("Sections", []);
 		$nbt->Sections->setTagType(NBT::TAG_Compound);
 		foreach($this->getSections() as $section){
 			if($section instanceof EmptyChunkSection){
@@ -187,7 +187,7 @@ class Chunk extends BaseChunk{
 			}
 		}
 
-		$nbt->Entities = new EnumTag("Entities", $entities);
+		$nbt->Entities = new Enum("Entities", $entities);
 		$nbt->Entities->setTagType(NBT::TAG_Compound);
 
 
@@ -197,7 +197,7 @@ class Chunk extends BaseChunk{
 			$tiles[] = $tile->namedtag;
 		}
 
-		$nbt->TileEntities = new EnumTag("TileEntities", $tiles);
+		$nbt->TileEntities = new Enum("TileEntities", $tiles);
 		$nbt->TileEntities->setTagType(NBT::TAG_Compound);
 		$writer = new NBT(NBT::BIG_ENDIAN);
 		$nbt->setName("Level");

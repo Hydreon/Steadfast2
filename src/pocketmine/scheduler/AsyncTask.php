@@ -39,8 +39,7 @@ abstract class AsyncTask extends \Collectable{
 
 		$this->onRun();
                 
-                //crash lbcore plugins if active
-		//$this->setGarbage();
+		$this->setGarbage();
 	}
 
 	/**

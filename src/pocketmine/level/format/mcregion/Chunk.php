@@ -27,7 +27,7 @@ use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\ByteArray;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\EnumTag;
+use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\IntArray;
 use pocketmine\nbt\tag\LongTag;
@@ -52,21 +52,21 @@ class Chunk extends BaseFullChunk{
 		if(isset($this->nbt->Entities) and $this->nbt->Entities instanceof Enum){
 			$this->nbt->Entities->setTagType(NBT::TAG_Compound);
 		}else{
-			$this->nbt->Entities = new EnumTag("Entities", []);
+			$this->nbt->Entities = new Enum("Entities", []);
 			$this->nbt->Entities->setTagType(NBT::TAG_Compound);
 		}
 
 		if(isset($this->nbt->TileEntities) and $this->nbt->TileEntities instanceof Enum){
 			$this->nbt->TileEntities->setTagType(NBT::TAG_Compound);
 		}else{
-			$this->nbt->TileEntities = new EnumTag("TileEntities", []);
+			$this->nbt->TileEntities = new Enum("TileEntities", []);
 			$this->nbt->TileEntities->setTagType(NBT::TAG_Compound);
 		}
 
 		if(isset($this->nbt->TileTicks) and $this->nbt->TileTicks instanceof Enum){
 			$this->nbt->TileTicks->setTagType(NBT::TAG_Compound);
 		}else{
-			$this->nbt->TileTicks = new EnumTag("TileTicks", []);
+			$this->nbt->TileTicks = new Enum("TileTicks", []);
 			$this->nbt->TileTicks->setTagType(NBT::TAG_Compound);
 		}
 
@@ -373,7 +373,7 @@ class Chunk extends BaseFullChunk{
 			}
 		}
 
-		$nbt->Entities = new EnumTag("Entities", $entities);
+		$nbt->Entities = new Enum("Entities", $entities);
 		$nbt->Entities->setTagType(NBT::TAG_Compound);
 
 
@@ -383,7 +383,7 @@ class Chunk extends BaseFullChunk{
 			$tiles[] = $tile->namedtag;
 		}
 
-		$nbt->TileEntities = new EnumTag("TileEntities", $tiles);
+		$nbt->TileEntities = new Enum("TileEntities", $tiles);
 		$nbt->TileEntities->setTagType(NBT::TAG_Compound);
 
 		$extraData = new BinaryStream();

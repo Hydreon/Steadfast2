@@ -92,7 +92,7 @@ use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\DoubleTag;
-use pocketmine\nbt\tag\EnumTag;
+use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
@@ -2035,17 +2035,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 					if($item->getId() === Item::SNOWBALL){
 						$nbt = new Compound("", [
-							"Pos" => new EnumTag("Pos", [
+							"Pos" => new Enum("Pos", [
 								new DoubleTag("", $this->x),
 								new DoubleTag("", $this->y + $this->getEyeHeight()),
 								new DoubleTag("", $this->z)
 							]),
-							"Motion" => new EnumTag("Motion", [
+							"Motion" => new Enum("Motion", [
 								new DoubleTag("", $aimPos->x),
 								new DoubleTag("", $aimPos->y),
 								new DoubleTag("", $aimPos->z)
 							]),
-							"Rotation" => new EnumTag("Rotation", [
+							"Rotation" => new Enum("Rotation", [
 								new FloatTag("", $this->yaw),
 								new FloatTag("", $this->pitch)
 							]),
@@ -2112,17 +2112,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 
 								$nbt = new Compound("", [
-									"Pos" => new EnumTag("Pos", [
+									"Pos" => new Enum("Pos", [
 										new DoubleTag("", $this->x),
 										new DoubleTag("", $this->y + $this->getEyeHeight()),
 										new DoubleTag("", $this->z)
 									]),
-									"Motion" => new EnumTag("Motion", [
+									"Motion" => new Enum("Motion", [
 										new DoubleTag("", -sin($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI)),
 										new DoubleTag("", -sin($this->pitch / 180 * M_PI)),
 										new DoubleTag("", cos($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI))
 									]),
-									"Rotation" => new EnumTag("Rotation", [
+									"Rotation" => new Enum("Rotation", [
 										new FloatTag("", $this->yaw),
 										new FloatTag("", $this->pitch)
 									]),

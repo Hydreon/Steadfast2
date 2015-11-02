@@ -30,7 +30,7 @@ use pocketmine\nbt\tag\ByteArray;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\End;
-use pocketmine\nbt\tag\EnumTag;
+use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\IntArray;
@@ -242,7 +242,7 @@ class NBT{
 					$data[$key] = new ByteTag($key, $value);
 					break;
 				case NBT::TAG_Enum:
-					$data[$key] = new EnumTag($key, $value);
+					$data[$key] = new Enum($key, $value);
 					break;
 				case NBT::TAG_Compound:
 					$data[$key] = new Compound($key, $value);
@@ -300,7 +300,7 @@ class NBT{
 					$data[$key] = new StringTag($key, $value);
 					break;
 				case NBT::TAG_Enum:
-					$data[$key] = new EnumTag($key, $value);
+					$data[$key] = new Enum($key, $value);
 					break;
 				case NBT::TAG_Compound:
 					$data[$key] = new Compound($key, $value);
@@ -537,7 +537,7 @@ class NBT{
 				$tag->read($this);
 				break;
 			case NBT::TAG_Enum:
-				$tag = new EnumTag($this->getString());
+				$tag = new Enum($this->getString());
 				$tag->read($this);
 				break;
 			case NBT::TAG_Compound:
@@ -666,7 +666,7 @@ class NBT{
 						$isIntArray = false;
 					}
 				}
-				$tag{$key} = $isNumeric ? ($isIntArray ? new IntArray($key, []) : new EnumTag($key, [])) : new Compound($key, []);
+				$tag{$key} = $isNumeric ? ($isIntArray ? new IntArray($key, []) : new Enum($key, [])) : new Compound($key, []);
 				self::fromArray($tag->{$key}, $value, $guesser);
 			}else{
 				$v = call_user_func($guesser, $key, $value);
