@@ -1679,7 +1679,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 
-				if($packet->protocol1 >= ProtocolInfo::CURRENT_PROTOCOL){
+				if($packet->protocol1 < ProtocolInfo::CURRENT_PROTOCOL){
 					$message = "";
 					if($packet->protocol1 < ProtocolInfo::CURRENT_PROTOCOL){
 						$message = "Please update Minecraft PE to join.";
