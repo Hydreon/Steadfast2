@@ -85,7 +85,9 @@ class RCONInstance extends Thread{
 	public function run(){
 
 		while($this->stop !== true){
-			usleep(2000);
+			$this->synchronized(function(){
+                            $this->wait(2000);
+			});
 			$r = [$socket = $this->socket];
 			$w = null;
 			$e = null;
