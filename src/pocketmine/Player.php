@@ -2480,7 +2480,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($this->spawned === false or $this->blocked === true or $this->dead === true){
 					break;
 				}
-				$item = $this->inventory->getItemInHand();
+                                //$item = $this->inventory->getItemInHand();
+                                $item = $packet->item;
 				$ev = new PlayerDropItemEvent($this, $item);
 				$this->server->getPluginManager()->callEvent($ev);
 				if($ev->isCancelled()){
