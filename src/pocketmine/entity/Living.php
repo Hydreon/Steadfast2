@@ -136,9 +136,9 @@ abstract class Living extends Entity implements Damageable{
 		$motion->x /= 2;
 		$motion->y /= 2;
 		$motion->z /= 2;
-		$motion->x += ($x / $f) * $base;
+		$motion->x += ($f != 0) ? ($x / $f) * $base : 0;
 		$motion->y += $base;
-		$motion->z += ($z / $f) * $base;
+		$motion->z += ($f != 0) ? ($z / $f) * $base : 0;
 
 		if($motion->y > $base){
 			$motion->y = $base;
