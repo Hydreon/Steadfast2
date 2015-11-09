@@ -1706,7 +1706,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					return;
 				}
 
-				if(strlen($packet->skin) < 64 * 32 * 4){
+				if($packet->protocol1 == ProtocolInfo::CURRENT_PROTOCOL && (strlen($packet->skin) <= 64 * 32 * 4 || strlen($packet->skin) <= 64 * 64 * 4)) {
+				} else if($packet->protocol1 >= ProtocolInfo::CURRENT_PROTOCOL && (strlen($packet->skin) == 64 || strlen($packet->skin) == 32)) {
+				} else {
 					$this->close("", "Invalid skin.", false);
 					return;
 				}
