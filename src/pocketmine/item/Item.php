@@ -152,8 +152,7 @@ class Item{
 	const LIT_FURNACE = 62;
 	const SIGN_POST = 63;
 	const DOOR_BLOCK = 64;
-	const WOODEN_DOOR_BLOCK = 64;
-	const WOOD_DOOR_BLOCK = 64;
+	const OAK_DOOR_BLOCK = 64;
 	const LADDER = 65;
 
 	const COBBLE_STAIRS = 67;
@@ -277,6 +276,12 @@ class Item{
 	const FENCE_GATE_DARK_OAK = 186;
 	const FENCE_GATE_ACACIA = 187;
 
+	const SPRUCE_DOOR_BLOCK = 193;
+	const BIRCH_DOOR_BLOCK = 194;
+	const JUNGLE_DOOR_BLOCK = 195;
+	const ACACIA_DOOR_BLOCK = 196;
+	const DARK_OAK_DOOR_BLOCK = 197;
+
 	const GRASS_PATH = 198;
 
 	const PODZOL = 243;
@@ -364,7 +369,7 @@ class Item{
 	const PAINTING = 321;
 	const GOLDEN_APPLE = 322;
 	const SIGN = 323;
-	const WOODEN_DOOR = 324;
+	const OAK_DOOR = 324;
 	const BUCKET = 325;
 
 	const MINECART = 328;
@@ -434,6 +439,12 @@ class Item{
 	const QUARTZ = 406;
 	const NETHER_QUARTZ = 406;
 
+	const SPRUCE_DOOR = 427;
+	const BIRCH_DOOR = 428;
+	const JUNGLE_DOOR = 429;
+	const ACACIA_DOOR = 430;
+	const DARK_OAK_DOOR = 431;
+
 	const CAMERA = 456;
 	const BEETROOT = 457;
 	const BEETROOT_SEEDS = 458;
@@ -469,7 +480,7 @@ class Item{
 			self::$list[self::POTATO] = Potato::class;
 			self::$list[self::BEETROOT_SEEDS] = BeetrootSeeds::class;
 			self::$list[self::SIGN] = Sign::class;
-			self::$list[self::WOODEN_DOOR] = WoodenDoor::class;
+			self::$list[self::OAK_DOOR] = WoodenDoor::class;
 			self::$list[self::BUCKET] = Bucket::class;
 			self::$list[self::IRON_DOOR] = IronDoor::class;
 			self::$list[self::CAKE] = Cake::class;
@@ -537,6 +548,12 @@ class Item{
 
 			self::$list[self::RAW_FISH] = Fish::class;
 			self::$list[self::COOKED_FISH] = CookedFish::class;
+
+			self::$list[self::SPRUCE_DOOR] = SpruceDoor::class;
+			self::$list[self::BIRCH_DOOR] = BirchDoor::class;
+			self::$list[self::JUNGLE_DOOR] = JungleDoor::class;
+			self::$list[self::ACACIA_DOOR] = AcaciaDoor::class;
+			self::$list[self::DARK_OAK_DOOR] = DarkOakDoor::class;
 
 			for($i = 0; $i < 256; ++$i){
 				if(Block::$list[$i] !== null){
@@ -669,7 +686,12 @@ class Item{
 		self::addCreativeItem(Item::get(Item::LADDER, 0));
 		self::addCreativeItem(Item::get(Item::SPONGE, 0));
 		self::addCreativeItem(Item::get(Item::GLASS_PANE, 0));
-		self::addCreativeItem(Item::get(Item::WOODEN_DOOR, 0));
+		self::addCreativeItem(Item::get(Item::OAK_DOOR, 0));
+		self::addCreativeItem(Item::get(Item::SPRUCE_DOOR, 0));
+		self::addCreativeItem(Item::get(Item::BIRCH_DOOR, 0));
+		self::addCreativeItem(Item::get(Item::JUNGLE_DOOR, 0));
+		self::addCreativeItem(Item::get(Item::ACACIA_DOOR, 0));
+		self::addCreativeItem(Item::get(Item::DARK_OAK_DOOR, 0));
 		self::addCreativeItem(Item::get(Item::TRAPDOOR, 0));
 		self::addCreativeItem(Item::get(Item::FENCE, 0));
 		self::addCreativeItem(Item::get(Item::FENCE, 1));
