@@ -444,22 +444,23 @@ abstract class BaseInventory implements Inventory{
 	 * @param Player|Player[] $target
 	 */
 	public function sendSlot($index, $target){
-		if($target instanceof Player){
-			$target = [$target];
-		}
-
-		$pk = new ContainerSetSlotPacket();
-		$pk->slot = $index;
-		$pk->item = clone $this->getItem($index);
-
-		foreach($target as $player){
-			if(($id = $player->getWindowId($this)) === -1){
-				$this->close($player);
-				continue;
-			}
-			$pk->windowid = $id;
-			$player->dataPacket($pk);
-		}
+		$this->sendContents($target);
+//		if($target instanceof Player){
+//			$target = [$target];
+//		}
+//
+//		$pk = new ContainerSetSlotPacket();
+//		$pk->slot = $index;
+//		$pk->item = clone $this->getItem($index);
+//
+//		foreach($target as $player){
+//			if(($id = $player->getWindowId($this)) === -1){
+//				$this->close($player);
+//				continue;
+//			}
+//			$pk->windowid = $id;
+//			$player->dataPacket($pk);
+//		}
 	}
 
 	public function getType(){
