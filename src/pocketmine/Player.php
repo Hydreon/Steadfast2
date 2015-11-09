@@ -47,6 +47,7 @@ use pocketmine\event\player\PlayerBedEnterEvent;
 use pocketmine\event\player\PlayerBedLeaveEvent;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerCommandPreprocessEvent;
+use pocketmine\event\player\PlayerCommandPostprocessEvent;
 use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerGameModeChangeEvent;
@@ -2525,6 +2526,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 									$this->server->broadcastMessage($ev->getPlayer()->getDisplayName() . ": " . $ev->getMessage(), $ev->getRecipients());
 								}
 							}
+                                                        $ev = new PlayerCommandPostprocessEvent($this, $message);
+                                                        $this->server->getPluginManager()->callEvent($ev);
 						}
 					}
 				}
