@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Honza
- * Date: 4. 11. 2015
- * Time: 14:59
- */
 
 namespace pocketmine\block;
 
