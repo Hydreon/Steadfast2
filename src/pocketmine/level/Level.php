@@ -1185,15 +1185,8 @@ class Level implements ChunkManager, Metadatable{
 				Cache::remove("world:" . $this->getId() . ":" . $index);
 			}
 
-			if($direct === true){
-				$pk = new UpdateBlockPacket();
-				$pk->x = $pos->x;
-				$pk->y = $pos->y;
-				$pk->z = $pos->z;
-				$pk->block = $block->getId();
-				$pk->meta = $block->getDamage();
-
-				Server::broadcastPacket($this->getUsingChunk($pos->x >> 4, $pos->z >> 4), $pk);
+			if($direct === true){                        
+                                $this->sendBlocks($this->getUsingChunk($block->x >> 4, $block->z >> 4), [$block]);
 			}else{
 				if(!($pos instanceof Position)){
 					$pos = $this->temporalPosition->setComponents($pos->x, $pos->y, $pos->z);
