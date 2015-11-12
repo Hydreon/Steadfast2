@@ -1195,10 +1195,10 @@ class Item{
 		return $this;
 	}
 
-	public function getNamedTagEntry($name){
+	public function getNamedTagEntry($named){
 		$tag = $this->getNamedTag();
 		if($tag !== null){
-			return isset($tag->{$name}) ? $tag->{$name} : null;
+			return isset($tag->{$named}) ? $tag->{$named} : null;
 		}
 
 		return null;
