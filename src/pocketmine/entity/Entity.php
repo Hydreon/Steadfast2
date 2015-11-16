@@ -1056,7 +1056,11 @@ abstract class Entity extends Location implements Metadatable{
 	}
 
 	public function isCollideWithWater() {
-		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($this->y), Math::floorFloat($this->z)));
+		// checking block under feet
+		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
+		if(!($block instanceof Water)) {
+			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
+		}
 
 		if($block instanceof Water) {
 			$f = ($block->y + 1) - ($block->getFluidHeightPercent() - 0.1111111);
