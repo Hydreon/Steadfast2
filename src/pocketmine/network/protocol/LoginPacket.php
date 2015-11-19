@@ -37,6 +37,7 @@ class LoginPacket extends DataPacket{
 	public $clientSecret;
 
 	public $slim = false;
+	public $isTransparent = false;
 	public $skin = null;
 
 	public function decode(){
@@ -53,6 +54,9 @@ class LoginPacket extends DataPacket{
 		$this->clientSecret = $this->getString();
 
 		$this->slim = $this->getByte() > 0;
+		if($this->protocol1 > Info::CURRENT_PROTOCOL) {
+			$this->isTransparent = $this->getByte() > 0;
+		}
 		$this->skin = $this->getString();
 	}
 

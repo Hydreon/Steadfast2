@@ -30,6 +30,7 @@ class ContainerSetSlotPacket extends DataPacket{
 
 	public $windowid;
 	public $slot;
+	public $hotbarSlot = 0;
 	/** @var Item */
 	public $item;
 
@@ -43,7 +44,7 @@ class ContainerSetSlotPacket extends DataPacket{
 		$this->reset();
 		$this->putByte($this->windowid);
 		$this->putShort($this->slot);
+		$this->putShort($this->hotbarSlot);
 		$this->putSlot($this->item);
 	}
-
 }
