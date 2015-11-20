@@ -595,13 +595,9 @@ class Level implements ChunkManager, Metadatable{
 						foreach($mini as $blocks){
 							/** @var Block $b */
 							foreach($blocks as $b){
-								$pk = new UpdateBlockPacket();
-								$pk->x = $b->x;
-								$pk->y = $b->y;
-								$pk->z = $b->z;
-								$pk->block = $b->getId();
-								$pk->meta = $b->getDamage();
-								Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
+                                                            $pk = new UpdateBlockPacket();
+                                                            $pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
+                                                            Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
 							}
 						}
 					}
@@ -639,7 +635,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @param Block[]  $blocks
 	 * @param int      $flags
 	 */
-	public function sendBlocks(array $target, array $blocks, $flags = UpdateBlockPacket::FLAG_NONE){
+	public function sendBlocks(array $target, array $blocks, $flags = UpdateBlockPacket::FLAG_ALL){
 		$pk = new UpdateBlockPacket();
 		foreach($blocks as $b){
 			if($b === null){
