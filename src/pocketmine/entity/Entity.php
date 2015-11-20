@@ -356,9 +356,9 @@ abstract class Entity extends Location implements Metadatable{
 		if(isset($this->effects[$effect->getId()])){
 			$oldEffect = $this->effects[$effect->getId()];
 			if(
-				abs($effect->getAmplifier()) <= ($oldEffect->getAmplifier())
+				abs($effect->getAmplifier()) < abs($oldEffect->getAmplifier())
 				or (abs($effect->getAmplifier()) === abs($oldEffect->getAmplifier())
-					and $effect->getDuration() < $oldEffect->getDuration())
+					and $effect->getDuration() <= $oldEffect->getDuration())
 			){
 				return;
 			}
@@ -1054,6 +1054,19 @@ abstract class Entity extends Location implements Metadatable{
 
 		return false;
 	}
+        
+        public function isCollideWithWater() {
+		// checking block under feet
+		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
+		if(!($block instanceof Water)) {
+			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
+		}
+		if($block instanceof Water) {
+			$f = ($block->y + 1) - ($block->getFluidHeightPercent() - 0.1111111);
+			return $y < $f;
+		}
+		return false;
+	}
 
 	public function isCollideWithWater() {
 		// checking block under feet
@@ -1506,7 +1519,7 @@ abstract class Entity extends Location implements Metadatable{
 		if($this->chunk === null or $this->closed){
 			return;
 		}
-		foreach($this->level->getUsingChunk($this->chunkX, $this->chunkZ) as $player){
+		foreach($this->level->getUsingChunk($this->chunk->getX(), $this->chunk->getZ()) as $player){
 			if($player->loggedIn === true){
 				$this->spawnTo($player);
 			}
