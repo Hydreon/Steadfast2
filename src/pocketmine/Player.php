@@ -576,7 +576,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setDisplayName($name){
 		$this->displayName = $name;
 		if($this->spawned){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->isSkinSlim(), $this->getSkinData());
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->isSkinSlim(), $this->isTransparent, $this->getSkinData());
 		}
 	}
 
@@ -590,7 +590,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setSkin($str, $isSlim = false, $isTransparent = false){
 		parent::setSkin($str, $isSlim, $isTransparent);
 		if($this->spawned === true){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $isSlim, $str);
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $isSlim, $isTransparent, $str);
 		}
 	}
 
