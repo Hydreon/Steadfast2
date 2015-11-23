@@ -224,9 +224,10 @@ class Level implements ChunkManager, Metadatable{
 
 	/** @var LevelTimings */
 	public $timings;
+        
+         private $isFrozen = false;
 
-
-	/**
+        /**
 	 * Returns the chunk unique hash/key
 	 *
 	 * @param int $x
@@ -862,7 +863,7 @@ class Level implements ChunkManager, Metadatable{
 			for($v->x = $minX; $v->x < $maxX; ++$v->x){
 				for($v->y = $minY - 1; $v->y < $maxY; ++$v->y){
 					$block = $this->getBlock($v);
-					if($block->getId() !== 0 && $block->collidesWithBB($bb, $collides)) {
+					if($block->getId() !== 0 and $block->collidesWithBB($bb)){
 						$collides[] = $block;
 					}
 				}
@@ -1181,7 +1182,7 @@ class Level implements ChunkManager, Metadatable{
 				Cache::remove("world:" . $this->getId() . ":" . $index);
 			}
 
-			if($direct === true){                        
+			if($direct === true){
                                 $this->sendBlocks($this->getUsingChunk($block->x >> 4, $block->z >> 4), [$block]);
 			}else{
 				if(!($pos instanceof Position)){
@@ -2113,7 +2114,7 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public function unloadChunk($x, $z, $safe = true){
-		if(($safe === true and $this->isChunkInUse($x, $z))){
+		if($this->isFrozen || ($safe === true and $this->isChunkInUse($x, $z))){
 			return false;
 		}
 
@@ -2329,7 +2330,7 @@ class Level implements ChunkManager, Metadatable{
 
 		foreach($this->provider->getLoadedChunks() as $chunk){
 			if(!isset($this->chunks[PHP_INT_SIZE === 8 ? ((($chunk->getX()) & 0xFFFFFFFF) << 32) | (( $chunk->getZ()) & 0xFFFFFFFF) : ($chunk->getX()) . ":" . ( $chunk->getZ())])){
-				$this->provider->unloadChunk($chunk->getX(), $chunk->getZ(), false);
+                            $this->provider->unloadChunk($chunk->getX(), $chunk->getZ(), false);
 			}
 		}
 
@@ -2339,7 +2340,7 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	protected function unloadChunks(){
-		if(count($this->unloadQueue) > 0){
+		if(count($this->unloadQueue) > 0 && !$this->isFrozen){
 			$X = null;
 			$Z = null;
 			foreach($this->unloadQueue as $index => $time){
@@ -2352,6 +2353,16 @@ class Level implements ChunkManager, Metadatable{
 			}
 		}
 	}
+        
+	public function freezeMap(){
+		$this->isFrozen = true;
+	}
+
+	public function unfreezeMap(){
+		$this->isFrozen = false;
+	}
+
+	
 
 	public function setMetadata($metadataKey, MetadataValue $metadataValue){
 		$this->server->getLevelMetadata()->setMetadata($this, $metadataKey, $metadataValue);

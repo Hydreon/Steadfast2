@@ -1055,7 +1055,7 @@ abstract class Entity extends Location implements Metadatable{
 		return false;
 	}
         
-        public function isCollideWithWater() {
+	public function isCollideWithWater() {
 		// checking block under feet
 		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
 		if(!($block instanceof Water)) {
@@ -1308,11 +1308,19 @@ abstract class Entity extends Location implements Metadatable{
 						$bb = clone $this->boundingBox;
 						$bb->maxY = $bb->minY + 0.5;
 						$bb->minY -= 1;
-						if(count($this->level->getCollisionBlocks($bb)) > 0){
+						if(count($this->level->getCollisionBlocks($bb, true)) > 0){
 							$this->onGround = true;
 						}else{
 							$this->onGround = false;
 						}
+//						
+//						$bb = clone $this->boundingBox;
+//						$bb->minY -= 1;
+//						if(count($this->level->getCollisionBlocks($bb)) > 0){
+//							$this->onGround = true;
+//						}else{
+//							$this->onGround = false;
+//						}
 					}
 					$this->isCollided = $this->onGround;
 				}else{

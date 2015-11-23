@@ -110,6 +110,7 @@ use pocketmine\network\protocol\DisconnectPacket;
 use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\Info as ProtocolInfo;
+use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\PlayerActionPacket;
 use pocketmine\network\protocol\PlayStatusPacket;
 use pocketmine\network\protocol\RespawnPacket;
@@ -575,7 +576,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setDisplayName($name){
 		$this->displayName = $name;
 		if($this->spawned){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->isSkinSlim(), $this->getSkinData());
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->isSkinSlim(), $this->isTransparent, $this->getSkinData());
 		}
 	}
 
@@ -589,7 +590,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setSkin($str, $isSlim = false, $isTransparent = false){
 		parent::setSkin($str, $isSlim, $isTransparent);
 		if($this->spawned === true){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $isSlim, $str);
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $isSlim, $isTransparent, $str);
 		}
 	}
 
@@ -1492,7 +1493,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 						if(!$this->hasEffect(Effect::JUMP) and $diff > 0.6 and $expectedVelocity < $this->speed->y and !$this->server->getAllowFlight()){
 							if($this->inAirTicks < 100){
-								//$this->setMotion(new Vector3(0, $expectedVelocity, 0));
+//								$this->setMotion(new Vector3(0, $expectedVelocity, 0));
 							}elseif($this->kick("Flying is not enabled on this server")){
 								$this->timings->stopTiming();
 								return false;
@@ -1679,23 +1680,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if(count($this->server->getOnlinePlayers()) > $this->server->getMaxPlayers() and $this->kick("Server is full")){
 					break;
 				}
-
-                                if($packet->protocol1 < ProtocolInfo::CURRENT_PROTOCOL){
-					$message = "";
-					if($packet->protocol1 < ProtocolInfo::CURRENT_PROTOCOL){
-						$message = "Please update Minecraft PE to join.";
-
-						$pk = new PlayStatusPacket();
-						$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
-						$this->dataPacket($pk);
-					}else{
-						$message = "Please use an older version of Minecraft PE.";
-
-						$pk = new PlayStatusPacket();
-						$pk->status = PlayStatusPacket::LOGIN_FAILED_SERVER;
-						$this->dataPacket($pk);
+				if($packet->protocol1 != ProtocolInfo::CURRENT_PROTOCOL){
+					if($packet->protocol1 < ProtocolInfo::CURRENT_PROTOCOL) {
+						$message = "upgrade";
+					} else {
+						$message = "downgrade";
 					}
-					$this->close("", $message, false);
+
+					$pk = new PlayStatusPacket();
+					$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
+					$this->dataPacket($pk);
+					$this->close("", TextFormat::RED . "Please " . $message . " to MCPE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.", false);
 
 					return;
 				}
@@ -1872,6 +1867,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->server->sendFullPlayerListData($this);
 				$this->server->sendRecipeList($this);
 
+				if($this->protocol != Info::CURRENT_PROTOCOL) {
+					$this->sendMessage(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED .".");
+					$this->sendTip(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN .$this->getServer()->getVersion() . TextFormat::RED .".");
+				}
 //				$this->orderChunks();
 //				$this->sendNextChunk();
 				break;
