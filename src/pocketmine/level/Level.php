@@ -862,8 +862,8 @@ class Level implements ChunkManager, Metadatable{
 			for($v->x = $minX; $v->x < $maxX; ++$v->x){
 				for($v->y = $minY - 1; $v->y < $maxY; ++$v->y){
 					$block = $this->getBlock($v);
-					if($block->getId() !== 0){
-						$block->collidesWithBB($bb, $collides);
+					if($block->getId() !== 0 && $block->collidesWithBB($bb, $collides)) {
+						$collides[] = $block;
 					}
 				}
 			}
