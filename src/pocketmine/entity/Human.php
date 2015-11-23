@@ -61,6 +61,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	protected $skin;
 	protected $isSlim = false;
+	protected $isTransparent = false;
 
 	public function getSkinData(){
 		return $this->skin;
@@ -68,6 +69,10 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	public function isSkinSlim(){
 		return $this->isSlim;
+	}
+
+	public function isSkinTransparent(){
+		return $this->isTransparent;
 	}
 
 	/**
@@ -88,9 +93,10 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	 * @param string $str
 	 * @param bool   $isSlim
 	 */
-	public function setSkin($str, $isSlim = false){
+	public function setSkin($str, $isSlim = false, $isTransparent = false){
 		$this->skin = $str;
 		$this->isSlim = (bool) $isSlim;
+		$this->isTransparent = (bool) $isTransparent;
 	}
 
 	public function getInventory(){
@@ -217,12 +223,12 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 
 			if(!($this instanceof Player)){
-				$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->isSlim, $this->skin, [$player]);
+				$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->isSlim, $this->isTransparent, $this->skin, [$player]);
 			}
 
 			$pk = new PlayerListPacket();
 			$pk->type = PlayerListPacket::TYPE_ADD;
-			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->isSlim, $this->skin];
+			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->isSlim, $this->isTransparent, $this->skin];
 			$player->dataPacket($pk);
 
 			$pk = new AddPlayerPacket();
