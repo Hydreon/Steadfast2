@@ -1110,7 +1110,9 @@ abstract class Entity extends Location implements Metadatable{
 			}
 		}
 		$this->isCollided = $this->onGround;
-		$this->updateFallState($dy, $this->onGround);
+
+		$notInAir = $this->onGround || $this->isCollideWithWater();
+		$this->updateFallState($dy, $notInAir);
 
 
 		Timings::$entityMoveTimer->stopTiming();
@@ -1329,7 +1331,8 @@ abstract class Entity extends Location implements Metadatable{
 					$this->isCollided = ($this->isCollidedHorizontally or $this->isCollidedVertically);
 					$this->onGround = ($movY != $dy and $movY < 0);
 				}
-				$this->updateFallState($dy, $this->onGround);
+				$notInAir = $this->onGround || $this->isCollideWithWater();
+				$this->updateFallState($dy, $notInAir);
 
 				if($movX != $dx){
 					$this->motionX = 0;
