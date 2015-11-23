@@ -866,8 +866,8 @@ class Level implements ChunkManager, Metadatable{
 			for($v->x = $minX; $v->x < $maxX; ++$v->x){
 				for($v->y = $minY - 1; $v->y < $maxY; ++$v->y){
 					$block = $this->getBlock($v);
-					if($block->getId() !== 0){
-						$block->collidesWithBB($bb, $collides);
+					if($block->getId() !== 0 and $block->collidesWithBB($bb)){
+						$collides[] = $block;
 					}
 				}
 			}
@@ -1185,7 +1185,7 @@ class Level implements ChunkManager, Metadatable{
 				Cache::remove("world:" . $this->getId() . ":" . $index);
 			}
 
-			if($direct === true){                        
+			if($direct === true){
                                 $this->sendBlocks($this->getUsingChunk($block->x >> 4, $block->z >> 4), [$block]);
 			}else{
 				if(!($pos instanceof Position)){
