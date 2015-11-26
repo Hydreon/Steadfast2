@@ -1465,16 +1465,30 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->lastUpdate = $currentTick;
 
+		
+
+		$this->timings->startTiming();
+		
+		
+		$this->checkTeleportPosition();
+
+		if($this->nextChunkOrderRun-- <= 0 or $this->chunk === null){
+			$this->orderChunks();
+		}
+
+		if(count($this->loadQueue) > 0 or !$this->spawned){
+			$this->sendNextChunk();
+		}
+
 		if($this->dead === true and $this->spawned){
 			++$this->deadTicks;
 			if($this->deadTicks >= 10){
 				$this->despawnFromAll();
 			}
+			$this->timings->stopTiming();
 			return $this->deadTicks < 10;
 		}
-
-		$this->timings->startTiming();
-
+		
 		if($this->spawned){
 			$this->processMovement($tickDiff);
 
@@ -1543,16 +1557,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if($this->getHealth() < $this->getMaxHealth()) {
 				$this->foodTick++;
 			}
-		}
-
-		$this->checkTeleportPosition();
-
-		if($this->nextChunkOrderRun-- <= 0 or $this->chunk === null){
-			$this->orderChunks();
-		}
-
-		if(count($this->loadQueue) > 0 or !$this->spawned){
-			$this->sendNextChunk();
 		}
 
 		$this->timings->stopTiming();
@@ -1830,7 +1834,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				$pk = new SetTimePacket();
 				$pk->time = $this->level->getTime();
-				$pk->started = $this->level->stopTime == false;
+				$pk->started = true;
 				$this->dataPacket($pk);
 
 				$pk = new SetSpawnPositionPacket();
