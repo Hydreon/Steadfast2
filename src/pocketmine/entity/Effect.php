@@ -47,7 +47,7 @@ class Effect{
 	const WATER_BREATHING = 13;
 	const INVISIBILITY = 14;
 	//const BLINDNESS = 15;
-	//const NIGHT_VISION = 16;
+	const NIGHT_VISION = 16;
 	//const HUNGER = 17;
 	const WEAKNESS = 18;
 	const POISON = 19;
@@ -69,6 +69,7 @@ class Effect{
 		self::$effects[Effect::STRENGTH] = new Effect(Effect::STRENGTH, "%potion.damageBoost", 147, 36, 35);
 		//self::$effects[Effect::HEALING] = new InstantEffect(Effect::HEALING, "%potion.heal", 248, 36, 35);
 		//self::$effects[Effect::HARMING] = new InstantEffect(Effect::HARMING, "%potion.harm", 67, 10, 9, true);
+		self::$effects[Effect::NIGHT_VISION] = new Effect(Effect::NIGHT_VISION, "%potion.nightVision", 147, 36, 35);
 		self::$effects[Effect::JUMP] = new Effect(Effect::JUMP, "%potion.jump", 34, 255, 76);
 		self::$effects[Effect::NAUSEA] = new Effect(Effect::NAUSEA, "%potion.confusion", 85, 29, 74, true);
 		self::$effects[Effect::REGENERATION] = new Effect(Effect::REGENERATION, "%potion.regeneration", 205, 92, 171);
