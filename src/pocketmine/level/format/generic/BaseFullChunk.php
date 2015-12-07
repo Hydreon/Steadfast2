@@ -70,6 +70,7 @@ abstract class BaseFullChunk implements FullChunk{
 
 	protected $hasChanged = false;
 
+	public $allowUnload = true;
 	/**
 	 * @param LevelProvider $provider
 	 * @param int           $x
@@ -293,6 +294,9 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function unload($save = true, $safe = true){
 		$level = $this->getProvider();
+		if(!$this->allowUnload){
+			return false;
+		}
 		if($level === null){
 			return true;
 		}
