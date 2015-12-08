@@ -967,7 +967,9 @@ abstract class Entity extends Location implements Metadatable{
 					//TODO
 				}
 
-				$this->fall($this->fallDistance);
+				if(!$this->isCollideWithWater()){
+					$this->fall($this->fallDistance);
+				}
 				$this->resetFallDistance();
 			}
 		}elseif($distanceThisTick < 0){
