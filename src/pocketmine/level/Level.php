@@ -63,6 +63,7 @@ use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\Item;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\format\FullChunk;
+use pocketmine\level\format\generic\BaseFullChunk;
 use pocketmine\level\format\generic\BaseLevelProvider;
 use pocketmine\level\format\generic\EmptyChunkSection;
 use pocketmine\level\format\LevelProvider;
@@ -2123,10 +2124,16 @@ class Level implements ChunkManager, Metadatable{
 		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
 
 		$chunk = $this->getChunk($x, $z);
+		/* @var BaseFullChunk $chunk */
+		if(!$chunk->allowUnload) {
+			$this->timings->doChunkUnload->stopTiming();
+			return false;
+		}
 
 		if($chunk !== null){
 			$this->server->getPluginManager()->callEvent($ev = new ChunkUnloadEvent($chunk));
 			if($ev->isCancelled()){
+				$this->timings->doChunkUnload->stopTiming();
 				return false;
 			}
 		}
