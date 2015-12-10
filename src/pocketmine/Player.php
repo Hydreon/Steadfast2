@@ -60,6 +60,7 @@ use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
+use pocketmine\event\player\PlayerRespawnAfterEvent;
 use pocketmine\event\player\PlayerToggleSneakEvent;
 use pocketmine\event\player\PlayerToggleSprintEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
@@ -2241,6 +2242,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 						$this->spawnToAll();
 						$this->scheduleUpdate();
+						
+						$this->server->getPluginManager()->callEvent(new PlayerRespawnAfterEvent($this));
 						break;
 					case PlayerActionPacket::ACTION_START_SPRINT:
 						$ev = new PlayerToggleSprintEvent($this, true);
