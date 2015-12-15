@@ -811,6 +811,9 @@ abstract class Entity extends Location implements Metadatable{
 		}
 
 		$hasUpdate = false;
+		if($block = $this->isCollideWithLiquid()){
+			$block->onEntityCollide($this);
+		}
 
 		if($this->y <= -16 and $this->dead !== true){
 			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_VOID, 10);
@@ -854,7 +857,7 @@ abstract class Entity extends Location implements Metadatable{
 
 		return $hasUpdate;
 	}
-
+	
 	protected function updateMovement(){
 		$diffPosition = ($this->x - $this->lastX) ** 2 + ($this->y - $this->lastY) ** 2 + ($this->z - $this->lastZ) ** 2;
 		$diffRotation = ($this->yaw - $this->lastYaw) ** 2 + ($this->pitch - $this->lastPitch) ** 2;
@@ -1069,6 +1072,18 @@ abstract class Entity extends Location implements Metadatable{
 		}
 		return false;
 	}
+	
+	public function isCollideWithLiquid() {
+		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
+		if(!(is_subclass_of($block,  '\pocketmine\block\Liquid'))) {
+			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
+		}
+		if((is_subclass_of($block,  '\pocketmine\block\Liquid'))) {
+			$f = ($block->y + 1) - ($block->getFluidHeightPercent() - 0.1111111);
+			return $y < $f ? $block : false;
+		}
+		return false;
+	}
 
 	public function isInsideOfSolid(){
 		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
@@ -1123,7 +1138,7 @@ abstract class Entity extends Location implements Metadatable{
 	}
 
 	public function move($dx, $dy, $dz){
-
+	
 		if($dx == 0 and $dz == 0 and $dy == 0){
 			return true;
 		}
