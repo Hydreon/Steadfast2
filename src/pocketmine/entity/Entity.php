@@ -220,9 +220,9 @@ abstract class Entity extends Location implements Metadatable{
 		}
 
 		$this->id = Entity::$entityCount++;
-		$this->justCreated = true;
+		$this->justCreated = true;	
 		$this->namedtag = $nbt;
-
+		
 		$this->chunk = $chunk;
 		$this->setLevel($chunk->getProvider()->getLevel());
 		$this->server = $chunk->getProvider()->getLevel()->getServer();
@@ -234,8 +234,8 @@ abstract class Entity extends Location implements Metadatable{
 				$this->namedtag["Pos"][1],
 				$this->namedtag["Pos"][2]
 			),
-			$this->namedtag->Rotation[0],
-			$this->namedtag->Rotation[1],
+			$this->namedtag["Rotation"][0],
+			$this->namedtag["Rotation"][1],
 			true
 		);
 		$this->setMotion(new Vector3($this->namedtag["Motion"][0], $this->namedtag["Motion"][1], $this->namedtag["Motion"][2]));
@@ -1005,7 +1005,7 @@ abstract class Entity extends Location implements Metadatable{
 	}
 
 	public function onCollideWithPlayer(Human $entityPlayer){
-
+		
 	}
 
 	protected function switchLevel(Level $targetLevel){
@@ -1532,7 +1532,7 @@ abstract class Entity extends Location implements Metadatable{
 
 	public function spawnToAll(){
 		if($this->chunk === null or $this->closed){
-			return;
+			return false;
 		}
 		foreach($this->level->getUsingChunk($this->chunk->getX(), $this->chunk->getZ()) as $player){
 			if($player->loggedIn === true){
