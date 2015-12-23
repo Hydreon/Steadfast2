@@ -37,8 +37,7 @@ class LoginPacket extends DataPacket{
 	public $clientSecret;
 
 	public $slim = false;
-	public $isTransparent = false;
-	public $skin = null;
+	public $skinName;
 
 	public function decode(){
 		$this->username = $this->getString();
@@ -50,8 +49,7 @@ class LoginPacket extends DataPacket{
 		$this->serverAddress = $this->getString();
 		$this->clientSecret = $this->getString();
 
-		$this->slim = $this->getByte() > 0;
-		$this->isTransparent = $this->getByte() > 0;
+		$this->skinName = $this->getString();
 		$this->skin = $this->getString();
 	}
 

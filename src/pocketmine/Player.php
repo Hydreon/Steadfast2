@@ -577,7 +577,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setDisplayName($name){
 		$this->displayName = $name;
 		if($this->spawned){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->isSkinSlim(), $this->isTransparent, $this->getSkinData());
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->getSkinName(), $this->getSkinData());
 		}
 	}
 
@@ -588,10 +588,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->nameTag;
 	}
 
-	public function setSkin($str, $isSlim = false, $isTransparent = false){
-		parent::setSkin($str, $isSlim, $isTransparent);
+	public function setSkin($str, $skinName){
+		parent::setSkin($str, $skinName);
 		if($this->spawned === true){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $isSlim, $isTransparent, $str);
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $skinName, $str);
 		}
 	}
 
@@ -1711,7 +1711,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					return;
 				}
 
-				$this->setSkin($packet->skin, $packet->slim);
+				$this->setSkin($packet->skin, $packet->skinName);
 
 				$this->server->getPluginManager()->callEvent($ev = new PlayerPreLoginEvent($this, "Plugin reason"));
 				if($ev->isCancelled()){
@@ -3184,7 +3184,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	protected $hungerDepletion = 0;
 
-	protected $hungerEnabled = false;
+	protected $hungerEnabled = true;
 
 	public function setFoodEnabled($enabled) {
 		$this->hungerEnabled = $enabled;
@@ -3211,6 +3211,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function subtractFood($amount){
+		if (!$this->getFoodEnabled()) {
+			return false;
+		}
+		
 		if($this->getFood()-$amount <= 6 && !($this->getFood() <= 6)) {
 			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, false);
 			$this->removeEffect(Effect::SLOWNESS);
