@@ -3184,7 +3184,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	protected $hungerDepletion = 0;
 
-	protected $hungerEnabled = false;
+	protected $hungerEnabled = true;
 
 	public function setFoodEnabled($enabled) {
 		$this->hungerEnabled = $enabled;
@@ -3211,6 +3211,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function subtractFood($amount){
+		if (!$this->getFoodEnabled()) {
+			return false;
+		}
+		
 		if($this->getFood()-$amount <= 6 && !($this->getFood() <= 6)) {
 			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, false);
 			$this->removeEffect(Effect::SLOWNESS);
