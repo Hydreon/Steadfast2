@@ -813,8 +813,11 @@ abstract class Entity extends Location implements Metadatable{
 		$hasUpdate = false;
 		if($block = $this->isCollideWithLiquid()){
 			$block->onEntityCollide($this);
+		} 
+		if($block = $this->isCollideWithLadder()){
+			$block->onEntityCollide($this);
 		}
-
+		
 		if($this->y <= -16 and $this->dead !== true){
 			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_VOID, 10);
 			$this->attack($ev->getFinalDamage(), $ev);
@@ -1081,6 +1084,17 @@ abstract class Entity extends Location implements Metadatable{
 		if((is_subclass_of($block,  '\pocketmine\block\Liquid'))) {
 			$f = ($block->y + 1) - ($block->getFluidHeightPercent() - 0.1111111);
 			return $y < $f ? $block : false;
+		}
+		return false;
+	}
+	
+	public function isCollideWithLadder() {
+		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
+		if(!($block instanceof \pocketmine\block\Ladder)) {
+			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
+		}
+		if($block instanceof \pocketmine\block\Ladder) {			
+			return $block;
 		}
 		return false;
 	}
