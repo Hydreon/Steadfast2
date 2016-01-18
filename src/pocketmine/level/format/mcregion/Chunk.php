@@ -249,7 +249,7 @@ class Chunk extends BaseFullChunk{
 	 * @return bool
 	 */
 	public function isPopulated(){
-		return $this->nbt["TerrainPopulated"] > 0;
+		return isset($this->nbt->TerrainPopulated) and $this->nbt->TerrainPopulated->getValue() > 0;
 	}
 
 	/**
@@ -263,7 +263,12 @@ class Chunk extends BaseFullChunk{
 	 * @return bool
 	 */
 	public function isGenerated(){
-		return $this->nbt["TerrainPopulated"] > 0 or (isset($this->nbt->TerrainGenerated) and $this->nbt["TerrainGenerated"] > 0);
+		if(isset($this->nbt->TerrainGenerated)){
+			return $this->nbt->TerrainGenerated->getValue() > 0;
+		}elseif(isset($this->nbt->TerrainPopulated)){
+			return $this->nbt->TerrainPopulated->getValue() > 0;
+		}
+		return false;
 	}
 
 	/**
@@ -440,5 +445,10 @@ class Chunk extends BaseFullChunk{
 		}catch(\Exception $e){
 			return null;
 		}
+	}
+	
+	public function setLightPopulated($value = 1){
+		$this->nbt->LightPopulated = new ByteTag("LightPopulated", $value ? 1 : 0);
+		$this->hasChanged = true;
 	}
 }

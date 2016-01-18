@@ -105,6 +105,8 @@ use pocketmine\level\generator\Generator;
 use pocketmine\level\generator\GeneratorRegisterTask;
 use pocketmine\level\generator\GeneratorUnregisterTask;
 use pocketmine\utils\Random;
+use pocketmine\level\generator\LightPopulationTask;
+use pocketmine\level\generator\PopulationTask;
 
 
 
@@ -202,6 +204,10 @@ class Level implements ChunkManager, Metadatable{
 	
 	private $chunkGenerationQueue = [];
 	private $chunkGenerationQueueSize = 8;
+	
+	private $chunkPopulationQueue = [];
+	private $chunkPopulationLock = [];
+	private $chunkPopulationQueueSize = 2;
 
 	protected $chunkTickRadius;
 	protected $chunkTickList = [];
@@ -1845,10 +1851,25 @@ class Level implements ChunkManager, Metadatable{
 	public function getChunkAt($x, $z, $create = false){
 		return $this->getChunk($x, $z, $create);
 	}
+	
+	public function getChunkLoaders(int $chunkX, int $chunkZ){
+		return isset($this->chunkLoaders[$index = Level::chunkHash($chunkX, $chunkZ)]) ? $this->chunkLoaders[$index] : [];
+	}
 
+	
+	
 	public function generateChunkCallback($x, $z, FullChunk $chunk){
 		$oldChunk = $this->getChunk($x, $z, false);
-		unset($this->chunkGenerationQueue[PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z)]);
+		$index = Level::chunkHash($x, $z);
+		
+		for($xx = -1; $xx <= 1; ++$xx){
+			for($zz = -1; $zz <= 1; ++$zz){
+				unset($this->chunkPopulationLock[Level::chunkHash($x + $xx, $z + $zz)]);
+			}
+		}
+		unset($this->chunkPopulationQueue[$index]);	
+		unset($this->chunkGenerationQueue[$index]);
+		
 		$chunk->setProvider($this->provider);
 		$this->setChunk($x, $z, $chunk);
 		$chunk = $this->getChunk($x, $z, false);
@@ -2441,5 +2462,40 @@ class Level implements ChunkManager, Metadatable{
 			$this->moveToSend[$index] = [];
 		}
 		$this->moveToSend[$index][$entityId] = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch];
+	}
+	
+	public function populateChunk(int $x, int $z, bool $force = false){
+		if(isset($this->chunkPopulationQueue[$index = Level::chunkHash($x, $z)]) or (count($this->chunkPopulationQueue) >= $this->chunkPopulationQueueSize and !$force)){
+			return false;
+		}
+
+		$chunk = $this->getChunk($x, $z, true);
+		if(!$chunk->isPopulated()){
+			$populate = true;
+			for($xx = -1; $xx <= 1; ++$xx){
+				for($zz = -1; $zz <= 1; ++$zz){
+					if(isset($this->chunkPopulationLock[Level::chunkHash($x + $xx, $z + $zz)])){
+						$populate = false;
+						break;
+					}
+				}
+			}
+
+			if($populate){
+				if(!isset($this->chunkPopulationQueue[$index])){
+					$this->chunkPopulationQueue[$index] = true;
+					for($xx = -1; $xx <= 1; ++$xx){
+						for($zz = -1; $zz <= 1; ++$zz){
+							$this->chunkPopulationLock[Level::chunkHash($x + $xx, $z + $zz)] = true;
+						}
+					}
+					$task = new PopulationTask($this, $chunk);
+					$this->server->getScheduler()->scheduleAsyncTask($task);
+				}
+			}
+			return false;
+		}
+
+		return true;
 	}
 }

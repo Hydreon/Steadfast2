@@ -331,5 +331,9 @@ interface FullChunk{
 	public static function fromBinary($data, LevelProvider $provider = null);
 	
 	public static function getEmptyChunk($chunkX, $chunkZ, LevelProvider $provider = null);
+	
+	public function recalculateHeightMap();
+	
+	public function populateSkyLight();
 
 }
