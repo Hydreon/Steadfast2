@@ -34,11 +34,11 @@ abstract class AsyncTask extends \Collectable{
 	/** @var int */
 	private $taskId = null;
 
-	public function run(){
+	public function run(){		
 		$this->result = null;
 
 		$this->onRun();
-                
+
 		$this->setGarbage();
 	}
 
@@ -112,6 +112,18 @@ abstract class AsyncTask extends \Collectable{
 	}
 
 	/**
+	 * Gets something into the local thread store.
+	 * You have to initialize this in some way from the task on run
+	 *
+	 * @param string $identifier
+	 * @return mixed
+	 */
+	public function getFromThreadStore($identifier){
+		global $store;
+		return $this->isFinished() ? null : $store[$identifier];
+	}
+	
+	/**
 	 * @return bool
 	 */
 	public function hasResult(){
@@ -151,5 +163,19 @@ abstract class AsyncTask extends \Collectable{
 	public function onCompletion(Server $server){
 
 	}
+	
+	public function saveToThreadStore($identifier, $value){
+		global $store;
+		if(!$this->isFinished()){
+			$store[$identifier] = $value;
+		}
+	}
 
+	public function cleanObject(){
+		foreach($this as $p => $v){
+			if(!($v instanceof \Threaded)){
+				$this->{$p} = null;
+			}
+		}
+	}
 }

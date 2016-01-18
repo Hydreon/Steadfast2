@@ -329,5 +329,7 @@ interface FullChunk{
 	 * @return FullChunk
 	 */
 	public static function fromBinary($data, LevelProvider $provider = null);
+	
+	public static function getEmptyChunk($chunkX, $chunkZ, LevelProvider $provider = null);
 
 }

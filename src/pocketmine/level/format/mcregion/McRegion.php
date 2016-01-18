@@ -212,6 +212,14 @@ class McRegion extends BaseLevelProvider{
 			return false;
 		}
 	}
+	
+	public function getGenerator(){
+		return $this->levelData["generatorName"];
+	}
+
+	public function getGeneratorOptions(){
+		return ["preset" => $this->levelData["generatorOptions"]];
+	}
 
 	public function getEmptyChunk($chunkX, $chunkZ){
 		return Chunk::getEmptyChunk($chunkX, $chunkZ, $this);

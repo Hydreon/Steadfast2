@@ -74,15 +74,15 @@ class AsyncPool{
 	}
 
 	private function removeTask(AsyncTask $task){
-		if(isset($this->taskWorkers[$task->getTaskId()])){
-			$this->workers[$w = $this->taskWorkers[$task->getTaskId()]]->unstack();
-			$this->workerUsage[$w]--;
+		if(isset($this->taskWorkers[$task->getTaskId()])){			
+			$this->workerUsage[$this->taskWorkers[$task->getTaskId()]]--;
 		}
 
 		unset($this->tasks[$task->getTaskId()]);
 		unset($this->taskWorkers[$task->getTaskId()]);
-	}
-
+		$task->cleanObject();
+	}	
+	
 	public function removeTasks(){
 		foreach($this->tasks as $task){
 			$this->removeTask($task);
@@ -96,10 +96,10 @@ class AsyncPool{
 		$this->tasks = [];
 	}
 
-	public function collectTasks(){
-		foreach($this->tasks as $task){
+	public function collectTasks(){		
+		foreach($this->tasks as $task){	
 			if($task->isGarbage()){
-
+				
 				$task->onCompletion($this->server);
 
 				$this->removeTask($task);
@@ -110,5 +110,28 @@ class AsyncPool{
 				$this->server->getLogger()->critical("On ".$info["scope"].", line ".$info["line"] .", ".$info["function"]."()");
 			}
 		}
+	}
+	
+	
+	
+	public function getSize(){
+		return $this->size;
+	}
+	
+	public function submitTaskToWorker(AsyncTask $task, $worker){
+		if(isset($this->tasks[$task->getTaskId()]) or $task->isFinished()){
+			return;
+		}
+
+		$worker = (int) $worker;
+		if($worker < 0 or $worker >= $this->size){
+			throw new \InvalidArgumentException("Invalid worker $worker");
+		}
+
+		$this->tasks[$task->getTaskId()] = $task;
+
+		$this->workers[$worker]->stack($task);
+		$this->workerUsage[$worker]++;
+		$this->taskWorkers[$task->getTaskId()] = $worker;
 	}
 }

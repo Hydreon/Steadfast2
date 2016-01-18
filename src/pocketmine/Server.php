@@ -112,7 +112,7 @@ use pocketmine\utils\TextWrapper;
 use pocketmine\utils\Utils;
 use pocketmine\utils\UUID;
 use pocketmine\utils\VersionString;
-
+use pocketmine\level\generator\biome\Biome;
 /**
  * The class that manages everything
  */
@@ -1471,6 +1471,7 @@ class Server{
 		InventoryType::init();
 		Block::init();
 		Item::init();
+		Biome::init();
 		TextWrapper::init();
 		$this->craftingManager = new CraftingManager();
 
