@@ -183,6 +183,9 @@ class Server{
 
 	/** @var bool */
 	private $autoSave;
+	
+	/** @var bool */
+	private $autoGenerate;
 
 	/** @var RCON */
 	private $rcon;
@@ -353,6 +356,20 @@ class Server{
 		foreach($this->getLevels() as $level){
 			$level->setAutoSave($this->autoSave);
 		}
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getAutoGenerate(){
+		return $this->autoGenerate;
+	}
+
+	/**
+	 * @param bool $value
+	 */
+	public function setAutoGenerate($value){
+		$this->autoGenerate = (bool) $value;		
 	}
 
 	/**
@@ -1390,6 +1407,7 @@ class Server{
 			"enable-rcon" => false,
 			"rcon.password" => substr(base64_encode(@Utils::getRandomBytes(20, false)), 3, 10),
 			"auto-save" => true,
+			"auto-generate" => false
 		]);
 
 		ServerScheduler::$WORKERS = 4;
@@ -1418,6 +1436,7 @@ class Server{
 
 		$this->maxPlayers = $this->getConfigInt("max-players", 20);
 		$this->setAutoSave($this->getConfigBoolean("auto-save", true));
+		$this->setAutoGenerate($this->getConfigBoolean("auto-generate", false));	
 
 		if(($memory = str_replace("B", "", strtoupper($this->getConfigString("memory-limit", "256M")))) !== false){
 			$value = ["M" => 1, "G" => 1024];

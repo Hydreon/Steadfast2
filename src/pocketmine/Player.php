@@ -693,12 +693,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->level->useChunk($X, $Z, $this);
 			$this->level->requestChunk($X, $Z, $this, LevelProvider::ORDER_ZXY);
-			
-			if(!$this->level->populateChunk($X, $Z, true)){
-				if($this->spawned and $this->teleportPosition === null){
-					continue;
-				}else{
-					break;
+			if($this->server->getAutoGenerate()){
+				if(!$this->level->populateChunk($X, $Z, true)){
+					if($this->spawned and $this->teleportPosition === null){
+						continue;
+					}else{
+						break;
+					}
 				}
 			}
 		}

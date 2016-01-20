@@ -170,12 +170,5 @@ abstract class AsyncTask extends \Collectable{
 			$store[$identifier] = $value;
 		}
 	}
-
-	public function cleanObject(){
-		foreach($this as $p => $v){
-			if(!($v instanceof \Threaded)){
-				$this->{$p} = null;
-			}
-		}
-	}
+	
 }
