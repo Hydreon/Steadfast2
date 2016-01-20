@@ -1756,7 +1756,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}
 					}
 				}
-
+                                
 				$nbt = $this->server->getOfflinePlayerData($this->username);
 				if(!isset($nbt->NameTag)){
 					$nbt->NameTag = new StringTag("NameTag", $this->username);
@@ -2581,7 +2581,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				$recipe = $this->server->getCraftingManager()->getRecipe($packet->id);
 
-				if($recipe === null or (($recipe instanceof BigShapelessRecipe or $recipe instanceof BigShapedRecipe) and $this->craftingType === 0)){
+				if($recipe === null){
 					$this->inventory->sendContents($this);
 					break;
 				}
@@ -2600,7 +2600,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 
 				if($recipe instanceof ShapedRecipe){
-					for($x = 0; $x < 3 and $canCraft; ++$x){
+                                        for($x = 0; $x < 3 and $canCraft; ++$x){
 						for($y = 0; $y < 3; ++$y){
 							$item = $packet->input[$y * 3 + $x];
 							$ingredient = $recipe->getIngredient($x, $y);
@@ -2664,8 +2664,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				foreach($ingredients as $ingredient){
 					$slot = -1;
 					foreach($this->inventory->getContents() as $index => $i){
-						if($ingredient->getId() !== 0 and $ingredient === $i and $i ->getDamage() !== null and ($i->getCount() - $used[$index]) >= 1){
-							$slot = $index;
+						if($ingredient->getId() !== 0 and $ingredient->getId() === $i->getId() and $i ->getDamage() !== null and ($i->getCount() - $used[$index]) >= 1){
+                                                        $slot = $index;
 							$used[$index]++;
 							break;
 						}
@@ -2676,14 +2676,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					}
 				}
-
+                                
 				if(!$canCraft){
 					$this->server->getLogger()->debug("Unmatched recipe ". $recipe->getId() ." from player ". $this->getName() .": client does not have enough items, using: " . implode(", ", $ingredients));
 					$this->inventory->sendContents($this);
 					break;
 				}
-
-				$this->server->getPluginManager()->callEvent($ev = new CraftItemEvent($ingredients, $recipe));
+				$this->server->getPluginManager()->callEvent($ev = new CraftItemEvent($ingredients, $recipe, $this));
 
 				if($ev->isCancelled()){
 					$this->inventory->sendContents($this);
@@ -2953,7 +2952,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if($this->username != ""){
 				$this->server->getPluginManager()->callEvent($ev = new PlayerQuitEvent($this, $message, $reason));
 				if($this->server->getAutoSave() and $this->loggedIn === true){
-					$this->save();
+                                    $this->save();
 				}
 			}
 
@@ -3033,7 +3032,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->namedtag["lastPlayed"] = floor(microtime(true) * 1000);
 
 			if($this->username != "" and $this->namedtag instanceof Compound){
-				$this->server->saveOfflinePlayerData($this->username, $this->namedtag);
+				$this->server->saveOfflinePlayerData($this->username, $this->namedtag, true);
 			}
 		}
 	}

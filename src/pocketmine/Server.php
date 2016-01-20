@@ -113,6 +113,7 @@ use pocketmine\utils\Utils;
 use pocketmine\utils\UUID;
 use pocketmine\utils\VersionString;
 use pocketmine\level\generator\biome\Biome;
+use pocketmine\scheduler\FileWriteTask;
 /**
  * The class that manages everything
  */
@@ -752,7 +753,21 @@ class Server{
 	 * @param string   $name
 	 * @param Compound $nbtTag
 	 */
-	public function saveOfflinePlayerData($name, Compound $nbtTag){
+	public function saveOfflinePlayerData($name, Compound $nbtTag, $async = false){
+            $nbt = new NBT(NBT::BIG_ENDIAN);
+		try{
+			$nbt->setData($nbtTag);
+			if($async){
+				$this->getScheduler()->scheduleAsyncTask(new FileWriteTask($this->getDataPath() . "players/" . strtolower($name) . ".dat", $nbt->writeCompressed()));
+			}else{
+				file_put_contents($this->getDataPath() . "players/" . strtolower($name) . ".dat", $nbt->writeCompressed());
+			}
+		}catch(\Exception $e){
+			$this->logger->critical($this->getLanguage()->translateString("pocketmine.data.saveError", [$name, $e->getMessage()]));
+			if(\pocketmine\DEBUG > 1 and $this->logger instanceof MainLogger){
+				$this->logger->logException($e);
+			}
+		}
 	}
 
 	/**
