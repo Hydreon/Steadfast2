@@ -2570,7 +2570,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				break;
 			case ProtocolInfo::CRAFTING_EVENT_PACKET:
-				if($this->spawned === false or $this->dead){
+					if($this->spawned === false or $this->dead){
 					break;
 				}elseif(!isset($this->windowIndex[$packet->windowId])){
 					$this->inventory->sendContents($this);
@@ -2605,8 +2605,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						for($y = 0; $y < 3; ++$y){
 							$item = $packet->input[$y * 3 + $x];
 							$ingredient = $recipe->getIngredient($x, $y);
-							if($item->getCount() > 0){
-								if($ingredient === null or !$ingredient->deepEquals($item, $ingredient->getDamage() !== null, $ingredient->getCompound() !== null)){
+							if($item->getCount() > 0 and $item->getId() > 0){
+								if($ingredient === null or !$ingredient->deepEquals($item, false, false)){
 									$canCraft = false;
 									break;
 								}
@@ -2621,7 +2621,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$item = clone $packet->input[$y * 3 + $x];
 
 							foreach($needed as $k => $n){
-								if($n->deepEquals($item, $n->getDamage() !== null, $n->getCompound() !== null)){
+								if($n->deepEquals($item, false, false)){
 									$remove = min($n->getCount(), $item->getCount());
 									$n->setCount($n->getCount() - $remove);
 									$item->setCount($item->getCount() - $remove);
@@ -2660,8 +2660,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				foreach($ingredients as $ingredient){
 					$slot = -1;
-					foreach($this->inventory->getContents() as $index => $i){
-						if($ingredient->getId() !== 0 and $ingredient->deepEquals($i, $i->getDamage() !== null) and ($i->getCount() - $used[$index]) >= 1){
+					foreach($this->inventory->getContents() as $index => $i){						
+						if($ingredient->getId() !== 0 and $ingredient->deepEquals($i, false, false) and ($i->getCount() - $used[$index]) >= 1){
 							$slot = $index;
 							$used[$index]++;
 							break;
@@ -2673,7 +2673,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					}
 				}
-                                
+
 				if(!$canCraft){
 					$this->server->getLogger()->debug("Unmatched recipe ". $recipe->getId() ." from player ". $this->getName() .": client does not have enough items, using: " . implode(", ", $ingredients));
 					$this->inventory->sendContents($this);
@@ -2685,7 +2685,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->inventory->sendContents($this);
 					break;
 				}
-
+			
 				foreach($used as $slot => $count){
 					if($count === 0){
 						continue;
