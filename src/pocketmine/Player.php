@@ -2579,10 +2579,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->dataPacket($pk);
 					break;
 				}
-
+				$this->craftingType = 1;
 				$recipe = $this->server->getCraftingManager()->getRecipe($packet->id);
 
-				if($recipe === null){
+				if($recipe === null or (($recipe instanceof BigShapelessRecipe or $recipe instanceof BigShapedRecipe) and $this->craftingType === 0)){
 					$this->inventory->sendContents($this);
 					break;
 				}
@@ -2601,19 +2601,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 
 				if($recipe instanceof ShapedRecipe){
-                                        for($x = 0; $x < 3 and $canCraft; ++$x){
+					for($x = 0; $x < 3 and $canCraft; ++$x){
 						for($y = 0; $y < 3; ++$y){
 							$item = $packet->input[$y * 3 + $x];
 							$ingredient = $recipe->getIngredient($x, $y);
-							if($item->getCount() > 0 and $item->getId() > 0){
+							if($item->getCount() > 0){
 								if($ingredient === null or !$ingredient->deepEquals($item, $ingredient->getDamage() !== null, $ingredient->getCompound() !== null)){
 									$canCraft = false;
 									break;
 								}
-
-							}elseif($ingredient !== null and $ingredient->getId() !== 0){
-								$canCraft = false;
-								break;
 							}
 						}
 					}
@@ -2625,7 +2621,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$item = clone $packet->input[$y * 3 + $x];
 
 							foreach($needed as $k => $n){
-								if($n === $item and $n->getDamage() !== null and $n->getCompound() !== null) {
+								if($n->deepEquals($item, $n->getDamage() !== null, $n->getCompound() !== null)){
 									$remove = min($n->getCount(), $item->getCount());
 									$n->setCount($n->getCount() - $remove);
 									$item->setCount($item->getCount() - $remove);
@@ -2665,8 +2661,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				foreach($ingredients as $ingredient){
 					$slot = -1;
 					foreach($this->inventory->getContents() as $index => $i){
-						if($ingredient->getId() !== 0 and $ingredient->getId() === $i->getId() and $i ->getDamage() !== null and ($i->getCount() - $used[$index]) >= 1){
-                                                        $slot = $index;
+						if($ingredient->getId() !== 0 and $ingredient->deepEquals($i, $i->getDamage() !== null) and ($i->getCount() - $used[$index]) >= 1){
+							$slot = $index;
 							$used[$index]++;
 							break;
 						}
