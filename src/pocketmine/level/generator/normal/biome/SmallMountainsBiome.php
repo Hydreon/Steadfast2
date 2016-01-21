@@ -27,7 +27,7 @@ class SmallMountainsBiome extends MountainsBiome{
 	public function __construct(){
 		parent::__construct();
 
-		$this->setElevation(63, 97);
+		$this->setElevation(63, 100);
 	}
 
 	public function getName(){

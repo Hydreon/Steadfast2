@@ -98,7 +98,7 @@ abstract class BaseFullChunk implements FullChunk{
 		if(count($biomeColors) === 256){
 			$this->biomeColors = $biomeColors;
 		}else{
-			$this->biomeColors = array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a"));
+			$this->biomeColors = array_fill(0, 256, 0);
 		}
 
 		if(count($heightMap) === 256){
@@ -201,12 +201,12 @@ abstract class BaseFullChunk implements FullChunk{
 	}
 
 	public function getBiomeId($x, $z){
-		return ord($this->biomeIds{($z << 4) + $x});
+		return ($this->biomeColors[($z << 4) + $x] & 0xFF000000) >> 24;
 	}
 
 	public function setBiomeId($x, $z, $biomeId){
 		$this->hasChanged = true;
-		$this->biomeIds{($z << 4) + $x} = chr($biomeId);
+		$this->biomeColors[($z << 4) + $x] = ($this->biomeColors[($z << 4) + $x] & 0xFFFFFF) | ($biomeId << 24);
 	}
 
 	public function getBiomeColor($x, $z){
@@ -217,7 +217,7 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function setBiomeColor($x, $z, $R, $G, $B){
 		$this->hasChanged = true;
-		$this->biomeColors[($z << 4) + $x] = 0 | (($R & 0xFF) << 16) | (($G & 0xFF) << 8) | ($B & 0xFF);
+		$this->biomeColors[($z << 4) + $x] = ($this->biomeColors[($z << 4) + $x] & 0xFF000000) | (($R & 0xFF) << 16) | (($G & 0xFF) << 8) | ($B & 0xFF);
 	}
 
 	public function getHeightMap($x, $z){

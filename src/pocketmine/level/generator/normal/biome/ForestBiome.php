@@ -46,7 +46,7 @@ class ForestBiome extends GrassyBiome{
 
 		$this->addPopulator($tallGrass);
 
-		$this->setElevation(63, 81);
+		$this->setElevation(63, 68);
 
 		if($type === self::TYPE_BIRCH){
 			$this->temperature = 0.5;
