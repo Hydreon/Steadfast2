@@ -2773,7 +2773,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 
-				if($transaction->getSourceItem() === $transaction->getTargetItem() and $transaction->getTargetItem()->getCount() === $transaction->getSourceItem()->getCount()){ //No changes!
+				if($transaction->getSourceItem()->getId() === $transaction->getTargetItem()->getId() and $transaction->getSourceItem()->getDamage() === $transaction->getTargetItem()->getDamage() and $transaction->getTargetItem()->getCount() === $transaction->getSourceItem()->getCount()){ //No changes!
 					//No changes, just a local inventory update sent by the server
 					break;
 				}

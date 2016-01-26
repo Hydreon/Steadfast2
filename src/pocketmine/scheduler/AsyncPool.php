@@ -75,8 +75,8 @@ class AsyncPool{
 
 	private function removeTask(AsyncTask $task){
 		if(isset($this->taskWorkers[$task->getTaskId()])){
-			$this->workers[$w = $this->taskWorkers[$task->getTaskId()]]->unstack();
-			$this->workerUsage[$w]--;
+			//$this->workers[$w = $this->taskWorkers[$task->getTaskId()]]->unstack();
+			$this->workerUsage[$this->taskWorkers[$task->getTaskId()]]--;
 		}
 
 		unset($this->tasks[$task->getTaskId()]);
