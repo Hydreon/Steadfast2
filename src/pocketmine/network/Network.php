@@ -76,6 +76,7 @@ use pocketmine\network\protocol\UseItemPacket;
 use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\Player;
 use pocketmine\Server;
+use pocketmine\utils\Binary;
 use pocketmine\utils\MainLogger;
 
 class Network {
@@ -214,14 +215,18 @@ class Network {
 		$offset = 0;
 		try{
 			while($offset < $len){
-				if(($pk = $this->getPacket(ord($str{$offset++}))) !== null){
+				$pkLen = Binary::readInt(substr($str, $offset, 4));
+				$offset += 4;
+				$buf = substr($str, $offset, $pkLen);
+				$offset += $pkLen;
+				$pk = $this->getPacket(ord($buf{0})); // should be 1
+				if($pk !== null){
 					if($pk::NETWORK_ID === Info::BATCH_PACKET){
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
 					}
-					$pk->setBuffer($str, $offset);
+					$pk->setBuffer($buf, 1); // should be 2
 					$pk->decode();
 					$p->handleDataPacket($pk);
-					$offset += $pk->getOffset();
 					if($pk->getOffset() <= 0){
 						return;
 					}

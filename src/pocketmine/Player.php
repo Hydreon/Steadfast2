@@ -1688,16 +1688,24 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($packet->protocol1 != ProtocolInfo::CURRENT_PROTOCOL){
 					if($packet->protocol1 < ProtocolInfo::CURRENT_PROTOCOL) {
 						$message = "upgrade";
-					} else {
-						$message = "downgrade";
+						
+						$pk = new PlayStatusPacket();
+						$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
+						$this->dataPacket($pk);
+						$this->close("", TextFormat::RED . "Please " . $message . " to MCPE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.", false);
+
+						return;
 					}
-
-					$pk = new PlayStatusPacket();
-					$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
-					$this->dataPacket($pk);
-					$this->close("", TextFormat::RED . "Please " . $message . " to MCPE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.", false);
-
-					return;
+//					} else {
+//						$message = "downgrade";
+//					}
+//
+//					$pk = new PlayStatusPacket();
+//					$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
+//					$this->dataPacket($pk);
+//					$this->close("", TextFormat::RED . "Please " . $message . " to MCPE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.", false);
+//
+//					return;
 				}
 
 				if(strpos($packet->username, "\x00") !== false or preg_match('#^[a-zA-Z0-9_]{3,16}$#', $packet->username) == 0 or $this->username === "" or $this->iusername === "rcon" or $this->iusername === "console" or strlen($packet->username) > 16 or strlen($packet->username) < 3){
@@ -1870,7 +1878,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->server->sendFullPlayerListData($this);
 				$this->server->sendRecipeList($this);
 
-				if($this->protocol != Info::CURRENT_PROTOCOL) {
+//				if($this->protocol != Info::CURRENT_PROTOCOL) {
+				if($this->protocol < Info::CURRENT_PROTOCOL) {
 					$this->sendMessage(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED .".");
 					$this->sendTip(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN .$this->getServer()->getVersion() . TextFormat::RED .".");
 				}
