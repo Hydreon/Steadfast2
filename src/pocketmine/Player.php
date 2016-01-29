@@ -848,7 +848,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($ev->isCancelled()){
 			return false;
 		}
-
+		
 		$identifier = $this->interface->putPacket($this, $packet, $needACK, false);
 
 		if($needACK and $identifier !== null){

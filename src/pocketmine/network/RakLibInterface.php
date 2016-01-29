@@ -175,7 +175,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		if(isset($this->players[$identifier])){
 			try{
 				if($packet->buffer !== ""){
-					$pk = $this->getPacket($packet->buffer);
+					$pk = $this->getPacket($packet->buffer);				
 					if (!is_null($pk)) {
 						$pk->decode();
 						$this->players[$identifier]->handleDataPacket($pk);
@@ -232,7 +232,10 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		}
 	}
 
-	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){		
+	/*
+	 * $player - packet recipient
+	 */
+	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
 		if(isset($this->identifiers[$player])){
 			$additionalChar = $player->protocol <= ProtocolInfo::CURRENT_PROTOCOL ? '' : chr(0x8e);
 			
@@ -241,12 +244,13 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			if(!$packet->isEncoded){
 				$packet->encode();
 			}elseif(!$needACK){
-				if(!isset($packet->__encapsulatedPacket)){
-					$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
-					$packet->__encapsulatedPacket->identifierACK = null;
-					$packet->__encapsulatedPacket->buffer = $additionalChar . $packet->buffer;
-					$packet->__encapsulatedPacket->reliability = 3;
+				if (isset($packet->__encapsulatedPacket)) {
+					unset($packet->__encapsulatedPacket);
 				}
+				$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
+				$packet->__encapsulatedPacket->identifierACK = null;
+				$packet->__encapsulatedPacket->buffer = $additionalChar . $packet->buffer;
+				$packet->__encapsulatedPacket->reliability = 2;
 				$pk = $packet->__encapsulatedPacket;
 			}
 
@@ -260,7 +264,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			if($pk === null){
 				$pk = new EncapsulatedPacket();
 				$pk->buffer = $additionalChar . $packet->buffer;
-				$pk->reliability = 3;
+				$pk->reliability = 2;
 
 				if($needACK === true){
 					$pk->identifierACK = $this->identifiersACK[$identifier]++;
