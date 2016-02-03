@@ -33,13 +33,15 @@ abstract class AsyncTask extends \Collectable{
 	private $result = null;
 	/** @var int */
 	private $taskId = null;
+	
+	protected $isFinished = false;
 
 	public function run(){
 		$this->result = null;
 
 		$this->onRun();
-                
-		$this->setGarbage();
+        $this->isFinished = true;    
+		//$this->setGarbage();
 	}
 
 	/**
@@ -48,7 +50,7 @@ abstract class AsyncTask extends \Collectable{
 	 * @return bool
 	 */
 	public function isFinished(){
-		return $this->isGarbage();
+		return $this->isFinished;
 	}
 
 	/**
