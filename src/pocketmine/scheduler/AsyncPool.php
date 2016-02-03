@@ -74,7 +74,7 @@ class AsyncPool{
 	}
 
 	private function removeTask(AsyncTask $task){
-		if($task->isRunning() or !$task->isFinished()){
+		if(!$task->isTerminated() and ($task->isRunning() or !$task->isFinished())){
 			return;
 		}
 
@@ -84,6 +84,7 @@ class AsyncPool{
 
 		unset($this->tasks[$task->getTaskId()]);
 		unset($this->taskWorkers[$task->getTaskId()]);
+		$task->setGarbage();
 	}
 
 	public function removeTasks(){
