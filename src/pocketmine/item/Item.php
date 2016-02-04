@@ -1347,7 +1347,7 @@ class Item{
 	public final function deepEquals(Item $item, $checkDamage = true, $checkCompound = true){
 		if($this->equals($item, $checkDamage, $checkCompound)){
 			return true;
-		}elseif($item->hasCompound() or $this->hasCompound()){
+		}elseif($item->hasCompound() and $this->hasCompound()){
 			return NBT::matchTree($this->getNamedTag(), $item->getNamedTag());
 		}
 

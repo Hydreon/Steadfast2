@@ -1674,13 +1674,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->displayName = $this->username;
 				$this->setNameTag($this->username);
 				$this->iusername = strtolower($this->username);
-				$this->randomClientId = $packet->clientId;
-				$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
-
-				$this->uuid = $packet->clientUUID;
-				$this->rawUUID = $this->uuid->toBinary();
-				$this->clientSecret = $packet->clientSecret;
-				$this->protocol = $packet->protocol1;
 
 				if(count($this->server->getOnlinePlayers()) > $this->server->getMaxPlayers() and $this->kick("Server is full")){
 					break;
@@ -1707,14 +1700,38 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //
 //					return;
 				}
+				
+				$this->randomClientId = $packet->clientId;
+				$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
+				$this->uuid = $packet->clientUUID;
+				$this->rawUUID = $this->uuid->toBinary();
+				$this->clientSecret = $packet->clientSecret;
+				$this->protocol = $packet->protocol1;
 
-				if(strpos($packet->username, "\x00") !== false or preg_match('#^[a-zA-Z0-9_]{3,16}$#', $packet->username) == 0 or $this->username === "" or $this->iusername === "rcon" or $this->iusername === "console" or strlen($packet->username) > 16 or strlen($packet->username) < 3){
+//				if(strpos($packet->username, "\x00") !== false or preg_match('#^[a-zA-Z0-9_]{3,16}$#', $packet->username) == 0 or $this->username === "" or $this->iusername === "rcon" or $this->iusername === "console" or strlen($packet->username) > 16 or strlen($packet->username) < 3){
+				$valid = true;
+				$len = strlen($packet->username);
+				if($len > 16 or $len < 3){
+					$valid = false;
+				}
+				for($i = 0; $i < $len and $valid; ++$i){
+					$c = ord($packet->username{$i});
+					if(($c >= ord("a") and $c <= ord("z")) or
+						($c >= ord("A") and $c <= ord("Z")) or
+						($c >= ord("0") and $c <= ord("9")) or $c === "_"
+					){
+						continue;
+					}
+					$valid = false;
+					break;
+				}
+				if(!$valid or $this->iusername === "rcon" or $this->iusername === "console"){
 					$this->close("", "Please choose a valid username.");
 
 					return;
 				}
 
-				if(strlen($packet->skin) < 64 * 32 * 4){
+				if(strlen($packet->skin) !== 64 * 32 * 4 && strlen($packet->skin) !== 64 * 64 * 4){
 					$this->close("", "Invalid skin.", false);
 					return;
 				}
@@ -2605,7 +2622,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						for($y = 0; $y < 3; ++$y){
 							$item = $packet->input[$y * 3 + $x];
 							$ingredient = $recipe->getIngredient($x, $y);
-							if($item->getCount() > 0 && $ingredient->getId() > 0){
+							if(!is_null($item) && $item->getCount() > 0 && $ingredient->getId() > 0){
 								if($ingredient === null or !$ingredient->deepEquals($item, false, false)){
 									$canCraft = false;
 									break;
@@ -2619,6 +2636,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					for($x = 0; $x < 3 and $canCraft; ++$x){
 						for($y = 0; $y < 3; ++$y){
 							$item = clone $packet->input[$y * 3 + $x];
+							
+							if (is_null($item)) {
+								continue;
+							}
 
 							foreach($needed as $k => $n){
 								if($n->deepEquals($item, false, false)){
