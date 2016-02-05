@@ -1718,7 +1718,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$c = ord($packet->username{$i});
 					if(($c >= ord("a") and $c <= ord("z")) or
 						($c >= ord("A") and $c <= ord("Z")) or
-						($c >= ord("0") and $c <= ord("9")) or $c === "_"
+						($c >= ord("0") and $c <= ord("9")) or $c === ord("_")
 					){
 						continue;
 					}
