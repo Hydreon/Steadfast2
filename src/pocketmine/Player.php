@@ -1678,8 +1678,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if(count($this->server->getOnlinePlayers()) > $this->server->getMaxPlayers() and $this->kick("Server is full")){
 					break;
 				}
+				
 				if($packet->protocol1 != ProtocolInfo::CURRENT_PROTOCOL){
-					if($packet->protocol1 < ProtocolInfo::CURRENT_PROTOCOL) {
+					if($packet->protocol1 < ProtocolInfo::CURRENT_PROTOCOL - 1) {
 						$message = "upgrade";
 						
 						$pk = new PlayStatusPacket();
