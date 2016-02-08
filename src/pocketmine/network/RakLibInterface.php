@@ -250,7 +250,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
 				$packet->__encapsulatedPacket->identifierACK = null;
 				$packet->__encapsulatedPacket->buffer = $additionalChar . $packet->buffer;
-				$packet->__encapsulatedPacket->reliability = 3;
+				$packet->__encapsulatedPacket->reliability = 2;
 				$pk = $packet->__encapsulatedPacket;
 			}
 
@@ -264,7 +264,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			if($pk === null){
 				$pk = new EncapsulatedPacket();
 				$pk->buffer = $additionalChar . $packet->buffer;
-				$pk->reliability = 3;
+				$pk->reliability = 2;
 
 				if($needACK === true){
 					$pk->identifierACK = $this->identifiersACK[$identifier]++;
@@ -280,14 +280,14 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	}
 
 	private function getPacket($buffer){
-		$offset = ord($buffer{0}) == 142 ? 1 : 0;
-		
-		$pid = ord($buffer{$offset});
+		if(ord($buffer{0}) == 142){
+			$buffer = substr($buffer, 1);		
+		}
+		$pid = ord($buffer{0});
 		if(($data = $this->network->getPacket($pid)) === null){
 			return null;
 		}
-		$offset++;
-		$data->setBuffer($buffer, $offset);
+		$data->setBuffer($buffer, 1);
 
 		return $data;
 	}

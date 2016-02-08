@@ -1897,10 +1897,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->server->sendRecipeList($this);
 
 //				if($this->protocol != Info::CURRENT_PROTOCOL) {
-				if($this->protocol < Info::CURRENT_PROTOCOL) {
-					$this->sendMessage(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED .".");
-					$this->sendTip(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN .$this->getServer()->getVersion() . TextFormat::RED .".");
-				}
+//				if($this->protocol < Info::CURRENT_PROTOCOL) {
+//					$this->sendMessage(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED .".");
+//					$this->sendTip(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN .$this->getServer()->getVersion() . TextFormat::RED .".");
+//				}
 //				$this->orderChunks();
 //				$this->sendNextChunk();
 				break;
