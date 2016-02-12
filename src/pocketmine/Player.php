@@ -2636,6 +2636,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 					for($x = 0; $x < 3 and $canCraft; ++$x){
 						for($y = 0; $y < 3; ++$y){
+							if (!isset($packet->input[$y * 3 + $x])) {
+								continue;
+							}
+							
 							$item = clone $packet->input[$y * 3 + $x];
 							
 							if (is_null($item)) {

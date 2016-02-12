@@ -230,4 +230,35 @@ class Item extends Entity{
 
 		parent::spawnTo($player);
 	}
+
+	
+	protected function updateMovement(){		
+		$diffPositionX =  abs($this->x - $this->lastX);
+		$diffPositionY =  abs($this->y - $this->lastY);
+		$diffPositionZ =  abs($this->z - $this->lastZ);		
+		
+		$diffMotionX = abs($this->motionX - $this->lastMotionX);
+		$diffMotionY = abs($this->motionY - $this->lastMotionY);
+		$diffMotionZ = abs($this->motionZ - $this->lastMotionZ);
+		
+
+		if($diffPositionX > 0.2 || $diffPositionZ > 0.2 || ($diffPositionX > 0.01 && $diffPositionZ > 0.01 && $diffPositionY > 0.2)){
+			$this->lastX = $this->x;
+			$this->lastY = $this->y;
+			$this->lastZ = $this->z;
+			$this->lastYaw = $this->yaw;
+			$this->lastPitch = $this->pitch;
+
+			$this->level->addEntityMovement($this->chunk->getX(), $this->chunk->getZ(), $this->id, $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+		}
+
+		if($diffMotionX > 0.05 || $diffMotionZ > 0.05 || ($diffMotionX > 0.001 && $diffMotionZ > 0.001 && $diffMotionY > 0.05 )){ 
+			$this->lastMotionX = $this->motionX;
+			$this->lastMotionY = $this->motionY;
+			$this->lastMotionZ = $this->motionZ;
+
+			$this->level->addEntityMotion($this->chunk->getX(), $this->chunk->getZ(), $this->id, $this->motionX, $this->motionY, $this->motionZ);
+		}
+	}
+	
 }

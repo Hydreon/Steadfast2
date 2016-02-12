@@ -35,8 +35,12 @@ class MobEquipmentPacket extends DataPacket{
 	public function decode(){
 		$this->eid = $this->getLong();
 		$this->item = $this->getSlot();
-		$this->slot = $this->getByte();
-		$this->selectedSlot = $this->getByte();
+//		$this->slot = $this->getByte();
+//		$this->selectedSlot = $this->getByte();
+		$slot = $this->getByte();
+		$this->slot = ($slot !== false) ? $slot : -1;
+		$selectedSlot = $this->getByte();
+		$this->selectedSlot = ($selectedSlot !== false) ? $selectedSlot : -1;
 	}
 
 	public function encode(){
@@ -45,6 +49,17 @@ class MobEquipmentPacket extends DataPacket{
 		$this->putSlot($this->item);
 		$this->putByte($this->slot);
 		$this->putByte($this->selectedSlot);
+	}
+	
+	/* 
+	 * Aniti notice
+	 * TODO may be packet have change in 0.14.? 
+	 */
+	public function getByte(){
+		if(isset($this->buffer{$this->offset})){
+			return ord($this->buffer{$this->offset++});
+		} 
+		return false;
 	}
 
 }
