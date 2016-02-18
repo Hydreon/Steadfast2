@@ -135,6 +135,7 @@ use pocketmine\tile\Sign;
 use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
 use pocketmine\utils\TextFormat;
+use pocketmine\network\protocol\SetPlayerGameTypePacket;
 
 use raklib\Binary;
 
@@ -1042,20 +1043,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 
 		$this->namedtag->playerGameType = new IntTag("playerGameType", $this->gamemode);
-
-		$spawnPosition = $this->getSpawn();
-
-		$pk = new StartGamePacket();
-		$pk->seed = -1;
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->spawnX = (int) $spawnPosition->x;
-		$pk->spawnY = (int) $spawnPosition->y;
-		$pk->spawnZ = (int) $spawnPosition->z;
-		$pk->generator = 1; //0 old, 1 infinite, 2 flat
+		$pk = new SetPlayerGameTypePacket();
 		$pk->gamemode = $this->gamemode & 0x01;
-		$pk->eid = 0;
 		$this->dataPacket($pk);
 		$this->sendSettings();
 
