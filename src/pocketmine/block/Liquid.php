@@ -213,7 +213,8 @@ abstract class Liquid extends Transparent{
 					$this->getLevel()->setBlock($bottomBlock, Block::get($this->id, $decay + 8), true);
 					$this->getLevel()->scheduleUpdate($bottomBlock, $this->tickRate());
 				}
-			}elseif($decay >= 0 and ($decay === 0 or !$bottomBlock->canBeFlowedInto())){
+			}
+			if($decay >= 0 and ($decay === 0 or !$bottomBlock->canBeFlowedInto())){
 				$flags = $this->getOptimalFlowDirections();
 
 				$l = $decay + $multiplier;
