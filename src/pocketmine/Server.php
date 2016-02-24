@@ -321,7 +321,7 @@ class Server{
 	 * @return int
 	 */
 	public function getViewDistance(){
-		return 96;
+		return 64;
 	}
 
 	/**

@@ -695,8 +695,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->level->useChunk($X, $Z, $this);
 			$this->level->requestChunk($X, $Z, $this, LevelProvider::ORDER_ZXY);
 		}
-
-		if($this->chunkLoadCount >= 56 and $this->spawned === false){
+		
+		if($this->chunkLoadCount >= 36 and $this->spawned === false){
 			$this->spawned = true;
 
 			$this->sendSettings();
