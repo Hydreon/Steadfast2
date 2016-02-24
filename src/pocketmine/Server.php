@@ -42,7 +42,6 @@ use pocketmine\entity\PrimedTNT;
 use pocketmine\entity\Snowball;
 use pocketmine\entity\Squid;
 use pocketmine\entity\Villager;
-use pocketmine\entity\Zombie;
 use pocketmine\event\HandlerList;
 use pocketmine\event\level\LevelInitEvent;
 use pocketmine\event\level\LevelLoadEvent;
@@ -114,6 +113,29 @@ use pocketmine\utils\UUID;
 use pocketmine\utils\VersionString;
 use pocketmine\level\generator\biome\Biome;
 use pocketmine\scheduler\FileWriteTask;
+use pocketmine\entity\animal\walking\Chicken;
+use pocketmine\entity\animal\walking\Cow;
+use pocketmine\entity\animal\walking\Mooshroom;
+use pocketmine\entity\animal\walking\Ocelot;
+use pocketmine\entity\animal\walking\Pig;
+use pocketmine\entity\animal\walking\Rabbit;
+use pocketmine\entity\animal\walking\Sheep;
+use pocketmine\entity\monster\flying\Blaze;
+use pocketmine\entity\monster\flying\Ghast;
+use pocketmine\entity\monster\walking\CaveSpider;
+use pocketmine\entity\monster\walking\Creeper;
+use pocketmine\entity\monster\walking\Enderman;
+use pocketmine\entity\monster\walking\IronGolem;
+use pocketmine\entity\monster\walking\PigZombie;
+use pocketmine\entity\monster\walking\Silverfish;
+use pocketmine\entity\monster\walking\Skeleton;
+use pocketmine\entity\monster\walking\SnowGolem;
+use pocketmine\entity\monster\walking\Spider;
+use pocketmine\entity\monster\walking\Wolf;
+use pocketmine\entity\monster\walking\Zombie;
+use pocketmine\entity\monster\walking\ZombieVillager;
+use pocketmine\entity\projectile\FireBall;
+
 /**
  * The class that manages everything
  */
@@ -2372,10 +2394,31 @@ class Server{
 		Entity::registerEntity(PrimedTNT::class);
 		Entity::registerEntity(Snowball::class);
 		Entity::registerEntity(Villager::class);
-		Entity::registerEntity(Zombie::class);
 		Entity::registerEntity(Squid::class);
-
-		Entity::registerEntity(Human::class, true);
+		Entity::registerEntity(Human::class, true);		
+		
+		Entity::registerEntity(Blaze::class);
+		Entity::registerEntity(CaveSpider::class);
+		Entity::registerEntity(Chicken::class);
+		Entity::registerEntity(Cow::class);
+		Entity::registerEntity(Creeper::class);
+		Entity::registerEntity(Enderman::class);
+		Entity::registerEntity(Ghast::class);
+		Entity::registerEntity(IronGolem::class);
+		Entity::registerEntity(Mooshroom::class);
+		Entity::registerEntity(Ocelot::class);
+		Entity::registerEntity(Pig::class);
+		Entity::registerEntity(PigZombie::class);
+		Entity::registerEntity(Rabbit::class);
+		Entity::registerEntity(Sheep::class);
+		Entity::registerEntity(Silverfish::class);
+		Entity::registerEntity(Skeleton::class);
+		Entity::registerEntity(SnowGolem::class);
+		Entity::registerEntity(Spider::class);
+		Entity::registerEntity(Wolf::class);
+		Entity::registerEntity(Zombie::class);
+		Entity::registerEntity(ZombieVillager::class);
+		Entity::registerEntity(FireBall::class);
 	}
 
 	private function registerTiles(){

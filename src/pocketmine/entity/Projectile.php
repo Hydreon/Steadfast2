@@ -27,7 +27,7 @@ use pocketmine\level\format\FullChunk;
 use pocketmine\level\MovingObjectPosition;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Short;
+use pocketmine\nbt\tag\ShortTag;
 abstract class Projectile extends Entity{
     const DATA_SHOOTER_ID = 17;
     /** @var Entity */
@@ -59,7 +59,7 @@ abstract class Projectile extends Entity{
     }
     public function saveNBT(){
         parent::saveNBT();
-        $this->namedtag->Age = new Short("Age", $this->age);
+        $this->namedtag->Age = new ShortTag("Age", $this->age);
     }
     public function onUpdate($currentTick){
         if($this->closed){
