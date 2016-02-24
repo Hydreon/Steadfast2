@@ -53,7 +53,7 @@ class AsyncPool{
 	}
 
 	public function submitTask(AsyncTask $task){
-		if(isset($this->tasks[$task->getTaskId()]) or $task->isGarbage()){
+		if(isset($this->tasks[$task->getTaskId()]) or $task->isFinished()){
 			return;
 		}
 
@@ -74,14 +74,19 @@ class AsyncPool{
 	}
 
 	private function removeTask(AsyncTask $task){
-		if(isset($this->taskWorkers[$task->getTaskId()])){			
+		if(!$task->isTerminated() and ($task->isRunning() or !$task->isFinished())){
+			return;
+		}
+
+		if(isset($this->taskWorkers[$task->getTaskId()])){
 			$this->workerUsage[$this->taskWorkers[$task->getTaskId()]]--;
 		}
 
 		unset($this->tasks[$task->getTaskId()]);
 		unset($this->taskWorkers[$task->getTaskId()]);
-	}	
-	
+		$task->setGarbage();
+	}
+
 	public function removeTasks(){
 		foreach($this->tasks as $task){
 			$this->removeTask($task);
@@ -95,18 +100,16 @@ class AsyncPool{
 		$this->tasks = [];
 	}
 
-	public function collectTasks(){		
-		foreach($this->tasks as $task){	
-			if($task->isGarbage()){
-				
+	public function collectTasks(){
+		foreach($this->tasks as $task){
+			if($task->isFinished()){
 				$task->onCompletion($this->server);
-
 				$this->removeTask($task);
 			}elseif($task->isTerminated()){
-				$info = $task->getTerminationInfo();
+				//$info = $task->getTerminationInfo();
 				$this->removeTask($task);
-				$this->server->getLogger()->critical("Could not execute asynchronous task " . (new \ReflectionClass($task))->getShortName() . ": " . $info["message"]);
-				$this->server->getLogger()->critical("On ".$info["scope"].", line ".$info["line"] .", ".$info["function"]."()");
+				//$this->server->getLogger()->critical("Could not execute asynchronous task " . (new \ReflectionClass($task))->getShortName() . ": " . $info["message"]);
+				//$this->server->getLogger()->critical("On ".$info["scope"].", line ".$info["line"] .", ".$info["function"]."()");
 			}
 		}
 	}

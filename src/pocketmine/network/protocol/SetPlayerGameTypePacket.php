@@ -24,42 +24,18 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class MobEquipmentPacket extends DataPacket{
-	const NETWORK_ID = Info::MOB_EQUIPMENT_PACKET;
+class SetPlayerGameTypePacket extends DataPacket{
+	const NETWORK_ID = Info::SET_PLAYER_GAMETYPE_PACKET;
 
-	public $eid;
-	public $item;
-	public $slot;
-	public $selectedSlot;
+	public $gamemode;
 
 	public function decode(){
-		$this->eid = $this->getLong();
-		$this->item = $this->getSlot();
-//		$this->slot = $this->getByte();
-//		$this->selectedSlot = $this->getByte();
-		$slot = $this->getByte();
-		$this->slot = ($slot !== false) ? $slot : -1;
-		$selectedSlot = $this->getByte();
-		$this->selectedSlot = ($selectedSlot !== false) ? $selectedSlot : -1;
+
 	}
 
 	public function encode(){
 		$this->reset();
-		$this->putLong($this->eid);
-		$this->putSlot($this->item);
-		$this->putByte($this->slot);
-		$this->putByte($this->selectedSlot);
-	}
-	
-	/* 
-	 * Aniti notice
-	 * TODO may be packet have change in 0.14.? 
-	 */
-	public function getByte(){
-		if(isset($this->buffer{$this->offset})){
-			return ord($this->buffer{$this->offset++});
-		} 
-		return false;
+		$this->putInt($this->gamemode);
 	}
 
 }

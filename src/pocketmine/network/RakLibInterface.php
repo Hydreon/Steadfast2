@@ -175,9 +175,11 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		if(isset($this->players[$identifier])){
 			try{
 				if($packet->buffer !== ""){
-					$pk = $this->getPacket($packet->buffer);
-					$pk->decode();
-					$this->players[$identifier]->handleDataPacket($pk);
+					$pk = $this->getPacket($packet->buffer);				
+					if (!is_null($pk)) {
+						$pk->decode();
+						$this->players[$identifier]->handleDataPacket($pk);
+					}
 				}
 			}catch(\Exception $e){
 				if(\pocketmine\DEBUG > 1 and isset($pk)){
@@ -230,19 +232,25 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		}
 	}
 
+	/*
+	 * $player - packet recipient
+	 */
 	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
 		if(isset($this->identifiers[$player])){
+			$additionalChar = $player->protocol <= ProtocolInfo::CURRENT_PROTOCOL ? '' : chr(0x8e);
+			
 			$identifier = $this->identifiers[$player];
 			$pk = null;
 			if(!$packet->isEncoded){
 				$packet->encode();
 			}elseif(!$needACK){
-				if(!isset($packet->__encapsulatedPacket)){
-					$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
-					$packet->__encapsulatedPacket->identifierACK = null;
-					$packet->__encapsulatedPacket->buffer = $packet->buffer;
-					$packet->__encapsulatedPacket->reliability = 2;
+				if (isset($packet->__encapsulatedPacket)) {
+					unset($packet->__encapsulatedPacket);
 				}
+				$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
+				$packet->__encapsulatedPacket->identifierACK = null;
+				$packet->__encapsulatedPacket->buffer = $additionalChar . $packet->buffer;
+				$packet->__encapsulatedPacket->reliability = 2;
 				$pk = $packet->__encapsulatedPacket;
 			}
 
@@ -255,8 +263,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 
 			if($pk === null){
 				$pk = new EncapsulatedPacket();
-				$pk->buffer = $packet->buffer;
-				$packet->reliability = 2;
+				$pk->buffer = $additionalChar . $packet->buffer;
+				$pk->reliability = 2;
 
 				if($needACK === true){
 					$pk->identifierACK = $this->identifiersACK[$identifier]++;
@@ -272,11 +280,12 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	}
 
 	private function getPacket($buffer){
+		if(ord($buffer{0}) == 142){
+			$buffer = substr($buffer, 1);		
+		}
 		$pid = ord($buffer{0});
-
 		if(($data = $this->network->getPacket($pid)) === null){
-			$data = new UnknownPacket();
-			$data->packetID = $pid;
+			return null;
 		}
 		$data->setBuffer($buffer, 1);
 

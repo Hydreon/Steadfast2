@@ -135,6 +135,7 @@ use pocketmine\tile\Sign;
 use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
 use pocketmine\utils\TextFormat;
+use pocketmine\network\protocol\SetPlayerGameTypePacket;
 
 use raklib\Binary;
 
@@ -703,8 +704,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 			}
 		}
-
-		if($this->chunkLoadCount >= 56 and $this->spawned === false){
+		
+		if($this->chunkLoadCount >= 36 and $this->spawned === false){
 			$this->spawned = true;
 
 			$this->sendSettings();
@@ -857,7 +858,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($ev->isCancelled()){
 			return false;
 		}
-
+		
 		$identifier = $this->interface->putPacket($this, $packet, $needACK, false);
 
 		if($needACK and $identifier !== null){
@@ -1051,20 +1052,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 
 		$this->namedtag->playerGameType = new IntTag("playerGameType", $this->gamemode);
-
-		$spawnPosition = $this->getSpawn();
-
-		$pk = new StartGamePacket();
-		$pk->seed = -1;
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->spawnX = (int) $spawnPosition->x;
-		$pk->spawnY = (int) $spawnPosition->y;
-		$pk->spawnZ = (int) $spawnPosition->z;
-		$pk->generator = 1; //0 old, 1 infinite, 2 flat
+		$pk = new SetPlayerGameTypePacket();
 		$pk->gamemode = $this->gamemode & 0x01;
-		$pk->eid = 0;
 		$this->dataPacket($pk);
 		$this->sendSettings();
 
@@ -1504,30 +1493,30 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->entityBaseTick($tickDiff);
 
-			if(!$this->isSpectator() and $this->speed !== null){
-				if($this->onGround || $this->isCollideWithWater()){
-					if($this->inAirTicks !== 0){
-						$this->startAirTicks = 5;
-					}
-					$this->inAirTicks = 0;
-				}else{
-					if(!$this->allowFlight and $this->inAirTicks > 10 and !$this->isSleeping() and $this->getDataProperty(self::DATA_NO_AI) !== 1){
-						$expectedVelocity = (-$this->gravity) / $this->drag - ((-$this->gravity) / $this->drag) * exp(-$this->drag * ($this->inAirTicks - $this->startAirTicks));
-						$diff = ($this->speed->y - $expectedVelocity) ** 2;
-
-						if(!$this->hasEffect(Effect::JUMP) and $diff > 0.6 and $expectedVelocity < $this->speed->y and !$this->server->getAllowFlight()){
-							if($this->inAirTicks < 100){
-//								$this->setMotion(new Vector3(0, $expectedVelocity, 0));
-							}elseif($this->kick("Flying is not enabled on this server")){
-								$this->timings->stopTiming();
-								return false;
-							}
-						}
-					}
-
-					++$this->inAirTicks;
-				}
-			}
+//			if(!$this->isSpectator() and $this->speed !== null){
+//				if($this->onGround || $this->isCollideWithWater()){
+//					if($this->inAirTicks !== 0){
+//						$this->startAirTicks = 5;
+//					}
+//					$this->inAirTicks = 0;
+//				}else{
+//					if(!$this->allowFlight and $this->inAirTicks > 10 and !$this->isSleeping() and $this->getDataProperty(self::DATA_NO_AI) !== 1){
+//						$expectedVelocity = (-$this->gravity) / $this->drag - ((-$this->gravity) / $this->drag) * exp(-$this->drag * ($this->inAirTicks - $this->startAirTicks));
+//						$diff = ($this->speed->y - $expectedVelocity) ** 2;
+//
+//						if(!$this->hasEffect(Effect::JUMP) and $diff > 0.6 and $expectedVelocity < $this->speed->y and !$this->server->getAllowFlight()){
+//							if($this->inAirTicks < 100){
+////								$this->setMotion(new Vector3(0, $expectedVelocity, 0));
+//							}elseif($this->kick("Flying is not enabled on this server")){
+//								$this->timings->stopTiming();
+//								return false;
+//							}
+//						}
+//					}
+//
+//					++$this->inAirTicks;
+//				}
+//			}
 
 			if($this->starvationTick >= 20) {
 				$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_CUSTOM, 1);
@@ -1683,39 +1672,65 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->displayName = $this->username;
 				$this->setNameTag($this->username);
 				$this->iusername = strtolower($this->username);
+
+				if(count($this->server->getOnlinePlayers()) > $this->server->getMaxPlayers() and $this->kick("Server is full")){
+					break;
+				}
+				
+				if($packet->protocol1 != ProtocolInfo::CURRENT_PROTOCOL){
+					if($packet->protocol1 < ProtocolInfo::CURRENT_PROTOCOL - 1) {//this is very very bad, remove it asap
+						$message = "upgrade";
+						
+						$pk = new PlayStatusPacket();
+						$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
+						$this->dataPacket($pk);
+						$this->close("", TextFormat::RED . "Please " . $message . " to MCPE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.", false);
+
+						return;
+					}
+//					} else {
+//						$message = "downgrade";
+//					}
+//
+//					$pk = new PlayStatusPacket();
+//					$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
+//					$this->dataPacket($pk);
+//					$this->close("", TextFormat::RED . "Please " . $message . " to MCPE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.", false);
+//
+//					return;
+				}
+				
 				$this->randomClientId = $packet->clientId;
 				$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
-
 				$this->uuid = $packet->clientUUID;
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
 				$this->protocol = $packet->protocol1;
 
-				if(count($this->server->getOnlinePlayers()) > $this->server->getMaxPlayers() and $this->kick("Server is full")){
+//				if(strpos($packet->username, "\x00") !== false or preg_match('#^[a-zA-Z0-9_]{3,16}$#', $packet->username) == 0 or $this->username === "" or $this->iusername === "rcon" or $this->iusername === "console" or strlen($packet->username) > 16 or strlen($packet->username) < 3){
+				$valid = true;
+				$len = strlen($packet->username);
+				if($len > 16 or $len < 3){
+					$valid = false;
+				}
+				for($i = 0; $i < $len and $valid; ++$i){
+					$c = ord($packet->username{$i});
+					if(($c >= ord("a") and $c <= ord("z")) or
+						($c >= ord("A") and $c <= ord("Z")) or
+						($c >= ord("0") and $c <= ord("9")) or $c === ord("_")
+					){
+						continue;
+					}
+					$valid = false;
 					break;
 				}
-				if($packet->protocol1 != ProtocolInfo::CURRENT_PROTOCOL){
-					if($packet->protocol1 < ProtocolInfo::CURRENT_PROTOCOL) {
-						$message = "upgrade";
-					} else {
-						$message = "downgrade";
-					}
-
-					$pk = new PlayStatusPacket();
-					$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
-					$this->dataPacket($pk);
-					$this->close("", TextFormat::RED . "Please " . $message . " to MCPE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.", false);
-
-					return;
-				}
-
-				if(strpos($packet->username, "\x00") !== false or preg_match('#^[a-zA-Z0-9_]{3,16}$#', $packet->username) == 0 or $this->username === "" or $this->iusername === "rcon" or $this->iusername === "console" or strlen($packet->username) > 16 or strlen($packet->username) < 3){
+				if(!$valid or $this->iusername === "rcon" or $this->iusername === "console"){
 					$this->close("", "Please choose a valid username.");
 
 					return;
 				}
 
-				if(strlen($packet->skin) < 64 * 32 * 4){
+				if(strlen($packet->skin) !== 64 * 32 * 4 && strlen($packet->skin) !== 64 * 64 * 4){
 					$this->close("", "Invalid skin.", false);
 					return;
 				}
@@ -1879,10 +1894,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->server->sendFullPlayerListData($this);
 				$this->server->sendRecipeList($this);
 
-				if($this->protocol != Info::CURRENT_PROTOCOL) {
-					$this->sendMessage(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED .".");
-					$this->sendTip(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN .$this->getServer()->getVersion() . TextFormat::RED .".");
-				}
+//				if($this->protocol != Info::CURRENT_PROTOCOL) {
+//				if($this->protocol < Info::CURRENT_PROTOCOL) {
+//					$this->sendMessage(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED .".");
+//					$this->sendTip(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN .$this->getServer()->getVersion() . TextFormat::RED .".");
+//				}
 //				$this->orderChunks();
 //				$this->sendNextChunk();
 				break;
@@ -2605,7 +2621,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						for($y = 0; $y < 3; ++$y){
 							$item = $packet->input[$y * 3 + $x];
 							$ingredient = $recipe->getIngredient($x, $y);
-							if($item->getCount() > 0 and $item->getId() > 0){
+							if(!is_null($item) && $item->getCount() > 0 && $ingredient->getId() > 0){
 								if($ingredient === null or !$ingredient->deepEquals($item, false, false)){
 									$canCraft = false;
 									break;
@@ -2618,7 +2634,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 					for($x = 0; $x < 3 and $canCraft; ++$x){
 						for($y = 0; $y < 3; ++$y){
+							if (!isset($packet->input[$y * 3 + $x])) {
+								continue;
+							}
+							
 							$item = clone $packet->input[$y * 3 + $x];
+							
+							if (is_null($item)) {
+								continue;
+							}
 
 							foreach($needed as $k => $n){
 								if($n->deepEquals($item, false, false)){
@@ -2781,7 +2805,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 
-				if($transaction->getSourceItem() === $transaction->getTargetItem() and $transaction->getTargetItem()->getCount() === $transaction->getSourceItem()->getCount()){ //No changes!
+				if($transaction->getSourceItem()->getId() === $transaction->getTargetItem()->getId() and $transaction->getSourceItem()->getDamage() === $transaction->getTargetItem()->getDamage() and $transaction->getTargetItem()->getCount() === $transaction->getSourceItem()->getCount()){ //No changes!
 					//No changes, just a local inventory update sent by the server
 					break;
 				}
