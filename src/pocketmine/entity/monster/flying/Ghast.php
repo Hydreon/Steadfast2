@@ -4,7 +4,7 @@ namespace pocketmine\entity\monster\flying;
 
 use pocketmine\entity\monster\FlyingMonster;
 use pocketmine\entity\projectile\FireBall;
-use milk\pureentities\PureEntities;
+use pocketmine\entity\BaseEntity;
 use pocketmine\entity\Creature;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\ProjectileLaunchEvent;
@@ -55,7 +55,7 @@ class Ghast extends FlyingMonster implements ProjectileSource{
                 $pitch,
                 $this->level
             );
-            $fireball = PureEntities::create("FireBall", $pos, $this);
+            $fireball = BaseEntity::create("FireBall", $pos, $this);
             if(!($fireball instanceof FireBall)){
                 return;
             }

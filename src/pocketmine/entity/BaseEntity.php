@@ -14,6 +14,12 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
+use pocketmine\level\Location;
+use pocketmine\level\Position;
+use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\DoubleTag;
+use pocketmine\nbt\tag\Enum;
+use pocketmine\nbt\tag\FloatTag;
 
 abstract class BaseEntity extends Creature{
 
@@ -214,6 +220,34 @@ abstract class BaseEntity extends Creature{
         return $this instanceof Monster && (!($creature instanceof Player) || ($creature->isSurvival() && $creature->spawned)) && $creature->isAlive() && !$creature->closed && $distance <= 81;
     }
 	
+	
+	 public static function create($type, Position $source, ...$args){
+        $chunk = $source->getLevel()->getChunk($source->x >> 4, $source->z >> 4, true);
+        if(!$chunk->isGenerated()){
+            $chunk->setGenerated();
+        }
+        if(!$chunk->isPopulated()){
+            $chunk->setPopulated();
+        }
+
+        $nbt = new Compound("", [
+            "Pos" => new Enum("Pos", [
+                new DoubleTag("", $source->x),
+                new DoubleTag("", $source->y),
+                new DoubleTag("", $source->z)
+            ]),
+            "Motion" => new Enum("Motion", [
+                new DoubleTag("", 0),
+                new DoubleTag("", 0),
+                new DoubleTag("", 0)
+            ]),
+            "Rotation" => new Enum("Rotation", [
+                new FloatTag("", $source instanceof Location ? $source->yaw : 0),
+                new FloatTag("", $source instanceof Location ? $source->pitch : 0)
+            ]),
+        ]);
+        return Entity::createEntity($type, $chunk, $nbt, ...$args);
+    }
 	  
   
 
