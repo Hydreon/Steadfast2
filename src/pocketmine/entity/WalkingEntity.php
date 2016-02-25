@@ -10,58 +10,41 @@ use pocketmine\math\Vector3;
 use pocketmine\entity\Creature;
 use pocketmine\block\Air;
 use pocketmine\block\Liquid;
+use pocketmine\Player;
 
 abstract class WalkingEntity extends BaseEntity {
+	
+	protected $agrDistance = 16;
 
 	protected function checkTarget($update = false) {
-		if(!$update){
-			if ($this->isKnockback()) {
-				return;
-			}
-
-			$target = $this->baseTarget;
-			if (!$target instanceof Creature or ! $this->targetOption($target, $this->distanceSquared($target))) {
-				$near = PHP_INT_MAX;
-				foreach ($this->getLevel()->getEntities() as $creature) {
-					if ($creature === $this || !($creature instanceof Creature) || $creature instanceof Animal) {
+		if($this->isKnockback() && !$update && $this->baseTarget instanceof Player && $this->baseTarge->isAlive() && sqrt($this->distanceSquared($player)) < $this->agrDistance){
+			return;	
+		}
+		if(!$this->isFriendly()){
+			$near = PHP_INT_MAX;
+			foreach ($this->getLevel()->getServer()->getOnlinePlayers() as $player) {
+				if($player->isAlive()){
+					$distance = sqrt($this->distanceSquared($player));	
+					if ($distance >= $near) {
 						continue;
 					}
-
-					if (
-							$creature instanceof BaseEntity && $creature->isFriendly() == $this->isFriendly()
-					) {
-						continue;
-					}
-
-					$distance = $this->distanceSquared($creature);
-					if (
-							$distance <= 100 && $this instanceof PigZombie && $this->isAngry() && $creature instanceof PigZombie && !$creature->isAngry()
-					) {
-						$creature->setAngry(1000);
-					}
-
-					if ($distance > $near or ! $this->targetOption($creature, $distance)) {
-						continue;
-					}
-					$near = $distance;
-
-					$this->moveTime = 0;
-					$this->baseTarget = $creature;
+					$target = $player;
+					$near = $distance;	
 				}
 			}
 
-			if (
-					$this->baseTarget instanceof Creature && $this->baseTarget->isAlive()
-			) {
+			if($near <= $this->agrDistance){
+				$this->baseTarget = $target;
+				$this->moveTime = 0;
 				return;
 			}
 		}
-
-		if ($update || $this->moveTime <= 0 || !($this->baseTarget instanceof Vector3)) {
+		
+		if ($this->moveTime <= 0 || !($this->baseTarget instanceof Vector3)) {
 			$x = mt_rand(20, 100);
 			$z = mt_rand(20, 100);
 			$this->moveTime = mt_rand(300, 1200);
-			$this->baseTarget = $this->add(mt_rand(0, 1) ? $x : -$x, 0, mt_rand(0, 1) ? $z : -$z);
+			$this->baseTarget = new Vector3($this->getX() + (mt_rand(0, 1) ? $x : -$x), $this->getY(), $this->getZ() + (mt_rand(0, 1) ? $z : -$z));
 		}
 	}
 
@@ -70,13 +53,12 @@ abstract class WalkingEntity extends BaseEntity {
 			return null;
 		}
 
-        if($this->isKnockback()){
-            $target = null;
-        } else{
-        
+		if ($this->isKnockback()) {
+			$target = null;
+		} else {
 			$before = $this->baseTarget;
 			$this->checkTarget();
-			if ($this->baseTarget instanceof Creature or $before !== $this->baseTarget) {
+			if ($this->baseTarget instanceof Player) {
 				$x = $this->baseTarget->x - $this->x;
 				$y = $this->baseTarget->y - $this->y;
 				$z = $this->baseTarget->z - $this->z;
@@ -95,7 +77,7 @@ abstract class WalkingEntity extends BaseEntity {
 			$target = $this->baseTarget;
 		}
 		$isJump = false;
-		$dx = $this->motionX;		
+		$dx = $this->motionX;
 		$dz = $this->motionZ;
 
 		$newX = Math::floorFloat($this->x + $dx);
@@ -109,26 +91,25 @@ abstract class WalkingEntity extends BaseEntity {
 				$this->checkTarget(true);
 				return;
 			} else {
-				if(!$block->canBeFlowedInto){
+				if (!$block->canBeFlowedInto) {
 					$isJump = true;
-					$this->motionY =  1;
-				} else{
-					$this->motionY =  0;
+					$this->motionY = 1;
+				} else {
+					$this->motionY = 0;
 				}
 			}
 		} else {
 			$block = $this->level->getBlock(new Vector3($newX, Math::floorFloat($this->y - 1), $newZ));
 			if (!($block instanceof Air) && !($block instanceof Liquid)) {
 				$blockY = Math::floorFloat($this->y);
-				if($this->y - $this->gravity * 4 > $blockY){
+				if ($this->y - $this->gravity * 4 > $blockY) {
 					$this->motionY = -$this->gravity * 4;
-				} else{
+				} else {
 					$this->motionY = ($this->y - $blockY) > 0 ? ($this->y - $blockY) : 0;
 				}
 			} else {
 				$this->motionY = -$this->gravity * 4;
 			}
-
 		}
 		$this->move($dx, $this->motionY, $dz);
 		$this->updateMovement();

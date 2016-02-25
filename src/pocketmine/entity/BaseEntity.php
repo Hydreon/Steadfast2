@@ -193,11 +193,6 @@ abstract class BaseEntity extends Creature{
 
     public function move($dx, $dy, $dz){
         Timings::$entityMoveTimer->startTiming();
-
-        $movX = $dx;
-        $movY = $dy;
-        $movZ = $dz;
-
         $list = $this->level->getCollisionCubes($this, $this->level->getServer()->getTick() > 1 ? $this->boundingBox->getOffsetBoundingBox($dx, $dy, $dz) : $this->boundingBox->addCoord($dx, $dy, $dz));
         if($this->isWallCheck()){
             foreach($list as $bb){
