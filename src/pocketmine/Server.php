@@ -265,7 +265,29 @@ class Server{
 
 	/** @var Level */
 	private $levelDefault = null;
+	
+	private $useAnimal;
+	private $animalLimit;
+	private $useMonster ;
+	private $monsterLimit;
 
+	
+	public function isUseAnimal() {
+		return $this->useAnimal;
+	}
+
+	public function getAnimalLimit() {
+		return $this->animalLimit;
+	}
+
+	public function isUseMonster() {
+		return $this->useMonster;
+	}
+
+	public function getMonsterLimit() {
+		return $this->monsterLimit;
+	}
+	
 	/**
 	 * @return string
 	 */
@@ -1430,7 +1452,9 @@ class Server{
 			"max-players" => 20,
 			"allow-flight" => false,
 			"spawn-animals" => true,
+			"animals-limit" => 0,
 			"spawn-mobs" => true,
+			"mobs-limit" => 0,
 			"gamemode" => 0,
 			"force-gamemode" => false,
 			"hardcore" => false,
@@ -1473,7 +1497,12 @@ class Server{
 
 		$this->maxPlayers = $this->getConfigInt("max-players", 20);
 		$this->setAutoSave($this->getConfigBoolean("auto-save", true));
-		$this->setAutoGenerate($this->getConfigBoolean("auto-generate", false));	
+		$this->setAutoGenerate($this->getConfigBoolean("auto-generate", false));
+		
+		$this->useAnimal = $this->getConfigBoolean("spawn-animals", false);
+		$this->animalLimit = $this->getConfigInt("animals-limit", 0);
+		$this->useMonster = $this->getConfigBoolean("spawn-mobs", false);
+		$this->monsterLimit = $this->getConfigInt("mobs-limit", 0);
 
 		if(($memory = str_replace("B", "", strtoupper($this->getConfigString("memory-limit", "256M")))) !== false){
 			$value = ["M" => 1, "G" => 1024];
@@ -2368,6 +2397,9 @@ class Server{
 			}
 		}
 
+		if ($this->tickCounter % 200 === 0 && ($this->isUseAnimal() || $this->isUseMonster())) {
+			SpawnerCreature::generateEntity($this, $this->isUseAnimal(), $this->isUseMonster());
+		}
 
 		Timings::$serverTickTimer->stopTiming();
 

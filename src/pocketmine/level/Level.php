@@ -107,6 +107,8 @@ use pocketmine\level\generator\GeneratorUnregisterTask;
 use pocketmine\utils\Random;
 use pocketmine\level\generator\LightPopulationTask;
 use pocketmine\level\generator\PopulationTask;
+use pocketmine\entity\monster\Monster;
+use pocketmine\entity\animal\Animal;
 
 
 
@@ -2177,9 +2179,18 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		try{
-			if($chunk !== null and $this->getAutoSave()){
-				$this->provider->setChunk($x, $z, $chunk);
-				$this->provider->saveChunk($x, $z);
+			if ($chunk !== null) {
+				if ($this->server->isUseAnimal() || $this->server->isUseMonster()) {
+					foreach ($chunk->getEntities() as $entity) {
+						if ($entity instanceof Monster || $entity instanceof Animal) {
+							$entity->close();
+						}
+					}
+				}
+				if ($this->getAutoSave()) {
+					$this->provider->setChunk($x, $z, $chunk);
+					$this->provider->saveChunk($x, $z);
+				}
 			}
 			$this->provider->unloadChunk($x, $z, $safe);
 		}catch(\Exception $e){

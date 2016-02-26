@@ -11,35 +11,39 @@ use pocketmine\entity\Creature;
 use pocketmine\block\Air;
 use pocketmine\block\Liquid;
 use pocketmine\Player;
+use pocketmine\entity\monster\Monster;
 
 abstract class WalkingEntity extends BaseEntity {
-	
+
 	protected $agrDistance = 16;
 
 	protected function checkTarget($update = false) {
-		if($this->isKnockback() && !$update && $this->baseTarget instanceof Player && $this->baseTarge->isAlive() && sqrt($this->distanceSquared($player)) < $this->agrDistance){
-			return;	
+		if ($this->isKnockback() && !$update && $this->baseTarget instanceof Player && $this->baseTarge->isAlive() && sqrt($this->distanceSquared($player)) < $this->agrDistance) {
+			return;
 		}
-		if(!$this->isFriendly()){
+		if ($update) {
+			$this->moveTime = 0;
+		}
+		if ($this instanceof Monster && !$this->isFriendly()) {
 			$near = PHP_INT_MAX;
 			foreach ($this->getLevel()->getServer()->getOnlinePlayers() as $player) {
-				if($player->isAlive()){
-					$distance = sqrt($this->distanceSquared($player));	
+				if ($player->isAlive()) {
+					$distance = sqrt($this->distanceSquared($player));
 					if ($distance >= $near) {
 						continue;
 					}
 					$target = $player;
-					$near = $distance;	
+					$near = $distance;
 				}
 			}
 
-			if($near <= $this->agrDistance){
+			if ($near <= $this->agrDistance) {
 				$this->baseTarget = $target;
 				$this->moveTime = 0;
 				return;
 			}
 		}
-		
+
 		if ($this->moveTime <= 0 || !($this->baseTarget instanceof Vector3)) {
 			$x = mt_rand(20, 100);
 			$z = mt_rand(20, 100);
@@ -56,11 +60,9 @@ abstract class WalkingEntity extends BaseEntity {
 		if ($this->isKnockback()) {
 			$target = null;
 		} else {
-			$before = $this->baseTarget;
 			$this->checkTarget();
-			if ($this->baseTarget instanceof Player) {
+			if ($this->baseTarget instanceof Vector3) {
 				$x = $this->baseTarget->x - $this->x;
-				$y = $this->baseTarget->y - $this->y;
 				$z = $this->baseTarget->z - $this->z;
 				if ($x ** 2 + $z ** 2 < 0.7) {
 					$this->motionX = 0;
@@ -71,7 +73,10 @@ abstract class WalkingEntity extends BaseEntity {
 					$this->motionZ = $this->getSpeed() * 0.15 * ($z / $diff);
 				}
 				$this->yaw = -atan2($this->motionX, $this->motionZ) * 180 / M_PI;
-				$this->pitch = $y == 0 ? 0 : rad2deg(-atan2($y, sqrt($x ** 2 + $z ** 2)));
+				if ($this->baseTarget instanceof Player) {
+					$y = $this->baseTarget->y - $this->y;
+					$this->pitch = $y == 0 ? 0 : rad2deg(-atan2($y, sqrt($x ** 2 + $z ** 2)));
+				}
 			}
 
 			$target = $this->baseTarget;
@@ -93,7 +98,7 @@ abstract class WalkingEntity extends BaseEntity {
 			} else {
 				if (!$block->canBeFlowedInto) {
 					$isJump = true;
-					$this->motionY = 1;
+					$this->motionY = 1.1;
 				} else {
 					$this->motionY = 0;
 				}
@@ -108,10 +113,11 @@ abstract class WalkingEntity extends BaseEntity {
 					$this->motionY = ($this->y - $blockY) > 0 ? ($this->y - $blockY) : 0;
 				}
 			} else {
-				$this->motionY = -$this->gravity * 4;
+				$this->motionY -= $this->gravity * 4;
 			}
 		}
-		$this->move($dx, $this->motionY, $dz);
+		$dy = $this->motionY;
+		$this->move($dx, $dy, $dz);
 		$this->updateMovement();
 		return $target;
 	}

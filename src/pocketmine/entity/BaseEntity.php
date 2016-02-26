@@ -20,6 +20,7 @@ use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\FloatTag;
+use pocketmine\entity\monster\walking\Wolf;
 
 abstract class BaseEntity extends Creature{
 
@@ -182,10 +183,11 @@ abstract class BaseEntity extends Creature{
         if($this->attackTime > 0){
             $this->attackTime -= $tickDiff;
         }
-
-		if(($this->level->getTime() < 14000 || $this->level->getTime() > 23000)){
-//			if(Monster)
-//			$this->close();
+		
+		$time =  $this->level->getTime() % 30000;
+		$isNight = $time > 16000 && $time < 29000;
+		if($this instanceof Monster && !($this instanceof Wolf) && !$isNight){
+			$this->close();
 		}		
         Timings::$timerEntityBaseTick->startTiming();
         return $hasUpdate;
@@ -205,6 +207,10 @@ abstract class BaseEntity extends Creature{
             }
             $this->boundingBox->offset(0, 0, $dz);
         }
+		foreach($list as $bb){
+            $dy = $bb->calculateYOffset($this->boundingBox, $dy);
+        }
+        $this->boundingBox->offset(0, $dy, 0);
         $this->setComponents($this->x + $dx, $this->y + $dy, $this->z + $dz);
         $this->checkChunks();
         Timings::$entityMoveTimer->stopTiming();
