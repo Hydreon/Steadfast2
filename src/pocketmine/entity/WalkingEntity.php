@@ -2,12 +2,8 @@
 
 namespace pocketmine\entity;
 
-use pocketmine\entity\animal\Animal;
-use pocketmine\entity\monster\walking\PigZombie;
 use pocketmine\math\Math;
-use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
-use pocketmine\entity\Creature;
 use pocketmine\block\Air;
 use pocketmine\block\Liquid;
 use pocketmine\Player;
@@ -57,8 +53,11 @@ abstract class WalkingEntity extends BaseEntity {
 			return null;
 		}
 
-		if ($this->isKnockback()) {
+		if ($this->isKnockback() || $this->sprintTime > 0) {
 			$target = null;
+			if($this->sprintTime > 0){
+				$this->yaw = -atan2($this->motionX, $this->motionZ) * 180 / M_PI;
+			}
 		} else {
 			$this->checkTarget();
 			if ($this->baseTarget instanceof Vector3) {

@@ -7,6 +7,8 @@ use pocketmine\entity\monster\Monster;
 use pocketmine\entity\animal\Animal;
 use pocketmine\level\Position;
 use pocketmine\entity\BaseEntity;
+use pocketmine\block\Liquid;
+use pocketmine\math\Vector3;
 
 class SpawnerCreature {
 
@@ -71,8 +73,11 @@ class SpawnerCreature {
 					continue;
 				}
 				$animals = array("Cow", "Pig", "Sheep", "Chicken", "Wolf", "Ocelot", "Mooshroom", "Rabbit", "IronGolem", "SnowGolem");
-				BaseEntity::create($animals[array_rand($animals)], self::getPosition($index, $level));
-				$anamalCount++;
+				$pos = self::getPosition($index, $level);
+				if ($pos) {
+					BaseEntity::create($animals[array_rand($animals)], $pos);
+					$anamalCount++;
+				}
 			}
 		}
 
@@ -89,8 +94,11 @@ class SpawnerCreature {
 					continue;
 				}
 				$monsters = array("Zombie", "Creeper", "Skeleton", "Spider", "PigZombie", "Enderman", "CaveSpider", "ZombieVillager", "Ghast", "Blaze");
-				BaseEntity::create($monsters[array_rand($monsters)], self::getPosition($index, $level));
-				$monsterCount++;
+				$pos = self::getPosition($index, $level);
+				if ($pos) {
+					BaseEntity::create($monsters[array_rand($monsters)], $pos);
+					$monsterCount++;
+				}
 			}
 		}
 	}
@@ -99,10 +107,17 @@ class SpawnerCreature {
 		$chunkX = null;
 		$chunkZ = null;
 		Level::getXZ($index, $chunkX, $chunkZ);
-		$x = ($chunkX << 4) + rand(0, 15);
-		$z = ($chunkZ << 4) + rand(0, 15);
-		$y = $level->getHighestBlockAt($x, $z) + 2;
-		return new Position($x, $y, $z, $level);
+		$chunk = $level->getChunk($chunkX, $chunkZ, false);
+		if (!is_null($chunk) && $chunk->isPopulated()) {
+			$x = ($chunkX << 4) + rand(0, 15);
+			$z = ($chunkZ << 4) + rand(0, 15);
+			$y = $level->getHighestBlockAt($x, $z) + 2;
+			if($level->getBlock(new Vector3($x, $y - 2, $z)) instanceof Liquid){
+				return false;
+			}
+			return new Position($x, $y, $z, $level);
+		}
+		return false;
 	}
 
 }

@@ -32,6 +32,7 @@ abstract class BaseEntity extends Creature{
     private $movement = true;
     private $friendly = false;
     private $wallcheck = true;
+	protected $sprintTime = 0;
 	
 	protected $speed = 1;
 
@@ -154,6 +155,10 @@ abstract class BaseEntity extends Creature{
         $motion = (new Vector3($this->x - $damager->x, $this->y - $damager->y, $this->z - $damager->z))->normalize();
         $this->motionX = $motion->x * 0.19;
         $this->motionZ = $motion->z * 0.19;
+		if (!($this instanceof Monster) || $this->isFriendly()) {
+			$this->sprintTime = mt_rand(60, 120);
+			$this->moveTime = 0;
+		}
         if($this instanceof FlyingEntity){
             $this->motionY = $motion->y * 0.19;
         }else{
@@ -178,6 +183,10 @@ abstract class BaseEntity extends Creature{
 
         if($this->moveTime > 0){
             $this->moveTime -= $tickDiff;
+        }
+		
+		 if($this->sprintTime > 0){
+            $this->sprintTime -= $tickDiff;
         }
 
         if($this->attackTime > 0){
