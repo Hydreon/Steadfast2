@@ -126,6 +126,7 @@ use pocketmine\network\protocol\StartGamePacket;
 use pocketmine\network\protocol\TakeItemEntityPacket;
 use pocketmine\network\protocol\UpdateAttributesPacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
+use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
 use pocketmine\network\SourceInterface;
 use pocketmine\permission\PermissibleBase;
 use pocketmine\permission\PermissionAttachment;
@@ -2887,6 +2888,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 				}
 				break;
+			case ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET:
+ 				if($this->spawned){
+ 					$this->viewDistance = $packet->radius ** 2;
+ 				}
+ 				$pk = new ChunkRadiusUpdatePacket();
+ 				$pk->radius = $packet->radius;
+ 				$this->dataPacket($pk);
+ 				break;
 			default:
 				break;
 		}

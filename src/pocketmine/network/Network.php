@@ -77,6 +77,8 @@ use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\MainLogger;
+use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
+use pocketmine\network\protocol\RequestChunkRadiusPacket;
 
 class Network {
 
@@ -326,5 +328,7 @@ class Network {
 		$this->registerPacket(ProtocolInfo::FULL_CHUNK_DATA_PACKET, FullChunkDataPacket::class);
 		$this->registerPacket(ProtocolInfo::SET_DIFFICULTY_PACKET, SetDifficultyPacket::class);
 		$this->registerPacket(ProtocolInfo::PLAYER_LIST_PACKET, PlayerListPacket::class);
+		$this->registerPacket(ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET, RequestChunkRadiusPacket::class);
+		$this->registerPacket(ProtocolInfo::CHUNK_RADIUS_UPDATE_PACKET, ChunkRadiusUpdatePacket::class);
 	}
 }
