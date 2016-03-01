@@ -25,6 +25,11 @@ use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
 class Quartz extends Solid{
+	
+	const QUARTZ_NORMAL = 0;
+	const QUARTZ_CHISELED = 1;
+	const QUARTZ_PILLAR = 2;
+	const QUARTZ_PILLAR2 = 3;
 
 	protected $id = self::QUARTZ_BLOCK;
 

@@ -41,7 +41,7 @@ use pocketmine\plugin\Plugin;
 
 
 class Block extends Position implements Metadatable{
-	const AIR = 0;
+const AIR = 0;
 	const STONE = 1;
 	const GRASS = 2;
 	const DIRT = 3;
@@ -181,7 +181,7 @@ class Block extends Position implements Metadatable{
 	const LILY_PAD = 111;
 	const NETHER_BRICKS = 112;
 	const NETHER_BRICK_BLOCK = 112;
-
+	const NETHER_BRICK_FENCE = 113;
 	const NETHER_BRICKS_STAIRS = 114;
 
 	const ENCHANTING_TABLE = 116;

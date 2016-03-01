@@ -21,19 +21,29 @@ class SpawnerCreature {
 		}
 		$level = $server->getDefaultLevel();
 		$chunks = array();
+		$freezeChunks = array();
 		foreach ($server->getOnlinePlayers() as $entityhuman) {
 			if ($entityhuman->isAlive()) {
 				$chunkX = floor($entityhuman->getX() >> 4);
 				$chunkZ = floor($entityhuman->getZ() >> 4);
-				$radius = 4;
+				$radius = 3;
 				for ($dx = -$radius; $dx <= $radius; $dx++) {
 					for ($dz = -$radius; $dz <= $radius; $dz++) {
-						if (rand(1, 8) == 3) {
-							$chunks[] = Level::chunkHash($chunkX + $dx, $chunkZ + $dz);
+						if (abs($dz) == $radius || abs($dz) == $radius) {
+							if (rand(1, 8) == 3) {
+								$hash = Level::chunkHash($chunkX + $dx, $chunkZ + $dz);
+								$chunks[$hash] = $hash;
+							}
+						} else {
+							$hash = Level::chunkHash($chunkX + $dx, $chunkZ + $dz);
+							$freezeChunks[$hash] = $hash;
 						}
 					}
 				}
 			}
+		}
+		foreach ($freezeChunks as $freezeChunk){
+			unset($chunks[$freezeChunk]);
 		}
 		$chunksClone = $chunks;
 
@@ -45,19 +55,27 @@ class SpawnerCreature {
 		foreach ($level->getEntities() as $entity) {
 			if ($entity instanceof Monster) {
 				$monsterCount++;
-				$hash = Level::chunkHash($entity->getX() >> 4, $entity->getZ() >> 4);
-				if (!isset($monsterInChunk[$hash])) {
-					$monsterInChunk[$hash] = 1;
-				} else {
-					$monsterInChunk[$hash] ++;
+				for ($i = -2; $i <= 2; $i++) {
+					for ($j = -2; $j <= 2; $j++) {
+						$hash = Level::chunkHash(floor($entity->getX()) >> 4 + $i, floor($entity->getZ()) >> 4 + $j);
+						if (!isset($monsterInChunk[$hash])) {
+							$monsterInChunk[$hash] = 1;
+						} else {
+							$monsterInChunk[$hash] ++;
+						}
+					}
 				}
 			}
 			if ($entity instanceof Animal) {
-				$hash = Level::chunkHash(floor($entity->getX() >> 4), floor($entity->getZ()) >> 4);
-				if (!isset($animalInChunk[$hash])) {
-					$animalInChunk[$hash] = 1;
-				} else {
-					$animalInChunk[$hash] ++;
+				for ($i = -2; $i <= 2; $i++) {
+					for ($j = -2; $j <= 2; $j++) {
+						$hash = Level::chunkHash(floor($entity->getX()) >> 4 + $i, floor($entity->getZ()) >> 4 + $j);
+						if (!isset($animalInChunk[$hash])) {
+							$animalInChunk[$hash] = 1;
+						} else {
+							$animalInChunk[$hash] ++;
+						}
+					}
 				}
 				$anamalCount++;
 			}
@@ -75,7 +93,11 @@ class SpawnerCreature {
 				$animals = array("Cow", "Pig", "Sheep", "Chicken", "Wolf", "Ocelot", "Mooshroom", "Rabbit", "IronGolem", "SnowGolem");
 				$pos = self::getPosition($index, $level);
 				if ($pos) {
-					BaseEntity::create($animals[array_rand($animals)], $pos);
+					$animal = $animals[array_rand($animals)];
+					if ($animal == "Wolf") {
+						$animal = $animals[array_rand($animals)];
+					}
+					BaseEntity::create($animal, $pos);
 					$anamalCount++;
 				}
 			}
@@ -93,7 +115,9 @@ class SpawnerCreature {
 				if (isset($monsterInChunk[$index]) && $monsterInChunk[$index] >= self::MAX_MOB_IN_CHUNK) {
 					continue;
 				}
-				$monsters = array("Zombie", "Creeper", "Skeleton", "Spider", "PigZombie", "Enderman", "CaveSpider", "ZombieVillager", "Ghast", "Blaze");
+
+				//"Ghast", "Blaze", "Creeper"
+				$monsters = array("Zombie", "Skeleton", "Spider", "PigZombie", "Enderman", "CaveSpider", "ZombieVillager");
 				$pos = self::getPosition($index, $level);
 				if ($pos) {
 					BaseEntity::create($monsters[array_rand($monsters)], $pos);
@@ -112,7 +136,7 @@ class SpawnerCreature {
 			$x = ($chunkX << 4) + rand(0, 15);
 			$z = ($chunkZ << 4) + rand(0, 15);
 			$y = $level->getHighestBlockAt($x, $z) + 2;
-			if($level->getBlock(new Vector3($x, $y - 2, $z)) instanceof Liquid){
+			if ($level->getBlock(new Vector3($x, $y - 2, $z)) instanceof Liquid) {
 				return false;
 			}
 			return new Position($x, $y, $z, $level);
