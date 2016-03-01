@@ -53,6 +53,7 @@ class TellCommand extends VanillaCommand{
 		$player = $sender->getServer()->getPlayer($name);
 
 		if($player instanceof Player){
+			$player->setLastMessageFrom($sender->getName());
 			$sender->sendMessage("[me -> " . $player->getName() . "] " . implode(" ", $args));
 			$player->sendMessage("[" . $sender->getName() . " -> me] " . implode(" ", $args));
 		}else{

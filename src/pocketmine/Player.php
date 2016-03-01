@@ -251,6 +251,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	/** @var PermissibleBase */
 	private $perm = null;
+	
+	/** @var string*/
+	protected $lastMessageReceivedFrom = "";
 
 	public function getLeaveMessage(){
 		return "";
@@ -3462,6 +3465,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function removeMetadata($metadataKey, Plugin $plugin){
 		$this->server->getPlayerMetadata()->removeMetadata($this, $metadataKey, $plugin);
 	}
+	
+	public function setLastMessageFrom($name) {
+		$this->lastMessageReceivedFrom = (string)$name;
+	}
 
+	public function getLastMessageFrom() {
+		return $this->lastMessageReceivedFrom;
+	}
 
 }
