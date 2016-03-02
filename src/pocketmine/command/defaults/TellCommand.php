@@ -19,6 +19,8 @@
  *
 */
 
+/*IMPORTANT NOTE: this command is owerridden inside lbcore, please do not update code here*/
+
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\CommandSender;
