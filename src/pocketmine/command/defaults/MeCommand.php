@@ -19,6 +19,8 @@
  *
 */
 
+/*IMPORTANT NOTE This command is overridden in LbComponents, change code there*/
+
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\CommandSender;
