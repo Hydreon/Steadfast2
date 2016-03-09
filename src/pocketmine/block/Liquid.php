@@ -199,13 +199,13 @@ abstract class Liquid extends Transparent{
 			$multiplier = $this instanceof Lava ? 2 : 1;
 
 			$bottomBlock = $this->level->getBlock($this->temporalVector->setComponents($this->x, $this->y - 1, $this->z));
-
+			
 			if($bottomBlock->canBeFlowedInto() or $bottomBlock instanceof Liquid){
-				if($this instanceof Lava and $bottomBlock instanceof Water){
+				if(($this instanceof Lava and $bottomBlock instanceof Water) || ($this instanceof Water and $bottomBlock instanceof Lava)){
 					$this->getLevel()->setBlock($bottomBlock, Block::get(Item::STONE), true);
 					return;
 				}
-
+				
 				if($decay >= 8){
 					$this->getLevel()->setBlock($bottomBlock, Block::get($this->id, $decay), true);
 					$this->getLevel()->scheduleUpdate($bottomBlock, $this->tickRate());
@@ -213,8 +213,7 @@ abstract class Liquid extends Transparent{
 					$this->getLevel()->setBlock($bottomBlock, Block::get($this->id, $decay + 8), true);
 					$this->getLevel()->scheduleUpdate($bottomBlock, $this->tickRate());
 				}
-			}
-			if($decay >= 0 and ($decay === 0 or !$bottomBlock->canBeFlowedInto())){
+			}elseif($decay >= 0 and ($decay === 0 or !$bottomBlock->canBeFlowedInto())){
 				$flags = $this->getOptimalFlowDirections();
 
 				$l = $decay + $multiplier;
