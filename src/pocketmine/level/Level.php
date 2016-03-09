@@ -227,6 +227,8 @@ class Level implements ChunkManager, Metadatable{
 	public $timings;
         
          private $isFrozen = false;
+		 
+	protected static $isMemoryLeakHappend = false;
 
         /**
 	 * Returns the chunk unique hash/key
@@ -1041,9 +1043,34 @@ class Level implements ChunkManager, Metadatable{
 		}else{
 			$fullState = 0;
 		}
+		
+//		$mem1 = round((memory_get_usage() / 1024) / 1024, 2);
+//		$mem2 = round((memory_get_usage(true) / 1024) / 1024, 2);
 
 		$block = clone $this->blockStates[$fullState & 0xfff];
-
+		
+//		$mem12 = round((memory_get_usage() / 1024) / 1024, 2);
+//		$mem22 = round((memory_get_usage(true) / 1024) / 1024, 2);
+		
+//		$memDiff = ($mem12 - $mem1) + ($mem22 - $mem2);
+//		if (!self::$isMemoryLeakHappend && $memDiff >= 10) {
+//		if ($memDiff >= 10) {
+//			self::$isMemoryLeakHappend = true;
+//			
+//			$filename = './logs/memoryleak.log';
+//			$message = 'TIME: '.date('H:i:s').PHP_EOL;
+//			$message .= 'MEM DIFF : '.$memDiff.PHP_EOL;
+//			$message .= 'CULPRIT : '.$block->getId().' : '.$block->getName().PHP_EOL;
+//			
+//			$backtrace = debug_backtrace(0, 8);
+//			foreach ($backtrace as $k => $v) {
+//				$message .= "[line ".$backtrace[$k]['line']."] ".$backtrace[$k]['class']." -> ".$backtrace[$k]['function'].PHP_EOL;
+//			}
+//			$message .= PHP_EOL;
+//			
+//			file_put_contents($filename, $message, FILE_APPEND | LOCK_EX);
+//		}
+//
 		$block->x = $pos->x;
 		$block->y = $pos->y;
 		$block->z = $pos->z;
