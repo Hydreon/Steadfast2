@@ -1039,7 +1039,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->gamemode = $gm;
 
 		$this->allowFlight = $this->isCreative();
-
+		
 		if($this->isSpectator()){
 			$this->despawnFromAll();
 		}else{
@@ -1372,7 +1372,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				if(!($revert = $ev->isCancelled())){ //Yes, this is intended
 					if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
-						$this->teleport($ev->getTo());
+						$this->teleport($ev->getTo());						
 					}else{
 						$this->level->addEntityMovement($this->x >> 4, $this->z >> 4, $this->getId(), $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
 					}
@@ -2613,9 +2613,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				if($recipe instanceof ShapedRecipe){
 					for($x = 0; $x < 3 and $canCraft; ++$x){
-						for($y = 0; $y < 3; ++$y){
-							$item = $packet->input[$y * 3 + $x];
+						for($y = 0; $y < 3; ++$y){						
 							$ingredient = $recipe->getIngredient($x, $y);
+							if(isset($ingredient) && $ingredient->getId() != Item::AIR && !isset($packet->input[$y * 3 + $x])){
+								$canCraft = false;
+								break;
+							}
+							if(!isset($packet->input[$y * 3 + $x])){
+								continue;
+							}
+							$item = $packet->input[$y * 3 + $x];
 							if(!is_null($item) && $item->getCount() > 0 && $ingredient->getId() > 0){
 								if($ingredient === null or !$ingredient->deepEquals($item, false, false)){
 									$canCraft = false;
@@ -3473,5 +3480,5 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function getLastMessageFrom() {
 		return $this->lastMessageReceivedFrom;
 	}
-
+	
 }
