@@ -2048,9 +2048,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 
 					$ev = new PlayerInteractEvent($this, $item, $aimPos, $packet->face, PlayerInteractEvent::RIGHT_CLICK_AIR);
-
+					
 					$this->server->getPluginManager()->callEvent($ev);
-
+					if($this->isSpectator()){
+						$ev->setCancelled(true);
+					}
 					if($ev->isCancelled()){
 						$this->inventory->sendHeldItem($this);
 						break;
@@ -2115,6 +2117,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$target = $this->level->getBlock($pos);
 						$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $target, $packet->face, $target->getId() === 0 ? PlayerInteractEvent::LEFT_CLICK_AIR : PlayerInteractEvent::LEFT_CLICK_BLOCK);
 						$this->getServer()->getPluginManager()->callEvent($ev);
+						if($this->isSpectator()){
+							$ev->setCancelled(true);
+						}
 						if($ev->isCancelled()){
 							$this->inventory->sendHeldItem($this);
 							break;
@@ -2518,6 +2523,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 				$item = $this->inventory->getItem($slot);
+				if($this->isSpectator()){
+					$this->inventory->sendSlot($slot, $this);
+					break;
+				}
 				$ev = new PlayerDropItemEvent($this, $item);
 				$this->server->getPluginManager()->callEvent($ev);
 				if($ev->isCancelled()){

@@ -1306,6 +1306,9 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		if($player instanceof Player){
+			if($player->isSpectator()){
+				return false;
+			}
 			$ev = new BlockBreakEvent($player, $target, $item, ($player->getGamemode() & 0x01) === 1 ? true : false);
 
 			if($player->isSurvival() and $item instanceof Item and !$target->isBreakable($item)){
@@ -1415,6 +1418,9 @@ class Level implements ChunkManager, Metadatable{
 				}
 			}
 			$this->server->getPluginManager()->callEvent($ev);
+			if($player->isSpectator()){
+				$ev->setCancelled(true);
+			}
 			if(!$ev->isCancelled()){
 				$target->onUpdate(self::BLOCK_UPDATE_TOUCH);
 				if($target->canBeActivated() === true and $target->onActivate($item, $player) === true){
@@ -1471,6 +1477,9 @@ class Level implements ChunkManager, Metadatable{
 
 
 		if($player instanceof Player){
+			if($player->isSpectator()){
+				return false;
+			}
 			$ev = new BlockPlaceEvent($player, $hand, $block, $target, $item);
 			if(!$player->isOp() and ($distance = $this->server->getConfigInt("spawn-protection", 16)) > -1){
 				$t = new Vector2($target->x, $target->z);
