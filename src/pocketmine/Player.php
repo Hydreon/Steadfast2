@@ -1667,10 +1667,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->displayName = $this->username;
 				$this->setNameTag($this->username);
 				$this->iusername = strtolower($this->username);
-
-				if(count($this->server->getOnlinePlayers()) > $this->server->getMaxPlayers() and $this->kick("Server is full")){
-					break;
-				}
 				
 				if($packet->protocol1 != ProtocolInfo::CURRENT_PROTOCOL){
 					if($packet->protocol1 < ProtocolInfo::CURRENT_PROTOCOL - 1) {//this is very very bad, remove it asap
@@ -1728,6 +1724,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if(strlen($packet->skin) !== 64 * 32 * 4 && strlen($packet->skin) !== 64 * 64 * 4){
 					$this->close("", "Invalid skin.", false);
 					return;
+				}
+				
+				if(count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers()){
+ 					$this->close("", "Server is Full",false);
+ 					break;
 				}
 
 				$this->setSkin($packet->skin, $packet->skinName);
