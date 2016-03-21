@@ -580,6 +580,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param string $name
 	 */
 	public function setDisplayName($name){
+		if($this->displayName == $name){
+			return;
+		}
 		$this->displayName = $name;
 		if($this->spawned){
 			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->getSkinName(), $this->getSkinData());
