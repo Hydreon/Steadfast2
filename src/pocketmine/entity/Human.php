@@ -36,6 +36,7 @@ use pocketmine\network\Network;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemovePlayerPacket;
 use pocketmine\Player;
+use pocketmine\level\Level;
 
 class Human extends Creature implements ProjectileSource, InventoryHolder{
 
@@ -208,7 +209,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	}
 
 	public function spawnTo(Player $player){
-		if($player !== $this and !isset($this->hasSpawned[$player->getId()])){
+		if($player !== $this and !isset($this->hasSpawned[$player->getId()])  and isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])){
 			$this->hasSpawned[$player->getId()] = $player;
 
 //			if(strlen($this->skin) < 64 * 32 * 4){
@@ -216,14 +217,14 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 //			}
 
 
-			if(!($this instanceof Player)){
-				$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, [$player]);
-			}
+//			if(!($this instanceof Player)){
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, [$player]);
+//			}
 
-			$pk = new PlayerListPacket();
-			$pk->type = PlayerListPacket::TYPE_ADD;
-			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin];
-			$player->dataPacket($pk);
+//			$pk = new PlayerListPacket();
+//			$pk->type = PlayerListPacket::TYPE_ADD;
+//			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin];
+//			$player->dataPacket($pk);
 
 			$pk = new AddPlayerPacket();
 			$pk->uuid = $this->getUniqueId();
