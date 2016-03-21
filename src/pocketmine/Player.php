@@ -3006,6 +3006,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if(!$player->canSee($this)){
 					$player->showPlayer($this);
 				}
+				$player->despawnFrom($this);
 			}
 			$this->hiddenPlayers = [];
 
