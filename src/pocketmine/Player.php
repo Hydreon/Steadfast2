@@ -2905,9 +2905,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				break;
 			case ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET:
- 				if($this->spawned){
- 					$this->viewDistance = $packet->radius ** 2;
- 				}
+ 				//if($this->spawned){
+				$this->viewDistance = $packet->radius ** 2;
+ 				//}
  				$pk = new ChunkRadiusUpdatePacket();
  				$pk->radius = $packet->radius;
  				$this->dataPacket($pk);
