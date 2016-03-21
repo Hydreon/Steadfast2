@@ -54,7 +54,7 @@ class TNT extends Solid{
 	public function onActivate(Item $item, Player $player = null){
 		if($item->getId() === Item::FLINT_STEEL){
 			$item->useOn($this);
-			$this->getLevel()->setBlock($this, new Air(), true);
+			$this->getLevel()->setBlock($this, new Air());
 
 			$mot = (new Random())->nextSignedFloat() * M_PI * 2;
 			$tnt = Entity::createEntity("PrimedTNT", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), new Compound("", [

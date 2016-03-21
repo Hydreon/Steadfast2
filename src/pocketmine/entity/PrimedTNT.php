@@ -87,7 +87,7 @@ class PrimedTNT extends Entity implements Explosive{
 
 			$this->motionY -= $this->gravity;
 
-			$this->move($this->motionX, $this->motionY, $this->motionZ);
+			//$this->move($this->motionX, $this->motionY, $this->motionZ);
 
 			$friction = 1 - $this->drag;
 
