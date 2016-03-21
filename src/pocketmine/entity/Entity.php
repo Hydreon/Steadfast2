@@ -1129,7 +1129,9 @@ abstract class Entity extends Location implements Metadatable{
 		$this->y = $this->boundingBox->minY - $this->ySize;
 		$this->z = ($this->boundingBox->minZ + $this->boundingBox->maxZ) / 2;
 
-		$this->checkChunks();
+		if (!($this instanceof Player)) {
+			$this->checkChunks();
+		}
 
 		if(!$this->onGround or $dy != 0){
 			$bb = clone $this->boundingBox;
@@ -1451,7 +1453,9 @@ abstract class Entity extends Location implements Metadatable{
 		$radius = $this->width / 2;
 		$this->boundingBox->setBounds($pos->x - $radius, $pos->y, $pos->z - $radius, $pos->x + $radius, $pos->y + $this->height, $pos->z + $radius);
 
-		$this->checkChunks();
+		if (!($this instanceof Player)) {
+			$this->checkChunks();
+		}
 
 		return true;
 	}

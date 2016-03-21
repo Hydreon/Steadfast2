@@ -1554,6 +1554,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if($this->getHealth() < $this->getMaxHealth()) {
 				$this->foodTick++;
 			}
+			$this->checkChunks();
 		}
 
 		$this->timings->stopTiming();
@@ -3334,33 +3335,30 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if($this->chunk !== null){
 				$this->chunk->removeEntity($this);
 			}
-			$this->chunk = $this->level->getChunk($this->x >> 4, $this->z >> 4, true);
+			$this->chunk = $this->level->getChunk($this->x >> 4, $this->z >> 4, true);	
+			if($this->chunk !== null){
+				$this->chunk->addEntity($this);
+			}
+		}	
 
-			if(!$this->justCreated){
-				$newChunk = $this->level->getUsingChunk($this->x >> 4, $this->z >> 4);
-				unset($newChunk[$this->getId()]);
+		if(!$this->justCreated){
+			$newChunk = $this->level->getUsingChunk($this->x >> 4, $this->z >> 4);
+			unset($newChunk[$this->getId()]);
 
-				/** @var Player[] $reload */
-				$reload = [];
-				foreach($this->hasSpawned as $player){
-					if(!isset($newChunk[$player->getId()])){
-						$this->despawnFrom($player);
-					}else{
-						unset($newChunk[$player->getId()]);
-						$reload[] = $player;
-					}
-				}
-
-				foreach($newChunk as $player){
-					$this->spawnTo($player);
+			/** @var Player[] $reload */
+			//$reload = [];
+			foreach($this->hasSpawned as $player){
+				if(!isset($newChunk[$player->getId()])){
+					$this->despawnFrom($player);
+				}else{
+					unset($newChunk[$player->getId()]);
+					//$reload[] = $player;
 				}
 			}
 
-			if($this->chunk === null){
-				return;
+			foreach($newChunk as $player){
+				$this->spawnTo($player);
 			}
-
-			$this->chunk->addEntity($this);
 		}
 	}
 
