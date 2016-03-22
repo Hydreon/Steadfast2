@@ -672,12 +672,14 @@ class Level implements ChunkManager, Metadatable{
 		}
 		$this->motionToSend = [];
 		
-		foreach ($this->playerHandItemQueue as $key => $data){
-			if($data['time'] + 1 < microtime(true)){
-				if($data['sender']->isSpawned($data['recipient'])){
-					$data['sender']->getInventory()->sendHeldItem($data['recipient']);
+		foreach ($this->playerHandItemQueue as $senderId => $playerList) {
+			foreach ($playerList as $recipientId => $data) {
+				if ($data['time'] + 1 < microtime(true)) {
+					unset($this->playerHandItemQueue[$senderId][$recipientId]);
+					if ($data['sender']->isSpawned($data['recipient'])) {
+						$data['sender']->getInventory()->sendHeldItem($data['recipient']);
+					}					
 				}
-				unset($this->playerHandItemQueue[$key]);
 			}
 		}
 
@@ -2490,11 +2492,22 @@ class Level implements ChunkManager, Metadatable{
 	}
 		
 	public function addPlayerHandItem($sender, $recipient){
-		$this->playerHandItemQueue[] = array(
+		if(!isset($this->playerHandItemQueue[$sender->getId()])){
+			$this->playerHandItemQueue[$sender->getId()] = array();
+		}
+		$this->playerHandItemQueue[$sender->getId()][$recipient->getId()] = array(
 			'sender' => $sender,
 			'recipient' => $recipient,
 			'time' => microtime(true)
 		);
+		
+	}
+	
+	public function mayAddPlayerHandItem($sender, $recipient){
+		if(isset($this->playerHandItemQueue[$sender->getId()][$recipient->getId()])){
+			return false;
+		}
+		return true;
 	}
 	
 }
