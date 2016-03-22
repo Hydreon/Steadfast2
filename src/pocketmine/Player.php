@@ -1178,14 +1178,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	}
 
-	public function setDataProperty($id, $type, $value){
-		if(parent::setDataProperty($id, $type, $value)){
-			$this->sendData([$this], [$id => $this->dataProperties[$id]]);
-			return true;
-		}
-
-		return false;
-	}
+//	public function setDataProperty($id, $type, $value){
+//		if(parent::setDataProperty($id, $type, $value)){
+//			$this->sendData([$this], [$id => $this->dataProperties[$id]]);
+//			return true;
+//		}
+//
+//		return false;
+//	}
 
 	protected function checkGroundState($movX, $movY, $movZ, $dx, $dy, $dz){
 		/*
@@ -2248,7 +2248,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->setSneaking(false);
 
 						$this->extinguish();
-						$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
+						$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
+//						$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
 						$this->deadTicks = 0;
 						$this->dead = false;
 						$this->noDamageTicks = 60;
@@ -3270,10 +3271,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		if($this->getFood()-$amount <= 6 && !($this->getFood() <= 6)) {
-			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, false);
+//			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, false);
 			$this->removeEffect(Effect::SLOWNESS);
 		} elseif($this->getFood()-$amount < 6 && !($this->getFood() > 6)) {
-			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, true);
+//			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, true);
 			$effect = Effect::getEffect(Effect::SLOWNESS);
 			$effect->setDuration(0x7fffffff);
 			$effect->setAmplifier(2);

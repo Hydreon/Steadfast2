@@ -253,7 +253,8 @@ abstract class Entity extends Location implements Metadatable{
 		if(!isset($this->namedtag->Air)){
 			$this->namedtag->Air = new ShortTag("Air", 300);
 		}
-		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $this->namedtag["Air"]);
+		$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
+//		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $this->namedtag["Air"]);
 
 		if(!isset($this->namedtag->OnGround)){
 			$this->namedtag->OnGround = new ByteTag("OnGround", 0);
@@ -541,6 +542,14 @@ abstract class Entity extends Location implements Metadatable{
 		if(!isset($this->hasSpawned[$player->getId()]) and isset($player->usedChunks[PHP_INT_SIZE === 8 ? ((($this->chunk->getX()) & 0xFFFFFFFF) << 32) | (( $this->chunk->getZ()) & 0xFFFFFFFF) : ($this->chunk->getX()) . ":" . ( $this->chunk->getZ())])){
 			$this->hasSpawned[$player->getId()] = $player;
 		}
+	}
+	
+	
+	public function isSpawned(Player $player){
+		if(isset($this->hasSpawned[$player->getId()])){
+			return true;
+		}
+		return false;
 	}
 
 	public function sendPotionEffects(Player $player){

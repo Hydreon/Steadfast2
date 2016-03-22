@@ -599,9 +599,9 @@ class Level implements ChunkManager, Metadatable{
 						foreach($mini as $blocks){
 							/** @var Block $b */
 							foreach($blocks as $b){
-                                                            $pk = new UpdateBlockPacket();
-                                                            $pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
-                                                            Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
+								$pk = new UpdateBlockPacket();
+								$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
+								Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
 							}
 						}
 					}
@@ -615,20 +615,62 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		$this->processChunkRequest();
-
+		$pkData = array();
+		$players = $this->server->getOnlinePlayers();
 		foreach($this->moveToSend as $index => $entry){
-			Level::getXZ($index, $chunkX, $chunkZ);
-			$pk = new MoveEntityPacket();
-			$pk->entities = $entry;
-			Server::broadcastPacket($this->getUsingChunk($chunkX, $chunkZ), $pk);
+			foreach($players as $p){
+				if(!isset($pkData[$p->getId()])){
+					$pkData[$p->getId()] = array();
+					$pkData[$p->getId()]['user'] = $p;
+					$pkData[$p->getId()]['data'] = array();
+				}
+				foreach ($entry as $entityId => $moveEntity){
+					if(!is_null($entity = $this->getEntity($entityId))){
+						if($entity->isSpawned($p)){
+							$pkData[$p->getId()]['data'][$entityId] = $moveEntity;
+						}
+					}
+					
+				}
+			}			
+		}
+		foreach ($pkData as $data){
+			if(count($data['data']) > 0){
+				$pk = new MoveEntityPacket();
+				$pk->entities = $data['data'];
+				$data['user']->dataPacket($pk);
+			}
 		}
 		$this->moveToSend = [];
+		
+		
+		$pkData = array();
 		foreach($this->motionToSend as $index => $entry){
-			Level::getXZ($index, $chunkX, $chunkZ);
-			$pk = new SetEntityMotionPacket();
-			$pk->entities = $entry;
-			Server::broadcastPacket($this->getUsingChunk($chunkX, $chunkZ), $pk);
+			foreach($players as $p){
+				if(!isset($pkData[$p->getId()])){
+					$pkData[$p->getId()] = array();
+					$pkData[$p->getId()]['user'] = $p;
+					$pkData[$p->getId()]['data'] = array();
+				}
+				foreach ($entry as $entityId => $moveEntity){
+					if(!is_null($entity = $this->getEntity($entityId))){
+						if($entity->isSpawned($p)){
+							$pkData[$p->getId()]['data'][$entityId] = $moveEntity;
+						}
+					}
+					
+				}
+			}			
 		}
+		foreach ($pkData as $data){
+			if(count($data['data']) > 0){
+				$pk = new SetEntityMotionPacket();
+				$pk->entities = $data['data'];
+				$data['user']->dataPacket($pk);
+			}
+		}
+		$this->motionToSend = [];
+	
 		$this->motionToSend = [];
 
 		$this->timings->doTick->stopTiming();
