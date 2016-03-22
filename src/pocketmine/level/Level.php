@@ -194,6 +194,7 @@ class Level implements ChunkManager, Metadatable{
 
 	/** @var \SplFixedArray */
 	private $blockStates;
+	protected $playerHandItemQueue = array();
 
 	protected $chunkTickRadius;
 	protected $chunkTickList = [];
@@ -670,8 +671,15 @@ class Level implements ChunkManager, Metadatable{
 			}
 		}
 		$this->motionToSend = [];
-	
-		$this->motionToSend = [];
+		
+		foreach ($this->playerHandItemQueue as $key => $data){
+			if($data['time'] + 1 < microtime(true)){
+				if($data['sender']->isSpawned($data['recipient'])){
+					$data['sender']->getInventory()->sendHeldItem($data['recipient']);
+				}
+				unset($this->playerHandItemQueue[$key]);
+			}
+		}
 
 		$this->timings->doTick->stopTiming();
 	}
@@ -2480,4 +2488,13 @@ class Level implements ChunkManager, Metadatable{
 		}
 		$this->moveToSend[$index][$entityId] = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch];
 	}
+		
+	public function addPlayerHandItem($sender, $recipient){
+		$this->playerHandItemQueue[] = array(
+			'sender' => $sender,
+			'recipient' => $recipient,
+			'time' => microtime(true)
+		);
+	}
+	
 }
