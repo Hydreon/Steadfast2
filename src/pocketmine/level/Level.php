@@ -194,6 +194,7 @@ class Level implements ChunkManager, Metadatable{
 
 	/** @var \SplFixedArray */
 	private $blockStates;
+	protected $playerHandItemQueue = array();
 
 	protected $chunkTickRadius;
 	protected $chunkTickList = [];
@@ -599,9 +600,9 @@ class Level implements ChunkManager, Metadatable{
 						foreach($mini as $blocks){
 							/** @var Block $b */
 							foreach($blocks as $b){
-                                                            $pk = new UpdateBlockPacket();
-                                                            $pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
-                                                            Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
+								$pk = new UpdateBlockPacket();
+								$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
+								Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
 							}
 						}
 					}
@@ -615,21 +616,75 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		$this->processChunkRequest();
-
+		$pkData = array();
+		$players = $this->server->getOnlinePlayers();
 		foreach($this->moveToSend as $index => $entry){
-			Level::getXZ($index, $chunkX, $chunkZ);
-			$pk = new MoveEntityPacket();
-			$pk->entities = $entry;
-			Server::broadcastPacket($this->getUsingChunk($chunkX, $chunkZ), $pk);
+			foreach($players as $p){
+				if(!isset($pkData[$p->getId()])){
+					$pkData[$p->getId()] = array();
+					$pkData[$p->getId()]['user'] = $p;
+					$pkData[$p->getId()]['data'] = array();
+				}
+				foreach ($entry as $entityId => $moveEntity){
+					if(!is_null($entity = $this->getEntity($entityId))){
+						if($entity->isSpawned($p)){
+							$pkData[$p->getId()]['data'][$entityId] = $moveEntity;
+						}
+					}
+					
+				}
+			}			
+		}
+		foreach ($pkData as $data){
+			if(count($data['data']) > 0){
+				$pk = new MoveEntityPacket();
+				$pk->entities = $data['data'];
+				$data['user']->dataPacket($pk);
+			}
 		}
 		$this->moveToSend = [];
+		
+		
+		$pkData = array();
 		foreach($this->motionToSend as $index => $entry){
-			Level::getXZ($index, $chunkX, $chunkZ);
-			$pk = new SetEntityMotionPacket();
-			$pk->entities = $entry;
-			Server::broadcastPacket($this->getUsingChunk($chunkX, $chunkZ), $pk);
+			foreach($players as $p){
+				if(!isset($pkData[$p->getId()])){
+					$pkData[$p->getId()] = array();
+					$pkData[$p->getId()]['user'] = $p;
+					$pkData[$p->getId()]['data'] = array();
+				}
+				foreach ($entry as $entityId => $moveEntity){
+					if(!is_null($entity = $this->getEntity($entityId))){
+						if($entity->isSpawned($p)){
+							$pkData[$p->getId()]['data'][$entityId] = $moveEntity;
+						}
+					}
+					
+				}
+			}			
+		}
+		foreach ($pkData as $data){
+			if(count($data['data']) > 0){
+				$pk = new SetEntityMotionPacket();
+				$pk->entities = $data['data'];
+				$data['user']->dataPacket($pk);
+			}
 		}
 		$this->motionToSend = [];
+		
+		foreach ($this->playerHandItemQueue as $senderId => $playerList) {
+			foreach ($playerList as $recipientId => $data) {
+				if ($data['time'] + 1 < microtime(true)) {
+					unset($this->playerHandItemQueue[$senderId][$recipientId]);
+					if ($data['sender']->isSpawned($data['recipient'])) {
+						$data['sender']->getInventory()->sendHeldItem($data['recipient']);
+					}	
+					if (count($this->playerHandItemQueue[$senderId]) == 0) {
+						unset($this->playerHandItemQueue[$senderId]);
+					}
+				}
+			}
+		}
 
 		$this->timings->doTick->stopTiming();
 	}
@@ -2231,7 +2286,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return bool|Position
 	 */
 	public function getSafeSpawn($spawn = null){
-		if(!($spawn instanceof Vector3)){
+		if(!($spawn instanceof Vector3) || $spawn->y < 1){
 			$spawn = $this->getSpawnLocation();
 		}
 		if($spawn instanceof Vector3){
@@ -2438,4 +2493,24 @@ class Level implements ChunkManager, Metadatable{
 		}
 		$this->moveToSend[$index][$entityId] = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch];
 	}
+		
+	public function addPlayerHandItem($sender, $recipient){
+		if(!isset($this->playerHandItemQueue[$sender->getId()])){
+			$this->playerHandItemQueue[$sender->getId()] = array();
+		}
+		$this->playerHandItemQueue[$sender->getId()][$recipient->getId()] = array(
+			'sender' => $sender,
+			'recipient' => $recipient,
+			'time' => microtime(true)
+		);
+		
+	}
+	
+	public function mayAddPlayerHandItem($sender, $recipient){
+		if(isset($this->playerHandItemQueue[$sender->getId()][$recipient->getId()])){
+			return false;
+		}
+		return true;
+	}
+	
 }
