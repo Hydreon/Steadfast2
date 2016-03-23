@@ -121,7 +121,7 @@ class Item extends Entity{
 			$this->motionY *= 1 - $this->drag;
 			$this->motionZ *= $friction;
 
-			$this->updateMovement();
+//			$this->updateMovement();
 
 			if($this->onGround){
 				$this->motionY *= -0.5;
@@ -140,7 +140,7 @@ class Item extends Entity{
 		}
 
 		$this->timings->stopTiming();
-
+		
 		return $hasUpdate or !$this->onGround or $this->motionX != 0 or $this->motionY != 0 or $this->motionZ != 0;
 	}
 
