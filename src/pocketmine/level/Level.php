@@ -678,7 +678,10 @@ class Level implements ChunkManager, Metadatable{
 					unset($this->playerHandItemQueue[$senderId][$recipientId]);
 					if ($data['sender']->isSpawned($data['recipient'])) {
 						$data['sender']->getInventory()->sendHeldItem($data['recipient']);
-					}					
+					}	
+					if (count($this->playerHandItemQueue[$senderId]) == 0) {
+						unset($this->playerHandItemQueue[$senderId]);
+					}
 				}
 			}
 		}
