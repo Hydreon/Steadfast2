@@ -1492,7 +1492,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->entityBaseTick($tickDiff);
 
 			if(!$this->isSpectator() and $this->speed !== null){
-				if($this->onGround || $this->isCollideWithWater()){
+				if($this->onGround || $this->isCollideWithLiquid()){
 					if($this->inAirTicks !== 0){
 						$this->startAirTicks = 5;
 					}
