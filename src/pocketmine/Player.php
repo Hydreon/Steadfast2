@@ -337,7 +337,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param Player $player
 	 */
 	public function spawnTo(Player $player){
-		if($this->spawned === true and $player->spawned === true and $this->dead !== true and $player->dead !== true and $player->getLevel() === $this->level and $player->canSee($this)){
+		if($this->spawned === true and $player->spawned === true and $this->dead !== true and $player->dead !== true and $player->getLevel() === $this->level and $player->canSee($this) and !$this->isSpectator()){
 			parent::spawnTo($player);
 		}
 	}
@@ -580,6 +580,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param string $name
 	 */
 	public function setDisplayName($name){
+		if($this->displayName == $name){
+			return;
+		}
 		$this->displayName = $name;
 		if($this->spawned){
 			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->getSkinName(), $this->getSkinData());
@@ -1175,14 +1178,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	}
 
-	public function setDataProperty($id, $type, $value){
-		if(parent::setDataProperty($id, $type, $value)){
-			$this->sendData([$this], [$id => $this->dataProperties[$id]]);
-			return true;
-		}
-
-		return false;
-	}
+//	public function setDataProperty($id, $type, $value){
+//		if(parent::setDataProperty($id, $type, $value)){
+//			$this->sendData([$this], [$id => $this->dataProperties[$id]]);
+//			return true;
+//		}
+//
+//		return false;
+//	}
 
 	protected function checkGroundState($movX, $movY, $movZ, $dx, $dy, $dz){
 		/*
@@ -1551,6 +1554,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if($this->getHealth() < $this->getMaxHealth()) {
 				$this->foodTick++;
 			}
+			$this->checkChunks();
 		}
 
 		$this->timings->stopTiming();
@@ -2244,7 +2248,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->setSneaking(false);
 
 						$this->extinguish();
-						$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
+						$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
+//						$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
 						$this->deadTicks = 0;
 						$this->dead = false;
 						$this->noDamageTicks = 60;
@@ -2901,9 +2906,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				break;
 			case ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET:
- 				if($this->spawned){
- 					$this->viewDistance = $packet->radius ** 2;
- 				}
+ 				//if($this->spawned){
+				$this->viewDistance = $packet->radius ** 2;
+ 				//}
  				$pk = new ChunkRadiusUpdatePacket();
  				$pk->radius = $packet->radius;
  				$this->dataPacket($pk);
@@ -3002,6 +3007,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if(!$player->canSee($this)){
 					$player->showPlayer($this);
 				}
+				$player->despawnFrom($this);
 			}
 			$this->hiddenPlayers = [];
 
@@ -3265,10 +3271,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		if($this->getFood()-$amount <= 6 && !($this->getFood() <= 6)) {
-			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, false);
+//			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, false);
 			$this->removeEffect(Effect::SLOWNESS);
 		} elseif($this->getFood()-$amount < 6 && !($this->getFood() > 6)) {
-			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, true);
+//			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, true);
 			$effect = Effect::getEffect(Effect::SLOWNESS);
 			$effect->setDuration(0x7fffffff);
 			$effect->setAmplifier(2);
@@ -3331,33 +3337,30 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if($this->chunk !== null){
 				$this->chunk->removeEntity($this);
 			}
-			$this->chunk = $this->level->getChunk($this->x >> 4, $this->z >> 4, true);
+			$this->chunk = $this->level->getChunk($this->x >> 4, $this->z >> 4, true);	
+			if($this->chunk !== null){
+				$this->chunk->addEntity($this);
+			}
+		}	
 
-			if(!$this->justCreated){
-				$newChunk = $this->level->getUsingChunk($this->x >> 4, $this->z >> 4);
-				unset($newChunk[$this->getId()]);
+		if(!$this->justCreated){
+			$newChunk = $this->level->getUsingChunk($this->x >> 4, $this->z >> 4);
+			unset($newChunk[$this->getId()]);
 
-				/** @var Player[] $reload */
-				$reload = [];
-				foreach($this->hasSpawned as $player){
-					if(!isset($newChunk[$player->getId()])){
-						$this->despawnFrom($player);
-					}else{
-						unset($newChunk[$player->getId()]);
-						$reload[] = $player;
-					}
-				}
-
-				foreach($newChunk as $player){
-					$this->spawnTo($player);
+			/** @var Player[] $reload */
+			//$reload = [];
+			foreach($this->hasSpawned as $player){
+				if(!isset($newChunk[$player->getId()])){
+					$this->despawnFrom($player);
+				}else{
+					unset($newChunk[$player->getId()]);
+					//$reload[] = $player;
 				}
 			}
 
-			if($this->chunk === null){
-				return;
+			foreach($newChunk as $player){
+				$this->spawnTo($player);
 			}
-
-			$this->chunk->addEntity($this);
 		}
 	}
 
