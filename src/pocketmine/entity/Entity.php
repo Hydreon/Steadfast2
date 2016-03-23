@@ -64,6 +64,7 @@ use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
 use pocketmine\utils\ChunkException;
+use pocketmine\block\Liquid;
 
 abstract class Entity extends Location implements Metadatable{
 
@@ -1087,10 +1088,22 @@ abstract class Entity extends Location implements Metadatable{
 	
 	public function isCollideWithLiquid() {
 		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
-		if(!(is_subclass_of($block,  '\pocketmine\block\Liquid'))) {
+		if(!($block instanceof Liquid)) {
 			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
 		}
-		if((is_subclass_of($block,  '\pocketmine\block\Liquid'))) {
+                if(!($block instanceof Liquid)) {
+			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x + $this->width), Math::floorFloat($y), Math::floorFloat($this->z)));
+		}
+                if(!($block instanceof Liquid)) {
+			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x - $this->width), Math::floorFloat($y), Math::floorFloat($this->z)));
+		}
+                if(!($block instanceof Liquid)) {
+			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y), Math::floorFloat($this->z + $this->width)));
+		}
+                if(!($block instanceof Liquid)) {
+			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y), Math::floorFloat($this->z - $this->width)));
+		}
+		if($block instanceof Liquid) {
 			$f = ($block->y + 1) - ($block->getFluidHeightPercent() - 0.1111111);
 			return $y < $f ? $block : false;
 		}
