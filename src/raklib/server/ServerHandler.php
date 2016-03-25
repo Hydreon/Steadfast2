@@ -120,7 +120,7 @@ class ServerHandler{
                 $identifier = substr($packet, $offset, $len);
                 $offset += $len;
                 $len = ord($packet{$offset++});
-                $reason = substr($packet, $offset, $len);
+                $reason = substr($packet, $offset);
                 $this->instance->closeSession($identifier, $reason);
             }elseif($id === RakLib::PACKET_INVALID_SESSION){
                 $len = ord($packet{$offset++});

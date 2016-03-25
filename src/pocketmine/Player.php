@@ -2987,7 +2987,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$task->cancel();
 		}
 		$this->tasks = [];
-
+		$logs = explode("|delemiter|", $reason);
+		$log = "";
+		if(count($logs) > 1){
+			$reason = $logs[0];
+			$log = $logs[1];
+		}
 		if($this->connected and !$this->closed){
 			if($reason != ""){
 				$pk = new DisconnectPacket;
@@ -2997,7 +3002,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->connected = false;
 			if($this->username != ""){
-				$this->server->getPluginManager()->callEvent($ev = new PlayerQuitEvent($this, $message, $reason));
+				$this->server->getPluginManager()->callEvent($ev = new PlayerQuitEvent($this, $message, $reason, $log));
 				if($this->server->getAutoSave() and $this->loggedIn === true){
 					$this->save();
 				}
