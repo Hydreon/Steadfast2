@@ -1522,6 +1522,9 @@ class Level implements ChunkManager, Metadatable{
 				if($e instanceof Arrow or $e instanceof DroppedItem){
 					continue;
 				}
+				if($e instanceof Player && $e->isSpectator()){
+					continue;
+				}
 				++$realCount;
 			}
 
