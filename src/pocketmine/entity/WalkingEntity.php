@@ -8,6 +8,7 @@ use pocketmine\block\Air;
 use pocketmine\block\Liquid;
 use pocketmine\Player;
 use pocketmine\entity\monster\Monster;
+use pocketmine\block\Water;
 
 abstract class WalkingEntity extends BaseEntity {
 
@@ -41,10 +42,20 @@ abstract class WalkingEntity extends BaseEntity {
 		}
 
 		if ($this->moveTime <= 0 || !($this->baseTarget instanceof Vector3)) {
-			$x = mt_rand(20, 100);
-			$z = mt_rand(20, 100);
-			$this->moveTime = mt_rand(300, 1200);
-			$this->baseTarget = new Vector3($this->getX() + (mt_rand(0, 1) ? $x : -$x), $this->getY(), $this->getZ() + (mt_rand(0, 1) ? $z : -$z));
+			$i = 0;
+			while($i < 10) {
+				$x = mt_rand(20, 100);
+				$z = mt_rand(20, 100);
+				$this->moveTime = mt_rand(300, 1200);
+				$this->baseTarget = new Vector3($this->getX() + (mt_rand(0, 1) ? $x : -$x), $this->getY(), $this->getZ() + (mt_rand(0, 1) ? $z : -$z));
+				$y =  $this->level->getHighestBlockAt($this->baseTarget->getX(), $this->baseTarget->getZ());
+				$this->baseTarget->y = $y;
+				$block = $this->level->getBlock($this->baseTarget);
+				if(!($block instanceof Water)){
+					break;
+				}
+				$i++;
+			}
 		}
 	}
 
@@ -88,19 +99,16 @@ abstract class WalkingEntity extends BaseEntity {
 		$newZ = Math::floorFloat($this->z + $dz);
 
 		$block = $this->level->getBlock(new Vector3($newX, Math::floorFloat($this->y), $newZ));
-		if (!($block instanceof Air) && !($block instanceof Liquid)) {
+		if (!($block instanceof Air) && !($block instanceof Liquid) && !$block->canBeFlowedInto()) {
 			$block = $this->level->getBlock(new Vector3($newX, Math::floorFloat($this->y + 1), $newZ));
-			if (!($block instanceof Air) && !($block instanceof Liquid)) {
+			if (!($block instanceof Air) && !($block instanceof Liquid) && !$block->canBeFlowedInto()) {
 				$this->motionY = 0;
 				$this->checkTarget(true);
 				return;
 			} else {
-				if (!$block->canBeFlowedInto) {
-					$isJump = true;
-					$this->motionY = 1.1;
-				} else {
-					$this->motionY = 0;
-				}
+				$isJump = true;
+				$this->motionY = 1.1;
+				$this->y += 1;
 			}
 		} else {
 			$block = $this->level->getBlock(new Vector3($newX, Math::floorFloat($this->y - 1), $newZ));

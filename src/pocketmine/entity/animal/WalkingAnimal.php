@@ -11,6 +11,8 @@ use pocketmine\math\Vector3;
 use pocketmine\Player;
 
 abstract class WalkingAnimal extends WalkingEntity implements Animal{
+	
+	protected $waterTick = 0;
 
     public function getSpeed(){
         return 0.7;
@@ -76,6 +78,15 @@ abstract class WalkingAnimal extends WalkingEntity implements Animal{
         ){
             $this->moveTime = 0;
         }
+		if($this->isCollideWithWater()){
+			$this->waterTick++;
+		} else{
+			$this->waterTick = 0;
+		}
+		if($this->waterTick > 60){
+			$this->close();
+			return false;
+		}
         return true;
     }
 

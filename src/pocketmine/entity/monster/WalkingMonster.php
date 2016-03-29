@@ -17,6 +17,7 @@ use pocketmine\Server;
 abstract class WalkingMonster extends WalkingEntity implements Monster{
 
     protected $attackDelay = 0;
+	protected $waterTick = 0;
 
     private $minDamage = [0, 0, 0, 0];
     private $maxDamage = [0, 0, 0, 0];
@@ -132,6 +133,15 @@ abstract class WalkingMonster extends WalkingEntity implements Monster{
                 $this->moveTime = 0;
             }
         }
+		if($this->isCollideWithWater()){
+			$this->waterTick++;
+		} else{
+			$this->waterTick = 0;
+		}
+		if($this->waterTick > 60){
+			$this->close();
+			return false;
+		}
         return true;
     }
 
