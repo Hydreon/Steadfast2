@@ -203,6 +203,7 @@ class Level implements ChunkManager, Metadatable{
 
 	/** @var \SplFixedArray */
 	private $blockStates;
+	protected $playerHandItemQueue = array();
 	
 	private $chunkGenerationQueue = [];
 	private $chunkGenerationQueueSize = 8;
@@ -243,6 +244,8 @@ class Level implements ChunkManager, Metadatable{
 	public $timings;
         
          private $isFrozen = false;
+		 
+	protected static $isMemoryLeakHappend = false;
 
         /**
 	 * Returns the chunk unique hash/key
@@ -620,9 +623,9 @@ class Level implements ChunkManager, Metadatable{
 						foreach($mini as $blocks){
 							/** @var Block $b */
 							foreach($blocks as $b){
-                                                            $pk = new UpdateBlockPacket();
-                                                            $pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
-                                                            Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
+								$pk = new UpdateBlockPacket();
+								$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
+								Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
 							}
 						}
 					}
@@ -636,21 +639,75 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		$this->processChunkRequest();
-
+		$pkData = array();
+		$players = $this->server->getOnlinePlayers();
 		foreach($this->moveToSend as $index => $entry){
-			Level::getXZ($index, $chunkX, $chunkZ);
-			$pk = new MoveEntityPacket();
-			$pk->entities = $entry;
-			Server::broadcastPacket($this->getUsingChunk($chunkX, $chunkZ), $pk);
+			foreach($players as $p){
+				if(!isset($pkData[$p->getId()])){
+					$pkData[$p->getId()] = array();
+					$pkData[$p->getId()]['user'] = $p;
+					$pkData[$p->getId()]['data'] = array();
+				}
+				foreach ($entry as $entityId => $moveEntity){
+					if(!is_null($entity = $this->getEntity($entityId))){
+						if($entity->isSpawned($p)){
+							$pkData[$p->getId()]['data'][$entityId] = $moveEntity;
+						}
+					}
+					
+				}
+			}			
+		}
+		foreach ($pkData as $data){
+			if(count($data['data']) > 0){
+				$pk = new MoveEntityPacket();
+				$pk->entities = $data['data'];
+				$data['user']->dataPacket($pk);
+			}
 		}
 		$this->moveToSend = [];
+		
+		
+		$pkData = array();
 		foreach($this->motionToSend as $index => $entry){
-			Level::getXZ($index, $chunkX, $chunkZ);
-			$pk = new SetEntityMotionPacket();
-			$pk->entities = $entry;
-			Server::broadcastPacket($this->getUsingChunk($chunkX, $chunkZ), $pk);
+			foreach($players as $p){
+				if(!isset($pkData[$p->getId()])){
+					$pkData[$p->getId()] = array();
+					$pkData[$p->getId()]['user'] = $p;
+					$pkData[$p->getId()]['data'] = array();
+				}
+				foreach ($entry as $entityId => $moveEntity){
+					if(!is_null($entity = $this->getEntity($entityId))){
+						if($entity->isSpawned($p)){
+							$pkData[$p->getId()]['data'][$entityId] = $moveEntity;
+						}
+					}
+					
+				}
+			}			
+		}
+		foreach ($pkData as $data){
+			if(count($data['data']) > 0){
+				$pk = new SetEntityMotionPacket();
+				$pk->entities = $data['data'];
+				$data['user']->dataPacket($pk);
+			}
 		}
 		$this->motionToSend = [];
+		
+		foreach ($this->playerHandItemQueue as $senderId => $playerList) {
+			foreach ($playerList as $recipientId => $data) {
+				if ($data['time'] + 1 < microtime(true)) {
+					unset($this->playerHandItemQueue[$senderId][$recipientId]);
+					if ($data['sender']->isSpawned($data['recipient'])) {
+						$data['sender']->getInventory()->sendHeldItem($data['recipient']);
+					}	
+					if (count($this->playerHandItemQueue[$senderId]) == 0) {
+						unset($this->playerHandItemQueue[$senderId]);
+					}
+				}
+			}
+		}
 
 		$this->timings->doTick->stopTiming();
 	}
@@ -1064,9 +1121,34 @@ class Level implements ChunkManager, Metadatable{
 		}else{
 			$fullState = 0;
 		}
+		
+//		$mem1 = round((memory_get_usage() / 1024) / 1024, 2);
+//		$mem2 = round((memory_get_usage(true) / 1024) / 1024, 2);
 
 		$block = clone $this->blockStates[$fullState & 0xfff];
-
+		
+//		$mem12 = round((memory_get_usage() / 1024) / 1024, 2);
+//		$mem22 = round((memory_get_usage(true) / 1024) / 1024, 2);
+		
+//		$memDiff = ($mem12 - $mem1) + ($mem22 - $mem2);
+//		if (!self::$isMemoryLeakHappend && $memDiff >= 10) {
+//		if ($memDiff >= 10) {
+//			self::$isMemoryLeakHappend = true;
+//			
+//			$filename = './logs/memoryleak.log';
+//			$message = 'TIME: '.date('H:i:s').PHP_EOL;
+//			$message .= 'MEM DIFF : '.$memDiff.PHP_EOL;
+//			$message .= 'CULPRIT : '.$block->getId().' : '.$block->getName().PHP_EOL;
+//			
+//			$backtrace = debug_backtrace(0, 8);
+//			foreach ($backtrace as $k => $v) {
+//				$message .= "[line ".$backtrace[$k]['line']."] ".$backtrace[$k]['class']." -> ".$backtrace[$k]['function'].PHP_EOL;
+//			}
+//			$message .= PHP_EOL;
+//			
+//			file_put_contents($filename, $message, FILE_APPEND | LOCK_EX);
+//		}
+//
 		$block->x = $pos->x;
 		$block->y = $pos->y;
 		$block->z = $pos->z;
@@ -1302,6 +1384,9 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		if($player instanceof Player){
+			if($player->isSpectator()){
+				return false;
+			}
 			$ev = new BlockBreakEvent($player, $target, $item, ($player->getGamemode() & 0x01) === 1 ? true : false);
 
 			if($player->isSurvival() and $item instanceof Item and !$target->isBreakable($item)){
@@ -1411,6 +1496,9 @@ class Level implements ChunkManager, Metadatable{
 				}
 			}
 			$this->server->getPluginManager()->callEvent($ev);
+			if($player->isSpectator()){
+				$ev->setCancelled(true);
+			}
 			if(!$ev->isCancelled()){
 				$target->onUpdate(self::BLOCK_UPDATE_TOUCH);
 				if($target->canBeActivated() === true and $target->onActivate($item, $player) === true){
@@ -1457,6 +1545,9 @@ class Level implements ChunkManager, Metadatable{
 				if($e instanceof Arrow or $e instanceof DroppedItem){
 					continue;
 				}
+				if($e instanceof Player && $e->isSpectator()){
+					continue;
+				}
 				++$realCount;
 			}
 
@@ -1467,6 +1558,9 @@ class Level implements ChunkManager, Metadatable{
 
 
 		if($player instanceof Player){
+			if($player->isSpectator()){
+				return false;
+			}
 			$ev = new BlockPlaceEvent($player, $hand, $block, $target, $item);
 			if(!$player->isOp() and ($distance = $this->server->getConfigInt("spawn-protection", 16)) > -1){
 				$t = new Vector2($target->x, $target->z);
@@ -2242,7 +2336,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return bool|Position
 	 */
 	public function getSafeSpawn($spawn = null){
-		if(!($spawn instanceof Vector3)){
+		if(!($spawn instanceof Vector3) || $spawn->y < 1){
 			$spawn = $this->getSpawnLocation();
 		}
 		if($spawn instanceof Vector3){
@@ -2474,6 +2568,27 @@ class Level implements ChunkManager, Metadatable{
 		}
 		$this->moveToSend[$index][$entityId] = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch];
 	}
+		
+	public function addPlayerHandItem($sender, $recipient){
+		if(!isset($this->playerHandItemQueue[$sender->getId()])){
+			$this->playerHandItemQueue[$sender->getId()] = array();
+		}
+		$this->playerHandItemQueue[$sender->getId()][$recipient->getId()] = array(
+			'sender' => $sender,
+			'recipient' => $recipient,
+			'time' => microtime(true)
+		);
+		
+	}
+	
+	public function mayAddPlayerHandItem($sender, $recipient){
+		if(isset($this->playerHandItemQueue[$sender->getId()][$recipient->getId()])){
+			return false;
+		}
+		return true;
+	}
+	
+}
 	
 	public function populateChunk(int $x, int $z, bool $force = false){
 		if(isset($this->chunkPopulationQueue[$index = Level::chunkHash($x, $z)]) or (count($this->chunkPopulationQueue) >= $this->chunkPopulationQueueSize and !$force)){

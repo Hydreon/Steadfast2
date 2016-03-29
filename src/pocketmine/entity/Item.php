@@ -48,7 +48,8 @@ class Item extends Entity{
 	public $length = 0.25;
 	public $height = 0.25;
 	protected $gravity = 0.04;
-	protected $drag = 0.02;
+//	protected $drag = 0.02;
+	protected $drag = 1;
 
 	public $canCollide = false;
 
@@ -120,7 +121,7 @@ class Item extends Entity{
 			$this->motionY *= 1 - $this->drag;
 			$this->motionZ *= $friction;
 
-			$this->updateMovement();
+//			$this->updateMovement();
 
 			if($this->onGround){
 				$this->motionY *= -0.5;
@@ -139,7 +140,7 @@ class Item extends Entity{
 		}
 
 		$this->timings->stopTiming();
-
+		
 		return $hasUpdate or !$this->onGround or $this->motionX != 0 or $this->motionY != 0 or $this->motionZ != 0;
 	}
 
@@ -248,7 +249,7 @@ class Item extends Entity{
 			$this->lastZ = $this->z;
 			$this->lastYaw = $this->yaw;
 			$this->lastPitch = $this->pitch;
-
+			
 			$this->level->addEntityMovement($this->chunk->getX(), $this->chunk->getZ(), $this->id, $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
 		}
 
@@ -256,7 +257,7 @@ class Item extends Entity{
 			$this->lastMotionX = $this->motionX;
 			$this->lastMotionY = $this->motionY;
 			$this->lastMotionZ = $this->motionZ;
-
+			
 			$this->level->addEntityMotion($this->chunk->getX(), $this->chunk->getZ(), $this->id, $this->motionX, $this->motionY, $this->motionZ);
 		}
 	}

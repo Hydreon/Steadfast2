@@ -64,6 +64,7 @@ use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
 use pocketmine\utils\ChunkException;
+use pocketmine\block\Liquid;
 
 abstract class Entity extends Location implements Metadatable{
 
@@ -253,7 +254,8 @@ abstract class Entity extends Location implements Metadatable{
 		if(!isset($this->namedtag->Air)){
 			$this->namedtag->Air = new ShortTag("Air", 300);
 		}
-		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $this->namedtag["Air"]);
+		$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
+//		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $this->namedtag["Air"]);
 
 		if(!isset($this->namedtag->OnGround)){
 			$this->namedtag->OnGround = new ByteTag("OnGround", 0);
@@ -542,6 +544,14 @@ abstract class Entity extends Location implements Metadatable{
 			$this->hasSpawned[$player->getId()] = $player;
 		}
 	}
+	
+	
+	public function isSpawned(Player $player){
+		if(isset($this->hasSpawned[$player->getId()])){
+			return true;
+		}
+		return false;
+	}
 
 	public function sendPotionEffects(Player $player){
 		foreach($this->effects as $effect){
@@ -814,7 +824,7 @@ abstract class Entity extends Location implements Metadatable{
 		if($block = $this->isCollideWithLiquid()){
 			$block->onEntityCollide($this);
 		} 
-		if($block = $this->isCollideWithLadder()){
+		if($block = $this->isCollideWithTransparent()){
 			$block->onEntityCollide($this);
 		}
 		
@@ -1078,22 +1088,34 @@ abstract class Entity extends Location implements Metadatable{
 	
 	public function isCollideWithLiquid() {
 		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
-		if(!(is_subclass_of($block,  '\pocketmine\block\Liquid'))) {
+		if(!($block instanceof Liquid)) {
 			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
 		}
-		if((is_subclass_of($block,  '\pocketmine\block\Liquid'))) {
+                if(!($block instanceof Liquid)) {
+			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x + $this->width), Math::floorFloat($y), Math::floorFloat($this->z)));
+		}
+                if(!($block instanceof Liquid)) {
+			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x - $this->width), Math::floorFloat($y), Math::floorFloat($this->z)));
+		}
+                if(!($block instanceof Liquid)) {
+			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y), Math::floorFloat($this->z + $this->width)));
+		}
+                if(!($block instanceof Liquid)) {
+			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y), Math::floorFloat($this->z - $this->width)));
+		}
+		if($block instanceof Liquid) {
 			$f = ($block->y + 1) - ($block->getFluidHeightPercent() - 0.1111111);
 			return $y < $f ? $block : false;
 		}
 		return false;
 	}
 	
-	public function isCollideWithLadder() {
+	public function isCollideWithTransparent() {
 		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
-		if(!($block instanceof \pocketmine\block\Ladder)) {
+		if(!($block instanceof \pocketmine\block\Ladder) && !($block instanceof \pocketmine\block\Fire)) {
 			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
 		}
-		if($block instanceof \pocketmine\block\Ladder) {			
+		if($block instanceof \pocketmine\block\Ladder || $block instanceof \pocketmine\block\Fire) {			
 			return $block;
 		}
 		return false;
@@ -1129,7 +1151,9 @@ abstract class Entity extends Location implements Metadatable{
 		$this->y = $this->boundingBox->minY - $this->ySize;
 		$this->z = ($this->boundingBox->minZ + $this->boundingBox->maxZ) / 2;
 
-		$this->checkChunks();
+		if (!($this instanceof Player)) {
+			$this->checkChunks();
+		}
 
 		if(!$this->onGround or $dy != 0){
 			$bb = clone $this->boundingBox;
@@ -1451,7 +1475,9 @@ abstract class Entity extends Location implements Metadatable{
 		$radius = $this->width / 2;
 		$this->boundingBox->setBounds($pos->x - $radius, $pos->y, $pos->z - $radius, $pos->x + $radius, $pos->y + $this->height, $pos->z + $radius);
 
-		$this->checkChunks();
+		if (!($this instanceof Player)) {
+			$this->checkChunks();
+		}
 
 		return true;
 	}
@@ -1545,6 +1571,7 @@ abstract class Entity extends Location implements Metadatable{
 	}
 
 	public function spawnToAll(){
+		$this->despawnFromAll();
 		if($this->chunk === null or $this->closed){
 			return false;
 		}

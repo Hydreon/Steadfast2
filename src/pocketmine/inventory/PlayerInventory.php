@@ -132,17 +132,21 @@ class PlayerInventory extends BaseInventory{
 		$pk->slot = $this->getHeldItemSlot();
 		$pk->selectedSlot = $this->getHeldItemIndex();
 
+		$level = $this->getHolder()->getLevel();
 		if(!is_array($target)){
-			$target->dataPacket($pk);
-			if($target === $this->getHolder()){
-				$this->sendSlot($this->getHeldItemSlot(), $target);
+			if($level->mayAddPlayerHandItem($this->getHolder(), $target)) {
+				$target->dataPacket($pk);
+				if($target === $this->getHolder()){
+					$this->sendSlot($this->getHeldItemSlot(), $target);
+				}
 			}
 		}else{
-			Server::broadcastPacket($target, $pk);
 			foreach($target as $player){
-				if($player === $this->getHolder()){
-					$this->sendSlot($this->getHeldItemSlot(), $player);
-					break;
+				if($level->mayAddPlayerHandItem($this->getHolder(), $player)) {
+					$player->dataPacket($pk);
+					if($player === $this->getHolder()){
+						$this->sendSlot($this->getHeldItemSlot(), $player);
+					}
 				}
 			}
 		}

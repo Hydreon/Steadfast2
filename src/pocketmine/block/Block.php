@@ -630,7 +630,8 @@ const AIR = 0;
 	 * @return float
 	 */
 	public function getFrictionFactor(){
-		return 0.6;
+//		return 0.6;
+		return 10;
 	}
 
 	/**
