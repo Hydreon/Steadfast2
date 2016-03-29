@@ -2588,7 +2588,7 @@ class Level implements ChunkManager, Metadatable{
 		return true;
 	}
 	
-}
+
 	
 	public function populateChunk(int $x, int $z, bool $force = false){
 		if(isset($this->chunkPopulationQueue[$index = Level::chunkHash($x, $z)]) or (count($this->chunkPopulationQueue) >= $this->chunkPopulationQueueSize and !$force)){
