@@ -824,7 +824,7 @@ abstract class Entity extends Location implements Metadatable{
 		if($block = $this->isCollideWithLiquid()){
 			$block->onEntityCollide($this);
 		} 
-		if($block = $this->isCollideWithLadder()){
+		if($block = $this->isCollideWithTransparent()){
 			$block->onEntityCollide($this);
 		}
 		
@@ -1110,12 +1110,12 @@ abstract class Entity extends Location implements Metadatable{
 		return false;
 	}
 	
-	public function isCollideWithLadder() {
+	public function isCollideWithTransparent() {
 		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
-		if(!($block instanceof \pocketmine\block\Ladder)) {
+		if(!($block instanceof \pocketmine\block\Ladder) && !($block instanceof \pocketmine\block\Fire)) {
 			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
 		}
-		if($block instanceof \pocketmine\block\Ladder) {			
+		if($block instanceof \pocketmine\block\Ladder || $block instanceof \pocketmine\block\Fire) {			
 			return $block;
 		}
 		return false;
