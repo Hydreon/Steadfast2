@@ -35,37 +35,37 @@ use pocketmine\Player;
 
 abstract class Fallable extends Solid{
 
-//	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
-//		$ret = $this->getLevel()->setBlock($this, $this, true, true);
-//
-//		return $ret;
-//	}
-//
-//	public function onUpdate($type){
-//		if($type === Level::BLOCK_UPDATE_NORMAL){
-//			$down = $this->getSide(Vector3::SIDE_DOWN);
-//			if($down->getId() === self::AIR or ($down instanceof Liquid)){
-//				$fall = Entity::createEntity("FallingSand", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), new Compound("", [
-//					"Pos" => new Enum("Pos", [
-//						new DoubleTag("", $this->x + 0.5),
-//						new DoubleTag("", $this->y),
-//						new DoubleTag("", $this->z + 0.5)
-//					]),
-//					"Motion" => new Enum("Motion", [
-//						new DoubleTag("", 0),
-//						new DoubleTag("", 0),
-//						new DoubleTag("", 0)
-//					]),
-//					"Rotation" => new Enum("Rotation", [
-//						new FloatTag("", 0),
-//						new FloatTag("", 0)
-//					]),
-//					"TileID" => new IntTag("TileID", $this->getId()),
-//					"Data" => new ByteTag("Data", $this->getDamage()),
-//				]));
-//
-//				$fall->spawnToAll();
-//			}
-//		}
-//	}
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
+		$ret = $this->getLevel()->setBlock($this, $this, true, true);
+
+		return $ret;
+	}
+
+	public function onUpdate($type){
+		if($type === Level::BLOCK_UPDATE_NORMAL){
+			$down = $this->getSide(Vector3::SIDE_DOWN);
+			if($down->getId() === self::AIR or ($down instanceof Liquid)){
+				$fall = Entity::createEntity("FallingSand", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), new Compound("", [
+					"Pos" => new Enum("Pos", [
+						new DoubleTag("", $this->x + 0.5),
+						new DoubleTag("", $this->y),
+						new DoubleTag("", $this->z + 0.5)
+					]),
+					"Motion" => new Enum("Motion", [
+						new DoubleTag("", 0),
+						new DoubleTag("", 0),
+						new DoubleTag("", 0)
+					]),
+					"Rotation" => new Enum("Rotation", [
+						new FloatTag("", 0),
+						new FloatTag("", 0)
+					]),
+					"TileID" => new IntTag("TileID", $this->getId()),
+					"Data" => new ByteTag("Data", $this->getDamage()),
+				]));
+
+				$fall->spawnToAll();
+			}
+		}
+	}
 }
