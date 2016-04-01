@@ -132,17 +132,6 @@ class Explosion{
 		$send = [];
 		$source = (new Vector3($this->source->x, $this->source->y, $this->source->z))->floor();
 		$yield = (1 / $this->size) * 100;
-
-		if($this->what instanceof Entity){
-			$this->level->getServer()->getPluginManager()->callEvent($ev = new EntityExplodeEvent($this->what, $this->source, $this->affectedBlocks, $yield));
-			if($ev->isCancelled()){
-				return false;
-			}else{
-				$yield = $ev->getYield();
-				$this->affectedBlocks = $ev->getBlockList();
-			}
-		}
-
 		$explosionSize = $this->size * 2;
 		$minX = Math::floorFloat($this->source->x - $explosionSize - 1);
 		$maxX = Math::floorFloat($this->source->x + $explosionSize + 1);
@@ -153,7 +142,19 @@ class Explosion{
 
 		$explosionBB = new AxisAlignedBB($minX, $minY, $minZ, $maxX, $maxY, $maxZ);
 
-		$list = $this->level->getNearbyEntities($explosionBB, $this->what instanceof Entity ? $this->what : null);
+        $list = $this->level->getNearbyEntities($explosionBB, $this->what instanceof Entity ? $this->what : null);
+        
+        if($this->what instanceof Entity){
+			$this->level->getServer()->getPluginManager()->callEvent($ev = new EntityExplodeEvent($this->what, $this->source, $this->affectedBlocks, $yield, $list));
+			if($ev->isCancelled()){
+				return false;
+			}else{
+				$yield = $ev->getYield();
+				$this->affectedBlocks = $ev->getBlockList();
+			}
+		}
+        
+		$list = $ev->getList();
 		foreach($list as $entity){
 			$distance = $entity->distance($this->source) / $explosionSize;
 
