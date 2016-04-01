@@ -114,11 +114,17 @@ class FallingSand extends Entity{
 			$this->motionX *= $friction;
 			$this->motionY *= 1 - $this->drag;
 			$this->motionZ *= $friction;
-
-			$pos = (new Vector3($this->x, $this->y, $this->z))->floor();
-
+			if($this->y < 1) {
+				$this->kill();
+			}
+			$pos = (new Vector3($this->x, $this->y - 1, $this->z))->floor();
+			$bottomBlock = $this->level->getBlock($pos);
+			if($bottomBlock->getId() > 0 && !($bottomBlock instanceof Liquid)){
+				$this->onGround = true;
+			}
 			if($this->onGround){
 				$this->kill();
+				$pos = (new Vector3($this->x, $this->y, $this->z))->floor();
 				$block = $this->level->getBlock($pos);
 				if($block->getId() > 0 and !$block->isSolid() and !($block instanceof Liquid)){
 					$this->getLevel()->dropItem($this, ItemItem::get($this->getBlock(), $this->getDamage(), 1));
