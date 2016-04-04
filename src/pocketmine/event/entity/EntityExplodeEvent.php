@@ -49,12 +49,11 @@ class EntityExplodeEvent extends EntityEvent implements Cancellable{
 	 * @param Block[]  $blocks
 	 * @param float    $yield
 	 */
-	public function __construct(Entity $entity, Position $position, array $blocks, $yield, $list){
+	public function __construct(Entity $entity, Position $position, array $blocks, $yield){
 		$this->entity = $entity;
 		$this->position = $position;
 		$this->blocks = $blocks;
 		$this->yield = $yield;
-        $this->list = $list;
 	}
 
 	/**
@@ -90,17 +89,6 @@ class EntityExplodeEvent extends EntityEvent implements Cancellable{
 	 */
 	public function setYield($yield){
 		$this->yield = $yield;
-	}
-    
-    /**
-	 * @return array
-	 */
-	public function getList(){
-		return $this->list;
-	}
-    
-    public function setList($list){
-		$this->list = $list;
 	}
 
 }
