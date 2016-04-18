@@ -1672,9 +1672,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->setNameTag($this->username);
 				$this->iusername = strtolower($this->username);
 				
-				if(in_array($packet->protocol1, ProtocolInfo::ACCEPTED_PROTOCOLS)){
+				if(!in_array($packet->protocol1, ProtocolInfo::ACCEPTED_PROTOCOLS)){
 					// in-case something goes wrong
-					$message = "change your client to";
+					$message = "change your client";
 					if($packet->protocol1 < ProtocolInfo::OLDEST_PROTOCOL) {
 						$message = "upgrade";
 
