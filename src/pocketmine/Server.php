@@ -2220,7 +2220,7 @@ class Server{
 			"version" => $version->get(true),
 			"build" => $version->getBuild(),
 			"mc_version" => \pocketmine\MINECRAFT_VERSION,
-			"protocol" => \pocketmine\network\protocol\Info::CURRENT_PROTOCOL,
+			"protocol" => \pocketmine\network\protocol\Info::OLDEST_PROTOCOL,
 			"online" => count($this->players),
 			"max" => $this->getMaxPlayers(),
 			"plugins" => $plist,

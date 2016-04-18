@@ -237,7 +237,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	 */
 	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
 		if(isset($this->identifiers[$player])){
-			$additionalChar = $player->protocol <= ProtocolInfo::CURRENT_PROTOCOL ? '' : chr(0x8e);
+			$additionalChar = $player->protocol <= ProtocolInfo::OLDEST_PROTOCOL ? '' : chr(0x8e);
 			
 			$identifier = $this->identifiers[$player];
 			$pk = null;
