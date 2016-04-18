@@ -51,7 +51,7 @@ class VersionCommand extends VanillaCommand{
 
 		$sender->sendMessage($output);
 //		if(count($args) === 0){
-//			$output = "This server is running " . $sender->getServer()->getName() . " version " . $sender->getServer()->getPocketMineVersion() . " 「" . $sender->getServer()->getCodename() . "」 (Implementing API version " . $sender->getServer()->getApiVersion() . " for Minecraft: PE " . $sender->getServer()->getVersion() . " protocol version " . Info::CURRENT_PROTOCOL . ")";
+//			$output = "This server is running " . $sender->getServer()->getName() . " version " . $sender->getServer()->getPocketMineVersion() . " 「" . $sender->getServer()->getCodename() . "」 (Implementing API version " . $sender->getServer()->getApiVersion() . " for Minecraft: PE " . $sender->getServer()->getVersion() . " protocol version " . Info::OLDEST_PROTOCOL . ")";
 //			if(\pocketmine\GIT_COMMIT !== str_repeat("00", 20)){
 //				$output .= " [git " . \pocketmine\GIT_COMMIT . "]";
 //			}
