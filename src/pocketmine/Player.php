@@ -1677,8 +1677,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$message = "change your client";
 					if($packet->protocol1 < ProtocolInfo::OLDEST_PROTOCOL) {
 						$message = "upgrade";
-
-						return;
 					} elseif($packet->protocol1 > ProtocolInfo::NEWEST_PROTOCOL) {
 						$message = "downgrade";
 					}
