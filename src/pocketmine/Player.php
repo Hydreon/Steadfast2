@@ -271,7 +271,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function getClientSecret(){
-		return $this->clientSecretId;
+		return $this->clientSecret;
 	}
 
 	public function isBanned(){
