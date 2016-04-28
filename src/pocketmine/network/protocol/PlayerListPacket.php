@@ -22,6 +22,7 @@
 namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
+use pocketmine\utils\TextFormat;
 
 
 class PlayerListPacket extends DataPacket{
@@ -52,7 +53,7 @@ class PlayerListPacket extends DataPacket{
 			if($this->type === self::TYPE_ADD){
 				$this->putUUID($d[0]);
 				$this->putLong($d[1]);
-				$this->putString($d[2]);
+				$this->putString(TextFormat::clean($d[2]));				
 				$this->putString($d[3]);
 				$this->putString($d[4]);
 			}else{
