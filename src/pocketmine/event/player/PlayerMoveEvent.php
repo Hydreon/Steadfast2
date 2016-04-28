@@ -46,13 +46,19 @@ class PlayerMoveEvent extends PlayerEvent implements Cancellable{
         }
 		$block = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()), floor($to->getZ())));
 		$blockUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 1, floor($to->getZ())));
-		if(!$block->isTransparent()){
-			$blockUpUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 2, floor($to->getZ())));
-			if(!$blockUp->isTransparent()){
-				$this->setCancelled(true);
-			}else{
-				if(!$blockUpUp->isTransparent()){
+		if($from->getY() > $to->getY()){
+			if(!$block->isTransparent()){
+				$this->setCancelled();
+			}
+		}else{
+			if(!$block->isTransparent()){
+				$blockUpUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 2, floor($to->getZ())));
+				if(!$blockUp->isTransparent()){
 					$this->setCancelled(true);
+				}else{
+					if(!$blockUpUp->isTransparent()){
+						$this->setCancelled(true);
+					}
 				}
 			}
 		}
