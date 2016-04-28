@@ -1370,17 +1370,41 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->lastPitch = $to->pitch;
 
 			if(!$isFirst){
-				$ev = new PlayerMoveEvent($this, $from, $to);
-				$this->setMoving(true);
-
-				$this->server->getPluginManager()->callEvent($ev);
-
-				if(!($revert = $ev->isCancelled())){ //Yes, this is intended
-					if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
-						$this->teleport($ev->getTo());						
-					}else{
-						$this->level->addEntityMovement($this->x >> 4, $this->z >> 4, $this->getId(), $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+				$needEvent = true;
+				$block = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()), floor($to->getZ())));
+				$blockUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 1, floor($to->getZ())));
+				$roundBlock = $from->level->getBlock(new Vector3(floor($to->getX()), round($to->getY()), floor($to->getZ())));
+				if($from->getY() - $to->getY() > 0.2){
+					if(!$roundBlock->isTransparent()){
+						$needEvent = false;
 					}
+				}else{
+					if(!$block->isTransparent()){
+						$blockUpUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 2, floor($to->getZ())));
+						if(!$blockUp->isTransparent()){
+							$needEvent = false;
+						}else{
+							if(!$blockUpUp->isTransparent()){
+								$needEvent = false;
+							}
+						}
+					}
+				}
+				if($needEvent){
+					$ev = new PlayerMoveEvent($this, $from, $to);
+					$this->setMoving(true);
+
+					$this->server->getPluginManager()->callEvent($ev);
+
+					if(!($revert = $ev->isCancelled())){ //Yes, this is intended
+						if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
+							$this->teleport($ev->getTo());						
+						}else{
+							$this->level->addEntityMovement($this->x >> 4, $this->z >> 4, $this->getId(), $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+						}
+					}
+				}else{
+					$revert = true;
 				}
 			}
 
