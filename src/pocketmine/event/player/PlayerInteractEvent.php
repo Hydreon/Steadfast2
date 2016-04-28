@@ -27,6 +27,7 @@ use pocketmine\item\Item;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
+use pocketmine\item\Armor;
 
 /**
  * Called when a player interacts or touches a block (including air?)
@@ -67,6 +68,14 @@ class PlayerInteractEvent extends PlayerEvent implements Cancellable{
 		$this->item = $item;
 		$this->blockFace = (int) $face;
 		$this->action = (int) $action;
+		if($item instanceof Armor){
+			$weared = $player->getInventory()->getArmorItem($item::SLOT_NUMBER);
+			$player->getInventory()->setItemInHand(Item::get(Item::AIR));
+			$player->getInventory()->setArmorItem($item::SLOT_NUMBER, $item);
+			$player->getInventory()->addItem($weared);
+			$player->getInventory()->sendArmorContents($player);
+			$player->getInventory()->sendContents($player);
+		}
 	}
 
 	/**
