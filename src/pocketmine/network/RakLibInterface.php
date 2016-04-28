@@ -237,7 +237,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	 */
 	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
 		if(isset($this->identifiers[$player])){
-			$additionalChar = $player->protocol <= ProtocolInfo::OLDEST_PROTOCOL ? '' : chr(0x8e);
+			$additionalChar = $player->protocol <= ProtocolInfo::OLDEST_PROTOCOL ? '' : chr(0xfe);
 			
 			$identifier = $this->identifiers[$player];
 			$pk = null;
@@ -280,8 +280,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	}
 
 	private function getPacket($buffer){
-		if(ord($buffer{0}) == 142){
-			$buffer = substr($buffer, 1);		
+		if(ord($buffer{0}) == 254){
+			$buffer = substr($buffer, 1);	
 		}
 		$pid = ord($buffer{0});
 		if(($data = $this->network->getPacket($pid)) === null){

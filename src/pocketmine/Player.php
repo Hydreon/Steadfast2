@@ -708,7 +708,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->sendSettings();
 			$this->sendPotionEffects($this);
-			$this->sendData($this);
+			$this->sendData($this);			
 			$this->inventory->sendContents($this);
 			$this->inventory->sendArmorContents($this);
 
@@ -1137,6 +1137,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$pk = new AdventureSettingsPacket();
 		$pk->flags = $flags;
+		$pk->userPermission = 2;
+        $pk->globalPermission = 2;
 		$this->dataPacket($pk);
 	}
 
@@ -1798,6 +1800,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 					return;
 				}
+				
+				$pk = new PlayStatusPacket();
+				$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
+				$this->dataPacket($pk);
 
 				$this->achievements = [];
 
@@ -1823,10 +1829,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}else{
 					$this->inventory->setHeldItemSlot($this->inventory->getHotbarSlotIndex(0));
 				}
-
-				$pk = new PlayStatusPacket();
-				$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
-				$this->dataPacket($pk);
+				
+				
 
 				$this->uuid = $packet->clientUUID;
 				$this->rawUUID = $this->uuid->toBinary();
@@ -1835,7 +1839,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($this->spawnPosition === null and isset($this->namedtag->SpawnLevel) and ($level = $this->server->getLevelByName($this->namedtag["SpawnLevel"])) instanceof Level){
 					$this->spawnPosition = new Position($this->namedtag["SpawnX"], $this->namedtag["SpawnY"], $this->namedtag["SpawnZ"], $level);
 				}
-
+				
 				$spawnPosition = $this->getSpawn();
 
 				$pk = new StartGamePacket();
