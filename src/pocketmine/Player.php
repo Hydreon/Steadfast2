@@ -1374,7 +1374,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$block = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()), floor($to->getZ())));
 				$blockUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 1, floor($to->getZ())));
 				$roundBlock = $from->level->getBlock(new Vector3(floor($to->getX()), round($to->getY()), floor($to->getZ())));
-				if($from->getY() - $to->getY() > 0.2){
+				if($from->getY() - $to->getY() > 0.1){
 					if(!$roundBlock->isTransparent()){
 						$needEvent = false;
 					}
