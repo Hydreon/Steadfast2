@@ -100,6 +100,7 @@ use pocketmine\utils\LevelException;
 use pocketmine\utils\MainLogger;
 use pocketmine\utils\ReversePriorityQueue;
 use pocketmine\utils\TextFormat;
+use pocketmine\ChunkMaker;
 
 
 
@@ -231,6 +232,8 @@ class Level implements ChunkManager, Metadatable{
 		 
 	protected static $isMemoryLeakHappend = false;
 	
+	public $chunkMaker = null;
+
         /**
 	 * Returns the chunk unique hash/key
 	 *
@@ -313,6 +316,7 @@ class Level implements ChunkManager, Metadatable{
 		$this->timings = new LevelTimings($this);
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
+		$this->chunkMaker = new ChunkMaker($this->server->getLoader());
 	}
 
 	public function initLevel(){
@@ -686,6 +690,9 @@ class Level implements ChunkManager, Metadatable{
 			}
 		}
 		
+		while(($data = unserialize($this->chunkMaker->readThreadToMainPacket()))){
+			$this->chunkRequestCallback($data['chunkX'], $data['chunkZ'], $data['result']);
+		}
 		$this->timings->doTick->stopTiming();
 	}
 
