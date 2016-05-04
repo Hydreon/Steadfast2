@@ -1488,13 +1488,13 @@ class Level implements ChunkManager, Metadatable{
 
 		if($player instanceof Player){
 			$ev = new PlayerInteractEvent($player, $item, $target, $face);
-			if(!$player->isOp() and ($distance = $this->server->getConfigInt("spawn-protection", 16)) > -1){
-				$t = new Vector2($target->x, $target->z);
-				$s = new Vector2($this->getSpawnLocation()->x, $this->getSpawnLocation()->z);
-				if($t->distance($s) <= $distance){ //set it to cancelled so plugins can bypass this
-					$ev->setCancelled();
-				}
-			}
+//			if(!$player->isOp() and ($distance = $this->server->getConfigInt("spawn-protection", 16)) > -1){
+//				$t = new Vector2($target->x, $target->z);
+//				$s = new Vector2($this->getSpawnLocation()->x, $this->getSpawnLocation()->z);
+//				if($t->distance($s) <= $distance){ //set it to cancelled so plugins can bypass this
+//					$ev->setCancelled();
+//				}
+//			}
 			$this->server->getPluginManager()->callEvent($ev);
 			if($player->isSpectator()){
 				$ev->setCancelled(true);

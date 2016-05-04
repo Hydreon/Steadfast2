@@ -49,7 +49,7 @@ class Item extends Entity{
 	public $height = 0.25;
 	protected $gravity = 0.04;
 //	protected $drag = 0.02;
-	protected $drag = 1;
+	protected $drag = 0.15;
 
 	public $canCollide = false;
 
@@ -121,7 +121,7 @@ class Item extends Entity{
 			$this->motionY *= 1 - $this->drag;
 			$this->motionZ *= $friction;
 
-//			$this->updateMovement();
+			$this->updateMovement();
 
 			if($this->onGround){
 				$this->motionY *= -0.5;
@@ -233,7 +233,7 @@ class Item extends Entity{
 	}
 
 	
-	protected function updateMovement(){		
+	protected function updateMovement(){	
 		$diffPositionX =  abs($this->x - $this->lastX);
 		$diffPositionY =  abs($this->y - $this->lastY);
 		$diffPositionZ =  abs($this->z - $this->lastZ);		

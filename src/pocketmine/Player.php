@@ -271,7 +271,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function getClientSecret(){
-		return $this->clientSecretId;
+		return $this->clientSecret;
 	}
 
 	public function isBanned(){
@@ -923,13 +923,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 
 		$this->sleeping = clone $pos;
-
+        $this->teleport(new Position($pos->x + 0.5, $pos->y - 0.5, $pos->z + 0.5, $this->level));
+            
 		$this->setDataProperty(self::DATA_PLAYER_BED_POSITION, self::DATA_TYPE_POS, [$pos->x, $pos->y, $pos->z]);
 		$this->setDataFlag(self::DATA_PLAYER_FLAGS, self::DATA_PLAYER_FLAG_SLEEP, true);
 
 		$this->setSpawn($pos);
 		$this->tasks[] = $this->server->getScheduler()->scheduleDelayedTask(new CallbackTask([$this, "checkSleep"]), 60);
-
 
 		return true;
 	}
@@ -1146,6 +1146,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$pk = new AdventureSettingsPacket();
 		$pk->flags = $flags;
+		$pk->userPermission = 2;
+        $pk->globalPermission = 2;
 		$this->dataPacket($pk);
 	}
 
@@ -1377,17 +1379,41 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->lastPitch = $to->pitch;
 
 			if(!$isFirst){
-				$ev = new PlayerMoveEvent($this, $from, $to);
-				$this->setMoving(true);
-
-				$this->server->getPluginManager()->callEvent($ev);
-
-				if(!($revert = $ev->isCancelled())){ //Yes, this is intended
-					if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
-						$this->teleport($ev->getTo());						
-					}else{
-						$this->level->addEntityMovement($this->x >> 4, $this->z >> 4, $this->getId(), $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+				$needEvent = true;
+				$block = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()), floor($to->getZ())));
+				$blockUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 1, floor($to->getZ())));
+				$roundBlock = $from->level->getBlock(new Vector3(floor($to->getX()), round($to->getY()), floor($to->getZ())));
+				if($from->getY() - $to->getY() > 0.1){
+					if(!$roundBlock->isTransparent()){
+						$needEvent = false;
 					}
+				}else{
+					if(!$block->isTransparent()){
+						$blockUpUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 2, floor($to->getZ())));
+						if(!$blockUp->isTransparent()){
+							$needEvent = false;
+						}else{
+							if(!$blockUpUp->isTransparent()){
+								$needEvent = false;
+							}
+						}
+					}
+				}
+				if($needEvent){
+					$ev = new PlayerMoveEvent($this, $from, $to);
+					$this->setMoving(true);
+
+					$this->server->getPluginManager()->callEvent($ev);
+
+					if(!($revert = $ev->isCancelled())){ //Yes, this is intended
+						if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
+							$this->teleport($ev->getTo());						
+						}else{
+							$this->level->addEntityMovement($this->x >> 4, $this->z >> 4, $this->getId(), $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+						}
+					}
+				}else{
+					$revert = true;
 				}
 			}
 
@@ -1681,28 +1707,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->setNameTag($this->username);
 				$this->iusername = strtolower($this->username);
 				
-				if($packet->protocol1 != ProtocolInfo::CURRENT_PROTOCOL){
-					if($packet->protocol1 < ProtocolInfo::CURRENT_PROTOCOL - 1) {//this is very very bad, remove it asap
+				//if(!in_array($packet->protocol1, ProtocolInfo::ACCEPTED_PROTOCOLS)){
+					// in-case something goes wrong
+					// $message = "change your client";
+					if($packet->protocol1 < ProtocolInfo::OLDEST_PROTOCOL) {
 						$message = "upgrade";
-						
+					} elseif($packet->protocol1 > ProtocolInfo::NEWEST_PROTOCOL) {
+						$message = "downgrade";
+					}
+					if(isset($message)) {
 						$pk = new PlayStatusPacket();
 						$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
 						$this->dataPacket($pk);
-						$this->close("", TextFormat::RED . "Please " . $message . " to MCPE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.", false);
-
+						$this->close("", TextFormat::RED . "Please " . $message . " to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.", false);
 						return;
 					}
-//					} else {
-//						$message = "downgrade";
-//					}
-//
-//					$pk = new PlayStatusPacket();
-//					$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
-//					$this->dataPacket($pk);
-//					$this->close("", TextFormat::RED . "Please " . $message . " to MCPE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.", false);
-//
-//					return;
-				}
+
+				//}
 				
 				$this->randomClientId = $packet->clientId;
 				$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
@@ -1903,8 +1924,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->server->sendFullPlayerListData($this);
 				$this->server->sendRecipeList($this);
 
-//				if($this->protocol != Info::CURRENT_PROTOCOL) {
-//				if($this->protocol < Info::CURRENT_PROTOCOL) {
+//				if($this->protocol != Info::OLDEST_PROTOCOL) {
+//				if($this->protocol < Info::OLDEST_PROTOCOL) {
 //					$this->sendMessage(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED .".");
 //					$this->sendTip(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN .$this->getServer()->getVersion() . TextFormat::RED .".");
 //				}
