@@ -2,17 +2,23 @@
 
 namespace pocketmine;
 
+use raklib\protocol\EncapsulatedPacket;
+use raklib\RakLib;
+use pocketmine\network\CachedEncapsulatedPacket;
+use pocketmine\network\protocol\DataPacket;
 use pocketmine\utils\Binary;
-use pocketmine\network\protocol\FullChunkDataPacket;
+use pocketmine\network\protocol\BatchPacket;
+use pocketmine\network\protocol\MoveEntityPacket;
+use pocketmine\network\protocol\SetEntityMotionPacket;
 
-class ChunkMaker extends Worker {
+class PacketMaker extends Worker {
 
 
 	protected $classLoader;
 	protected $shutdown;
 	
 	protected $externalQueue;
-	protected $internalQueue;		
+	protected $internalQueue;	
 
 	public function __construct(\ClassLoader $loader = null) {
 		$this->externalQueue = new \Threaded;
@@ -42,6 +48,7 @@ class ChunkMaker extends Worker {
 	    ini_set("display_startup_errors", 1);
 
 	    set_error_handler([$this, "errorHandler"], E_ALL);
+	    register_shutdown_function([$this, "shutdownHandler"]);
 		$this->tickProcessor();
 	}
 
@@ -59,7 +66,6 @@ class ChunkMaker extends Worker {
 	protected function tickProcessor() {
 		while (!$this->shutdown) {			
 			$start = microtime(true);
-			$count = count($this->internalQueue);
 			$this->tick();
 			$time = microtime(true) - $start;
 			if ($time < 0.025) {
@@ -71,54 +77,88 @@ class ChunkMaker extends Worker {
 	protected function tick() {				
 		while(count($this->internalQueue) > 0){
 			$data = unserialize($this->readMainToThreadPacket());
-			$this->doChunk($data);
+			$this->checkPacket($data);
 		}
 	}
 	
-	protected function doChunk($data) {
-		$offset = 8;
-		$blockIdArray = substr($data['chunk'], $offset, 32768);
-		$offset += 32768;
-		$blockDataArray = substr($data['chunk'], $offset, 16384);
-		$offset += 16384;
-		$skyLightArray = substr($data['chunk'], $offset, 16384);
-		$offset += 16384;
-		$blockLightArray = substr($data['chunk'], $offset, 16384);
-		$offset += 16384;
-		$heightMapArray = array_values(unpack("C*", substr($data['chunk'], $offset, 256)));
-		$offset += 256;
-		$biomeColorArray = array_values(unpack("N*", substr($data['chunk'], $offset, 1024)));
-
-		$ordered = $blockIdArray .
-				$blockDataArray .
-				$skyLightArray .
-				$blockLightArray .
-				pack("C*", ...$heightMapArray) .
-				pack("N*", ...$biomeColorArray) .
-				Binary::writeLInt(0) .
-				$data['tiles'];
-
-		$pk = new FullChunkDataPacket();
-		$pk->chunkX = $data['chunkX'];
-		$pk->chunkZ = $data['chunkZ'];
-		$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
-		$pk->data = $ordered;
-		$pk->encode();
-		if(!empty($pk->buffer)) {
-			$str = Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
-			$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
-			$result = array();
-			$result['chunkX'] = $data['chunkX'];
-			$result['chunkZ'] = $data['chunkZ'];
-			$result['result'] = $ordered;	
-			$this->externalQueue[] = serialize($result);
+	protected function checkPacket($data) {
+		$result = "";
+		if (isset($data->moveData)) {
+			foreach ($data->moveData as $identifier => $moveData) {
+				$pk = new MoveEntityPacket();
+				$pk->entities = $moveData['data'];
+				$res = $this->makeBuffer($identifier, $moveData['additionalChar'], $pk, false, false);
+				$this->externalQueue[] = $res;
+			}	
+			foreach ($data->motionData as $identifier => $motionData) {
+				$pk = new SetEntityMotionPacket();
+				$pk->entities = $motionData['data'];
+				$res = $this->makeBuffer($identifier, $motionData['additionalChar'], $pk, false, false);
+				$this->externalQueue[] = $res;
+			}
+		} elseif($data->isBatch) {
+			$str = "";
+			foreach($data->packets as $p){
+				if($p instanceof DataPacket){
+					if(!$p->isEncoded){					
+						$p->encode();
+					}
+					$str .= Binary::writeInt(strlen($p->buffer)) . $p->buffer;
+				}else{
+					$str .= Binary::writeInt(strlen($p)) . $p;
+				}
+			}
+			$buffer = zlib_encode($str, ZLIB_ENCODING_DEFLATE, $data->networkCompressionLevel);
+			$pk = new BatchPacket();
+			$pk->payload = $buffer;
+			$pk->encode();
+			$pk->isEncoded = true;
+			foreach($data->targets as $target){
+				$result = $this->makeBuffer($target[0], $target[1], $pk, false, false);
+			}
+		} else {
+			$result = $this->makeBuffer($data->identifier, $data->additionalChar, $data->packet, $data->needACK, $data->identifierACK);;
+		}
+		if(!empty($result)) {
+			$this->externalQueue[] = $result;
 		}
 	}
 
-	
+	protected function makeBuffer($identifier, $additionalChar, $fullPacket, $needACK, $identifierACK) {		
+		$pk = null;
+		if (!$fullPacket->isEncoded) {
+			$fullPacket->encode();
+		} elseif (!$needACK) {
+			if (isset($fullPacket->__encapsulatedPacket)) {
+				unset($fullPacket->__encapsulatedPacket);
+			}
+			$fullPacket->__encapsulatedPacket = new CachedEncapsulatedPacket();
+			$fullPacket->__encapsulatedPacket->identifierACK = null;
+			$fullPacket->__encapsulatedPacket->buffer = $additionalChar . $fullPacket->buffer;
+			$fullPacket->__encapsulatedPacket->reliability = 2;
+			$pk = $fullPacket->__encapsulatedPacket;
+		}
+
+		if ($pk === null) {
+			$pk = new EncapsulatedPacket();
+			$pk->buffer = $additionalChar . $fullPacket->buffer;
+			$pk->reliability = 2;
+
+			if ($needACK === true && $identifierACK !== false) {
+				$pk->identifierACK = $identifierACK;
+			}
+		}
+
+		$flags = ($needACK === true ? RakLib::FLAG_NEED_ACK : RakLib::PRIORITY_NORMAL) | (RakLib::PRIORITY_NORMAL);
+
+		$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($identifier)) . $identifier . chr($flags) . $pk->toBinary(true);
+
+		return $buffer;
+	}
 	
 	public function shutdown(){		
         $this->shutdown = true;
+		var_dump("Packet thread shutdown!");
     }
 	
 	
@@ -144,7 +184,7 @@ class ChunkMaker extends Worker {
 		if(($pos = strpos($errstr, "\n")) !== false){
 			$errstr = substr($errstr, 0, $pos);
 		}
-		
+
 		var_dump("An $errno error happened: \"$errstr\" in \"$errfile\" at line $errline");		
 
 		foreach(($trace = $this->getTrace($trace === null ? 3 : 0, $trace)) as $i => $line){
@@ -183,6 +223,12 @@ class ChunkMaker extends Worker {
 		}
 
 		return $messages;
+	}
+	
+	public function shutdownHandler(){
+		if($this->shutdown !== true){
+			var_dump("Packet thread crashed!");
+		}
 	}
 
 }

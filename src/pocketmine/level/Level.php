@@ -100,6 +100,7 @@ use pocketmine\utils\LevelException;
 use pocketmine\utils\MainLogger;
 use pocketmine\utils\ReversePriorityQueue;
 use pocketmine\utils\TextFormat;
+use pocketmine\network\protocol\Info;
 use pocketmine\ChunkMaker;
 
 
@@ -620,60 +621,12 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		$this->processChunkRequest();
-		$pkData = array();
-		$players = $this->server->getOnlinePlayers();
-		foreach($this->moveToSend as $index => $entry){
-			foreach($players as $p){
-				if(!isset($pkData[$p->getId()])){
-					$pkData[$p->getId()] = array();
-					$pkData[$p->getId()]['user'] = $p;
-					$pkData[$p->getId()]['data'] = array();
-				}
-				foreach ($entry as $entityId => $moveEntity){
-					if(!is_null($entity = $this->getEntity($entityId))){
-						if($entity->isSpawned($p)){
-							$pkData[$p->getId()]['data'][$entityId] = $moveEntity;
-						}
-					}
 
-				}
-			}			
-		}
-		foreach ($pkData as $data){
-			if(count($data['data']) > 0){
-				$pk = new MoveEntityPacket();
-				$pk->entities = $data['data'];
-				$data['user']->dataPacket($pk);
-			}
-		}
+		$data = new \stdClass();
+		$data->moveData = $this->moveToSend;
+		$data->motionData = $this->motionToSend;
+		$this->server->packetMaker->pushMainToThreadPacket(serialize($data));
 		$this->moveToSend = [];
-		
-		
-		$pkData = array();
-		foreach($this->motionToSend as $index => $entry){
-			foreach($players as $p){
-				if(!isset($pkData[$p->getId()])){
-					$pkData[$p->getId()] = array();
-					$pkData[$p->getId()]['user'] = $p;
-					$pkData[$p->getId()]['data'] = array();
-				}
-				foreach ($entry as $entityId => $moveEntity){
-					if(!is_null($entity = $this->getEntity($entityId))){
-						if($entity->isSpawned($p)){
-							$pkData[$p->getId()]['data'][$entityId] = $moveEntity;
-						}
-					}
-					
-				}
-			}			
-		}
-		foreach ($pkData as $data){
-			if(count($data['data']) > 0){
-				$pk = new SetEntityMotionPacket();
-				$pk->entities = $data['data'];
-				$data['user']->dataPacket($pk);
-			}
-		}
 		$this->motionToSend = [];
 
 		foreach ($this->playerHandItemQueue as $senderId => $playerList) {
@@ -2492,19 +2445,31 @@ class Level implements ChunkManager, Metadatable{
 		$this->server->getLevelMetadata()->removeMetadata($this, $metadataKey, $plugin);
 	}
 
-	public function addEntityMotion($chunkX, $chunkZ, $entityId, $x, $y, $z){
-		if(!isset($this->motionToSend[$index = Level::chunkHash($chunkX, $chunkZ)])){
-			$this->motionToSend[$index] = [];
+	public function addEntityMotion($viewers, $entityId, $x, $y, $z){	
+		$motion = [$entityId, $x, $y, $z];
+		foreach ($viewers as $p) {
+			if(!isset($this->motionToSend[$p->getIdentifier()])){
+				$this->motionToSend[$p->getIdentifier()] = array(
+					'data' => array(),
+					'additionalChar' => $p->protocol <= Info::OLDEST_PROTOCOL ? '' : chr(0x8e)
+				);
 			}
-		$this->motionToSend[$index][$entityId] = [$entityId, $x, $y, $z];
+			$this->motionToSend[$p->getIdentifier()]['data'][] = $motion;
 		}
+	}
 
-	public function addEntityMovement($chunkX, $chunkZ, $entityId, $x, $y, $z, $yaw, $pitch, $headYaw = null){
-		if(!isset($this->moveToSend[$index = Level::chunkHash($chunkX, $chunkZ)])){
-			$this->moveToSend[$index] = [];
+	public function addEntityMovement($viewers, $entityId, $x, $y, $z, $yaw, $pitch, $headYaw = null){
+		$move = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch];
+		foreach ($viewers as $p) {
+			if(!isset($this->moveToSend[$p->getIdentifier()])){
+				$this->moveToSend[$p->getIdentifier()] = array(
+					'data' => array(),
+					'additionalChar' => $p->protocol <= Info::OLDEST_PROTOCOL ? '' : chr(0x8e)
+				);
 			}
-		$this->moveToSend[$index][$entityId] = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch];
+			$this->moveToSend[$p->getIdentifier()]['data'][] = $move;
 		}
+	}
 		
 	public function addPlayerHandItem($sender, $recipient){
 		if(!isset($this->playerHandItemQueue[$sender->getId()])){

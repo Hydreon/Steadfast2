@@ -168,6 +168,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->players[$identifier] = $player;
 		$this->identifiersACK[$identifier] = 0;
 		$this->identifiers->attach($player, $identifier);
+		$player->setIdentifier($identifier);
 		$this->server->addPlayer($identifier, $player);
 	}
 
@@ -272,13 +273,11 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			}
 
 			$this->interface->sendEncapsulated($identifier, $pk, ($needACK === true ? RakLib::FLAG_NEED_ACK : 0) | ($immediate === true ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL));
-
-			return $pk->identifierACK;
 		}
 
 		return null;
 	}
-
+	
 	private function getPacket($buffer){
 		if(ord($buffer{0}) == 142){
 			$buffer = substr($buffer, 1);		
@@ -290,5 +289,9 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$data->setBuffer($buffer, 1);
 
 		return $data;
+	}
+	
+	public function putReadyPacket($buffer) {
+		$this->interface->sendReadyEncapsulated($buffer);
 	}
 }

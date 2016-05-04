@@ -112,6 +112,7 @@ use pocketmine\utils\TextWrapper;
 use pocketmine\utils\Utils;
 use pocketmine\utils\UUID;
 use pocketmine\utils\VersionString;
+use pocketmine\network\protocol\Info;
 
 /**
  * The class that manages everything
@@ -240,6 +241,9 @@ class Server{
 	/** @var Level */
 	private $levelDefault = null;
 		
+
+	public $packetMaker = null;
+
 	/**
 	 * @return string
 	 */
@@ -1672,14 +1676,7 @@ class Server{
 	 * @param Player[]   $players
 	 * @param DataPacket $packet
 	 */
-	public static function broadcastPacket(array $players, DataPacket $packet){
-		$packet->encode();
-		$packet->isEncoded = true;
-		if(Network::$BATCH_THRESHOLD >= 0 and strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
-			Server::getInstance()->batchPackets($players, [$packet->buffer], false);
-			return;
-		}
-
+	public static function broadcastPacket(array $players, DataPacket $packet) {
 		foreach($players as $player){
 			$player->dataPacket($packet);
 		}
@@ -1696,27 +1693,29 @@ class Server{
 	 * @param bool                 $forceSync
 	 */
 	public function batchPackets(array $players, array $packets, $forceSync = true){
-		$str = "";
-
+		$targets = [];
+		foreach($players as $p){
+			$targets[] = array($p->getIdentifier(), $p->protocol <= Info::OLDEST_PROTOCOL ? '' : chr(0x8e));
+		}
+		$newPackets = array();
 		foreach($packets as $p){
 			if($p instanceof DataPacket){
 				if(!$p->isEncoded){					
 					$p->encode();
 				}
-				$str .= Binary::writeInt(strlen($p->buffer)) . $p->buffer;
+				$newPackets[] = $p->buffer;
 			}else{
-				$str .= Binary::writeInt(strlen($p)) . $p;
+				$newPackets[] = $p;
 			}
 		}
-
-		$targets = [];
-		foreach($players as $p){
-			$targets[] = $this->identifiers[spl_object_hash($p)];
+		$data = new \stdClass();
+		$data->packets = $newPackets;
+		$data->targets = $targets;
+		$data->networkCompressionLevel = $this->networkCompressionLevel;
+		$data->isBatch = true;
+		$this->packetMaker->pushMainToThreadPacket(serialize($data));
 	}
 	
-		$this->broadcastPacketsCallback(zlib_encode($str, ZLIB_ENCODING_DEFLATE, $this->networkCompressionLevel), $targets);
-	}
-
 	public function broadcastPacketsCallback($data, array $identifiers){
 		$pk = new BatchPacket();
 		$pk->payload = $data;
@@ -1952,6 +1951,15 @@ class Server{
 		Effect::init();
 
 		$this->logger->info("Done (" . round(microtime(true) - \pocketmine\START_TIME, 3) . 's)! For help, type "help" or "?"');
+
+		$this->packetMaker = new PacketMaker($this->getLoader());
+		
+		$this->tickAverage = array();
+		$this->useAverage = array();
+		for($i = 0; $i < 1200; $i++) {
+			$this->tickAverage[] = 20;
+			$this->useAverage[] = 0;
+		}
 
 		$this->tickProcessor();
 		$this->forceShutdown();
@@ -2293,6 +2301,11 @@ class Server{
 		
 		$this->checkConsole();
 		
+
+		while(strlen($str = $this->packetMaker->readThreadToMainPacket()) > 0){
+			$this->mainInterface->putReadyPacket($str);
+		}
+	
 		//Timings::$connectionTimer->startTiming();
 		$this->network->processInterfaces();
 		//Timings::$connectionTimer->stopTiming();

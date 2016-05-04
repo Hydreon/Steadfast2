@@ -242,8 +242,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	private $checkMovement;
 	protected $allowFlight = false;
 
-	private $needACK = [];
-
 	/**
 	 * @var \pocketmine\scheduler\TaskHandler[]
 	 */
@@ -255,6 +253,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/** @var string*/
 	protected $lastMessageReceivedFrom = "";
 	
+	protected $identifier;
+
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -855,14 +855,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 		
-		$identifier = $this->interface->putPacket($this, $packet, $needACK, false);
-
-		if($needACK and $identifier !== null){
-			$this->needACK[$identifier] = false;
-
-			return $identifier;
-		}
-
+		$this->interface->putPacket($this, $packet, $needACK, false);	
 		return true;
 	}
 
@@ -881,13 +874,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 
-		$identifier = $this->interface->putPacket($this, $packet, $needACK, true);
-
-		if($needACK and $identifier !== null){
-			$this->needACK[$identifier] = false;
-
-			return $identifier;
-		}
+		$this->interface->putPacket($this, $packet, $needACK, true);
 
 		return true;
 	}
@@ -1396,7 +1383,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
 							$this->teleport($ev->getTo());						
 						}else{
-							$this->level->addEntityMovement($this->x >> 4, $this->z >> 4, $this->getId(), $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+							$this->level->addEntityMovement($this->getViewers(), $this->getId(), $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
 						}
 					}
 				}else{
@@ -1454,7 +1441,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setMotion(Vector3 $mot){
 		if(parent::setMotion($mot)){
 			if($this->chunk !== null){
-				$this->level->addEntityMotion($this->chunk->getX(), $this->chunk->getZ(), $this->getId(), $this->motionX, $this->motionY, $this->motionZ);
+				$this->level->addEntityMotion($this->getViewers(), $this->getId(), $this->motionX, $this->motionY, $this->motionZ);
 				$pk = new SetEntityMotionPacket();
 				$pk->entities[] = [0, $mot->x, $mot->y, $mot->z];
 				$this->dataPacket($pk);
@@ -3579,6 +3566,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	public function getLastMessageFrom() {
 		return $this->lastMessageReceivedFrom;
+	}
+	
+	public function setIdentifier($identifier){
+		$this->identifier = $identifier;
+	}
+	
+	public function getIdentifier(){
+		return $this->identifier;
 	}
 	
 }
