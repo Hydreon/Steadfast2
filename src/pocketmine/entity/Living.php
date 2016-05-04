@@ -159,7 +159,7 @@ abstract class Living extends Entity implements Damageable{
 	}
 
 	public function entityBaseTick($tickDiff = 1){
-		Timings::$timerEntityBaseTick->startTiming();
+		//Timings::$timerEntityBaseTick->startTiming();
 
 		if($this->dead === true){
 			++$this->deadTicks;
@@ -170,7 +170,7 @@ abstract class Living extends Entity implements Damageable{
 				}
 			}
 
-			Timings::$timerEntityBaseTick->stopTiming();
+			//Timings::$timerEntityBaseTick->stopTiming();
 			return $this->deadTicks < 10;
 		}
 
@@ -216,7 +216,7 @@ abstract class Living extends Entity implements Damageable{
 			$this->attackTime -= $tickDiff;
 		}
 
-		Timings::$timerEntityBaseTick->stopTiming();
+		//Timings::$timerEntityBaseTick->stopTiming();
 
 		return $hasUpdate;
 	}
