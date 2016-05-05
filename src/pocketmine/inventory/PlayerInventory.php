@@ -85,7 +85,7 @@ class PlayerInventory extends BaseInventory{
 		if($item instanceof Item){
 			return $item;
 		}else{
-			return Item::get(Item::AIR, 0, 0);
+			return clone $this->air;
 		}
 	}
 
@@ -243,7 +243,7 @@ class PlayerInventory extends BaseInventory{
 
 	public function clear($index){
 		if(isset($this->slots[$index])){
-			$item = Item::get(Item::AIR, null, 0);
+			$item = clone $this->air;
 			$old = $this->slots[$index];
 			if($index >= $this->getSize() and $index < $this->size){ //Armor change
 				Server::getInstance()->getPluginManager()->callEvent($ev = new EntityArmorChangeEvent($this->getHolder(), $old, $item, $index));
@@ -334,7 +334,7 @@ class PlayerInventory extends BaseInventory{
 	public function setArmorContents(array $items){
 		for($i = 0; $i < 4; ++$i){
 			if(!isset($items[$i]) or !($items[$i] instanceof Item)){
-				$items[$i] = Item::get(Item::AIR, null, 0);
+				$items[$i] = clone $this->air;
 			}
 
 			if($items[$i]->getId() === Item::AIR){
@@ -376,7 +376,7 @@ class PlayerInventory extends BaseInventory{
 			}
 		}
 	}
-
+	
 	/**
 	 * @param Player|Player[] $target
 	 */

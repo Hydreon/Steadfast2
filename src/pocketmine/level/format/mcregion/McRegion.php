@@ -114,7 +114,7 @@ class McRegion extends BaseLevelProvider{
 		$z = $chunkZ >> 5;
 	}
 
-	public function requestChunkTask($x, $z){
+	public function requestChunkTask($x, $z){	
 		$chunk = $this->getChunk($x, $z, false);
 		if(!($chunk instanceof Chunk)){
 			throw new ChunkException("Invalid Chunk sent");
@@ -128,34 +128,14 @@ class McRegion extends BaseLevelProvider{
 				$tiles .= $nbt->write();
 			}
 		}
-
-		$extraData = new BinaryStream();
-		$extraData->putLInt(count($chunk->getBlockExtraDataArray()));
-		foreach($chunk->getBlockExtraDataArray() as $key => $value){
-			$extraData->putLInt($key);
-			$extraData->putLShort($value);
-		}
-
-		$ordered = $chunk->getBlockIdArray() .
-			$chunk->getBlockDataArray() .
-			$chunk->getBlockSkyLightArray() .
-			$chunk->getBlockLightArray() .
-			pack("C*", ...$chunk->getHeightMapArray()) .
-			pack("N*", ...$chunk->getBiomeColorArray()) .
-			$extraData->getBuffer() .
-			$tiles;
-
-		$pk = new FullChunkDataPacket();
-		$pk->chunkX = $x;
-		$pk->chunkZ = $z;
-		$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
-		$pk->data = $ordered;
-		$pk->encode();
-		$str = "";
-		$str .= Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
-
-		$this->getLevel()->chunkRequestCallback($x, $z, zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7));
-
+		
+		$data = array();
+		$data['chunkX'] = $x;
+		$data['chunkZ'] = $z;
+		$data['tiles'] = $tiles;
+		$data['chunk'] = $chunk->toFastBinary();
+		
+		$this->getLevel()->chunkMaker->pushMainToThreadPacket(serialize($data));
 		return null;
 	}
 

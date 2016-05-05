@@ -123,8 +123,55 @@ abstract class Timings{
 		self::$schedulerSyncTimer = new TimingsHandler("** Scheduler - Sync Tasks", PluginManager::$pluginParentTimer);
 
 		self::$playerCommandTimer = new TimingsHandler("** playerCommand");
+		
+		
+		self::$timerBatchPacket = new TimingsHandler("timerBatchPacket");
+		self::$timerLoginPacket = new TimingsHandler("timerLoginPacket");		
+		self::$timerMovePacket = new TimingsHandler("timerMovePacket");
+		self::$timerMobEqipmentPacket = new TimingsHandler("timerMobEqipmentPacket");
+		self::$timerUseItemPacket = new TimingsHandler("timerUseItemPacket");
+		self::$timerActionPacket = new TimingsHandler("timerActionPacket");
+		self::$timerRemoveBlockPacket = new TimingsHandler("timerRemoveBlockPacket");
+		self::$timerInteractPacket = new TimingsHandler("timerInteractPacket");
+		self::$timerAnimatePacket = new TimingsHandler("timerAnimatePacket");
+		self::$timerEntityEventPacket = new TimingsHandler("timerEntityEventPacket");
+		self::$timerDropItemPacket = new TimingsHandler("timerDropItemPacket");
+		self::$timerTextPacket = new TimingsHandler("timerTextPacket");
+		self::$timerContainerClosePacket = new TimingsHandler("timerContainerClosePacket");
+		self::$timerCraftingEventPacket = new TimingsHandler("timerCraftingEventPacket");
+		self::$timerConteinerSetSlotPacket = new TimingsHandler("timerConteinerSetSlotPacket");
+		self::$timerTileEntityPacket = new TimingsHandler("timerTileEntityPacket");
+		self::$timerChunkRudiusPacket = new TimingsHandler("timerChunkRudiusPacket");
+		
+		self::$timerMovePrepare = new TimingsHandler("timerMovePrepare");
+		self::$timerMoveSend = new TimingsHandler("timerMoveSend");
+		self::$timerMoutionPrepare = new TimingsHandler("timerMoutionPrepare");
+		self::$timerMoutionSend = new TimingsHandler("timerMoutionSend");
 
-	}
+	}	
+	
+	public static $timerBatchPacket;
+	public static $timerLoginPacket;	
+	public static $timerMovePacket;
+	public static $timerMobEqipmentPacket;
+	public static $timerUseItemPacket;
+	public static $timerActionPacket;
+	public static $timerRemoveBlockPacket;
+	public static $timerInteractPacket;
+	public static $timerAnimatePacket;
+	public static $timerEntityEventPacket;
+	public static $timerDropItemPacket;
+	public static $timerTextPacket;
+	public static $timerContainerClosePacket;
+	public static $timerCraftingEventPacket;
+	public static $timerConteinerSetSlotPacket;
+	public static $timerTileEntityPacket;
+	public static $timerChunkRudiusPacket;
+	
+	public static $timerMovePrepare;
+	public static $timerMoveSend;
+	public static $timerMoutionPrepare;
+	public static $timerMoutionSend;
 
 	/**
 	 * @param TaskHandler $task
