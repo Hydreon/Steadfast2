@@ -239,6 +239,9 @@ abstract class Entity extends Location implements Metadatable{
 			$this->namedtag["Rotation"][1],
 			true
 		);
+		$this->motionX = $this->namedtag["Motion"][0];
+		$this->motionY = $this->namedtag["Motion"][1];
+		$this->motionZ = $this->namedtag["Motion"][2];
 //		$this->setMotion(new Vector3($this->namedtag["Motion"][0], $this->namedtag["Motion"][1], $this->namedtag["Motion"][2]));
 
 		if(!isset($this->namedtag->FallDistance)){
