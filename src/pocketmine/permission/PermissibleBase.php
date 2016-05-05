@@ -164,7 +164,7 @@ class PermissibleBase implements Permissible{
 	}
 
 	public function recalculatePermissions(){
-		Timings::$permissibleCalculationTimer->startTiming();
+		//Timings::$permissibleCalculationTimer->startTiming();
 
 		$this->clearPermissions();
 		$defaults = Server::getInstance()->getPluginManager()->getDefaultPermissions($this->isOp());
@@ -181,7 +181,7 @@ class PermissibleBase implements Permissible{
 			$this->calculateChildPermissions($attachment->getPermissions(), false, $attachment);
 		}
 
-		Timings::$permissibleCalculationTimer->stopTiming();
+		//Timings::$permissibleCalculationTimer->stopTiming();
 	}
 
 	public function clearPermissions(){

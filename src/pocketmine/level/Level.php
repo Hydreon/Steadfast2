@@ -100,6 +100,8 @@ use pocketmine\utils\LevelException;
 use pocketmine\utils\MainLogger;
 use pocketmine\utils\ReversePriorityQueue;
 use pocketmine\utils\TextFormat;
+use pocketmine\network\protocol\Info;
+use pocketmine\ChunkMaker;
 
 
 
@@ -230,6 +232,8 @@ class Level implements ChunkManager, Metadatable{
          private $isFrozen = false;
 		 
 	protected static $isMemoryLeakHappend = false;
+	
+	public $chunkMaker = null;
 
         /**
 	 * Returns the chunk unique hash/key
@@ -313,6 +317,7 @@ class Level implements ChunkManager, Metadatable{
 		$this->timings = new LevelTimings($this);
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
+		$this->chunkMaker = new ChunkMaker($this->server->getLoader());
 	}
 
 	public function initLevel(){
@@ -548,25 +553,25 @@ class Level implements ChunkManager, Metadatable{
 
 		$this->timings->entityTick->startTiming();
 		//Update entities that need update
-		Timings::$tickEntityTimer->startTiming();
+		//Timings::$tickEntityTimer->startTiming();
 		foreach($this->updateEntities as $id => $entity){
 			if($entity->closed or !$entity->onUpdate($currentTick)){
 				unset($this->updateEntities[$id]);
 			}
 		}
-		Timings::$tickEntityTimer->stopTiming();
+		//Timings::$tickEntityTimer->stopTiming();
 		$this->timings->entityTick->stopTiming();
 
 		$this->timings->tileEntityTick->startTiming();
 		//Update tiles that need update
 		if(count($this->updateTiles) > 0){
-			//Timings::$tickTileEntityTimer->startTiming();
+			////Timings::$tickTileEntityTimer->startTiming();
 			foreach($this->updateTiles as $id => $tile){
 				if($tile->onUpdate() !== true){
 					unset($this->updateTiles[$id]);
 				}
 			}
-			//Timings::$tickTileEntityTimer->stopTiming();
+			////Timings::$tickTileEntityTimer->stopTiming();
 		}
 		$this->timings->tileEntityTick->stopTiming();
 
@@ -616,62 +621,14 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		$this->processChunkRequest();
-		$pkData = array();
-		$players = $this->server->getOnlinePlayers();
-		foreach($this->moveToSend as $index => $entry){
-			foreach($players as $p){
-				if(!isset($pkData[$p->getId()])){
-					$pkData[$p->getId()] = array();
-					$pkData[$p->getId()]['user'] = $p;
-					$pkData[$p->getId()]['data'] = array();
-				}
-				foreach ($entry as $entityId => $moveEntity){
-					if(!is_null($entity = $this->getEntity($entityId))){
-						if($entity->isSpawned($p)){
-							$pkData[$p->getId()]['data'][$entityId] = $moveEntity;
-						}
-					}
-					
-				}
-			}			
-		}
-		foreach ($pkData as $data){
-			if(count($data['data']) > 0){
-				$pk = new MoveEntityPacket();
-				$pk->entities = $data['data'];
-				$data['user']->dataPacket($pk);
-			}
-		}
+
+		$data = new \stdClass();
+		$data->moveData = $this->moveToSend;
+		$data->motionData = $this->motionToSend;
+		$this->server->packetMaker->pushMainToThreadPacket(serialize($data));
 		$this->moveToSend = [];
-		
-		
-		$pkData = array();
-		foreach($this->motionToSend as $index => $entry){
-			foreach($players as $p){
-				if(!isset($pkData[$p->getId()])){
-					$pkData[$p->getId()] = array();
-					$pkData[$p->getId()]['user'] = $p;
-					$pkData[$p->getId()]['data'] = array();
-				}
-				foreach ($entry as $entityId => $moveEntity){
-					if(!is_null($entity = $this->getEntity($entityId))){
-						if($entity->isSpawned($p)){
-							$pkData[$p->getId()]['data'][$entityId] = $moveEntity;
-						}
-					}
-					
-				}
-			}			
-		}
-		foreach ($pkData as $data){
-			if(count($data['data']) > 0){
-				$pk = new SetEntityMotionPacket();
-				$pk->entities = $data['data'];
-				$data['user']->dataPacket($pk);
-			}
-		}
 		$this->motionToSend = [];
-		
+
 		foreach ($this->playerHandItemQueue as $senderId => $playerList) {
 			foreach ($playerList as $recipientId => $data) {
 				if ($data['time'] + 1 < microtime(true)) {
@@ -685,7 +642,10 @@ class Level implements ChunkManager, Metadatable{
 				}
 			}
 		}
-
+		
+		while(($data = unserialize($this->chunkMaker->readThreadToMainPacket()))){
+			$this->chunkRequestCallback($data['chunkX'], $data['chunkZ'], $data['result']);
+		}
 		$this->timings->doTick->stopTiming();
 	}
 
@@ -2417,29 +2377,31 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public function doChunkGarbageCollection(){
-		$this->timings->doChunkGC->startTiming();
+		if(!$this->isFrozen) {
+			$this->timings->doChunkGC->startTiming();
 
-		$X = null;
-		$Z = null;
+			$X = null;
+			$Z = null;
 
-		foreach($this->chunks as $index => $chunk){
-			if(!isset($this->unloadQueue[$index]) and (!isset($this->usedChunks[$index]) or count($this->usedChunks[$index]) === 0)){
-				if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32;  $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X,  $Z) = explode(":", $index);  $X = (int)  $X;  $Z = (int)  $Z;};
-				if(!$this->isSpawnChunk($X, $Z)){
-					$this->unloadChunkRequest($X, $Z, true);
+			foreach($this->chunks as $index => $chunk){
+				if(!isset($this->unloadQueue[$index]) and (!isset($this->usedChunks[$index]) or count($this->usedChunks[$index]) === 0)){
+					if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32;  $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X,  $Z) = explode(":", $index);  $X = (int)  $X;  $Z = (int)  $Z;};
+					if(!$this->isSpawnChunk($X, $Z)){
+						$this->unloadChunkRequest($X, $Z, true);
+					}
 				}
 			}
-		}
 
-		foreach($this->provider->getLoadedChunks() as $chunk){
-			if(!isset($this->chunks[PHP_INT_SIZE === 8 ? ((($chunk->getX()) & 0xFFFFFFFF) << 32) | (( $chunk->getZ()) & 0xFFFFFFFF) : ($chunk->getX()) . ":" . ( $chunk->getZ())])){
-                            $this->provider->unloadChunk($chunk->getX(), $chunk->getZ(), false);
+			foreach($this->provider->getLoadedChunks() as $chunk){
+				if(!isset($this->chunks[PHP_INT_SIZE === 8 ? ((($chunk->getX()) & 0xFFFFFFFF) << 32) | (( $chunk->getZ()) & 0xFFFFFFFF) : ($chunk->getX()) . ":" . ( $chunk->getZ())])){
+								$this->provider->unloadChunk($chunk->getX(), $chunk->getZ(), false);
+				}
 			}
+
+			$this->provider->doGarbageCollection();
+
+			$this->timings->doChunkGC->stopTiming();
 		}
-
-		$this->provider->doGarbageCollection();
-
-		$this->timings->doChunkGC->stopTiming();
 	}
 
 	protected function unloadChunks(){
@@ -2483,18 +2445,30 @@ class Level implements ChunkManager, Metadatable{
 		$this->server->getLevelMetadata()->removeMetadata($this, $metadataKey, $plugin);
 	}
 
-	public function addEntityMotion($chunkX, $chunkZ, $entityId, $x, $y, $z){
-		if(!isset($this->motionToSend[$index = Level::chunkHash($chunkX, $chunkZ)])){
-			$this->motionToSend[$index] = [];
+	public function addEntityMotion($viewers, $entityId, $x, $y, $z){	
+		$motion = [$entityId, $x, $y, $z];
+		foreach ($viewers as $p) {
+			if(!isset($this->motionToSend[$p->getIdentifier()])){
+				$this->motionToSend[$p->getIdentifier()] = array(
+					'data' => array(),
+					'additionalChar' => $p->protocol <= Info::OLDEST_PROTOCOL ? '' : chr(0x8e)
+				);
+			}
+			$this->motionToSend[$p->getIdentifier()]['data'][] = $motion;
 		}
-		$this->motionToSend[$index][$entityId] = [$entityId, $x, $y, $z];
 	}
 
-	public function addEntityMovement($chunkX, $chunkZ, $entityId, $x, $y, $z, $yaw, $pitch, $headYaw = null){
-		if(!isset($this->moveToSend[$index = Level::chunkHash($chunkX, $chunkZ)])){
-			$this->moveToSend[$index] = [];
+	public function addEntityMovement($viewers, $entityId, $x, $y, $z, $yaw, $pitch, $headYaw = null){
+		$move = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch];
+		foreach ($viewers as $p) {
+			if(!isset($this->moveToSend[$p->getIdentifier()])){
+				$this->moveToSend[$p->getIdentifier()] = array(
+					'data' => array(),
+					'additionalChar' => $p->protocol <= Info::OLDEST_PROTOCOL ? '' : chr(0x8e)
+				);
+			}
+			$this->moveToSend[$p->getIdentifier()]['data'][] = $move;
 		}
-		$this->moveToSend[$index][$entityId] = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch];
 	}
 		
 	public function addPlayerHandItem($sender, $recipient){
@@ -2515,5 +2489,5 @@ class Level implements ChunkManager, Metadatable{
 		}
 		return true;
 	}
-	
+		
 }

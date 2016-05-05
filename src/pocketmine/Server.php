@@ -112,6 +112,7 @@ use pocketmine\utils\TextWrapper;
 use pocketmine\utils\Utils;
 use pocketmine\utils\UUID;
 use pocketmine\utils\VersionString;
+use pocketmine\network\protocol\Info;
 
 /**
  * The class that manages everything
@@ -239,6 +240,9 @@ class Server{
 
 	/** @var Level */
 	private $levelDefault = null;
+		
+
+	public $packetMaker = null;
 
 	/**
 	 * @return string
@@ -1567,7 +1571,7 @@ class Server{
 		if($this->getAdvancedProperty("main.player-shuffle", 0) > 0){
 			$this->scheduler->scheduleDelayedRepeatingTask(new CallbackTask([$this, "shufflePlayers"]), $this->getAdvancedProperty("main.player-shuffle", 0), $this->getAdvancedProperty("main.player-shuffle", 0));
 		}
-
+		
 		$this->start();
 	}
 
@@ -1672,14 +1676,7 @@ class Server{
 	 * @param Player[]   $players
 	 * @param DataPacket $packet
 	 */
-	public static function broadcastPacket(array $players, DataPacket $packet){
-		$packet->encode();
-		$packet->isEncoded = true;
-		if(Network::$BATCH_THRESHOLD >= 0 and strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
-			Server::getInstance()->batchPackets($players, [$packet->buffer], false);
-			return;
-		}
-
+	public static function broadcastPacket(array $players, DataPacket $packet) {
 		foreach($players as $player){
 			$player->dataPacket($packet);
 		}
@@ -1696,27 +1693,29 @@ class Server{
 	 * @param bool                 $forceSync
 	 */
 	public function batchPackets(array $players, array $packets, $forceSync = true){
-		$str = "";
-
-		foreach($packets as $p){
-			if($p instanceof DataPacket){
-				if(!$p->isEncoded){
-					$p->encode();
-				}
-				$str .= Binary::writeInt(strlen($p->buffer)) . $p->buffer;
-			}else{
-				$str .= Binary::writeInt(strlen($p)) . $p;
-			}
-		}
-
 		$targets = [];
 		foreach($players as $p){
-			$targets[] = $this->identifiers[spl_object_hash($p)];
+			$targets[] = array($p->getIdentifier(), $p->protocol <= Info::OLDEST_PROTOCOL ? '' : chr(0x8e));
 		}
-
-		$this->broadcastPacketsCallback(zlib_encode($str, ZLIB_ENCODING_DEFLATE, $this->networkCompressionLevel), $targets);
+		$newPackets = array();
+		foreach($packets as $p){
+			if($p instanceof DataPacket){
+				if(!$p->isEncoded){					
+					$p->encode();
+				}
+				$newPackets[] = $p->buffer;
+			}else{
+				$newPackets[] = $p;
+			}
+		}
+		$data = new \stdClass();
+		$data->packets = $newPackets;
+		$data->targets = $targets;
+		$data->networkCompressionLevel = $this->networkCompressionLevel;
+		$data->isBatch = true;
+		$this->packetMaker->pushMainToThreadPacket(serialize($data));
 	}
-
+	
 	public function broadcastPacketsCallback($data, array $identifiers){
 		$pk = new BatchPacket();
 		$pk->payload = $data;
@@ -1768,14 +1767,14 @@ class Server{
 	}
 
 	public function checkConsole(){
-		Timings::$serverCommandTimer->startTiming();
+		//Timings::$serverCommandTimer->startTiming();
 		if(($line = $this->console->getLine()) !== null){
 			$this->pluginManager->callEvent($ev = new ServerCommandEvent($this->consoleSender, $line));
 			if(!$ev->isCancelled()){
 				$this->dispatchCommand($ev->getSender(), $ev->getCommand());
 			}
 		}
-		Timings::$serverCommandTimer->stopTiming();
+		//Timings::$serverCommandTimer->stopTiming();
 	}
 
 	/**
@@ -1924,10 +1923,10 @@ class Server{
 			$this->network->blockAddress($entry->getName(), -1);
 		}
 
-		if($this->getProperty("settings.send-usage", true) !== false){
-			$this->scheduler->scheduleDelayedRepeatingTask(new CallbackTask([$this, "sendUsage"]), 6000, 6000);
-			$this->sendUsage();
-		}
+//		if($this->getProperty("settings.send-usage", true) !== false){
+//			$this->scheduler->scheduleDelayedRepeatingTask(new CallbackTask([$this, "sendUsage"]), 6000, 6000);
+//			$this->sendUsage();
+//		}
 
 
 		if($this->getProperty("settings.upnp-forwarding", false) == true){
@@ -1952,6 +1951,15 @@ class Server{
 		Effect::init();
 
 		$this->logger->info("Done (" . round(microtime(true) - \pocketmine\START_TIME, 3) . 's)! For help, type "help" or "?"');
+
+		$this->packetMaker = new PacketMaker($this->getLoader());
+		
+		$this->tickAverage = array();
+		$this->useAverage = array();
+		for($i = 0; $i < 1200; $i++) {
+			$this->tickAverage[] = 20;
+			$this->useAverage[] = 0;
+		}
 
 		$this->tickProcessor();
 		$this->forceShutdown();
@@ -2112,14 +2120,18 @@ class Server{
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_ADD;
 		$pk->entries[] = [$uuid, $entityId, $name, $skinName, $skinData];
-		Server::broadcastPacket($players === null ? $this->playerList : $players, $pk);
+		foreach ($players === null ? $this->playerList : $players as $p){		
+			$p->dataPacket($pk);
+		}
 	}
 
 	public function removePlayerListData(UUID $uuid, array $players = null){
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_REMOVE;
 		$pk->entries[] = [$uuid];
-		Server::broadcastPacket($players === null ? $this->playerList : $players, $pk);
+		foreach ($players === null ? $this->playerList : $players as $p){		
+			$p->dataPacket($pk);
+		}
 	}
 
 	public function sendFullPlayerListData(Player $p){
@@ -2132,23 +2144,30 @@ class Server{
 		$p->dataPacket($pk);
 	}
 
+	private $craftList;
+	
 	public function sendRecipeList(Player $p){
-		$pk = new CraftingDataPacket();
-		$pk->cleanRecipes = true;
+		if(!isset($this->craftList)) {
+			$pk = new CraftingDataPacket();
+			$pk->cleanRecipes = true;
 
-		foreach($this->getCraftingManager()->getRecipes() as $recipe){
-			if($recipe instanceof ShapedRecipe){
-				$pk->addShapedRecipe($recipe);
-			}elseif($recipe instanceof ShapelessRecipe){
-				$pk->addShapelessRecipe($recipe);
+			foreach($this->getCraftingManager()->getRecipes() as $recipe){
+				if($recipe instanceof ShapedRecipe){
+					$pk->addShapedRecipe($recipe);
+				}elseif($recipe instanceof ShapelessRecipe){
+					$pk->addShapelessRecipe($recipe);
+				}
 			}
-		}
 
-		foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
-			$pk->addFurnaceRecipe($recipe);
+			foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
+				$pk->addFurnaceRecipe($recipe);
+			}
+			$pk->encode();
+			$pk->isEncoded = true;
+			$this->craftList = $pk;
 		}
-
-		$p->dataPacket($pk);
+		
+		$this->batchPackets([$p], [$this->craftList]);
 	}
 
 	public function addPlayer($identifier, Player $player){
@@ -2173,7 +2192,7 @@ class Server{
 
 	public function doAutoSave(){
 		if($this->getAutoSave()){
-			Timings::$worldSaveTimer->startTiming();
+			//Timings::$worldSaveTimer->startTiming();
 			foreach($this->getOnlinePlayers() as $index => $player){
 				if($player->isOnline()){
 					$player->save();
@@ -2185,7 +2204,7 @@ class Server{
 			foreach($this->getLevels() as $level){
 				$level->save(false);
 			}
-			Timings::$worldSaveTimer->stopTiming();
+			//Timings::$worldSaveTimer->stopTiming();
 		}
 	}
 
@@ -2195,39 +2214,39 @@ class Server{
 		}
 	}
 
-	public function sendUsage(){
-		if($this->lastSendUsage instanceof SendUsageTask){
-			if(!$this->lastSendUsage->isGarbage()){ //do not call multiple times
-				return;
-			}
-		}
-
-		$plist = "";
-		foreach($this->getPluginManager()->getPlugins() as $p){
-			$d = $p->getDescription();
-			$plist .= str_replace([";", ":"], "", $d->getName()) . ":" . str_replace([";", ":"], "", $d->getVersion()) . ";";
-		}
-
-		$version = new VersionString();
-		$this->lastSendUsage = new SendUsageTask("http://stats.pocketmine.net/usage.php", [
-			"serverid" => 0, // todo: fix for real
-			"port" => $this->getPort(),
-			"os" => Utils::getOS(),
-			"name" => $this->getName(),
-			"memory_total" => $this->getConfigString("memory-limit"),
-			"memory_usage" => memory_get_usage(),
-			"php_version" => PHP_VERSION,
-			"version" => $version->get(true),
-			"build" => $version->getBuild(),
-			"mc_version" => \pocketmine\MINECRAFT_VERSION,
-			"protocol" => \pocketmine\network\protocol\Info::OLDEST_PROTOCOL,
-			"online" => count($this->players),
-			"max" => $this->getMaxPlayers(),
-			"plugins" => $plist,
-		]);
-
-		$this->scheduler->scheduleAsyncTask($this->lastSendUsage);
-	}
+//	public function sendUsage(){
+//		if($this->lastSendUsage instanceof SendUsageTask){
+//			if(!$this->lastSendUsage->isGarbage()){ //do not call multiple times
+//				return;
+//			}
+//		}
+//
+//		$plist = "";
+//		foreach($this->getPluginManager()->getPlugins() as $p){
+//			$d = $p->getDescription();
+//			$plist .= str_replace([";", ":"], "", $d->getName()) . ":" . str_replace([";", ":"], "", $d->getVersion()) . ";";
+//		}
+//
+//		$version = new VersionString();
+//		$this->lastSendUsage = new SendUsageTask("http://stats.pocketmine.net/usage.php", [
+//			"serverid" => 0, // todo: fix for real
+//			"port" => $this->getPort(),
+//			"os" => Utils::getOS(),
+//			"name" => $this->getName(),
+//			"memory_total" => $this->getConfigString("memory-limit"),
+//			"memory_usage" => memory_get_usage(),
+//			"php_version" => PHP_VERSION,
+//			"version" => $version->get(true),
+//			"build" => $version->getBuild(),
+//			"mc_version" => \pocketmine\MINECRAFT_VERSION,
+//			"protocol" => \pocketmine\network\protocol\Info::CURRENT_PROTOCOL,
+//			"online" => count($this->players),
+//			"max" => $this->getMaxPlayers(),
+//			"plugins" => $plist,
+//		]);
+//
+//		$this->scheduler->scheduleAsyncTask($this->lastSendUsage);
+//	}
 
 	/**
 	 * @return Network
@@ -2276,19 +2295,24 @@ class Server{
 			return false;
 		}
 
-		Timings::$serverTickTimer->startTiming();
+		//Timings::$serverTickTimer->startTiming();
 
 		++$this->tickCounter;
-
+		
 		$this->checkConsole();
+		
 
-		Timings::$connectionTimer->startTiming();
+		while(strlen($str = $this->packetMaker->readThreadToMainPacket()) > 0){
+			$this->mainInterface->putReadyPacket($str);
+		}
+	
+		//Timings::$connectionTimer->startTiming();
 		$this->network->processInterfaces();
-		Timings::$connectionTimer->stopTiming();
+		//Timings::$connectionTimer->stopTiming();
 
-		Timings::$schedulerTimer->startTiming();
+		//Timings::$schedulerTimer->startTiming();
 		$this->scheduler->mainThreadHeartbeat($this->tickCounter);
-		Timings::$schedulerTimer->stopTiming();
+		//Timings::$schedulerTimer->stopTiming();
 
 		$this->checkTickUpdates($this->tickCounter);
 
@@ -2310,11 +2334,11 @@ class Server{
 				$level->clearCache();
 			}
 		}
+		
 
+		//Timings::$serverTickTimer->stopTiming();
 
-		Timings::$serverTickTimer->stopTiming();
-
-		TimingsHandler::tick();
+//		TimingsHandler::tick();
 
 		$now = microtime(true);
 		array_shift($this->tickAverage);
@@ -2364,5 +2388,5 @@ class Server{
 
 		$this->players = $random;
 	}
-
+	
 }

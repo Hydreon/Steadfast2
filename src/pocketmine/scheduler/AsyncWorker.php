@@ -29,13 +29,13 @@ class AsyncWorker extends Worker{
 		$this->registerClassLoader();
 		gc_enable();
 		ini_set("memory_limit", -1);
-
+		
 		global $store;
 		$store = [];
 
 	}
 
 	public function start(int $options = PTHREADS_INHERIT_NONE){
-		parent::start(PTHREADS_INHERIT_CONSTANTS | PTHREADS_INHERIT_FUNCTIONS);
+		parent::start(PTHREADS_INHERIT_CONSTANTS);
 	}
-}
+		}

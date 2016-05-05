@@ -791,7 +791,7 @@ abstract class Entity extends Location implements Metadatable{
 
 	public function entityBaseTick($tickDiff = 1){
 
-		Timings::$tickEntityTimer->startTiming();
+		//Timings::$tickEntityTimer->startTiming();
 		//TODO: check vehicles
 
 		$this->justCreated = false;
@@ -804,7 +804,7 @@ abstract class Entity extends Location implements Metadatable{
 				$this->close();
 			}
 
-			Timings::$tickEntityTimer->stopTiming();
+			//Timings::$tickEntityTimer->stopTiming();
 			return false;
 		}
 
@@ -866,7 +866,7 @@ abstract class Entity extends Location implements Metadatable{
 		$this->age += $tickDiff;
 		$this->ticksLived += $tickDiff;
 
-		Timings::$tickEntityTimer->stopTiming();
+		//Timings::$tickEntityTimer->stopTiming();
 
 		return $hasUpdate;
 	}
@@ -885,7 +885,7 @@ abstract class Entity extends Location implements Metadatable{
 			$this->lastYaw = $this->yaw;
 			$this->lastPitch = $this->pitch;
 
-			$this->level->addEntityMovement($this->chunk->getX(), $this->chunk->getZ(), $this->id, $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+			$this->level->addEntityMovement($this->getViewers(), $this->id, $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
 		}
 
 		if($diffMotion > 0.0025 or ($diffMotion > 0.0001 and $this->getMotion()->lengthSquared() <= 0.0001)){ //0.05 ** 2
@@ -893,7 +893,7 @@ abstract class Entity extends Location implements Metadatable{
 			$this->lastMotionY = $this->motionY;
 			$this->lastMotionZ = $this->motionZ;
 
-			$this->level->addEntityMotion($this->chunk->getX(), $this->chunk->getZ(), $this->id, $this->motionX, $this->motionY, $this->motionZ);
+			$this->level->addEntityMotion($this->getViewers(), $this->id, $this->motionX, $this->motionY, $this->motionZ);
 		}
 	}
 
@@ -1137,7 +1137,7 @@ abstract class Entity extends Location implements Metadatable{
 			return true;
 		}
 
-		Timings::$entityMoveTimer->startTiming();
+		//Timings::$entityMoveTimer->startTiming();
 
 		$newBB = $this->boundingBox->getOffsetBoundingBox($dx, $dy, $dz);
 
@@ -1170,7 +1170,7 @@ abstract class Entity extends Location implements Metadatable{
 		$this->updateFallState($dy, $notInAir);
 
 
-		Timings::$entityMoveTimer->stopTiming();
+		//Timings::$entityMoveTimer->stopTiming();
 
 		return true;
 	}
@@ -1188,7 +1188,7 @@ abstract class Entity extends Location implements Metadatable{
 			return true;
 		}else{
 
-			Timings::$entityMoveTimer->startTiming();
+			//Timings::$entityMoveTimer->startTiming();
 
 			$this->ySize *= 0.4;
 
@@ -1369,7 +1369,7 @@ abstract class Entity extends Location implements Metadatable{
 							$this->onGround = true;
 						}else{
 							$this->onGround = false;
-						}
+						}					
 //						
 //						$bb = clone $this->boundingBox;
 //						$bb->minY -= 1;
@@ -1404,7 +1404,7 @@ abstract class Entity extends Location implements Metadatable{
 
 			//TODO: vehicle collision events (first we need to spawn them!)
 
-			Timings::$entityMoveTimer->stopTiming();
+			//Timings::$entityMoveTimer->stopTiming();
 
 			return $result;
 		}
@@ -1571,7 +1571,6 @@ abstract class Entity extends Location implements Metadatable{
 	}
 
 	public function spawnToAll(){
-		$this->despawnFromAll();
 		if($this->chunk === null or $this->closed){
 			return false;
 		}

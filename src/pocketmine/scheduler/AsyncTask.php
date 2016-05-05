@@ -154,5 +154,13 @@ abstract class AsyncTask extends Collectable{
 	public function onCompletion(Server $server){
 
 	}
+	
+	public function cleanObject(){
+		foreach($this as $p => $v){
+			if(!($v instanceof \Threaded)){
+				$this->{$p} = null;
+			}
+		}
+	}
 
 }

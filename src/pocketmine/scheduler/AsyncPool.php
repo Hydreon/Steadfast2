@@ -67,7 +67,7 @@ class AsyncPool{
 				$selectedTasks = $this->workerUsage[$i];
 			}
 		}
-
+		
 		$this->workers[$selectedWorker]->stack($task);
 		$this->workerUsage[$selectedWorker]++;
 		$this->taskWorkers[$task->getTaskId()] = $selectedWorker;
@@ -83,8 +83,8 @@ class AsyncPool{
 		}
 
 		unset($this->tasks[$task->getTaskId()]);
-		unset($this->taskWorkers[$task->getTaskId()]);
-		$task->setGarbage();
+		unset($this->taskWorkers[$task->getTaskId()]);	
+		$task->cleanObject();
 	}
 
 	public function removeTasks(){
@@ -106,10 +106,8 @@ class AsyncPool{
 				$task->onCompletion($this->server);
 				$this->removeTask($task);
 			}elseif($task->isTerminated()){
-//				$info = $task->getTerminationInfo();
 				$this->removeTask($task);
-				//$this->server->getLogger()->critical("Could not execute asynchronous task " . (new \ReflectionClass($task))->getShortName() . ": " . $info["message"]);
-				//$this->server->getLogger()->critical("On ".$info["scope"].", line ".$info["line"] .", ".$info["function"]."()");
+				$this->server->getLogger()->critical("Could not execute asynchronous task " . get_class($task));				
 			}
 		}
 	}
