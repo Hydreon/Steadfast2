@@ -1695,7 +1695,7 @@ class Server{
 	public function batchPackets(array $players, array $packets, $forceSync = true){
 		$targets = [];
 		foreach($players as $p){
-			$targets[] = array($p->getIdentifier(), $p->protocol <= Info::OLDEST_PROTOCOL ? '' : chr(0xfe));
+			$targets[] = array($p->getIdentifier(), $p->getAdditionalChar());
 		}
 		$newPackets = array();
 		foreach($packets as $p){
@@ -1716,18 +1716,18 @@ class Server{
 		$this->packetMaker->pushMainToThreadPacket(serialize($data));
 	}
 	
-	public function broadcastPacketsCallback($data, array $identifiers){
-		$pk = new BatchPacket();
-		$pk->payload = $data;
-		$pk->encode();
-		$pk->isEncoded = true;
-
-		foreach($identifiers as $i){
-			if(isset($this->players[$i])){
-				$this->players[$i]->dataPacket($pk);
-			}
-		}
-	}
+//	public function broadcastPacketsCallback($data, array $identifiers){
+//		$pk = new BatchPacket();
+//		$pk->payload = $data;
+//		$pk->encode();
+//		$pk->isEncoded = true;
+//
+//		foreach($identifiers as $i){
+//			if(isset($this->players[$i])){
+//				$this->players[$i]->dataPacket($pk);
+//			}
+//		}
+//	}
 
 
 	/**

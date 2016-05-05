@@ -50,34 +50,54 @@ class LoginPacket extends DataPacket {
 	public $playerDataLength;
 	public $playerData;
 	public $strangeData;   // terra incognita
+	
+	public $additionalChar = "";
 
-	public function decode() {
-		$this->unknown3Bytes = $this->get(2);
-		$this->protocol1 = $this->getInt();
-		$this->protocol2 = $this->getInt();
-		$this->unknown4Bytes = $this->getInt();
-		$this->chainsDataLength = $this->getLInt();
-		$this->chains = json_decode($this->get($this->chainsDataLength), true);
-		$this->playerDataLength = $this->getLInt();
-		$this->playerData = $this->get($this->playerDataLength);
-
-		$this->strangeData = substr($this->playerData, -1 * self::MAGIC_NUMBER);
-		$this->playerData = substr($this->playerData, 0, -1 * self::MAGIC_NUMBER);
-
-		$this->chains['data'] = array();
-		foreach ($this->chains['chain'] as $key => $jwt) {
-			$this->chains['data'][] = self::load($jwt);
+	public function decode() {		
+		$addCharNumber = $this->getByte();
+		if($addCharNumber > 0) {
+			$this->additionalChar = chr($addCharNumber);
 		}
+		if($addCharNumber == 0xfe) {
+			$this->unknown3Bytes = $this->get(2);
+			$this->protocol1 = $this->getInt();
+			$this->protocol2 = $this->getInt();
+			$this->unknown4Bytes = $this->getInt();
+			$this->chainsDataLength = $this->getLInt();
+			$this->chains = json_decode($this->get($this->chainsDataLength), true);
+			$this->playerDataLength = $this->getLInt();
+			$this->playerData = $this->get($this->playerDataLength);
 
-		$this->playerData = self::load($this->playerData);;
-		$this->username = $this->chains['data'][1]['extraData']['displayName'];
-		$this->clientId = $this->chains['data'][1]['extraData']['identity'];
-		$this->clientUUID = UUID::fromBinary($this->chains['data'][1]['extraData']['XUID']);
-		$this->serverAddress = $this->playerData['ServerAddress'];
-//		$this->clientSecret = $this->getString();
+			$this->strangeData = substr($this->playerData, -1 * self::MAGIC_NUMBER);
+			$this->playerData = substr($this->playerData, 0, -1 * self::MAGIC_NUMBER);
 
-		$this->skinName = $this->playerData['SkinId'];
-		$this->skin = base64_decode($this->playerData['SkinData']);
+			$this->chains['data'] = array();
+			foreach ($this->chains['chain'] as $key => $jwt) {
+				$this->chains['data'][] = self::load($jwt);
+			}
+
+			$this->playerData = self::load($this->playerData);;
+			$this->username = $this->chains['data'][1]['extraData']['displayName'];
+			$this->clientId = $this->chains['data'][1]['extraData']['identity'];
+			$this->clientUUID = UUID::fromBinary($this->chains['data'][1]['extraData']['XUID']);
+			$this->serverAddress = $this->playerData['ServerAddress'];
+	//		$this->clientSecret = $this->getString();
+
+			$this->skinName = $this->playerData['SkinId'];
+			$this->skin = base64_decode($this->playerData['SkinData']);
+		} else {
+			$this->username = $this->getString();
+			$this->protocol1 = $this->getInt();
+			$this->protocol2 = $this->getInt();
+
+			$this->clientId = $this->getLong();
+			$this->clientUUID = $this->getUUID();
+			$this->serverAddress = $this->getString();
+			$this->clientSecret = $this->getString();
+
+			$this->skinName = $this->getString();
+			$this->skin = $this->getString();
+		}
 	}
 
 	public function encode() {

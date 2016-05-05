@@ -98,23 +98,35 @@ class PacketMaker extends Worker {
 			}
 		} elseif($data->isBatch) {
 			$str = "";
+			$str15 = "";
 			foreach($data->packets as $p){
 				if($p instanceof DataPacket){
 					if(!$p->isEncoded){					
 						$p->encode();
 					}
 					$str .= Binary::writeInt(strlen($p->buffer)) . $p->buffer;
-				}else{
+					$p->updateBuffer(chr(0xfe));
+					$str15 .= Binary::writeInt(strlen($p->buffer)) . $p->buffer;
+				}else{					
 					$str .= Binary::writeInt(strlen($p)) . $p;
+					$pkId = ord($p{0});
+					$p{0} = chr(DataPacket::$pkKeysRev[$pkId]);
+					$str15 .= Binary::writeInt(strlen($p)) . $p;
 				}
 			}
 			$buffer = zlib_encode($str, ZLIB_ENCODING_DEFLATE, $data->networkCompressionLevel);
+			$buffer15 = zlib_encode($str15, ZLIB_ENCODING_DEFLATE, $data->networkCompressionLevel);
 			$pk = new BatchPacket();
 			$pk->payload = $buffer;
 			$pk->encode();
 			$pk->isEncoded = true;
+			
+			$pk15 = new BatchPacket();
+			$pk15->payload = $buffer15;
+			$pk15->encode();
+			$pk15->isEncoded = true;
 			foreach($data->targets as $target){
-				$result = $this->makeBuffer($target[0], $target[1], $pk, false, false);
+				$result = $this->makeBuffer($target[0], $target[1], ($target[1] == chr(0xfe) ? $pk15 : $pk), false, false);
 			}
 		} else {
 			$result = $this->makeBuffer($data->identifier, $data->additionalChar, $data->packet, $data->needACK, $data->identifierACK);;
@@ -132,6 +144,7 @@ class PacketMaker extends Worker {
 			if (isset($fullPacket->__encapsulatedPacket)) {
 				unset($fullPacket->__encapsulatedPacket);
 			}
+			$fullPacket->updateBuffer($additionalChar);
 			$fullPacket->__encapsulatedPacket = new CachedEncapsulatedPacket();
 			$fullPacket->__encapsulatedPacket->identifierACK = null;
 			$fullPacket->__encapsulatedPacket->buffer = $additionalChar . $fullPacket->buffer;
@@ -140,7 +153,8 @@ class PacketMaker extends Worker {
 		}
 
 		if ($pk === null) {
-			$pk = new EncapsulatedPacket();
+			$fullPacket->updateBuffer($additionalChar);
+			$pk = new EncapsulatedPacket();			
 			$pk->buffer = $additionalChar . $fullPacket->buffer;
 			$pk->reliability = 2;
 

@@ -254,6 +254,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastMessageReceivedFrom = "";
 	
 	protected $identifier;
+	
+	protected $additionalChar;
 
 	public function getLeaveMessage(){
 		return "";
@@ -820,23 +822,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 *
 	 * @return bool
 	 */
-	public function batchDataPacket(DataPacket $packet){
-		$str = "";
-		if($packet instanceof DataPacket){
-			if(!$packet->isEncoded){
-				$packet->encode();
-			}
-			$str .= Binary::writeInt(strlen($packet->buffer)) . $packet->buffer;
-		}else{
-			$str .= Binary::writeInt(strlen($packet)) . $packet;
-		}
-
-		$pk = new BatchPacket();
-		$pk->payload = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
-		$pk->encode();
-		$pk->isEncoded = true;
-		$this->dataPacket($pk);
-	}
+//	public function batchDataPacket(DataPacket $packet){
+//		$str = "";
+//		if($packet instanceof DataPacket){
+//			if(!$packet->isEncoded){
+//				$packet->encode();
+//			}
+//			$str .= Binary::writeInt(strlen($packet->buffer)) . $packet->buffer;
+//		}else{
+//			$str .= Binary::writeInt(strlen($packet)) . $packet;
+//		}
+//
+//		$pk = new BatchPacket();
+//		$pk->payload = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
+//		$pk->encode();
+//		$pk->isEncoded = true;
+//		$this->dataPacket($pk);
+//	}
 
 	/**
 	 * Sends an ordered DataPacket to the send buffer
@@ -1709,7 +1711,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
 				$this->protocol = $packet->protocol1;
-
+				$this->additionalChar = $packet->additionalChar;
 //				if(strpos($packet->username, "\x00") !== false or preg_match('#^[a-zA-Z0-9_]{3,16}$#', $packet->username) == 0 or $this->username === "" or $this->iusername === "rcon" or $this->iusername === "console" or strlen($packet->username) > 16 or strlen($packet->username) < 3){
 				$valid = true;
 				$len = strlen($packet->username);
@@ -3576,6 +3578,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public function getIdentifier(){
 		return $this->identifier;
+	}
+	
+	public function getAdditionalChar() {
+		return $this->additionalChar;
 	}
 	
 }
