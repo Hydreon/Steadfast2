@@ -1695,7 +1695,7 @@ class Server{
 	public function batchPackets(array $players, array $packets, $forceSync = true){
 		$targets = [];
 		foreach($players as $p){
-			$targets[] = array($p->getIdentifier(), $p->protocol <= Info::OLDEST_PROTOCOL ? '' : chr(0x8e));
+			$targets[] = array($p->getIdentifier(), $p->getAdditionalChar());
 		}
 		$newPackets = array();
 		foreach($packets as $p){
@@ -1708,26 +1708,26 @@ class Server{
 				$newPackets[] = $p;
 			}
 		}
-		$data = new \stdClass();
-		$data->packets = $newPackets;
-		$data->targets = $targets;
-		$data->networkCompressionLevel = $this->networkCompressionLevel;
-		$data->isBatch = true;
+		$data = array();
+		$data['packets'] = $newPackets;
+		$data['targets'] = $targets;
+		$data['networkCompressionLevel'] = $this->networkCompressionLevel;
+		$data['isBatch'] = true;
 		$this->packetMaker->pushMainToThreadPacket(serialize($data));
 	}
 	
-	public function broadcastPacketsCallback($data, array $identifiers){
-		$pk = new BatchPacket();
-		$pk->payload = $data;
-		$pk->encode();
-		$pk->isEncoded = true;
-
-		foreach($identifiers as $i){
-			if(isset($this->players[$i])){
-				$this->players[$i]->dataPacket($pk);
-			}
-		}
-	}
+//	public function broadcastPacketsCallback($data, array $identifiers){
+//		$pk = new BatchPacket();
+//		$pk->payload = $data;
+//		$pk->encode();
+//		$pk->isEncoded = true;
+//
+//		foreach($identifiers as $i){
+//			if(isset($this->players[$i])){
+//				$this->players[$i]->dataPacket($pk);
+//			}
+//		}
+//	}
 
 
 	/**
@@ -2100,9 +2100,8 @@ class Server{
 	}
 
 	public function addOnlinePlayer(Player $player){
-		$this->playerList[$player->getRawUniqueId()] = $player;
-
 		$this->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getDisplayName(), $player->getSkinName(), $player->getSkinData());
+		$this->playerList[$player->getRawUniqueId()] = $player;		
 	}
 
 	public function removeOnlinePlayer(Player $player){
@@ -2138,7 +2137,9 @@ class Server{
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_ADD;
 		foreach($this->playerList as $player){
-			$pk->entries[] = [$player->getUniqueId(), $player->getId(), $player->getDisplayName(), $player->getSkinName(), $player->getSkinData()];
+			if($player !== $p) {
+				$pk->entries[] = [$player->getUniqueId(), $player->getId(), $player->getDisplayName(), $player->getSkinName(), $player->getSkinData()];
+			}
 		}
 
 		$p->dataPacket($pk);

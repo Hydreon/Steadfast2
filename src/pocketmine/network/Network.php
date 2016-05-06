@@ -216,11 +216,16 @@ class Network {
 		$offset = 0;
 		try{
 			while($offset < $len){
-				if(($pk = $this->getPacket(ord($str{$offset++}))) !== null){
+				$pid = ord($str{$offset++});				
+				if(($pk = $this->getPacket($pid)) !== null){
 					if($pk::NETWORK_ID === Info::BATCH_PACKET){
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
 					}
-					$pk->setBuffer($str, $offset);
+					$str = substr($str, $offset);
+					if($pid == 0x8f) {
+						$str = chr(0) . $str;
+					}
+					$pk->setBuffer($str);
 					$pk->decode();
 					$p->handleDataPacket($pk);
 					$offset += $pk->getOffset();
