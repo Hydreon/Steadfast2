@@ -1708,11 +1708,11 @@ class Server{
 				$newPackets[] = $p;
 			}
 		}
-		$data = new \stdClass();
-		$data->packets = $newPackets;
-		$data->targets = $targets;
-		$data->networkCompressionLevel = $this->networkCompressionLevel;
-		$data->isBatch = true;
+		$data = array();
+		$data['packets'] = $newPackets;
+		$data['targets'] = $targets;
+		$data['networkCompressionLevel'] = $this->networkCompressionLevel;
+		$data['isBatch'] = true;
 		$this->packetMaker->pushMainToThreadPacket(serialize($data));
 	}
 	

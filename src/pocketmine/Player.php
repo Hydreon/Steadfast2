@@ -2518,7 +2518,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					if($item->isTool() and $this->isSurvival()){
 						if($item->useOn($target) and $item->getDamage() >= $item->getMaxDurability()){
 							$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 1), $this);
-						}else{
+						} elseif ($this->inventory->getItemInHand()->getId() == $item->getId()) {
 							$this->inventory->setItemInHand($item, $this);
 						}
 					}

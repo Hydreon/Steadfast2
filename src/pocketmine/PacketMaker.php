@@ -83,23 +83,23 @@ class PacketMaker extends Worker {
 	
 	protected function checkPacket($data) {
 		$result = "";
-		if (isset($data->moveData)) {
-			foreach ($data->moveData as $identifier => $moveData) {
+		if (isset($data['moveData'])) {
+			foreach ($data['moveData'] as $identifier => $moveData) {
 				$pk = new MoveEntityPacket();
 				$pk->entities = $moveData['data'];
 				$res = $this->makeBuffer($identifier, $moveData['additionalChar'], $pk, false, false);
 				$this->externalQueue[] = $res;
 			}	
-			foreach ($data->motionData as $identifier => $motionData) {
+			foreach ($data['motionData'] as $identifier => $motionData) {
 				$pk = new SetEntityMotionPacket();
 				$pk->entities = $motionData['data'];
 				$res = $this->makeBuffer($identifier, $motionData['additionalChar'], $pk, false, false);
 				$this->externalQueue[] = $res;
 			}
-		} elseif($data->isBatch) {
+		} elseif($data['isBatch']) {
 			$str = "";
 			$str15 = "";
-			foreach($data->packets as $p){
+			foreach($data['packets'] as $p){
 				if($p instanceof DataPacket){
 					if(!$p->isEncoded){					
 						$p->encode();
@@ -114,8 +114,8 @@ class PacketMaker extends Worker {
 					$str15 .= Binary::writeInt(strlen($p)) . $p;
 				}
 			}
-			$buffer = zlib_encode($str, ZLIB_ENCODING_DEFLATE, $data->networkCompressionLevel);
-			$buffer15 = zlib_encode($str15, ZLIB_ENCODING_DEFLATE, $data->networkCompressionLevel);
+			$buffer = zlib_encode($str, ZLIB_ENCODING_DEFLATE, $data['networkCompressionLevel']);
+			$buffer15 = zlib_encode($str15, ZLIB_ENCODING_DEFLATE, $data['networkCompressionLevel']);
 			$pk = new BatchPacket();
 			$pk->payload = $buffer;
 			$pk->encode();
@@ -125,11 +125,9 @@ class PacketMaker extends Worker {
 			$pk15->payload = $buffer15;
 			$pk15->encode();
 			$pk15->isEncoded = true;
-			foreach($data->targets as $target){
+			foreach($data['targets'] as $target){
 				$result = $this->makeBuffer($target[0], $target[1], ($target[1] == chr(0xfe) ? $pk15 : $pk), false, false);
 			}
-		} else {
-			$result = $this->makeBuffer($data->identifier, $data->additionalChar, $data->packet, $data->needACK, $data->identifierACK);;
 		}
 		if(!empty($result)) {
 			$this->externalQueue[] = $result;

@@ -622,9 +622,9 @@ class Level implements ChunkManager, Metadatable{
 
 		$this->processChunkRequest();
 
-		$data = new \stdClass();
-		$data->moveData = $this->moveToSend;
-		$data->motionData = $this->motionToSend;
+		$data = array();
+		$data['moveData'] = $this->moveToSend;
+		$data['motionData'] = $this->motionToSend;
 		$this->server->packetMaker->pushMainToThreadPacket(serialize($data));
 		$this->moveToSend = [];
 		$this->motionToSend = [];
