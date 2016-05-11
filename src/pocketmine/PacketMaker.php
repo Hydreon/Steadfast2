@@ -68,7 +68,7 @@ class PacketMaker extends Worker {
 			$start = microtime(true);
 			$this->tick();
 			$time = microtime(true) - $start;
-			if ($time < 0.025) {
+			if ($time < 0.024) {
 				time_sleep_until(microtime(true) + 0.025 - $time);
 			}
 		}
@@ -197,10 +197,12 @@ class PacketMaker extends Worker {
 			$errstr = substr($errstr, 0, $pos);
 		}
 
-		var_dump("An $errno error happened: \"$errstr\" in \"$errfile\" at line $errline");		
+		//var_dump("An $errno error happened: \"$errstr\" in \"$errfile\" at line $errline");	
+		@file_put_contents('logs/' .date('Y.m.d') . '_debug.log', "An $errno error happened: \"$errstr\" in \"$errfile\" at line $errline\n", FILE_APPEND | LOCK_EX);
 
 		foreach(($trace = $this->getTrace($trace === null ? 3 : 0, $trace)) as $i => $line){
-			var_dump($line);
+			//var_dump($line);			
+			@file_put_contents('logs/' .date('Y.m.d') . '_debug.log', $line."\n", FILE_APPEND | LOCK_EX);
 		}
 
 		return true;
