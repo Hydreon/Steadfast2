@@ -35,6 +35,10 @@ class ServerHandler{
         $buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($identifier)) . $identifier . chr($flags) . $packet->toBinary(true);
         $this->server->pushMainToThreadPacket($buffer);
     }
+	
+	public function sendReadyEncapsulated($buffer){
+		$this->server->pushMainToThreadPacket($buffer);
+	}
 
     public function sendRaw($address, $port, $payload){
         $buffer = chr(RakLib::PACKET_RAW) . chr(strlen($address)) . $address . Binary::writeShort($port) . $payload;

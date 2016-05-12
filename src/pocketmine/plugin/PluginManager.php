@@ -403,7 +403,7 @@ class PluginManager{
 	 * @param Permission $permission
 	 */
 	private function calculatePermissionDefault(Permission $permission){
-		Timings::$permissionDefaultTimer->startTiming();
+		//Timings::$permissionDefaultTimer->startTiming();
 		if($permission->getDefault() === Permission::DEFAULT_OP or $permission->getDefault() === Permission::DEFAULT_TRUE){
 			$this->defaultPermsOp[$permission->getName()] = $permission;
 			$this->dirtyPermissibles(true);
@@ -413,7 +413,7 @@ class PluginManager{
 			$this->defaultPerms[$permission->getName()] = $permission;
 			$this->dirtyPermissibles(false);
 		}
-		Timings::$permissionDefaultTimer->startTiming();
+		//Timings::$permissionDefaultTimer->startTiming();
 	}
 
 	/**

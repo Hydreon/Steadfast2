@@ -129,104 +129,11 @@ class Session{
     public function getID(){
         return $this->id;
     }
-	
-	private function timeoutLogger($packet, $prefix = false){
-		$log = "";
-		foreach($packet->packets as $p){
-			if(is_object($p)){
-				$buffer = $p->buffer;
-			} else {
-				$pack = EncapsulatedPacket::fromBinary($p); 
-				$buffer = $pack->buffer;
-			}
-			if(ord($buffer{0}) == 142){
-				$buffer = substr($buffer, 1);		
-			}
-			$pid = ord($buffer{0});
-			if($pid == 0 || $pid == 3){
-				continue;
-			}
-			$packets = array(
-				"LOGIN_PACKET" => 0x8f,
-				"PLAY_STATUS_PACKET" => 0x90,
-				"DISCONNECT_PACKET" => 0x91,
-				"BATCH_PACKET" => 0x92,
-				"TEXT_PACKET" => 0x93,
-				"SET_TIME_PACKET" => 0x94,
-				"START_GAME_PACKET" => 0x95,
-				"ADD_PLAYER_PACKET" => 0x96,
-				"REMOVE_PLAYER_PACKET" => 0x97,
-				"ADD_ENTITY_PACKET" => 0x98,
-				"REMOVE_ENTITY_PACKET" => 0x99,
-				"ADD_ITEM_ENTITY_PACKET" => 0x9a,
-				"TAKE_ITEM_ENTITY_PACKET" => 0x9b,
-				"MOVE_ENTITY_PACKET" => 0x9c,
-				"MOVE_PLAYER_PACKET" => 0x9d,
-				"REMOVE_BLOCK_PACKET" => 0x9e,
-				"UPDATE_BLOCK_PACKET" => 0x9f,
-				"ADD_PAINTING_PACKET" => 0xa0,
-				"EXPLODE_PACKET" => 0xa1,
-				"LEVEL_EVENT_PACKET" => 0xa2,
-				"TILE_EVENT_PACKET" => 0xa3,
-				"ENTITY_EVENT_PACKET" => 0xa4,
-				"MOB_EFFECT_PACKET" => 0xa5,
-				"UPDATE_ATTRIBUTES_PACKET" => 0xa6,
-				"MOB_EQUIPMENT_PACKET" => 0xa7,
-				"MOB_ARMOR_EQUIPMENT_PACKET" => 0xa8,
-				"INTERACT_PACKET" => 0xa9,
-				"USE_ITEM_PACKET" => 0xaa,
-				"PLAYER_ACTION_PACKET" => 0xab,
-				"HURT_ARMOR_PACKET" => 0xac,
-				"SET_ENTITY_DATA_PACKET" => 0xad,
-				"SET_ENTITY_MOTION_PACKET" => 0xae,
-				"SET_ENTITY_LINK_PACKET" => 0xaf,
-				"SET_HEALTH_PACKET" => 0xb0,
-				"SET_SPAWN_POSITION_PACKET" => 0xb1,
-				"ANIMATE_PACKET" => 0xb2,
-				"RESPAWN_PACKET" => 0xb3,
-				"DROP_ITEM_PACKET" => 0xb4,
-				"CONTAINER_OPEN_PACKET" => 0xb5,
-				"CONTAINER_CLOSE_PACKET" => 0xb6,
-				"CONTAINER_SET_SLOT_PACKET" => 0xb7,
-				"CONTAINER_SET_DATA_PACKET" => 0xb8,
-				"CONTAINER_SET_CONTENT_PACKET" => 0xb9,
-				"CRAFTING_DATA_PACKET" => 0xba,
-				"CRAFTING_EVENT_PACKET" => 0xbb,
-				"ADVENTURE_SETTINGS_PACKET" => 0xbc,
-				"TILE_ENTITY_DATA_PACKET" => 0xbd,
-				"FULL_CHUNK_DATA_PACKET" => 0xbf,
-				"SET_DIFFICULTY_PACKET" => 0xc0,
-				"SET_PLAYER_GAMETYPE_PACKET" => 0xc2,
-				"PLAYER_LIST_PACKET" => 0xc3,
-				"REQUEST_CHUNK_RADIUS_PACKET" => 0xc8,
-				"CHUNK_RADIUS_UPDATE_PACKET" => 0xc9,
-			);
-			$packets = array_flip($packets);
-			$log .= (isset($packets[$pid]) ? $packets[$pid] : $pid) . ", ";
-		
-		}
-		if($prefix){
-			$log = "-----------------------------------\n".$log."\n-----------------------------------\n";
-		} else{
-			$log .= "\n";
-		}
-		return $log;
-	}
 
     public function update($time){
         if(!$this->isActive and ($this->lastUpdate + 10) < $time){
-           
-			$log = date("G:i:s") . "\n";		
-			if(isset($this->preLastGetPacket)){
-				$log .= $this->timeoutLogger($this->preLastGetPacket, true);
-			}
-			if(isset($this->lastGetPacket)){
-				$log .= $this->timeoutLogger($this->lastGetPacket, true);
-				$this->disconnect("timeout"."|delemiter|".$log);
-			} else{
-				$this->disconnect("timeout");
-			}
-			
+            $this->disconnect("timeout");
+
             return;
         }
         $this->isActive = false;
@@ -583,10 +490,6 @@ class Session{
                                     unset($this->needACK[$pk->identifierACK][$pk->messageIndex]);
                                 }
                             }
-							if(isset($this->lastGetPacket)){
-								$this->preLastGetPacket = $this->lastGetPacket;
-							}
-							$this->lastGetPacket = $this->recoveryQueue[$seq];
                             unset($this->recoveryQueue[$seq]);
                         }
                     }

@@ -168,6 +168,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->players[$identifier] = $player;
 		$this->identifiersACK[$identifier] = 0;
 		$this->identifiers->attach($player, $identifier);
+		$player->setIdentifier($identifier);
 		$this->server->addPlayer($identifier, $player);
 	}
 
@@ -237,7 +238,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	 */
 	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
 		if(isset($this->identifiers[$player])){
-			$additionalChar = $player->protocol <= ProtocolInfo::OLDEST_PROTOCOL ? '' : chr(0x8e);
+			$additionalChar = $player->getAdditionalChar();
 			
 			$identifier = $this->identifiers[$player];
 			$pk = null;
@@ -247,6 +248,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				if (isset($packet->__encapsulatedPacket)) {
 					unset($packet->__encapsulatedPacket);
 				}
+				$packet->updateBuffer($additionalChar);
 				$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
 				$packet->__encapsulatedPacket->identifierACK = null;
 				$packet->__encapsulatedPacket->buffer = $additionalChar . $packet->buffer;
@@ -262,6 +264,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			}
 
 			if($pk === null){
+				$packet->updateBuffer($additionalChar);
 				$pk = new EncapsulatedPacket();
 				$pk->buffer = $additionalChar . $packet->buffer;
 				$pk->reliability = 2;
@@ -272,23 +275,39 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			}
 
 			$this->interface->sendEncapsulated($identifier, $pk, ($needACK === true ? RakLib::FLAG_NEED_ACK : 0) | ($immediate === true ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL));
-
-			return $pk->identifierACK;
 		}
 
 		return null;
 	}
-
+	
 	private function getPacket($buffer){
-		if(ord($buffer{0}) == 142){
-			$buffer = substr($buffer, 1);		
+		if(ord($buffer{0}) == 254){
+			$buffer = substr($buffer, 1);	
+			$additionalChar = chr(0xfe);
+			$pid = DataPacket::$pkKeys[ord($buffer{0})];			
+		} elseif(ord($buffer{0}) == 142) {
+			$buffer = substr($buffer, 1);	
+			$additionalChar = chr(0x8e);
+			$pid = ord($buffer{0});
+		} else {
+			$additionalChar = chr(0);
+			$pid = ord($buffer{0});
 		}
-		$pid = ord($buffer{0});
+
 		if(($data = $this->network->getPacket($pid)) === null){
 			return null;
 		}
+		
+		if($pid == 0x8f) {
+			$buffer = chr($pid) . $additionalChar . substr($buffer, 1);
+		}
+		
 		$data->setBuffer($buffer, 1);
 
 		return $data;
+	}
+	
+	public function putReadyPacket($buffer) {
+		$this->interface->sendReadyEncapsulated($buffer);
 	}
 }

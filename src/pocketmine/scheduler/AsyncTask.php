@@ -167,6 +167,14 @@ abstract class AsyncTask extends Collectable{
 
 	}
 	
+	public function cleanObject(){
+		foreach($this as $p => $v){
+			if(!($v instanceof \Threaded)){
+				$this->{$p} = null;
+			}
+		}
+	}
+
 	public function saveToThreadStore($identifier, $value){
 		global $store;
 		if(!$this->isFinished()){
