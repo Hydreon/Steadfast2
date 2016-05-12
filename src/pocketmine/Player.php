@@ -1356,21 +1356,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			if(!$isFirst){
 				$needEvent = true;
-				$block = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()), floor($to->getZ())));
-				$blockUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 1, floor($to->getZ())));
-				$roundBlock = $from->level->getBlock(new Vector3(floor($to->getX()), round($to->getY()), floor($to->getZ())));
-				if($from->getY() - $to->getY() > 0.1){
-					if(!$roundBlock->isTransparent()){
-						$needEvent = false;
-					}
-				}else{
-					if(!$block->isTransparent()){
-						$blockUpUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 2, floor($to->getZ())));
-						if(!$blockUp->isTransparent()){
+				if(!$this->isSpectator()) {					
+					$block = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()), floor($to->getZ())));
+					$blockUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 1, floor($to->getZ())));
+					$roundBlock = $from->level->getBlock(new Vector3(floor($to->getX()), round($to->getY()), floor($to->getZ())));
+					if($from->getY() - $to->getY() > 0.1){
+						if(!$roundBlock->isTransparent()){
 							$needEvent = false;
-						}else{
-							if(!$blockUpUp->isTransparent()){
+						}
+					}else{
+						if(!$block->isTransparent()){
+							$blockUpUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 2, floor($to->getZ())));
+							if(!$blockUp->isTransparent()){
 								$needEvent = false;
+							}else{
+								if(!$blockUpUp->isTransparent()){
+									$needEvent = false;
+								}
 							}
 						}
 					}
