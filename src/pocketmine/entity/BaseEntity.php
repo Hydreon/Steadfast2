@@ -133,7 +133,7 @@ abstract class BaseEntity extends Creature{
             $this->lastYaw = $this->yaw;
             $this->lastPitch = $this->pitch;
         }
-        $this->level->addEntityMovement($this->chunk->getX(), $this->chunk->getZ(), $this->id, $this->x, $this->y, $this->z, $this->yaw, $this->pitch);
+        $this->level->addEntityMovement($this->getViewers(), $this->id, $this->x, $this->y, $this->z, $this->yaw, $this->pitch);
     }
 
     public function isInsideOfSolid(){
