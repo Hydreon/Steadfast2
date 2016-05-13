@@ -137,6 +137,7 @@ use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
 use pocketmine\utils\TextFormat;
 use pocketmine\network\protocol\SetPlayerGameTypePacket;
+use pocketmine\block\Water;
 
 use raklib\Binary;
 
@@ -1365,12 +1366,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$needEvent = false;
 						}
 					}else{
-						if(!$block->isTransparent()){
+						if(!$block->isTransparent() || !$blockUp->isTransparent()){
 							$blockUpUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 2, floor($to->getZ())));
 							if(!$blockUp->isTransparent()){
 								$needEvent = false;
 							}else{
 								if(!$blockUpUp->isTransparent()){
+									$needEvent = false;
+								}
+								$blockFrom = $from->level->getBlock(new Vector3($from->getX(), $from->getY(), $from->getZ()));
+								if($blockFrom instanceof Water){
+									echo 'q ';
 									$needEvent = false;
 								}
 							}
