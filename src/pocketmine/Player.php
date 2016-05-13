@@ -137,7 +137,7 @@ use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
 use pocketmine\utils\TextFormat;
 use pocketmine\network\protocol\SetPlayerGameTypePacket;
-use pocketmine\block\Water;
+use pocketmine\block\Liquid;
 
 use raklib\Binary;
 
@@ -1375,8 +1375,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 									$needEvent = false;
 								}
 								$blockFrom = $from->level->getBlock(new Vector3($from->getX(), $from->getY(), $from->getZ()));
-								if($blockFrom instanceof Water){
-									echo 'q ';
+								if($blockFrom instanceof Liquid){
 									$needEvent = false;
 								}
 							}
