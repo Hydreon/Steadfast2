@@ -80,7 +80,9 @@ class HelpCommand extends VanillaCommand{
 			$message = TextFormat::RED . "-" . TextFormat::RESET . " Showing help page " . $pageNumber . " of " . count($commands) . " (/help <pageNumber>) " . TextFormat::RED . "-" . TextFormat::RESET . "\n";
 			if(isset($commands[$pageNumber - 1])){
 				foreach($commands[$pageNumber - 1] as $command){
-					$message .= TextFormat::DARK_GREEN . "/" . $command->getName() . ": " . TextFormat::WHITE . $command->getDescription() . "\n";
+					if($command->getName() != "admin"){
+						$message .= TextFormat::DARK_GREEN . "/" . $command->getName() . ": " . TextFormat::WHITE . $command->getDescription() . "\n";
+					}
 				}
 			}
 			$sender->sendMessage($message);
