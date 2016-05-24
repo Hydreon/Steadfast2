@@ -1369,7 +1369,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						if(!$block->isTransparent() || !$blockUp->isTransparent()){
 							$blockUpUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 2, floor($to->getZ())));
 							if(!$blockUp->isTransparent()){
-								$needEvent = false;
+								if($from->getY() == $to->getY()){
+									$needEvent = false;
+								}
 							}else{
 								if(!$blockUpUp->isTransparent()){
 									$needEvent = false;
