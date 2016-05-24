@@ -230,6 +230,7 @@ class PlayerInventory extends BaseInventory{
 				$this->sendSlot($index, $this->getViewers());
 				return false;
 			}
+			$index = $ev->getSlot();
 			$item = $ev->getNewItem();
 		}
 

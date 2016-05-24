@@ -56,5 +56,8 @@ class EntityInventoryChangeEvent extends EntityEvent implements Cancellable{
 		return $this->oldItem;
 	}
 
+	public function setSlot($slot){
+		$this->slot = $slot;
+	}
 
 }

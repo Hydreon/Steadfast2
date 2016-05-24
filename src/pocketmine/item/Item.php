@@ -443,6 +443,7 @@ class Item{
 
 	/** @var \SplFixedArray */
 	public static $list = null;
+	public static $food = null;
 	protected $block;
 	protected $id;
 	protected $meta;
@@ -451,6 +452,7 @@ class Item{
 	public $count;
 	protected $durability = 0;
 	protected $name;
+	protected $obtainTime = 0;
 
 	public function canBeActivated(){
 		return false;
@@ -546,6 +548,7 @@ class Item{
 		}
 
 		self::initCreativeItems();
+		self::initFood();
 	}
 
 	private static $creative = [];
@@ -845,6 +848,29 @@ class Item{
 		self::addCreativeItem(Item::get(Item::DYE, 9));
 		self::addCreativeItem(Item::get(Item::DYE, 8));
 	}
+	
+	private static function initFood(){
+		self::$food[] = Item::COOKIE;
+		self::$food[] = Item::MELON;
+		self::$food[] = Item::RAW_BEEF;
+		self::$food[] = Item::COOKED_BEEF;
+		self::$food[] = Item::RAW_CHICKEN;
+		self::$food[] = Item::COOKED_CHICKEN;
+		self::$food[] = Item::CARROT;
+		self::$food[] = Item::POTATO;
+		self::$food[] = Item::BAKED_POTATO;
+		self::$food[] = Item::PUMPKIN_PIE;
+		self::$food[] = Item::COOKIE;
+		self::$food[] = Item::BREAD;
+		self::$food[] = Item::APPLE;
+		self::$food[] = Item::GOLDEN_APPLE;
+		self::$food[] = Item::EGG;
+		self::$food[] = Item::RAW_FISH;
+		self::$food[] = Item::COOKED_FISH;
+		self::$food[] = Item::RAW_PORKCHOP;
+		self::$food[] = Item::COOKED_PORKCHOP;
+		self::$food[] = Item::BAKED_POTATO;
+	}
 
 	public static function clearCreativeItems(){
 		Item::$creative = [];
@@ -941,11 +967,14 @@ class Item{
 		}
 	}
 
-	public function __construct($id, $meta = 0, $count = 1, $name = "Unknown"){
+	public function __construct($id, $meta = 0, $count = 1, $name = "Unknown", $obtainTime = null){
 		$this->id = $id & 0xffff;
 		$this->meta = $meta !== null ? $meta & 0xffff : null;
 		$this->count = (int) $count;
 		$this->name = $name;
+		if($obtainTime == null){
+			$obtainTime = time();
+		}
 		if(!isset($this->block) and $this->id <= 0xff and isset(Block::$list[$this->id])){
 			$this->block = Block::get($this->id, $this->meta);
 			$this->name = $this->block->getName();
@@ -1352,6 +1381,18 @@ class Item{
 		}
 
 		return false;
+	}
+	
+	public function isFood(){
+		return in_array($this->id, self::$food);
+	}
+	
+	public function setObtainTime($time){
+		$this->obtainTime = $time;
+	}
+	
+	public function getObtainTime(){
+		return $this->obtainTime;
 	}
 
 }
