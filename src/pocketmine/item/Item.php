@@ -155,7 +155,7 @@ class Item{
 	const WOODEN_DOOR_BLOCK = 64;
 	const WOOD_DOOR_BLOCK = 64;
 	const LADDER = 65;
-
+	const RAIL = 66;
 	const COBBLE_STAIRS = 67;
 	const COBBLESTONE_STAIRS = 67;
 	const WALL_SIGN = 68;
@@ -499,6 +499,7 @@ class Item{
 		63 => "Sign Post",
 		64 => "Door",
 		65 => "Ladder",
+		66 => "Rail",
 		67 => "Cobble Stairs",
 		68 => "Wall Sign",
 		71 => "Iron Door",
@@ -870,6 +871,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::QUARTZ_STAIRS, 0));
 		self::addCreativeItem(Item::get(Item::SLAB, 0));
 		self::addCreativeItem(Item::get(Item::SLAB, 1));
+		self::addCreativeItem(Item::get(Item::RAIL, 0));
 		self::addCreativeItem(Item::get(Item::WOODEN_SLAB, 0));
 		self::addCreativeItem(Item::get(Item::WOODEN_SLAB, 1));
 		self::addCreativeItem(Item::get(Item::WOODEN_SLAB, 2));
