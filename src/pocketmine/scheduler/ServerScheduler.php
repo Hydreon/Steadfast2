@@ -118,6 +118,16 @@ class ServerScheduler{
 			unset($this->tasks[$taskId]);
 		}
 	}
+	
+	public function getAsyncTaskPoolSize(){
+		return $this->asyncPool->getSize();
+	}
+	
+	public function scheduleAsyncTaskToWorker(AsyncTask $task, $worker){
+		$id = $this->nextId();
+		$task->setTaskId($id);
+		$this->asyncPool->submitTaskToWorker($task, $worker);
+	}
 
 	/**
 	 * @param Plugin $plugin

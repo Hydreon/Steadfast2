@@ -42,7 +42,6 @@ use pocketmine\entity\PrimedTNT;
 use pocketmine\entity\Snowball;
 use pocketmine\entity\Squid;
 use pocketmine\entity\Villager;
-use pocketmine\entity\Zombie;
 use pocketmine\event\HandlerList;
 use pocketmine\event\level\LevelInitEvent;
 use pocketmine\event\level\LevelLoadEvent;
@@ -113,6 +112,30 @@ use pocketmine\utils\Utils;
 use pocketmine\utils\UUID;
 use pocketmine\utils\VersionString;
 use pocketmine\network\protocol\Info;
+use pocketmine\level\generator\biome\Biome;
+use pocketmine\scheduler\FileWriteTask;
+use pocketmine\entity\animal\walking\Chicken;
+use pocketmine\entity\animal\walking\Cow;
+use pocketmine\entity\animal\walking\Mooshroom;
+use pocketmine\entity\animal\walking\Ocelot;
+use pocketmine\entity\animal\walking\Pig;
+use pocketmine\entity\animal\walking\Rabbit;
+use pocketmine\entity\animal\walking\Sheep;
+use pocketmine\entity\monster\flying\Blaze;
+use pocketmine\entity\monster\flying\Ghast;
+use pocketmine\entity\monster\walking\CaveSpider;
+use pocketmine\entity\monster\walking\Creeper;
+use pocketmine\entity\monster\walking\Enderman;
+use pocketmine\entity\monster\walking\IronGolem;
+use pocketmine\entity\monster\walking\PigZombie;
+use pocketmine\entity\monster\walking\Silverfish;
+use pocketmine\entity\monster\walking\Skeleton;
+use pocketmine\entity\monster\walking\SnowGolem;
+use pocketmine\entity\monster\walking\Spider;
+use pocketmine\entity\monster\walking\Wolf;
+use pocketmine\entity\monster\walking\Zombie;
+use pocketmine\entity\monster\walking\ZombieVillager;
+use pocketmine\entity\projectile\FireBall;
 
 /**
  * The class that manages everything
@@ -184,6 +207,9 @@ class Server{
 
 	/** @var bool */
 	private $autoSave;
+	
+	/** @var bool */
+	private $autoGenerate;
 
 	/** @var RCON */
 	private $rcon;
@@ -240,10 +266,32 @@ class Server{
 
 	/** @var Level */
 	private $levelDefault = null;
+	
+	private $useAnimal;
+	private $animalLimit;
+	private $useMonster ;
+	private $monsterLimit;
 		
 
 	public $packetMaker = null;
 
+	
+	public function isUseAnimal() {
+		return $this->useAnimal;
+	}
+
+	public function getAnimalLimit() {
+		return $this->animalLimit;
+	}
+
+	public function isUseMonster() {
+		return $this->useMonster;
+	}
+
+	public function getMonsterLimit() {
+		return $this->monsterLimit;
+	}
+	
 	/**
 	 * @return string
 	 */
@@ -357,6 +405,20 @@ class Server{
 		foreach($this->getLevels() as $level){
 			$level->setAutoSave($this->autoSave);
 		}
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getAutoGenerate(){
+		return $this->autoGenerate;
+	}
+
+	/**
+	 * @param bool $value
+	 */
+	public function setAutoGenerate($value){
+		$this->autoGenerate = (bool) $value;		
 	}
 
 	/**
@@ -756,7 +818,21 @@ class Server{
 	 * @param string   $name
 	 * @param Compound $nbtTag
 	 */
-	public function saveOfflinePlayerData($name, Compound $nbtTag){
+	public function saveOfflinePlayerData($name, Compound $nbtTag, $async = false){
+            $nbt = new NBT(NBT::BIG_ENDIAN);
+		try{
+			$nbt->setData($nbtTag);
+			if($async){
+				$this->getScheduler()->scheduleAsyncTask(new FileWriteTask($this->getDataPath() . "players/" . strtolower($name) . ".dat", $nbt->writeCompressed()));
+			}else{
+				file_put_contents($this->getDataPath() . "players/" . strtolower($name) . ".dat", $nbt->writeCompressed());
+			}
+		}catch(\Exception $e){
+			$this->logger->critical($this->getLanguage()->translateString("pocketmine.data.saveError", [$name, $e->getMessage()]));
+			if(\pocketmine\DEBUG > 1 and $this->logger instanceof MainLogger){
+				$this->logger->logException($e);
+			}
+		}
 	}
 
 	/**
@@ -1380,7 +1456,9 @@ class Server{
 			"max-players" => 20,
 			"allow-flight" => false,
 			"spawn-animals" => true,
+			"animals-limit" => 0,
 			"spawn-mobs" => true,
+			"mobs-limit" => 0,
 			"gamemode" => 0,
 			"force-gamemode" => false,
 			"hardcore" => false,
@@ -1394,6 +1472,7 @@ class Server{
 			"enable-rcon" => false,
 			"rcon.password" => substr(base64_encode(@Utils::getRandomBytes(20, false)), 3, 10),
 			"auto-save" => true,
+			"auto-generate" => false
 		]);
 
 		ServerScheduler::$WORKERS = 4;
@@ -1422,6 +1501,12 @@ class Server{
 
 		$this->maxPlayers = $this->getConfigInt("max-players", 20);
 		$this->setAutoSave($this->getConfigBoolean("auto-save", true));
+		$this->setAutoGenerate($this->getConfigBoolean("auto-generate", false));
+		
+		$this->useAnimal = $this->getConfigBoolean("spawn-animals", false);
+		$this->animalLimit = $this->getConfigInt("animals-limit", 0);
+		$this->useMonster = $this->getConfigBoolean("spawn-mobs", false);
+		$this->monsterLimit = $this->getConfigInt("mobs-limit", 0);
 
 		if(($memory = str_replace("B", "", strtoupper($this->getConfigString("memory-limit", "256M")))) !== false){
 			$value = ["M" => 1, "G" => 1024];
@@ -1475,6 +1560,7 @@ class Server{
 		InventoryType::init();
 		Block::init();
 		Item::init();
+		Biome::init();
 		TextWrapper::init();
 		$this->craftingManager = new CraftingManager();
 
@@ -2337,6 +2423,9 @@ class Server{
 		}
 		
 
+		if ($this->tickCounter % 200 === 0 && ($this->isUseAnimal() || $this->isUseMonster())) {
+			SpawnerCreature::generateEntity($this, $this->isUseAnimal(), $this->isUseMonster());
+		}
 		//Timings::$serverTickTimer->stopTiming();
 
 //		TimingsHandler::tick();
@@ -2362,10 +2451,31 @@ class Server{
 		Entity::registerEntity(PrimedTNT::class);
 		Entity::registerEntity(Snowball::class);
 		Entity::registerEntity(Villager::class);
-		Entity::registerEntity(Zombie::class);
 		Entity::registerEntity(Squid::class);
-
-		Entity::registerEntity(Human::class, true);
+		Entity::registerEntity(Human::class, true);		
+		
+		Entity::registerEntity(Blaze::class);
+		Entity::registerEntity(CaveSpider::class);
+		Entity::registerEntity(Chicken::class);
+		Entity::registerEntity(Cow::class);
+		Entity::registerEntity(Creeper::class);
+		Entity::registerEntity(Enderman::class);
+		Entity::registerEntity(Ghast::class);
+		Entity::registerEntity(IronGolem::class);
+		Entity::registerEntity(Mooshroom::class);
+		Entity::registerEntity(Ocelot::class);
+		Entity::registerEntity(Pig::class);
+		Entity::registerEntity(PigZombie::class);
+		Entity::registerEntity(Rabbit::class);
+		Entity::registerEntity(Sheep::class);
+		Entity::registerEntity(Silverfish::class);
+		Entity::registerEntity(Skeleton::class);
+		Entity::registerEntity(SnowGolem::class);
+		Entity::registerEntity(Spider::class);
+		Entity::registerEntity(Wolf::class);
+		Entity::registerEntity(Zombie::class);
+		Entity::registerEntity(ZombieVillager::class);
+		Entity::registerEntity(FireBall::class);
 	}
 
 	private function registerTiles(){

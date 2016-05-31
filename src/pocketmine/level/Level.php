@@ -102,6 +102,15 @@ use pocketmine\utils\ReversePriorityQueue;
 use pocketmine\utils\TextFormat;
 use pocketmine\network\protocol\Info;
 use pocketmine\ChunkMaker;
+use pocketmine\level\generator\GenerationTask;
+use pocketmine\level\generator\Generator;
+use pocketmine\level\generator\GeneratorRegisterTask;
+use pocketmine\level\generator\GeneratorUnregisterTask;
+use pocketmine\utils\Random;
+use pocketmine\level\generator\LightPopulationTask;
+use pocketmine\level\generator\PopulationTask;
+use pocketmine\entity\monster\Monster;
+use pocketmine\entity\animal\Animal;
 
 
 
@@ -197,6 +206,13 @@ class Level implements ChunkManager, Metadatable{
 	/** @var \SplFixedArray */
 	private $blockStates;
 	protected $playerHandItemQueue = array();
+	
+	private $chunkGenerationQueue = [];
+	private $chunkGenerationQueueSize = 8;
+	
+	private $chunkPopulationQueue = [];
+	private $chunkPopulationLock = [];
+	private $chunkPopulationQueueSize = 2;
 
 	protected $chunkTickRadius;
 	protected $chunkTickList = [];
@@ -318,9 +334,14 @@ class Level implements ChunkManager, Metadatable{
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
 		$this->chunkMaker = new ChunkMaker($this->server->getLoader());
+		$this->generator = Generator::getGenerator($this->provider->getGenerator());
 	}
 
 	public function initLevel(){
+		$generator = $this->generator;
+		$this->generatorInstance = new $generator($this->provider->getGeneratorOptions());
+		$this->generatorInstance->init($this, new Random($this->getSeed()));
+		$this->registerGenerator();
 	}
 
 	/**
@@ -361,6 +382,8 @@ class Level implements ChunkManager, Metadatable{
 		foreach($this->chunks as $chunk){
 			$this->unloadChunk($chunk->getX(), $chunk->getZ(), false);
 		}
+		
+		$this->unregisterGenerator();
 
 		$this->provider->close();
 		$this->provider = null;
@@ -1889,10 +1912,25 @@ class Level implements ChunkManager, Metadatable{
 	public function getChunkAt($x, $z, $create = false){
 		return $this->getChunk($x, $z, $create);
 	}
+	
+	public function getChunkLoaders(int $chunkX, int $chunkZ){
+		return isset($this->chunkLoaders[$index = Level::chunkHash($chunkX, $chunkZ)]) ? $this->chunkLoaders[$index] : [];
+	}
 
+	
+	
 	public function generateChunkCallback($x, $z, FullChunk $chunk){
 		$oldChunk = $this->getChunk($x, $z, false);
-		unset($this->chunkGenerationQueue[PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z)]);
+		$index = Level::chunkHash($x, $z);
+		
+		for($xx = -1; $xx <= 1; ++$xx){
+			for($zz = -1; $zz <= 1; ++$zz){
+				unset($this->chunkPopulationLock[Level::chunkHash($x + $xx, $z + $zz)]);
+			}
+		}
+		unset($this->chunkPopulationQueue[$index]);	
+		unset($this->chunkGenerationQueue[$index]);
+		
 		$chunk->setProvider($this->provider);
 		$this->setChunk($x, $z, $chunk);
 		$chunk = $this->getChunk($x, $z, false);
@@ -2203,9 +2241,18 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		try{
-			if($chunk !== null and $this->getAutoSave()){
-				$this->provider->setChunk($x, $z, $chunk);
-				$this->provider->saveChunk($x, $z);
+			if ($chunk !== null) {
+				if ($this->server->isUseAnimal() || $this->server->isUseMonster()) {
+					foreach ($chunk->getEntities() as $entity) {
+						if ($entity instanceof Monster || $entity instanceof Animal) {
+							$entity->close();
+						}
+					}
+				}
+				if ($this->getAutoSave()) {
+					$this->provider->setChunk($x, $z, $chunk);
+					$this->provider->saveChunk($x, $z);
+				}
 			}
 			$this->provider->unloadChunk($x, $z, $safe);
 		}catch(\Exception $e){
@@ -2370,9 +2417,34 @@ class Level implements ChunkManager, Metadatable{
 	public function setSeed($seed){
 		$this->provider->setSeed($seed);
 	}
+	
+	
 
-	public function generateChunk($x, $z){
-        $this->setChunk($x, $z, Chunk::getEmptyChunk($x, $z, $this->provider));
+	public function generateChunk(int $x, int $z, bool $force = false){
+		if(count($this->chunkGenerationQueue) >= $this->chunkGenerationQueueSize and !$force){
+			return;
+		}
+		if(!isset($this->chunkGenerationQueue[$index = Level::chunkHash($x, $z)])){
+			Timings::$generationTimer->startTiming();
+			$this->chunkGenerationQueue[$index] = true;
+			$task = new GenerationTask($this, $this->getChunk($x, $z, true));
+			$this->server->getScheduler()->scheduleAsyncTask($task);			
+			Timings::$generationTimer->stopTiming();
+		}
+	}
+	
+	public function registerGenerator(){
+		$size = $this->server->getScheduler()->getAsyncTaskPoolSize();
+		for($i = 0; $i < $size; ++$i){
+			$this->server->getScheduler()->scheduleAsyncTaskToWorker(new GeneratorRegisterTask($this,  $this->generatorInstance), $i);
+		}
+	}
+
+	public function unregisterGenerator(){
+		$size = $this->server->getScheduler()->getAsyncTaskPoolSize();
+		for($i = 0; $i < $size; ++$i){
+			$this->server->getScheduler()->scheduleAsyncTaskToWorker(new GeneratorUnregisterTask($this,  $this->generatorInstance), $i);
+		}
 	}
 
 	public function regenerateChunk($x, $z){
@@ -2498,4 +2570,41 @@ class Level implements ChunkManager, Metadatable{
 		return true;
 	}
 		
+	
+
+	
+	public function populateChunk(int $x, int $z, bool $force = false){
+		if(isset($this->chunkPopulationQueue[$index = Level::chunkHash($x, $z)]) or (count($this->chunkPopulationQueue) >= $this->chunkPopulationQueueSize and !$force)){
+			return false;
+		}
+
+		$chunk = $this->getChunk($x, $z, true);
+		if(!$chunk->isPopulated()){
+			$populate = true;
+			for($xx = -1; $xx <= 1; ++$xx){
+				for($zz = -1; $zz <= 1; ++$zz){
+					if(isset($this->chunkPopulationLock[Level::chunkHash($x + $xx, $z + $zz)])){
+						$populate = false;
+						break;
+					}
+				}
+			}
+
+			if($populate){
+				if(!isset($this->chunkPopulationQueue[$index])){
+					$this->chunkPopulationQueue[$index] = true;
+					for($xx = -1; $xx <= 1; ++$xx){
+						for($zz = -1; $zz <= 1; ++$zz){
+							$this->chunkPopulationLock[Level::chunkHash($x + $xx, $z + $zz)] = true;
+						}
+					}
+					$task = new PopulationTask($this, $chunk);
+					$this->server->getScheduler()->scheduleAsyncTask($task);
+				}
+			}
+			return false;
+		}
+
+		return true;
+	}
 }

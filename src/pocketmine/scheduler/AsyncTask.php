@@ -37,7 +37,7 @@ abstract class AsyncTask extends Collectable{
 	
 	protected $isFinished = false;
 
-	public function run(){
+	public function run(){		
 		$this->result = null;
 
 		$this->onRun();
@@ -115,6 +115,18 @@ abstract class AsyncTask extends Collectable{
 	}
 
 	/**
+	 * Gets something into the local thread store.
+	 * You have to initialize this in some way from the task on run
+	 *
+	 * @param string $identifier
+	 * @return mixed
+	 */
+	public function getFromThreadStore($identifier){
+		global $store;
+		return $this->isFinished() ? null : $store[$identifier];
+	}
+	
+	/**
 	 * @return bool
 	 */
 	public function hasResult(){
@@ -163,4 +175,11 @@ abstract class AsyncTask extends Collectable{
 		}
 	}
 
+	public function saveToThreadStore($identifier, $value){
+		global $store;
+		if(!$this->isFinished()){
+			$store[$identifier] = $value;
+		}
+	}
+	
 }

@@ -704,6 +704,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->level->useChunk($X, $Z, $this);
 			$this->level->requestChunk($X, $Z, $this, LevelProvider::ORDER_ZXY);
+			if($this->server->getAutoGenerate()){
+				if(!$this->level->populateChunk($X, $Z, true)){
+					if($this->spawned and $this->teleportPosition === null){
+						continue;
+					}else{
+						break;
+					}
+				}
+			}
 		}
 		
 		if($this->chunkLoadCount >= 36 and $this->spawned === false){
@@ -1795,7 +1804,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}
 					}
 				}
-
+                                
 				$nbt = $this->server->getOfflinePlayerData($this->username);
 				if(!isset($nbt->NameTag)){
 					$nbt->NameTag = new StringTag("NameTag", $this->username);
@@ -2803,8 +2812,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerCraftingEventPacket->stopTiming();
 					break;
 				}
-
-				$this->server->getPluginManager()->callEvent($ev = new CraftItemEvent($ingredients, $recipe));
+				$this->server->getPluginManager()->callEvent($ev = new CraftItemEvent($ingredients, $recipe, $this));
 
 				if($ev->isCancelled()){
 					$this->inventory->sendContents($this);
@@ -3095,7 +3103,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if($this->username != ""){
 				$this->server->getPluginManager()->callEvent($ev = new PlayerQuitEvent($this, $message, $reason));
 				if($this->server->getAutoSave() and $this->loggedIn === true){
-					$this->save();
+                                    $this->save();
 				}
 			}
 
@@ -3176,7 +3184,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->namedtag["lastPlayed"] = floor(microtime(true) * 1000);
 
 			if($this->username != "" and $this->namedtag instanceof Compound){
-				$this->server->saveOfflinePlayerData($this->username, $this->namedtag);
+				$this->server->saveOfflinePlayerData($this->username, $this->namedtag, true);
 			}
 		}
 	}

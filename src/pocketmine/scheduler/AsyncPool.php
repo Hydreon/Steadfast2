@@ -111,4 +111,27 @@ class AsyncPool{
 			}
 		}
 	}
+	
+	
+	
+	public function getSize(){
+		return $this->size;
+	}
+	
+	public function submitTaskToWorker(AsyncTask $task, $worker){
+		if(isset($this->tasks[$task->getTaskId()]) or $task->isFinished()){
+			return;
+		}
+
+		$worker = (int) $worker;
+		if($worker < 0 or $worker >= $this->size){
+			throw new \InvalidArgumentException("Invalid worker $worker");
+		}
+
+		$this->tasks[$task->getTaskId()] = $task;
+
+		$this->workers[$worker]->stack($task);
+		$this->workerUsage[$worker]++;
+		$this->taskWorkers[$task->getTaskId()] = $worker;
+	}
 }
