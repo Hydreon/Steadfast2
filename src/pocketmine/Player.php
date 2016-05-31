@@ -137,6 +137,7 @@ use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
 use pocketmine\utils\TextFormat;
 use pocketmine\network\protocol\SetPlayerGameTypePacket;
+use pocketmine\block\Liquid;
 
 use raklib\Binary;
 
@@ -1365,21 +1366,30 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			if(!$isFirst){
 				$needEvent = true;
-				$block = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()), floor($to->getZ())));
-				$blockUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 1, floor($to->getZ())));
-				$roundBlock = $from->level->getBlock(new Vector3(floor($to->getX()), round($to->getY()), floor($to->getZ())));
-				if($from->getY() - $to->getY() > 0.1){
-					if(!$roundBlock->isTransparent()){
-						$needEvent = false;
-					}
-				}else{
-					if(!$block->isTransparent()){
-						$blockUpUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 2, floor($to->getZ())));
-						if(!$blockUp->isTransparent()){
+				if(!$this->isSpectator()) {					
+					$block = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()), floor($to->getZ())));
+					$blockUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 1, floor($to->getZ())));
+					$roundBlock = $from->level->getBlock(new Vector3(floor($to->getX()), round($to->getY()), floor($to->getZ())));
+					if($from->getY() - $to->getY() > 0.1){
+						if(!$roundBlock->isTransparent()){
 							$needEvent = false;
-						}else{
-							if(!$blockUpUp->isTransparent()){
-								$needEvent = false;
+						}
+					}else{
+						if(!$block->isTransparent() || !$blockUp->isTransparent()){
+							$blockUpUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 2, floor($to->getZ())));
+							if(!$blockUp->isTransparent()){
+								$blockLow = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) - 1, floor($to->getZ())));
+								if($from->getY() == $to->getY() && !$blockLow->isTransparent()){
+									$needEvent = false;
+								}
+							}else{
+								if(!$blockUpUp->isTransparent()){
+									$needEvent = false;
+								}
+								$blockFrom = $from->level->getBlock(new Vector3($from->getX(), $from->getY(), $from->getZ()));
+								if($blockFrom instanceof Liquid){
+									$needEvent = false;
+								}
 							}
 						}
 					}
@@ -1873,9 +1883,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->x = $this->x;
 				$pk->y = $this->y;
 				$pk->z = $this->z;
-				$pk->spawnX = (int) $spawnPosition->x;
-				$pk->spawnY = (int) $spawnPosition->y;
-				$pk->spawnZ = (int) $spawnPosition->z;
+//				$pk->spawnX = (int) $spawnPosition->x;
+//				$pk->spawnY = (int) $spawnPosition->y;
+//				$pk->spawnZ = (int) $spawnPosition->z;
+				/* hack for compass*/
+				$pk->spawnX = -1000000;
+				$pk->spawnY = 10;
+				$pk->spawnZ = -1000000;
 				$pk->generator = 1; //0 old, 1 infinite, 2 flat
 				$pk->gamemode = $this->gamemode & 0x01;
 				$pk->eid = 0; //Always use EntityID as zero for the actual player
@@ -2028,6 +2042,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerMobEqipmentPacket->stopTiming();
 				break;
 			case ProtocolInfo::USE_ITEM_PACKET:
+				$packet->decodeAddational($this->protocol); //hack for 0.14.3
 				//Timings::$timerUseItemPacket->startTiming();
 				if($this->spawned === false or $this->dead === true or $this->blocked){
 					//Timings::$timerUseItemPacket->stopTiming();

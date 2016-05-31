@@ -126,12 +126,10 @@ class PacketMaker extends Worker {
 			$pk15->encode();
 			$pk15->isEncoded = true;
 			foreach($data['targets'] as $target){
-				$result = $this->makeBuffer($target[0], $target[1], ($target[1] == chr(0xfe) ? $pk15 : $pk), false, false);
+				$this->externalQueue[] = $this->makeBuffer($target[0], $target[1], ($target[1] == chr(0xfe) ? $pk15 : $pk), false, false);
 			}
 		}
-		if(!empty($result)) {
-			$this->externalQueue[] = $result;
-		}
+		
 	}
 
 	protected function makeBuffer($identifier, $additionalChar, $fullPacket, $needACK, $identifierACK) {		

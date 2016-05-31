@@ -125,7 +125,7 @@ const AIR = 0;
 	const WOODEN_DOOR_BLOCK = 64;
 	const WOOD_DOOR_BLOCK = 64;
 	const LADDER = 65;
-
+	const RAIL = 66;
 	const COBBLE_STAIRS = 67;
 	const COBBLESTONE_STAIRS = 67;
 	const WALL_SIGN = 68;
@@ -372,7 +372,7 @@ const AIR = 0;
 			self::$list[self::SIGN_POST] = SignPost::class;
 			self::$list[self::WOOD_DOOR_BLOCK] = WoodDoor::class;
 			self::$list[self::LADDER] = Ladder::class;
-
+			self::$list[self::RAIL] = Rail::class;
 			self::$list[self::COBBLESTONE_STAIRS] = CobblestoneStairs::class;
 			self::$list[self::WALL_SIGN] = WallSign::class;
 

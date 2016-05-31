@@ -155,7 +155,7 @@ class Item{
 	const WOODEN_DOOR_BLOCK = 64;
 	const WOOD_DOOR_BLOCK = 64;
 	const LADDER = 65;
-
+	const RAIL = 66;
 	const COBBLE_STAIRS = 67;
 	const COBBLESTONE_STAIRS = 67;
 	const WALL_SIGN = 68;
@@ -439,10 +439,254 @@ class Item{
 	const BEETROOT_SEEDS = 458;
 	const BEETROOT_SEED = 458;
 	const BEETROOT_SOUP = 459;
-
+	
+	
+	protected static $names = [
+		0 => "Air",
+		1 => "Stone",
+		2 => "Grass",
+		3 => "Dirt",
+		4 => "Cobblestone",
+		5 => "Plank",
+		6 => "Sapling",
+		7 => "Bedrock",
+		8 => "Water",
+		9 => "Still Water",
+		10 => "Lava",
+		11 => "Still Lava",
+		12 => "Sand",
+		13 => "Gravel",
+		14 => "Gold Ore",
+		15 => "Iron Ore",
+		16 => "Coal Ore",
+		17 => "Wood",
+		18 => "Leaves",
+		19 => "Sponge",
+		20 => "Glass",
+		21 => "Lapis Ore",
+		22 => "Lapis Block",
+		24 => "Sandstone",
+		26 => "Bed",
+		30 => "Cobweb",
+		31 => "Tall Grass",
+		32 => "Bush",
+		35 => "Wool",
+		37 => "Dandelion",
+		38 => "Red Flower",
+		39 => "Brown Mushroom",
+		40 => "Red Mushroom",
+		41 => "Gold Block",
+		42 => "Iron Block",
+		43 => "Double Slab",
+		44 => "Slab",
+		45 => "Bricks",
+		46 => "TNT",
+		47 => "Bookshelf",
+		48 => "Moss Stone",
+		49 => "Obsidian",
+		50 => "Torch",
+		51 => "Fire",
+		52 => "Monster Spawner",
+		53 => "Wooden Stairs",
+		54 => "Chest",
+		56 => "Diamond Ore",
+		57 => "Diamond Block",
+		58 => "Crafting Table",
+		59 => "Wheat Block",
+		60 => "Farmland",
+		61 => "Furnace",
+		62 => "Burning Furnace",
+		63 => "Sign Post",
+		64 => "Door",
+		65 => "Ladder",
+		66 => "Rail",
+		67 => "Cobble Stairs",
+		68 => "Wall Sign",
+		71 => "Iron Door",
+		73 => "Redstone Ore",
+		74 => "Glowing Redstone Ore",
+		78 => "Snow",
+		79 => "Ice",
+		80 => "Snow Block",
+		81 => "Cactus",
+		82 => "Clay Block",
+		83 => "Sugarcane Block",
+		91 => "Jack-O'-Lantern",
+		92 => "Cake Block",
+		96 => "Trapdoor",
+		98 => "Stone Bricks",
+		101 => "Iron Bar",
+		102 => "Glass Panel",
+		103 => "Melon BLock",
+		104 => "Pumpkin Stem",
+		106 => "Vine",
+		107 => "Fence Gate",
+		108 => "Brick Stairs",
+		109 => "Stone Brick Stairs",
+		110 => "Mycelium",
+		111 => "Water Lily",
+		112 => "Nether Brick",
+		114 => "Nether Brick Stairs",
+		116 => "Enchantment Table",
+		120 => "End Portal",
+		121 => "End Stone",
+		128 => "Sendstone Stairs",
+		129 => "Emerald Ore",
+		133 => "Emerald Block",
+		134 => "Spruce Wood Stairs",
+		135 => "Birch Wood Stairs",
+		136 => "Jungle Wood Stairs",
+		139 => "Cobblestone Wall",
+		141 => "Carrot Block",
+		142 => "Potato Block",
+		145 => "Anvil",
+		152 => "Redstone Block",
+		155 => "Quartz Block",
+		156 => "Quartz Stairs",
+		157 => "Double Wood Slab",
+		158 => "Wooden Slab",
+		159 => "Stained Clay",
+		161 => "Leaves2",
+		162 => "Wood2",
+		163 => "Acacia Wood Stairs",
+		164 => "Dark Oak Wood Stairs",
+		170 => "Hay Bale",
+		171 => "Carpet",
+		172 => "Hardened CLay",
+		173 => "Coal BLock",
+		175 => "Double Plant",
+		183 => "Fence Gate Spruce",
+		184 => "Fence Gate Birch",
+		185 => "Fence Gate Jungle",
+		186 => "Fence Gate Dark Oak",
+		187 => "Fence Gate Acacia",
+		198 => "Grass Path",
+		243 => "Podzol",
+		244 => "Beetroot Block",
+		245 => "Stonecutter",
+		246 => "Glowing Obsidian",
+		247 => "Nether Reactor",
+		256 => "Iron Shovel",
+		257 => "Iron Pickaxe",
+		258 => "Iron Axe",
+		259 => "Flint and Steel",
+		260 => "Apple",
+		261 => "Bow",
+		262 => "Arrow",
+		263 => "Coal",
+		264 => "Diamond",
+		265 => "Iron Ingot",
+		266 => "Gold Ingot",
+		267 => "Iron Sword",
+		268 => "Wooden Sword",
+		269 => "Wooden Shovel",
+		270 => "Wooden Pickaxe",
+		271 => "Wooden Axe",
+		272 => "Stone Sword",
+		273 => "Stone Shovel",
+		274 => "Stone Pickaxe",
+		275 => "Stone Axe",
+		276 => "Diamond Sword",
+		277 => "Diamond Shovel",
+		278 => "Diamond Pickaxe",
+		279 => "Diamond Axe",
+		280 => "Stick",
+		281 => "Bowl",
+		282 => "Mushroom Stew",
+		283 => "Gold Sword",
+		284 => "Gold Shovel",
+		285 => "Gold Pickaxe",
+		286 => "Gold Axe",
+		287 => "String",
+		288 => "Feather",
+		289 => "Gunpowder",
+		290 => "Wooden Hoe",
+		291 => "Stone Hoe",
+		292 => "Iron Hoe",
+		293 => "Diamond Hoe",
+		294 => "Gold Hoe",
+		295 => "Wheat Seed",
+		296 => "Wheat",
+		297 => "Bread",
+		298 => "Leather Cap",
+		299 => "Leather Tunic",
+		300 => "Leather Pants",
+		301 => "Leather Boots",
+		302 => "Chain Helmet",
+		303 => "Chain Chestplate",
+		304 => "Chain Leggins",
+		305 => "Chain Boots",
+		306 => "Iron Helmet",
+		307 => "Iron Chestplate",
+		308 => "Iron Leggins",
+		309 => "Iron Boots",
+		310 => "Diamond Helmet",
+		311 => "Diamond Chestplate",
+		312 => "Diamond Leggins",
+		313 => "Diamond Boots",
+		314 => "Gold Helmet",
+		315 => "Gold Chestplate",
+		316 => "Gold Leggins",
+		317 => "Gold Boots",
+		318 => "Flint",
+		319 => "Raw Porkchop",
+		320 => "Cooked Porkchop",
+		321 => "Painting",
+		322 => "Golden Apple",
+		323 => "Sign",
+		324 => "Wooden Door",
+		325 => "Bucket",
+		328 => "Minecart",
+		330 => "Iron Door",
+		331 => "Redstone",
+		332 => "Snowball",
+		334 => "Leather",
+		336 => "Bricks",
+		337 => "Clay",
+		338 => "Sugarcane",
+		339 => "Paper",
+		340 => "Book",
+		341 => "Slimeball",
+		344 => "Egg",
+		345 => "Compass",
+		346 => "Compass",
+		347 => "Clock",
+		348 => "Glowstone Dust",
+		349 => "Raw Fish",
+		350 => "Cooked Fish",
+		351 => "Dye",
+		352 => "Bone",
+		353 => "Sugar",
+		354 => "Cake",
+		355 => "Bed",
+		357 => "Cookie",
+		359 => "Shears",
+		360 => "Melon",
+		361 => "Pumpkin Seed",
+		362 => "Melon Seed",
+		363 => "Raw Beef",
+		364 => "Steak",
+		365 => "Raw Chicken",
+		366 => "Cooked Chicken",
+		371 => "Gold Nugget",
+		378 => "Magma Cream",
+		383 => "Spawn Egg",
+		388 => "Emerald",
+		391 => "Carrot",
+		392 => "Potato",
+		393 => "Baked Potato",
+		400 => "Pumpkin Pie",
+		405 => "Nether Bricks",
+		406 => "Quartz",
+		456 => "Camera",
+		457 => "Beetroot",
+		458 => "Beetroot Seed",
+		459 => "Beetroot Soup"
+	];
 
 	/** @var \SplFixedArray */
 	public static $list = null;
+	public static $food = null;
 	protected $block;
 	protected $id;
 	protected $meta;
@@ -451,6 +695,7 @@ class Item{
 	public $count;
 	protected $durability = 0;
 	protected $name;
+	protected $obtainTime = 0;
 
 	public function canBeActivated(){
 		return false;
@@ -546,6 +791,7 @@ class Item{
 		}
 
 		self::initCreativeItems();
+		self::initFood();
 	}
 
 	private static $creative = [];
@@ -625,6 +871,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::QUARTZ_STAIRS, 0));
 		self::addCreativeItem(Item::get(Item::SLAB, 0));
 		self::addCreativeItem(Item::get(Item::SLAB, 1));
+		self::addCreativeItem(Item::get(Item::RAIL, 0));
 		self::addCreativeItem(Item::get(Item::WOODEN_SLAB, 0));
 		self::addCreativeItem(Item::get(Item::WOODEN_SLAB, 1));
 		self::addCreativeItem(Item::get(Item::WOODEN_SLAB, 2));
@@ -845,6 +1092,29 @@ class Item{
 		self::addCreativeItem(Item::get(Item::DYE, 9));
 		self::addCreativeItem(Item::get(Item::DYE, 8));
 	}
+	
+	private static function initFood(){
+		self::$food[] = Item::COOKIE;
+		self::$food[] = Item::MELON;
+		self::$food[] = Item::RAW_BEEF;
+		self::$food[] = Item::COOKED_BEEF;
+		self::$food[] = Item::RAW_CHICKEN;
+		self::$food[] = Item::COOKED_CHICKEN;
+		self::$food[] = Item::CARROT;
+		self::$food[] = Item::POTATO;
+		self::$food[] = Item::BAKED_POTATO;
+		self::$food[] = Item::PUMPKIN_PIE;
+		self::$food[] = Item::COOKIE;
+		self::$food[] = Item::BREAD;
+		self::$food[] = Item::APPLE;
+		self::$food[] = Item::GOLDEN_APPLE;
+		self::$food[] = Item::EGG;
+		self::$food[] = Item::RAW_FISH;
+		self::$food[] = Item::COOKED_FISH;
+		self::$food[] = Item::RAW_PORKCHOP;
+		self::$food[] = Item::COOKED_PORKCHOP;
+		self::$food[] = Item::BAKED_POTATO;
+	}
 
 	public static function clearCreativeItems(){
 		Item::$creative = [];
@@ -941,14 +1211,20 @@ class Item{
 		}
 	}
 
-	public function __construct($id, $meta = 0, $count = 1, $name = "Unknown"){
+	public function __construct($id, $meta = 0, $count = 1, $name = "Unknown", $obtainTime = null){
 		$this->id = $id & 0xffff;
 		$this->meta = $meta !== null ? $meta & 0xffff : null;
 		$this->count = (int) $count;
 		$this->name = $name;
+		if($obtainTime == null){
+			$obtainTime = time();
+		}
 		if(!isset($this->block) and $this->id <= 0xff and isset(Block::$list[$this->id])){
 			$this->block = Block::get($this->id, $this->meta);
 			$this->name = $this->block->getName();
+		}
+		if($this->name == "Unknown" && isset(Item::$names[$this->id])){
+			$this->name = Item::$names[$this->id];
 		}
 	}
 
@@ -1352,6 +1628,18 @@ class Item{
 		}
 
 		return false;
+	}
+	
+	public function isFood(){
+		return in_array($this->id, self::$food);
+	}
+	
+	public function setObtainTime($time){
+		$this->obtainTime = $time;
+	}
+	
+	public function getObtainTime(){
+		return $this->obtainTime;
 	}
 
 }
