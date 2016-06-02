@@ -1878,7 +1878,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				$pk->spawnY = (int) $spawnPosition->y;
 //				$pk->spawnZ = (int) $spawnPosition->z;
 				/* hack for compass*/
-				$pk->spawnX = -1000000;
+				$pk->spawnX = 15000;
 				$pk->spawnY = 10;
 				$pk->spawnZ = -1000000;
 				$pk->generator = 1; //0 old, 1 infinite, 2 flat
