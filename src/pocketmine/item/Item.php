@@ -276,6 +276,12 @@ class Item{
 	const FENCE_GATE_JUNGLE = 185;
 	const FENCE_GATE_DARK_OAK = 186;
 	const FENCE_GATE_ACACIA = 187;
+	
+	const SPRUCE_DOOR_BLOCK = 193;
+	const BIRCH_DOOR_BLOCK = 194;
+	const JUNGLE_DOOR_BLOCK = 195;
+	const ACACIA_DOOR_BLOCK = 196;
+	const DARK_OAK_DOOR_BLOCK = 197;
 
 	const GRASS_PATH = 198;
 
@@ -433,6 +439,12 @@ class Item{
 	const NETHER_BRICK = 405;
 	const QUARTZ = 406;
 	const NETHER_QUARTZ = 406;
+	
+	const SPRUCE_DOOR = 427;
+	const BIRCH_DOOR = 428;
+	const JUNGLE_DOOR = 429;
+ 	const ACACIA_DOOR = 430;
+	const DARK_OAK_DOOR = 431;
 
 	const CAMERA = 456;
 	const BEETROOT = 457;
@@ -916,6 +928,12 @@ class Item{
 		self::addCreativeItem(Item::get(Item::SPONGE, 0));
 		self::addCreativeItem(Item::get(Item::GLASS_PANE, 0));
 		self::addCreativeItem(Item::get(Item::WOODEN_DOOR, 0));
+		self::addCreativeItem(Item::get(Item::OAK_DOOR, 0));
+ 		self::addCreativeItem(Item::get(Item::SPRUCE_DOOR, 0));
+ 		self::addCreativeItem(Item::get(Item::BIRCH_DOOR, 0));
+ 		self::addCreativeItem(Item::get(Item::JUNGLE_DOOR, 0));
+		self::addCreativeItem(Item::get(Item::ACACIA_DOOR, 0));
+ 		self::addCreativeItem(Item::get(Item::DARK_OAK_DOOR, 0));
 		self::addCreativeItem(Item::get(Item::TRAPDOOR, 0));
 		self::addCreativeItem(Item::get(Item::FENCE, 0));
 		self::addCreativeItem(Item::get(Item::FENCE, 1));
