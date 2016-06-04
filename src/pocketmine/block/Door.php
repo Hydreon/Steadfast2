@@ -29,14 +29,18 @@ use pocketmine\math\Vector3;
 use pocketmine\Player;
 
 
-abstract class Door extends Transparent{
+abstract class Door extends Transparent implements ElectricalAppliance{
 
-	public function canBeActivated(){
+	public function canBeActivated() : bool {
 		return true;
 	}
 
 	public function isSolid(){
 		return false;
+	}
+
+	public function canPassThrough(){
+		return true;
 	}
 
 	private function getFullDamage(){
@@ -56,7 +60,7 @@ abstract class Door extends Transparent{
 		return $down & 0x07 | ($isUp ? 8 : 0) | ($isRight ? 0x10 : 0);
 	}
 
-	protected function recalculateBoundingBox(){
+	protected function recalculateBoundingBox() {
 
 		$f = 0.1875;
 		$damage = $this->getFullDamage();
@@ -265,15 +269,19 @@ abstract class Door extends Transparent{
 		return true;
 	}
 
+	public function isOpened(){
+		return (($this->getFullDamage() & 0x04) > 0);
+	}
+
 	public function onActivate(Item $item, Player $player = null){
 		if(($this->getDamage() & 0x08) === 0x08){ //Top
 			$down = $this->getSide(0);
 			if($down->getId() === $this->getId()){
 				$meta = $down->getDamage() ^ 0x04;
 				$this->getLevel()->setBlock($down, Block::get($this->getId(), $meta), true);
-				$players = $this->getLevel()->getUsingChunk($this->x >> 4, $this->z >> 4);
+				$players = $this->getLevel()->getChunkPlayers($this->x >> 4, $this->z >> 4);
 				if($player instanceof Player){
-					unset($players[$player->getId()]);
+					unset($players[$player->getLoaderId()]);
 				}
 
 				$this->level->addSound(new DoorSound($this));
@@ -284,9 +292,9 @@ abstract class Door extends Transparent{
 		}else{
 			$this->meta ^= 0x04;
 			$this->getLevel()->setBlock($this, $this, true);
-			$players = $this->getLevel()->getUsingChunk($this->x >> 4, $this->z >> 4);
+			$players = $this->getLevel()->getChunkPlayers($this->x >> 4, $this->z >> 4);
 			if($player instanceof Player){
-				unset($players[$player->getId()]);
+				unset($players[$player->getLoaderId()]);
 			}
 			$this->level->addSound(new DoorSound($this));
 		}
