@@ -1641,6 +1641,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				--$slot->count;
 				$this->inventory->setItemInHand($slot);
+				$this->inventory->sendHeldItem($this);
 				if($slot->getId() === Item::MUSHROOM_STEW or $slot->getId() === Item::BEETROOT_SOUP){
 					$this->inventory->addItem(Item::get(Item::BOWL, 0, 1));
 				}elseif($slot->getId() === Item::RAW_FISH and $slot->getDamage() === 3){ //Pufferfish
