@@ -387,7 +387,8 @@ class Item{
 
 	const EGG = 344;
 	const COMPASS = 345;
-
+        const FISHING_ROD = 346;
+        	
 	const CLOCK = 347;
 	const GLOWSTONE_DUST = 348;
 	const RAW_FISH = 349;
@@ -1035,6 +1036,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::IRON_SHOVEL, 0));
 		self::addCreativeItem(Item::get(Item::IRON_SWORD, 0));
 		self::addCreativeItem(Item::get(Item::BOW, 0));
+		self::addCreativeItem(Item::get(Item::FISHING_ROD, 0));
 		self::addCreativeItem(Item::get(Item::SHEARS, 0));
 		self::addCreativeItem(Item::get(Item::FLINT_AND_STEEL, 0));
 		self::addCreativeItem(Item::get(Item::CLOCK, 0));
