@@ -912,7 +912,6 @@ class Item{
 		self::addCreativeItem(Item::get(Item::GLASS, 0));
 		self::addCreativeItem(Item::get(Item::GLOWSTONE_BLOCK, 0));
 		self::addCreativeItem(Item::get(Item::VINES, 0));
-		self::addCreativeItem(Item::get(Item::NETHER_REACTOR, 0));
 		self::addCreativeItem(Item::get(Item::LADDER, 0));
 		self::addCreativeItem(Item::get(Item::SPONGE, 0));
 		self::addCreativeItem(Item::get(Item::GLASS_PANE, 0));
@@ -1031,44 +1030,97 @@ class Item{
 		self::addCreativeItem(Item::get(Item::BUCKET, 8));
 		self::addCreativeItem(Item::get(Item::BUCKET, 10));
 		self::addCreativeItem(Item::get(Item::TNT, 0));
-		self::addCreativeItem(Item::get(Item::IRON_HOE, 0));
-		self::addCreativeItem(Item::get(Item::IRON_SHOVEL, 0));
-		self::addCreativeItem(Item::get(Item::IRON_SWORD, 0));
+		self::addCreativeItem(Item::get(Item::REDSTONE, 0));
 		self::addCreativeItem(Item::get(Item::BOW, 0));
-		self::addCreativeItem(Item::get(Item::SHEARS, 0));
 		self::addCreativeItem(Item::get(Item::FLINT_AND_STEEL, 0));
+		self::addCreativeItem(Item::get(Item::SHEARS, 0));
 		self::addCreativeItem(Item::get(Item::CLOCK, 0));
 		self::addCreativeItem(Item::get(Item::COMPASS, 0));
 		self::addCreativeItem(Item::get(Item::MINECART, 0));
-		self::addCreativeItem(Item::get(Item::SPAWN_EGG, Villager::NETWORK_ID));
-		//self::addCreativeItem(Item::get(Item::SPAWN_EGG, 10)); //Chicken
-		//self::addCreativeItem(Item::get(Item::SPAWN_EGG, 11)); //Cow
-		//self::addCreativeItem(Item::get(Item::SPAWN_EGG, 12)); //Pig
-		//self::addCreativeItem(Item::get(Item::SPAWN_EGG, 13)); //Sheep
-		//TODO: Wolf
-		//TODO: Mooshroom
-		//TODO: Creeper
-		//TODO: Enderman
-		//TODO: Silverfish
-		//TODO: Skeleton
-		//TODO: Slime
-		//self::addCreativeItem(Item::get(Item::SPAWN_EGG, Zombie::NETWORK_ID));
-		//TODO: PigZombie
-		self::addCreativeItem(Item::get(Item::SPAWN_EGG, Squid::NETWORK_ID));
+		self::addCreativeItem(Item::get(Item::WOODEN_SWORD, 0));
+		self::addCreativeItem(Item::get(Item::WOODEN_HOE, 0));
+		self::addCreativeItem(Item::get(Item::WOODEN_SHOVEL, 0));
+		self::addCreativeItem(Item::get(Item::WOODEN_PICKAXE, 0));
+		self::addCreativeItem(Item::get(Item::WOODEN_AXE, 0));
+		self::addCreativeItem(Item::get(Item::STONE_SWORD, 0));
+		self::addCreativeItem(Item::get(Item::STONE_HOE, 0));
+		self::addCreativeItem(Item::get(Item::STONE_SHOVEL, 0));
+		self::addCreativeItem(Item::get(Item::STONE_PICKAXE, 0));
+		self::addCreativeItem(Item::get(Item::STONE_AXE, 0));
+		self::addCreativeItem(Item::get(Item::IRON_SWORD, 0));
+		self::addCreativeItem(Item::get(Item::IRON_HOE, 0));
+		self::addCreativeItem(Item::get(Item::IRON_SHOVEL, 0));
+		self::addCreativeItem(Item::get(Item::IRON_PICKAXE, 0));
+		self::addCreativeItem(Item::get(Item::IRON_AXE, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_SWORD, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_HOE, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_SHOVEL, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_PICKAXE, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_AXE, 0));
+		self::addCreativeItem(Item::get(Item::GOLD_SWORD, 0));
+		self::addCreativeItem(Item::get(Item::GOLD_HOE, 0));
+		self::addCreativeItem(Item::get(Item::GOLD_SHOVEL, 0));
+		self::addCreativeItem(Item::get(Item::GOLD_PICKAXE, 0));
+		self::addCreativeItem(Item::get(Item::GOLD_AXE, 0));
+		for($i = 298; $i < 318; $i++){ //All armor
+				self::addCreativeItem(Item::get($i, 0));
+			}
+			
+		    self::addCreativeItem(Item::get(Item::SPAWN_EGG, 15));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 10));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 11));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 12));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 13));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 14));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 22));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 16));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 19));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 18));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 33));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 38));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 39));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 34));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 37));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 35));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 32));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 36));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 17));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 40));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 42));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 41));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 43));
 
 		self::addCreativeItem(Item::get(Item::SNOWBALL));
 
 
 		//Seeds
-		self::addCreativeItem(Item::get(Item::SUGARCANE, 0));
+		self::addCreativeItem(Item::get(Item::COAL, 0));
+		self::addCreativeItem(Item::get(Item::COAL, 1));
+		self::addCreativeItem(Item::get(Item::DIAMOND, 0));
+		self::addCreativeItem(Item::get(Item::IRON_INGOT, 0));
+		self::addCreativeItem(Item::get(Item::GOLD_INGOT, 0));
+		self::addCreativeItem(Item::get(Item::EMERALD, 0));
+		self::addCreativeItem(Item::get(Item::STICKS, 0));
+		self::addCreativeItem(Item::get(Item::BOWL, 0));
+		self::addCreativeItem(Item::get(Item::STRING, 0));
+		self::addCreativeItem(Item::get(Item::FEATHER, 0));
+		self::addCreativeItem(Item::get(Item::FLINT, 0));
+		self::addCreativeItem(Item::get(Item::LEATHER, 0));
+		self::addCreativeItem(Item::get(Item::CLAY, 0));
+		self::addCreativeItem(Item::get(Item::SUGAR, 0));
+		self::addCreativeItem(Item::get(Item::QUARTZ, 0));
+		self::addCreativeItem(Item::get(Item::PAPER, 0));
+		self::addCreativeItem(Item::get(Item::MELON, 0));
+		self::addCreativeItem(Item::get(Item::ARROW, 0));
+		self::addCreativeItem(Item::get(Item::BONE, 0));
+		self::addCreativeItem(Item::get(Item::SUGAR_CANES, 0));
 		self::addCreativeItem(Item::get(Item::WHEAT, 0));
 		self::addCreativeItem(Item::get(Item::SEEDS, 0));
-		self::addCreativeItem(Item::get(Item::MELON_SEEDS, 0));
 		self::addCreativeItem(Item::get(Item::PUMPKIN_SEEDS, 0));
-		self::addCreativeItem(Item::get(Item::CARROT, 0));
-		self::addCreativeItem(Item::get(Item::POTATO, 0));
+		self::addCreativeItem(Item::get(Item::MELON_SEEDS, 0));
 		self::addCreativeItem(Item::get(Item::BEETROOT_SEEDS, 0));
-		self::addCreativeItem(Item::get(Item::EGG, 0));
+		self::addCreativeItem(Item::get(Item::APPLE, 0));
+		self::addCreativeItem(Item::get(Item::GOLDEN_APPLE, 0));
 		self::addCreativeItem(Item::get(Item::RAW_FISH, 0));
 		self::addCreativeItem(Item::get(Item::RAW_FISH, 1));
 		self::addCreativeItem(Item::get(Item::RAW_FISH, 2));
@@ -1091,6 +1143,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::DYE, 10));
 		self::addCreativeItem(Item::get(Item::DYE, 9));
 		self::addCreativeItem(Item::get(Item::DYE, 8));
+		
 	}
 	
 	private static function initFood(){
