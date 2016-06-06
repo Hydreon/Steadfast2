@@ -58,8 +58,8 @@ class UseItemPacket extends DataPacket{
 	}
 
 	
-	public function decodeAddational($protocol) { //hack for 0.14.3
-		if($protocol == 70) {
+	public function decodeAddational($protocol) { //hack for 0.14.3 TODO15
+		if($protocol >= 70) {
 			$this->getInt();
 		}
 		$this->item = $this->getSlot();

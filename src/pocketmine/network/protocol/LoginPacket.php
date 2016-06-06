@@ -25,6 +25,7 @@ namespace pocketmine\network\protocol;
 
 
 use pocketmine\utils\UUID;
+use pocketmine\utils\Binary;
 
 class LoginPacket extends DataPacket {
 
@@ -53,36 +54,60 @@ class LoginPacket extends DataPacket {
 	
 	public $additionalChar = "";
 
+	
+	private function getFromString(&$body, $len) {
+		$res = substr($body, 0, $len);
+		$body = substr($body, $len);
+		return $res;
+	}
+	
 	public function decode() {		
 		$addCharNumber = $this->getByte();
 		if($addCharNumber > 0) {
 			$this->additionalChar = chr($addCharNumber);
 		}
 		if($addCharNumber == 0xfe) {
-			$this->unknown3Bytes = $this->get(2);
 			$this->protocol1 = $this->getInt();
-			$this->protocol2 = $this->getInt();
-			$this->unknown4Bytes = $this->getInt();
-			$this->chainsDataLength = $this->getLInt();
-			$this->chains = json_decode($this->get($this->chainsDataLength), true);
-			$this->playerDataLength = $this->getLInt();
-			$this->playerData = $this->get($this->playerDataLength);
+			//var_dump($this->protocol1);
+			$bodyLength = $this->getInt();
+			//var_dump($bodyLength);
+			$body =  \zlib_decode($this->get($bodyLength));
+			//var_dump(strlen($body));
+			$this->chainsDataLength = Binary::readLInt($this->getFromString($body, 4));
+			//var_dump($this->chainsDataLength);
+			$this->chains = json_decode($this->getFromString($body, $this->chainsDataLength), true);
+			//var_dump($this->chains);
+			
 
-			$this->strangeData = substr($this->playerData, -1 * self::MAGIC_NUMBER);
-			$this->playerData = substr($this->playerData, 0, -1 * self::MAGIC_NUMBER);
+
+			$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));
+			//var_dump($this->playerDataLength);
+			$this->playerData = $this->getFromString($body, $this->playerDataLength);
+			//var_dump(strlen($this->playerData));
+
+			//$this->strangeData = substr($this->playerData, -1 * self::MAGIC_NUMBER);
+			//$this->playerData = substr($this->playerData, 0, -1 * self::MAGIC_NUMBER);
 
 			$this->chains['data'] = array();
 			foreach ($this->chains['chain'] as $key => $jwt) {
 				$this->chains['data'][] = self::load($jwt);
 			}
 
-			$this->playerData = self::load($this->playerData);;
-			$this->username = $this->chains['data'][1]['extraData']['displayName'];
-			$this->clientId = $this->chains['data'][1]['extraData']['identity'];
-			$this->clientUUID = UUID::fromBinary($this->chains['data'][1]['extraData']['XUID']);
+			//$this->strangeData = self::load($this->strangeData);
+		
+			$this->playerData = self::load($this->playerData);
+			$this->username = $this->chains['data'][0]['extraData']['displayName'];
+			$this->clientId = $this->chains['data'][0]['extraData']['identity'];
+			try{
+				$this->clientUUID = UUID::fromBinary(substr($this->playerData['ClientRandomId'], 0, 16));
+			} catch (\Exception $e) {
+				$this->clientUUID =  UUID::fromBinary('2535437613357535');
+			}
+			//$this->clientUUID = UUID::fromBinary($this->chains['data'][0]['identityPublicKey']);
+			//$this->clientUUID = UUID::fromBinary($this->chains['data'][1]['extraData']['XUID']);
+			
+			
 			$this->serverAddress = $this->playerData['ServerAddress'];
-	//		$this->clientSecret = $this->getString();
-
 			$this->skinName = $this->playerData['SkinId'];
 			$this->skin = base64_decode($this->playerData['SkinData']);
 		} else {

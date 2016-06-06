@@ -216,19 +216,22 @@ class Network {
 		$offset = 0;
 		try{
 			while($offset < $len){
-				$pid = ord($str{$offset++});				
+				$pkLen = \pocketmine\utils\Binary::readInt(substr($str, 4));	
+				$offset += 4;
+				$pid = ord($str{$offset++});	
+				$pid = DataPacket::$pkKeys[$pid];	
 				if(($pk = $this->getPacket($pid)) !== null){
 					if($pk::NETWORK_ID === Info::BATCH_PACKET){
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
 					}
 					$str = substr($str, $offset);
 					if($pid == 0x8f) {
-						$str = chr(0) . $str;
+						$str = chr(0xfe) . $str;
 					}
 					$pk->setBuffer($str);
 					$pk->decode();
 					$p->handleDataPacket($pk);
-					$offset += $pk->getOffset();
+					$offset += $pkLen;
 					if($pk->getOffset() <= 0){
 						return;
 					}

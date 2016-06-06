@@ -82,16 +82,15 @@ class PacketMaker extends Worker {
 	}
 	
 	protected function checkPacket($data) {
-		$result = "";
 		if (isset($data['moveData'])) {
 			foreach ($data['moveData'] as $identifier => $moveData) {
-				$pk = new MoveEntityPacket();
+				$pk = new MoveEntityPacket($moveData['additionalChar']);
 				$pk->entities = $moveData['data'];
 				$res = $this->makeBuffer($identifier, $moveData['additionalChar'], $pk, false, false);
 				$this->externalQueue[] = $res;
 			}	
 			foreach ($data['motionData'] as $identifier => $motionData) {
-				$pk = new SetEntityMotionPacket();
+				$pk = new SetEntityMotionPacket($motionData['additionalChar']);
 				$pk->entities = $motionData['data'];
 				$res = $this->makeBuffer($identifier, $motionData['additionalChar'], $pk, false, false);
 				$this->externalQueue[] = $res;
