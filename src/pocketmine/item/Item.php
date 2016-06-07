@@ -682,7 +682,8 @@ class Item{
 		456 => "Camera",
 		457 => "Beetroot",
 		458 => "Beetroot Seed",
-		459 => "Beetroot Soup"
+		459 => "Beetroot Soup",
+		373 => "Potion"
 	];
 
 	/** @var \SplFixedArray */
@@ -913,7 +914,6 @@ class Item{
 		self::addCreativeItem(Item::get(Item::GLASS, 0));
 		self::addCreativeItem(Item::get(Item::GLOWSTONE_BLOCK, 0));
 		self::addCreativeItem(Item::get(Item::VINES, 0));
-		self::addCreativeItem(Item::get(Item::NETHER_REACTOR, 0));
 		self::addCreativeItem(Item::get(Item::LADDER, 0));
 		self::addCreativeItem(Item::get(Item::SPONGE, 0));
 		self::addCreativeItem(Item::get(Item::GLASS_PANE, 0));
