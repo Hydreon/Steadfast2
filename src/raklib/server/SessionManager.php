@@ -168,6 +168,10 @@ class SessionManager{
             }
 
             $pid = ord($buffer{0});
+            
+            if($pid == UNCONNECTED_PONG::$ID){
+                return false;
+            }
 
             if(($packet = $this->getPacketFromPool($pid)) !== null){
                 $packet->buffer = $buffer;
