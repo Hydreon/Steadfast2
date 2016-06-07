@@ -416,7 +416,7 @@ class Item{
 
 	const GOLD_NUGGET = 371;
 	const GOLDEN_NUGGET = 371;
-
+	const POTION = 373;
 	const SPAWN_EGG = 383;
 
 	const EMERALD = 388;
@@ -681,7 +681,8 @@ class Item{
 		456 => "Camera",
 		457 => "Beetroot",
 		458 => "Beetroot Seed",
-		459 => "Beetroot Soup"
+		459 => "Beetroot Soup",
+		373 => "Potion"
 	];
 
 	/** @var \SplFixedArray */
