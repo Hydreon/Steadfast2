@@ -2127,8 +2127,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							]),
 							"Motion" => new Enum("Motion", [
 								new DoubleTag("", -sin($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI)),
- 								new DoubleTag("", -sin($this->pitch / 180 * M_PI)),
- 								new DoubleTag("", cos($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI))
+								new DoubleTag("", -sin($this->pitch / 180 * M_PI)),
+								new DoubleTag("", cos($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI))
 							]),
 							"Rotation" => new Enum("Rotation", [
 								new FloatTag("", $this->yaw),

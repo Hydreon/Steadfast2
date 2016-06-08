@@ -417,7 +417,6 @@ class Item{
 	const GOLD_NUGGET = 371;
 	const GOLDEN_NUGGET = 371;
 	const POTION = 373;
-	
 	const SPAWN_EGG = 383;
 
 	const EMERALD = 388;
@@ -670,6 +669,7 @@ class Item{
 		365 => "Raw Chicken",
 		366 => "Cooked Chicken",
 		371 => "Gold Nugget",
+		373 => "Potion",
 		378 => "Magma Cream",
 		383 => "Spawn Egg",
 		388 => "Emerald",
@@ -682,7 +682,8 @@ class Item{
 		456 => "Camera",
 		457 => "Beetroot",
 		458 => "Beetroot Seed",
-		459 => "Beetroot Soup"
+		459 => "Beetroot Soup",
+		373 => "Potion"
 	];
 
 	/** @var \SplFixedArray */
