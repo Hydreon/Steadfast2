@@ -41,7 +41,7 @@ use pocketmine\plugin\Plugin;
 
 
 class Block extends Position implements Metadatable{
-const AIR = 0;
+	const AIR = 0;
 	const STONE = 1;
 	const GRASS = 2;
 	const DIRT = 3;
@@ -75,9 +75,14 @@ const AIR = 0;
 
 	const SANDSTONE = 24;
 
+	const DISPENSER = 23;
+
+	const NOTEBLOCK = 25;
+
 	const BED_BLOCK = 26;
 
-
+	const POWERED_RAIL = 27;
+	const DETECTOR_RAIL = 28;
 	const COBWEB = 30;
 	const TALL_GRASS = 31;
 	const BUSH = 32;
@@ -111,6 +116,7 @@ const AIR = 0;
 	const OAK_WOODEN_STAIRS = 53;
 	const CHEST = 54;
 
+	const REDSTONE_WIRE = 55;
 	const DIAMOND_ORE = 56;
 	const DIAMOND_BLOCK = 57;
 	const CRAFTING_TABLE = 58;
@@ -125,17 +131,23 @@ const AIR = 0;
 	const WOODEN_DOOR_BLOCK = 64;
 	const WOOD_DOOR_BLOCK = 64;
 	const LADDER = 65;
-	const RAIL = 66;
+
 	const COBBLE_STAIRS = 67;
 	const COBBLESTONE_STAIRS = 67;
 	const WALL_SIGN = 68;
 
 	const IRON_DOOR_BLOCK = 71;
 
+	const LEVER = 69;
+	const STONE_PRESSURE_PLATE = 70;
+	const WOODEN_PRESSURE_PLATE = 72;
 	const REDSTONE_ORE = 73;
 	const GLOWING_REDSTONE_ORE = 74;
 	const LIT_REDSTONE_ORE = 74;
 
+	const UNLIT_REDSTONE_TORCH = 75;
+	const REDSTONE_TORCH = 76;
+	const STONE_BUTTON = 77;
 	const SNOW = 78;
 	const SNOW_LAYER = 78;
 	const ICE = 79;
@@ -152,17 +164,25 @@ const AIR = 0;
 	const GLOWSTONE = 89;
 	const GLOWSTONE_BLOCK = 89;
 
-
+	const PORTAL = 90;
 	const LIT_PUMPKIN = 91;
 	const JACK_O_LANTERN = 91;
 	const CAKE_BLOCK = 92;
+	
+	const UNPOWERED_REPEATER = 93;
+	const POWERED_REPEATER = 94;
 
 	const TRAPDOOR = 96;
 	const WOODEN_TRAPDOOR = 96;
 	const WOOD_TRAPDOOR = 96;
 
+	const MONSTER_EGG_BLOCK = 97;
+
 	const STONE_BRICKS = 98;
 	const STONE_BRICK = 98;
+
+	const BROWN_MUSHROOM_BLOCK = 99;
+	const RED_MUSHROOM_BLOCK = 100;
 
 	const IRON_BAR = 101;
 	const IRON_BARS = 101;
@@ -181,19 +201,33 @@ const AIR = 0;
 	const LILY_PAD = 111;
 	const NETHER_BRICKS = 112;
 	const NETHER_BRICK_BLOCK = 112;
-	const NETHER_BRICK_FENCE = 113;
+
 	const NETHER_BRICKS_STAIRS = 114;
+	const NETHER_WART_BLOCK = 115;
 
 	const ENCHANTING_TABLE = 116;
 	const ENCHANT_TABLE = 116;
 	const ENCHANTMENT_TABLE = 116;
 
+	const BREWING_STAND_BLOCK = 117;
+	const CAULDRON_BLOCK = 118;
+
 	const END_PORTAL_FRAME = 120;
 	const END_STONE = 121;
 
+	const INACTIVE_REDSTONE_LAMP = 123;
+	const ACTIVE_REDSTONE_LAMP = 124;
+
+	const DROPPER = 125;
+
+	const ACTIVATOR_RAIL = 126;
+	const COCOA_BLOCK = 127;
+	const COCOA_PODS = 127;
 	const SANDSTONE_STAIRS = 128;
 	const EMERALD_ORE = 129;
 
+	const TRIPWIRE_HOOK = 131;
+	const TRIPWIRE = 132;
 	const EMERALD_BLOCK = 133;
 	const SPRUCE_WOOD_STAIRS = 134;
 	const SPRUCE_WOODEN_STAIRS = 134;
@@ -206,13 +240,24 @@ const AIR = 0;
 	const STONE_WALL = 139;
 	const COBBLESTONE_WALL = 139;
 
+	const FLOWER_POT_BLOCK = 140;
 	const CARROT_BLOCK = 141;
 	const POTATO_BLOCK = 142;
 
-	const ANVIL = 145;
+	const WOODEN_BUTTON = 143;
 
+	const SKULL_BLOCK = 144;
+
+	const ANVIL = 145;
+	const TRAPPED_CHEST = 146;
+
+	const LIGHT_WEIGHTED_PRESSURE_PLATE = 147;
+	const HEAVY_WEIGHTED_PRESSURE_PLATE = 148;
+	const DAYLIGHT_SENSOR = 151;
+	const DAYLIGHT_SENSOR_INVERTED = 178;
 	const REDSTONE_BLOCK = 152;
 
+	const NETHER_QUARTZ_ORE = 153;
 	const QUARTZ_BLOCK = 155;
 	const QUARTZ_STAIRS = 156;
 	const DOUBLE_WOOD_SLAB = 157;
@@ -235,13 +280,20 @@ const AIR = 0;
 	const ACACIA_WOODEN_STAIRS = 163;
 	const DARK_OAK_WOOD_STAIRS = 164;
 	const DARK_OAK_WOODEN_STAIRS = 164;
-
+	const SLIME_BLOCK = 165;
+	const IRON_TRAPDOOR = 167;
 	const HAY_BALE = 170;
 	const CARPET = 171;
 	const HARDENED_CLAY = 172;
 	const COAL_BLOCK = 173;
 
+	const PACKED_ICE = 174;
 	const DOUBLE_PLANT = 175;
+
+	const RED_SANDSTONE = 179;
+	const RED_SANDSTONE_STAIRS = 180;
+	const DOUBLE_RED_SANDSTONE_SLAB = 181;
+	const RED_SANDSTONE_SLAB = 182;
 
 	const FENCE_GATE_SPRUCE = 183;
 	const FENCE_GATE_BIRCH = 184;
@@ -249,13 +301,26 @@ const AIR = 0;
 	const FENCE_GATE_DARK_OAK = 186;
 	const FENCE_GATE_ACACIA = 187;
 
+	const SPRUCE_DOOR_BLOCK = 193;
+	const BIRCH_DOOR_BLOCK = 194;
+	const JUNGLE_DOOR_BLOCK = 195;
+	const ACACIA_DOOR_BLOCK = 196;
+	const DARK_OAK_DOOR_BLOCK = 197;
+
 	const GRASS_PATH = 198;
+
+	const ITEM_FRAME_BLOCK = 199;
 
 	const PODZOL = 243;
 	const BEETROOT_BLOCK = 244;
 	const STONECUTTER = 245;
 	const GLOWING_OBSIDIAN = 246;
 	const NETHER_REACTOR = 247;
+	const CAMERA = 439;
+
+	const NETHER_BRICK_FENCE = 113;
+
+	const RAIL = 66;
 
 	/** @var \SplFixedArray */
 	public static $list = null;
@@ -371,6 +436,11 @@ const AIR = 0;
 			self::$list[self::BURNING_FURNACE] = BurningFurnace::class;
 			self::$list[self::SIGN_POST] = SignPost::class;
 			self::$list[self::WOOD_DOOR_BLOCK] = WoodDoor::class;
+			self::$list[self::SPRUCE_DOOR_BLOCK] = SpruceDoor::class;
+			self::$list[self::BIRCH_DOOR_BLOCK] = BirchDoor::class;
+			self::$list[self::JUNGLE_DOOR_BLOCK] = JungleDoor::class;
+			self::$list[self::ACACIA_DOOR_BLOCK] = AcaciaDoor::class;
+			self::$list[self::DARK_OAK_DOOR_BLOCK] = DarkOakDoor::class;
 			self::$list[self::LADDER] = Ladder::class;
 			self::$list[self::RAIL] = Rail::class;
 			self::$list[self::COBBLESTONE_STAIRS] = CobblestoneStairs::class;
@@ -465,7 +535,12 @@ const AIR = 0;
 			self::$list[self::BEETROOT_BLOCK] = Beetroot::class;
 			self::$list[self::STONECUTTER] = Stonecutter::class;
 			self::$list[self::GLOWING_OBSIDIAN] = GlowingObsidian::class;
-			self::$list[self::NETHER_REACTOR] = NetherReactor::class;
+			
+			self::$list[self::SPRUCE_DOOR_BLOCK] = SpruceDoor::class;
+			self::$list[self::BIRCH_DOOR_BLOCK] = BirchDoor::class;
+			self::$list[self::JUNGLE_DOOR_BLOCK] = JungleDoor::class;
+			self::$list[self::ACACIA_DOOR_BLOCK] = AcaciaDoor::class;
+			self::$list[self::DARK_OAK_DOOR_BLOCK] = DarkOakDoor::class;
 
 			foreach(self::$list as $id => $class){
 				if($class !== null){
