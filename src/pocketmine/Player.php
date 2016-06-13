@@ -952,7 +952,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->level->sleepTicks = 0;
 
 			$pk = new AnimatePacket();
-			$pk->eid = Entity::PLAYER_CLIENT_ID;
+			$pk->eid = 0;
 			$pk->action = 3; //Wake up
 			$this->dataPacket($pk);
 		}
@@ -1229,7 +1229,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				Server::broadcastPacket($entity->getViewers(), $pk);
 
 				$pk = new TakeItemEntityPacket();
-				$pk->eid = Entity::PLAYER_CLIENT_ID;
+				$pk->eid = 0;
 				$pk->target = $entity->getId();
 				$this->dataPacket($pk);
 
@@ -1264,7 +1264,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						Server::broadcastPacket($entity->getViewers(), $pk);
 
 						$pk = new TakeItemEntityPacket();
-						$pk->eid = Entity::PLAYER_CLIENT_ID;
+						$pk->eid = 0;
 						$pk->target = $entity->getId();
 						$this->dataPacket($pk);
 
@@ -1892,7 +1892,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->spawnZ = -1000000;
 				$pk->generator = 1; //0 old, 1 infinite, 2 flat
 				$pk->gamemode = $this->gamemode & 0x01;
-				$pk->eid = Entity::PLAYER_CLIENT_ID; //Always use EntityID as zero for the actual player
+				$pk->eid = 0; //Always use EntityID as zero for the actual player
 				$this->dataPacket($pk);
 
 				$pk = new SetTimePacket();
@@ -3408,7 +3408,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}elseif($this->getLastDamageCause() === $source and $this->spawned){
 			$pk = new EntityEventPacket();
-			$pk->eid = Entity::PLAYER_CLIENT_ID;
+			$pk->eid = 0;
 			$pk->event = EntityEventPacket::HURT_ANIMATION;
 			$this->dataPacket($pk);
 		}
@@ -3431,7 +3431,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($targets !== null) {
 			Server::broadcastPacket($targets, $pk);
 		} else {
-			$pk->eid = Entity::PLAYER_CLIENT_ID;
+			$pk->eid = 0;
 			$this->dataPacket($pk);
 		}
 	}

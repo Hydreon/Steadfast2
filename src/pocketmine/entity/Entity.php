@@ -101,8 +101,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_INVISIBLE = 5;
 
 
-	const PLAYER_CLIENT_ID = 1;
-	public static $entityCount = 2;
+	public static $entityCount = 1;
 	/** @var Entity[] */
 	private static $knownEntities = [];
 	private static $shortNames = [];
@@ -562,7 +561,7 @@ abstract class Entity extends Location implements Metadatable{
 	public function sendPotionEffects(Player $player){
 		foreach($this->effects as $effect){
 			$pk = new MobEffectPacket();
-			$pk->eid = Entity::PLAYER_CLIENT_ID;
+			$pk->eid = 0;
 			$pk->effectId = $effect->getId();
 			$pk->amplifier = $effect->getAmplifier();
 			$pk->particles = $effect->isVisible();
