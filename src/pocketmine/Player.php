@@ -1908,7 +1908,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->spawnZ = -1000000;
 				$pk->generator = 1; //0 old, 1 infinite, 2 flat
 				$pk->gamemode = $this->gamemode & 0x01;
-				$pk->eid = $this->getId(); //Always use EntityID as zero for the actual player
+				$pk->eid = 0;//$this->getId(); //Always use EntityID as zero for the actual player
 				$this->dataPacket($pk);
 				
 				$pk = new SetTimePacket();
