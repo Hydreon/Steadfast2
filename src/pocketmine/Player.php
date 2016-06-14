@@ -2013,6 +2013,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						for($i = 0; $i < $this->inventory->getHotbarSize(); ++$i){
 							if($this->inventory->getHotbarSlotIndex($i) === -1){
 								$this->inventory->setHeldItemIndex($i);
+								$this->inventory->sendHeldItem($this->getViewers());
 								$found = true;
 								break;
 							}
@@ -2051,8 +2052,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					}
 				}
-
-				$this->inventory->sendHeldItem($this->hasSpawned);
 
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 				//Timings::$timerMobEqipmentPacket->stopTiming();
