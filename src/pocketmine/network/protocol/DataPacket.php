@@ -35,6 +35,7 @@ use pocketmine\utils\Utils;
 abstract class DataPacket extends BinaryStream{
 	
 	public static $pkKeys = array(
+		0x03 => 0x03,
 		0x01 => 0x8f,
 		0x02 => 0x90,
 		0x05 => 0x91,
@@ -99,6 +100,7 @@ abstract class DataPacket extends BinaryStream{
 	);
 	
 	public static $pkKeysRev = array(
+		0x03 => 0x03,
 		0x8f => 0x01,
 		0x90 => 0x02,
 		0x91 => 0x05,

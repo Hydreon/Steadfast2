@@ -40,6 +40,10 @@ interface Info{
 	 */
 	const LOGIN_PACKET = 0x8f;
 	const PLAY_STATUS_PACKET = 0x90;
+	
+	const TEST = 0x03;
+	
+	
 	const DISCONNECT_PACKET = 0x91;
 	const BATCH_PACKET = 0x92;
 	const TEXT_PACKET = 0x93;

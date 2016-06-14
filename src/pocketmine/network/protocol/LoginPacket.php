@@ -78,7 +78,7 @@ class LoginPacket extends DataPacket {
 			$this->chains = json_decode($this->getFromString($body, $this->chainsDataLength), true);
 			//var_dump($this->chains);
 			
-
+			
 
 			$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));
 			//var_dump($this->playerDataLength);
@@ -89,23 +89,32 @@ class LoginPacket extends DataPacket {
 			//$this->playerData = substr($this->playerData, 0, -1 * self::MAGIC_NUMBER);
 
 			$this->chains['data'] = array();
+			$index = 0;			
 			foreach ($this->chains['chain'] as $key => $jwt) {
-				$this->chains['data'][] = self::load($jwt);
+				$data = self::load($jwt);
+				if(isset($data['extraData'])) {
+					$dataIndex = $index;
+				}
+				$this->chains['data'][$index] = $data;
+				$index++;
 			}
-
+//			var_dump($this->chains);
 			//$this->strangeData = self::load($this->strangeData);
 		
 			$this->playerData = self::load($this->playerData);
-			$this->username = $this->chains['data'][0]['extraData']['displayName'];
-			$this->clientId = $this->chains['data'][0]['extraData']['identity'];
-			try{
+			$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
+			$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
+			if(isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
+				$this->clientUUID = UUID::fromBinary($this->chains['data'][$dataIndex]['extraData']['XUID']);
+			} else {
+				try{
 				$this->clientUUID = UUID::fromBinary(substr($this->playerData['ClientRandomId'], 0, 16));
-			} catch (\Exception $e) {
-				$this->clientUUID =  UUID::fromBinary('2535437613357535');
+				} catch (\Exception $e) {
+					$this->clientUUID =  UUID::fromBinary('2535437613357535');
+				}
 			}
-			//$this->clientUUID = UUID::fromBinary($this->chains['data'][0]['identityPublicKey']);
-			//$this->clientUUID = UUID::fromBinary($this->chains['data'][1]['extraData']['XUID']);
-			
+			$this->identityPublicKey = $this->chains['data'][$dataIndex]['identityPublicKey'];
+//			var_dump($this->identityPublicKey);
 			
 			$this->serverAddress = $this->playerData['ServerAddress'];
 			$this->skinName = $this->playerData['SkinId'];

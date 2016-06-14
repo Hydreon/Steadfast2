@@ -138,6 +138,7 @@ use pocketmine\tile\Tile;
 use pocketmine\utils\TextFormat;
 use pocketmine\network\protocol\SetPlayerGameTypePacket;
 use pocketmine\block\Liquid;
+use pocketmine\network\protocol\ATestPacket;
 
 use raklib\Binary;
 
@@ -867,7 +868,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 		
-		$this->interface->putPacket($this, $packet, $needACK, false);	
+			$this->interface->putPacket($this, $packet, $needACK, false);	
 		return true;
 	}
 
@@ -1835,11 +1836,26 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerLoginPacket->stopTiming();
 					return;
 				}
+			
+			
 				
+				$s = '';
+				for ($i = 0; $i < 128; $i++){
+					$s .= '0';
+				}
+//			var_dump($packet->identityPublicKey);	
+//			while(empty($test = file_get_contents('test.txt'))) {}
+//				
+//				$pk = new ATestPacket();
+//				$pk->key1 = 'MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEqofKIr6LBTeOscce8yCtdG4dO2KLp5uYWfdB4IJUKjhVAvJdv1UpbDpUXjhydgq3NhfeSpYmLG9dnpi/kpLcKfj0Hb0omhR86doxE7XwuMAKYLHOHX6BnXpDHXyQ6g5f';
+//				$pk->key2 = $s;
+//				$this->dataPacket($pk);
+//
+//					return;
 				$pk = new PlayStatusPacket();
 				$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
 				$this->dataPacket($pk);
-
+				
 				$this->achievements = [];
 
 				/** @var Byte $achievement */
@@ -1892,9 +1908,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->spawnZ = -1000000;
 				$pk->generator = 1; //0 old, 1 infinite, 2 flat
 				$pk->gamemode = $this->gamemode & 0x01;
-				$pk->eid = 0; //Always use EntityID as zero for the actual player
+				$pk->eid = $this->getId(); //Always use EntityID as zero for the actual player
 				$this->dataPacket($pk);
-
+				
 				$pk = new SetTimePacket();
 				$pk->time = $this->level->getTime();
 				$pk->started = true;
