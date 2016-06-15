@@ -79,9 +79,9 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_TYPE_STRING = 4;
 	const DATA_TYPE_SLOT = 5;
 	const DATA_TYPE_POS = 6;
-	const DATA_TYPE_ROTATION = 7;
-	const DATA_TYPE_LONG = 8;
+//	const DATA_TYPE_ROTATION = 7;
 
+	const DATA_TYPE_LONG = 7;
 	const DATA_FLAGS = 0;
 	const DATA_AIR = 1;
 	const DATA_NAMETAG = 2;
@@ -125,7 +125,8 @@ abstract class Entity extends Location implements Metadatable{
 		self::DATA_SHOW_NAMETAG => [self::DATA_TYPE_BYTE, 1],
 		self::DATA_SILENT => [self::DATA_TYPE_BYTE, 0],
 		self::DATA_NO_AI => [self::DATA_TYPE_BYTE, 0],
-		self::DATA_LEAD_HOLDER => [self::DATA_TYPE_INT, -1],
+		self::DATA_LEAD_HOLDER => [self::DATA_TYPE_LONG, -1],
+//		self::DATA_LEAD => [self::DATA_TYPE_BYTE, 0],
 	];
 
 	public $passenger = null;
