@@ -115,6 +115,7 @@ use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\PlayerActionPacket;
 use pocketmine\network\protocol\PlayStatusPacket;
 use pocketmine\network\protocol\RespawnPacket;
+use pocketmine\network\protocol\SetEntityDataPacket;
 use pocketmine\network\protocol\StrangePacket;
 use pocketmine\network\protocol\TextPacket;
 use pocketmine\network\protocol\MovePlayerPacket;
@@ -1947,6 +1948,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				$this->server->sendFullPlayerListData($this);
 				$this->server->sendRecipeList($this);
+
+				$pk = new SetEntityDataPacket();
+				$pk->eid = 0;
+				$pk->metadata = [self::DATA_LEAD_HOLDER => [self::DATA_TYPE_LONG, -1]];
+				$this->dataPacket($pk);
 
 //				if($this->protocol != Info::OLDEST_PROTOCOL) {
 //				if($this->protocol < Info::OLDEST_PROTOCOL) {
