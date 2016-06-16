@@ -220,7 +220,9 @@ abstract class DataPacket extends BinaryStream{
 	public function updateBuffer($addChar) {
 		if($addChar == chr(0xfe)) {
 			$pkId = ord($this->buffer{0});
-			$this->buffer{0} = chr(self::$pkKeysRev[$pkId]);
+			if(isset(self::$pkKeysRev[$pkId])) {
+				$this->buffer{0} = chr(self::$pkKeysRev[$pkId]);
+			}
 		}
 	}
 }
