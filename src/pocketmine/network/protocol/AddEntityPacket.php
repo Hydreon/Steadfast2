@@ -41,7 +41,7 @@ class AddEntityPacket extends DataPacket{
 	public $speedZ;
 	public $yaw;
 	public $pitch;
-	public $metadata;
+	public $metadata = [];
 	public $links = [];
 
 	public function decode(){
@@ -60,15 +60,18 @@ class AddEntityPacket extends DataPacket{
 		$this->putFloat($this->speedZ);
 		$this->putFloat($this->yaw);
 		$this->putFloat($this->pitch);
-		$this->putShort(0);
-//		$meta = Binary::writeMetadata($this->metadata);
-//		$this->put($meta);
-//		$this->putShort(count($this->links));
+		
+//		if(!empty($this->metadata)) {
+//			$meta = Binary::writeMetadata($this->metadata);
+//			$this->put($meta);
+//		}
+
+//		$this->putShort(0);//count($this->links));
+
 //		foreach($this->links as $link){
 //			$this->putLong($link[0]);
 //			$this->putLong($link[1]);
 //			$this->putByte($link[2]);
 //		}
 	}
-
 }

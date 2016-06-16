@@ -57,10 +57,9 @@ class MoveEntityPacket extends DataPacket{
 			$this->putFloat($d[1]); //x
 			$this->putFloat($d[2]); //y
 			$this->putFloat($d[3]); //z
-			$this->putFloat($d[4]); //yaw
-			$this->putFloat($d[5]); //headYaw
-			$this->putFloat($d[6]); //pitch
+			$this->putByte($d[6] * 0.71111); //pitch
+			$this->putByte($d[5] * 0.71111); //headYaw
+			$this->putByte($d[4] * 0.71111); //yaw
 		}
 	}
-
 }
