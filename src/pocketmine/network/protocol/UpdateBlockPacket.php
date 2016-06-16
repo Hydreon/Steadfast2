@@ -38,13 +38,22 @@ class UpdateBlockPacket extends DataPacket{
 
 	public $records = []; //x, z, y, blockId, blockData, flags
 
+	private $addChar = '';
+	
+	public function __construct($addChar = "") {
+		$this->addChar = $addChar;
+		parent::__construct("", 0);
+	}
+	
 	public function decode(){
 
 	}
 
 	public function encode(){
 		$this->reset();
-		$this->putInt(count($this->records)); //TODO15
+		if($this->addChar != chr(0xfe)) {
+			$this->putInt(count($this->records));			
+		}
 		foreach($this->records as $r){
 			$this->putInt($r[0]);
 			$this->putInt($r[1]);

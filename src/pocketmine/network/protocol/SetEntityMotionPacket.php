@@ -31,7 +31,7 @@ class SetEntityMotionPacket extends DataPacket{
 	// eid, motX, motY, motZ
 	/** @var array[] */
 	public $entities = [];
-	private $addChar = [];
+	private $addChar = '';
 	
 	public function __construct($addChar = "") {
 		$this->addChar = $addChar;

@@ -31,7 +31,7 @@ class MoveEntityPacket extends DataPacket{
 	// eid, x, y, z, yaw, pitch
 	/** @var array[] */
 	public $entities = [];
-	private $addChar = [];
+	private $addChar = '';
 	
 	public function __construct($addChar = "") {
 		$this->addChar = $addChar;

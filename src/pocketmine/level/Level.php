@@ -632,9 +632,12 @@ class Level implements ChunkManager, Metadatable{
 						foreach($mini as $blocks){
 							/** @var Block $b */
 							foreach($blocks as $b){
-								$pk = new UpdateBlockPacket();
-								$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
-								Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
+								foreach ($this->getUsingChunk($b->x >> 4, $b->z >> 4) as $player) {								
+									$pk = new UpdateBlockPacket($player->getAdditionalChar());
+									$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
+									$player->dataPacket($pk);
+								}
+//								Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
 							}
 						}
 					}
@@ -681,20 +684,23 @@ class Level implements ChunkManager, Metadatable{
 	 * @param Block[]  $blocks
 	 * @param int      $flags
 	 */
-	public function sendBlocks(array $target, array $blocks, $flags = UpdateBlockPacket::FLAG_ALL){
-		$pk = new UpdateBlockPacket();
-		foreach($blocks as $b){
-			if($b === null){
+	public function sendBlocks(array $target, array $blocks, $flags = UpdateBlockPacket::FLAG_ALL) {
+		foreach ($blocks as $b) {
+			if ($b === null) {
 				continue;
 			}
-			if($b instanceof Block){
-				$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), $flags];
-			}else{
-				$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
-				$pk->records[] = [$b->x, $b->z, $b->y, $fullBlock >> 4, $fullBlock & 0xf, $flags];
+			foreach ($target as $player) {
+				$pk = new UpdateBlockPacket($player->getAdditionalChar());
+				if ($b instanceof Block) {
+					$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), $flags];
+				} else {
+					$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
+					$pk->records[] = [$b->x, $b->z, $b->y, $fullBlock >> 4, $fullBlock & 0xf, $flags];
+				}
+				$player->dataPacket($pk);
 			}
 		}
-		Server::broadcastPacket($target, $pk);
+//		Server::broadcastPacket($target, $pk);
 	}
 
 	public function clearCache(){
