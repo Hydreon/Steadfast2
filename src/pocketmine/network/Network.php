@@ -79,6 +79,7 @@ use pocketmine\Server;
 use pocketmine\utils\MainLogger;
 use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
 use pocketmine\network\protocol\RequestChunkRadiusPacket;
+use pocketmine\utils\Binary;
 
 class Network {
 
@@ -209,29 +210,30 @@ class Network {
 	public function getServer(){
 		return $this->server;
 	}
-	
+        	
 	public function processBatch(BatchPacket $packet, Player $p){
 		$str = \zlib_decode($packet->payload, 1024 * 1024 * 64); //Max 64MB
 		$len = strlen($str);
 		$offset = 0;
 		try{
 			while($offset < $len){
-				$pkLen = \pocketmine\utils\Binary::readInt(substr($str, 4));	
+				$pkLen = Binary::readInt(substr($str, $offset, 4));
 				$offset += 4;
-				$pid = ord($str{$offset++});	
-				$pid = DataPacket::$pkKeys[$pid];	
+				$buf = substr($str, $offset, $pkLen);
+				$offset += $pkLen;
+				$pid = ord($buf{0});
+				$pid = DataPacket::$pkKeys[$pid];
+				$buf = substr($buf, 1);                           
 				if(($pk = $this->getPacket($pid)) !== null){
 					if($pk::NETWORK_ID === Info::BATCH_PACKET){
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
 					}
-					$str = substr($str, $offset);
 					if($pid == 0x8f) {
-						$str = chr(0xfe) . $str;
+						$buf = chr(0xfe) . $buf;
 					}
-					$pk->setBuffer($str);
+					$pk->setBuffer($buf);
 					$pk->decode();
 					$p->handleDataPacket($pk);
-					$offset += $pkLen;
 					if($pk->getOffset() <= 0){
 						return;
 					}
