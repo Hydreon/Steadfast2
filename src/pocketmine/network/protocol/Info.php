@@ -30,10 +30,10 @@ interface Info{
 	/**
 	 * Minecraft: PE protocol versions
 	 */
-	const CURRENT_PROTOCOL = 38;
-	const NEWEST_PROTOCOL = 81;
-	const OLDEST_PROTOCOL = 39;
-	const ACCEPTED_PROTOCOLS = [38, 39, 40, 41, 42, 43, 44, 45, 46, 60, 70, 81];
+	const CURRENT_PROTOCOL = 81;
+//	const NEWEST_PROTOCOL = 81;
+//	const OLDEST_PROTOCOL = 39;
+	const ACCEPTED_PROTOCOLS = [40, 41, 42, 43, 44, 45, 46, 60, 70, 81];
 
 	/**
 	 * Minecraft: PE packets

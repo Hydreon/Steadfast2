@@ -1701,38 +1701,25 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
 				}
+				
+				$this->additionalChar = $packet->additionalChar;
+				
+				if($packet->isValidProtocol === false) {
+					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
+					break;
+				}
 
 				$this->username = TextFormat::clean($packet->username);
 				$this->displayName = $this->username;
 				$this->setNameTag($this->username);
 				$this->iusername = strtolower($this->username);
-				
-				//if(!in_array($packet->protocol1, ProtocolInfo::ACCEPTED_PROTOCOLS)){
-					// in-case something goes wrong
-					// $message = "change your client";
-					if($packet->protocol1 < ProtocolInfo::OLDEST_PROTOCOL - 1) {
-						$message = "upgrade";
-					} elseif($packet->protocol1 > ProtocolInfo::NEWEST_PROTOCOL) {
-						$message = "downgrade";
-					}
-					if(isset($message)) {
-						$pk = new PlayStatusPacket();
-						$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
-						$this->dataPacket($pk);
-						$this->close("", TextFormat::RED . "Please " . $message . " to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.", false);
-						//Timings::$timerLoginPacket->stopTiming();
-						return;
-					}
-
-				//}
-				
+								
 				$this->randomClientId = $packet->clientId;
 				$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
 				$this->uuid = $packet->clientUUID;
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
 				$this->protocol = $packet->protocol1;
-				$this->additionalChar = $packet->additionalChar;
 //				if(strpos($packet->username, "\x00") !== false or preg_match('#^[a-zA-Z0-9_]{3,16}$#', $packet->username) == 0 or $this->username === "" or $this->iusername === "rcon" or $this->iusername === "console" or strlen($packet->username) > 16 or strlen($packet->username) < 3){
 				$valid = true;
 				$len = strlen($packet->username);
@@ -1953,14 +1940,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->eid = 0;
 				$pk->metadata = [self::DATA_LEAD_HOLDER => [self::DATA_TYPE_LONG, -1]];
 				$this->dataPacket($pk);
-
-//				if($this->protocol != Info::OLDEST_PROTOCOL) {
-//				if($this->protocol < Info::OLDEST_PROTOCOL) {
-//					$this->sendMessage(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED .".");
-//					$this->sendTip(TextFormat::RED . "You are using an unsupported version of MCPE we recommend switching to " . TextFormat::GREEN .$this->getServer()->getVersion() . TextFormat::RED .".");
-//				}
-//				$this->orderChunks();
-//				$this->sendNextChunk();
+				
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
 			case ProtocolInfo::MOVE_PLAYER_PACKET:

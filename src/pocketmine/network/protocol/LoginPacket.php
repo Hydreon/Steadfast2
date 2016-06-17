@@ -26,6 +26,7 @@ namespace pocketmine\network\protocol;
 
 use pocketmine\utils\UUID;
 use pocketmine\utils\Binary;
+use pocketmine\network\protocol\Info;
 
 class LoginPacket extends DataPacket {
 
@@ -53,6 +54,7 @@ class LoginPacket extends DataPacket {
 	public $strangeData;   // terra incognita
 	
 	public $additionalChar = "";
+	public $isValidProtocol = true;
 
 	
 	private function getFromString(&$body, $len) {
@@ -61,13 +63,18 @@ class LoginPacket extends DataPacket {
 		return $res;
 	}
 	
-	public function decode() {		
+	public function decode() {	
 		$addCharNumber = $this->getByte();
 		if($addCharNumber > 0) {
 			$this->additionalChar = chr($addCharNumber);
 		}
-		if($addCharNumber == 0xfe) {
-			$this->protocol1 = $this->getInt();
+		$acceptedProtocols = Info::ACCEPTED_PROTOCOLS;
+		if($addCharNumber == 0xfe) {			
+			$this->protocol1 = $this->getInt();			
+			if (!in_array($this->protocol1, $acceptedProtocols)) {
+				$this->isValidProtocol = false;
+				return;
+			}
 			//var_dump($this->protocol1);
 			$bodyLength = $this->getInt();
 			//var_dump($bodyLength);
@@ -123,6 +130,10 @@ class LoginPacket extends DataPacket {
 			$this->username = $this->getString();
 			$this->protocol1 = $this->getInt();
 			$this->protocol2 = $this->getInt();
+			if (!in_array($this->protocol1, $acceptedProtocols)) {
+				$this->isValidProtocol = false;
+				return;
+			}
 
 			$this->clientId = $this->getLong();
 			$this->clientUUID = $this->getUUID();
