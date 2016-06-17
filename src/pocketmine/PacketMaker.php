@@ -84,16 +84,20 @@ class PacketMaker extends Worker {
 	protected function checkPacket($data) {
 		if (isset($data['moveData'])) {
 			foreach ($data['moveData'] as $identifier => $moveData) {
-				$pk = new MoveEntityPacket($moveData['additionalChar']);
-				$pk->entities = $moveData['data'];
-				$res = $this->makeBuffer($identifier, $moveData['additionalChar'], $pk, false, false);
-				$this->externalQueue[] = $res;
+				foreach ($moveData['data'] as $singleMoveData) {
+					$pk = new MoveEntityPacket($moveData['additionalChar']);
+					$pk->entities = [$singleMoveData];
+					$res = $this->makeBuffer($identifier, $moveData['additionalChar'], $pk, false, false);
+					$this->externalQueue[] = $res;
+				}
 			}	
 			foreach ($data['motionData'] as $identifier => $motionData) {
-				$pk = new SetEntityMotionPacket($motionData['additionalChar']);
-				$pk->entities = $motionData['data'];
-				$res = $this->makeBuffer($identifier, $motionData['additionalChar'], $pk, false, false);
-				$this->externalQueue[] = $res;
+				foreach ($motionData['data'] as $singleMotionData) {
+					$pk = new SetEntityMotionPacket($motionData['additionalChar']);
+					$pk->entities = [$singleMotionData];
+					$res = $this->makeBuffer($identifier, $motionData['additionalChar'], $pk, false, false);
+					$this->externalQueue[] = $res;
+				}
 			}
 		} elseif($data['isBatch']) {
 			$str = "";
