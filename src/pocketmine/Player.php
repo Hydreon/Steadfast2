@@ -1131,11 +1131,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($this->isSpectator()){
 			$flags |= 0x100;
 		}
+		
+		$flags |= 0x02;  
+ 		$flags |= 0x04;  
 
 		$pk = new AdventureSettingsPacket();
 		$pk->flags = $flags;
 		$pk->userPermission = 2;
-        $pk->globalPermission = 2;
+        	$pk->globalPermission = 2;
 		$this->dataPacket($pk);
 	}
 
