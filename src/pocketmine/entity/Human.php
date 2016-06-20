@@ -2,11 +2,11 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,7 +15,7 @@
  *
  * @author PocketMine Team
  * @link http://www.pocketmine.net/
- * 
+ *
  *
 */
 
@@ -28,8 +28,10 @@ use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\utils\UUID;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Enum;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\FloatTag;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\Network;
@@ -115,14 +117,14 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 				$this->setNameTag($this->namedtag["NameTag"]);
 			}
 
-			if(isset($this->namedtag->Skin) and $this->namedtag->Skin instanceof Compound){
+			if(isset($this->namedtag->Skin) and $this->namedtag->Skin instanceof CompoundTag){
 				$this->setSkin($this->namedtag->Skin["Data"], $this->namedtag->Skin["Slim"] > 0);
 			}
 
 			$this->uuid = UUID::fromData($this->getId(), $this->getSkinData(), $this->getNameTag());
 		}
 
-		if(isset($this->namedtag->Inventory) and $this->namedtag->Inventory instanceof Enum){
+		if(isset($this->namedtag->Inventory) and $this->namedtag->Inventory instanceof ListTag){
 			foreach($this->namedtag->Inventory as $item){
 				if($item["Slot"] >= 0 and $item["Slot"] < 9){ //Hotbar
 					$this->inventory->setHotbarSlotIndex($item["Slot"], isset($item["TrueSlot"]) ? $item["TrueSlot"] : -1);
@@ -154,7 +156,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	public function saveNBT(){
 		parent::saveNBT();
-		$this->namedtag->Inventory = new Enum("Inventory", []);
+		$this->namedtag->Inventory = new ListTag("Inventory", []);
 		$this->namedtag->Inventory->setTagType(NBT::TAG_Compound);
 		if($this->inventory !== null){
 			for($slot = 0; $slot < 9; ++$slot){
@@ -162,7 +164,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 				if($hotbarSlot !== -1){
 					$item = $this->inventory->getItem($hotbarSlot);
 					if($item->getId() !== 0 and $item->getCount() > 0){
-						$this->namedtag->Inventory[$slot] = new Compound(false, [
+						$this->namedtag->Inventory[$slot] = new CompoundTag(false, [
 							new ByteTag("Count", $item->getCount()),
 							new ShortTag("Damage", $item->getDamage()),
 							new ByteTag("Slot", $slot),
@@ -172,7 +174,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 						continue;
 					}
 				}
-				$this->namedtag->Inventory[$slot] = new Compound(false, [
+				$this->namedtag->Inventory[$slot] = new CompoundTag(false, [
 					new ByteTag("Count", 0),
 					new ShortTag("Damage", 0),
 					new ByteTag("Slot", $slot),
@@ -186,7 +188,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			//$slotCount = (($this instanceof Player and ($this->gamemode & 0x01) === 1) ? Player::CREATIVE_SLOTS : Player::SURVIVAL_SLOTS) + 9;
 			for($slot = 9; $slot < $slotCount; ++$slot){
 				$item = $this->inventory->getItem($slot - 9);
-				$this->namedtag->Inventory[$slot] = new Compound(false, [
+				$this->namedtag->Inventory[$slot] = new CompoundTag(false, [
 					new ByteTag("Count", $item->getCount()),
 					new ShortTag("Damage", $item->getDamage()),
 					new ByteTag("Slot", $slot),
@@ -198,7 +200,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			for($slot = 100; $slot < 104; ++$slot){
 				$item = $this->inventory->getItem($this->inventory->getSize() + $slot - 100);
 				if($item instanceof ItemItem and $item->getId() !== ItemItem::AIR){
-					$this->namedtag->Inventory[$slot] = new Compound(false, [
+					$this->namedtag->Inventory[$slot] = new CompoundTag(false, [
 						new ByteTag("Count", $item->getCount()),
 						new ShortTag("Damage", $item->getDamage()),
 						new ByteTag("Slot", $slot),
@@ -279,5 +281,4 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			parent::close();
 		}
 	}
-
 }

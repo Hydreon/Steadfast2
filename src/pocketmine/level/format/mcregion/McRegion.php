@@ -26,7 +26,7 @@ use pocketmine\level\format\generic\BaseLevelProvider;
 use pocketmine\level\Level;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\StringTag;
@@ -82,7 +82,7 @@ class McRegion extends BaseLevelProvider{
 			mkdir($path . "/region", 0777);
 		}
 		//TODO, add extra details
-		$levelData = new Compound("Data", [
+		$levelData = new CompoundTag("Data", [
 			"hardcore" => new ByteTag("hardcore", 0),
 			"initialized" => new ByteTag("initialized", 1),
 			"GameType" => new IntTag("GameType", 0),
@@ -99,10 +99,10 @@ class McRegion extends BaseLevelProvider{
 			"generatorName" => new StringTag("generatorName", "FLAT"),
 			"generatorOptions" => new StringTag("generatorOptions", isset($options["preset"]) ? $options["preset"] : ""),
 			"LevelName" => new StringTag("LevelName", $name),
-			"GameRules" => new Compound("GameRules", [])
+			"GameRules" => new CompoundTag("GameRules", [])
 		]);
 		$nbt = new NBT(NBT::BIG_ENDIAN);
-		$nbt->setData(new Compound("", [
+		$nbt->setData(new CompoundTag("", [
 			"Data" => $levelData
 		]));
 		$buffer = $nbt->writeCompressed();
@@ -114,7 +114,7 @@ class McRegion extends BaseLevelProvider{
 		$z = $chunkZ >> 5;
 	}
 
-	public function requestChunkTask($x, $z){	
+	public function requestChunkTask($x, $z){
 		$chunk = $this->getChunk($x, $z, false);
 		if(!($chunk instanceof Chunk)){
 			throw new ChunkException("Invalid Chunk sent");

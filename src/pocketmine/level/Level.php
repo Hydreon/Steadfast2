@@ -77,9 +77,9 @@ use pocketmine\metadata\BlockMetadataStore;
 use pocketmine\metadata\Metadatable;
 use pocketmine\metadata\MetadataValue;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\DoubleTag;
-use pocketmine\nbt\tag\Enum;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ShortTag;
@@ -111,11 +111,6 @@ use pocketmine\level\generator\LightPopulationTask;
 use pocketmine\level\generator\PopulationTask;
 use pocketmine\entity\monster\Monster;
 use pocketmine\entity\animal\Animal;
-
-
-
-
-
 
 class Level implements ChunkManager, Metadatable{
 
@@ -1307,24 +1302,24 @@ class Level implements ChunkManager, Metadatable{
 	public function dropItem(Vector3 $source, Item $item, Vector3 $motion = null, $delay = 10){
 		$motion = $motion === null ? new Vector3(lcg_value() * 0.2 - 0.1, 0.2, lcg_value() * 0.2 - 0.1) : $motion;
 		if($item->getId() > 0 and $item->getCount() > 0){
-			$itemEntity = Entity::createEntity("Item", $this->getChunk($source->getX() >> 4, $source->getZ() >> 4), new Compound("", [
-				"Pos" => new Enum("Pos", [
+			$itemEntity = Entity::createEntity("Item", $this->getChunk($source->getX() >> 4, $source->getZ() >> 4), new CompoundTag("", [
+				"Pos" => new ListTag("Pos", [
 					new DoubleTag("", $source->getX()),
 					new DoubleTag("", $source->getY()),
 					new DoubleTag("", $source->getZ())
 				]),
 
-				"Motion" => new Enum("Motion", [
+				"Motion" => new ListTag("Motion", [
 					new DoubleTag("", $motion->x),
 					new DoubleTag("", $motion->y),
 					new DoubleTag("", $motion->z)
 				]),
-				"Rotation" => new Enum("Rotation", [
+				"Rotation" => new ListTag("Rotation", [
 					new FloatTag("", lcg_value() * 360),
 					new FloatTag("", 0)
 				]),
 				"Health" => new ShortTag("Health", 5),
-				"Item" => new Compound("Item", [
+				"Item" => new CompoundTag("Item", [
 					"id" => new ShortTag("id", $item->getId()),
 					"Damage" => new ShortTag("Damage", $item->getDamage()),
 					"Count" => new ByteTag("Count", $item->getCount())
@@ -1551,7 +1546,7 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		if($hand->getId() === Item::SIGN_POST or $hand->getId() === Item::WALL_SIGN){
-			$tile = Tile::createTile("Sign", $this->getChunk($block->x >> 4, $block->z >> 4), new Compound(false, [
+			$tile = Tile::createTile("Sign", $this->getChunk($block->x >> 4, $block->z >> 4), new CompoundTag(false, [
 				"id" => new StringTag("id", Tile::SIGN),
 				"x" => new IntTag("x", $block->x),
 				"y" => new IntTag("y", $block->y),

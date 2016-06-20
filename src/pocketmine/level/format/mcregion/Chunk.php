@@ -25,11 +25,11 @@ use pocketmine\level\format\generic\BaseFullChunk;
 use pocketmine\level\format\LevelProvider;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\ByteArray;
-use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Enum;
+use pocketmine\nbt\tag\ByteArrayTag;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\IntArray;
+use pocketmine\nbt\tag\IntArrayTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\Player;
 use pocketmine\utils\Binary;
@@ -37,59 +37,59 @@ use pocketmine\utils\BinaryStream;
 
 class Chunk extends BaseFullChunk{
 
-	/** @var Compound */
+	/** @var CompoundTag */
 	protected $nbt;
 
-	public function __construct($level, Compound $nbt = null){
+	public function __construct($level, CompoundTag $nbt = null){
 		if($nbt === null){
 			$this->provider = $level;
-			$this->nbt = new Compound("Level", []);
+			$this->nbt = new CompoundTag("Level", []);
 			return;
 		}
-
+		
 		$this->nbt = $nbt;
 
-		if(isset($this->nbt->Entities) and $this->nbt->Entities instanceof Enum){
+		if(isset($this->nbt->Entities) and $this->nbt->Entities instanceof ListTag){
 			$this->nbt->Entities->setTagType(NBT::TAG_Compound);
 		}else{
-			$this->nbt->Entities = new Enum("Entities", []);
+			$this->nbt->Entities = new ListTag("Entities", []);
 			$this->nbt->Entities->setTagType(NBT::TAG_Compound);
 		}
 
-		if(isset($this->nbt->TileEntities) and $this->nbt->TileEntities instanceof Enum){
+		if(isset($this->nbt->TileEntities) and $this->nbt->TileEntities instanceof ListTag){
 			$this->nbt->TileEntities->setTagType(NBT::TAG_Compound);
 		}else{
-			$this->nbt->TileEntities = new Enum("TileEntities", []);
+			$this->nbt->TileEntities = new ListTag("TileEntities", []);
 			$this->nbt->TileEntities->setTagType(NBT::TAG_Compound);
 		}
 
-		if(isset($this->nbt->TileTicks) and $this->nbt->TileTicks instanceof Enum){
+		if(isset($this->nbt->TileTicks) and $this->nbt->TileTicks instanceof ListTag){
 			$this->nbt->TileTicks->setTagType(NBT::TAG_Compound);
 		}else{
-			$this->nbt->TileTicks = new Enum("TileTicks", []);
+			$this->nbt->TileTicks = new ListTag("TileTicks", []);
 			$this->nbt->TileTicks->setTagType(NBT::TAG_Compound);
 		}
 
-		$this->nbt->BiomeColors = new IntArray("BiomeColors", array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a")));
+		$this->nbt->BiomeColors = new IntArrayTag("BiomeColors", array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a")));
 
-		if(!isset($this->nbt->HeightMap) or !($this->nbt->HeightMap instanceof IntArray)){
-			$this->nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, 0));
+		if(!isset($this->nbt->HeightMap) or !($this->nbt->HeightMap instanceof IntArrayTag)){
+			$this->nbt->HeightMap = new IntArrayTag("HeightMap", array_fill(0, 256, 0));
 		}
 
 		if(!isset($this->nbt->Blocks)){
-			$this->nbt->Blocks = new ByteArray("Blocks", str_repeat("\x00", 32768));
+			$this->nbt->Blocks = new ByteArrayTag("Blocks", str_repeat("\x00", 32768));
 		}
 
 		if(!isset($this->nbt->Data)){
-			$this->nbt->Data = new ByteArray("Data", $half = str_repeat("\x00", 16384));
-			$this->nbt->SkyLight = new ByteArray("SkyLight", $half);
-			$this->nbt->BlockLight = new ByteArray("BlockLight", $half);
+			$this->nbt->Data = new ByteArrayTag("Data", $half = str_repeat("\x00", 16384));
+			$this->nbt->SkyLight = new ByteArrayTag("SkyLight", $half);
+			$this->nbt->BlockLight = new ByteArrayTag("BlockLight", $half);
 		}
 
 		$extraData = [];
 
-		if(!isset($this->nbt->ExtraData) or !($this->nbt->ExtraData instanceof ByteArray)){
-			$this->nbt->ExtraData = new ByteArray("ExtraData", Binary::writeInt(0));
+		if(!isset($this->nbt->ExtraData) or !($this->nbt->ExtraData instanceof ByteArrayTag)){
+			$this->nbt->ExtraData = new ByteArrayTag("ExtraData", Binary::writeInt(0));
 		}else{
 			$stream = new BinaryStream($this->nbt->ExtraData->getValue());
 			$count = $stream->getInt();
@@ -291,7 +291,7 @@ class Chunk extends BaseFullChunk{
 			$nbt->readCompressed($data, ZLIB_ENCODING_DEFLATE);
 			$chunk = $nbt->getData();
 
-			if(!isset($chunk->Level) or !($chunk->Level instanceof Compound)){
+			if(!isset($chunk->Level) or !($chunk->Level instanceof CompoundTag)){
 				return null;
 			}
 
@@ -359,14 +359,14 @@ class Chunk extends BaseFullChunk{
 		$nbt->zPos = new IntTag("zPos", $this->z);
 
 		if($this->isGenerated()){
-			$nbt->Blocks = new ByteArray("Blocks", $this->getBlockIdArray());
-			$nbt->Data = new ByteArray("Data", $this->getBlockDataArray());
-			$nbt->SkyLight = new ByteArray("SkyLight", $this->getBlockSkyLightArray());
-			$nbt->BlockLight = new ByteArray("BlockLight", $this->getBlockLightArray());
+			$nbt->Blocks = new ByteArrayTag("Blocks", $this->getBlockIdArray());
+			$nbt->Data = new ByteArrayTag("Data", $this->getBlockDataArray());
+			$nbt->SkyLight = new ByteArrayTag("SkyLight", $this->getBlockSkyLightArray());
+			$nbt->BlockLight = new ByteArrayTag("BlockLight", $this->getBlockLightArray());
 
-			$nbt->BiomeColors = new IntArray("BiomeColors", $this->getBiomeColorArray());
+			$nbt->BiomeColors = new IntArrayTag("BiomeColors", $this->getBiomeColorArray());
 
-			$nbt->HeightMap = new IntArray("HeightMap", $this->getHeightMapArray());
+			$nbt->HeightMap = new IntArrayTag("HeightMap", $this->getHeightMapArray());
 		}
 
 		$entities = [];
@@ -378,7 +378,7 @@ class Chunk extends BaseFullChunk{
 			}
 		}
 
-		$nbt->Entities = new Enum("Entities", $entities);
+		$nbt->Entities = new ListTag("Entities", $entities);
 		$nbt->Entities->setTagType(NBT::TAG_Compound);
 
 
@@ -388,7 +388,7 @@ class Chunk extends BaseFullChunk{
 			$tiles[] = $tile->namedtag;
 		}
 
-		$nbt->TileEntities = new Enum("TileEntities", $tiles);
+		$nbt->TileEntities = new ListTag("TileEntities", $tiles);
 		$nbt->TileEntities->setTagType(NBT::TAG_Compound);
 
 		$extraData = new BinaryStream();
@@ -398,17 +398,17 @@ class Chunk extends BaseFullChunk{
 			$extraData->putShort($value);
 		}
 
-		$nbt->ExtraData = new ByteArray("ExtraData", $extraData->getBuffer());
+		$nbt->ExtraData = new ByteArrayTag("ExtraData", $extraData->getBuffer());
 
 		$writer = new NBT(NBT::BIG_ENDIAN);
 		$nbt->setName("Level");
-		$writer->setData(new Compound("", ["Level" => $nbt]));
+		$writer->setData(new CompoundTag("", ["Level" => $nbt]));
 
 		return $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, RegionLoader::$COMPRESSION_LEVEL);
 	}
 
 	/**
-	 * @return Compound
+	 * @return CompoundTag
 	 */
 	public function getNBT(){
 		return $this->nbt;

@@ -25,11 +25,11 @@ use pocketmine\level\format\FullChunk;
 use pocketmine\level\format\LevelProvider;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\ByteArray;
-use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Enum;
+use pocketmine\nbt\tag\ByteArrayTag;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\IntArray;
+use pocketmine\nbt\tag\IntArrayTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\utils\Binary;
 use pocketmine\utils\ChunkException;
@@ -138,7 +138,7 @@ class RegionLoader{
 	}
 
 	public function generateChunk($x, $z){
-		$nbt = new Compound("Level", []);
+		$nbt = new CompoundTag("Level", []);
 		$nbt->xPos = new IntTag("xPos", ($this->getX() * 32) + $x);
 		$nbt->zPos = new IntTag("zPos", ($this->getZ() * 32) + $z);
 		$nbt->LastUpdate = new LongTag("LastUpdate", 0);
@@ -147,26 +147,26 @@ class RegionLoader{
 		$nbt->V = new ByteTag("V", self::VERSION);
 		$nbt->InhabitedTime = new LongTag("InhabitedTime", 0);
 		$biomes = str_repeat(Binary::writeByte(-1), 256);
-		$nbt->Biomes = new ByteArray("Biomes", $biomes);
-		$nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, 127));
-		$nbt->BiomeColors = new IntArray("BiomeColors", array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a")));
+		$nbt->Biomes = new ByteArrayTag("Biomes", $biomes);
+		$nbt->HeightMap = new IntArrayTag("HeightMap", array_fill(0, 256, 127));
+		$nbt->BiomeColors = new IntArrayTag("BiomeColors", array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a")));
 
 		$half = str_repeat("\x00", 16384);
 		$full = $half . $half;
-		$nbt->Blocks = new ByteArray("Blocks", $full);
-		$nbt->Data = new ByteArray("Data", $half);
-		$nbt->SkyLight = new ByteArray("SkyLight", str_repeat("\xff", 16384));
-		$nbt->BlockLight = new ByteArray("BlockLight", $half);
+		$nbt->Blocks = new ByteArrayTag("Blocks", $full);
+		$nbt->Data = new ByteArrayTag("Data", $half);
+		$nbt->SkyLight = new ByteArrayTag("SkyLight", str_repeat("\xff", 16384));
+		$nbt->BlockLight = new ByteArrayTag("BlockLight", $half);
 
-		$nbt->Entities = new Enum("Entities", []);
+		$nbt->Entities = new ListTag("Entities", []);
 		$nbt->Entities->setTagType(NBT::TAG_Compound);
-		$nbt->TileEntities = new Enum("TileEntities", []);
+		$nbt->TileEntities = new ListTag("TileEntities", []);
 		$nbt->TileEntities->setTagType(NBT::TAG_Compound);
-		$nbt->TileTicks = new Enum("TileTicks", []);
+		$nbt->TileTicks = new ListTag("TileTicks", []);
 		$nbt->TileTicks->setTagType(NBT::TAG_Compound);
 		$writer = new NBT(NBT::BIG_ENDIAN);
 		$nbt->setName("Level");
-		$writer->setData(new Compound("", ["Level" => $nbt]));
+		$writer->setData(new CompoundTag("", ["Level" => $nbt]));
 		$chunkData = $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, self::$COMPRESSION_LEVEL);
 
 		if($chunkData !== false){

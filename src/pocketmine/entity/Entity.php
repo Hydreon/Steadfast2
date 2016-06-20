@@ -45,9 +45,9 @@ use pocketmine\math\Vector3;
 use pocketmine\metadata\Metadatable;
 use pocketmine\metadata\MetadataValue;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\DoubleTag;
-use pocketmine\nbt\tag\Enum;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ShortTag;
@@ -213,7 +213,7 @@ abstract class Entity extends Location implements Metadatable{
 	protected $timings;
 
 
-	public function __construct(FullChunk $chunk, Compound $nbt){
+	public function __construct(FullChunk $chunk, CompoundTag $nbt){
 		if($chunk === null or $chunk->getProvider() === null){
 			throw new ChunkException("Invalid garbage Chunk given to Entity");
 		}
@@ -418,12 +418,12 @@ abstract class Entity extends Location implements Metadatable{
 	/**
 	 * @param int|string $type
 	 * @param FullChunk  $chunk
-	 * @param Compound   $nbt
+	 * @param CompoundTag   $nbt
 	 * @param            $args
 	 *
 	 * @return Entity
 	 */
-	public static function createEntity($type, FullChunk $chunk, Compound $nbt, ...$args){
+	public static function createEntity($type, FullChunk $chunk, CompoundTag $nbt, ...$args){
 		if(isset(self::$knownEntities[$type])){
 			$class = self::$knownEntities[$type];
 			return new $class($chunk, $nbt, ...$args);
@@ -470,19 +470,19 @@ abstract class Entity extends Location implements Metadatable{
 			}
 		}
 
-		$this->namedtag->Pos = new Enum("Pos", [
+		$this->namedtag->Pos = new ListTag("Pos", [
 			new DoubleTag(0, $this->x),
 			new DoubleTag(1, $this->y),
 			new DoubleTag(2, $this->z)
 		]);
 
-		$this->namedtag->Motion = new Enum("Motion", [
+		$this->namedtag->Motion = new ListTag("Motion", [
 			new DoubleTag(0, $this->motionX),
 			new DoubleTag(1, $this->motionY),
 			new DoubleTag(2, $this->motionZ)
 		]);
 
-		$this->namedtag->Rotation = new Enum("Rotation", [
+		$this->namedtag->Rotation = new ListTag("Rotation", [
 			new FloatTag(0, $this->yaw),
 			new FloatTag(1, $this->pitch)
 		]);
@@ -496,7 +496,7 @@ abstract class Entity extends Location implements Metadatable{
 		if(count($this->effects) > 0){
 			$effects = [];
 			foreach($this->effects as $effect){
-				$effects[$effect->getId()] = new Compound($effect->getId(), [
+				$effects[$effect->getId()] = new CompoundTag($effect->getId(), [
 					"Id" => new ByteTag("Id", $effect->getId()),
 					"Amplifier" => new ByteTag("Amplifier", $effect->getAmplifier()),
 					"Duration" => new IntTag("Duration", $effect->getDuration()),
@@ -505,7 +505,7 @@ abstract class Entity extends Location implements Metadatable{
 				]);
 			}
 
-			$this->namedtag->ActiveEffects = new Enum("ActiveEffects", $effects);
+			$this->namedtag->ActiveEffects = new ListTag("ActiveEffects", $effects);
 		}else{
 			unset($this->namedtag->ActiveEffects);
 		}

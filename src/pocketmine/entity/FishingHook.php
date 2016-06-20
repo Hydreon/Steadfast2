@@ -21,7 +21,6 @@
 
 namespace pocketmine\entity;
 
-use pocketmine\event\player\PlayerFishEvent;
 use pocketmine\level\format\FullChunk;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\Player;
@@ -130,15 +129,15 @@ class FishingHook extends Projectile{
 		$this->damageRod = false;
 
 		if($this->shootingEntity instanceof Player && $this->coughtTimer > 0){
-			$fishes = [ItemItem::RAW_FISH, ItemItem::RAW_SALMON, ItemItem::CLOWN_FISH, ItemItem::PUFFER_FISH];
-			$fish = array_rand($fishes, 1);
-			$item = ItemItem::get($fishes[$fish]);
-			$this->getLevel()->getServer()->getPluginManager()->callEvent($ev = new PlayerFishEvent($this->shootingEntity, $item, $this));
-			if(!$ev->isCancelled()){
-				$this->shootingEntity->getInventory()->addItem($item);
-				$this->shootingEntity->addExperience(mt_rand(1, 6));
-				$this->damageRod = true;
-			}
+//			$fishes = [ItemItem::RAW_FISH, ItemItem::RAW_SALMON, ItemItem::CLOWN_FISH, ItemItem::PUFFER_FISH];
+//			$fish = array_rand($fishes, 1);
+//			$item = ItemItem::get($fishes[$fish]);
+//			$this->getLevel()->getServer()->getPluginManager()->callEvent($ev = new PlayerFishEvent($this->shootingEntity, $item, $this));
+//			if(!$ev->isCancelled()){
+//				$this->shootingEntity->getInventory()->addItem($item);
+//				$this->shootingEntity->addExperience(mt_rand(1, 6));
+//				$this->damageRod = true;
+//			}
 		}
 
 		if($this->shootingEntity instanceof Player){

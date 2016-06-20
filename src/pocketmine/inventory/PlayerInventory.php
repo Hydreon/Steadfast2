@@ -377,7 +377,7 @@ class PlayerInventory extends BaseInventory{
 			}
 		}
 	}
-	
+
 	/**
 	 * @param Player|Player[] $target
 	 */

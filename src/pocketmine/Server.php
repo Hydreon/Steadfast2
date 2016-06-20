@@ -32,7 +32,6 @@ use pocketmine\command\ConsoleCommandSender;
 use pocketmine\command\PluginIdentifiableCommand;
 use pocketmine\command\SimpleCommandMap;
 use pocketmine\entity\Arrow;
-use pocketmine\entity\Attribute;
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
 use pocketmine\entity\FallingSand;
@@ -65,9 +64,9 @@ use pocketmine\metadata\LevelMetadataStore;
 use pocketmine\metadata\PlayerMetadataStore;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\DoubleTag;
-use pocketmine\nbt\tag\Enum;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
@@ -751,7 +750,7 @@ class Server{
 	/**
 	 * @param string $name
 	 *
-	 * @return Compound
+	 * @return CompoundTag
 	 */
 	public function getOfflinePlayerData($name){
 		$name = strtolower($name);
@@ -770,10 +769,10 @@ class Server{
 			$this->logger->notice("Player data not found for \"" . $name . "\", creating new profile");
 		}
 		$spawn = $this->getDefaultLevel()->getSafeSpawn();
-		$nbt = new Compound("", [
+		$nbt = new CompoundTag("", [
 			new LongTag("firstPlayed", floor(microtime(true) * 1000)),
 			new LongTag("lastPlayed", floor(microtime(true) * 1000)),
-			new Enum("Pos", [
+			new ListTag("Pos", [
 				new DoubleTag(0, $spawn->x),
 				new DoubleTag(1, $spawn->y),
 				new DoubleTag(2, $spawn->z)
@@ -784,15 +783,15 @@ class Server{
 			//new IntTag("SpawnY", (int) $spawn->y),
 			//new IntTag("SpawnZ", (int) $spawn->z),
 			//new ByteTag("SpawnForced", 1), //TODO
-			new Enum("Inventory", []),
-			new Compound("Achievements", []),
+			new ListTag("Inventory", []),
+			new CompoundTag("Achievements", []),
 			new IntTag("playerGameType", $this->getGamemode()),
-			new Enum("Motion", [
+			new ListTag("Motion", [
 				new DoubleTag(0, 0.0),
 				new DoubleTag(1, 0.0),
 				new DoubleTag(2, 0.0)
 			]),
-			new Enum("Rotation", [
+			new ListTag("Rotation", [
 				new FloatTag(0, 0.0),
 				new FloatTag(1, 0.0)
 			]),
@@ -816,9 +815,9 @@ class Server{
 
 	/**
 	 * @param string   $name
-	 * @param Compound $nbtTag
+	 * @param CompoundTag $nbtTag
 	 */
-	public function saveOfflinePlayerData($name, Compound $nbtTag, $async = false){
+	public function saveOfflinePlayerData($name, CompoundTag $nbtTag, $async = false){
 			$nbt = new NBT(NBT::BIG_ENDIAN);
 		try{
 			$nbt->setData($nbtTag);

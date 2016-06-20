@@ -16,9 +16,9 @@ use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
 use pocketmine\level\Location;
 use pocketmine\level\Position;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\DoubleTag;
-use pocketmine\nbt\tag\Enum;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\entity\monster\walking\Wolf;
 
@@ -240,18 +240,18 @@ abstract class BaseEntity extends Creature{
 			$chunk->setPopulated();
 		}
 
-		$nbt = new Compound("", [
-			"Pos" => new Enum("Pos", [
+		$nbt = new CompoundTag("", [
+			"Pos" => new ListTag("Pos", [
 				new DoubleTag("", $source->x),
 				new DoubleTag("", $source->y),
 				new DoubleTag("", $source->z)
 			]),
-			"Motion" => new Enum("Motion", [
+			"Motion" => new ListTag("Motion", [
 				new DoubleTag("", 0),
 				new DoubleTag("", 0),
 				new DoubleTag("", 0)
 			]),
-			"Rotation" => new Enum("Rotation", [
+			"Rotation" => new ListTag("Rotation", [
 				new FloatTag("", $source instanceof Location ? $source->yaw : 0),
 				new FloatTag("", $source instanceof Location ? $source->pitch : 0)
 			]),

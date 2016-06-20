@@ -19,7 +19,6 @@
  *
 */
 
-
 namespace pocketmine\item;
 
 use pocketmine\block\Block;
@@ -31,7 +30,7 @@ abstract class Tool extends Item{
 	const TIER_STONE = 3;
 	const TIER_IRON = 4;
 	const TIER_DIAMOND = 5;
-	
+
 	const TYPE_NONE = 0;
 	const TYPE_SWORD = 1;
 	const TYPE_SHOVEL = 2;
@@ -76,11 +75,11 @@ abstract class Tool extends Item{
 	public function getMaxDurability(){
 
 		$levels = [
-			2 => 33,
-			1 => 60,
-			3 => 132,
-			4 => 251,
-			5 => 1562,
+			Tool::TIER_GOLD => 33,
+			Tool::TIER_WOODEN => 60,
+			Tool::TIER_STONE => 132,
+			Tool::TIER_IRON => 251,
+			Tool::TIER_DIAMOND => 1562,
 			self::FLINT_STEEL => 65,
 			self::SHEARS => 239,
 			self::BOW => 385,

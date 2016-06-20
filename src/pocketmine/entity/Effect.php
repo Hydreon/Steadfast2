@@ -27,7 +27,6 @@ use pocketmine\network\Network;
 use pocketmine\network\protocol\MobEffectPacket;
 use pocketmine\Player;
 
-
 class Effect{
 	const SPEED = 1;
 	const SLOWNESS = 2;
@@ -36,8 +35,8 @@ class Effect{
 	const FATIGUE = 4;
 	const MINING_FATIGUE = 4;
 	const STRENGTH = 5;
-	//TODO: const HEALING = 6;
-	//TODO: const HARMING = 7;
+//	TODO: const HEALING = 6;
+//	TODO: const HARMING = 7;
 	const JUMP = 8;
 	const NAUSEA = 9;
 	const CONFUSION = 9;
@@ -46,15 +45,15 @@ class Effect{
 	const FIRE_RESISTANCE = 12;
 	const WATER_BREATHING = 13;
 	const INVISIBILITY = 14;
-	//const BLINDNESS = 15;
+	const BLINDNESS = 15;
 	const NIGHT_VISION = 16;
-	//const HUNGER = 17;
+	const HUNGER = 17;
 	const WEAKNESS = 18;
 	const POISON = 19;
 	const WITHER = 20;
 	const HEALTH_BOOST = 21;
-	//const ABSORPTION = 22;
-	//const SATURATION = 23;
+	const ABSORPTION = 22; // TODO implement
+	const SATURATION = 23;
 
 	/** @var Effect[] */
 	protected static $effects;
@@ -88,6 +87,7 @@ class Effect{
 
 	/**
 	 * @param int $id
+	 *
 	 * @return $this
 	 */
 	public static function getEffect($id){

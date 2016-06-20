@@ -54,7 +54,7 @@ abstract class Living extends Entity implements Damageable{
 			unset($this->namedtag->HealF);
 		}
 
-		if(!isset($this->namedtag->Health) or !($this->namedtag->Health instanceof Short)){
+		if(!isset($this->namedtag->Health) or !($this->namedtag->Health instanceof ShortTag)){
 			$this->namedtag->Health = new ShortTag("Health", $this->getMaxHealth());
 		}
 
@@ -287,8 +287,7 @@ abstract class Living extends Entity implements Damageable{
 			if($block instanceof Block){
 				return $block;
 			}
-		}catch (\ArrayOutOfBoundsException $e){
-
+		}catch(\ArrayOutOfBoundsException $e){
 		}
 
 		return null;

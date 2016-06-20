@@ -29,7 +29,7 @@ class AdventureSettingsPacket extends DataPacket{
 
 	public $flags;
 	public $userPermission;
- 	public $globalPermission;
+	public $globalPermission;
 
 	public function decode(){
 
@@ -37,9 +37,9 @@ class AdventureSettingsPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putInt($this->flags);		
+		$this->putInt($this->flags);
 		$this->putInt($this->userPermission);
- 		$this->putInt($this->globalPermission);
+		$this->putInt($this->globalPermission);
 	}
 
 }
