@@ -44,11 +44,11 @@ class PrimedTNT extends Entity implements Explosive{
 	protected $fuse;
 
 	public $canCollide = false;
-    
-    protected $owner = null;
+
+	protected $owner = null;
 
 
-    public function attack($damage, EntityDamageEvent $source){
+	public function attack($damage, EntityDamageEvent $source){
 
 	}
 
@@ -145,8 +145,8 @@ class PrimedTNT extends Entity implements Explosive{
 
 		parent::spawnTo($player);
 	}
-    
-    public function setOwner($owner){
-        $this->owner = $owner;
-    }
+
+	public function setOwner($owner){
+		$this->owner = $owner;
+	}
 }

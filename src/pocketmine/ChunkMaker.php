@@ -39,9 +39,9 @@ class ChunkMaker extends Worker {
 		gc_enable();
 		ini_set("memory_limit", -1);
 		ini_set("display_errors", 1);
-	    ini_set("display_startup_errors", 1);
+		ini_set("display_startup_errors", 1);
 
-	    set_error_handler([$this, "errorHandler"], E_ALL);
+		set_error_handler([$this, "errorHandler"], E_ALL);
 		$this->tickProcessor();
 	}
 
@@ -122,8 +122,8 @@ class ChunkMaker extends Worker {
 	
 	
 	public function shutdown(){		
-        $this->shutdown = true;
-    }
+		$this->shutdown = true;
+	}
 	
 	
 	public function errorHandler($errno, $errstr, $errfile, $errline, $context, $trace = null){

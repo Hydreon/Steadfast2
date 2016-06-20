@@ -41,7 +41,7 @@ abstract class AsyncTask extends Collectable{
 		$this->result = null;
 
 		$this->onRun();
-        $this->isFinished = true;    
+		$this->isFinished = true;
 		//$this->setGarbage();
 	}
 

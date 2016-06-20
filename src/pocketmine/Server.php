@@ -819,7 +819,7 @@ class Server{
 	 * @param Compound $nbtTag
 	 */
 	public function saveOfflinePlayerData($name, Compound $nbtTag, $async = false){
-            $nbt = new NBT(NBT::BIG_ENDIAN);
+			$nbt = new NBT(NBT::BIG_ENDIAN);
 		try{
 			$nbt->setData($nbtTag);
 			if($async){
@@ -2169,8 +2169,8 @@ class Server{
 		return [];
 	}
 
-       
-        private function tickProcessor(){
+
+		private function tickProcessor(){
 		$this->nextTick = microtime(true);
 		while($this->isRunning){
 			$this->tick();

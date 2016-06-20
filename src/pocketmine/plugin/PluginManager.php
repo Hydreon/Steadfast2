@@ -454,8 +454,8 @@ class PluginManager{
 	 *
 	 * @return Permissible[]
 	 */
-	        
-        public function getPermissionSubscriptions($permission){
+			
+		public function getPermissionSubscriptions($permission){
 		if(isset($this->permSubs[$permission])){
 			return $this->permSubs[$permission];
 			$subs = [];

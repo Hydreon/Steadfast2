@@ -98,15 +98,15 @@ abstract class Living extends Entity implements Damageable{
 		if($this->attackTime > 0 or $this->noDamageTicks > 0){
 			$lastCause = $this->getLastDamageCause();
 			if($lastCause !== null and $lastCause->getDamage() >= $damage){
-                $source->setCancelled();
+				$source->setCancelled();
 			}
 		}
 
-        parent::attack($damage, $source);
+		parent::attack($damage, $source);
 
-        if($source->isCancelled()){
-            return;
-        }
+		if($source->isCancelled()){
+			return;
+		}
 
 		if($source instanceof EntityDamageByEntityEvent){
 			$e = $source->getDamager();
