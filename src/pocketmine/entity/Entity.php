@@ -89,7 +89,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_SILENT = 4;
 	const DATA_POTION_COLOR = 7;
 	const DATA_POTION_AMBIENT = 8;
-    const DATA_NO_AI = 15;
+	const DATA_NO_AI = 15;
 	const DATA_LEAD_HOLDER = 23;
 	const DATA_LEAD = 24;
 
@@ -612,23 +612,23 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param EntityDamageEvent $source
 	 *
 	 */
-    public function attack($damage, EntityDamageEvent $source){
-        if($this->hasEffect(Effect::FIRE_RESISTANCE)
-            and $source->getCause() === EntityDamageEvent::CAUSE_FIRE
-            and $source->getCause() === EntityDamageEvent::CAUSE_FIRE_TICK
-            and $source->getCause() === EntityDamageEvent::CAUSE_LAVA){
-            $source->setCancelled();
-        }
+	public function attack($damage, EntityDamageEvent $source){
+		if($this->hasEffect(Effect::FIRE_RESISTANCE)
+			and $source->getCause() === EntityDamageEvent::CAUSE_FIRE
+			and $source->getCause() === EntityDamageEvent::CAUSE_FIRE_TICK
+			and $source->getCause() === EntityDamageEvent::CAUSE_LAVA){
+			$source->setCancelled();
+		}
 
-        $this->server->getPluginManager()->callEvent($source);
-        if($source->isCancelled()){
-            return;
-        }
+		$this->server->getPluginManager()->callEvent($source);
+		if($source->isCancelled()){
+			return;
+		}
 
-        $this->setLastDamageCause($source);
+		$this->setLastDamageCause($source);
 
-        $this->setHealth($this->getHealth() - $source->getFinalDamage());
-    }
+		$this->setHealth($this->getHealth() - $source->getFinalDamage());
+	}
 
 	/**
 	 * @param float                   $amount
@@ -636,13 +636,13 @@ abstract class Entity extends Location implements Metadatable{
 	 *
 	 */
 	public function heal($amount, EntityRegainHealthEvent $source){
-        $this->server->getPluginManager()->callEvent($source);
-        if($source->isCancelled()){
-            return;
-        }
+		$this->server->getPluginManager()->callEvent($source);
+		if($source->isCancelled()){
+			return;
+		}
 
-        $this->setHealth($this->getHealth() + $source->getAmount());
-    }
+		$this->setHealth($this->getHealth() + $source->getAmount());
+	}
 
 	/**
 	 * @return int
@@ -1042,7 +1042,7 @@ abstract class Entity extends Location implements Metadatable{
 			$this->despawnFromAll();
 			if($this instanceof Player){
 				foreach($this->usedChunks as $index => $d){
-					if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32;  $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X,  $Z) = explode(":", $index);  $X = (int)  $X;  $Z = (int)  $Z;};
+					if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32; $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X, $Z) = explode(":", $index); $X = (int) $X; $Z = (int) $Z;};
 					$this->unloadChunk($X, $Z);
 				}
 			}
@@ -1079,7 +1079,7 @@ abstract class Entity extends Location implements Metadatable{
 
 		return false;
 	}
-        
+
 	public function isCollideWithWater() {
 		// checking block under feet
 		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
@@ -1098,16 +1098,16 @@ abstract class Entity extends Location implements Metadatable{
 		if(!($block instanceof Liquid)) {
 			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
 		}
-                if(!($block instanceof Liquid)) {
+				if(!($block instanceof Liquid)) {
 			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x + $this->width), Math::floorFloat($y), Math::floorFloat($this->z)));
 		}
-                if(!($block instanceof Liquid)) {
+				if(!($block instanceof Liquid)) {
 			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x - $this->width), Math::floorFloat($y), Math::floorFloat($this->z)));
 		}
-                if(!($block instanceof Liquid)) {
+				if(!($block instanceof Liquid)) {
 			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y), Math::floorFloat($this->z + $this->width)));
 		}
-                if(!($block instanceof Liquid)) {
+				if(!($block instanceof Liquid)) {
 			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y), Math::floorFloat($this->z - $this->width)));
 		}
 		if($block instanceof Liquid) {
@@ -1445,11 +1445,11 @@ abstract class Entity extends Location implements Metadatable{
 			if(!$this->justCreated){
 				$newChunk = $this->level->getUsingChunk($this->x >> 4, $this->z >> 4);
 				foreach($this->hasSpawned as $player){
-                    if(!isset($newChunk[$player->getId()])){
-                        $this->despawnFrom($player);
-                    }else{
-                        unset($newChunk[$player->getId()]);
-                    }
+					if(!isset($newChunk[$player->getId()])){
+						$this->despawnFrom($player);
+					}else{
+						unset($newChunk[$player->getId()]);
+					}
 				}
 				foreach($newChunk as $player){
 					$this->spawnTo($player);
@@ -1614,19 +1614,19 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param mixed $value
 	 */
 	public function setDataProperty($id, $type, $value){
-        if($this->getDataProperty($id) !== $value){
-            $this->dataProperties[$id] = [$type, $value];
+		if($this->getDataProperty($id) !== $value){
+			$this->dataProperties[$id] = [$type, $value];
 
-            $targets = $this->hasSpawned;
-            if($this instanceof Player){
+			$targets = $this->hasSpawned;
+			if($this instanceof Player){
 				if(!$this->spawned){
 					return;
 				}
-                $targets[] = $this;
-            }
+				$targets[] = $this;
+			}
 
-            $this->sendData($targets, [$id => $this->dataProperties[$id]]);
-        }
+			$this->sendData($targets, [$id => $this->dataProperties[$id]]);
+		}
 	}
 
 	/**

@@ -34,8 +34,8 @@ class CraftItemEvent extends Event implements Cancellable{
 	private $input = [];
 	/** @var Recipe */
 	private $recipe;
-        /** @var Player */
-        private $player;
+		/** @var Player */
+		private $player;
 	/**
 	 * @param Item[] $input
 	 * @param Recipe $recipe
@@ -43,7 +43,7 @@ class CraftItemEvent extends Event implements Cancellable{
 	public function __construct(array $input, Recipe $recipe, Player $player){
 		$this->input = $input;
 		$this->recipe = $recipe;
-                $this->player = $player;
+				$this->player = $player;
 	}
 
 	/**
@@ -57,8 +57,8 @@ class CraftItemEvent extends Event implements Cancellable{
 
 		return $items;
 	}
-        
-        public function getPlayer(){
+		
+		public function getPlayer(){
 		return $this->player;
 	}
 

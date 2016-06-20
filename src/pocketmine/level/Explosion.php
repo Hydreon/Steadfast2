@@ -142,7 +142,7 @@ class Explosion{
 
 		$explosionBB = new AxisAlignedBB($minX, $minY, $minZ, $maxX, $maxY, $maxZ);
 
-        if($this->what instanceof Entity){
+		if($this->what instanceof Entity){
 			$this->level->getServer()->getPluginManager()->callEvent($ev = new EntityExplodeEvent($this->what, $this->source, $this->affectedBlocks, $yield));
 			if($ev->isCancelled()){
 				return false;
@@ -151,8 +151,8 @@ class Explosion{
 				$this->affectedBlocks = $ev->getBlockList();
 			}
 		}
-        
-        $list = $this->level->getNearbyEntities($explosionBB, $this->what instanceof Entity ? $this->what : null);
+
+		$list = $this->level->getNearbyEntities($explosionBB, $this->what instanceof Entity ? $this->what : null);
 		foreach($list as $entity){
 			$distance = $entity->distance($this->source) / $explosionSize;
 

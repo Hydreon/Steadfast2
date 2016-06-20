@@ -387,8 +387,8 @@ class Item{
 
 	const EGG = 344;
 	const COMPASS = 345;
-        const FISHING_ROD = 346;
-        	
+	const FISHING_ROD = 346;
+
 	const CLOCK = 347;
 	const GLOWSTONE_DUST = 348;
 	const RAW_FISH = 349;
@@ -1071,7 +1071,7 @@ class Item{
 				self::addCreativeItem(Item::get($i, 0));
 			}
 			
-		    self::addCreativeItem(Item::get(Item::SPAWN_EGG, 15));
+			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 15));
 			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 10));
 			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 11));
 			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 12));

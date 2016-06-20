@@ -42,8 +42,8 @@ class CrashDump{
 		$this->time = time();
 		$this->server = $server;
 
-        if(!is_dir($this->server->getDataPath() . "logs"))
-            mkdir($this->server->getDataPath() . "logs");
+		if(!is_dir($this->server->getDataPath() . "logs"))
+			mkdir($this->server->getDataPath() . "logs");
 
 		$this->path = $this->server->getDataPath() . "logs/" . date("D_M_j-H.i.s-T_Y", $this->time) . ".log";
 		$this->fp = @fopen($this->path, "wb");

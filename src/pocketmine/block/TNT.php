@@ -75,9 +75,9 @@ class TNT extends Solid{
 				"Fuse" => new ByteTag("Fuse", 80)
 			]));
 
-            if($player != null){
-                $tnt->setOwner($player);
-            }
+			if($player != null){
+				$tnt->setOwner($player);
+			}
 			$tnt->spawnToAll();
 
 			return true;
