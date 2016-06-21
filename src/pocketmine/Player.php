@@ -913,8 +913,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 
 		$this->sleeping = clone $pos;
-        $this->teleport(new Position($pos->x + 0.5, $pos->y - 0.5, $pos->z + 0.5, $this->level));
-            
+		$this->teleport(new Position($pos->x + 0.5, $pos->y - 0.5, $pos->z + 0.5, $this->level));
+			
 		$this->setDataProperty(self::DATA_PLAYER_BED_POSITION, self::DATA_TYPE_POS, [$pos->x, $pos->y, $pos->z]);
 		$this->setDataFlag(self::DATA_PLAYER_FLAGS, self::DATA_PLAYER_FLAG_SLEEP, true);
 
@@ -1132,13 +1132,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$flags |= 0x100;
 		}
 		
-		$flags |= 0x02;  
- 		$flags |= 0x04;  
+		$flags |= 0x02;
+		$flags |= 0x04;
 
 		$pk = new AdventureSettingsPacket();
 		$pk->flags = $flags;
 		$pk->userPermission = 2;
-        	$pk->globalPermission = 2;
+			$pk->globalPermission = 2;
 		$this->dataPacket($pk);
 	}
 
@@ -1754,9 +1754,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				
 				if(count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers()){
- 					$this->close("", "Server is Full",false);
+					$this->close("", "Server is Full",false);
 					//Timings::$timerLoginPacket->stopTiming();
- 					break;
+					break;
 				}
 
 				$this->setSkin($packet->skin, $packet->skinName);
@@ -1797,7 +1797,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}
 					}
 				}
-                                
+								
 				$nbt = $this->server->getOfflinePlayerData($this->username);
 				if(!isset($nbt->NameTag)){
 					$nbt->NameTag = new StringTag("NameTag", $this->username);
@@ -3016,14 +3016,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET:
 				//Timings::$timerChunkRudiusPacket->startTiming();
- 				//if($this->spawned){
+				//if($this->spawned){
 				$this->viewDistance = $packet->radius ** 2;
- 				//}
- 				$pk = new ChunkRadiusUpdatePacket();
- 				$pk->radius = $packet->radius;
- 				$this->dataPacket($pk);
+				//}
+				$pk = new ChunkRadiusUpdatePacket();
+				$pk->radius = $packet->radius;
+				$this->dataPacket($pk);
 				//Timings::$timerChunkRudiusPacket->stopTiming();
- 				break;
+				break;
 			default:
 				break;
 		}
@@ -3109,7 +3109,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if($this->username != ""){
 				$this->server->getPluginManager()->callEvent($ev = new PlayerQuitEvent($this, $message, $reason));
 				if($this->server->getAutoSave() and $this->loggedIn === true){
-                                    $this->save();
+					$this->save();
 				}
 			}
 
@@ -3129,7 +3129,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$chunkX = $chunkZ = null;
 			foreach($this->usedChunks as $index => $d){
-				if(PHP_INT_SIZE === 8){ $chunkX = ($index >> 32) << 32 >> 32;  $chunkZ = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $chunkX,  $chunkZ) = explode(":", $index);  $chunkX = (int)  $chunkX;  $chunkZ = (int)  $chunkZ;};
+				if(PHP_INT_SIZE === 8){ $chunkX = ($index >> 32) << 32 >> 32; $chunkZ = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $chunkX, $chunkZ) = explode(":", $index); $chunkX = (int) $chunkX; $chunkZ = (int) $chunkZ;};
 				$this->level->freeChunk($chunkX, $chunkZ, $this);
 				unset($this->usedChunks[$index]);
 			}

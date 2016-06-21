@@ -205,8 +205,8 @@ class Chunk extends BaseChunk{
 
 		return $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, RegionLoader::$COMPRESSION_LEVEL);
 	}
-        
-        public static function getEmptyChunk($chunkX, $chunkZ, LevelProvider $provider = null){
+		
+		public static function getEmptyChunk($chunkX, $chunkZ, LevelProvider $provider = null){
 		try{
 			$chunk = new Chunk($provider instanceof LevelProvider ? $provider : Anvil::class, null);
 			$chunk->x = $chunkX;

@@ -45,10 +45,10 @@ class PacketMaker extends Worker {
 		gc_enable();
 		ini_set("memory_limit", -1);
 		ini_set("display_errors", 1);
-	    ini_set("display_startup_errors", 1);
+		ini_set("display_startup_errors", 1);
 
-	    set_error_handler([$this, "errorHandler"], E_ALL);
-	    register_shutdown_function([$this, "shutdownHandler"]);
+		set_error_handler([$this, "errorHandler"], E_ALL);
+		register_shutdown_function([$this, "shutdownHandler"]);
 		$this->tickProcessor();
 	}
 
@@ -170,9 +170,9 @@ class PacketMaker extends Worker {
 	}
 	
 	public function shutdown(){		
-        $this->shutdown = true;
+		$this->shutdown = true;
 		var_dump("Packet thread shutdown!");
-    }
+	}
 	
 	
 	public function errorHandler($errno, $errstr, $errfile, $errline, $context, $trace = null){

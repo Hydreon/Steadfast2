@@ -244,14 +244,14 @@ class Level implements ChunkManager, Metadatable{
 
 	/** @var LevelTimings */
 	public $timings;
-        
-         private $isFrozen = false;
+		
+		 private $isFrozen = false;
 		 
 	protected static $isMemoryLeakHappend = false;
 	
 	public $chunkMaker = null;
 
-        /**
+		/**
 	 * Returns the chunk unique hash/key
 	 *
 	 * @param int $x
@@ -618,7 +618,7 @@ class Level implements ChunkManager, Metadatable{
 						}else{
 							$X = null;
 							$Z = null;
-							if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32;  $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X,  $Z) = explode(":", $index);  $X = (int)  $X;  $Z = (int)  $Z;};
+							if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32; $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X, $Z) = explode(":", $index); $X = (int) $X; $Z = (int) $Z;};
 							foreach($this->getUsingChunk($X, $Z) as $p){
 								$p->unloadChunk($X, $Z);
 							}
@@ -737,7 +737,7 @@ class Level implements ChunkManager, Metadatable{
 		$blockTest = 0;
 
 		foreach($this->chunkTickList as $index => $players){
-			if(PHP_INT_SIZE === 8){ $chunkX = ($index >> 32) << 32 >> 32;  $chunkZ = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $chunkX,  $chunkZ) = explode(":", $index);  $chunkX = (int)  $chunkX;  $chunkZ = (int)  $chunkZ;};
+			if(PHP_INT_SIZE === 8){ $chunkX = ($index >> 32) << 32 >> 32; $chunkZ = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $chunkX, $chunkZ) = explode(":", $index); $chunkX = (int) $chunkX; $chunkZ = (int) $chunkZ;};
 
 
 
@@ -1260,7 +1260,7 @@ class Level implements ChunkManager, Metadatable{
 			}
 
 			if($direct === true){
-                                $this->sendBlocks($this->getUsingChunk($block->x >> 4, $block->z >> 4), [$block]);
+								$this->sendBlocks($this->getUsingChunk($block->x >> 4, $block->z >> 4), [$block]);
 			}else{
 				if(!($pos instanceof Position)){
 					$pos = $this->temporalPosition->setComponents($pos->x, $pos->y, $pos->z);
@@ -2047,7 +2047,7 @@ class Level implements ChunkManager, Metadatable{
 				if(isset($this->chunkSendTasks[$index])){
 					continue;
 				}
-				if(PHP_INT_SIZE === 8){ $x = ($index >> 32) << 32 >> 32;  $z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $x,  $z) = explode(":", $index);  $x = (int)  $x;  $z = (int)  $z;};
+				if(PHP_INT_SIZE === 8){ $x = ($index >> 32) << 32 >> 32; $z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $x, $z) = explode(":", $index); $x = (int) $x; $z = (int) $z;};
 				if(ADVANCED_CACHE == true and ($cache = Cache::get("world:" . $this->getId() . ":" . $index)) !== false and ($cache15 = Cache::get("world15:" . $this->getId() . ":" . $index)) !== false){
 					/** @var Player[] $players */
 					foreach($players as $player){
@@ -2471,7 +2471,7 @@ class Level implements ChunkManager, Metadatable{
 
 			foreach($this->chunks as $index => $chunk){
 				if(!isset($this->unloadQueue[$index]) and (!isset($this->usedChunks[$index]) or count($this->usedChunks[$index]) === 0)){
-					if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32;  $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X,  $Z) = explode(":", $index);  $X = (int)  $X;  $Z = (int)  $Z;};
+					if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32; $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X, $Z) = explode(":", $index); $X = (int) $X; $Z = (int) $Z;};
 					if(!$this->isSpawnChunk($X, $Z)){
 						$this->unloadChunkRequest($X, $Z, true);
 					}
@@ -2495,7 +2495,7 @@ class Level implements ChunkManager, Metadatable{
 			$X = null;
 			$Z = null;
 			foreach($this->unloadQueue as $index => $time){
-				if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32;  $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X,  $Z) = explode(":", $index);  $X = (int)  $X;  $Z = (int)  $Z;};
+				if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32; $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X, $Z) = explode(":", $index); $X = (int) $X; $Z = (int) $Z;};
 
 				//If the chunk can't be unloaded, it stays on the queue
 				if($this->unloadChunk($X, $Z, true)){
@@ -2504,7 +2504,7 @@ class Level implements ChunkManager, Metadatable{
 			}
 		}
 	}
-        
+		
 	public function freezeMap(){
 		$this->isFrozen = true;
 	}

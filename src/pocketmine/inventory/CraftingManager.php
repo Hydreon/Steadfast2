@@ -397,7 +397,7 @@ class CraftingManager{
 				"XXX",
 				"XXX",
 				"   "
-			],                   
+			],
 			"blockrecipe1" => [
 				"XX",
 				"XX"				
@@ -410,16 +410,16 @@ class CraftingManager{
 			"blockrecipe2X2" => [
 				"AB",
 				"BA"
-			],                    
+			],
 			"blockrecipe1X2" => [
 				"  ",
 				"AB"
-			]                          
-		];              
+			]
+		];
 
 		$buildRecipes = [];
 
-		// Single ingedient stone cutter recipes:                
+		// Single ingedient stone cutter recipes:
 			$RESULT_ITEMID = 0;         $RESULT_META = 1;           $INGREDIENT_ITEMID = 2;     $INGREDIENT_META = 3; $RECIPE_SHAPE = 4;$RESULT_AMOUNT = 5;                
 		$recipes = [
 			//RESULT_ITEM_ID            RESULT_META                 INGREDIENT_ITEMID           INGREDIENT_META     RECIPE_SHAPE        RESULT_AMOUNT
@@ -469,7 +469,7 @@ class CraftingManager{
 		))->setIngredient("A", Item::get(Item::COBBLESTONE, 0, 1))->setIngredient("B", Item::get(Item::STONE, Stone::DIORITE, 1)));
 		$buildRecipes[] = ((new ShapedRecipe(Item::get(Item::STONE_BRICK, StoneBricks::MOSSY, 1),
 			...$shapes["blockrecipe1X2"]
-		))->setIngredient("A", Item::get(Item::STONE_BRICK, StoneBricks::NORMAL, 1))->setIngredient("B", Item::get(Item::VINES, 0, 1)));                 
+		))->setIngredient("A", Item::get(Item::STONE_BRICK, StoneBricks::NORMAL, 1))->setIngredient("B", Item::get(Item::VINES, 0, 1)));
 
 		$this->sortAndAddRecipesArray($buildRecipes);
 	}
