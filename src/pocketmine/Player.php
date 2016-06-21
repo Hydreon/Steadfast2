@@ -24,6 +24,7 @@ namespace pocketmine;
 use pocketmine\block\Block;
 use pocketmine\command\CommandSender;
 use pocketmine\entity\Arrow;
+use pocketmine\entity\Attribute;
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Human;
@@ -92,9 +93,9 @@ use pocketmine\math\Vector3;
 use pocketmine\metadata\MetadataValue;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\DoubleTag;
-use pocketmine\nbt\tag\Enum;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
@@ -260,6 +261,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $additionalChar;
 
+	/** @var Attribute[] */
+	protected $attributes;
+
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -309,15 +313,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function getFirstPlayed(){
-		return $this->namedtag instanceof Compound ? $this->namedtag["firstPlayed"] : null;
+		return $this->namedtag instanceof CompoundTag ? $this->namedtag["firstPlayed"] : null;
 	}
 
 	public function getLastPlayed(){
-		return $this->namedtag instanceof Compound ? $this->namedtag["lastPlayed"] : null;
+		return $this->namedtag instanceof CompoundTag ? $this->namedtag["lastPlayed"] : null;
 	}
 
 	public function hasPlayedBefore(){
-		return $this->namedtag instanceof Compound;
+		return $this->namedtag instanceof CompoundTag;
 	}
 
 	public function setAllowFlight($value){
@@ -516,7 +520,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->interface = $interface;
 		$this->windows = new \SplObjectStorage();
 		$this->perm = new PermissibleBase($this);
-		$this->namedtag = new Compound();
+		$this->namedtag = new CompoundTag();
 		$this->server = Server::getInstance();
 		$this->lastBreak = PHP_INT_MAX;
 		$this->ip = $ip;
@@ -535,6 +539,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->rawUUID = null;
 
 		$this->creationTime = microtime(true);
+
+		$this->attributes = [
+//			Attribute::ABSORPTION => new Attribute("generic.absorption", 0.00, 340282346638528859811704183484516925440.00, 0.00, false),
+			Attribute::SATURATION => new Attribute("player.saturation", 0.00, 20.00, 5.00, false),
+//			Attribute::EXHAUSTION => new Attribute("player.exhaustion", 0.00, 5.00, 0.41, false),
+			Attribute::HEALTH => new Attribute("generic.health", 0.00, 30.00, 30.00),
+//			Attribute::MOVEMENT_SPEED => new Attribute("generic.movementSpeed", 0.00, 340282346638528859811704183484516925440.00, 0.10),
+			Attribute::HUNGER => new Attribute("player.hunger", 0.00, 1.00, 1.00),
+			Attribute::EXPERIENCE_LEVEL => new Attribute("player.level", 0.00, 24791.00, 0.00),
+			Attribute::EXPERIENCE => new Attribute("player.experience", 0.00, 1.00, 0.00)
+		];
 	}
 
 	/**
@@ -1550,51 +1565,56 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					++$this->inAirTicks;
 				}
 			}
-			
-			if($this->starvationTick >= 20) {
-				$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_CUSTOM, 1);
-				$this->attack(1, $ev);
-				$this->starvationTick = 0;
-			}
-			if($this->getFood() <= 0) {
-				$this->starvationTick++;
-			}
 
-			if($this->isMoving() && $this->isSurvival()) {
-				if($this->isSprinting()) {
-					$this->foodUsageTime += 500;
-				} else {
-					$this->foodUsageTime += 250;
-				}
-			}
-
-			if($this->foodUsageTime >= 100000 && $this->hungerDepletion) {
-				$this->foodUsageTime -= 100000;
-				$this->subtractFood(1);
-			}
-
-			if($this->foodTick >= 80) {
-				if($this->getHealth() < $this->getMaxHealth() && $this->getFood() >= 18) {
-					$ev = new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_EATING);
-					$this->heal(1, $ev);
-					if($this->hungerDepletion >=2) {
-						$this->subtractFood(1);
-						$this->foodDepletion = 0;
-					} else {
-						$this->hungerDepletion++;
-					}
-				}
-				$this->foodTick = 0;
-			}
-			if($this->getHealth() < $this->getMaxHealth()) {
-				$this->foodTick++;
-			}
 			$this->checkChunks();
 		}
+		
+		$this->foodTick($currentTick);
 
 		$this->timings->stopTiming();
 
 		return true;
+	}
+
+	public function foodTick($currentTick) {
+		if($this->starvationTick >= 20) {
+			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_CUSTOM, 1);
+			$this->attack(1, $ev);
+			$this->starvationTick = 0;
+		}
+		if($this->getFood() <= 0) {
+			$this->starvationTick++;
+		}
+
+		if($this->isMoving() && $this->isSurvival()) {
+			if($this->isSprinting()) {
+				$this->foodUsageTime += 500;
+			} else {
+				$this->foodUsageTime += 250;
+			}
+		}
+
+		if($this->foodUsageTime >= 100000 && $this->hungerDepletion) {
+			$this->foodUsageTime -= 100000;
+			$this->subtractFood(1);
+		}
+
+		if($this->foodTick >= 80) {
+			if($this->getHealth() < $this->getMaxHealth() && $this->getFood() >= 18) {
+				$ev = new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_EATING);
+				$this->heal(1, $ev);
+				if($this->hungerDepletion >=2) {
+					$this->subtractFood(1);
+					$this->foodDepletion = 0;
+				} else {
+					$this->hungerDepletion++;
+				}
+			}
+			$this->foodTick = 0;
+		}
+		if($this->getHealth() < $this->getMaxHealth()) {
+			$this->foodTick++;
+		}
 	}
 
 	public function eatFoodInHand() {
@@ -1822,7 +1842,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->setLevel($level, true);
 				}
 
-				if(!($nbt instanceof Compound)){
+				if(!($nbt instanceof CompoundTag)){
 					$this->close(TextFormat::YELLOW . $this->username . " has left the game", "Corrupt joining data, check your connection.");
 					//Timings::$timerLoginPacket->stopTiming();
 					return;
@@ -2124,18 +2144,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 
 					if($item->getId() === Item::SNOWBALL){
-						$nbt = new Compound("", [
-							"Pos" => new Enum("Pos", [
+						$nbt = new CompoundTag("", [
+							"Pos" => new ListTag("Pos", [
 								new DoubleTag("", $this->x),
 								new DoubleTag("", $this->y + $this->getEyeHeight()),
 								new DoubleTag("", $this->z)
 							]),
-							"Motion" => new Enum("Motion", [
+							"Motion" => new ListTag("Motion", [
 								new DoubleTag("", -sin($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI)),
 								new DoubleTag("", -sin($this->pitch / 180 * M_PI)),
 								new DoubleTag("", cos($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI))
 							]),
-							"Rotation" => new Enum("Rotation", [
+							"Rotation" => new ListTag("Rotation", [
 								new FloatTag("", $this->yaw),
 								new FloatTag("", $this->pitch)
 							]),
@@ -2207,18 +2227,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								}
 
 
-								$nbt = new Compound("", [
-									"Pos" => new Enum("Pos", [
+								$nbt = new CompoundTag("", [
+									"Pos" => new ListTag("Pos", [
 										new DoubleTag("", $this->x),
 										new DoubleTag("", $this->y + $this->getEyeHeight()),
 										new DoubleTag("", $this->z)
 									]),
-									"Motion" => new Enum("Motion", [
+									"Motion" => new ListTag("Motion", [
 										new DoubleTag("", -sin($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI)),
 										new DoubleTag("", -sin($this->pitch / 180 * M_PI)),
 										new DoubleTag("", cos($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI))
 									]),
-									"Rotation" => new Enum("Rotation", [
+									"Rotation" => new ListTag("Rotation", [
 										new FloatTag("", $this->yaw),
 										new FloatTag("", $this->pitch)
 									]),
@@ -2318,7 +2338,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->noDamageTicks = 60;
 
 						$this->setHealth($this->getMaxHealth());
-						$this->setFood(20);
+						$this->setFood($this->attributes[Attribute::HUNGER]->getDefaultValue());
 
 						$this->starvationTick = 0;
 						$this->foodTick = 0;
@@ -3188,7 +3208,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->namedtag["playerGameType"] = $this->gamemode;
 			$this->namedtag["lastPlayed"] = floor(microtime(true) * 1000);
 
-			if($this->username != "" and $this->namedtag instanceof Compound){
+			if($this->username != "" and $this->namedtag instanceof CompoundTag){
 				$this->server->saveOfflinePlayerData($this->username, $this->namedtag, true);
 			}
 		}
@@ -3333,22 +3353,28 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	public function setHealth($amount){
 		parent::setHealth($amount);
-		if($this->spawned === true){
-			$pk = new UpdateAttributesPacket();
-			$this->foodTick = 0;
-			$pk->minValue = 0;
-			$pk->maxValue = $this->getMaxHealth();
-			$pk->value = $amount;
-			$pk->name = UpdateAttributesPacket::HEALTH;
-			$this->dataPacket($pk);
-		}
+		$this->attributes[Attribute::HEALTH]->setValue($amount);
+		if($this->spawned === true)
+			$this->sendAttributes();
 	}
-
-	private $hunger = 20;
+	
+	public function sendAttributes() {
+		$pk = new UpdateAttributesPacket();
+		$pk->attributes = $this->attributes;
+		$this->dataPacket($pk);
+	}
 
 	protected $hungerDepletion = 0;
 
 	protected $hungerEnabled = true;
+
+	public function getAttribute(int $attribute) : Attribute {
+		if(isset($this->attributes[$attribute])) {
+			return $this->attributes[$attribute];
+		} else {
+			return null;
+		}
+	}
 
 	public function setFoodEnabled($enabled) {
 		$this->hungerEnabled = $enabled;
@@ -3359,19 +3385,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function setFood($amount){
-		if($this->spawned === true){
-			$pk = new UpdateAttributesPacket();
-			$pk->minValue = 0;
-			$pk->maxValue = 20;
-			$pk->value = $amount;
-			$pk->name = UpdateAttributesPacket::HUNGER;
-			$this->dataPacket($pk);
-		}
-		$this->hunger = $amount;
+		$this->attributes[Attribute::HUNGER]->setValue($amount);
+		if($this->spawned === true)
+			$this->sendAttributes();
 	}
 
 	public function getFood() {
-		return $this->hunger;
+		return $this->attributes[Attribute::HUNGER]->getValue();
 	}
 
 	public function subtractFood($amount){
@@ -3379,19 +3399,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 		
-		if($this->getFood()-$amount <= 6 && !($this->getFood() <= 6)) {
-//			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, false);
-			$this->removeEffect(Effect::SLOWNESS);
-		} elseif($this->getFood()-$amount < 6 && !($this->getFood() > 6)) {
-//			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, true);
-			$effect = Effect::getEffect(Effect::SLOWNESS);
-			$effect->setDuration(0x7fffffff);
-			$effect->setAmplifier(2);
-			$effect->setVisible(false);
-			$this->addEffect($effect);
-		}
-		if($this->hunger - $amount < 0) return;
+//		if($this->getFood()-$amount <= 6 && !($this->getFood() <= 6)) {
+////			$this->attributes[Attribute::EXHAUSTION]->resetToDefaultValue();
+//		} elseif($this->getFood()-$amount < 6 && !($this->getFood() > 6)) {
+////			$this->setExhaustion(2.0);
+//		}
+		if($this->getFood() - $amount < 0)
+			return false;
 		$this->setFood($this->getFood() - $amount);
+		return true;
 	}
 
 	public function attack($damage, EntityDamageEvent $source){
