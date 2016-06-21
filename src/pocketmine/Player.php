@@ -694,7 +694,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if($count >= $this->chunksPerTick){
 				break;
 			}
-
+			
 			$X = null;
 			$Z = null;
 			Level::getXZ($index, $X, $Z);
@@ -1519,6 +1519,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 			$this->timings->stopTiming();
 			return $this->deadTicks < 10;
+//			return true;
 		}
 		
 		if($this->spawned){
@@ -3202,6 +3203,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function getName(){
 		return $this->username;
 	}
+	
+	
+	public function freeChunks(){
+		foreach ($this->usedChunks as $index => $chunk) {
+			Level::getXZ($index, $x, $z);
+			$this->level->freeChunk($x, $z, $this);
+			unset($this->usedChunks[$index]);
+			unset($this->loadQueue[$index]);
+		}
+	}
+	
 
 	public function kill(){
 		if($this->dead === true or $this->spawned === false){
@@ -3304,6 +3316,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		Entity::kill();
 
 		$this->server->getPluginManager()->callEvent($ev = new PlayerDeathEvent($this, $this->getDrops(), $message));
+		
+		
+		
+		$this->freeChunks();
+		
+		
 
 		if(!$ev->getKeepInventory()){
 			foreach($ev->getDrops() as $item){
@@ -3481,7 +3499,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			for($X = -1; $X <= 1; ++$X){
 				for($Z = -1; $Z <= 1; ++$Z){
 					if(!isset($this->usedChunks[$index = Level::chunkHash($chunkX + $X, $chunkZ + $Z)]) or $this->usedChunks[$index] === false){
-						return false;
+//						return false;
 					}
 				}
 			}
@@ -3521,6 +3539,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->resetFallDistance();
 			$this->nextChunkOrderRun = 0;
 			$this->newPosition = null;
+			
+			$this->unloadChunk($oldPos->getFloorX() >> 4, $oldPos->getFloorZ() >> 4);
 		}
 	}
 
