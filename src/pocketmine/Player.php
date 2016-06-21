@@ -3204,7 +3204,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->username;
 	}
 	
-	
 	public function freeChunks(){
 		foreach ($this->usedChunks as $index => $chunk) {
 			Level::getXZ($index, $x, $z);
@@ -3213,7 +3212,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			unset($this->loadQueue[$index]);
 		}
 	}
-	
 
 	public function kill(){
 		if($this->dead === true or $this->spawned === false){
@@ -3317,12 +3315,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->server->getPluginManager()->callEvent($ev = new PlayerDeathEvent($this, $this->getDrops(), $message));
 		
-		
-		
 		$this->freeChunks();
 		
-		
-
 		if(!$ev->getKeepInventory()){
 			foreach($ev->getDrops() as $item){
 				$this->level->dropItem($this, $item);
@@ -3496,13 +3490,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$chunkX = $this->teleportPosition->x >> 4;
 			$chunkZ = $this->teleportPosition->z >> 4;
 
-			for($X = -1; $X <= 1; ++$X){
-				for($Z = -1; $Z <= 1; ++$Z){
-					if(!isset($this->usedChunks[$index = Level::chunkHash($chunkX + $X, $chunkZ + $Z)]) or $this->usedChunks[$index] === false){
+//			for($X = -1; $X <= 1; ++$X){
+//				for($Z = -1; $Z <= 1; ++$Z){
+//					if(!isset($this->usedChunks[$index = Level::chunkHash($chunkX + $X, $chunkZ + $Z)]) or $this->usedChunks[$index] === false){
 //						return false;
-					}
-				}
-			}
+//					}
+//				}
+//			}
 
 			$this->sendPosition($this, $this->pitch, $this->yaw, 1);
 			$this->forceMovement = $this->teleportPosition;
@@ -3539,8 +3533,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->resetFallDistance();
 			$this->nextChunkOrderRun = 0;
 			$this->newPosition = null;
-			
-			$this->unloadChunk($oldPos->getFloorX() >> 4, $oldPos->getFloorZ() >> 4);
 		}
 	}
 
