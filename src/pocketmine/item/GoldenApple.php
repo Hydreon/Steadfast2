@@ -21,24 +21,31 @@
 
 namespace pocketmine\item;
 
-class MushroomStew extends Food{
-	public function __construct($meta = 0, $count = 1){
-		parent::__construct(self::MUSHROOM_STEW, 0, $count, "Mushroom Stew");
-	}
+use pocketmine\entity\Effect;
 
-	public function getMaxStackSize(){
-		return 1;
+class GoldenApple extends Food{
+	public function __construct($meta = 0, $count = 1){
+		parent::__construct(self::GOLDEN_APPLE, $meta, $count, ($meta === 1 ? "Enchanted " : "") . "Golden Apple");
 	}
 
 	public function getFoodRestore() : int{
-		return 6;
+		return 4;
 	}
 
 	public function getSaturationRestore() : float{
-		return 7.2;
+		return 9.6;
 	}
 
-	public function getResidue(){
-		return Item::get(Item::BOWL);
+	public function getAdditionalEffects() : array{
+		return $this->meta === 1 ? [
+			Effect::getEffect(Effect::REGENERATION)->setDuration(600)->setAmplifier(4),
+			Effect::getEffect(Effect::ABSORPTION)->setDuration(2400),
+			Effect::getEffect(Effect::DAMAGE_RESISTANCE)->setDuration(6000),
+			Effect::getEffect(Effect::FIRE_RESISTANCE)->setDuration(6000),
+		] : [
+			Effect::getEffect(Effect::REGENERATION)->setDuration(100)->setAmplifier(1),
+			Effect::getEffect(Effect::ABSORPTION)->setDuration(2400)
+		];
 	}
 }
+

@@ -26,12 +26,6 @@ use pocketmine\entity\Attribute;
 class UpdateAttributesPacket extends DataPacket{
 	const NETWORK_ID = Info::UPDATE_ATTRIBUTES_PACKET;
 
-    const HEALTH = "generic.health";
-    const HUNGER = "player.hunger";
-    const EXPERIENCE = "player.experience";
-    const EXPERIENCE_LEVEL = "player.level";
-
-
     public $entityId;
 
 	/** @var Attribute[] */
@@ -49,8 +43,6 @@ class UpdateAttributesPacket extends DataPacket{
 		$this->putShort(count($this->attributes));
 
 		foreach($this->attributes as $attribute) {
-			if(!$attribute->shouldSend())
-				break;
 			$this->putFloat($attribute->getMinValue());
 			$this->putFloat($attribute->getMaxValue());
 			$this->putFloat($attribute->getValue());

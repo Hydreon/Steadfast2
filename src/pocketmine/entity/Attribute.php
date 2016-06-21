@@ -140,6 +140,13 @@ class Attribute{
 		return $this;
 	}
 
+	public function addValue(float $value) {
+		$this->setValue($value + $this->currentValue, true);
+	}
+	public function subtractValue(float $value) {
+		$this->setValue($this->currentValue - $value, true);
+	}
+
 	public function getName(){
 		return $this->name;
 	}

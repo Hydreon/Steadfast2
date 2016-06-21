@@ -21,24 +21,17 @@
 
 namespace pocketmine\item;
 
-class MushroomStew extends Food{
-	public function __construct($meta = 0, $count = 1){
-		parent::__construct(self::MUSHROOM_STEW, 0, $count, "Mushroom Stew");
-	}
+use pocketmine\entity\Effect;
 
-	public function getMaxStackSize(){
-		return 1;
-	}
+interface FoodSource{
+	public function getFoodRestore() : int;
 
-	public function getFoodRestore() : int{
-		return 6;
-	}
+	public function getSaturationRestore() : float;
 
-	public function getSaturationRestore() : float{
-		return 7.2;
-	}
+	public function getResidue();
 
-	public function getResidue(){
-		return Item::get(Item::BOWL);
-	}
+	/**
+	 * @return Effect[]
+	 */
+	public function getAdditionalEffects() : array;
 }

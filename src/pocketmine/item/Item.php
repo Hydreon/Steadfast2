@@ -722,7 +722,6 @@ class Item{
 
 	/** @var \SplFixedArray */
 	public static $list = null;
-	public static $food = null;
 	protected $block;
 	protected $id;
 	protected $meta;
@@ -763,8 +762,14 @@ class Item{
 			self::$list[self::STICK] = Stick::class;
 			self::$list[self::SNOWBALL] = Snowball::class;
 			self::$list[self::BOWL] = Bowl::class;
+			self::$list[self::MUSHROOM_STEW] = MushroomStew::class;
+			self::$list[self::GOLD_SWORD] = GoldSword::class;
+			self::$list[self::GOLD_SHOVEL] = GoldShovel::class;
+			self::$list[self::GOLD_PICKAXE] = GoldPickaxe::class;
+			self::$list[self::GOLD_AXE] = GoldAxe::class;
 			self::$list[self::FEATHER] = Feather::class;
 			self::$list[self::BRICK] = Brick::class;
+			self::$list[self::BREAD] = Bread::class;
 			self::$list[self::LEATHER_CAP] = LeatherCap::class;
 			self::$list[self::LEATHER_TUNIC] = LeatherTunic::class;
 			self::$list[self::LEATHER_PANTS] = LeatherPants::class;
@@ -777,10 +782,6 @@ class Item{
 			self::$list[self::IRON_CHESTPLATE] = IronChestplate::class;
 			self::$list[self::IRON_LEGGINGS] = IronLeggings::class;
 			self::$list[self::IRON_BOOTS] = IronBoots::class;
-			self::$list[self::GOLD_HELMET] = GoldHelmet::class;
-			self::$list[self::GOLD_CHESTPLATE] = GoldChestplate::class;
-			self::$list[self::GOLD_LEGGINGS] = GoldLeggings::class;
-			self::$list[self::GOLD_BOOTS] = GoldBoots::class;
 			self::$list[self::DIAMOND_HELMET] = DiamondHelmet::class;
 			self::$list[self::DIAMOND_CHESTPLATE] = DiamondChestplate::class;
 			self::$list[self::DIAMOND_LEGGINGS] = DiamondLeggings::class;
@@ -818,6 +819,28 @@ class Item{
 
 			self::$list[self::RAW_FISH] = Fish::class;
 			self::$list[self::COOKED_FISH] = CookedFish::class;
+			self::$list[self::CAKE] = Cake::class;
+			self::$list[self::BED] = Bed::class;
+			self::$list[self::COOKIE] = Cookie::class;
+			self::$list[self::SHEARS] = Shears::class;
+			self::$list[self::MELON] = Melon::class;
+			self::$list[self::PUMPKIN_SEEDS] = PumpkinSeeds::class;
+			self::$list[self::MELON_SEEDS] = MelonSeeds::class;
+			self::$list[self::RAW_BEEF] = RawBeef::class;
+			self::$list[self::STEAK] = Steak::class;
+			self::$list[self::RAW_CHICKEN] = RawChicken::class;
+			self::$list[self::COOKED_CHICKEN] = CookedChicken::class;
+			self::$list[self::SPAWN_EGG] = SpawnEgg::class;
+			self::$list[self::CARROT] = Carrot::class;
+			self::$list[self::POTATO] = Potato::class;
+			self::$list[self::BAKED_POTATO] = BakedPotato::class;
+			self::$list[self::GOLDEN_CARROT] = GoldenCarrot::class;
+			self::$list[self::PUMPKIN_PIE] = PumpkinPie::class;
+			self::$list[self::COOKED_RABBIT] = CookedRabbit::class;
+			// self::$list[self::CAMERA] = Camera::class;
+			self::$list[self::BEETROOT] = Beetroot::class;
+			self::$list[self::BEETROOT_SEEDS] = BeetrootSeeds::class;
+			self::$list[self::BEETROOT_SOUP] = BeetrootSoup::class;
 
 			for($i = 0; $i < 256; ++$i){
 				if(Block::$list[$i] !== null){
@@ -827,7 +850,6 @@ class Item{
 		}
 
 		self::initCreativeItems();
-		self::initFood();
 	}
 
 	private static $creative = [];
@@ -1182,29 +1204,6 @@ class Item{
 		self::addCreativeItem(Item::get(Item::DYE, 9));
 		self::addCreativeItem(Item::get(Item::DYE, 8));
 		
-	}
-	
-	private static function initFood(){
-		self::$food[] = Item::COOKIE;
-		self::$food[] = Item::MELON;
-		self::$food[] = Item::RAW_BEEF;
-		self::$food[] = Item::COOKED_BEEF;
-		self::$food[] = Item::RAW_CHICKEN;
-		self::$food[] = Item::COOKED_CHICKEN;
-		self::$food[] = Item::CARROT;
-		self::$food[] = Item::POTATO;
-		self::$food[] = Item::BAKED_POTATO;
-		self::$food[] = Item::PUMPKIN_PIE;
-		self::$food[] = Item::COOKIE;
-		self::$food[] = Item::BREAD;
-		self::$food[] = Item::APPLE;
-		self::$food[] = Item::GOLDEN_APPLE;
-		self::$food[] = Item::EGG;
-		self::$food[] = Item::RAW_FISH;
-		self::$food[] = Item::COOKED_FISH;
-		self::$food[] = Item::RAW_PORKCHOP;
-		self::$food[] = Item::COOKED_PORKCHOP;
-		self::$food[] = Item::BAKED_POTATO;
 	}
 
 	public static function clearCreativeItems(){
@@ -1724,7 +1723,7 @@ class Item{
 	}
 	
 	public function isFood(){
-		return in_array($this->id, self::$food);
+		return $this instanceof Food;
 	}
 	
 	public function setObtainTime($time){

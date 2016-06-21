@@ -80,6 +80,7 @@ use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\inventory\SimpleTransactionGroup;
 
+use pocketmine\item\Food;
 use pocketmine\item\Item;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\format\LevelProvider;
@@ -544,9 +545,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //			Attribute::ABSORPTION => new Attribute("generic.absorption", 0.00, 340282346638528859811704183484516925440.00, 0.00, false),
 			Attribute::SATURATION => new Attribute("player.saturation", 0.00, 20.00, 5.00, false),
 //			Attribute::EXHAUSTION => new Attribute("player.exhaustion", 0.00, 5.00, 0.41, false),
-			Attribute::HEALTH => new Attribute("generic.health", 0.00, 30.00, 30.00),
+			Attribute::HEALTH => new Attribute("generic.health", 0.00, 20.00, 20.00),
 //			Attribute::MOVEMENT_SPEED => new Attribute("generic.movementSpeed", 0.00, 340282346638528859811704183484516925440.00, 0.10),
-			Attribute::HUNGER => new Attribute("player.hunger", 0.00, 1.00, 1.00),
+			Attribute::HUNGER => new Attribute("player.hunger", 0.00, 20.00, 20.00),
 			Attribute::EXPERIENCE_LEVEL => new Attribute("player.level", 0.00, 24791.00, 0.00),
 			Attribute::EXPERIENCE => new Attribute("player.experience", 0.00, 1.00, 0.00)
 		];
@@ -1512,10 +1513,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->lastUpdate = $currentTick;
 
-		
-
 		$this->timings->startTiming();
-		
 		
 		$this->checkTeleportPosition();
 		
@@ -1578,7 +1576,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	public function foodTick($currentTick) {
 		if($this->starvationTick >= 20) {
-			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_CUSTOM, 1);
+			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_STARVATION, 1);
 			$this->attack(1, $ev);
 			$this->starvationTick = 0;
 		}
@@ -1618,72 +1616,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function eatFoodInHand() {
-		if(!$this->spawned) {
-			return;
-		}
-
-		$items = [ //TODO: move this to item classes
-			Item::APPLE => 4,
-			Item::MUSHROOM_STEW => 6,
-			Item::BEETROOT_SOUP => 5,
-			Item::BREAD => 5,
-			Item::RAW_PORKCHOP => 2,
-			Item::COOKED_PORKCHOP => 8,
-			Item::RAW_BEEF => 3,
-			Item::STEAK => 8,
-			Item::COOKED_CHICKEN => 6,
-			Item::RAW_CHICKEN => 2,
-			Item::MELON_SLICE => 2,
-			Item::GOLDEN_APPLE => 4,
-			Item::PUMPKIN_PIE => 8,
-			Item::CARROT => 3,
-			Item::POTATO => 1,
-			Item::BAKED_POTATO => 5,
-			Item::COOKIE => 2,
-			Item::COOKED_FISH => [
-				0 => 5,
-				1 => 6
-			],
-			Item::RAW_FISH => [
-				0 => 2,
-				1 => 2,
-				2 => 1,
-				3 => 1
-			],
-		];
-
+		/** @var Food $slot */
 		$slot = $this->inventory->getItemInHand();
-		if(isset($items[$slot->getId()])) {
-			if($this->getFood() < 20 and isset($items[$slot->getId()])){
-				$this->server->getPluginManager()->callEvent($ev = new PlayerItemConsumeEvent($this, $slot));
-				if($ev->isCancelled()){
-					$this->inventory->sendContents($this);
-					return;
-				}
+		if(!$this->spawned || !$slot instanceof Food)
+			return;
 
-				$pk = new EntityEventPacket();
-				$pk->eid = $this->getId();
-				$pk->event = EntityEventPacket::USE_ITEM;
-				$this->dataPacket($pk);
-				Server::broadcastPacket($this->getViewers(), $pk);
-
-				$amount = $items[$slot->getId()];
-				if(is_array($amount)){
-					$amount = isset($amount[$slot->getDamage()]) ? $amount[$slot->getDamage()] : 0;
-				}
-				$this->setFood($this->getFood() + $amount);
-
-				--$slot->count;
-				$this->inventory->setItemInHand($slot);
-				if($slot->getId() === Item::MUSHROOM_STEW or $slot->getId() === Item::BEETROOT_SOUP){
-					$this->inventory->addItem(Item::get(Item::BOWL, 0, 1));
-				}elseif($slot->getId() === Item::RAW_FISH and $slot->getDamage() === 3){ //Pufferfish
-					$this->addEffect(Effect::getEffect(Effect::HUNGER)->setAmplifier(2)->setDuration(15 * 20));
-					//$this->addEffect(Effect::getEffect(Effect::NAUSEA)->setAmplifier(1)->setDuration(15 * 20));
-					$this->addEffect(Effect::getEffect(Effect::POISON)->setAmplifier(3)->setDuration(60 * 20));
-				}
-			}
-		}
+		if($this->getFood() < 20)
+			$slot->onConsume($this);
 	}
 
 	/**
@@ -3353,6 +3292,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	public function setHealth($amount){
 		parent::setHealth($amount);
+		echo $amount . "\n";
 		$this->attributes[Attribute::HEALTH]->setValue($amount);
 		if($this->spawned === true)
 			$this->sendAttributes();
@@ -3360,7 +3300,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public function sendAttributes() {
 		$pk = new UpdateAttributesPacket();
-		$pk->attributes = $this->attributes;
+		$list = [];
+		foreach($this->attributes as $attribute) {
+			if($attribute->shouldSend())
+				$list[] = $attribute;
+			
+		}
+		$pk->attributes = $list;
 		$this->dataPacket($pk);
 	}
 
@@ -3385,7 +3331,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function setFood($amount){
-		$this->attributes[Attribute::HUNGER]->setValue($amount);
+		$this->attributes[Attribute::HUNGER]->setValue($amount, true);
 		if($this->spawned === true)
 			$this->sendAttributes();
 	}

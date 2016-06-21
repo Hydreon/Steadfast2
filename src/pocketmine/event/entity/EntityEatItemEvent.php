@@ -19,26 +19,28 @@
  *
 */
 
-namespace pocketmine\item;
+namespace pocketmine\event\entity;
 
-class MushroomStew extends Food{
-	public function __construct($meta = 0, $count = 1){
-		parent::__construct(self::MUSHROOM_STEW, 0, $count, "Mushroom Stew");
+use pocketmine\entity\Entity;
+use pocketmine\item\Food;
+use pocketmine\item\Item;
+
+class EntityEatItemEvent extends EntityEatEvent{
+	public function __construct(Entity $entity, Food $foodSource){
+		parent::__construct($entity, $foodSource);
 	}
 
-	public function getMaxStackSize(){
-		return 1;
-	}
-
-	public function getFoodRestore() : int{
-		return 6;
-	}
-
-	public function getSaturationRestore() : float{
-		return 7.2;
-	}
-
+	/**
+	 * @return Item
+	 */
 	public function getResidue(){
-		return Item::get(Item::BOWL);
+		return parent::getResidue();
+	}
+
+	public function setResidue($residue){
+		if(!($residue instanceof Item)){
+			throw new \InvalidArgumentException("Eating an Item can only result in an Item residue");
+		}
+		parent::setResidue($residue);
 	}
 }

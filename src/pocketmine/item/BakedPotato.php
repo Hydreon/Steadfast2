@@ -21,17 +21,17 @@
 
 namespace pocketmine\item;
 
-
-class Apple extends Food{
+class BakedPotato extends Food{
 	public function __construct($meta = 0, $count = 1){
-		parent::__construct(self::APPLE, 0, $count, "Apple");
+		parent::__construct(self::BAKED_POTATO, $meta, $count, "Baked Potato");
 	}
 
 	public function getFoodRestore() : int{
-		return 4;
+		return 5;
 	}
 
 	public function getSaturationRestore() : float{
-		return 2.4;
+		return 7.2;
 	}
 }
+

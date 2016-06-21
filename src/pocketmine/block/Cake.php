@@ -21,14 +21,19 @@
 
 namespace pocketmine\block;
 
-use pocketmine\event\entity\EntityRegainHealthEvent;
+use pocketmine\entity\Attribute;
+use pocketmine\entity\Effect;
+use pocketmine\event\entity\EntityEatBlockEvent;
+use pocketmine\event\entity\EntityEatItemEvent;
+use pocketmine\item\FoodSource;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\math\AxisAlignedBB;
+use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\Player;
+use pocketmine\Server;
 
-
-class Cake extends Transparent{
+class Cake extends Transparent implements FoodSource{
 
 	protected $id = self::CAKE_BLOCK;
 
@@ -90,22 +95,47 @@ class Cake extends Transparent{
 	}
 
 	public function onActivate(Item $item, Player $player = null){
-		if($player instanceof Player and $player->getHealth() < $player->getMaxHealth()){
-			++$this->meta;
+		if($player instanceof Player and $player->getFood() < 20){
+			$ev = new EntityEatBlockEvent($player, $this);
 
-			$ev = new EntityRegainHealthEvent($player, 3, EntityRegainHealthEvent::CAUSE_EATING);
-			$player->heal($ev->getAmount(), $ev);
+			if(!$ev->isCancelled()){
+				$this->getLevel()->setBlock($this, $ev->getResidue());
+				$pk = new EntityEventPacket();
+				$pk->eid = $player->getId();
+				$pk->event = EntityEventPacket::USE_ITEM;
+				$player->dataPacket($pk);
+				Server::broadcastPacket($player->getViewers(), $pk);
 
-			if($this->meta >= 0x06){
-				$this->getLevel()->setBlock($this, new Air(), true);
-			}else{
-				$this->getLevel()->setBlock($this, $this, true);
+				$player->getAttribute(Attribute::SATURATION)->addValue($ev->getSaturationRestore());
+				$player->setFood($player->getFood() + $ev->getFoodRestore());
+				return true;
 			}
-
-			return true;
 		}
 
 		return false;
 	}
 
+	public function getFoodRestore() : int{
+		return 2;
+	}
+
+	public function getSaturationRestore() : float{
+		return 0.4;
+	}
+
+	public function getResidue(){
+		$clone = clone $this;
+		$clone->meta++;
+		if($clone->meta >= 0x06){
+			$clone = new Air();
+		}
+		return $clone;
+	}
+
+	/**
+	 * @return Effect[]
+	 */
+	public function getAdditionalEffects() : array{
+		return [];
+	}
 }
