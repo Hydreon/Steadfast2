@@ -111,15 +111,16 @@ class LoginPacket extends DataPacket {
 			$this->playerData = self::load($this->playerData);
 			$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
 			$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
-			if(isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
-				$this->clientUUID = UUID::fromBinary($this->chains['data'][$dataIndex]['extraData']['XUID']);
-			} else {
-				try{
-				$this->clientUUID = UUID::fromBinary(substr($this->playerData['ClientRandomId'], 0, 16));
-				} catch (\Exception $e) {
-					$this->clientUUID =  UUID::fromBinary('2535437613357535');
-				}
-			}
+//			if(isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
+//				$this->clientUUID = UUID::fromBinary($this->chains['data'][$dataIndex]['extraData']['XUID']);
+//			} else {
+//				try{
+//					$this->clientUUID = UUID::fromBinary(substr($this->playerData['ClientRandomId'], 0, 16));
+//				} catch (\Exception $e) {
+//					$this->clientUUID =  UUID::fromBinary('2535437613357535');
+//				}
+//			}
+			$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
 			$this->identityPublicKey = $this->chains['data'][$dataIndex]['identityPublicKey'];
 //			var_dump($this->identityPublicKey);
 			
