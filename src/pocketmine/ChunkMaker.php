@@ -89,34 +89,42 @@ class ChunkMaker extends Worker {
 		$offset += 256;
 		$biomeColorArray = array_values(unpack("N*", substr($data['chunk'], $offset, 1024)));
 
-		$ordered = $blockIdArray .
+		$languages = ['English', 'German', 'Spanish'];
+		
+		$chunkDataWithoutSigns = $blockIdArray .
 				$blockDataArray .
 				$skyLightArray .
 				$blockLightArray .
 				pack("C*", ...$heightMapArray) .
 				pack("N*", ...$biomeColorArray) .
 				Binary::writeLInt(0) .
-				$data['tiles'];
-
-		$pk = new FullChunkDataPacket();
-		$pk->chunkX = $data['chunkX'];
-		$pk->chunkZ = $data['chunkZ'];
-		$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
-		$pk->data = $ordered;
-		$pk->encode();
-		if(!empty($pk->buffer)) {
-			$str = Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
-			$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
-			$pk->updateBuffer(chr(0xfe));
-			$str = Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
-			$ordered15 = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
-			$result = array();
-			$result['chunkX'] = $data['chunkX'];
-			$result['chunkZ'] = $data['chunkZ'];
-			$result['result'] = $ordered;
-			$result['result15'] = $ordered15;
-			$this->externalQueue[] = serialize($result);
+				$data['tiles'];		
+		
+		$result = array();
+		$result['chunkX'] = $data['chunkX'];
+		$result['chunkZ'] = $data['chunkZ'];
+		foreach ($languages as $lang) {
+			if(!isset($data['signTiles'][$lang])) {
+				continue;
+			}
+			$chunkData = $chunkDataWithoutSigns . $data['signTiles'][$lang];
+			$pk = new FullChunkDataPacket();
+			$pk->chunkX = $data['chunkX'];
+			$pk->chunkZ = $data['chunkZ'];
+			$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
+			$pk->data = $chunkData;
+			$pk->encode();
+			if(!empty($pk->buffer)) {
+				$str = Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
+				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
+				$pk->updateBuffer(chr(0xfe));
+				$str = Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
+				$ordered15 = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);			
+				$result[$lang]['result'] = $ordered;
+				$result[$lang]['result15'] = $ordered15;				
+			}
 		}
+		$this->externalQueue[] = serialize($result);		
 	}
 
 	

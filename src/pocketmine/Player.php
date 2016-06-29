@@ -259,6 +259,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $identifier;
 	
 	protected $additionalChar;
+	
+	/**@var string*/
+	public $language = 'English';
 
 	public function getLeaveMessage(){
 		return "";
@@ -662,13 +665,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function sendChunk($x, $z, $payload){
 		if($this->connected === false){
 			return;
+		}		
+		
+		$resIndex = $this->getAdditionalChar() == chr(0xfe) ? 'result15' : 'result';
+		if(isset($payload[$this->language])) {
+			$data = $payload[$this->language][$resIndex];
+		} else {
+			$data = $payload['English'][$resIndex];
 		}
 
 		$this->usedChunks[Level::chunkHash($x, $z)] = true;
 		$this->chunkLoadCount++;
 
 		$pk = new BatchPacket();
-		$pk->payload = $payload;
+		$pk->payload = $data;
 		$pk->encode();
 		$pk->isEncoded = true;
 		$this->dataPacket($pk);

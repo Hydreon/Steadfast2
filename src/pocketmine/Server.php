@@ -274,8 +274,9 @@ class Server{
 		
 
 	public $packetMaker = null;
-
 	
+	private $signTranslation = [];
+
 	public function isUseAnimal() {
 		return $this->useAnimal;
 	}
@@ -2001,6 +2002,7 @@ class Server{
 	 * Starts the PocketMine-MP server and starts processing ticks and packets
 	 */
 	public function start(){
+		$this->loadSignTranslation();		
 		if($this->getConfigBoolean("enable-query", true) === true){
 			$this->queryHandler = new QueryHandler();
 		}
@@ -2500,4 +2502,37 @@ class Server{
 		$this->players = $random;
 	}
 	
+	private function loadSignTranslation() {
+		$languages = ['en' => 'English', 'de' => 'German', 'es' => 'Spanish'];
+		$signTranslation = [];
+		foreach ($languages as $langKey => $language) {
+			$path = 'worlds/world/signData/' . $langKey . '.json';
+			if (!file_exists($path)) {
+					continue;
+				}
+			$data = json_decode(file_get_contents($path), true);
+			if ($data) {
+				$signTranslation[$language] = $data;
+			}
+		}
+		$translation = [];
+		foreach ($signTranslation as $lang => $data) {
+			$translation[$lang] = [];
+			foreach ($data as $key => $val) {
+				$translation[$lang]['key'][] = '$' . $key . '$';
+				$translation[$lang]['val'][] = $val;
+			}
+		}
+		if(!isset($translation['English'])) {
+			$translation['English'] = [
+				'key' => [],
+				'val' => []
+			];
+		}
+		$this->signTranslation = $translation;
+	}
+	
+	public function getSignTranslation() {
+		return $this->signTranslation;
+	}	
 }

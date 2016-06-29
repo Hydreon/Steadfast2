@@ -30,12 +30,11 @@ use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\tile\Spawnable;
 
-use pocketmine\utils\BinaryStream;
 use pocketmine\utils\ChunkException;
-use raklib\Binary;
+use pocketmine\tile\Sign;
+use pocketmine\tile\Tile;
 
 class McRegion extends BaseLevelProvider{
 
@@ -114,15 +113,52 @@ class McRegion extends BaseLevelProvider{
 		$z = $chunkZ >> 5;
 	}
 
+	private function updateSignText($text, $lang) {
+		if(empty($text)) {
+			return '';
+		}
+		return str_replace($lang['key'], $lang['val'], $text);
+		
+	}
+	
+	
+	private function getSignSpawnCompound($sign, $lang){
+		return new Compound("", [
+			new StringTag("id", Tile::SIGN),
+			new StringTag("Text1", $this->updateSignText($sign->namedtag['Text1'], $lang)),
+			new StringTag("Text2", $this->updateSignText($sign->namedtag['Text2'], $lang)),
+			new StringTag("Text3", $this->updateSignText($sign->namedtag['Text3'], $lang)),
+			new StringTag("Text4", $this->updateSignText($sign->namedtag['Text4'], $lang)),
+			new IntTag("x", (int) $sign->x),
+			new IntTag("y", (int) $sign->y),
+			new IntTag("z", (int) $sign->z)
+		]);
+	}
+	
+	
 	public function requestChunkTask($x, $z){	
 		$chunk = $this->getChunk($x, $z, false);
 		if(!($chunk instanceof Chunk)){
 			throw new ChunkException("Invalid Chunk sent");
 		}
 
+		$signTiles = [];
+		$translation = $this->getServer()->getSignTranslation();
+		foreach ($translation as $lang => $data) {
+			$signTiles[$lang] = '';
+		}
+		
 		$tiles = "";
-		$nbt = new NBT(NBT::LITTLE_ENDIAN);
+		$nbt = new NBT(NBT::LITTLE_ENDIAN);		
 		foreach($chunk->getTiles() as $tile){
+			if($tile instanceof Sign) {				
+				foreach ($translation as $lang => $data) {
+					$nbt->setData($this->getSignSpawnCompound($tile, $data));
+					$signTiles[$lang] .= $nbt->write();			
+				}
+				
+				continue;
+			}	
 			if($tile instanceof Spawnable){
 				$nbt->setData($tile->getSpawnCompound());
 				$tiles .= $nbt->write();
@@ -133,6 +169,7 @@ class McRegion extends BaseLevelProvider{
 		$data['chunkX'] = $x;
 		$data['chunkZ'] = $z;
 		$data['tiles'] = $tiles;
+		$data['signTiles'] = $signTiles;
 		$data['chunk'] = $chunk->toFastBinary();
 		
 		$this->getLevel()->chunkMaker->pushMainToThreadPacket(serialize($data));

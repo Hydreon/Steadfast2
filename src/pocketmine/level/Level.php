@@ -674,7 +674,7 @@ class Level implements ChunkManager, Metadatable{
 		}
 		
 		while(($data = unserialize($this->chunkMaker->readThreadToMainPacket()))){
-			$this->chunkRequestCallback($data['chunkX'], $data['chunkZ'], $data['result'], $data['result15']);
+			$this->chunkRequestCallback($data['chunkX'], $data['chunkZ'], $data);
 		}
 		$this->timings->doTick->stopTiming();
 	}
@@ -1256,7 +1256,6 @@ class Level implements ChunkManager, Metadatable{
 			$index = PHP_INT_SIZE === 8 ? ((($pos->x >> 4) & 0xFFFFFFFF) << 32) | (( $pos->z >> 4) & 0xFFFFFFFF) : ($pos->x >> 4) . ":" . ( $pos->z >> 4);
 			if(ADVANCED_CACHE == true){
 				Cache::remove("world:" . $this->getId() . ":" . $index);
-				Cache::remove("world15:" . $this->getId() . ":" . $index);
 			}
 
 			if($direct === true){
@@ -1958,7 +1957,6 @@ class Level implements ChunkManager, Metadatable{
 			$this->chunks[$index] = $chunk;
 		}
 		if(ADVANCED_CACHE == true){
-			Cache::remove("world15:" . $this->getId() . ":" . PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z));
 			Cache::remove("world:" . $this->getId() . ":" . PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z));
 		}
 		$chunk->setChanged();
@@ -2048,11 +2046,11 @@ class Level implements ChunkManager, Metadatable{
 					continue;
 				}
 				if(PHP_INT_SIZE === 8){ $x = ($index >> 32) << 32 >> 32; $z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $x, $z) = explode(":", $index); $x = (int) $x; $z = (int) $z;};
-				if(ADVANCED_CACHE == true and ($cache = Cache::get("world:" . $this->getId() . ":" . $index)) !== false and ($cache15 = Cache::get("world15:" . $this->getId() . ":" . $index)) !== false){
+				if(ADVANCED_CACHE == true and ($cache = Cache::get("world:" . $this->getId() . ":" . $index)) !== false){
 					/** @var Player[] $players */
 					foreach($players as $player){
 						if($player->isConnected() and isset($player->usedChunks[$index])){
-							$player->sendChunk($x, $z, ($player->getAdditionalChar() == chr(0xfe) ? $cache15 : $cache));
+							$player->sendChunk($x, $z, $cache);
 						}
 					}
 					unset($this->chunkSendQueue[$index]);
@@ -2071,18 +2069,17 @@ class Level implements ChunkManager, Metadatable{
 		}
 	}
 
-	public function chunkRequestCallback($x, $z, $payload, $payload15){
+	public function chunkRequestCallback($x, $z, $payload){
 		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
 		if(isset($this->chunkSendTasks[$index])){
 
 			if(ADVANCED_CACHE == true){
 				Cache::add("world:" . $this->getId() . ":" . $index, $payload, 60);
-				Cache::add("world15:" . $this->getId() . ":" . $index, $payload15, 60);
 			}
 			foreach($this->chunkSendQueue[$index] as $player){
 				/** @var Player $player */
 				if($player->isConnected() and isset($player->usedChunks[$index])){
-					$player->sendChunk($x, $z, ($player->getAdditionalChar() == chr(0xfe) ? $payload15 : $payload));
+					$player->sendChunk($x, $z, $payload);
 					
 				}
 			}
