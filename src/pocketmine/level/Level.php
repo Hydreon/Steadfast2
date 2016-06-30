@@ -1222,6 +1222,13 @@ class Level implements ChunkManager, Metadatable{
 			}
 		}
 	}
+	
+	public function chunkCacheClear($x, $z){
+		$index = PHP_INT_SIZE === 8 ? (($x & 0xFFFFFFFF) << 32) | ($z & 0xFFFFFFFF) : $x . ":" . $z;
+		if(ADVANCED_CACHE == true){
+			Cache::remove("world:" . $this->getId() . ":" . $index);
+		}
+	}
 
 	/**
 	 * Sets on Vector3 the data from a Block object,
