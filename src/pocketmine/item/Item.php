@@ -276,6 +276,8 @@ class Item{
 	const FENCE_GATE_JUNGLE = 185;
 	const FENCE_GATE_DARK_OAK = 186;
 	const FENCE_GATE_ACACIA = 187;
+	
+	const SPRUCE_DOOR_BLOCK = 193;
 
 	const GRASS_PATH = 198;
 
@@ -561,6 +563,7 @@ class Item{
 		185 => "Fence Gate Jungle",
 		186 => "Fence Gate Dark Oak",
 		187 => "Fence Gate Acacia",
+		193 => "Wood Door Block",
 		198 => "Grass Path",
 		243 => "Podzol",
 		244 => "Beetroot Block",
@@ -720,6 +723,7 @@ class Item{
 			self::$list[self::WOODEN_DOOR] = WoodenDoor::class;
 			self::$list[self::BUCKET] = Bucket::class;
 			self::$list[self::IRON_DOOR] = IronDoor::class;
+			self::$list[self::SPRUCE_DOOR_BLOCK] = SpruceDoor::class;
 			self::$list[self::CAKE] = Cake::class;
 			self::$list[self::BED] = Bed::class;
 			self::$list[self::PAINTING] = Painting::class;
