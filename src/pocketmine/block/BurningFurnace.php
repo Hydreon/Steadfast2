@@ -31,6 +31,7 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
 use pocketmine\tile\Furnace;
 use pocketmine\tile\Tile;
+use pocketmine\network\protocol\UpdateBlockPacket;
 
 class BurningFurnace extends Solid{
 
@@ -101,6 +102,12 @@ class BurningFurnace extends Solid{
 
 	public function onActivate(Item $item, Player $player = null){
 		if($player instanceof Player){
+			$pk = new UpdateBlockPacket($player->getAdditionalChar());
+			$pk->records[] = [$this->x, $this->z, $this->y, 0, 0, UpdateBlockPacket::FLAG_ALL];
+			$player->dataPacket($pk);
+			$pk = new UpdateBlockPacket($player->getAdditionalChar());
+			$pk->records[] = [$this->x, $this->z, $this->y, $this->getId(), $this->getDamage(), UpdateBlockPacket::FLAG_ALL];
+			$player->dataPacket($pk);		
 			$t = $this->getLevel()->getTile($this);
 			$furnace = false;
 			if($t instanceof Furnace){
