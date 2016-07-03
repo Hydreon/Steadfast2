@@ -39,24 +39,24 @@ class DeopCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) === 0){
+		if(count($args) === 0){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \false;
+			return false;
 		}
 
-		$name = \array_shift($args);
+		$name = array_shift($args);
 
 		$player = $sender->getServer()->getOfflinePlayer($name);
-		$player->setOp(\false);
+		$player->setOp(false);
 		if($player instanceof Player){
 			$player->sendMessage(TextFormat::YELLOW . "You are no longer op!");
 		}
 		Command::broadcastCommandMessage($sender, "De-opped " . $player->getName());
 
-		return \true;
+		return true;
 	}
 }

@@ -47,18 +47,19 @@ class AsyncPool{
 		for($i = 0; $i < $this->size; ++$i){
 			$this->workerUsage[$i] = 0;
 			$this->workers[$i] = new AsyncWorker();
+			$this->workers[$i]->setClassLoader($this->server->getLoader());
 			$this->workers[$i]->start();
 		}
 	}
 
 	public function submitTask(AsyncTask $task){
-		if(isset($this->tasks[$task->getTaskId()]) or $task->isGarbage()){
+		if(isset($this->tasks[$task->getTaskId()]) or $task->isFinished()){
 			return;
 		}
 
 		$this->tasks[$task->getTaskId()] = $task;
 
-		$selectedWorker = \mt_rand(0, $this->size - 1);
+		$selectedWorker = mt_rand(0, $this->size - 1);
 		$selectedTasks = $this->workerUsage[$selectedWorker];
 		for($i = 0; $i < $this->size; ++$i){
 			if($this->workerUsage[$i] < $selectedTasks){
@@ -66,20 +67,24 @@ class AsyncPool{
 				$selectedTasks = $this->workerUsage[$i];
 			}
 		}
-
+		
 		$this->workers[$selectedWorker]->stack($task);
 		$this->workerUsage[$selectedWorker]++;
 		$this->taskWorkers[$task->getTaskId()] = $selectedWorker;
 	}
 
 	private function removeTask(AsyncTask $task){
+		if(!$task->isTerminated() and ($task->isRunning() or !$task->isFinished())){
+			return;
+		}
+
 		if(isset($this->taskWorkers[$task->getTaskId()])){
-			$this->workers[$w = $this->taskWorkers[$task->getTaskId()]]->unstack($task);
-			$this->workerUsage[$w]--;
+			$this->workerUsage[$this->taskWorkers[$task->getTaskId()]]--;
 		}
 
 		unset($this->tasks[$task->getTaskId()]);
-		unset($this->taskWorkers[$task->getTaskId()]);
+		unset($this->taskWorkers[$task->getTaskId()]);	
+		$task->cleanObject();
 	}
 
 	public function removeTasks(){
@@ -97,17 +102,36 @@ class AsyncPool{
 
 	public function collectTasks(){
 		foreach($this->tasks as $task){
-			if($task->isGarbage()){
-
+			if($task->isFinished()){
 				$task->onCompletion($this->server);
-
 				$this->removeTask($task);
 			}elseif($task->isTerminated()){
-				$info = $task->getTerminationInfo();
 				$this->removeTask($task);
-				$this->server->getLogger()->critical("Could not execute asynchronous task " . (new \ReflectionClass($task))->getShortName() . ": " . $info["message"]);
-				$this->server->getLogger()->critical("On ".$info["scope"].", line ".$info["line"] .", ".$info["function"]."()");
+				$this->server->getLogger()->critical("Could not execute asynchronous task " . get_class($task));				
 			}
 		}
+	}
+	
+	
+	
+	public function getSize(){
+		return $this->size;
+	}
+	
+	public function submitTaskToWorker(AsyncTask $task, $worker){
+		if(isset($this->tasks[$task->getTaskId()]) or $task->isFinished()){
+			return;
+		}
+
+		$worker = (int) $worker;
+		if($worker < 0 or $worker >= $this->size){
+			throw new \InvalidArgumentException("Invalid worker $worker");
+		}
+
+		$this->tasks[$task->getTaskId()] = $task;
+
+		$this->workers[$worker]->stack($task);
+		$this->workerUsage[$worker]++;
+		$this->taskWorkers[$task->getTaskId()] = $worker;
 	}
 }

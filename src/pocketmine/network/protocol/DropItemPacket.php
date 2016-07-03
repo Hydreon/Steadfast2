@@ -21,32 +21,17 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 class DropItemPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::DROP_ITEM_PACKET;
 
-	public $eid;
-	public $unknown;
+	public $type;
 	public $item;
 
-	public function pid(){
-		return Info::DROP_ITEM_PACKET;
-	}
-
 	public function decode(){
-		$this->eid = $this->getLong();
-		$this->unknown = $this->getByte();
+		$this->type = $this->getByte();
 		$this->item = $this->getSlot();
 	}
 

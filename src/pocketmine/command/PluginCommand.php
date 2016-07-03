@@ -46,11 +46,11 @@ class PluginCommand extends Command implements PluginIdentifiableCommand{
 	public function execute(CommandSender $sender, $commandLabel, array $args){
 
 		if(!$this->owningPlugin->isEnabled()){
-			return \false;
+			return false;
 		}
 
 		if(!$this->testPermission($sender)){
-			return \false;
+			return false;
 		}
 
 		$success = $this->executor->onCommand($sender, $this, $commandLabel, $args);
@@ -70,7 +70,7 @@ class PluginCommand extends Command implements PluginIdentifiableCommand{
 	 * @param CommandExecutor $executor
 	 */
 	public function setExecutor(CommandExecutor $executor){
-		$this->executor = ($executor != \null) ? $executor : $this->owningPlugin;
+		$this->executor = ($executor != null) ? $executor : $this->owningPlugin;
 	}
 
 	/**

@@ -27,10 +27,6 @@ use pocketmine\Player;
 
 abstract class Stair extends Transparent{
 
-	public function getHardness(){
-		return 30;
-	}
-
 	/*
 	public function collidesWithBB(AxisAlignedBB $bb, &$list = []){
 		$damage = $this->getDamage();
@@ -130,7 +126,7 @@ abstract class Stair extends Transparent{
 		}
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		$faces = [
 			0 => 0,
 			1 => 2,
@@ -141,15 +137,15 @@ abstract class Stair extends Transparent{
 		if(($fy > 0.5 and $face !== 1) or $face === 0){
 			$this->meta |= 0x04; //Upside-down stairs
 		}
-		$this->getLevel()->setBlock($block, $this, \true, \true);
+		$this->getLevel()->setBlock($block, $this, true, true);
 
-		return \true;
+		return true;
 	}
 
 	public function getDrops(Item $item){
 		if($item->isPickaxe() >= 1){
 			return [
-				[$this->id, 0, 1],
+				[$this->getId(), 0, 1],
 			];
 		}else{
 			return [];

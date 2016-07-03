@@ -2,11 +2,11 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -14,8 +14,8 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
-
- * 
+ * @link http://www.pocketmine.net/
+ *
  *
 */
 
@@ -106,16 +106,16 @@ abstract class Achievement{
 
 	public static function broadcast(Player $player, $achievementId){
 		if(isset(Achievement::$list[$achievementId])){
-			if(Server::getInstance()->getConfigString("announce-player-achievements", \true) === \true){
+			if(Server::getInstance()->getConfigString("announce-player-achievements", true) === true){
 				Server::getInstance()->broadcastMessage($player->getDisplayName() . " has just earned the achievement " . TextFormat::GREEN . Achievement::$list[$achievementId]["name"]);
 			}else{
 				$player->sendMessage("You have just earned the achievement " . TextFormat::GREEN . Achievement::$list[$achievementId]["name"]);
 			}
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 	public static function add($achievementId, $achievementName, array $requires = []){
@@ -125,10 +125,10 @@ abstract class Achievement{
 				"requires" => $requires,
 			];
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 

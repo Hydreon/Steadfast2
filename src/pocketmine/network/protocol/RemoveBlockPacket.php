@@ -21,29 +21,16 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 class RemoveBlockPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::REMOVE_BLOCK_PACKET;
 
 	public $eid;
 	public $x;
 	public $y;
 	public $z;
-
-	public function pid(){
-		return Info::REMOVE_BLOCK_PACKET;
-	}
 
 	public function decode(){
 		$this->eid = $this->getLong();

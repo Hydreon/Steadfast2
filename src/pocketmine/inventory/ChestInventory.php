@@ -43,7 +43,7 @@ class ChestInventory extends ContainerInventory{
 	public function onOpen(Player $who){
 		parent::onOpen($who);
 
-		if(\count($this->getViewers()) === 1){
+		if(count($this->getViewers()) === 1){
 			$pk = new TileEventPacket();
 			$pk->x = $this->getHolder()->getX();
 			$pk->y = $this->getHolder()->getY();
@@ -51,13 +51,13 @@ class ChestInventory extends ContainerInventory{
 			$pk->case1 = 1;
 			$pk->case2 = 2;
 			if(($level = $this->getHolder()->getLevel()) instanceof Level){
-				Server::broadcastPacket($level->getUsingChunk($this->getHolder()->getX() >> 4, $this->getHolder()->getZ() >> 4), $pk->setChannel(Network::CHANNEL_WORLD_EVENTS));
+				Server::broadcastPacket($level->getUsingChunk($this->getHolder()->getX() >> 4, $this->getHolder()->getZ() >> 4), $pk);
 			}
 		}
 	}
 
 	public function onClose(Player $who){
-		if(\count($this->getViewers()) === 1){
+		if(count($this->getViewers()) === 1){
 			$pk = new TileEventPacket();
 			$pk->x = $this->getHolder()->getX();
 			$pk->y = $this->getHolder()->getY();
@@ -65,7 +65,7 @@ class ChestInventory extends ContainerInventory{
 			$pk->case1 = 1;
 			$pk->case2 = 0;
 			if(($level = $this->getHolder()->getLevel()) instanceof Level){
-				Server::broadcastPacket($level->getUsingChunk($this->getHolder()->getX() >> 4, $this->getHolder()->getZ() >> 4), $pk->setChannel(Network::CHANNEL_WORLD_EVENTS));
+				Server::broadcastPacket($level->getUsingChunk($this->getHolder()->getX() >> 4, $this->getHolder()->getZ() >> 4), $pk);
 			}
 		}
 		parent::onClose($who);

@@ -41,11 +41,15 @@ class EndPortalFrame extends Solid{
 	}
 
 	public function getHardness(){
+		return -1;
+	}
+
+	public function getResistance(){
 		return 18000000;
 	}
 
 	public function isBreakable(Item $item){
-		return \false;
+		return false;
 	}
 
 	protected function recalculateBoundingBox(){

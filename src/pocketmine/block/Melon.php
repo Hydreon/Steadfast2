@@ -22,6 +22,7 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 
 class Melon extends Transparent{
 
@@ -36,12 +37,16 @@ class Melon extends Transparent{
 	}
 
 	public function getHardness(){
-		return 5;
+		return 1;
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_AXE;
 	}
 
 	public function getDrops(Item $item){
 		return [
-			[Item::MELON_SLICE, 0, \mt_rand(3, 7)],
+			[Item::MELON_SLICE, 0, mt_rand(3, 7)],
 		];
 	}
 }

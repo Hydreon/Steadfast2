@@ -21,38 +21,171 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
+#include <rules/DataPacket.h>
+
+#ifndef COMPILE
+
+#endif
 
 
+use pocketmine\utils\BinaryStream;
+use pocketmine\utils\Utils;
 
 
+abstract class DataPacket extends BinaryStream{
+	
+	public static $pkKeys = array(
+		0x03 => 0x03,
+		0x01 => 0x8f,
+		0x02 => 0x90,
+		0x05 => 0x91,
+		0x06 => 0x92,
+		0x07 => 0x93,
+		0x08 => 0x94,
+		0x09 => 0x95,
+		0x0a => 0x96,
+	//	0x0b => 0x97,
+		0x0b => 0x98,
+		0x0c => 0x99,
+		0x0d => 0x9a,
+		0x0e => 0x9b,
+		0x0f => 0x9c,
+		0x10 => 0x9d,
+		//
+		0x12 => 0x9e,
+		0x13 => 0x9f,
+		0x14 => 0xa0,
+		0x15 => 0xa1,
+		0x16 => 0xa2, 
+		0x17 => 0xa3,
+		0x18 => 0xa4,
+		0x19 => 0xa5,
+		0x1a => 0xa6,
+		0x1b => 0xa7,
+		0x1c => 0xa8,
+		//
+		0x1e => 0xa9,
+		0x1f => 0xaa,
+		0x20 => 0xab,
+		0x21 => 0xac,
+		0x22 => 0xad,
+		0x23 => 0xae,
+		0x24 => 0xaf,
+		0x25 => 0xb0,
+		0x26 => 0xb1,
+		0x27 => 0xb2,
+		0x28 => 0xb3,
+		0x29 => 0xb4,
+		0x2a => 0xb5,
+		0x2b => 0xb6,
+		0x2c => 0xb7,
+		0x2d => 0xb8,
+		0x2e => 0xb9,
+		0x2f => 0xba,
+		0x30 => 0xbb,
+		0x31 => 0xbc,
+		0x32 => 0xbd,
+		0x33 => 0xbe,
+		0x34 => 0xbf,
+		0x35 => 0xc0,
+		0x36 => 0xc1,
+		0x37 => 0xc2,
+		0x38 => 0xc3,
+		0x39 => 0xc4,
+		0x3a => 0xc5,
+		0x3b => 0xc6,
+		0x3c => 0xc7,
+		0x3d => 0xc8,
+		0x3e => 0xc9,
+	);
+	
+	public static $pkKeysRev = array(
+		0x03 => 0x03,
+		0x8f => 0x01,
+		0x90 => 0x02,
+		0x91 => 0x05,
+		0x92 => 0x06,
+		0x93 => 0x07,
+		0x94 => 0x08,
+		0x95 => 0x09,
+		0x96 => 0x0a,
+	//	0x97 => 0x0b,
+		0x98 => 0x0b,
+		0x99 => 0x0c,
+		0x9a => 0x0d,
+		0x9b => 0x0e,
+		0x9c => 0x0f,
+		0x9d => 0x10,
+		//
+		0x9e => 0x12,
+		0x9f => 0x13,
+		0xa0 => 0x14,
+		0xa1 => 0x15,
+		0xa2 => 0x16,
+		0xa3 => 0x17,
+		0xa4 => 0x18,
+		0xa5 => 0x19,
+		0xa6 => 0x1a,
+		0xa7 => 0x1b, 
+		0xa8 => 0x1c,
+		//
+		0xa9 => 0x1e,
+		0xaa => 0x1f,
+		0xab => 0x20,
+		0xac => 0x21,
+		0xad => 0x22,
+		0xae => 0x23,
+		0xaf => 0x24,
+		0xb0 => 0x25,
+		0xb1 => 0x26,
+		0xb2 => 0x27,
+		0xb3 => 0x28, 
+		0xb4 => 0x29,
+		0xb5 => 0x2a,
+		0xb6 => 0x2b,
+		0xb7 => 0x2c,
+		0xb8 => 0x2d,
+		0xb9 => 0x2e,
+		0xba => 0x2f,
+		0xbb => 0x30, 
+		0xbc => 0x31,
+		0xbd => 0x32,
+		0xbe => 0x33, 
+		0xbf => 0x34,
+		0xc0 => 0x35,
+		0xc1 => 0x36,
+		0xc2 => 0x37,
+		0xc3 => 0x38,
+		0xc4 => 0x39,
+		0xc5 => 0x3a,
+		0xc6 => 0x3b,
+		0xc7 => 0x3c,
+		0xc8 => 0x3d,
+		0xc9 => 0x3e,
+	);
+		
 
+	const NETWORK_ID = 0;
 
-
-
-
-
-use pocketmine\item\Item;
-
-
-abstract class DataPacket extends \stdClass{
-
-	private $offset = 0;
-	public $buffer = "";
-	public $isEncoded = \false;
+	public $isEncoded = false;
 	private $channel = 0;
 
-	abstract public function pid();
+	public function pid(){
+		return $this::NETWORK_ID;
+	}
 
 	abstract public function encode();
 
 	abstract public function decode();
 
-	protected function reset(){
-		$this->buffer = \chr($this->pid());
+	public function reset(){
+		$this->buffer = chr($this::NETWORK_ID);
 		$this->offset = 0;
 	}
 
+	/**
+	 * @deprecated This adds extra overhead on the network, so its usage is now discouraged. It was a test for the viability of this.
+	 */
 	public function setChannel($channel){
 		$this->channel = (int) $channel;
 		return $this;
@@ -62,141 +195,44 @@ abstract class DataPacket extends \stdClass{
 		return $this->channel;
 	}
 
-	public function setBuffer($buffer = \null, $offset = 0){
-		$this->buffer = $buffer;
-		$this->offset = (int) $offset;
-	}
-
-	public function getOffset(){
-		return $this->offset;
-	}
-
-	public function getBuffer(){
-		return $this->buffer;
-	}
-
-	protected function get($len){
-		if($len < 0){
-			$this->offset = \strlen($this->buffer) - 1;
-			return "";
-		}elseif($len === \true){
-			return \substr($this->buffer, $this->offset);
-		}
-
-		return $len === 1 ? $this->buffer{$this->offset++} : \substr($this->buffer, ($this->offset += $len) - $len, $len);
-	}
-
-	protected function put($str){
-		$this->buffer .= $str;
-	}
-
-	protected function getLong(){
-		return Binary::readLong($this->get(8));
-	}
-
-	protected function putLong($v){
-		$this->buffer .= Binary::writeLong($v);
-	}
-
-	protected function getInt(){
-		return Binary::readInt($this->get(4));
-	}
-
-	protected function putInt($v){
-		$this->buffer .= Binary::writeInt($v);
-	}
-
-	protected function getShort($signed = true){
-		return $signed ? Binary::readSignedShort($this->get(2)) : Binary::readShort($this->get(2));
-	}
-
-	protected function putShort($v){
-		$this->buffer .= Binary::writeShort($v);
-	}
-
-	protected function getFloat(){
-		return Binary::readFloat($this->get(4));
-	}
-
-	protected function putFloat($v){
-		$this->buffer .= Binary::writeFloat($v);
-	}
-
-	protected function getTriad(){
-		return Binary::readTriad($this->get(3));
-	}
-
-	protected function putTriad($v){
-		$this->buffer .= Binary::writeTriad($v);
-	}
-
-
-	protected function getLTriad(){
-		return Binary::readLTriad($this->get(3));
-	}
-
-	protected function putLTriad($v){
-		$this->buffer .= Binary::writeLTriad($v);
-	}
-
-	protected function getByte(){
-		return ord($this->buffer{$this->offset++});
-	}
-
-	protected function putByte($v){
-		$this->buffer .= chr($v);
-	}
-
-	protected function getDataArray($len = 10){
-		$data = [];
-		for($i = 1; $i <= $len and !$this->feof(); ++$i){
-			$data[] = $this->get($this->getTriad());
-		}
-
-		return $data;
-	}
-
-	protected function putDataArray(array $data = []){
-		foreach($data as $v){
-			$this->putTriad(strlen($v));
-			$this->put($v);
-		}
-	}
-
-	protected function getSlot(){
-		$id = $this->getShort();
-		$cnt = $this->getByte();
-
-		return Item::get(
-			$id,
-			$this->getShort(),
-			$cnt
-		);
-	}
-
-	protected function putSlot(Item $item){
-		$this->putShort($item->getId());
-		$this->putByte($item->getCount());
-		$this->putShort($item->getDamage());
-	}
-
-	protected function getString(){
-		return $this->get($this->getShort());
-	}
-
-	protected function putString($v){
-		$this->putShort(strlen($v));
-		$this->put($v);
-	}
-
-	protected function feof(){
-		return !isset($this->buffer{$this->offset});
-	}
-
 	public function clean(){
 		$this->buffer = null;
 		$this->isEncoded = false;
 		$this->offset = 0;
 		return $this;
 	}
+
+	public function __debugInfo(){
+		$data = [];
+		foreach($this as $k => $v){
+			if($k === "buffer"){
+				$data[$k] = bin2hex($v);
+			}elseif(is_string($v) or (is_object($v) and method_exists($v, "__toString"))){
+				$data[$k] = Utils::printable((string) $v);
+			}else{
+				$data[$k] = $v;
+			}
+		}
+
+		return $data;
+	}
+	
+	public function updateBuffer($addChar) {
+		if($addChar == chr(0xfe)) {
+			$pkId = ord($this->buffer{0});
+			if(isset(self::$pkKeysRev[$pkId])) {
+				$this->buffer{0} = chr(self::$pkKeysRev[$pkId]);
+			}
+		}
+	}
 }
+
+/*
+ * не видно движения 
+ * нет remove player  +
+ * дождь
+ * UUID
+ * интеракт плохо работает 
+ * голва всегда смотрит вниз
+ * при поломке блока не восстанавливается
+ */

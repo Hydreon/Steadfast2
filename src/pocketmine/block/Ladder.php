@@ -23,6 +23,7 @@ namespace pocketmine\block;
 
 use pocketmine\entity\Entity;
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 use pocketmine\level\Level;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
@@ -40,20 +41,20 @@ class Ladder extends Transparent{
 	}
 
 	public function hasEntityCollision(){
-		return \true;
+		return true;
 	}
 
 	public function isSolid(){
-		return \false;
+		return false;
 	}
 
 	public function getHardness(){
-		return 2;
+		return 0.4;
 	}
 
 	public function onEntityCollide(Entity $entity){
 		$entity->resetFallDistance();
-		$entity->onGround = \true;
+		$entity->onGround = true;
 	}
 
 	protected function recalculateBoundingBox(){
@@ -98,12 +99,12 @@ class Ladder extends Transparent{
 			);
 		}
 
-		return \null;
+		return null;
 	}
 
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
-		if($target->isTransparent() === \false){
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
+		if($target->isTransparent() === false){
 			$faces = [
 				2 => 2,
 				3 => 3,
@@ -112,13 +113,13 @@ class Ladder extends Transparent{
 			];
 			if(isset($faces[$face])){
 				$this->meta = $faces[$face];
-				$this->getLevel()->setBlock($block, $this, \true, \true);
+				$this->getLevel()->setBlock($block, $this, true, true);
 
-				return \true;
+				return true;
 			}
 		}
 
-		return \false;
+		return false;
 	}
 
 	public function onUpdate($type){
@@ -130,7 +131,11 @@ class Ladder extends Transparent{
 			}*/
 		}
 
-		return \false;
+		return false;
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_AXE;
 	}
 
 	public function getDrops(Item $item){

@@ -39,13 +39,13 @@ class SayCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) === 0){
+		if(count($args) === 0){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \false;
+			return false;
 		}
 
 		$message = TextFormat::LIGHT_PURPLE . "[";
@@ -56,9 +56,9 @@ class SayCommand extends VanillaCommand{
 		}else{
 			$message .= $sender->getName();
 		}
-		$message .= TextFormat::LIGHT_PURPLE . "] " . \implode(" ", $args);
+		$message .= TextFormat::LIGHT_PURPLE . "] " . implode(" ", $args);
 		$sender->getServer()->broadcastMessage($message);
 
-		return \true;
+		return true;
 	}
 }

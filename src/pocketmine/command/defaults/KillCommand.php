@@ -40,14 +40,14 @@ class KillCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
 		if($sender instanceof Player){
 			$sender->getServer()->getPluginManager()->callEvent($ev = new EntityDamageEvent($sender, EntityDamageEvent::CAUSE_SUICIDE, 1000));
 
 			if($ev->isCancelled()){
-				return \true;
+				return true;
 			}
 
 			$sender->setLastDamageCause($ev);
@@ -57,6 +57,6 @@ class KillCommand extends VanillaCommand{
 			$sender->sendMessage(TextFormat::RED . "You can only perform this command as a player");
 		}
 
-		return \true;
+		return true;
 	}
 }

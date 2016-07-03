@@ -37,10 +37,10 @@ class HayBale extends Solid{
 	}
 
 	public function getHardness(){
-		return 10;
+		return 0.5;
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		$faces = [
 			0 => 0,
 			1 => 0,
@@ -51,9 +51,9 @@ class HayBale extends Solid{
 		];
 
 		$this->meta = ($this->meta & 0x03) | $faces[$face];
-		$this->getLevel()->setBlock($block, $this, \true, \true);
+		$this->getLevel()->setBlock($block, $this, true, true);
 
-		return \true;
+		return true;
 	}
 
 	public function getDrops(Item $item){

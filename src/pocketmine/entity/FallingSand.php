@@ -30,8 +30,8 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\item\Item as ItemItem;
 use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\Byte;
-use pocketmine\nbt\tag\Int;
+use pocketmine\nbt\tag\ByteTag;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
@@ -50,7 +50,7 @@ class FallingSand extends Entity{
 	protected $blockId = 0;
 	protected $damage;
 
-	public $canCollide = \false;
+	public $canCollide = false;
 
 	protected function initEntity(){
 		parent::initEntity();
@@ -58,7 +58,7 @@ class FallingSand extends Entity{
 			$this->blockId = $this->namedtag["TileID"];
 		}elseif(isset($this->namedtag->Tile)){
 			$this->blockId = $this->namedtag["Tile"];
-			$this->namedtag["TileID"] = new Int("TileID", $this->blockId);
+			$this->namedtag["TileID"] = new IntTag("TileID", $this->blockId);
 		}
 
 		if(isset($this->namedtag->Data)){
@@ -74,7 +74,7 @@ class FallingSand extends Entity{
 	}
 
 	public function canCollideWith(Entity $entity){
-		return \false;
+		return false;
 	}
 
 	public function attack($damage, EntityDamageEvent $source){
@@ -84,12 +84,12 @@ class FallingSand extends Entity{
 	public function onUpdate($currentTick){
 
 		if($this->closed){
-			return \false;
+			return false;
 		}
 
 		$this->timings->startTiming();
 
-		$tickDiff = \max(1, $currentTick - $this->lastUpdate);
+		$tickDiff = max(1, $currentTick - $this->lastUpdate);
 		$this->lastUpdate = $currentTick;
 
 		$hasUpdate = $this->entityBaseTick($tickDiff);
@@ -99,9 +99,9 @@ class FallingSand extends Entity{
 				$block = $this->level->getBlock($pos = (new Vector3($this->x, $this->y, $this->z))->floor());
 				if($block->getId() != $this->blockId){
 					$this->kill();
-					return \true;
+					return true;
 				}
-				$this->level->setBlock($pos, Block::get(0), \true);
+				$this->level->setBlock($pos, Block::get(0), true);
 
 			}
 
@@ -114,21 +114,27 @@ class FallingSand extends Entity{
 			$this->motionX *= $friction;
 			$this->motionY *= 1 - $this->drag;
 			$this->motionZ *= $friction;
-
-			$pos = (new Vector3($this->x, $this->y, $this->z))->floor();
-
+			if($this->y < 1) {
+				$this->kill();
+			}
+			$pos = (new Vector3($this->x, $this->y - 1, $this->z))->floor();
+			$bottomBlock = $this->level->getBlock($pos);
+			if($bottomBlock->getId() > 0 && !($bottomBlock instanceof Liquid)){
+				$this->onGround = true;
+			}
 			if($this->onGround){
 				$this->kill();
+				$pos = (new Vector3($this->x, $this->y, $this->z))->floor();
 				$block = $this->level->getBlock($pos);
 				if($block->getId() > 0 and !$block->isSolid() and !($block instanceof Liquid)){
 					$this->getLevel()->dropItem($this, ItemItem::get($this->getBlock(), $this->getDamage(), 1));
 				}else{
 					$this->server->getPluginManager()->callEvent($ev = new EntityBlockChangeEvent($this, $block, Block::get($this->getBlock(), $this->getDamage())));
 					if(!$ev->isCancelled()){
-						$this->getLevel()->setBlock($pos, $ev->getTo(), \true);
+						$this->getLevel()->setBlock($pos, $ev->getTo(), true);
 					}
 				}
-				$hasUpdate = \true;
+				$hasUpdate = true;
 			}
 
 			$this->updateMovement();
@@ -146,8 +152,8 @@ class FallingSand extends Entity{
 	}
 
 	public function saveNBT(){
-		$this->namedtag->TileID = new Int("TileID", $this->blockId);
-		$this->namedtag->Data = new Byte("Data", $this->damage);
+		$this->namedtag->TileID = new IntTag("TileID", $this->blockId);
+		$this->namedtag->Data = new ByteTag("Data", $this->damage);
 	}
 
 	public function spawnTo(Player $player){
@@ -160,11 +166,10 @@ class FallingSand extends Entity{
 		$pk->speedX = $this->motionX;
 		$pk->speedY = $this->motionY;
 		$pk->speedZ = $this->motionZ;
-
 		$pk->yaw = $this->yaw;
 		$pk->pitch = $this->pitch;
 		$pk->metadata = $this->dataProperties;
-		$player->dataPacket($pk->setChannel(Network::CHANNEL_ENTITY_SPAWNING));
+		$player->dataPacket($pk);
 
 		parent::spawnTo($player);
 	}

@@ -38,24 +38,24 @@ class DefaultGamemodeCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) === 0){
+		if(count($args) === 0){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \false;
+			return false;
 		}
 
 		$gameMode = Server::getGamemodeFromString($args[0]);
 
 		if($gameMode !== -1){
 			$sender->getServer()->setConfigInt("gamemode", $gameMode);
-			$sender->sendMessage("Default game mode set to " . \strtolower(Server::getGamemodeString($gameMode)));
+			$sender->sendMessage("Default game mode set to " . strtolower(Server::getGamemodeString($gameMode)));
 		}else{
 			$sender->sendMessage("Unknown game mode");
 		}
 
-		return \true;
+		return true;
 	}
 }

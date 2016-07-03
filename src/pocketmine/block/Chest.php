@@ -22,12 +22,13 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Enum;
-use pocketmine\nbt\tag\Int;
-use pocketmine\nbt\tag\String;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
 use pocketmine\tile\Chest as TileChest;
 use pocketmine\tile\Tile;
@@ -41,15 +42,19 @@ class Chest extends Transparent{
 	}
 
 	public function canBeActivated(){
-		return \true;
+		return true;
 	}
 
 	public function getHardness(){
-		return 15;
+		return 2.5;
 	}
 
 	public function getName(){
 		return "Chest";
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_AXE;
 	}
 
 	protected function recalculateBoundingBox(){
@@ -63,7 +68,7 @@ class Chest extends Transparent{
 		);
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		$faces = [
 			0 => 4,
 			1 => 2,
@@ -71,7 +76,7 @@ class Chest extends Transparent{
 			3 => 3,
 		];
 
-		$chest = \null;
+		$chest = null;
 		$this->meta = $faces[$player instanceof Player ? $player->getDirection() : 0];
 
 		for($side = 2; $side <= 5; ++$side){
@@ -90,15 +95,26 @@ class Chest extends Transparent{
 			}
 		}
 
-		$this->getLevel()->setBlock($block, $this, \true, \true);
-		$nbt = new Compound(\false, [
+		$this->getLevel()->setBlock($block, $this, true, true);
+		$nbt = new Compound("", [
 			new Enum("Items", []),
-			new String("id", Tile::CHEST),
-			new Int("x", $this->x),
-			new Int("y", $this->y),
-			new Int("z", $this->z)
+			new StringTag("id", Tile::CHEST),
+			new IntTag("x", $this->x),
+			new IntTag("y", $this->y),
+			new IntTag("z", $this->z)
 		]);
 		$nbt->Items->setTagType(NBT::TAG_Compound);
+
+		if($item->hasCustomName()){
+			$nbt->CustomName = new StringTag("CustomName", $item->getCustomName());
+		}
+
+		if($item->hasCustomBlockData()){
+			foreach($item->getCustomBlockData() as $key => $v){
+				$nbt->{$key} = $v;
+			}
+		}
+
 		$tile = Tile::createTile("Chest", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
 
 		if($chest instanceof TileChest and $tile instanceof TileChest){
@@ -106,7 +122,7 @@ class Chest extends Transparent{
 			$tile->pairWith($chest);
 		}
 
-		return \true;
+		return true;
 	}
 
 	public function onBreak(Item $item){
@@ -114,42 +130,47 @@ class Chest extends Transparent{
 		if($t instanceof TileChest){
 			$t->unpair();
 		}
-		$this->getLevel()->setBlock($this, new Air(), \true, \true);
+		$this->getLevel()->setBlock($this, new Air(), true, true);
 
-		return \true;
+		return true;
 	}
 
-	public function onActivate(Item $item, Player $player = \null){
+	public function onActivate(Item $item, Player $player = null){
 		if($player instanceof Player){
 			$top = $this->getSide(1);
-			if($top->isTransparent() !== \true){
-				return \true;
+			if($top->isTransparent() !== true){
+				return true;
 			}
 
 			$t = $this->getLevel()->getTile($this);
-			$chest = \null;
+			$chest = null;
 			if($t instanceof TileChest){
 				$chest = $t;
 			}else{
-				$nbt = new Compound(\false, [
+				$nbt = new Compound("", [
 					new Enum("Items", []),
-					new String("id", Tile::CHEST),
-					new Int("x", $this->x),
-					new Int("y", $this->y),
-					new Int("z", $this->z)
+					new StringTag("id", Tile::CHEST),
+					new IntTag("x", $this->x),
+					new IntTag("y", $this->y),
+					new IntTag("z", $this->z)
 				]);
 				$nbt->Items->setTagType(NBT::TAG_Compound);
 				$chest = Tile::createTile("Chest", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
 			}
 
+			if(isset($chest->namedtag->Lock) and $chest->namedtag->Lock instanceof StringTag){
+				if($chest->namedtag->Lock->getValue() !== $item->getCustomName()){
+					return true;
+				}
+			}
 
 			if($player->isCreative()){
-				return \true;
+				return true;
 			}
 			$player->addWindow($chest->getInventory());
 		}
 
-		return \true;
+		return true;
 	}
 
 	public function getDrops(Item $item){

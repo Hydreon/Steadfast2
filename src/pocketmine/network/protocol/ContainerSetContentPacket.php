@@ -21,33 +21,19 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 class ContainerSetContentPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::CONTAINER_SET_CONTENT_PACKET;
 
 	const SPECIAL_INVENTORY = 0;
 	const SPECIAL_ARMOR = 0x78;
 	const SPECIAL_CREATIVE = 0x79;
-	const SPECIAL_CRAFTING = 0x7a;
 
 	public $windowid;
 	public $slots = [];
 	public $hotbar = [];
-
-	public function pid(){
-		return Info::CONTAINER_SET_CONTENT_PACKET;
-	}
 
 	public function clean(){
 		$this->slots = [];

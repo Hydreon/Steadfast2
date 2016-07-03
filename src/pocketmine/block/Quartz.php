@@ -22,13 +22,23 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 
 class Quartz extends Solid{
+	
+	const QUARTZ_NORMAL = 0;
+	const QUARTZ_CHISELED = 1;
+	const QUARTZ_PILLAR = 2;
+	const QUARTZ_PILLAR2 = 3;
 
 	protected $id = self::QUARTZ_BLOCK;
 
 	public function __construct($meta = 0){
 		$this->meta = $meta;
+	}
+
+	public function getHardness(){
+		return 0.8;
 	}
 
 	public function getName(){
@@ -41,22 +51,8 @@ class Quartz extends Solid{
 		return $names[$this->meta & 0x03];
 	}
 
-	public function getBreakTime(Item $item){
-
-		switch($item->isPickaxe()){
-			case 5:
-				return 0.15;
-			case 4:
-				return 0.2;
-			case 3:
-				return 0.3;
-			case 2:
-				return 0.1;
-			case 1:
-				return 0.6;
-			default:
-				return 4;
-		}
+	public function getToolType(){
+		return Tool::TYPE_PICKAXE;
 	}
 
 	public function getDrops(Item $item){

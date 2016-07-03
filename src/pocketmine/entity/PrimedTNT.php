@@ -26,7 +26,7 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\ExplosionPrimeEvent;
 use pocketmine\level\Explosion;
-use pocketmine\nbt\tag\Byte;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
@@ -43,7 +43,9 @@ class PrimedTNT extends Entity implements Explosive{
 
 	protected $fuse;
 
-	public $canCollide = \false;
+	public $canCollide = false;
+
+	protected $owner = null;
 
 
 	public function attack($damage, EntityDamageEvent $source){
@@ -62,23 +64,23 @@ class PrimedTNT extends Entity implements Explosive{
 
 
 	public function canCollideWith(Entity $entity){
-		return \false;
+		return false;
 	}
 
 	public function saveNBT(){
 		parent::saveNBT();
-		$this->namedtag->Fuse = new Byte("Fuse", $this->fuse);
+		$this->namedtag->Fuse = new ByteTag("Fuse", $this->fuse);
 	}
 
 	public function onUpdate($currentTick){
 
 		if($this->closed){
-			return \false;
+			return false;
 		}
 
 		$this->timings->startTiming();
 
-		$tickDiff = \max(1, $currentTick - $this->lastUpdate);
+		$tickDiff = max(1, $currentTick - $this->lastUpdate);
 		$this->lastUpdate = $currentTick;
 
 		$hasUpdate = $this->entityBaseTick($tickDiff);
@@ -87,7 +89,7 @@ class PrimedTNT extends Entity implements Explosive{
 
 			$this->motionY -= $this->gravity;
 
-			$this->move($this->motionX, $this->motionY, $this->motionZ);
+			//$this->move($this->motionX, $this->motionY, $this->motionZ);
 
 			$friction = 1 - $this->drag;
 
@@ -120,7 +122,7 @@ class PrimedTNT extends Entity implements Explosive{
 		$this->server->getPluginManager()->callEvent($ev = new ExplosionPrimeEvent($this, 4));
 
 		if(!$ev->isCancelled()){
-			$explosion = new Explosion($this, $ev->getForce(), $this);
+			$explosion = new Explosion($this, $ev->getForce(), $this->owner);
 			if($ev->isBlockBreaking()){
 				$explosion->explodeA();
 			}
@@ -139,8 +141,12 @@ class PrimedTNT extends Entity implements Explosive{
 		$pk->speedY = $this->motionY;
 		$pk->speedZ = $this->motionZ;
 		$pk->metadata = $this->dataProperties;
-		$player->dataPacket($pk->setChannel(Network::CHANNEL_ENTITY_SPAWNING));
+		$player->dataPacket($pk);
 
 		parent::spawnTo($player);
+	}
+
+	public function setOwner($owner){
+		$this->owner = $owner;
 	}
 }

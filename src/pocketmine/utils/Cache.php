@@ -33,7 +33,7 @@ class Cache{
 	 * @param float|int $minTTL The data will remain cached for at least $minTTL seconds
 	 */
 	public static function add($identifier, $blob, $minTTL = 30){
-		self::$cached[$identifier] = [$blob, \microtime(\true) + $minTTL, $minTTL];
+		self::$cached[$identifier] = [$blob, microtime(true) + $minTTL, $minTTL];
 	}
 
 	/**
@@ -45,12 +45,12 @@ class Cache{
 	 */
 	public static function get($identifier){
 		if(isset(self::$cached[$identifier])){
-			self::$cached[$identifier][1] = \microtime(\true) + self::$cached[$identifier][2];
+			self::$cached[$identifier][1] = microtime(true) + self::$cached[$identifier][2];
 
 			return self::$cached[$identifier][0];
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**
@@ -73,7 +73,7 @@ class Cache{
 	 * Starts a cache cleanup
 	 */
 	public static function cleanup(){
-		$time = \microtime(\true);
+		$time = microtime(true);
 		foreach(self::$cached as $index => $data){
 			if($data[1] < $time){
 				unset(self::$cached[$index]);

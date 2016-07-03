@@ -33,10 +33,10 @@ class PluginDescription{
 	private $loadBefore = [];
 	private $version;
 	private $commands = [];
-	private $description = \null;
+	private $description = null;
 	private $authors = [];
-	private $website = \null;
-	private $prefix = \null;
+	private $website = null;
+	private $prefix = null;
 	private $order = PluginLoadOrder::POSTWORLD;
 
 	/**
@@ -45,10 +45,10 @@ class PluginDescription{
 	private $permissions = [];
 
 	/**
-	 * @param string $yamlString
+	 * @param string|array $yamlString
 	 */
 	public function __construct($yamlString){
-		$this->loadMap(\yaml_parse($yamlString));
+		$this->loadMap(!is_array($yamlString) ? \yaml_parse($yamlString) : $yamlString);
 	}
 
 	/**
@@ -57,19 +57,19 @@ class PluginDescription{
 	 * @throws PluginException
 	 */
 	private function loadMap(array $plugin){
-		$this->name = \preg_replace("[^A-Za-z0-9 _.-]", "", $plugin["name"]);
+		$this->name = preg_replace("[^A-Za-z0-9 _.-]", "", $plugin["name"]);
 		if($this->name === ""){
 			throw new PluginException("Invalid PluginDescription name");
 		}
-		$this->name = \str_replace(" ", "_", $this->name);
+		$this->name = str_replace(" ", "_", $this->name);
 		$this->version = $plugin["version"];
 		$this->main = $plugin["main"];
-		$this->api = !\is_array($plugin["api"]) ? [$plugin["api"]] : $plugin["api"];
-		if(\stripos($this->main, "pocketmine\\") === 0){
+		$this->api = !is_array($plugin["api"]) ? [$plugin["api"]] : $plugin["api"];
+		if(stripos($this->main, "pocketmine\\") === 0){
 			throw new PluginException("Invalid PluginDescription main, cannot start within the PocketMine namespace");
 		}
 
-		if(isset($plugin["commands"]) and \is_array($plugin["commands"])){
+		if(isset($plugin["commands"]) and is_array($plugin["commands"])){
 			$this->commands = $plugin["commands"];
 		}
 
@@ -93,11 +93,11 @@ class PluginDescription{
 			$this->prefix = $plugin["prefix"];
 		}
 		if(isset($plugin["load"])){
-			$order = \strtoupper($plugin["load"]);
-			if(!\defined(PluginLoadOrder::class . "::" . $order)){
+			$order = strtoupper($plugin["load"]);
+			if(!defined(PluginLoadOrder::class . "::" . $order)){
 				throw new PluginException("Invalid PluginDescription load");
 			}else{
-				$this->order = \constant(PluginLoadOrder::class . "::" . $order);
+				$this->order = constant(PluginLoadOrder::class . "::" . $order);
 			}
 		}
 		$this->authors = [];

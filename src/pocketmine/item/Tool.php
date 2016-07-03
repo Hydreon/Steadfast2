@@ -31,6 +31,13 @@ abstract class Tool extends Item{
 	const TIER_STONE = 3;
 	const TIER_IRON = 4;
 	const TIER_DIAMOND = 5;
+	
+	const TYPE_NONE = 0;
+	const TYPE_SWORD = 1;
+	const TYPE_SHOVEL = 2;
+	const TYPE_PICKAXE = 3;
+	const TYPE_AXE = 4;
+	const TYPE_SHEARS = 5;
 
 	public function __construct($id, $meta = 0, $count = 1, $name = "Unknown"){
 		parent::__construct($id, $meta, $count, $name);
@@ -58,7 +65,7 @@ abstract class Tool extends Item{
 			$this->meta++;
 		}
 
-		return \true;
+		return true;
 	}
 
 	/**
@@ -79,11 +86,11 @@ abstract class Tool extends Item{
 			self::BOW => 385,
 		];
 
-		if(($type = $this->isPickaxe()) === \false){
-			if(($type = $this->isAxe()) === \false){
-				if(($type = $this->isSword()) === \false){
-					if(($type = $this->isShovel()) === \false){
-						if(($type = $this->isHoe()) === \false){
+		if(($type = $this->isPickaxe()) === false){
+			if(($type = $this->isAxe()) === false){
+				if(($type = $this->isSword()) === false){
+					if(($type = $this->isShovel()) === false){
+						if(($type = $this->isHoe()) === false){
 							$type = $this->id;
 						}
 					}
@@ -95,23 +102,23 @@ abstract class Tool extends Item{
 	}
 
 	public function isPickaxe(){
-		return \false;
+		return false;
 	}
 
 	public function isAxe(){
-		return \false;
+		return false;
 	}
 
 	public function isSword(){
-		return \false;
+		return false;
 	}
 
 	public function isShovel(){
-		return \false;
+		return false;
 	}
 
 	public function isHoe(){
-		return \false;
+		return false;
 	}
 
 	public function isShears(){
@@ -119,6 +126,6 @@ abstract class Tool extends Item{
 	}
 
 	public function isTool(){
-		return ($this->id === self::FLINT_STEEL or $this->id === self::SHEARS or $this->id === self::BOW or $this->isPickaxe() !== \false or $this->isAxe() !== \false or $this->isShovel() !== \false or $this->isSword() !== \false);
+		return ($this->id === self::FLINT_STEEL or $this->id === self::SHEARS or $this->id === self::BOW or $this->isPickaxe() !== false or $this->isAxe() !== false or $this->isShovel() !== false or $this->isSword() !== false);
 	}
 }

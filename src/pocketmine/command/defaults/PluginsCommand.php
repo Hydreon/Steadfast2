@@ -38,24 +38,24 @@ class PluginsCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
 		$sender->sendMessage("Plugins " . $this->getPluginList($sender));
 
-		return \true;
+		return true;
 	}
 
 	private function getPluginList(CommandSender $sender){
 		$list = "";
 		foreach(($plugins = $sender->getServer()->getPluginManager()->getPlugins()) as $plugin){
-			if(\strlen($list) > 0){
+			if(strlen($list) > 0){
 				$list .= TextFormat::WHITE . ", ";
 			}
 			$list .= $plugin->isEnabled() ? TextFormat::GREEN : TextFormat::RED;
 			$list .= $plugin->getDescription()->getFullName();
 		}
 
-		return "(" . \count($plugins) . "): $list";
+		return "(" . count($plugins) . "): $list";
 	}
 }

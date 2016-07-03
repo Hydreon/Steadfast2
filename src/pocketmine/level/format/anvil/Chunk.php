@@ -25,11 +25,11 @@ use pocketmine\level\format\generic\BaseChunk;
 use pocketmine\level\format\generic\EmptyChunkSection;
 use pocketmine\level\format\LevelProvider;
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\Byte;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\ByteArray;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Enum;
-use pocketmine\nbt\tag\Int;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\IntArray;
 use pocketmine\Player;
 use pocketmine\utils\Binary;
@@ -63,7 +63,7 @@ class Chunk extends BaseChunk{
 		}
 
 		if(!isset($this->nbt->Biomes) or !($this->nbt->Biomes instanceof ByteArray)){
-			$this->nbt->Biomes = new ByteArray("Biomes", \str_repeat("\x01", 256));
+			$this->nbt->Biomes = new ByteArray("Biomes", str_repeat("\x01", 256));
 		}
 
 		if(!isset($this->nbt->BiomeColors) or !($this->nbt->BiomeColors instanceof IntArray)){
@@ -71,7 +71,7 @@ class Chunk extends BaseChunk{
 		}
 
 		if(!isset($this->nbt->HeightMap) or !($this->nbt->HeightMap instanceof IntArray)){
-			$this->nbt->HeightMap = new IntArray("HeightMap", \array_fill(0, 256, 127));
+			$this->nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, 127));
 		}
 
 		$sections = [];
@@ -105,7 +105,7 @@ class Chunk extends BaseChunk{
 	 * @param int $value
 	 */
 	public function setPopulated($value = 1){
-		$this->nbt->TerrainPopulated = new Byte("TerrainPopulated", $value);
+		$this->nbt->TerrainPopulated = new ByteTag("TerrainPopulated", $value);
 	}
 
 	/**
@@ -119,7 +119,7 @@ class Chunk extends BaseChunk{
 	 * @param int $value
 	 */
 	public function setGenerated($value = 1){
-		$this->nbt->TerrainGenerated = new Byte("TerrainGenerated", $value);
+		$this->nbt->TerrainGenerated = new ByteTag("TerrainGenerated", $value);
 	}
 
 	/**
@@ -135,7 +135,7 @@ class Chunk extends BaseChunk{
 	 *
 	 * @return Chunk
 	 */
-	public static function fromBinary($data, LevelProvider $provider = \null){
+	public static function fromBinary($data, LevelProvider $provider = null){
 		$nbt = new NBT(NBT::BIG_ENDIAN);
 
 		try{
@@ -143,20 +143,20 @@ class Chunk extends BaseChunk{
 			$chunk = $nbt->getData();
 
 			if(!isset($chunk->Level) or !($chunk->Level instanceof Compound)){
-				return \null;
+				return null;
 			}
 
 			return new Chunk($provider instanceof LevelProvider ? $provider : Anvil::class, $chunk->Level);
 		}catch(\Exception $e){
-			return \null;
+			return null;
 		}
 	}
 
 	public function toBinary(){
 		$nbt = clone $this->getNBT();
 
-		$nbt->xPos = new Int("xPos", $this->x);
-		$nbt->zPos = new Int("zPos", $this->z);
+		$nbt->xPos = new IntTag("xPos", $this->x);
+		$nbt->zPos = new IntTag("zPos", $this->z);
 
 		$nbt->Sections = new Enum("Sections", []);
 		$nbt->Sections->setTagType(NBT::TAG_Compound);
@@ -164,8 +164,8 @@ class Chunk extends BaseChunk{
 			if($section instanceof EmptyChunkSection){
 				continue;
 			}
-			$nbt->Sections[$section->getY()] = new Compound(\null, [
-				"Y" => new Byte("Y", $section->getY()),
+			$nbt->Sections[$section->getY()] = new Compound(null, [
+				"Y" => new ByteTag("Y", $section->getY()),
 				"Blocks" => new ByteArray("Blocks", $section->getIdArray()),
 				"Data" => new ByteArray("Data", $section->getDataArray()),
 				"BlockLight" => new ByteArray("BlockLight", $section->getLightArray()),
@@ -204,5 +204,30 @@ class Chunk extends BaseChunk{
 		$writer->setData(new Compound("", ["Level" => $nbt]));
 
 		return $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, RegionLoader::$COMPRESSION_LEVEL);
+	}
+		
+		public static function getEmptyChunk($chunkX, $chunkZ, LevelProvider $provider = null){
+		try{
+			$chunk = new Chunk($provider instanceof LevelProvider ? $provider : Anvil::class, null);
+			$chunk->x = $chunkX;
+			$chunk->z = $chunkZ;
+
+			for($y = 0; $y < 8; ++$y){
+				$chunk->sections[$y] = new EmptyChunkSection($y);
+			}
+
+			$chunk->heightMap = array_fill(0, 256, 0);
+			$chunk->biomeColors = array_fill(0, 256, 0);
+
+			$chunk->nbt->V = new ByteTag("V", 1);
+			$chunk->nbt->InhabitedTime = new LongTag("InhabitedTime", 0);
+			$chunk->nbt->TerrainGenerated = new ByteTag("TerrainGenerated", 0);
+			$chunk->nbt->TerrainPopulated = new ByteTag("TerrainPopulated", 0);
+			$chunk->nbt->LightPopulated = new ByteTag("LightPopulated", 0);
+
+			return $chunk;
+		}catch(\Throwable $e){
+			return null;
+		}
 	}
 }

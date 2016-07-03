@@ -31,11 +31,11 @@ use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Math;
 use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\Byte;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Double;
+use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\Enum;
-use pocketmine\nbt\tag\Float;
+use pocketmine\nbt\tag\FloatTag;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\ExplodePacket;
 use pocketmine\Server;
@@ -55,10 +55,10 @@ class Explosion{
 	/** @var Entity|Block */
 	private $what;
 
-	public function __construct(Position $center, $size, $what = \null){
+	public function __construct(Position $center, $size, $what = null){
 		$this->level = $center->getLevel();
 		$this->source = $center;
-		$this->size = \max($size, 0);
+		$this->size = max($size, 0);
 		$this->what = $what;
 	}
 
@@ -71,7 +71,7 @@ class Explosion{
 			return $this->explodeB();
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**
@@ -79,13 +79,13 @@ class Explosion{
 	 */
 	public function explodeA(){
 		if($this->size < 0.1){
-			return \false;
+			return false;
 		}
 
 		$vector = new Vector3(0, 0, 0);
 		$vBlock = new Vector3(0, 0, 0);
 
-		$mRays = \intval($this->rays - 1);
+		$mRays = intval($this->rays - 1);
 		for($i = 0; $i < $this->rays; ++$i){
 			for($j = 0; $j < $this->rays; ++$j){
 				for($k = 0; $k < $this->rays; ++$k){
@@ -96,7 +96,7 @@ class Explosion{
 						$pointerY = $this->source->y;
 						$pointerZ = $this->source->z;
 
-						for($blastForce = $this->size * (\mt_rand(700, 1300) / 1000); $blastForce > 0; $blastForce -= $this->stepLen * 0.75){
+						for($blastForce = $this->size * (mt_rand(700, 1300) / 1000); $blastForce > 0; $blastForce -= $this->stepLen * 0.75){
 							$x = (int) $pointerX;
 							$y = (int) $pointerY;
 							$z = (int) $pointerZ;
@@ -111,7 +111,7 @@ class Explosion{
 							if($block->getId() !== 0){
 								$blastForce -= ($block->getHardness() / 5 + 0.3) * $this->stepLen;
 								if($blastForce > 0){
-									if(!isset($this->affectedBlocks[$index = \PHP_INT_SIZE === 8 ? ((($block->x) & 0xFFFFFFF) << 35) | ((( $block->y) & 0x7f) << 28) | (( $block->z) & 0xFFFFFFF) : ($block->x) . ":" . ( $block->y) .":". ( $block->z)])){
+									if(!isset($this->affectedBlocks[$index = PHP_INT_SIZE === 8 ? ((($block->x) & 0xFFFFFFF) << 35) | ((( $block->y) & 0x7f) << 28) | (( $block->z) & 0xFFFFFFF) : ($block->x) . ":" . ( $block->y) .":". ( $block->z)])){
 										$this->affectedBlocks[$index] = $block;
 									}
 								}
@@ -125,24 +125,13 @@ class Explosion{
 			}
 		}
 
-		return \true;
+		return true;
 	}
 
 	public function explodeB(){
 		$send = [];
 		$source = (new Vector3($this->source->x, $this->source->y, $this->source->z))->floor();
 		$yield = (1 / $this->size) * 100;
-
-		if($this->what instanceof Entity){
-			$this->level->getServer()->getPluginManager()->callEvent($ev = new EntityExplodeEvent($this->what, $this->source, $this->affectedBlocks, $yield));
-			if($ev->isCancelled()){
-				return \false;
-			}else{
-				$yield = $ev->getYield();
-				$this->affectedBlocks = $ev->getBlockList();
-			}
-		}
-
 		$explosionSize = $this->size * 2;
 		$minX = Math::floorFloat($this->source->x - $explosionSize - 1);
 		$maxX = Math::floorFloat($this->source->x + $explosionSize + 1);
@@ -153,7 +142,17 @@ class Explosion{
 
 		$explosionBB = new AxisAlignedBB($minX, $minY, $minZ, $maxX, $maxY, $maxZ);
 
-		$list = $this->level->getNearbyEntities($explosionBB, $this->what instanceof Entity ? $this->what : \null);
+		if($this->what instanceof Entity){
+			$this->level->getServer()->getPluginManager()->callEvent($ev = new EntityExplodeEvent($this->what, $this->source, $this->affectedBlocks, $yield));
+			if($ev->isCancelled()){
+				return false;
+			}else{
+				$yield = $ev->getYield();
+				$this->affectedBlocks = $ev->getBlockList();
+			}
+		}
+
+		$list = $this->level->getNearbyEntities($explosionBB, $this->what instanceof Entity ? $this->what : null);
 		foreach($list as $entity){
 			$distance = $entity->distance($this->source) / $explosionSize;
 
@@ -185,23 +184,23 @@ class Explosion{
 				$mot = (new Random())->nextSignedFloat() * M_PI * 2;
 				$tnt = Entity::createEntity("PrimedTNT", $this->level->getChunk($block->x >> 4, $block->z >> 4), new Compound("", [
 					"Pos" => new Enum("Pos", [
-						new Double("", $block->x + 0.5),
-						new Double("", $block->y),
-						new Double("", $block->z + 0.5)
+						new DoubleTag("", $block->x + 0.5),
+						new DoubleTag("", $block->y),
+						new DoubleTag("", $block->z + 0.5)
 					]),
 					"Motion" => new Enum("Motion", [
-						new Double("", -\sin($mot) * 0.02),
-						new Double("", 0.2),
-						new Double("", -\cos($mot) * 0.02)
+						new DoubleTag("", -sin($mot) * 0.02),
+						new DoubleTag("", 0.2),
+						new DoubleTag("", -cos($mot) * 0.02)
 					]),
 					"Rotation" => new Enum("Rotation", [
-						new Float("", 0),
-						new Float("", 0)
+						new FloatTag("", 0),
+						new FloatTag("", 0)
 					]),
-					"Fuse" => new Byte("Fuse", \mt_rand(10, 30))
+					"Fuse" => new ByteTag("Fuse", mt_rand(10, 30))
 				]));
 				$tnt->spawnToAll();
-			}elseif(\mt_rand(0, 100) < $yield){
+			}elseif(mt_rand(0, 100) < $yield){
 				foreach($block->getDrops($air) as $drop){
 					$this->level->dropItem($block->add(0.5, 0.5, 0.5), Item::get(...$drop));
 				}
@@ -215,8 +214,8 @@ class Explosion{
 		$pk->z = $this->source->z;
 		$pk->radius = $this->size;
 		$pk->records = $send;
-		Server::broadcastPacket($this->level->getUsingChunk($source->x >> 4, $source->z >> 4), $pk->setChannel(Network::CHANNEL_BLOCKS));
+		Server::broadcastPacket($this->level->getUsingChunk($source->x >> 4, $source->z >> 4), $pk);
 
-		return \true;
+		return true;
 	}
 }

@@ -22,6 +22,7 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 use pocketmine\Player;
 
 class Wood extends Solid{
@@ -39,7 +40,7 @@ class Wood extends Solid{
 	}
 
 	public function getHardness(){
-		return 10;
+		return 2;
 	}
 
 	public function getName(){
@@ -52,7 +53,7 @@ class Wood extends Solid{
 		return $names[$this->meta & 0x03];
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = \null){
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		$faces = [
 			0 => 0,
 			1 => 0,
@@ -63,14 +64,18 @@ class Wood extends Solid{
 		];
 
 		$this->meta = ($this->meta & 0x03) | $faces[$face];
-		$this->getLevel()->setBlock($block, $this, \true, \true);
+		$this->getLevel()->setBlock($block, $this, true, true);
 
-		return \true;
+		return true;
 	}
 
 	public function getDrops(Item $item){
 		return [
 			[$this->id, $this->meta & 0x03, 1],
 		];
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_AXE;
 	}
 }

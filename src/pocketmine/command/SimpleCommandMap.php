@@ -34,7 +34,7 @@ use pocketmine\command\defaults\HelpCommand;
 use pocketmine\command\defaults\KickCommand;
 use pocketmine\command\defaults\KillCommand;
 use pocketmine\command\defaults\ListCommand;
-use pocketmine\command\defaults\MeCommand;
+//use pocketmine\command\defaults\MeCommand;
 use pocketmine\command\defaults\OpCommand;
 use pocketmine\command\defaults\PardonCommand;
 use pocketmine\command\defaults\PardonIpCommand;
@@ -51,7 +51,7 @@ use pocketmine\command\defaults\SpawnpointCommand;
 use pocketmine\command\defaults\StatusCommand;
 use pocketmine\command\defaults\StopCommand;
 use pocketmine\command\defaults\TeleportCommand;
-use pocketmine\command\defaults\TellCommand;
+//use pocketmine\command\defaults\TellCommand;
 use pocketmine\command\defaults\TimeCommand;
 use pocketmine\command\defaults\TimingsCommand;
 use pocketmine\command\defaults\VanillaCommand;
@@ -81,7 +81,7 @@ class SimpleCommandMap implements CommandMap{
 		$this->register("pocketmine", new SeedCommand("seed"));
 		$this->register("pocketmine", new HelpCommand("help"));
 		$this->register("pocketmine", new StopCommand("stop"));
-		$this->register("pocketmine", new TellCommand("tell"));
+//		$this->register("pocketmine", new TellCommand("tell"));
 		$this->register("pocketmine", new DefaultGamemodeCommand("defaultgamemode"));
 		$this->register("pocketmine", new BanCommand("ban"));
 		$this->register("pocketmine", new BanIpCommand("ban-ip"));
@@ -89,7 +89,7 @@ class SimpleCommandMap implements CommandMap{
 		$this->register("pocketmine", new PardonCommand("pardon"));
 		$this->register("pocketmine", new PardonIpCommand("pardon-ip"));
 		$this->register("pocketmine", new SayCommand("say"));
-		$this->register("pocketmine", new MeCommand("me"));
+//		$this->register("pocketmine", new MeCommand("me"));
 		$this->register("pocketmine", new ListCommand("list"));
 		$this->register("pocketmine", new DifficultyCommand("difficulty"));
 		$this->register("pocketmine", new KickCommand("kick"));
@@ -111,7 +111,7 @@ class SimpleCommandMap implements CommandMap{
 		$this->register("pocketmine", new TimingsCommand("timings"));
 		$this->register("pocketmine", new ReloadCommand("reload"));
 
-		if($this->server->getProperty("debug.commands", \false) === \true){
+		if($this->server->getProperty("debug.commands", false) === true){
 			$this->register("pocketmine", new StatusCommand("status"));
 		}
 	}
@@ -123,18 +123,18 @@ class SimpleCommandMap implements CommandMap{
 		}
 	}
 
-	public function register($fallbackPrefix, Command $command, $label = \null){
-		if($label === \null){
+	public function register($fallbackPrefix, Command $command, $label = null){
+		if($label === null){
 			$label = $command->getName();
 		}
-		$label = \strtolower(\trim($label));
-		$fallbackPrefix = \strtolower(\trim($fallbackPrefix));
+		$label = strtolower(trim($label));
+		$fallbackPrefix = strtolower(trim($fallbackPrefix));
 
-		$registered = $this->registerAlias($command, \false, $fallbackPrefix, $label);
+		$registered = $this->registerAlias($command, false, $fallbackPrefix, $label);
 
 		$aliases = $command->getAliases();
 		foreach($aliases as $index => $alias){
-			if(!$this->registerAlias($command, \true, $fallbackPrefix, $alias)){
+			if(!$this->registerAlias($command, true, $fallbackPrefix, $alias)){
 				unset($aliases[$index]);
 			}
 		}
@@ -149,14 +149,14 @@ class SimpleCommandMap implements CommandMap{
 		return $registered;
 	}
 
-	private function registerAlias(Command $command, $isAlias, $fallbackPrefix, $label){
+	public function registerAlias(Command $command, $isAlias, $fallbackPrefix, $label){
 		$this->knownCommands[$fallbackPrefix . ":" . $label] = $command;
 		if(($command instanceof VanillaCommand or $isAlias) and isset($this->knownCommands[$label])){
-			return \false;
+			return false;
 		}
 
-		if(isset($this->knownCommands[$label]) and $this->knownCommands[$label]->getLabel() !== \null and $this->knownCommands[$label]->getLabel() === $label){
-			return \false;
+		if(isset($this->knownCommands[$label]) and $this->knownCommands[$label]->getLabel() !== null and $this->knownCommands[$label]->getLabel() === $label){
+			return false;
 		}
 
 		if(!$isAlias){
@@ -165,21 +165,21 @@ class SimpleCommandMap implements CommandMap{
 
 		$this->knownCommands[$label] = $command;
 
-		return \true;
+		return true;
 	}
 
 	public function dispatch(CommandSender $sender, $commandLine){
-		$args = \explode(" ", $commandLine);
+		$args = explode(" ", $commandLine);
 
-		if(\count($args) === 0){
-			return \false;
+		if(count($args) === 0){
+			return false;
 		}
 
-		$sentCommandLabel = \strtolower(\array_shift($args));
+		$sentCommandLabel = strtolower(array_shift($args));
 		$target = $this->getCommand($sentCommandLabel);
 
-		if($target === \null){
-			return \false;
+		if($target === null){
+			return false;
 		}
 
 		$target->timings->startTiming();
@@ -194,7 +194,7 @@ class SimpleCommandMap implements CommandMap{
 		}
 		$target->timings->stopTiming();
 
-		return \true;
+		return true;
 	}
 
 	public function clearCommands(){
@@ -205,12 +205,19 @@ class SimpleCommandMap implements CommandMap{
 		$this->setDefaultCommands();
 	}
 
+	public function unregister(Command $command) {
+		unset($this->knownCommands[strtolower($command->getName())]);
+		foreach($command->getAliases() as $alias) {
+			unset($this->knownCommands[strtolower($alias)]);
+		}
+	}
+
 	public function getCommand($name){
 		if(isset($this->knownCommands[$name])){
 			return $this->knownCommands[$name];
 		}
 
-		return \null;
+		return null;
 	}
 
 	/**
@@ -228,7 +235,7 @@ class SimpleCommandMap implements CommandMap{
 		$values = $this->server->getCommandAliases();
 
 		foreach($values as $alias => $commandStrings){
-			if(\strpos($alias, ":") !== \false or \strpos($alias, " ") !== \false){
+			if(strpos($alias, ":") !== false or strpos($alias, " ") !== false){
 				$this->server->getLogger()->warning("Could not register alias " . $alias . " because it contains illegal characters");
 				continue;
 			}
@@ -237,11 +244,11 @@ class SimpleCommandMap implements CommandMap{
 
 			$bad = "";
 			foreach($commandStrings as $commandString){
-				$args = \explode(" ", $commandString);
+				$args = explode(" ", $commandString);
 				$command = $this->getCommand($args[0]);
 
-				if($command === \null){
-					if(\strlen($bad) > 0){
+				if($command === null){
+					if(strlen($bad) > 0){
 						$bad .= ", ";
 					}
 					$bad .= $commandString;
@@ -250,16 +257,16 @@ class SimpleCommandMap implements CommandMap{
 				}
 			}
 
-			if(\strlen($bad) > 0){
+			if(strlen($bad) > 0){
 				$this->server->getLogger()->warning("Could not register alias " . $alias . " because it contains commands that do not exist: " . $bad);
 				continue;
 			}
 
 			//These registered commands have absolute priority
-			if(\count($targets) > 0){
-				$this->knownCommands[\strtolower($alias)] = new FormattedCommandAlias(\strtolower($alias), $targets);
+			if(count($targets) > 0){
+				$this->knownCommands[strtolower($alias)] = new FormattedCommandAlias(strtolower($alias), $targets);
 			}else{
-				unset($this->knownCommands[\strtolower($alias)]);
+				unset($this->knownCommands[strtolower($alias)]);
 			}
 
 		}

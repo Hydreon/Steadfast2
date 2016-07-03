@@ -60,7 +60,7 @@ class ConsoleCommandSender implements CommandSender{
 	 *
 	 * @return \pocketmine\permission\PermissionAttachment
 	 */
-	public function addAttachment(Plugin $plugin, $name = \null, $value = \null){
+	public function addAttachment(Plugin $plugin, $name = null, $value = null){
 		return $this->perm->addAttachment($plugin, $name, $value);
 	}
 
@@ -88,7 +88,7 @@ class ConsoleCommandSender implements CommandSender{
 	 * @return bool
 	 */
 	public function isPlayer(){
-		return \false;
+		return false;
 	}
 
 	/**
@@ -102,7 +102,7 @@ class ConsoleCommandSender implements CommandSender{
 	 * @param string $message
 	 */
 	public function sendMessage($message){
-		foreach(\explode("\n", \trim($message)) as $line){
+		foreach(explode("\n", trim($message)) as $line){
 			MainLogger::getLogger()->info($line);
 		}
 	}
@@ -118,7 +118,7 @@ class ConsoleCommandSender implements CommandSender{
 	 * @return bool
 	 */
 	public function isOp(){
-		return \true;
+		return true;
 	}
 
 	/**

@@ -76,7 +76,7 @@ interface Plugin extends CommandExecutor{
 	 * @param string $filename
 	 * @param bool   $replace
 	 */
-	public function saveResource($filename, $replace = \false);
+	public function saveResource($filename, $replace = false);
 
 	/**
 	 * Returns all the resources incrusted in the plugin

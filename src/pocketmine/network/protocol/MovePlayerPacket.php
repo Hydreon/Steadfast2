@@ -25,12 +25,12 @@ namespace pocketmine\network\protocol;
 
 
 class MovePlayerPacket extends DataPacket{
+	const NETWORK_ID = Info::MOVE_PLAYER_PACKET;
+
 	const MODE_NORMAL = 0;
 	const MODE_RESET = 1;
 	const MODE_ROTATION = 2;
 
-	public static $pool = [];
-	public static $next = 0;
 	public $eid;
 	public $x;
 	public $y;
@@ -40,10 +40,6 @@ class MovePlayerPacket extends DataPacket{
 	public $pitch;
 	public $mode = self::MODE_NORMAL;
 	public $onGround;
-
-	public function pid(){
-		return Info::MOVE_PLAYER_PACKET;
-	}
 
 	public function clean(){
 		$this->teleport = false;

@@ -28,10 +28,10 @@ class SendUsageTask extends AsyncTask{
 
 	public function __construct($endpoint, array $data){
 		$this->endpoint = $endpoint;
-		$this->data = \serialize($data);
+		$this->data = serialize($data);
 	}
 
 	public function onRun() {
-		$this->postURL($this->endpoint, \unserialize($this->data));
+		$this->postURL($this->endpoint, unserialize($this->data));
 	}
 }

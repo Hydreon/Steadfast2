@@ -27,14 +27,18 @@ use pocketmine\Player;
  * Called when a player leaves the server
  */
 class PlayerQuitEvent extends PlayerEvent{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	/** @var string */
 	protected $quitMessage;
+	protected $quitReason;
+	protected $quitLog;
 
-	public function __construct(Player $player, $quitMessage){
+	public function __construct(Player $player, $quitMessage, $quitReason, $quitLog = ""){
 		$this->player = $player;
 		$this->quitMessage = $quitMessage;
+		$this->quitReason = $quitReason;
+		$this->quitLog = $quitLog;
 	}
 
 	public function setQuitMessage($quitMessage){
@@ -44,5 +48,14 @@ class PlayerQuitEvent extends PlayerEvent{
 	public function getQuitMessage(){
 		return $this->quitMessage;
 	}
+	
+	public function getQuitReason(){
+		return $this->quitReason;
+	}
+	
+	public function getQuitLog(){
+		return $this->quitLog;
+	}
+	
 
 }

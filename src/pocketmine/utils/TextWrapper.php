@@ -45,7 +45,7 @@ abstract class TextWrapper{
 
 	public static function init(){
 		self::$allowedCharsArray = [];
-		$len = \strlen(self::$allowedChars);
+		$len = strlen(self::$allowedChars);
 		for($i = 0; $i < $len; ++$i){
 			self::$allowedCharsArray[self::$allowedChars{$i}] = self::$characterWidths[$i];
 		}
@@ -60,7 +60,7 @@ abstract class TextWrapper{
 	 */
 	public static function wrap($text){
 		$result = "";
-		$len = \strlen($text);
+		$len = strlen($text);
 		$lineWidth = 0;
 		$lineLength = 0;
 

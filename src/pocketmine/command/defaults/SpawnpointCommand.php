@@ -40,32 +40,32 @@ class SpawnpointCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		$target = \null;
+		$target = null;
 
-		if(\count($args) === 0){
+		if(count($args) === 0){
 			if($sender instanceof Player){
 				$target = $sender;
 			}else{
 				$sender->sendMessage(TextFormat::RED . "Please provide a player!");
 
-				return \true;
+				return true;
 			}
 		}else{
 			$target = $sender->getServer()->getPlayer($args[0]);
-			if($target === \null){
+			if($target === null){
 				$sender->sendMessage(TextFormat::RED . "Can't find player " . $args[0]);
 
-				return \true;
+				return true;
 			}
 		}
 
 		$level = $target->getLevel();
 
-		if(\count($args) === 4){
-			if($level !== \null){
+		if(count($args) === 4){
+			if($level !== null){
 				$pos = $sender instanceof Player ? $sender->getPosition() : $level->getSpawnLocation();
 				$x = (int) $this->getRelativeDouble($pos->x, $sender, $args[1]);
 				$y = $this->getRelativeDouble($pos->y, $sender, $args[2], 0, 128);
@@ -73,24 +73,24 @@ class SpawnpointCommand extends VanillaCommand{
 				$target->setSpawn(new Position($x, $y, $z, $level));
 				Command::broadcastCommandMessage($sender, "Set " . $target->getDisplayName() . "'s spawnpoint to " . $x . ", " . $y . ", " . $z);
 
-				return \true;
+				return true;
 			}
-		}elseif(\count($args) <= 1){
+		}elseif(count($args) <= 1){
 			if($sender instanceof Player){
 				$pos = new Position((int) $sender->x, (int) $sender->y, (int) $sender->z, $sender->getLevel());
 				$target->setSpawn($pos);
 				Command::broadcastCommandMessage($sender, "Set " . $target->getDisplayName() . "'s spawnpoint to " . $pos->x . ", " . $pos->y . ", " . $pos->z);
 
-				return \true;
+				return true;
 			}else{
 				$sender->sendMessage(TextFormat::RED . "Please provide a player!");
 
-				return \true;
+				return true;
 			}
 		}
 
 		$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-		return \true;
+		return true;
 	}
 }

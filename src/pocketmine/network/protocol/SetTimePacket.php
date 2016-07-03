@@ -21,29 +21,16 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 use pocketmine\level\Level;
 
 class SetTimePacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::SET_TIME_PACKET;
 
 	public $time;
-	public $started = \true;
-
-	public function pid(){
-		return Info::SET_TIME_PACKET;
-	}
+	public $started = true;
 
 	public function decode(){
 
@@ -52,7 +39,7 @@ class SetTimePacket extends DataPacket{
 	public function encode(){
 		$this->reset();
 		$this->putInt((int) (($this->time / Level::TIME_FULL) * 19200));
-		$this->putByte($this->started == true ? 0x80 : 0x00);
+		$this->putByte($this->started ? 1 : 0);
 	}
 
 }

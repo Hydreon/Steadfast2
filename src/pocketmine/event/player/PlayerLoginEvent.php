@@ -28,17 +28,14 @@ use pocketmine\Player;
  * Called when a player joins, after things have been correctly set up (you can change anything now)
  */
 class PlayerLoginEvent extends PlayerEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	/** @var string */
 	protected $kickMessage;
 
-	protected $sendChunks;
-
 	public function __construct(Player $player, $kickMessage){
 		$this->player = $player;
 		$this->kickMessage = $kickMessage;
-		$this->sendChunks = true;
 	}
 
 	public function setKickMessage($kickMessage){
@@ -47,14 +44,6 @@ class PlayerLoginEvent extends PlayerEvent implements Cancellable{
 
 	public function getKickMessage(){
 		return $this->kickMessage;
-	}
-
-	public function setSendChunks($sendChunks) {
-		$this->sendChunks = $sendChunks;
-	}
-
-	public function getSendChunks() {
-		return $this->sendChunks;
 	}
 
 }

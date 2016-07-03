@@ -38,7 +38,7 @@ class ReloadCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
 		Command::broadcastCommandMessage($sender, TextFormat::YELLOW . "Reloading server...");
@@ -46,6 +46,6 @@ class ReloadCommand extends VanillaCommand{
 		$sender->getServer()->reload();
 		Command::broadcastCommandMessage($sender, TextFormat::GOLD . "Reload complete.");
 
-		return \true;
+		return true;
 	}
 }

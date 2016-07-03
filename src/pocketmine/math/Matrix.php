@@ -44,8 +44,8 @@ class Matrix implements \ArrayAccess{
 	}
 
 	public function __construct($rows, $columns, array $set = []){
-		$this->rows = \max(1, (int) $rows);
-		$this->columns = \max(1, (int) $columns);
+		$this->rows = max(1, (int) $rows);
+		$this->columns = max(1, (int) $columns);
 		$this->set($set);
 	}
 
@@ -68,16 +68,16 @@ class Matrix implements \ArrayAccess{
 
 	public function setElement($row, $column, $value){
 		if($row > $this->rows or $row < 0 or $column > $this->columns or $column < 0){
-			return \false;
+			return false;
 		}
 		$this->matrix[(int) $row][(int) $column] = $value;
 
-		return \true;
+		return true;
 	}
 
 	public function getElement($row, $column){
 		if($row > $this->rows or $row < 0 or $column > $this->columns or $column < 0){
-			return \false;
+			return false;
 		}
 
 		return $this->matrix[(int) $row][(int) $column];
@@ -89,7 +89,7 @@ class Matrix implements \ArrayAccess{
 
 	public function add(Matrix $matrix){
 		if($this->rows !== $matrix->getRows() or $this->columns !== $matrix->getColumns()){
-			return \false;
+			return false;
 		}
 		$result = new Matrix($this->rows, $this->columns);
 		for($r = 0; $r < $this->rows; ++$r){
@@ -103,7 +103,7 @@ class Matrix implements \ArrayAccess{
 
 	public function substract(Matrix $matrix){
 		if($this->rows !== $matrix->getRows() or $this->columns !== $matrix->getColumns()){
-			return \false;
+			return false;
 		}
 		$result = clone $this;
 		for($r = 0; $r < $this->rows; ++$r){
@@ -152,7 +152,7 @@ class Matrix implements \ArrayAccess{
 	//Naive Matrix product, O(n^3)
 	public function product(Matrix $matrix){
 		if($this->columns !== $matrix->getRows()){
-			return \false;
+			return false;
 		}
 		$c = $matrix->getColumns();
 		$result = new Matrix($this->rows, $c);
@@ -172,8 +172,8 @@ class Matrix implements \ArrayAccess{
 
 	//Computation of the determinant of 2x2 and 3x3 matrices
 	public function determinant(){
-		if($this->isSquare() !== \true){
-			return \false;
+		if($this->isSquare() !== true){
+			return false;
 		}
 		switch($this->rows){
 			case 1:
@@ -184,17 +184,17 @@ class Matrix implements \ArrayAccess{
 				return $this->matrix[0][0] * $this->matrix[1][1] * $this->matrix[2][2] + $this->matrix[0][1] * $this->matrix[1][2] * $this->matrix[2][0] + $this->matrix[0][2] * $this->matrix[1][0] * $this->matrix[2][1] - $this->matrix[2][0] * $this->matrix[1][1] * $this->matrix[0][2] - $this->matrix[2][1] * $this->matrix[1][2] * $this->matrix[0][0] - $this->matrix[2][2] * $this->matrix[1][0] * $this->matrix[0][1];
 		}
 
-		return \false;
+		return false;
 	}
 
 
 	public function __toString(){
 		$s = "";
 		for($r = 0; $r < $this->rows; ++$r){
-			$s .= \implode(",", $this->matrix[$r]) . ";";
+			$s .= implode(",", $this->matrix[$r]) . ";";
 		}
 
-		return "Matrix({$this->rows}x{$this->columns};" . \substr($s, 0, -1) . ")";
+		return "Matrix({$this->rows}x{$this->columns};" . substr($s, 0, -1) . ")";
 	}
 
 }

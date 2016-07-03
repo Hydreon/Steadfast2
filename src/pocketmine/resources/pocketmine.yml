@@ -17,23 +17,12 @@ settings:
  #Number of AsyncTask workers
  #WARNING: This will increase global memory usage, but it won't be listed in the total.
  async-workers: 1
- #Save playerdata
- save-playerdata: true
 
 debug:
  #If > 1, it will show debug messages in the console
  level: 1
  #Enables /status
  commands: true
-
-# When the server is full, where should we send players?
-forwarding:
- enabled: false
-
- # Can be a domain or a valid IPv4 address (x.x.x.x)
- ip: ""
-
- port: 19132
 
 level-settings:
  #The default format that levels will use when created
@@ -91,21 +80,9 @@ auto-report:
  send-phpinfo: false
  host: crash.pocketmine.net
 
-auto-updater:
- enabled: false
- on-update:
-  warn-console: false
-  warn-ops: false
- host: www.pocketmine.net
-
 aliases:
  #Examples:
  #showtheversion: version
  #savestop: [save-all, stop]
 
 worlds:
- #These settings will override the generator set in server.properties and allows loading multiple levels
- #Example:
- #world:
- # seed: 404
- # generator: FLAT:2;7,59x1,3x3,2;1;decoration(treecount=80 grasscount=45)

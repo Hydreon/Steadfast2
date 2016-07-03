@@ -32,7 +32,7 @@ abstract class Spawnable extends Tile{
 
 	public function spawnTo(Player $player){
 		if($this->closed){
-			return \false;
+			return false;
 		}
 
 		$nbt = new NBT(NBT::LITTLE_ENDIAN);
@@ -42,11 +42,14 @@ abstract class Spawnable extends Tile{
 		$pk->y = $this->y;
 		$pk->z = $this->z;
 		$pk->namedtag = $nbt->write();
-		$player->dataPacket($pk->setChannel(Network::CHANNEL_WORLD_EVENTS));
+		$player->dataPacket($pk);
 
-		return \true;
+		return true;
 	}
 
+	/**
+	 * @return Compound
+	 */
 	public abstract function getSpawnCompound();
 
 	public function __construct(FullChunk $chunk, Compound $nbt){
@@ -60,7 +63,7 @@ abstract class Spawnable extends Tile{
 		}
 
 		foreach($this->getLevel()->getUsingChunk($this->chunk->getX(), $this->chunk->getZ()) as $player){
-			if($player->spawned === \true){
+			if($player->spawned === true){
 				$this->spawnTo($player);
 			}
 		}

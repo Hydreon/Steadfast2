@@ -38,7 +38,7 @@ class Carrot extends Crops{
 	public function getDrops(Item $item){
 		$drops = [];
 		if($this->meta >= 0x07){
-			$drops[] = [Item::CARROT, 0, \mt_rand(1, 4)];
+			$drops[] = [Item::CARROT, 0, mt_rand(1, 4)];
 		}else{
 			$drops[] = [Item::CARROT, 0, 1];
 		}

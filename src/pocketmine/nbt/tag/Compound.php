@@ -23,21 +23,7 @@ namespace pocketmine\nbt\tag;
 
 use pocketmine\nbt\NBT;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#include <rules/NBT.h>
 
 class Compound extends NamedTag implements \ArrayAccess{
 
@@ -52,8 +38,19 @@ class Compound extends NamedTag implements \ArrayAccess{
 		}
 	}
 
+	public function getCount(){
+		$count = 0;
+		foreach($this as $tag){
+			if($tag instanceof Tag){
+				++$count;
+			}
+		}
+
+		return $count;
+	}
+
 	public function offsetExists($offset){
-		return isset($this->{$offset});
+		return isset($this->{$offset}) and $this->{$offset} instanceof Tag;
 	}
 
 	public function offsetGet($offset){
@@ -65,7 +62,7 @@ class Compound extends NamedTag implements \ArrayAccess{
 			}
 		}
 
-		return \null;
+		return null;
 	}
 
 	public function offsetSet($offset, $value){
@@ -101,5 +98,15 @@ class Compound extends NamedTag implements \ArrayAccess{
 			}
 		}
 		$nbt->writeTag(new End);
+	}
+
+	public function __toString(){
+		$str = get_class($this) . "{\n";
+		foreach($this as $tag){
+			if($tag instanceof Tag){
+				$str .= get_class($tag) . ":" . $tag->__toString() . "\n";
+			}
+		}
+		return $str . "}";
 	}
 }

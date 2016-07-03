@@ -23,17 +23,18 @@ namespace pocketmine\level\format\mcregion;
 
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\format\generic\BaseLevelProvider;
-use pocketmine\level\generator\Generator;
 use pocketmine\level\Level;
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\Byte;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Int;
-use pocketmine\nbt\tag\Long;
-use pocketmine\nbt\tag\String;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\LongTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\tile\Spawnable;
-use pocketmine\utils\Binary;
+
 use pocketmine\utils\ChunkException;
+use pocketmine\tile\Sign;
+use pocketmine\tile\Tile;
 
 class McRegion extends BaseLevelProvider{
 
@@ -52,17 +53,17 @@ class McRegion extends BaseLevelProvider{
 	}
 
 	public static function usesChunkSection(){
-		return \false;
+		return false;
 	}
 
 	public static function isValid($path){
-		$isValid = (\file_exists($path . "/level.dat") and \is_dir($path . "/region/"));
+		$isValid = (file_exists($path . "/level.dat") and is_dir($path . "/region/"));
 
 		if($isValid){
-			$files = \glob($path . "/region/*.mc*");
+			$files = glob($path . "/region/*.mc*");
 			foreach($files as $f){
-				if(\strpos($f, ".mca") !== \false){ //Anvil
-					$isValid = \false;
+				if(strpos($f, ".mca") !== false){ //Anvil
+					$isValid = false;
 					break;
 				}
 			}
@@ -71,32 +72,32 @@ class McRegion extends BaseLevelProvider{
 		return $isValid;
 	}
 
-	public static function generate($path, $name, $seed, $generator, array $options = []){
-		if(!\file_exists($path)){
-			\mkdir($path, 0777, \true);
+	public static function generate($path, $name, $seed, array $options = []){
+		if(!file_exists($path)){
+			mkdir($path, 0777, true);
 		}
 
-		if(!\file_exists($path . "/region")){
-			\mkdir($path . "/region", 0777);
+		if(!file_exists($path . "/region")){
+			mkdir($path . "/region", 0777);
 		}
 		//TODO, add extra details
 		$levelData = new Compound("Data", [
-			"hardcore" => new Byte("hardcore", 0),
-			"initialized" => new Byte("initialized", 1),
-			"GameType" => new Int("GameType", 0),
-			"generatorVersion" => new Int("generatorVersion", 1), //2 in MCPE
-			"SpawnX" => new Int("SpawnX", 128),
-			"SpawnY" => new Int("SpawnY", 70),
-			"SpawnZ" => new Int("SpawnZ", 128),
-			"version" => new Int("version", 19133),
-			"DayTime" => new Int("DayTime", 0),
-			"LastPlayed" => new Long("LastPlayed", \microtime(\true) * 1000),
-			"RandomSeed" => new Long("RandomSeed", $seed),
-			"SizeOnDisk" => new Long("SizeOnDisk", 0),
-			"Time" => new Long("Time", 0),
-			"generatorName" => new String("generatorName", Generator::getGeneratorName($generator)),
-			"generatorOptions" => new String("generatorOptions", isset($options["preset"]) ? $options["preset"] : ""),
-			"LevelName" => new String("LevelName", $name),
+			"hardcore" => new ByteTag("hardcore", 0),
+			"initialized" => new ByteTag("initialized", 1),
+			"GameType" => new IntTag("GameType", 0),
+			"generatorVersion" => new IntTag("generatorVersion", 1), //2 in MCPE
+			"SpawnX" => new IntTag("SpawnX", 0),
+			"SpawnY" => new IntTag("SpawnY", 10),
+			"SpawnZ" => new IntTag("SpawnZ", 0),
+			"version" => new IntTag("version", 19133),
+			"DayTime" => new IntTag("DayTime", 0),
+			"LastPlayed" => new LongTag("LastPlayed", microtime(true) * 1000),
+			"RandomSeed" => new LongTag("RandomSeed", $seed),
+			"SizeOnDisk" => new LongTag("SizeOnDisk", 0),
+			"Time" => new LongTag("Time", 0),
+			"generatorName" => new StringTag("generatorName", "FLAT"),
+			"generatorOptions" => new StringTag("generatorOptions", isset($options["preset"]) ? $options["preset"] : ""),
+			"LevelName" => new StringTag("LevelName", $name),
 			"GameRules" => new Compound("GameRules", [])
 		]);
 		$nbt = new NBT(NBT::BIG_ENDIAN);
@@ -104,7 +105,7 @@ class McRegion extends BaseLevelProvider{
 			"Data" => $levelData
 		]));
 		$buffer = $nbt->writeCompressed();
-		\file_put_contents($path . "level.dat", $buffer);
+		file_put_contents($path . "level.dat", $buffer);
 	}
 
 	public static function getRegionIndex($chunkX, $chunkZ, &$x, &$z){
@@ -112,50 +113,74 @@ class McRegion extends BaseLevelProvider{
 		$z = $chunkZ >> 5;
 	}
 
-	public function requestChunkTask($x, $z){
-		$chunk = $this->getChunk($x, $z, \false);
+	private function updateSignText($text, $lang) {
+		if(empty($text)) {
+			return '';
+		}
+		return str_replace($lang['key'], $lang['val'], $text);
+		
+	}
+	
+	
+	private function getSignSpawnCompound($sign, $lang){
+		return new Compound("", [
+			new StringTag("id", Tile::SIGN),
+			new StringTag("Text1", $this->updateSignText($sign->namedtag['Text1'], $lang)),
+			new StringTag("Text2", $this->updateSignText($sign->namedtag['Text2'], $lang)),
+			new StringTag("Text3", $this->updateSignText($sign->namedtag['Text3'], $lang)),
+			new StringTag("Text4", $this->updateSignText($sign->namedtag['Text4'], $lang)),
+			new IntTag("x", (int) $sign->x),
+			new IntTag("y", (int) $sign->y),
+			new IntTag("z", (int) $sign->z)
+		]);
+	}
+	
+	
+	public function requestChunkTask($x, $z){	
+		$chunk = $this->getChunk($x, $z, false);
 		if(!($chunk instanceof Chunk)){
 			throw new ChunkException("Invalid Chunk sent");
 		}
 
+		$signTiles = [];
+		$translation = $this->getServer()->getSignTranslation();
+		foreach ($translation as $lang => $data) {
+			$signTiles[$lang] = '';
+		}
+		
 		$tiles = "";
-		$nbt = new NBT(NBT::LITTLE_ENDIAN);
+		$nbt = new NBT(NBT::LITTLE_ENDIAN);		
 		foreach($chunk->getTiles() as $tile){
+			if($tile instanceof Sign) {				
+				foreach ($translation as $lang => $data) {
+					$nbt->setData($this->getSignSpawnCompound($tile, $data));
+					$signTiles[$lang] .= $nbt->write();			
+				}
+				
+				continue;
+			}	
 			if($tile instanceof Spawnable){
 				$nbt->setData($tile->getSpawnCompound());
 				$tiles .= $nbt->write();
 			}
 		}
-
-		$heightmap = \pack("C*", ...$chunk->getHeightMapArray());
-		$biomeColors = \pack("N*", ...$chunk->getBiomeColorArray());
-
-		$ordered = $chunk->getBlockIdArray() .
-			$chunk->getBlockDataArray() .
-			$chunk->getBlockSkyLightArray() .
-			$chunk->getBlockLightArray() .
-			$heightmap .
-			$biomeColors .
-			$tiles;
-
-		$this->getLevel()->chunkRequestCallback($x, $z, $ordered);
-
-		return \null;
+		
+		$data = array();
+		$data['chunkX'] = $x;
+		$data['chunkZ'] = $z;
+		$data['tiles'] = $tiles;
+		$data['signTiles'] = $signTiles;
+		$data['chunk'] = $chunk->toFastBinary();
+		
+		$this->getLevel()->chunkMaker->pushMainToThreadPacket(serialize($data));
+		return null;
 	}
 
 	public function unloadChunks(){
 		foreach($this->chunks as $chunk){
-			$this->unloadChunk($chunk->getX(), $chunk->getZ(), \false);
+			$this->unloadChunk($chunk->getX(), $chunk->getZ(), false);
 		}
 		$this->chunks = [];
-	}
-
-	public function getGenerator(){
-		return $this->levelData["generatorName"];
-	}
-
-	public function getGeneratorOptions(){
-		return ["preset" => $this->levelData["generatorOptions"]];
 	}
 
 	public function getLoadedChunks(){
@@ -163,7 +188,7 @@ class McRegion extends BaseLevelProvider{
 	}
 
 	public function isChunkLoaded($x, $z){
-		return isset($this->chunks[(\PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z))]);
+		return isset($this->chunks[Level::chunkHash($x, $z)]);
 	}
 
 	public function saveChunks(){
@@ -173,7 +198,7 @@ class McRegion extends BaseLevelProvider{
 	}
 
 	public function doGarbageCollection(){
-		$limit = \time() - 300;
+		$limit = time() - 300;
 		foreach($this->regions as $index => $region){
 			if($region->lastUsed <= $limit){
 				$region->close();
@@ -182,44 +207,59 @@ class McRegion extends BaseLevelProvider{
 		}
 	}
 
-	public function loadChunk($chunkX, $chunkZ, $create = \false){
-		$index = (\PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ));
+	public function loadChunk($chunkX, $chunkZ, $create = false){
+		$index = Level::chunkHash($chunkX, $chunkZ);
 		if(isset($this->chunks[$index])){
-			return \true;
+			return true;
 		}
-		$regionX = $regionZ = \null;
+		$regionX = $regionZ = null;
 		self::getRegionIndex($chunkX, $chunkZ, $regionX, $regionZ);
 		$this->loadRegion($regionX, $regionZ);
 		$this->level->timings->syncChunkLoadDataTimer->startTiming();
-		$chunk = $this->getRegion($regionX, $regionZ)->readChunk($chunkX - $regionX * 32, $chunkZ - $regionZ * 32, $create); //generate empty chunk if not loaded
+		$chunk = $this->getRegion($regionX, $regionZ)->readChunk($chunkX - $regionX * 32, $chunkZ - $regionZ * 32);
+		if($chunk === null and $create){
+			$chunk = $this->getEmptyChunk($chunkX, $chunkZ);
+		}
 		$this->level->timings->syncChunkLoadDataTimer->stopTiming();
 
-		if($chunk instanceof FullChunk){
+		if($chunk !== null){
 			$this->chunks[$index] = $chunk;
-			return \true;
+			return true;
 		}else{
-			return \false;
+			return false;
 		}
 	}
+	
+	public function getGenerator(){
+		return $this->levelData["generatorName"];
+	}
 
-	public function unloadChunk($x, $z, $safe = \true){
-		$chunk = isset($this->chunks[$index = (\PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z))]) ? $this->chunks[$index] : \null;
-		if($chunk instanceof FullChunk and $chunk->unload(\false, $safe)){
+	public function getGeneratorOptions(){
+		return ["preset" => $this->levelData["generatorOptions"]];
+	}
+
+	public function getEmptyChunk($chunkX, $chunkZ){
+		return Chunk::getEmptyChunk($chunkX, $chunkZ, $this);
+	}
+
+	public function unloadChunk($x, $z, $safe = true){
+		$chunk = isset($this->chunks[$index = Level::chunkHash($x, $z)]) ? $this->chunks[$index] : null;
+		if($chunk instanceof FullChunk and $chunk->unload(false, $safe)){
 			unset($this->chunks[$index]);
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 	public function saveChunk($x, $z){
 		if($this->isChunkLoaded($x, $z)){
 			$this->getRegion($x >> 5, $z >> 5)->writeChunk($this->getChunk($x, $z));
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**
@@ -229,7 +269,7 @@ class McRegion extends BaseLevelProvider{
 	 * @return RegionLoader
 	 */
 	protected function getRegion($x, $z){
-		return isset($this->regions[$index = (\PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z))]) ? $this->regions[$index] : \null;
+		return isset($this->regions[$index = Level::chunkHash($x, $z)]) ? $this->regions[$index] : null;
 	}
 
 	/**
@@ -239,14 +279,14 @@ class McRegion extends BaseLevelProvider{
 	 *
 	 * @return Chunk
 	 */
-	public function getChunk($chunkX, $chunkZ, $create = \false){
-		$index = (\PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ));
+	public function getChunk($chunkX, $chunkZ, $create = false){
+		$index = Level::chunkHash($chunkX, $chunkZ);
 		if(isset($this->chunks[$index])){
 			return $this->chunks[$index];
 		}else{
 			$this->loadChunk($chunkX, $chunkZ, $create);
 
-			return isset($this->chunks[$index]) ? $this->chunks[$index] : \null;
+			return isset($this->chunks[$index]) ? $this->chunks[$index] : null;
 		}
 	}
 
@@ -264,39 +304,38 @@ class McRegion extends BaseLevelProvider{
 		$chunk->setZ($chunkZ);
 
 
-		if(isset($this->chunks[$index = (\PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ))]) and $this->chunks[$index] !== $chunk){
-			$this->unloadChunk($chunkX, $chunkZ, \false);
+		if(isset($this->chunks[$index = Level::chunkHash($chunkX, $chunkZ)]) and $this->chunks[$index] !== $chunk){
+			$this->unloadChunk($chunkX, $chunkZ, false);
 		}
 
 		$this->chunks[$index] = $chunk;
 	}
 
 	public static function createChunkSection($Y){
-		return \null;
+		return null;
 	}
 
 	public function isChunkGenerated($chunkX, $chunkZ){
-		if(($region = $this->getRegion($chunkX >> 5, $chunkZ >> 5)) !== \null){
-			return $region->chunkExists($chunkX - $region->getX() * 32, $chunkZ - $region->getZ() * 32) and $this->getChunk($chunkX - $region->getX() * 32, $chunkZ - $region->getZ() * 32, \true)->isGenerated();
+		if(($region = $this->getRegion($chunkX >> 5, $chunkZ >> 5)) !== null){
+			return $region->chunkExists($chunkX - $region->getX() * 32, $chunkZ - $region->getZ() * 32) and $this->getChunk($chunkX - $region->getX() * 32, $chunkZ - $region->getZ() * 32, true)->isGenerated();
 		}
 
-		return \false;
+		return false;
 	}
 
 	public function isChunkPopulated($chunkX, $chunkZ){
 		$chunk = $this->getChunk($chunkX, $chunkZ);
-		if($chunk instanceof FullChunk){
+		if($chunk !== null){
 			return $chunk->isPopulated();
 		}else{
-			return \false;
+			return false;
 		}
 	}
 
 	protected function loadRegion($x, $z){
-		if(!isset($this->regions[$index = (\PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z))])){
+		if(!isset($this->regions[$index = Level::chunkHash($x, $z)])){
 			$this->regions[$index] = new RegionLoader($this, $x, $z);
 		}
-		return \true;
 	}
 
 	public function close(){
@@ -305,6 +344,6 @@ class McRegion extends BaseLevelProvider{
 			$region->close();
 			unset($this->regions[$index]);
 		}
-		$this->level = \null;
+		$this->level = null;
 	}
 }

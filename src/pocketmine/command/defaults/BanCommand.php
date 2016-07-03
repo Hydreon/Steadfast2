@@ -39,19 +39,19 @@ class BanCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) === 0){
+		if(count($args) === 0){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \false;
+			return false;
 		}
 
-		$name = \array_shift($args);
-		$reason = \implode(" ", $args);
+		$name = array_shift($args);
+		$reason = implode(" ", $args);
 
-		$sender->getServer()->getNameBans()->addBan($name, $reason, \null, $sender->getName());
+		$sender->getServer()->getNameBans()->addBan($name, $reason, null, $sender->getName());
 
 		if(($player = $sender->getServer()->getPlayerExact($name)) instanceof Player){
 			$player->kick("Banned by admin.");
@@ -59,6 +59,6 @@ class BanCommand extends VanillaCommand{
 
 		Command::broadcastCommandMessage($sender, "Banned player " . $name);
 
-		return \true;
+		return true;
 	}
 }

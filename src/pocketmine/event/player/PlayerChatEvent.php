@@ -29,7 +29,7 @@ use pocketmine\Server;
  * Called when a player chats something
  */
 class PlayerChatEvent extends PlayerEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	/** @var string */
 	protected $message;
@@ -42,11 +42,11 @@ class PlayerChatEvent extends PlayerEvent implements Cancellable{
 	 */
 	protected $recipients = [];
 
-	public function __construct(Player $player, $message, $format = "<%s> %s", array $recipients = \null){
+	public function __construct(Player $player, $message, $format = "<%s> %s", array $recipients = null){
 		$this->player = $player;
 		$this->message = $message;
 		$this->format = $format;
-		if($recipients === \null){
+		if($recipients === null){
 			$this->recipients = Server::getInstance()->getPluginManager()->getPermissionSubscriptions(Server::BROADCAST_CHANNEL_USERS);
 		}else{
 			$this->recipients = $recipients;

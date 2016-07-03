@@ -34,7 +34,7 @@ class Location extends Position{
 	 * @param float $pitch
 	 * @param Level $level
 	 */
-	public function __construct($x = 0, $y = 0, $z = 0, $yaw = 0.0, $pitch = 0.0, Level $level = \null){
+	public function __construct($x = 0, $y = 0, $z = 0, $yaw = 0.0, $pitch = 0.0, Level $level = null){
 		$this->x = $x;
 		$this->y = $y;
 		$this->z = $z;

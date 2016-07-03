@@ -26,7 +26,7 @@ use pocketmine\Server;
 use pocketmine\utils\Binary;
 
 class QueryRegenerateEvent extends ServerEvent{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	const GAME_ID = "MINECRAFTPE";
 
@@ -54,11 +54,11 @@ class QueryRegenerateEvent extends ServerEvent{
 	public function __construct(Server $server, $timeout = 5){
 		$this->timeout = $timeout;
 		$this->serverName = $server->getServerName();
-		$this->listPlugins = $server->getProperty("settings.query-plugins", \true);
+		$this->listPlugins = $server->getProperty("settings.query-plugins", true);
 		$this->plugins = $server->getPluginManager()->getPlugins();
 		$this->players = [];
 		foreach($server->getOnlinePlayers() as $player){
-			if($player->getName() != "" and $player->isConnected()){
+			if($player->isOnline()){
 				$this->players[] = $player;
 			}
 		}
@@ -66,8 +66,8 @@ class QueryRegenerateEvent extends ServerEvent{
 		$this->gametype = ($server->getGamemode() & 0x01) === 0 ? "SMP" : "CMP";
 		$this->version = $server->getVersion();
 		$this->server_engine = $server->getName() . " " . $server->getPocketMineVersion();
-		$this->map = $server->getDefaultLevel() === \null ? "unknown" : $server->getDefaultLevel()->getName();
-		$this->numPlayers = \count($this->players);
+		$this->map = $server->getDefaultLevel() === null ? "unknown" : $server->getDefaultLevel()->getName();
+		$this->numPlayers = count($this->players);
 		$this->maxPlayers = $server->getMaxPlayers();
 		$this->whitelist = $server->hasWhitelist() ? "on" : "off";
 		$this->port = $server->getPort();
@@ -173,17 +173,17 @@ class QueryRegenerateEvent extends ServerEvent{
 		$query = "";
 
 		$plist = $this->server_engine;
-		if(\count($this->plugins) > 0 and $this->listPlugins){
+		if(count($this->plugins) > 0 and $this->listPlugins){
 			$plist .= ":";
 			foreach($this->plugins as $p){
 				$d = $p->getDescription();
-				$plist .= " " . \str_replace([";", ":", " "], ["", "", "_"], $d->getName()) . " " . \str_replace([";", ":", " "], ["", "", "_"], $d->getVersion()) . ";";
+				$plist .= " " . str_replace([";", ":", " "], ["", "", "_"], $d->getName()) . " " . str_replace([";", ":", " "], ["", "", "_"], $d->getVersion()) . ";";
 			}
-			$plist = \substr($plist, 0, -1);
+			$plist = substr($plist, 0, -1);
 		}
 
 		$KVdata = [
-			"splitnum" => \chr(128),
+			"splitnum" => chr(128),
 			"hostname" => $this->serverName,
 			"gametype" => $this->gametype,
 			"game_id" => self::GAME_ID,
@@ -216,7 +216,7 @@ class QueryRegenerateEvent extends ServerEvent{
 	}
 
 	public function getShortQuery(){
-		return $this->serverName . "\x00" . $this->gametype . "\x00" . $this->map . "\x00" . $this->numPlayers . "\x00" . $this->maxPlayers . "\x00" . \pack("v", $this->port) . $this->ip . "\x00";
+		return $this->serverName . "\x00" . $this->gametype . "\x00" . $this->map . "\x00" . $this->numPlayers . "\x00" . $this->maxPlayers . "\x00" . Binary::writeLShort($this->port) . $this->ip . "\x00";
 	}
 
 }

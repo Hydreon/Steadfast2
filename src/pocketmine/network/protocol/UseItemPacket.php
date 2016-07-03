@@ -21,28 +21,17 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 class UseItemPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::USE_ITEM_PACKET;
 
 	public $x;
 	public $y;
 	public $z;
 	public $face;
 	public $item;
-	public $meta;
-	public $eid;
 	public $fx;
 	public $fy;
 	public $fz;
@@ -50,28 +39,29 @@ class UseItemPacket extends DataPacket{
 	public $posY;
 	public $posZ;
 
-	public function pid(){
-		return Info::USE_ITEM_PACKET;
-	}
-
 	public function decode(){
 		$this->x = $this->getInt();
 		$this->y = $this->getInt();
 		$this->z = $this->getInt();
 		$this->face = $this->getByte();
-		$this->item = $this->getShort();
-		$this->meta = $this->getShort();
-		$this->eid = $this->getLong();
 		$this->fx = $this->getFloat();
 		$this->fy = $this->getFloat();
 		$this->fz = $this->getFloat();
 		$this->posX = $this->getFloat();
 		$this->posY = $this->getFloat();
 		$this->posZ = $this->getFloat();
+		//$this->item = $this->getSlot(); //hack for 0.14.3
 	}
 
 	public function encode(){
 
 	}
 
+	
+	public function decodeAddational($protocol) { //hack for 0.14.3 TODO15
+		if($protocol >= 70) {
+			$this->getInt();
+		}
+		$this->item = $this->getSlot();
+	}
 }

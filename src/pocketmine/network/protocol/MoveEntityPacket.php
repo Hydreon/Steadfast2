@@ -21,28 +21,21 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 class MoveEntityPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::MOVE_ENTITY_PACKET;
 
 
 	// eid, x, y, z, yaw, pitch
 	/** @var array[] */
 	public $entities = [];
-
-	public function pid(){
-		return Info::MOVE_ENTITY_PACKET;
+	private $addChar = '';
+	
+	public function __construct($addChar = "") {
+		$this->addChar = $addChar;
+		parent::__construct("", 0);
 	}
 
 	public function clean(){
@@ -56,16 +49,23 @@ class MoveEntityPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putInt(count($this->entities));
+		if($this->addChar != chr(0xfe)) {
+			$this->putInt(count($this->entities));
+		}
 		foreach($this->entities as $d){
 			$this->putLong($d[0]); //eid
 			$this->putFloat($d[1]); //x
 			$this->putFloat($d[2]); //y
 			$this->putFloat($d[3]); //z
-			$this->putFloat($d[4]); //yaw
-			$this->putFloat($d[5]); //headYaw
-			$this->putFloat($d[6]); //pitch
+			if($this->addChar != chr(0xfe)) {
+				$this->putFloat($d[4]); //yaw
+				$this->putFloat($d[5]); //headYaw
+				$this->putFloat($d[6]); //pitch
+			} else {
+				$this->putByte($d[6] * 0.71111); //pitch
+				$this->putByte($d[5] * 0.71111); //headYaw
+				$this->putByte($d[4] * 0.71111); //yaw
+			}
 		}
 	}
-
 }

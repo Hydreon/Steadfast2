@@ -28,7 +28,7 @@ abstract class MetadataValue{
 	protected $owningPlugin;
 
 	protected function __construct(Plugin $owningPlugin){
-		$this->owningPlugin = new \WeakRef($owningPlugin);
+		$this->owningPlugin = $owningPlugin;
 	}
 
 	/**

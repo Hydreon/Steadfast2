@@ -22,6 +22,7 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 
 class IronDoor extends Door{
 
@@ -35,25 +36,12 @@ class IronDoor extends Door{
 		return "Iron Door Block";
 	}
 
-	public function getHardness(){
-		return 25;
+	public function getToolType(){
+		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getBreakTime(Item $item){
-		switch($item->isPickaxe()){
-			case 5:
-				return 0.95;
-			case 4:
-				return 1.25;
-			case 3:
-				return 1.9;
-			case 2:
-				return 0.65;
-			case 1:
-				return 3.75;
-			default:
-				return 25;
-		}
+	public function getHardness(){
+		return 5;
 	}
 
 	public function getDrops(Item $item){

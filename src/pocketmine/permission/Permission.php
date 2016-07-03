@@ -43,14 +43,14 @@ class Permission{
 	 * @return string
 	 */
 	public static function getByName($value){
-		if(\is_bool($value)){
-			if($value === \true){
+		if(is_bool($value)){
+			if($value === true){
 				return "true";
 			}else{
 				return "false";
 			}
 		}
-		switch(\strtolower($value)){
+		switch(strtolower($value)){
 			case "op":
 			case "isop":
 			case "operator":
@@ -97,10 +97,10 @@ class Permission{
 	 * @param string       $defaultValue
 	 * @param Permission[] $children
 	 */
-	public function __construct($name, $description = \null, $defaultValue = \null, array $children = []){
+	public function __construct($name, $description = null, $defaultValue = null, array $children = []){
 		$this->name = $name;
-		$this->description = $description !== \null ? $description : "";
-		$this->defaultValue = $defaultValue !== \null ? $defaultValue : self::$DEFAULT_PERMISSION;
+		$this->description = $description !== null ? $description : "";
+		$this->defaultValue = $defaultValue !== null ? $defaultValue : self::$DEFAULT_PERMISSION;
 		$this->children = $children;
 
 		$this->recalculatePermissibles();
@@ -182,7 +182,7 @@ class Permission{
 			return;
 		}else{
 			$perm = Server::getInstance()->getPluginManager()->getPermission($name);
-			if($perm === \null){
+			if($perm === null){
 				$perm = new Permission($name);
 				Server::getInstance()->getPluginManager()->addPermission($perm);
 			}
@@ -219,11 +219,11 @@ class Permission{
 	 * @throws \Exception
 	 */
 	public static function loadPermission($name, array $data, $default = self::DEFAULT_OP, &$output = []){
-		$desc = \null;
+		$desc = null;
 		$children = [];
 		if(isset($data["default"])){
 			$value = Permission::getByName($data["default"]);
-			if($value !== \null){
+			if($value !== null){
 				$default = $value;
 			}else{
 				throw new \InvalidStateException("'default' key contained unknown value");
@@ -231,14 +231,14 @@ class Permission{
 		}
 
 		if(isset($data["children"])){
-			if(\is_array($data["children"])){
+			if(is_array($data["children"])){
 				foreach($data["children"] as $k => $v){
-					if(\is_array($v)){
-						if(($perm = self::loadPermission($k, $v, $default, $output)) !== \null){
+					if(is_array($v)){
+						if(($perm = self::loadPermission($k, $v, $default, $output)) !== null){
 							$output[] = $perm;
 						}
 					}
-					$children[$k] = \true;
+					$children[$k] = true;
 				}
 			}else{
 				throw new \InvalidStateException("'children' key is of wrong type");

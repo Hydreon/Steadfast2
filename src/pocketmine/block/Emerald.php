@@ -22,6 +22,7 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 
 class Emerald extends Solid{
 
@@ -32,22 +33,15 @@ class Emerald extends Solid{
 	}
 
 	public function getHardness(){
-		return 30;
+		return 5;
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_PICKAXE;
 	}
 
 	public function getName(){
 		return "Emerald Block";
-	}
-
-	public function getBreakTime(Item $item){
-		switch($item->isPickaxe()){
-			case 5:
-				return 0.95;
-			case 4:
-				return 1.25;
-			default:
-				return 25;
-		}
 	}
 
 	public function getDrops(Item $item){

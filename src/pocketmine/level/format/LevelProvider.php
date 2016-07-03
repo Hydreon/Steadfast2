@@ -81,22 +81,9 @@ interface LevelProvider{
 	 * @param string  $path
 	 * @param string  $name
 	 * @param int     $seed
-	 * @param string  $generator
 	 * @param array[] $options
 	 */
-	public static function generate($path, $name, $seed, $generator, array $options = []);
-
-	/**
-	 * Returns the generator name
-	 *
-	 * @return string
-	 */
-	public function getGenerator();
-
-	/**
-	 * @return array
-	 */
-	public function getGeneratorOptions();
+	public static function generate($path, $name, $seed, array $options = []);
 
 	/**
 	 * Gets the Chunk object
@@ -108,7 +95,7 @@ interface LevelProvider{
 	 *
 	 * @return FullChunk|Chunk
 	 */
-	public function getChunk($X, $Z, $create = \false);
+	public function getChunk($X, $Z, $create = false);
 
 	/**
 	 * @param $Y 0-7
@@ -134,7 +121,7 @@ interface LevelProvider{
 	 *
 	 * @return bool
 	 */
-	public function loadChunk($X, $Z, $create = \false);
+	public function loadChunk($X, $Z, $create = false);
 
 	/**
 	 * @param int  $X
@@ -143,7 +130,7 @@ interface LevelProvider{
 	 *
 	 * @return bool
 	 */
-	public function unloadChunk($X, $Z, $safe = \true);
+	public function unloadChunk($X, $Z, $safe = true);
 
 	/**
 	 * @param int $X

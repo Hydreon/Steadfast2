@@ -27,10 +27,10 @@ use pocketmine\event\entity\ItemDespawnEvent;
 use pocketmine\event\entity\ItemSpawnEvent;
 use pocketmine\item\Item as ItemItem;
 use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\Byte;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Short;
-use pocketmine\nbt\tag\String;
+use pocketmine\nbt\tag\ShortTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\AddItemEntityPacket;
 use pocketmine\Player;
@@ -38,8 +38,8 @@ use pocketmine\Player;
 class Item extends Entity{
 	const NETWORK_ID = 64;
 
-	protected $owner = \null;
-	protected $thrower = \null;
+	protected $owner = null;
+	protected $thrower = null;
 	protected $pickupDelay = 0;
 	/** @var ItemItem */
 	protected $item;
@@ -48,9 +48,10 @@ class Item extends Entity{
 	public $length = 0.25;
 	public $height = 0.25;
 	protected $gravity = 0.04;
-	protected $drag = 0.02;
+//	protected $drag = 0.02;
+	protected $drag = 0.15;
 
-	public $canCollide = \false;
+	public $canCollide = false;
 
 	protected function initEntity(){
 		parent::initEntity();
@@ -77,17 +78,22 @@ class Item extends Entity{
 
 
 	public function attack($damage, EntityDamageEvent $source){
-		if($source->getCause() === EntityDamageEvent::CAUSE_FIRE_TICK){
+		if(
+			$source->getCause() === EntityDamageEvent::CAUSE_VOID or
+			$source->getCause() === EntityDamageEvent::CAUSE_FIRE_TICK or
+			$source->getCause() === EntityDamageEvent::CAUSE_ENTITY_EXPLOSION or
+			$source->getCause() === EntityDamageEvent::CAUSE_BLOCK_EXPLOSION
+		){
 			parent::attack($damage, $source);
 		}
 	}
 
 	public function onUpdate($currentTick){
-		if($this->closed !== \false){
-			return \false;
+		if($this->closed){
+			return false;
 		}
 
-		$tickDiff = \max(1, $currentTick - $this->lastUpdate);
+		$tickDiff = max(1, $currentTick - $this->lastUpdate);
 		$this->lastUpdate = $currentTick;
 
 		$this->timings->startTiming();
@@ -127,32 +133,32 @@ class Item extends Entity{
 					$this->age = 0;
 				}else{
 					$this->kill();
-					$hasUpdate = \true;
+					$hasUpdate = true;
 				}
 			}
 
 		}
 
 		$this->timings->stopTiming();
-
+		
 		return $hasUpdate or !$this->onGround or $this->motionX != 0 or $this->motionY != 0 or $this->motionZ != 0;
 	}
 
 	public function saveNBT(){
 		parent::saveNBT();
 		$this->namedtag->Item = new Compound("Item", [
-			"id" => new Short("id", $this->item->getId()),
-			"Damage" => new Short("Damage", $this->item->getDamage()),
-			"Count" => new Byte("Count", $this->item->getCount())
+			"id" => new ShortTag("id", $this->item->getId()),
+			"Damage" => new ShortTag("Damage", $this->item->getDamage()),
+			"Count" => new ByteTag("Count", $this->item->getCount())
 		]);
-		$this->namedtag->Health = new Short("Health", $this->getHealth());
-		$this->namedtag->Age = new Short("Age", $this->age);
-		$this->namedtag->PickupDelay = new Short("PickupDelay", $this->pickupDelay);
-		if($this->owner !== \null){
-			$this->namedtag->Owner = new String("Owner", $this->owner);
+		$this->namedtag->Health = new ShortTag("Health", $this->getHealth());
+		$this->namedtag->Age = new ShortTag("Age", $this->age);
+		$this->namedtag->PickupDelay = new ShortTag("PickupDelay", $this->pickupDelay);
+		if($this->owner !== null){
+			$this->namedtag->Owner = new StringTag("Owner", $this->owner);
 		}
-		if($this->thrower !== \null){
-			$this->namedtag->Thrower = new String("Thrower", $this->thrower);
+		if($this->thrower !== null){
+			$this->namedtag->Thrower = new StringTag("Thrower", $this->thrower);
 		}
 	}
 
@@ -164,7 +170,7 @@ class Item extends Entity{
 	}
 
 	public function canCollideWith(Entity $entity){
-		return \false;
+		return false;
 	}
 
 	/**
@@ -219,10 +225,41 @@ class Item extends Entity{
 		$pk->speedY = $this->motionY;
 		$pk->speedZ = $this->motionZ;
 		$pk->item = $this->getItem();
-		$player->dataPacket($pk->setChannel(Network::CHANNEL_ENTITY_SPAWNING));
+		$player->dataPacket($pk);
 
 		$this->sendData($player);
 
 		parent::spawnTo($player);
 	}
+
+	
+	protected function updateMovement(){	
+		$diffPositionX =  abs($this->x - $this->lastX);
+		$diffPositionY =  abs($this->y - $this->lastY);
+		$diffPositionZ =  abs($this->z - $this->lastZ);		
+		
+		$diffMotionX = abs($this->motionX - $this->lastMotionX);
+		$diffMotionY = abs($this->motionY - $this->lastMotionY);
+		$diffMotionZ = abs($this->motionZ - $this->lastMotionZ);
+		
+
+		if($diffPositionX > 0.2 || $diffPositionZ > 0.2 || ($diffPositionX > 0.01 && $diffPositionZ > 0.01 && $diffPositionY > 0.2)){
+			$this->lastX = $this->x;
+			$this->lastY = $this->y;
+			$this->lastZ = $this->z;
+			$this->lastYaw = $this->yaw;
+			$this->lastPitch = $this->pitch;
+			
+			$this->level->addEntityMovement($this->getViewers(), $this->id, $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+		}
+
+		if($diffMotionX > 0.05 || $diffMotionZ > 0.05 || ($diffMotionX > 0.001 && $diffMotionZ > 0.001 && $diffMotionY > 0.05 )){ 
+			$this->lastMotionX = $this->motionX;
+			$this->lastMotionY = $this->motionY;
+			$this->lastMotionZ = $this->motionZ;
+			
+			$this->level->addEntityMotion($this->getViewers(), $this->id, $this->motionX, $this->motionY, $this->motionZ);
+		}
+	}
+	
 }

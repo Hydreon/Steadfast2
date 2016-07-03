@@ -30,6 +30,6 @@ class PlayerMetadataStore extends MetadataStore{
 			throw new \InvalidArgumentException("Argument must be an IPlayer instance");
 		}
 
-		return \strtolower($player->getName()) . ":" . $metadataKey;
+		return strtolower($player->getName()) . ":" . $metadataKey;
 	}
 }

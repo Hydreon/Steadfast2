@@ -26,7 +26,7 @@ use pocketmine\event\Cancellable;
 use pocketmine\Player;
 
 class PlayerBedEnterEvent extends PlayerEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	private $bed;
 

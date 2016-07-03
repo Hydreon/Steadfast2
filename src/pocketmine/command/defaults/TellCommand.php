@@ -19,6 +19,8 @@
  *
 */
 
+/*IMPORTANT NOTE: this command is owerridden inside lbcore, please do not update code here*/
+
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\CommandSender;
@@ -39,26 +41,27 @@ class TellCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) < 2){
+		if(count($args) < 2){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \false;
+			return false;
 		}
 
-		$name = \strtolower(\array_shift($args));
+		$name = strtolower(array_shift($args));
 
 		$player = $sender->getServer()->getPlayer($name);
 
 		if($player instanceof Player){
-			$sender->sendMessage("[me -> " . $player->getName() . "] " . \implode(" ", $args));
-			$player->sendMessage("[" . $sender->getName() . " -> me] " . \implode(" ", $args));
+			$player->setLastMessageFrom($sender->getName());
+			$sender->sendMessage("[me -> " . $player->getName() . "] " . implode(" ", $args));
+			$player->sendMessage("[" . $sender->getName() . " -> me] " . implode(" ", $args));
 		}else{
 			$sender->sendMessage("There's no player by that name online.");
 		}
 
-		return \true;
+		return true;
 	}
 }

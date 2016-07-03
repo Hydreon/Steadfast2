@@ -30,7 +30,7 @@ use pocketmine\inventory\TransactionGroup;
  * The source of this can be a Player, entities, mobs, or even hoppers in the future!
  */
 class InventoryTransactionEvent extends Event implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	/** @var TransactionGroup */
 	private $ts;

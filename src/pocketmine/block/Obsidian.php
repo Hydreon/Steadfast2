@@ -22,6 +22,7 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\Tool;
 
 class Obsidian extends Solid{
 
@@ -35,17 +36,12 @@ class Obsidian extends Solid{
 		return "Obsidian";
 	}
 
-	public function getHardness(){
-		return 6000;
+	public function getToolType(){
+		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getBreakTime(Item $item){
-
-		if($item->isPickaxe() >= 5){
-			return 9.4;
-		}else{
-			return 250;
-		}
+	public function getHardness(){
+		return 50;
 	}
 
 	public function getDrops(Item $item){

@@ -27,7 +27,7 @@ use pocketmine\utils\LevelException;
 class Position extends Vector3{
 
 	/** @var Level */
-	public $level = \null;
+	public $level = null;
 
 	/**
 	 * @param int   $x
@@ -35,14 +35,14 @@ class Position extends Vector3{
 	 * @param int   $z
 	 * @param Level $level
 	 */
-	public function __construct($x = 0, $y = 0, $z = 0, Level $level = \null){
+	public function __construct($x = 0, $y = 0, $z = 0, Level $level = null){
 		$this->x = $x;
 		$this->y = $y;
 		$this->z = $z;
 		$this->level = $level;
 	}
 
-	public static function fromObject(Vector3 $pos, Level $level = \null){
+	public static function fromObject(Vector3 $pos, Level $level = null){
 		return new Position($pos->x, $pos->y, $pos->z, $level);
 	}
 
@@ -64,7 +64,7 @@ class Position extends Vector3{
 	 * @return bool
 	 */
 	public function isValid(){
-		return $this->level !== \null;
+		return $this->level !== null;
 	}
 
 	/**
@@ -76,7 +76,7 @@ class Position extends Vector3{
 	 * @return bool
 	 */
 	public function setStrong(){
-		return \false;
+		return false;
 	}
 
 	/**
@@ -88,7 +88,7 @@ class Position extends Vector3{
 	 * @return bool
 	 */
 	public function setWeak(){
-		return \false;
+		return false;
 	}
 
 	/**

@@ -36,7 +36,7 @@ class TallGrass{
 			[Block::TALL_GRASS, 1],
 			[Block::TALL_GRASS, 1]
 		];
-		$arrC = \count($arr) - 1;
+		$arrC = count($arr) - 1;
 		for($c = 0; $c < $count; ++$c){
 			$x = $random->nextRange($pos->x - $radius, $pos->x + $radius);
 			$z = $random->nextRange($pos->z - $radius, $pos->z + $radius);

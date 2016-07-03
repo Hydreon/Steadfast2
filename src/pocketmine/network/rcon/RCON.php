@@ -27,7 +27,6 @@ namespace pocketmine\network\rcon;
 
 use pocketmine\command\RemoteConsoleCommandSender;
 use pocketmine\event\server\RemoteServerCommandEvent;
-use pocketmine\scheduler\CallbackTask;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
@@ -51,10 +50,10 @@ class RCON{
 
 			return;
 		}
-		$this->threads = (int) \max(1, $threads);
-		$this->clientsPerThread = (int) \max(1, $clientsPerThread);
+		$this->threads = (int) max(1, $threads);
+		$this->clientsPerThread = (int) max(1, $clientsPerThread);
 		$this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-		if($this->socket === \false or !socket_bind($this->socket, $interface, (int) $port) or !socket_listen($this->socket)){
+		if($this->socket === false or !socket_bind($this->socket, $interface, (int) $port) or !socket_listen($this->socket)){
 			$this->server->getLogger()->critical("RCON can't be started: " . socket_strerror(socket_last_error()));
 			$this->threads = 0;
 			return;
@@ -66,13 +65,12 @@ class RCON{
 		}
 		socket_getsockname($this->socket, $addr, $port);
 		$this->server->getLogger()->info("RCON running on $addr:$port");
-		$this->server->getScheduler()->scheduleRepeatingTask(new CallbackTask([$this, "check"]), 3);
 	}
 
 	public function stop(){
 		for($n = 0; $n < $this->threads; ++$n){
 			$this->workers[$n]->close();
-			\usleep(50000);
+			usleep(50000);
 			$this->workers[$n]->kill();
 		}
 		@socket_close($this->socket);
@@ -81,7 +79,7 @@ class RCON{
 
 	public function check(){
 		for($n = 0; $n < $this->threads; ++$n){
-			if($this->workers[$n]->isTerminated() === \true){
+			if($this->workers[$n]->isTerminated() === true){
 				$this->workers[$n] = new RCONInstance($this->socket, $this->password, $this->clientsPerThread);
 			}elseif($this->workers[$n]->isWaiting()){
 				if($this->workers[$n]->response !== ""){

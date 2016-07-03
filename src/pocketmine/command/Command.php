@@ -49,7 +49,7 @@ abstract class Command{
 	private $activeAliases = [];
 
 	/** @var CommandMap */
-	private $commandMap = \null;
+	private $commandMap = null;
 
 	/** @var string */
 	protected $description = "";
@@ -58,10 +58,10 @@ abstract class Command{
 	protected $usageMessage;
 
 	/** @var string */
-	private $permission = \null;
+	private $permission = null;
 
 	/** @var string */
-	private $permissionMessage = \null;
+	private $permissionMessage = null;
 
 	/** @var TimingsHandler */
 	public $timings;
@@ -72,12 +72,12 @@ abstract class Command{
 	 * @param string   $usageMessage
 	 * @param string[] $aliases
 	 */
-	public function __construct($name, $description = "", $usageMessage = \null, array $aliases = []){
+	public function __construct($name, $description = "", $usageMessage = null, array $aliases = []){
 		$this->name = $name;
 		$this->nextLabel = $name;
 		$this->label = $name;
 		$this->description = $description;
-		$this->usageMessage = $usageMessage === \null ? "/" . $name : $usageMessage;
+		$this->usageMessage = $usageMessage === null ? "/" . $name : $usageMessage;
 		$this->aliases = $aliases;
 		$this->activeAliases = (array) $aliases;
 		$this->timings = new TimingsHandler("** Command: " . $name);
@@ -120,19 +120,19 @@ abstract class Command{
 	 */
 	public function testPermission(CommandSender $target){
 		if($this->testPermissionSilent($target)){
-			return \true;
+			return true;
 		}
 
-		if($this->permissionMessage === \null){
+		if($this->permissionMessage === null){
 			$message = $target->getServer()->getAdvancedProperty("messages.command-permissions", "You don't have permissions to use this command.");
-			if(\is_string($message) and \strlen($message) > 0){
+			if(is_string($message) and strlen($message) > 0){
 				$target->sendMessage(TextFormat::RED . $message);
 			}
 		}elseif($this->permissionMessage !== ""){
-			$target->sendMessage(\str_replace("<permission>", $this->permission, $this->permissionMessage));
+			$target->sendMessage(str_replace("<permission>", $this->permission, $this->permissionMessage));
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**
@@ -141,17 +141,17 @@ abstract class Command{
 	 * @return bool
 	 */
 	public function testPermissionSilent(CommandSender $target){
-		if($this->permission === \null or $this->permission === ""){
-			return \true;
+		if($this->permission === null or $this->permission === ""){
+			return true;
 		}
 
-		foreach(\explode(";", $this->permission) as $permission){
+		foreach(explode(";", $this->permission) as $permission){
 			if($target->hasPermission($permission)){
-				return \true;
+				return true;
 			}
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**
@@ -167,10 +167,10 @@ abstract class Command{
 			$this->timings = new TimingsHandler("** Command: " . $name);
 			$this->label = $name;
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**
@@ -184,10 +184,10 @@ abstract class Command{
 		if($this->allowChangesFrom($commandMap)){
 			$this->commandMap = $commandMap;
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**
@@ -197,14 +197,14 @@ abstract class Command{
 	 */
 	public function unregister(CommandMap $commandMap){
 		if($this->allowChangesFrom($commandMap)){
-			$this->commandMap = \null;
+			$this->commandMap = null;
 			$this->activeAliases = $this->aliases;
 			$this->label = $this->nextLabel;
 
-			return \true;
+			return true;
 		}
 
-		return \false;
+		return false;
 	}
 
 	/**
@@ -213,14 +213,14 @@ abstract class Command{
 	 * @return bool
 	 */
 	private function allowChangesFrom(CommandMap $commandMap){
-		return $this->commandMap === \null or $this->commandMap === $commandMap;
+		return $this->commandMap === null or $this->commandMap === $commandMap;
 	}
 
 	/**
 	 * @return bool
 	 */
 	public function isRegistered(){
-		return $this->commandMap !== \null;
+		return $this->commandMap !== null;
 	}
 
 	/**
@@ -287,14 +287,14 @@ abstract class Command{
 	 * @param string        $message
 	 * @param bool          $sendToSource
 	 */
-	public static function broadcastCommandMessage(CommandSender $source, $message, $sendToSource = \true){
+	public static function broadcastCommandMessage(CommandSender $source, $message, $sendToSource = true){
 		$result = $source->getName() . ": " . $message;
 
 		//Command minecarts or command blocks are not implemented
 
 		$users = Server::getInstance()->getPluginManager()->getPermissionSubscriptions(Server::BROADCAST_CHANNEL_ADMINISTRATIVE);
 		$colored = TextFormat::GRAY . TextFormat::ITALIC . "[$result" . TextFormat::GRAY . TextFormat::ITALIC . "]";
-		if($sendToSource === \true and !($source instanceof ConsoleCommandSender)){
+		if($sendToSource === true and !($source instanceof ConsoleCommandSender)){
 			$source->sendMessage($message);
 		}
 

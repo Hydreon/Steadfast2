@@ -32,11 +32,11 @@ class PluginLogger implements \AttachableLogger{
 	private $attachments = [];
 
 	public function addAttachment(\LoggerAttachment $attachment){
-		$this->attachments[\spl_object_hash($attachment)] = $attachment;
+		$this->attachments[spl_object_hash($attachment)] = $attachment;
 	}
 
 	public function removeAttachment(\LoggerAttachment $attachment){
-		unset($this->attachments[\spl_object_hash($attachment)]);
+		unset($this->attachments[spl_object_hash($attachment)]);
 	}
 
 	public function removeAttachments(){
@@ -52,7 +52,7 @@ class PluginLogger implements \AttachableLogger{
 	 */
 	public function __construct(Plugin $context){
 		$prefix = $context->getDescription()->getPrefix();
-		$this->pluginName = $prefix != \null ? "[$prefix] " : "[" . $context->getDescription()->getName() . "] ";
+		$this->pluginName = $prefix != null ? "[$prefix] " : "[" . $context->getDescription()->getName() . "] ";
 	}
 
 	public function emergency($message){
@@ -85,6 +85,10 @@ class PluginLogger implements \AttachableLogger{
 
 	public function debug($message){
 		$this->log(LogLevel::DEBUG, $message);
+	}
+
+	public function logException(\Throwable $e, $trace = null){
+		Server::getInstance()->getLogger()->logException($e, $trace);
 	}
 
 	public function log($level, $message){

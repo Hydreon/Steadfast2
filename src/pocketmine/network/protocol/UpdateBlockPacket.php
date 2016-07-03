@@ -21,24 +21,15 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 class UpdateBlockPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::UPDATE_BLOCK_PACKET;
 
 	const FLAG_NONE      = 0b0000;
 	const FLAG_NEIGHBORS = 0b0001;
-    const FLAG_NETWORK   = 0b0010;
+	const FLAG_NETWORK   = 0b0010;
 	const FLAG_NOGRAPHIC = 0b0100;
 	const FLAG_PRIORITY  = 0b1000;
 
@@ -47,17 +38,22 @@ class UpdateBlockPacket extends DataPacket{
 
 	public $records = []; //x, z, y, blockId, blockData, flags
 
-	public function pid(){
-		return Info::UPDATE_BLOCK_PACKET;
+	private $addChar = '';
+	
+	public function __construct($addChar = "") {
+		$this->addChar = $addChar;
+		parent::__construct("", 0);
 	}
-
+	
 	public function decode(){
 
 	}
 
 	public function encode(){
 		$this->reset();
-		$this->putInt(count($this->records));
+		if($this->addChar != chr(0xfe)) {
+			$this->putInt(count($this->records));			
+		}
 		foreach($this->records as $r){
 			$this->putInt($r[0]);
 			$this->putInt($r[1]);

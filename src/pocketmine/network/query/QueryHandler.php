@@ -59,48 +59,50 @@ class QueryHandler{
 
 	public function regenerateInfo(){
 		$this->server->getPluginManager()->callEvent($ev = new QueryRegenerateEvent($this->server, 5));
+		$this->server->mainInterface->setName($this->server->getNetwork()->getName());
+		$this->server->mainInterface->setCount($ev->getPlayerCount(), $ev->getMaxPlayerCount());
 		$this->longData = $ev->getLongQuery();
 		$this->shortData = $ev->getShortQuery();
-		$this->timeout = \microtime(\true) + $ev->getTimeout();
+		$this->timeout = microtime(true) + $ev->getTimeout();
 	}
 
 	public function regenerateToken(){
 		$this->lastToken = $this->token;
-		$this->token = @Utils::getRandomBytes(16, \false);
+		$this->token = @Utils::getRandomBytes(16, false);
 	}
 
 	public static function getTokenString($token, $salt){
-		return (\PHP_INT_SIZE === 8 ? \unpack("N", \substr(\hash("sha512", $salt . ":" . $token, \true), 7, 4))[1] << 32 >> 32 : \unpack("N", \substr(\hash("sha512", $salt . ":" . $token, \true), 7, 4))[1]);
+		return Binary::readInt(substr(hash("sha512", $salt . ":" . $token, true), 7, 4));
 	}
 
 	public function handle($address, $port, $packet){
 		$offset = 2;
-		$packetType = \ord($packet{$offset++});
-		$sessionID = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+		$packetType = ord($packet{$offset++});
+		$sessionID = Binary::readInt(substr($packet, $offset, 4));
 		$offset += 4;
-		$payload = \substr($packet, $offset);
+		$payload = substr($packet, $offset);
 
 		switch($packetType){
 			case self::HANDSHAKE: //Handshake
-				$reply = \chr(self::HANDSHAKE);
-				$reply .= \pack("N", $sessionID);
+				$reply = chr(self::HANDSHAKE);
+				$reply .= Binary::writeInt($sessionID);
 				$reply .= self::getTokenString($this->token, $address) . "\x00";
 
 				$this->server->getNetwork()->sendPacket($address, $port, $reply);
 				break;
 			case self::STATISTICS: //Stat
-				$token = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($payload, 0, 4))[1] << 32 >> 32 : \unpack("N", \substr($payload, 0, 4))[1]);
+				$token = Binary::readInt(substr($payload, 0, 4));
 				if($token !== self::getTokenString($this->token, $address) and $token !== self::getTokenString($this->lastToken, $address)){
 					break;
 				}
-				$reply = \chr(self::STATISTICS);
-				$reply .= \pack("N", $sessionID);
+				$reply = chr(self::STATISTICS);
+				$reply .= Binary::writeInt($sessionID);
 
-				if($this->timeout < \microtime(\true)){
+				if($this->timeout < microtime(true)){
 					$this->regenerateInfo();
 				}
 
-				if(\strlen($payload) === 8){
+				if(strlen($payload) === 8){
 					$reply .= $this->longData;
 				}else{
 					$reply .= $this->shortData;

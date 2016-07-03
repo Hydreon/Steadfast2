@@ -22,9 +22,10 @@
 namespace pocketmine\level\particle;
 
 use pocketmine\entity\Entity;
+use pocketmine\entity\Item as ItemEntity;
 use pocketmine\math\Vector3;
-use pocketmine\network\protocol\AddPlayerPacket;
-use pocketmine\network\protocol\RemovePlayerPacket;
+use pocketmine\network\protocol\AddEntityPacket;
+use pocketmine\network\protocol\RemoveEntityPacket;
 
 class FloatingTextParticle extends Particle{
 	//TODO: HACK!
@@ -32,8 +33,13 @@ class FloatingTextParticle extends Particle{
 	protected $text;
 	protected $title;
 	protected $entityId;
-	protected $invisible = \false;
+	protected $invisible = false;
 
+	/**
+	 * @param Vector3 $pos
+	 * @param int $text
+	 * @param string $title
+	 */
 	public function __construct(Vector3 $pos, $text, $title = ""){
 		parent::__construct($pos->x, $pos->y, $pos->z);
 		$this->text = $text;
@@ -52,31 +58,29 @@ class FloatingTextParticle extends Particle{
 		return $this->invisible;
 	}
 	
-	public function setInvisible($value = \true){
+	public function setInvisible($value = true){
 		$this->invisible = (bool) $value;
 	}
 
 	public function encode(){
 		$p = [];
 
-		if($this->entityId === \null){
-			$this->entityId = bcadd("1095216660480", \mt_rand(0, 0x7fffffff)); //No conflict with other things
+		if($this->entityId === null){
+			$this->entityId = bcadd("1095216660480", mt_rand(0, 0x7fffffff)); //No conflict with other things
 		}else{
-			$pk0 = new RemovePlayerPacket();
+			$pk0 = new RemoveEntityPacket();
 			$pk0->eid = $this->entityId;
-			$pk0->clientID = $this->entityId;
 
 			$p[] = $pk0;
 		}
 
 		if(!$this->invisible){
 			
-			$pk = new AddPlayerPacket();
+			$pk = new AddEntityPacket();
 			$pk->eid = $this->entityId;
-			$pk->username = $this->title . ($this->text !== "" ? "\n" . $this->text : "");
-			$pk->clientID = $this->entityId;
+			$pk->type = ItemEntity::NETWORK_ID;
 			$pk->x = $this->x;
-			$pk->y = $this->y - 2.5;
+			$pk->y = $this->y - 0.75;
 			$pk->z = $this->z;
 			$pk->speedX = 0;
 			$pk->speedY = 0;
@@ -85,14 +89,12 @@ class FloatingTextParticle extends Particle{
 			$pk->pitch = 0;
 			$pk->item = 0;
 			$pk->meta = 0;
-			$pk->slim = \false;
-			$pk->skin = \str_repeat("\x00", 64 * 32 * 4);
 			$pk->metadata = [
 				Entity::DATA_FLAGS => [Entity::DATA_TYPE_BYTE, 1 << Entity::DATA_FLAG_INVISIBLE],
-				Entity::DATA_AIR => [Entity::DATA_TYPE_SHORT, 300],
+				Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, $this->title . ($this->text !== "" ? "\n" . $this->text : "")],
 				Entity::DATA_SHOW_NAMETAG => [Entity::DATA_TYPE_BYTE, 1],
 				Entity::DATA_NO_AI => [Entity::DATA_TYPE_BYTE, 1]
-            ];
+			];
 
 			$p[] = $pk;
 		}

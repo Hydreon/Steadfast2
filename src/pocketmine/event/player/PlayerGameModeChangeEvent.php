@@ -28,7 +28,7 @@ use pocketmine\Player;
  * Called when a player has its gamemode changed
  */
 class PlayerGameModeChangeEvent extends PlayerEvent implements Cancellable{
-	public static $handlerList = \null;
+	public static $handlerList = null;
 
 	/** @var int */
 	protected $gamemode;

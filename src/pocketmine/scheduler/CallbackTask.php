@@ -14,7 +14,7 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
-
+ * @link http://www.pocketmine.net/
  *
  *
 */
@@ -26,6 +26,9 @@ namespace pocketmine\scheduler;
  * The last parameter in the callback will be this object
  *
  * If you want to do a task in a Plugin, consider extending PluginTask to your needs
+ *
+ * @deprecated
+ *
  */
 class CallbackTask extends Task{
 
@@ -53,7 +56,7 @@ class CallbackTask extends Task{
 	}
 
 	public function onRun($currentTicks){
-		\call_user_func_array($this->callable, $this->args);
+		call_user_func_array($this->callable, $this->args);
 	}
 
 }

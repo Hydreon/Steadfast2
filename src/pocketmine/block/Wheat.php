@@ -39,7 +39,7 @@ class Wheat extends Crops{
 		$drops = [];
 		if($this->meta >= 0x07){
 			$drops[] = [Item::WHEAT, 0, 1];
-			$drops[] = [Item::WHEAT_SEEDS, 0, \mt_rand(0, 3)];
+			$drops[] = [Item::WHEAT_SEEDS, 0, mt_rand(0, 3)];
 		}else{
 			$drops[] = [Item::WHEAT_SEEDS, 0, 1];
 		}

@@ -14,7 +14,7 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
-
+ * @link http://www.pocketmine.net/
  *
  *
 */
@@ -25,8 +25,8 @@ class GarbageCollectionTask extends Task{
 
 	public function onRun($currentTicks){
 		\gc_collect_cycles();
-		\memory_get_usage();
-		\memory_get_usage(\true);
+		memory_get_usage();
+		memory_get_usage(true);
 	}
 
 }

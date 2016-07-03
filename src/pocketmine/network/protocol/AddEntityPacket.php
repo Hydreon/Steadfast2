@@ -21,20 +21,15 @@
 
 namespace pocketmine\network\protocol;
 
+#include <rules/DataPacket.h>
+
+#ifndef COMPILE
 use pocketmine\utils\Binary;
 
-
-
-
-
-
-
-
-
+#endif
 
 class AddEntityPacket extends DataPacket{
-	public static $pool = [];
-	public static $next = 0;
+	const NETWORK_ID = Info::ADD_ENTITY_PACKET;
 
 	public $eid;
 	public $type;
@@ -46,12 +41,8 @@ class AddEntityPacket extends DataPacket{
 	public $speedZ;
 	public $yaw;
 	public $pitch;
-	public $metadata;
+	public $metadata = [];
 	public $links = [];
-
-	public function pid(){
-		return Info::ADD_ENTITY_PACKET;
-	}
 
 	public function decode(){
 
@@ -69,14 +60,17 @@ class AddEntityPacket extends DataPacket{
 		$this->putFloat($this->speedZ);
 		$this->putFloat($this->yaw);
 		$this->putFloat($this->pitch);
-		$meta = Binary::writeMetadata($this->metadata);
-		$this->put($meta);
-		$this->putShort(count($this->links));
-		foreach($this->links as $link){
-			$this->putLong($link[0]);
-			$this->putLong($link[1]);
-			$this->putByte($link[2]);
+		$this->putShort(0);
+		if(!empty($this->metadata)) {
+			$meta = Binary::writeMetadata($this->metadata);
+			$this->put($meta);
 		}
-	}
+		$this->putShort(0);//count($this->links));
 
+//		foreach($this->links as $link){
+//			$this->putLong($link[0]);
+//			$this->putLong($link[1]);
+//			$this->putByte($link[2]);
+//		}
+	}
 }

@@ -105,6 +105,6 @@ class RegisteredListener{
 	 * @return bool
 	 */
 	public function isIgnoringCancelled(){
-		return $this->ignoreCancelled === \true;
+		return $this->ignoreCancelled === true;
 	}
 }

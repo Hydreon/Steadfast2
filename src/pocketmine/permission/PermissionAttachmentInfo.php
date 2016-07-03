@@ -44,7 +44,7 @@ class PermissionAttachmentInfo{
 	 * @throws \InvalidStateException
 	 */
 	public function __construct(Permissible $permissible, $permission, $attachment, $value){
-		if($permission === \null){
+		if($permission === null){
 			throw new \InvalidStateException("Permission may not be null");
 		}
 

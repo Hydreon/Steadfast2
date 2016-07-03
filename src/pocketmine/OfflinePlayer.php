@@ -39,15 +39,15 @@ class OfflinePlayer implements IPlayer{
 	public function __construct(Server $server, $name){
 		$this->server = $server;
 		$this->name = $name;
-		if(\file_exists($this->server->getDataPath() . "players/" . \strtolower($this->getName()) . ".dat")){
+		if(file_exists($this->server->getDataPath() . "players/" . strtolower($this->getName()) . ".dat")){
 			$this->namedtag = $this->server->getOfflinePlayerData($this->name);
 		}else{
-			$this->namedtag = \null;
+			$this->namedtag = null;
 		}
 	}
 
 	public function isOnline(){
-		return $this->getPlayer() !== \null;
+		return $this->getPlayer() !== null;
 	}
 
 	public function getName(){
@@ -59,7 +59,7 @@ class OfflinePlayer implements IPlayer{
 	}
 
 	public function isOp(){
-		return $this->server->isOp(\strtolower($this->getName()));
+		return $this->server->isOp(strtolower($this->getName()));
 	}
 
 	public function setOp($value){
@@ -67,34 +67,34 @@ class OfflinePlayer implements IPlayer{
 			return;
 		}
 
-		if($value === \true){
-			$this->server->addOp(\strtolower($this->getName()));
+		if($value === true){
+			$this->server->addOp(strtolower($this->getName()));
 		}else{
-			$this->server->removeOp(\strtolower($this->getName()));
+			$this->server->removeOp(strtolower($this->getName()));
 		}
 	}
 
 	public function isBanned(){
-		return $this->server->getNameBans()->isBanned(\strtolower($this->getName()));
+		return $this->server->getNameBans()->isBanned(strtolower($this->getName()));
 	}
 
 	public function setBanned($value){
-		if($value === \true){
-			$this->server->getNameBans()->addBan($this->getName(), \null, \null, \null);
+		if($value === true){
+			$this->server->getNameBans()->addBan($this->getName(), null, null, null);
 		}else{
 			$this->server->getNameBans()->remove($this->getName());
 		}
 	}
 
 	public function isWhitelisted(){
-		return $this->server->isWhitelisted(\strtolower($this->getName()));
+		return $this->server->isWhitelisted(strtolower($this->getName()));
 	}
 
 	public function setWhitelisted($value){
-		if($value === \true){
-			$this->server->addWhitelist(\strtolower($this->getName()));
+		if($value === true){
+			$this->server->addWhitelist(strtolower($this->getName()));
 		}else{
-			$this->server->removeWhitelist(\strtolower($this->getName()));
+			$this->server->removeWhitelist(strtolower($this->getName()));
 		}
 	}
 
@@ -103,11 +103,11 @@ class OfflinePlayer implements IPlayer{
 	}
 
 	public function getFirstPlayed(){
-		return $this->namedtag instanceof Compound ? $this->namedtag["firstPlayed"] : \null;
+		return $this->namedtag instanceof Compound ? $this->namedtag["firstPlayed"] : null;
 	}
 
 	public function getLastPlayed(){
-		return $this->namedtag instanceof Compound ? $this->namedtag["lastPlayed"] : \null;
+		return $this->namedtag instanceof Compound ? $this->namedtag["lastPlayed"] : null;
 	}
 
 	public function hasPlayedBefore(){

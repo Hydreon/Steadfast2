@@ -39,21 +39,21 @@ class KickCommand extends VanillaCommand{
 
 	public function execute(CommandSender $sender, $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) === 0){
+		if(count($args) === 0){
 			$sender->sendMessage(TextFormat::RED . "Usage: " . $this->usageMessage);
 
-			return \false;
+			return false;
 		}
 
-		$name = \array_shift($args);
-		$reason = \trim(\implode(" ", $args));
+		$name = array_shift($args);
+		$reason = trim(implode(" ", $args));
 
 		if(($player = $sender->getServer()->getPlayer($name)) instanceof Player){
 			$player->kick($reason);
-			if(\strlen($reason) >= 1){
+			if(strlen($reason) >= 1){
 				Command::broadcastCommandMessage($sender, "Kicked " . $player->getName() . " from the game: '{$reason}'");
 			}else{
 				Command::broadcastCommandMessage($sender, "Kicked " . $player->getName() . " from the game.");
@@ -63,6 +63,6 @@ class KickCommand extends VanillaCommand{
 		}
 
 
-		return \true;
+		return true;
 	}
 }

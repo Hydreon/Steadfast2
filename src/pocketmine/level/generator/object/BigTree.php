@@ -34,12 +34,12 @@ class BigTree extends Tree{
 	private $totalHeight = 6;
 	private $leavesHeight = 3;
 	protected $radiusIncrease = 0;
-	private $addLeavesVines = \false;
-	private $addLogVines = \false;
-	private $addCocoaPlants = \false;
+	private $addLeavesVines = false;
+	private $addLogVines = false;
+	private $addCocoaPlants = false;
 
 	public function canPlaceObject(ChunkManager $level, $x, $y, $z){
-		return \false;
+		return false;
 	}
 
 	public function placeObject(ChunkManager $level, $x, $y, $z, $type){

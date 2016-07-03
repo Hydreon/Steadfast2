@@ -30,7 +30,7 @@ use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\Timings;
 use pocketmine\item\Item as ItemItem;
 use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\Short;
+use pocketmine\nbt\tag\ShortTag;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\Player;
@@ -44,23 +44,22 @@ abstract class Living extends Entity implements Damageable{
 
 	protected $attackTime = 0;
 
-	protected $invisible = \false;
+	protected $invisible = false;
 
 	protected function initEntity(){
 		parent::initEntity();
 
 		if(isset($this->namedtag->HealF)){
-			$this->namedtag->Health = new Short("Health", (int) $this->namedtag["HealF"]);
+			$this->namedtag->Health = new ShortTag("Health", (int) $this->namedtag["HealF"]);
 			unset($this->namedtag->HealF);
 		}
 
 		if(!isset($this->namedtag->Health) or !($this->namedtag->Health instanceof Short)){
-			$this->namedtag->Health = new Short("Health", $this->getMaxHealth());
+			$this->namedtag->Health = new ShortTag("Health", $this->getMaxHealth());
 		}
 
 		$this->setHealth($this->namedtag["Health"]);
 	}
-
 
 	public function setHealth($amount){
 		$wasAlive = !$this->dead;
@@ -69,20 +68,20 @@ abstract class Living extends Entity implements Damageable{
 			$pk = new EntityEventPacket();
 			$pk->eid = $this->getId();
 			$pk->event = EntityEventPacket::RESPAWN;
-			Server::broadcastPacket($this->hasSpawned, $pk->setChannel(Network::CHANNEL_WORLD_EVENTS));
+			Server::broadcastPacket($this->hasSpawned, $pk);
 		}
 	}
 
 	public function saveNBT(){
 		parent::saveNBT();
-		$this->namedtag->Health = new Short("Health", $this->getHealth());
+		$this->namedtag->Health = new ShortTag("Health", $this->getHealth());
 	}
 
 	public abstract function getName();
 
 	public function hasLineOfSight(Entity $entity){
 		//TODO: head height
-		return \true;
+		return true;
 		//return $this->getLevel()->rayTraceBlocks(Vector3::createVector($this->x, $this->y + $this->height, $this->z), Vector3::createVector($entity->x, $entity->y + $entity->height, $entity->z)) === null;
 	}
 
@@ -98,16 +97,16 @@ abstract class Living extends Entity implements Damageable{
 	public function attack($damage, EntityDamageEvent $source){
 		if($this->attackTime > 0 or $this->noDamageTicks > 0){
 			$lastCause = $this->getLastDamageCause();
-			if($lastCause !== \null and $lastCause->getDamage() >= $damage){
-                $source->setCancelled();
+			if($lastCause !== null and $lastCause->getDamage() >= $damage){
+				$source->setCancelled();
 			}
 		}
 
-        parent::attack($damage, $source);
+		parent::attack($damage, $source);
 
-        if($source->isCancelled()){
-            return;
-        }
+		if($source->isCancelled()){
+			return;
+		}
 
 		if($source instanceof EntityDamageByEntityEvent){
 			$e = $source->getDamager();
@@ -124,27 +123,22 @@ abstract class Living extends Entity implements Damageable{
 		$pk = new EntityEventPacket();
 		$pk->eid = $this->getId();
 		$pk->event = $this->getHealth() <= 0 ? EntityEventPacket::DEATH_ANIMATION : EntityEventPacket::HURT_ANIMATION; //Ouch!
-		Server::broadcastPacket($this->hasSpawned, $pk->setChannel(Network::CHANNEL_WORLD_EVENTS));
+		Server::broadcastPacket($this->hasSpawned, $pk);
 
 		$this->attackTime = 10; //0.5 seconds cooldown
 	}
 
 	public function knockBack(Entity $attacker, $damage, $x, $z, $base = 0.4){
-		$f = sqrt($x * $x + $z * $z);
-		if($f <= 0){
-			return;
-		}
-
-		$f = 1 / $f;
+		$f = sqrt($x ** 2 + $z ** 2);
 
 		$motion = new Vector3($this->motionX, $this->motionY, $this->motionZ);
 
 		$motion->x /= 2;
 		$motion->y /= 2;
 		$motion->z /= 2;
-		$motion->x += $x * $f * $base;
+		$motion->x += ($f != 0) ? ($x / $f) * $base : 0;
 		$motion->y += $base;
-		$motion->z += $z * $f * $base;
+		$motion->z += ($f != 0) ? ($z / $f) * $base : 0;
 
 		if($motion->y > $base){
 			$motion->y = $base;
@@ -165,9 +159,9 @@ abstract class Living extends Entity implements Damageable{
 	}
 
 	public function entityBaseTick($tickDiff = 1){
-		Timings::$timerEntityBaseTick->startTiming();
+		//Timings::$timerEntityBaseTick->startTiming();
 
-		if($this->dead === \true){
+		if($this->dead === true){
 			++$this->deadTicks;
 			if($this->deadTicks >= 10){
 				$this->despawnFromAll();
@@ -176,23 +170,23 @@ abstract class Living extends Entity implements Damageable{
 				}
 			}
 
-			Timings::$timerEntityBaseTick->stopTiming();
+			//Timings::$timerEntityBaseTick->stopTiming();
 			return $this->deadTicks < 10;
 		}
 
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
-		if($this->dead !== \true and $this->isInsideOfSolid()){
-			$hasUpdate = \true;
+		if($this->dead !== true and $this->isInsideOfSolid()){
+			$hasUpdate = true;
 			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_SUFFOCATION, 1);
 			$this->attack($ev->getFinalDamage(), $ev);
 		}
 
-		if($this->dead !== \true and !$this->hasEffect(Effect::WATER_BREATHING) and $this->isInsideOfWater()){
+		if($this->dead !== true and !$this->hasEffect(Effect::WATER_BREATHING) and $this->isInsideOfWater()){
 			if($this instanceof WaterAnimal){
-				$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
+				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
 			}else{
-				$hasUpdate = \true;
+				$hasUpdate = true;
 				$airTicks = $this->getDataProperty(self::DATA_AIR) - $tickDiff;
 				if($airTicks <= -20){
 					$airTicks = 0;
@@ -200,11 +194,11 @@ abstract class Living extends Entity implements Damageable{
 					$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_DROWNING, 2);
 					$this->attack($ev->getFinalDamage(), $ev);
 				}
-				$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $airTicks);
+				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, $airTicks];			
 			}
 		}else{
 			if($this instanceof WaterAnimal){
-				$hasUpdate = \true;
+				$hasUpdate = true;
 				$airTicks = $this->getDataProperty(self::DATA_AIR) - $tickDiff;
 				if($airTicks <= -20){
 					$airTicks = 0;
@@ -212,9 +206,9 @@ abstract class Living extends Entity implements Damageable{
 					$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_SUFFOCATION, 2);
 					$this->attack($ev->getFinalDamage(), $ev);
 				}
-				$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $airTicks);
+				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, $airTicks];
 			}else{
-				$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
+				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
 			}
 		}
 
@@ -222,7 +216,7 @@ abstract class Living extends Entity implements Damageable{
 			$this->attackTime -= $tickDiff;
 		}
 
-		Timings::$timerEntityBaseTick->stopTiming();
+		//Timings::$timerEntityBaseTick->stopTiming();
 
 		return $hasUpdate;
 	}
@@ -246,8 +240,8 @@ abstract class Living extends Entity implements Damageable{
 			$maxDistance = 120;
 		}
 
-		if(\count($transparent) === 0){
-			$transparent = \null;
+		if(count($transparent) === 0){
+			$transparent = null;
 		}
 
 		$blocks = [];
@@ -260,14 +254,14 @@ abstract class Living extends Entity implements Damageable{
 			$block = $itr->current();
 			$blocks[$nextIndex++] = $block;
 
-			if($maxLength !== 0 and \count($blocks) > $maxLength){
-				\array_shift($blocks);
+			if($maxLength !== 0 and count($blocks) > $maxLength){
+				array_shift($blocks);
 				--$nextIndex;
 			}
 
 			$id = $block->getId();
 
-			if($transparent === \null){
+			if($transparent === null){
 				if($id !== 0){
 					break;
 				}
@@ -297,6 +291,6 @@ abstract class Living extends Entity implements Damageable{
 
 		}
 
-		return \null;
+		return null;
 	}
 }
