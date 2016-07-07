@@ -84,20 +84,36 @@ class PacketMaker extends Worker {
 	protected function checkPacket($data) {
 		if (isset($data['moveData'])) {
 			foreach ($data['moveData'] as $identifier => $moveData) {
+				$moveStr = "";
 				foreach ($moveData['data'] as $singleMoveData) {
 					$pk = new MoveEntityPacket($moveData['additionalChar']);
 					$pk->entities = [$singleMoveData];
-					$res = $this->makeBuffer($identifier, $moveData['additionalChar'], $pk, false, false);
-					$this->externalQueue[] = $res;
+					$pk->encode();
+					$pk->updateBuffer($moveData['additionalChar']);
+					$moveStr .= Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;					
 				}
+				$buffer = zlib_encode($moveStr, ZLIB_ENCODING_DEFLATE, 7);
+				$pkBatch = new BatchPacket();
+				$pkBatch->payload = $buffer;
+				$pkBatch->encode();
+				$pkBatch->isEncoded = true;
+				$this->externalQueue[] = $this->makeBuffer($identifier, $moveData['additionalChar'], $pkBatch, false, false);
 			}	
 			foreach ($data['motionData'] as $identifier => $motionData) {
+				$motionStr = "";
 				foreach ($motionData['data'] as $singleMotionData) {
 					$pk = new SetEntityMotionPacket($motionData['additionalChar']);
 					$pk->entities = [$singleMotionData];
-					$res = $this->makeBuffer($identifier, $motionData['additionalChar'], $pk, false, false);
-					$this->externalQueue[] = $res;
+					$pk->encode();
+					$pk->updateBuffer($motionData['additionalChar']);
+					$motionStr .= Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;		
 				}
+				$buffer = zlib_encode($motionStr, ZLIB_ENCODING_DEFLATE, 7);
+				$pkBatch = new BatchPacket();
+				$pkBatch->payload = $buffer;
+				$pkBatch->encode();
+				$pkBatch->isEncoded = true;
+				$this->externalQueue[] = $this->makeBuffer($identifier, $motionData['additionalChar'], $pkBatch, false, false);
 			}
 		} elseif($data['isBatch']) {
 			$str = "";
