@@ -227,7 +227,7 @@ class Item extends Entity{
 		$pk->item = $this->getItem();
 		$player->dataPacket($pk);
 
-		$this->sendData($player);
+//		$this->sendData($player);
 
 		parent::spawnTo($player);
 	}
