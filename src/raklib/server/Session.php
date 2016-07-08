@@ -56,7 +56,7 @@ class Session{
     private $address;
     private $port;
     private $state = self::STATE_UNCONNECTED;
-    private $mtuSize = 548; //Min size
+    private $mtuSize = 508; //(Max IP Header Size) — (UDP Header Size) = 576 — 60 — 8 = 508
     private $id = 0;
     private $splitID = 0;
 
@@ -163,12 +163,12 @@ class Session{
 
 				if(--$limit <= 0){
 					break;
-            }
+				}
             }
 
 			if(count($this->packetToSend) > self::$WINDOW_SIZE){
 				$this->packetToSend = [];
-        }
+			}
         }
 
         if(count($this->needACK) > 0){
@@ -256,8 +256,8 @@ class Session{
 		    $this->sendQueue->packets[] = $pk->toBinary();
 	    }
     }
-	
-	/**
+
+    /**
      * @param EncapsulatedPacket $packet
      * @param int                $flags
      */
@@ -480,7 +480,7 @@ class Session{
 				foreach($packet->packets as $pk){
 					$this->handleEncapsulatedPacket($pk);
 				}
-			}else{				
+			}else{
                 if($packet instanceof ACK){
                     $packet->decode();
                     foreach($packet->packets as $seq){
@@ -518,8 +518,8 @@ class Session{
             }elseif($this->state === self::STATE_CONNECTING_1 and $packet instanceof OPEN_CONNECTION_REQUEST_2){
                 $this->id = $packet->clientID;
                 if($packet->serverPort === $this->sessionManager->getPort() or !$this->sessionManager->portChecking){
-                    $this->mtuSize = min(abs($packet->mtuSize), 548); //Max size, do not allow creating large buffers to fill server memory
-                    $pk = new OPEN_CONNECTION_REPLY_2();
+                    $this->mtuSize = min(abs($packet->mtuSize), 1432);  //MTU — (Max IP Header Size) — (UDP Header Size) = 1500 — 60 — 8 = 1432 
+					$pk = new OPEN_CONNECTION_REPLY_2();
                     $pk->mtuSize = $this->mtuSize;
                     $pk->serverID = $this->sessionManager->getID();
 					$pk->clientAddress = $this->address;
