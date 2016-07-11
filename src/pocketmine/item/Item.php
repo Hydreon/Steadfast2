@@ -1175,7 +1175,6 @@ class Item{
 		self::$food[] = Item::COOKED_FISH;
 		self::$food[] = Item::RAW_PORKCHOP;
 		self::$food[] = Item::COOKED_PORKCHOP;
-		self::$food[] = Item::BAKED_POTATO;
 	}
 
 	public static function clearCreativeItems(){
