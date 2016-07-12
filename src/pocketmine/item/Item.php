@@ -1166,7 +1166,6 @@ class Item{
 		self::$food[] = Item::POTATO;
 		self::$food[] = Item::BAKED_POTATO;
 		self::$food[] = Item::PUMPKIN_PIE;
-		self::$food[] = Item::COOKIE;
 		self::$food[] = Item::BREAD;
 		self::$food[] = Item::APPLE;
 		self::$food[] = Item::GOLDEN_APPLE;
