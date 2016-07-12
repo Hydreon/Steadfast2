@@ -1166,7 +1166,6 @@ class Item{
 		self::$food[] = Item::POTATO;
 		self::$food[] = Item::BAKED_POTATO;
 		self::$food[] = Item::PUMPKIN_PIE;
-		self::$food[] = Item::COOKIE;
 		self::$food[] = Item::BREAD;
 		self::$food[] = Item::APPLE;
 		self::$food[] = Item::GOLDEN_APPLE;
@@ -1175,7 +1174,6 @@ class Item{
 		self::$food[] = Item::COOKED_FISH;
 		self::$food[] = Item::RAW_PORKCHOP;
 		self::$food[] = Item::COOKED_PORKCHOP;
-		self::$food[] = Item::BAKED_POTATO;
 	}
 
 	public static function clearCreativeItems(){
