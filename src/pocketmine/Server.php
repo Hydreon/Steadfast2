@@ -276,6 +276,12 @@ class Server{
 	public $packetMaker = null;
 	
 	private $signTranslation = [];
+	
+	private $globalCompasPosition = array(
+		'x' => 15000,
+		'y' => 10,
+		'z' => -1000000
+	);
 
 	public function isUseAnimal() {
 		return $this->useAnimal;
@@ -2535,4 +2541,14 @@ class Server{
 	public function getSignTranslation() {
 		return $this->signTranslation;
 	}	
+		
+	public function setGlobalCompassPosition($x, $z) {
+		$this->globalCompasPosition['x'] = $x;
+		$this->globalCompasPosition['z'] = $z;
+	}
+
+	public function getGlobalCompassPosition() {
+		return $this->globalCompasPosition;
+	}	
+
 }
