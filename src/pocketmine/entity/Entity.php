@@ -82,18 +82,26 @@ abstract class Entity extends Location implements Metadatable{
 //	const DATA_TYPE_ROTATION = 7;
 	const DATA_TYPE_LONG = 7;
 
-	const DATA_FLAGS = 0;
-	const DATA_AIR = 1;
+	const DATA_FLAGS = 0;//is entity burning or not
+	const DATA_AIR = 1;//air under water
 	const DATA_NAMETAG = 2;
-	const DATA_SHOW_NAMETAG = 3;
+	const DATA_SHOW_NAMETAG = 3;//is name permanent visible or not
 	const DATA_SILENT = 4;
 	const DATA_POTION_COLOR = 7;
-	const DATA_POTION_AMBIENT = 8;
-	const DATA_NO_AI = 15;
+	const DATA_POTION_AMBIENT = 8;//is potion ambient or not
+	const DATA_NO_AI = 15;//can move or not
 	const DATA_LEAD_HOLDER = 23;
 	const DATA_LEAD = 24;
-
-
+	//other dataProperty values:
+	//14 - age (0 - baby, 130000 - parent)
+	//16 - sheep color (the same as wool meta)
+	//17 - shooter id (for throwable entities)
+	//18 - type/variant (for ocelots, bats, sheep)
+	//19 - charge value for creaper
+	//20 - boat color
+	//21 - in love (for those who can breed)
+	
+	
 	const DATA_FLAG_ONFIRE = 0;
 	const DATA_FLAG_SNEAKING = 1;
 	const DATA_FLAG_RIDING = 2;
