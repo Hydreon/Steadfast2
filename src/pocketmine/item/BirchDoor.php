@@ -29,7 +29,8 @@ class BirchDoor extends Item{
 		parent::__construct(self::BIRCH_DOOR, 0, $count, "Birch Door");
 	}
 
-	public function getMaxStackSize() : int{
+	public function getMaxStackSize(){
 		return 1;
 	}
 }
+
