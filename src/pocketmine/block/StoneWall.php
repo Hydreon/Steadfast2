@@ -27,7 +27,6 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 
 class StoneWall extends Transparent{
-	
 	const NONE_MOSSY_WALL = 0;
 	const MOSSY_WALL = 1;
 
