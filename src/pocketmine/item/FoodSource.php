@@ -21,10 +21,17 @@
 
 namespace pocketmine\item;
 
+use pocketmine\entity\Effect;
 
-class Bowl extends Item{
-	public function __construct($meta = 0, $count = 1){
-		parent::__construct(self::BOWL, 0, $count, "Bowl");
-	}
+interface FoodSource{
+	public function getFoodRestore() : int;
 
+	public function getSaturationRestore() : float;
+
+	public function getResidue();
+
+	/**
+	 * @return Effect[]
+	 */
+	public function getAdditionalEffects() : array;
 }

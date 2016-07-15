@@ -21,17 +21,10 @@
 
 namespace pocketmine\item;
 
-
-class Apple extends Food{
+class Clock extends Item{
 	public function __construct($meta = 0, $count = 1){
-		parent::__construct(self::APPLE, 0, $count, "Apple");
+		parent::__construct(self::CLOCK, $meta, $count, "Clock");
 	}
 
-	public function getFoodRestore() : int{
-		return 4;
-	}
-
-	public function getSaturationRestore() : float{
-		return 2.4;
-	}
 }
+

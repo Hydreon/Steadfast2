@@ -23,9 +23,6 @@ namespace pocketmine\item;
 
 
 class GoldHelmet extends Armor{
-	
-	const SLOT_NUMBER = 0;
-	
 	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::GOLD_HELMET, $meta, $count, "Gold Helmet");
 	}
