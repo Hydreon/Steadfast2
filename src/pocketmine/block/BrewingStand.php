@@ -22,45 +22,25 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\math\AxisAlignedBB;
+use pocketmine\item\Tool;
 
-class EndPortalFrame extends Solid{
+class BrewingStand extends Transparent{
 
-	protected $id = self::END_PORTAL_FRAME;
+	protected $id = self::BREWING_STAND;
 
-	public function __construct($meta = 0){
-		$this->meta = $meta;
-	}
+	public function __construct(){
 
-	public function getLightLevel(){
-		return 1;
 	}
 
 	public function getName(){
-		return "EndTag Portal Frame";
+		return "Brewing Stand";
 	}
 
 	public function getHardness(){
-		return -1;
+		return 0.5;
 	}
 
-	public function getResistance(){
-		return 18000000;
-	}
-
-	public function isBreakable(Item $item){
-		return false;
-	}
-
-	protected function recalculateBoundingBox(){
-
-		return new AxisAlignedBB(
-			$this->x,
-			$this->y,
-			$this->z,
-			$this->x + 1,
-			$this->y + (($this->getDamage() & 0x04) > 0 ? 1 : 0.8125),
-			$this->z + 1
-		);
+	public function getToolType(){
+		return Tool::TYPE_PICKAXE;
 	}
 }

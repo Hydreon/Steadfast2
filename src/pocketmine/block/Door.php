@@ -271,9 +271,9 @@ abstract class Door extends Transparent{
 			if($down->getId() === $this->getId()){
 				$meta = $down->getDamage() ^ 0x04;
 				$this->getLevel()->setBlock($down, Block::get($this->getId(), $meta), true);
-				$players = $this->getLevel()->getUsingChunk($this->x >> 4, $this->z >> 4);
+				$players = $this->getLevel()->getChunkPlayers($this->x >> 4, $this->z >> 4);
 				if($player instanceof Player){
-					unset($players[$player->getId()]);
+					unset($players[$player->getLoaderId()]);
 				}
 
 				$this->level->addSound(new DoorSound($this));
@@ -284,9 +284,9 @@ abstract class Door extends Transparent{
 		}else{
 			$this->meta ^= 0x04;
 			$this->getLevel()->setBlock($this, $this, true);
-			$players = $this->getLevel()->getUsingChunk($this->x >> 4, $this->z >> 4);
+			$players = $this->getLevel()->getChunkPlayers($this->x >> 4, $this->z >> 4);
 			if($player instanceof Player){
-				unset($players[$player->getId()]);
+				unset($players[$player->getLoaderId()]);
 			}
 			$this->level->addSound(new DoorSound($this));
 		}
