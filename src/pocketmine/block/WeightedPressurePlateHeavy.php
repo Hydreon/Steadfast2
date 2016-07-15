@@ -21,15 +21,15 @@
 
 namespace pocketmine\block;
 
-class Rail extends Solid {
+class WeightedPressurePlateHeavy extends Solid {
 
-    protected $id = self::RAIL;
+    protected $id = self::WEIGHTED_PRESSURE_PLATE_HEAVY;
 
     public function __construct($meta = 0){
         $this->meta = $meta;
     }
 
     public function getName(){
-        return "Rail";
+        return "Weighted Pressure Plate Heavy";
     }
 }

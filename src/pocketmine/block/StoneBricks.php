@@ -25,7 +25,6 @@ use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
 class StoneBricks extends Solid{
-	
 	const NORMAL = 0;
 	const MOSSY = 1;
 	const CRACKED = 2;
@@ -47,16 +46,16 @@ class StoneBricks extends Solid{
 
 	public function getName(){
 		static $names = [
-			0 => "Stone Bricks",
-			1 => "Mossy Stone Bricks",
-			2 => "Cracked Stone Bricks",
-			3 => "Chiseled Stone Bricks",
+			self::NORMAL => "Stone Bricks",
+			self::MOSSY => "Mossy Stone Bricks",
+			self::CRACKED => "Cracked Stone Bricks",
+			self::CHISELED => "Chiseled Stone Bricks",
 		];
 		return $names[$this->meta & 0x03];
 	}
 	
 	public function getDrops(Item $item){
-		if($item->isPickaxe() >= 1){
+		if($item->isPickaxe() >= Tool::TIER_WOODEN){
 			return [
 				[Item::STONE_BRICKS, $this->meta & 0x03, 1],
 			];

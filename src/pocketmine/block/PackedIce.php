@@ -24,33 +24,24 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class NetherBrick extends Solid{
+class PackedIce extends Solid{
 
-	protected $id = self::NETHER_BRICKS;
+	protected $id = self::PACKED_ICE;
 
 	public function __construct(){
 
+	}
+
+	public function getName(){
+		return "Packed Ice";
+	}
+
+	public function getHardness(){
+		return 0.5;
 	}
 
 	public function getToolType(){
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getName(){
-		return "Nether Bricks";
-	}
-
-	public function getHardness(){
-		return 2;
-	}
-
-	public function getDrops(Item $item){
-		if($item->isPickaxe() >= Tool::TIER_WOODEN){
-			return [
-				[Item::NETHER_BRICKS, 0, 1],
-			];
-		}else{
-			return [];
-		}
-	}
 }

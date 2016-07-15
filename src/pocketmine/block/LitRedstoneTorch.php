@@ -21,15 +21,15 @@
 
 namespace pocketmine\block;
 
-class Rail extends Solid {
+class LitRedstoneTorch extends Solid {
 
-    protected $id = self::RAIL;
+    protected $id = self::REDSTONE_TORCH;
 
     public function __construct($meta = 0){
         $this->meta = $meta;
     }
 
     public function getName(){
-        return "Rail";
+        return "Lit Redstone Torch";
     }
 }

@@ -21,15 +21,15 @@
 
 namespace pocketmine\block;
 
-class Rail extends Solid {
+class WoodenPressurePlate extends Solid{
+	
+	protected $id = self::WOODEN_PRESSURE_PLATE;
 
-    protected $id = self::RAIL;
+	public function __construct($meta = 0) {
+		$this->meta = $meta;
+	}
 
-    public function __construct($meta = 0){
-        $this->meta = $meta;
-    }
-
-    public function getName(){
-        return "Rail";
-    }
+	public function getName(){
+		return "Wooden Pressure Plate";
+	}
 }

@@ -18,57 +18,54 @@
  * 
  *
 */
-
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class Stone extends Solid{
-	const NORMAL = 0;
-	const GRANITE = 1;
-	const POLISHED_GRANITE = 2;
-	const DIORITE = 3;
-	const POLISHED_DIORITE = 4;
-	const ANDESITE = 5;
-	const POLISHED_ANDESITE = 6;
+class NetherBrickFence extends Transparent {
 
-	protected $id = self::STONE;
+	protected $id = self::NETHER_BRICK_FENCE;
 
 	public function __construct($meta = 0){
 		$this->meta = $meta;
 	}
-
-	public function getHardness(){
-		return 1.5;
+	
+	public function getBreakTime(Item $item){
+		if ($item instanceof Air){
+			//Breaking by hand
+			return 10;
+		}
+		else{
+			// Other breaktimes are equal to woodfences.
+			return parent::getBreakTime($item);
+		}
 	}
 
+	public function getHardness(){
+		return 2;
+	}
+        
 	public function getToolType(){
 		return Tool::TYPE_PICKAXE;
 	}
-
+	
 	public function getName(){
-		static $names = [
-			self::NORMAL => "Stone",
-			self::GRANITE => "Granite",
-			self::POLISHED_GRANITE => "Polished Granite",
-			self::DIORITE => "Diorite",
-			self::POLISHED_DIORITE => "Polished Diorite",
-			self::ANDESITE => "Andesite",
-			self::POLISHED_ANDESITE => "Polished Andesite",
-			7 => "Unknown Stone",
-		];
-		return $names[$this->meta & 0x07];
+		return "Nether Brick Fence";
+	}
+	
+	public function canConnect(Block $block){
+		//TODO: activate comments when the NetherBrickFenceGate class has been created.
+		return ($block instanceof NetherBrickFence /* or $block instanceof NetherBrickFenceGate */) ? true : $block->isSolid() and !$block->isTransparent();
 	}
 
 	public function getDrops(Item $item){
 		if($item->isPickaxe() >= Tool::TIER_WOODEN){
 			return [
-				[$this->getDamage() === 0 ? Item::COBBLESTONE : Item::STONE, $this->getDamage(), 1],
+				[$this->id, $this->meta, 1],
 			];
 		}else{
 			return [];
 		}
-	}
-
+	}        
 }

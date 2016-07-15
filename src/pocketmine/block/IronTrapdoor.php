@@ -21,36 +21,21 @@
 
 namespace pocketmine\block;
 
-use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class NetherBrick extends Solid{
+class IronTrapdoor extends Trapdoor{
 
-	protected $id = self::NETHER_BRICKS;
+	protected $id = self::IRON_TRAPDOOR;
 
-	public function __construct(){
+	public function getName(){
+		return "Iron Trapdoor";
+	}
 
+	public function getHardness(){
+		return 5;
 	}
 
 	public function getToolType(){
 		return Tool::TYPE_PICKAXE;
-	}
-
-	public function getName(){
-		return "Nether Bricks";
-	}
-
-	public function getHardness(){
-		return 2;
-	}
-
-	public function getDrops(Item $item){
-		if($item->isPickaxe() >= Tool::TIER_WOODEN){
-			return [
-				[Item::NETHER_BRICKS, 0, 1],
-			];
-		}else{
-			return [];
-		}
 	}
 }
