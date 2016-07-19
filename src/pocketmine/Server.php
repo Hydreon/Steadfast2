@@ -210,6 +210,9 @@ class Server{
 	
 	/** @var bool */
 	private $autoGenerate;
+	
+	/** @var bool */
+	private $savePlayerData;
 
 	/** @var RCON */
 	private $rcon;
@@ -426,6 +429,21 @@ class Server{
 	 */
 	public function setAutoGenerate($value){
 		$this->autoGenerate = (bool) $value;		
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getSavePlayerData(){
+		return $this->savePlayerData;
+	}
+
+	
+	/**
+	 * @param bool $value
+	 */
+	public function setSavePlayerData($value) {
+		$this->savePlayerData = (bool) $value;		
 	}
 
 	/**
@@ -1479,7 +1497,8 @@ class Server{
 			"enable-rcon" => false,
 			"rcon.password" => substr(base64_encode(@Utils::getRandomBytes(20, false)), 3, 10),
 			"auto-save" => true,
-			"auto-generate" => false
+			"auto-generate" => false,
+			"save-player-data" => false
 		]);
 
 		ServerScheduler::$WORKERS = 4;
@@ -1509,6 +1528,7 @@ class Server{
 		$this->maxPlayers = $this->getConfigInt("max-players", 20);
 		$this->setAutoSave($this->getConfigBoolean("auto-save", true));
 		$this->setAutoGenerate($this->getConfigBoolean("auto-generate", false));
+		$this->setSavePlayerData($this->getConfigBoolean("save-player-data", false));
 		
 		$this->useAnimal = $this->getConfigBoolean("spawn-animals", false);
 		$this->animalLimit = $this->getConfigInt("animals-limit", 0);
