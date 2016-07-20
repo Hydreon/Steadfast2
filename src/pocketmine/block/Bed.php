@@ -63,7 +63,7 @@ class Bed extends Transparent{
 	}
 
 	public function onActivate(Item $item, Player $player = null){
-
+		return false;
 		$time = $this->getLevel()->getTime() % self::FULL_DAY;
 
 		$isNight = ($time >= self::NIGHT_START and $time < self::NIGHT_END);
