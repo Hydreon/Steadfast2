@@ -80,6 +80,8 @@ use pocketmine\utils\MainLogger;
 use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
 use pocketmine\network\protocol\RequestChunkRadiusPacket;
 use pocketmine\utils\Binary;
+use pocketmine\network\proxy\ConnectPacket;
+use pocketmine\network\proxy\Info as ProtocolProxyInfo;
 
 class Network {
 
@@ -87,6 +89,9 @@ class Network {
 
 	/** @var \SplFixedArray */
 	private $packetPool;
+	
+	/** @var \SplFixedArray */
+	private $proxyPacketPool;
 
 	/** @var Server */
 	private $server;
@@ -105,6 +110,7 @@ class Network {
 	public function __construct(Server $server){
 
 		$this->registerPackets();
+		$this->registerProxyPackets();
 
 		$this->server = $server;
 
@@ -206,6 +212,14 @@ class Network {
 	public function registerPacket($id, $class){
 		$this->packetPool[$id] = new $class;
 	}
+	
+	/**
+	 * @param int        $id 0-255
+	 * @param DataPacket $class
+	 */
+	public function registerProxyPacket($id, $class){
+		$this->proxyPacketPool[$id] = new $class;
+	}
 
 	public function getServer(){
 		return $this->server;
@@ -267,7 +281,20 @@ class Network {
 		}
 		return null;
 	}
-
+	
+		/**
+	 * @param $id
+	 *
+	 * @return DataPacket
+	 */
+	public function getProxyPacket($id){
+		/** @var DataPacket $class */
+		$class = $this->proxyPacketPool[$id];
+		if($class !== null){
+			return clone $class;
+		}
+		return null;
+	}
 
 	/**
 	 * @param string $address
@@ -344,5 +371,10 @@ class Network {
 		$this->registerPacket(ProtocolInfo::PLAYER_LIST_PACKET, PlayerListPacket::class);
 		$this->registerPacket(ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET, RequestChunkRadiusPacket::class);
 		$this->registerPacket(ProtocolInfo::CHUNK_RADIUS_UPDATE_PACKET, ChunkRadiusUpdatePacket::class);
+	}
+	
+	private function registerProxyPackets(){
+		$this->proxyPacketPool = new \SplFixedArray(256);
+		$this->registerProxyPacket(ProtocolProxyInfo::CONNECT_PACKET, ConnectPacket::class);
 	}
 }

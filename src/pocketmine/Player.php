@@ -139,9 +139,8 @@ use pocketmine\tile\Tile;
 use pocketmine\utils\TextFormat;
 use pocketmine\network\protocol\SetPlayerGameTypePacket;
 use pocketmine\block\Liquid;
-use pocketmine\network\protocol\ATestPacket;
-
 use raklib\Binary;
+use pocketmine\network\proxy\Info as ProtocolProxyInfo;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -262,6 +261,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	/**@var string*/
 	public $language = 'English';
+	
+	public $proxyId = '';
+	public $proxySessionId = '';
 
 	public function getLeaveMessage(){
 		return "";
@@ -1706,10 +1708,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		switch($packet->pid()){
 			case ProtocolInfo::LOGIN_PACKET:
-				/*
-				 * A/N: Not going to implement any session code until it actually does stuff.
-				 * Single line functions are obnoxious to follow.
-				 */
 				//Timings::$timerLoginPacket->startTiming();
 				if($this->loggedIn === true){
 					//Timings::$timerLoginPacket->stopTiming();
@@ -1717,246 +1715,24 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				
 				$this->additionalChar = $packet->additionalChar;
-				
-				if($packet->isValidProtocol === false) {
-					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
-					break;
-				}
-
 				$this->username = TextFormat::clean($packet->username);
 				$this->displayName = $this->username;
 				$this->setNameTag($this->username);
 				$this->iusername = strtolower($this->username);
-								
 				$this->randomClientId = $packet->clientId;
 				$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
 				$this->uuid = $packet->clientUUID;
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
 				$this->protocol = $packet->protocol1;
-//				if(strpos($packet->username, "\x00") !== false or preg_match('#^[a-zA-Z0-9_]{3,16}$#', $packet->username) == 0 or $this->username === "" or $this->iusername === "rcon" or $this->iusername === "console" or strlen($packet->username) > 16 or strlen($packet->username) < 3){
-				$valid = true;
-				$len = strlen($packet->username);
-				if($len > 16 or $len < 3){
-					$valid = false;
-				}
-				for($i = 0; $i < $len and $valid; ++$i){
-					$c = ord($packet->username{$i});
-					if(($c >= ord("a") and $c <= ord("z")) or
-						($c >= ord("A") and $c <= ord("Z")) or
-						($c >= ord("0") and $c <= ord("9")) or $c === ord("_")
-					){
-						continue;
-					}
-					$valid = false;
-					break;
-				}
-				if(!$valid or $this->iusername === "rcon" or $this->iusername === "console"){
-					$this->close("", "Please choose a valid username.");
-					//Timings::$timerLoginPacket->stopTiming();
-					return;
-				}
-
-				if(strlen($packet->skin) !== 64 * 32 * 4 && strlen($packet->skin) !== 64 * 64 * 4){
-					$this->close("", "Invalid skin.", false);
-					//Timings::$timerLoginPacket->stopTiming();
-					return;
-				}
-				
-				if(count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers()){
-					$this->close("", "Server is Full",false);
-					//Timings::$timerLoginPacket->stopTiming();
-					break;
-				}
-
 				$this->setSkin($packet->skin, $packet->skinName);
-
-				$this->server->getPluginManager()->callEvent($ev = new PlayerPreLoginEvent($this, "Plugin reason"));
-				if($ev->isCancelled()){
-					$this->close("", $ev->getKickMessage());
+				
+				if($packet->isValidProtocol === false) {
+					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
 					//Timings::$timerLoginPacket->stopTiming();
-					return;
-				}
-
-				if(!$this->server->isWhitelisted(strtolower($this->getName()))){
-					$this->close(TextFormat::YELLOW . $this->username . " has left the game", "Server is private.");
-					//Timings::$timerLoginPacket->stopTiming();
-					return;
-				}elseif($this->server->getNameBans()->isBanned(strtolower($this->getName())) or $this->server->getIPBans()->isBanned($this->getAddress())){
-					$this->close(TextFormat::YELLOW . $this->username . " has left the game", "You have been banned.");
-					//Timings::$timerLoginPacket->stopTiming();
-					return;
-				}
-
-				if($this->hasPermission(Server::BROADCAST_CHANNEL_USERS)){
-					$this->server->getPluginManager()->subscribeToPermission(Server::BROADCAST_CHANNEL_USERS, $this);
-				}
-				if($this->hasPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE)){
-					$this->server->getPluginManager()->subscribeToPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, $this);
-				}
-
-				foreach($this->server->getOnlinePlayers() as $p){
-					if($p !== $this and strtolower($p->getName()) === strtolower($this->getName())){
-						if($p->kick("You connected from somewhere else.") === false){
-							$this->close(TextFormat::YELLOW . $this->getName() . " has left the game", "You connected from somewhere else.");
-							//Timings::$timerLoginPacket->stopTiming();
-							return;
-						}else{
-							//Timings::$timerLoginPacket->stopTiming();
-							return;
-						}
-					}
-				}
-								
-				$nbt = $this->server->getOfflinePlayerData($this->username);
-				if(!isset($nbt->NameTag)){
-					$nbt->NameTag = new StringTag("NameTag", $this->username);
-				}else{
-					$nbt["NameTag"] = $this->username;
-				}
-				$this->gamemode = $nbt["playerGameType"] & 0x03;
-				if($this->server->getForceGamemode()){
-					$this->gamemode = $this->server->getGamemode();
-					$nbt->playerGameType = new IntTag("playerGameType", $this->gamemode);
-				}
-
-				$this->allowFlight = $this->isCreative();
-
-
-				if(($level = $this->server->getLevelByName($nbt["Level"])) === null){
-					$this->setLevel($this->server->getDefaultLevel(), true);
-					$nbt["Level"] = $this->level->getName();
-					$nbt["Pos"][0] = $this->level->getSpawnLocation()->x;
-					$nbt["Pos"][1] = $this->level->getSpawnLocation()->y + 5;
-					$nbt["Pos"][2] = $this->level->getSpawnLocation()->z;
-				}else{
-					$this->setLevel($level, true);
-				}
-
-				if(!($nbt instanceof Compound)){
-					$this->close(TextFormat::YELLOW . $this->username . " has left the game", "Corrupt joining data, check your connection.");
-					//Timings::$timerLoginPacket->stopTiming();
-					return;
-				}
-			
-			
-				
-				$s = '';
-				for ($i = 0; $i < 128; $i++){
-					$s .= '0';
-				}
-//			var_dump($packet->identityPublicKey);	
-//			while(empty($test = file_get_contents('test.txt'))) {}
-//				
-//				$pk = new ATestPacket();
-//				$pk->key1 = 'MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEqofKIr6LBTeOscce8yCtdG4dO2KLp5uYWfdB4IJUKjhVAvJdv1UpbDpUXjhydgq3NhfeSpYmLG9dnpi/kpLcKfj0Hb0omhR86doxE7XwuMAKYLHOHX6BnXpDHXyQ6g5f';
-//				$pk->key2 = $s;
-//				$this->dataPacket($pk);
-//
-//					return;
-				$pk = new PlayStatusPacket();
-				$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
-				$this->dataPacket($pk);
-				
-				$this->achievements = [];
-
-				/** @var Byte $achievement */
-				foreach($nbt->Achievements as $achievement){
-					$this->achievements[$achievement->getName()] = $achievement->getValue() > 0 ? true : false;
-				}
-
-				$nbt->lastPlayed = new LongTag("lastPlayed", floor(microtime(true) * 1000));
-				parent::__construct($this->level->getChunk($nbt["Pos"][0] >> 4, $nbt["Pos"][2] >> 4, true), $nbt);
-				$this->loggedIn = true;
-				$this->server->addOnlinePlayer($this);
-
-				$this->server->getPluginManager()->callEvent($ev = new PlayerLoginEvent($this, "Plugin reason"));
-				if($ev->isCancelled()){
-					$this->close(TextFormat::YELLOW . $this->username . " has left the game", $ev->getKickMessage());
-					//Timings::$timerLoginPacket->stopTiming();
-					return;
-				}
-
-				if($this->isCreative()){
-					$this->inventory->setHeldItemSlot(0);
-				}else{
-					$this->inventory->setHeldItemSlot($this->inventory->getHotbarSlotIndex(0));
-				}
-				
-				
-
-				$this->uuid = $packet->clientUUID;
-				$this->rawUUID = $this->uuid->toBinary();
-				$this->clientSecret = $packet->clientSecret;
-
-				if($this->spawnPosition === null and isset($this->namedtag->SpawnLevel) and ($level = $this->server->getLevelByName($this->namedtag["SpawnLevel"])) instanceof Level){
-					$this->spawnPosition = new Position($this->namedtag["SpawnX"], $this->namedtag["SpawnY"], $this->namedtag["SpawnZ"], $level);
-				}
-				
-				$spawnPosition = $this->getSpawn();
-				
-				$compassPosition = $this->server->getGlobalCompassPosition();
-				
-				$pk = new StartGamePacket();
-				$pk->seed = -1;
-				$pk->dimension = 0;
-				$pk->x = $this->x;
-				$pk->y = $this->y;
-				$pk->z = $this->z;
-//				$pk->spawnX = (int) $spawnPosition->x;
-//				$pk->spawnY = (int) $spawnPosition->y;
-//				$pk->spawnZ = (int) $spawnPosition->z;
-				/* hack for compass*/
-				$pk->spawnX = $compassPosition['x'];
-				$pk->spawnY = $compassPosition['y'];
-				$pk->spawnZ = $compassPosition['z'];
-				$pk->generator = 1; //0 old, 1 infinite, 2 flat
-				$pk->gamemode = $this->gamemode & 0x01;
-				$pk->eid = 0;//$this->getId(); //Always use EntityID as zero for the actual player
-				$this->dataPacket($pk);
-				
-				$pk = new SetTimePacket();
-				$pk->time = $this->level->getTime();
-				$pk->started = true;
-				$this->dataPacket($pk);
-
-				$pk = new SetSpawnPositionPacket();
-				$pk->x = (int) $spawnPosition->x;
-				$pk->y = (int) $spawnPosition->y;
-				$pk->z = (int) $spawnPosition->z;
-				$this->dataPacket($pk);
-				
-				if($this->getHealth() <= 0){
-					$this->dead = true;
-				}
-
-				$pk = new SetDifficultyPacket();
-				$pk->difficulty = $this->server->getDifficulty();
-				$this->dataPacket($pk);
-
-				$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . TextFormat::AQUA . $this->ip . " connected");
-
-				if($this->gamemode === Player::SPECTATOR){
-					$pk = new ContainerSetContentPacket();
-					$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
-					$this->dataPacket($pk);
-				}elseif($this->gamemode === Player::CREATIVE) {
-					$pk = new ContainerSetContentPacket();
-					$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
-					foreach(Item::getCreativeItems() as $item){
-						$pk->slots[] = clone $item;
-					}
-					$this->dataPacket($pk);
-				}
-
-				$this->server->sendFullPlayerListData($this);
-				$this->server->sendRecipeList($this);
-
-				$pk = new SetEntityDataPacket();
-				$pk->eid = 0;
-				$pk->metadata = [self::DATA_LEAD_HOLDER => [self::DATA_TYPE_LONG, -1]];
-				$this->dataPacket($pk);
-				
+					break;
+				}		
+				$this->processLogin();
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
 			case ProtocolInfo::MOVE_PLAYER_PACKET:
@@ -3624,8 +3400,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->lastMessageReceivedFrom;
 	}
 	
-	public function setIdentifier($identifier){
+	public function setIdentifier($identifier, $id = '', $sessionId = ''){
 		$this->identifier = $identifier;
+		$this->proxyId = $id;
+		$this->proxySessionId = $sessionId;
 	}
 	
 	public function getIdentifier(){
@@ -3640,4 +3418,218 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->eyeHeight;
 	}
 	
+	
+	public function processLogin() {
+		$valid = true;
+		$len = strlen($this->username);
+		if ($len > 16 or $len < 3) {
+			$valid = false;
+		}
+		for ($i = 0; $i < $len and $valid; ++$i) {
+			$c = ord($this->username{$i});
+			if (($c >= ord("a") and $c <= ord("z")) or ( $c >= ord("A") and $c <= ord("Z")) or ( $c >= ord("0") and $c <= ord("9")) or $c === ord("_")
+			) {
+				continue;
+			}
+			$valid = false;
+			break;
+		}
+		if (!$valid or $this->iusername === "rcon" or $this->iusername === "console") {
+			$this->close("", "Please choose a valid username.");
+			return;
+		}
+
+		if (strlen($this->skin) !== 64 * 32 * 4 && strlen($this->skin) !== 64 * 64 * 4) {
+			$this->close("", "Invalid skin.", false);
+			return;
+		}
+
+		if (count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers()) {
+			$this->close("", "Server is Full", false);
+			;
+			return;
+		}
+
+		$this->server->getPluginManager()->callEvent($ev = new PlayerPreLoginEvent($this, "Plugin reason"));
+		if ($ev->isCancelled()) {
+			$this->close("", $ev->getKickMessage());
+			return;
+		}
+
+		if (!$this->server->isWhitelisted(strtolower($this->getName()))) {
+			$this->close(TextFormat::YELLOW . $this->username . " has left the game", "Server is private.");
+			return;
+		} elseif ($this->server->getNameBans()->isBanned(strtolower($this->getName())) or $this->server->getIPBans()->isBanned($this->getAddress())) {
+			$this->close(TextFormat::YELLOW . $this->username . " has left the game", "You have been banned.");
+			return;
+		}
+
+		if ($this->hasPermission(Server::BROADCAST_CHANNEL_USERS)) {
+			$this->server->getPluginManager()->subscribeToPermission(Server::BROADCAST_CHANNEL_USERS, $this);
+		}
+		if ($this->hasPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE)) {
+			$this->server->getPluginManager()->subscribeToPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, $this);
+		}
+
+		foreach ($this->server->getOnlinePlayers() as $p) {
+			if ($p !== $this and strtolower($p->getName()) === strtolower($this->getName())) {
+				if ($p->kick("You connected from somewhere else.") === false) {
+					$this->close(TextFormat::YELLOW . $this->getName() . " has left the game", "You connected from somewhere else.");
+					return;
+				} else {
+					return;
+				}
+			}
+		}
+
+		$nbt = $this->server->getOfflinePlayerData($this->username);
+		if (!isset($nbt->NameTag)) {
+			$nbt->NameTag = new StringTag("NameTag", $this->username);
+		} else {
+			$nbt["NameTag"] = $this->username;
+		}
+		$this->gamemode = $nbt["playerGameType"] & 0x03;
+		if ($this->server->getForceGamemode()) {
+			$this->gamemode = $this->server->getGamemode();
+			$nbt->playerGameType = new IntTag("playerGameType", $this->gamemode);
+		}
+
+		$this->allowFlight = $this->isCreative();
+
+
+		if (($level = $this->server->getLevelByName($nbt["Level"])) === null) {
+			$this->setLevel($this->server->getDefaultLevel(), true);
+			$nbt["Level"] = $this->level->getName();
+			$nbt["Pos"][0] = $this->level->getSpawnLocation()->x;
+			$nbt["Pos"][1] = $this->level->getSpawnLocation()->y + 5;
+			$nbt["Pos"][2] = $this->level->getSpawnLocation()->z;
+		} else {
+			$this->setLevel($level, true);
+		}
+
+		if (!($nbt instanceof Compound)) {
+			$this->close(TextFormat::YELLOW . $this->username . " has left the game", "Corrupt joining data, check your connection.");
+			return;
+		}
+
+		$pk = new PlayStatusPacket();
+		$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
+		$this->dataPacket($pk);
+
+		$this->achievements = [];
+
+		/** @var Byte $achievement */
+		foreach ($nbt->Achievements as $achievement) {
+			$this->achievements[$achievement->getName()] = $achievement->getValue() > 0 ? true : false;
+		}
+
+		$nbt->lastPlayed = new LongTag("lastPlayed", floor(microtime(true) * 1000));
+		parent::__construct($this->level->getChunk($nbt["Pos"][0] >> 4, $nbt["Pos"][2] >> 4, true), $nbt);
+		$this->loggedIn = true;
+		$this->server->addOnlinePlayer($this);
+
+		$this->server->getPluginManager()->callEvent($ev = new PlayerLoginEvent($this, "Plugin reason"));
+		if ($ev->isCancelled()) {
+			$this->close(TextFormat::YELLOW . $this->username . " has left the game", $ev->getKickMessage());
+			return;
+		}
+
+		if ($this->isCreative()) {
+			$this->inventory->setHeldItemSlot(0);
+		} else {
+			$this->inventory->setHeldItemSlot($this->inventory->getHotbarSlotIndex(0));
+		}
+
+		if ($this->spawnPosition === null and isset($this->namedtag->SpawnLevel) and ( $level = $this->server->getLevelByName($this->namedtag["SpawnLevel"])) instanceof Level) {
+			$this->spawnPosition = new Position($this->namedtag["SpawnX"], $this->namedtag["SpawnY"], $this->namedtag["SpawnZ"], $level);
+		}
+
+		$spawnPosition = $this->getSpawn();
+
+		$compassPosition = $this->server->getGlobalCompassPosition();
+
+		$pk = new StartGamePacket();
+		$pk->seed = -1;
+		$pk->dimension = 0;
+		$pk->x = $this->x;
+		$pk->y = $this->y;
+		$pk->z = $this->z;
+//		$pk->spawnX = (int) $spawnPosition->x;
+//		$pk->spawnY = (int) $spawnPosition->y;
+//		$pk->spawnZ = (int) $spawnPosition->z;
+		/* hack for compass */
+		$pk->spawnX = $compassPosition['x'];
+		$pk->spawnY = $compassPosition['y'];
+		$pk->spawnZ = $compassPosition['z'];
+		$pk->generator = 1; //0 old, 1 infinite, 2 flat
+		$pk->gamemode = $this->gamemode & 0x01;
+		$pk->eid = 0;
+		$this->dataPacket($pk);
+
+		$pk = new SetTimePacket();
+		$pk->time = $this->level->getTime();
+		$pk->started = true;
+		$this->dataPacket($pk);
+
+		$pk = new SetSpawnPositionPacket();
+		$pk->x = (int) $spawnPosition->x;
+		$pk->y = (int) $spawnPosition->y;
+		$pk->z = (int) $spawnPosition->z;
+		$this->dataPacket($pk);
+
+		if ($this->getHealth() <= 0) {
+			$this->dead = true;
+		}
+
+		$pk = new SetDifficultyPacket();
+		$pk->difficulty = $this->server->getDifficulty();
+		$this->dataPacket($pk);
+
+		$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . TextFormat::AQUA . $this->ip . " connected");
+
+		if ($this->gamemode === Player::SPECTATOR) {
+			$pk = new ContainerSetContentPacket();
+			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
+			$this->dataPacket($pk);
+		} elseif ($this->gamemode === Player::CREATIVE) {
+			$pk = new ContainerSetContentPacket();
+			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
+			foreach (Item::getCreativeItems() as $item) {
+				$pk->slots[] = clone $item;
+			}
+			$this->dataPacket($pk);
+		}
+
+		$this->server->sendFullPlayerListData($this);
+		$this->server->sendRecipeList($this);
+
+		$pk = new SetEntityDataPacket();
+		$pk->eid = 0;
+		$pk->metadata = [self::DATA_LEAD_HOLDER => [self::DATA_TYPE_LONG, -1]];
+		$this->dataPacket($pk);
+	}
+	
+	public function handleProxyDataPacket($packet) {
+		if ($packet->pid() === ProtocolProxyInfo::CONNECT_PACKET) {
+			if ($this->loggedIn === true) {
+				return;
+			}
+
+			$this->additionalChar = $packet->additionalChar;
+			$this->username = TextFormat::clean($packet->username);
+			$this->displayName = $this->username;
+			$this->setNameTag($this->username);
+			$this->iusername = strtolower($this->username);
+
+			$this->randomClientId = $packet->clientId;
+			$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
+			$this->uuid = $packet->clientUUID;
+			$this->rawUUID = $this->uuid->toBinary();
+			$this->clientSecret = $packet->clientSecret;
+			$this->protocol = $packet->protocol;
+			$this->setSkin($packet->skin, $packet->skinName);
+			$this->processLogin();
+		}
+	}
+
 }
