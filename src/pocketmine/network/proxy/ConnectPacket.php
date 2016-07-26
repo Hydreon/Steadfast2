@@ -3,9 +3,8 @@
 namespace pocketmine\network\proxy;
 
 use pocketmine\network\proxy\Info;
-use pocketmine\network\protocol\DataPacket;
 
-class ConnectPacket extends DataPacket {
+class ConnectPacket extends ProxyPacket {
 
 	const NETWORK_ID = Info::CONNECT_PACKET;
 
@@ -18,24 +17,29 @@ class ConnectPacket extends DataPacket {
 	public $username;
 	public $skinName;
 	public $skin;
+	public $viewDistance;
+	public $ip;
+	public $port;
 
 	public function decode() {
 		$this->identifier = $this->getString();
-		$this->additionalChar = $this->getByte();
+		$this->additionalChar = chr($this->getByte());
 		$this->protocol = $this->getInt();
 		$this->clientId = $this->getLong();
 		$this->clientUUID = $this->getUUID();
 		$this->clientSecret = $this->getString();
 		$this->username = $this->getString();
 		$this->skinName = $this->getString();
-		$this->skin = $this->getString();		
-		
+		$this->skin = $this->getString();
+		$this->viewDistance = $this->getInt();
+		$this->ip = $this->getString();
+		$this->port = $this->getInt();
 	}
 
 	public function encode() {
 		$this->reset();
 		$this->putString($this->identifier);
-		$this->putByte($this->additionalChar);
+		$this->putByte(ord($this->additionalChar));
 		$this->putInt($this->protocol);
 		$this->putLong($this->clientId);
 		$this->putUUID($this->clientUUID);
@@ -43,6 +47,9 @@ class ConnectPacket extends DataPacket {
 		$this->putString($this->username);
 		$this->putString($this->skinName);
 		$this->putString($this->skin);
+		$this->putInt($this->viewDistance);
+		$this->putString($this->ip);
+		$this->putInt($this->port);
 	}
 
 }

@@ -18,7 +18,7 @@ class ProxyServer extends Worker {
 	public function __construct(\ThreadedLogger $logger, \ClassLoader $loader, $port = 10305, $interface = "0.0.0.0") {
 		$this->logger = $logger;
 		$this->interface = $interface;
-		$this->port = 10305; //(int) $port;
+		$this->port = (int) $port;
 		$this->shutdown = false;
 		$this->setClassLoader($loader);
 		$this->externalQueue = new \Threaded;

@@ -26,6 +26,11 @@ class RemoteProxyServer {
 
 	public function close() {
 		$this->proxyManager->getLogger()->notice("RemoteProxyServer [$this->ip:$this->port] has disconnected.");
+		$info = array(
+			'id' => $this->getIdentifier(),
+			'data' => 'close'
+		);
+		$this->proxyManager->getProxyServer()->pushToExternalQueue(serialize($info));
 		@socket_close($this->socket);
 	}
 

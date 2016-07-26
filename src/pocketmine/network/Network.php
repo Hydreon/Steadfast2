@@ -81,6 +81,7 @@ use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
 use pocketmine\network\protocol\RequestChunkRadiusPacket;
 use pocketmine\utils\Binary;
 use pocketmine\network\proxy\ConnectPacket;
+use pocketmine\network\proxy\DisconnectPacket as ProxyDisconnectPacket;
 use pocketmine\network\proxy\Info as ProtocolProxyInfo;
 
 class Network {
@@ -376,5 +377,7 @@ class Network {
 	private function registerProxyPackets(){
 		$this->proxyPacketPool = new \SplFixedArray(256);
 		$this->registerProxyPacket(ProtocolProxyInfo::CONNECT_PACKET, ConnectPacket::class);
+		$this->registerProxyPacket(ProtocolProxyInfo::DISCONNECT_PACKET, ProxyDisconnectPacket::class);
+		
 	}
 }

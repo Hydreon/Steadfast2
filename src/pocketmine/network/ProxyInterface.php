@@ -7,6 +7,7 @@ use pocketmine\network\proxylib\ProxyServer;
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\Player;
 use pocketmine\network\protocol\DataPacket;
+use pocketmine\network\proxy\ProxyPacket;
 
 class ProxyInterface implements SourceInterface {
 
@@ -43,6 +44,14 @@ class ProxyInterface implements SourceInterface {
 	public function process() {
 		while ($info = $this->proxyServer->readFromProxyServer()) {
 			$data = unserialize($info);
+			if ($data['data'] == 'close') {
+				foreach ($this->session as $sessionId => $session) {
+					if(strpos($sessionId,  $data['id']) === 0) {
+						$session->close('', 'Proxy disconnect');
+					}
+				}
+				return;
+			}
 			$offset = 0;
 			$sessionId = unpack('N', substr($data['data'], 0, 4));
 			$sessionId = $sessionId[1];
@@ -99,10 +108,15 @@ class ProxyInterface implements SourceInterface {
 			if (!$packet->isEncoded) {
 				$packet->encode();
 			}
+			if ($packet instanceof ProxyPacket) {
+				$type = chr(self::PROXY_PACKET_ID);
+			} else {
+				$type = chr(self::STANDART_PACKET_ID);
+			}
 			$packet->updateBuffer($player->getAdditionalChar());
 			$info = array(
 				'id' => $player->proxyId,
-				'data' => pack('N', $player->proxySessionId) . $packet->buffer
+				'data' => pack('N', $player->proxySessionId) . $type . $packet->buffer
 			);
 			$this->proxyServer->writeToProxyServer(serialize($info));
 		}
@@ -112,8 +126,14 @@ class ProxyInterface implements SourceInterface {
 		unset($this->session[$player->getIdentifier()]);
 	}
 
-	public function putReadyPacket($buffer) {
-		//?
+	public function putReadyPacket($player, $buffer) {
+		if (isset($this->session[$player->getIdentifier()])) {	
+			$info = array(
+				'id' => $player->proxyId,
+				'data' => pack('N', $player->proxySessionId) . chr(self::STANDART_PACKET_ID) . $buffer
+			);
+			$this->proxyServer->writeToProxyServer(serialize($info));	
+		}
 	}
 
 	private function getPacket($buffer) {

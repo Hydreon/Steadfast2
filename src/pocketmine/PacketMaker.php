@@ -152,37 +152,46 @@ class PacketMaker extends Worker {
 	}
 
 	protected function makeBuffer($identifier, $additionalChar, $fullPacket, $needACK, $identifierACK) {		
-		$pk = null;
 		if (!$fullPacket->isEncoded) {
 			$fullPacket->encode();
-		} elseif (!$needACK) {
-			if (isset($fullPacket->__encapsulatedPacket)) {
-				unset($fullPacket->__encapsulatedPacket);
-			}
-			$fullPacket->updateBuffer($additionalChar);
-			$fullPacket->__encapsulatedPacket = new CachedEncapsulatedPacket();
-			$fullPacket->__encapsulatedPacket->identifierACK = null;
-			$fullPacket->__encapsulatedPacket->buffer = $additionalChar . $fullPacket->buffer;
-			$fullPacket->__encapsulatedPacket->reliability = 2;
-			$pk = $fullPacket->__encapsulatedPacket;
 		}
-
-		if ($pk === null) {
-			$fullPacket->updateBuffer($additionalChar);
-			$pk = new EncapsulatedPacket();			
-			$pk->buffer = $additionalChar . $fullPacket->buffer;
-			$pk->reliability = 2;
-
-			if ($needACK === true && $identifierACK !== false) {
-				$pk->identifierACK = $identifierACK;
-			}
-		}
-
-		$flags = ($needACK === true ? RakLib::FLAG_NEED_ACK : RakLib::PRIORITY_NORMAL) | (RakLib::PRIORITY_NORMAL);
-
-		$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($identifier)) . $identifier . chr($flags) . $pk->toBinary(true);
-
-		return $buffer;
+		$fullPacket->updateBuffer($additionalChar);
+		$data = array(
+			'identifier' => $identifier,
+			'buffer' => $fullPacket->buffer
+		);
+		return serialize($data);
+//		$pk = null;
+//		if (!$fullPacket->isEncoded) {
+//			$fullPacket->encode();
+//		} elseif (!$needACK) {
+//			if (isset($fullPacket->__encapsulatedPacket)) {
+//				unset($fullPacket->__encapsulatedPacket);
+//			}
+//			$fullPacket->updateBuffer($additionalChar);
+//			$fullPacket->__encapsulatedPacket = new CachedEncapsulatedPacket();
+//			$fullPacket->__encapsulatedPacket->identifierACK = null;
+//			$fullPacket->__encapsulatedPacket->buffer = $additionalChar . $fullPacket->buffer;
+//			$fullPacket->__encapsulatedPacket->reliability = 2;
+//			$pk = $fullPacket->__encapsulatedPacket;
+//		}
+//
+//		if ($pk === null) {
+//			$fullPacket->updateBuffer($additionalChar);
+//			$pk = new EncapsulatedPacket();			
+//			$pk->buffer = $additionalChar . $fullPacket->buffer;
+//			$pk->reliability = 2;
+//
+//			if ($needACK === true && $identifierACK !== false) {
+//				$pk->identifierACK = $identifierACK;
+//			}
+//		}
+//
+//		$flags = ($needACK === true ? RakLib::FLAG_NEED_ACK : RakLib::PRIORITY_NORMAL) | (RakLib::PRIORITY_NORMAL);
+//
+//		$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($identifier)) . $identifier . chr($flags) . $pk->toBinary(true);
+//
+//		return $buffer;
 	}
 	
 	public function shutdown(){		

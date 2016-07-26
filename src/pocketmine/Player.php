@@ -141,6 +141,9 @@ use pocketmine\network\protocol\SetPlayerGameTypePacket;
 use pocketmine\block\Liquid;
 use raklib\Binary;
 use pocketmine\network\proxy\Info as ProtocolProxyInfo;
+use pocketmine\network\proxy\DisconnectPacket as ProxyDisconnectPacket;
+use pocketmine\network\ProxyInterface;
+use pocketmine\network\proxy\RedirectPacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -752,11 +755,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $pos));
 
 			$pos = $ev->getRespawnPosition();
-			$pk = new RespawnPacket();
-			$pk->x = $pos->x;
-			$pk->y = $pos->y;
-			$pk->z = $pos->z;
-			$this->dataPacket($pk);
+//			$pk = new RespawnPacket();
+//			$pk->x = $pos->x;
+//			$pk->y = $pos->y;
+//			$pk->z = $pos->z;
+//			$this->dataPacket($pk);
 
 			$this->noDamageTicks = 60;
 			
@@ -771,15 +774,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->teleport($pos);
 			
-			if($this->getHealth() <= 0){
-				$pk = new RespawnPacket();
-				$pos = $this->getSpawn();
-				$pk->x = $pos->x;
-				$pk->y = $pos->y;
-				$pk->z = $pos->z;
-				$this->dataPacket($pk);
-			}
-
+//			if($this->getHealth() <= 0){
+//				$pk = new RespawnPacket();
+//				$pos = $this->getSpawn();
+//				$pk->x = $pos->x;
+//				$pk->y = $pos->y;
+//				$pk->z = $pos->z;
+//				$this->dataPacket($pk);
+//			}
+			
 			$this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));
 		}
 	}
@@ -2447,7 +2450,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								//Timings::$playerCommandTimer->startTiming();
 								$this->server->dispatchCommand($ev->getPlayer(), substr($ev->getMessage(), 1));
 								//Timings::$playerCommandTimer->stopTiming();
-							}else{
+							}else{								
 								$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $ev->getMessage()));
 								if(!$ev->isCancelled()){
 									$this->server->broadcastMessage($ev->getPlayer()->getDisplayName() . ": " . $ev->getMessage(), $ev->getRecipients());
@@ -2803,14 +2806,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerTileEntityPacket->stopTiming();
 				break;
 			case ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET:
-				//Timings::$timerChunkRudiusPacket->startTiming();
-				//if($this->spawned){
 				$this->viewDistance = $packet->radius ** 2;
-				//}
-				$pk = new ChunkRadiusUpdatePacket();
-				$pk->radius = $packet->radius;
-				$this->dataPacket($pk);
-				//Timings::$timerChunkRudiusPacket->stopTiming();
 				break;
 			default:
 				break;
@@ -2830,6 +2826,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if(!$ev->isCancelled()){
 			$message = $reason;
 			$this->sendMessage($message);
+			if ($this->interface instanceof ProxyInterface) {
+				$pk = new ProxyDisconnectPacket();
+				$pk->reason = $message;
+				$this->dataPacket($pk);
+			} else {
+				$pk = new DisconnectPacket;
+				$pk->message = $message;
+				$this->directDataPacket($pk);
+			}
 			$this->close($ev->getQuitMessage(), $message);
 
 			return true;
@@ -2887,12 +2892,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		$this->tasks = [];
 		if($this->connected and !$this->closed){
-			if($reason != ""){
-				$pk = new DisconnectPacket;
-				$pk->message = $reason;
-				$this->directDataPacket($pk);
-			}
-
 			$this->connected = false;
 			if($this->username != ""){
 				$this->server->getPluginManager()->callEvent($ev = new PlayerQuitEvent($this, $message, $reason));
@@ -3512,9 +3511,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 
-		$pk = new PlayStatusPacket();
-		$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
-		$this->dataPacket($pk);
+//		$pk = new PlayStatusPacket();
+//		$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
+//		$this->dataPacket($pk);
 
 		$this->achievements = [];
 
@@ -3544,7 +3543,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->spawnPosition = new Position($this->namedtag["SpawnX"], $this->namedtag["SpawnY"], $this->namedtag["SpawnZ"], $level);
 		}
 
-		$spawnPosition = $this->getSpawn();
+		$spawnPosition = $this->getSpawn();		
 
 		$compassPosition = $this->server->getGlobalCompassPosition();
 
@@ -3615,7 +3614,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				return;
 			}
 
-			$this->additionalChar = $packet->additionalChar;
+			$this->additionalChar = $packet->additionalChar;		
 			$this->username = TextFormat::clean($packet->username);
 			$this->displayName = $this->username;
 			$this->setNameTag($this->username);
@@ -3628,8 +3627,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->clientSecret = $packet->clientSecret;
 			$this->protocol = $packet->protocol;
 			$this->setSkin($packet->skin, $packet->skinName);
+			$this->viewDistance = $packet->viewDistance;
+			$this->ip = $packet->ip;
+			$this->port = $packet->port;
 			$this->processLogin();
+		} elseif ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
+			$this->close('', $packet->reason);
 		}
 	}
 
+	
+	public function getInterface() {
+		return $this->interface;
+	}
 }

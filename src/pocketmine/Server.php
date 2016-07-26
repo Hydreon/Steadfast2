@@ -2420,7 +2420,12 @@ class Server{
 		
 
 		while(strlen($str = $this->packetMaker->readThreadToMainPacket()) > 0){
-			$this->mainInterface->putReadyPacket($str);
+			$data = unserialize($str);
+			if (isset($this->players[$data['identifier']])) {
+				$player = $this->players[$data['identifier']];
+				$player->getInterface()->putReadyPacket($player, $data['buffer']);
+			}
+//			$this->mainInterface->putReadyPacket($str);
 		}
 	
 		//Timings::$connectionTimer->startTiming();
