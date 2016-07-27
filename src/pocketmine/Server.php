@@ -379,6 +379,13 @@ class Server{
 	public function getPort(){
 		return $this->getConfigInt("server-port", 19132);
 	}
+	
+	/**
+	 * @return int
+	 */
+	public function getProxyPort(){
+		return $this->getConfigInt("proxy-port", 10305);
+	}	
 
 	/**
 	 * @return int
@@ -1475,6 +1482,7 @@ class Server{
 		$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, [
 			"motd" => "Minecraft: PE Server",
 			"server-port" => 19132,
+			"proxy-port" => 10305,
 			"memory-limit" => "256M",
 			"white-list" => false,
 			"announce-player-achievements" => true,
@@ -1499,7 +1507,9 @@ class Server{
 			"rcon.password" => substr(base64_encode(@Utils::getRandomBytes(20, false)), 3, 10),
 			"auto-save" => true,
 			"auto-generate" => false,
-			"save-player-data" => false
+			"save-player-data" => false,
+			"use-proxy" => false,
+			"use-raklib" => true
 		]);
 
 		ServerScheduler::$WORKERS = 4;
@@ -1571,8 +1581,18 @@ class Server{
 		define("BOOTUP_RANDOM", @Utils::getRandomBytes(16));
 		$this->serverID = Utils::getMachineUniqueId($this->getIp() . $this->getPort());
 
-		$this->addInterface($this->mainInterface = new ProxyInterface($this));
-//		$this->addInterface($this->mainInterface = new RakLibInterface($this));
+		
+		$useRaklib = $this->getConfigBoolean("use-raklib", true);
+		$useProxy = $this->getConfigBoolean("use-proxy", false);
+		if ($useRaklib) {
+			$this->addInterface($this->mainInterface = new RakLibInterface($this));
+		}
+		if ($useProxy) {
+			$this->addInterface($proxyInterface= new ProxyInterface($this));
+			if (!$useRaklib) {
+				$this->mainInterface = $proxyInterface;
+			}
+		}
 
 		$this->logger->info("This server is running " . $this->getName() . " version " . ($version->isDev() ? TextFormat::YELLOW : "") . $version->get(true) . TextFormat::WHITE . " \"" . $this->getCodename() . "\" (API " . $this->getApiVersion() . ")");
 		$this->logger->info($this->getName() . " is distributed under the LGPL License");
@@ -2223,12 +2243,23 @@ class Server{
 	public function removeOnlinePlayer(Player $player){
 		if(isset($this->playerList[$player->getRawUniqueId()])){
 			unset($this->playerList[$player->getRawUniqueId()]);
-
+			
 			$pk = new PlayerListPacket();
 			$pk->type = PlayerListPacket::TYPE_REMOVE;
 			$pk->entries[] = [$player->getUniqueId()];
 			Server::broadcastPacket($this->playerList, $pk);
 		}
+	}
+	
+	public function clearPlayerList(Player $player) {
+		$pk = new PlayerListPacket();
+		$pk->type = PlayerListPacket::TYPE_REMOVE;
+		foreach ($this->playerList as $onlinePlayer) {
+			if($player != $onlinePlayer) {
+				$pk->entries[] = [$onlinePlayer->getUniqueId()];
+			}
+		}
+		$player->dataPacket($pk);
 	}
 
 	public function updatePlayerListData(UUID $uuid, $entityId, $name, $skinName, $skinData, array $players = null){
@@ -2425,7 +2456,6 @@ class Server{
 				$player = $this->players[$data['identifier']];
 				$player->getInterface()->putReadyPacket($player, $data['buffer']);
 			}
-//			$this->mainInterface->putReadyPacket($str);
 		}
 	
 		//Timings::$connectionTimer->startTiming();

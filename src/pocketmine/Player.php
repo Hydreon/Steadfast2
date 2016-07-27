@@ -144,6 +144,7 @@ use pocketmine\network\proxy\Info as ProtocolProxyInfo;
 use pocketmine\network\proxy\DisconnectPacket as ProxyDisconnectPacket;
 use pocketmine\network\ProxyInterface;
 use pocketmine\network\proxy\RedirectPacket;
+use pocketmine\network\proxy\ProxyPacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -876,6 +877,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @return int|bool
 	 */
 	public function dataPacket(DataPacket $packet, $needACK = false){	
+		if (!($this->interface instanceof ProxyInterface) && ($packet instanceof ProxyPacket)) {
+			return;
+		}
+		if ($packet instanceof RedirectPacket) {
+			$this->removeAllEffects();
+			$this->server->clearPlayerList($this);
+		}
+		
 		if($this->connected === false){
 			return false;
 		}
@@ -884,7 +893,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 		
-			$this->interface->putPacket($this, $packet, $needACK, false);	
+		$this->interface->putPacket($this, $packet, $needACK, false);	
 		return true;
 	}
 
@@ -3510,6 +3519,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->close(TextFormat::YELLOW . $this->username . " has left the game", "Corrupt joining data, check your connection.");
 			return;
 		}
+		
+		if (!($this->interface instanceof ProxyInterface)) {
+			$pk = new PlayStatusPacket();
+			$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
+			$this->dataPacket($pk);			
+		}
 
 //		$pk = new PlayStatusPacket();
 //		$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
@@ -3639,5 +3654,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public function getInterface() {
 		return $this->interface;
+	}
+	
+	public function transfer($address, $port = 10305) {							
+		$pk = new RedirectPacket();
+		$pk->ip = $address;
+		$pk->port = $port;
+		$this->dataPacket($pk);
 	}
 }

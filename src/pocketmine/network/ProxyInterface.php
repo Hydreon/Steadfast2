@@ -22,7 +22,7 @@ class ProxyInterface implements SourceInterface {
 	public function __construct(Server $server) {
 		$this->server = $server;
 		$this->identifiers = new \SplObjectStorage();
-		$this->proxyServer = new ProxyServer($this->server->getLogger(), $this->server->getLoader(), $this->server->getPort(), $this->server->getIp() === "" ? "127.0.0.1" : $this->server->getIp());
+		$this->proxyServer = new ProxyServer($this->server->getLogger(), $this->server->getLoader(), $this->server->getProxyPort(), $this->server->getIp() === "" ? "127.0.0.1" : $this->server->getIp());
 	}
 
 	public function emergencyShutdown() {
