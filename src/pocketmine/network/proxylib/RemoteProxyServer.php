@@ -48,6 +48,10 @@ class RemoteProxyServer {
 			if (($dataLen = strlen($data)) > 0) {
 				$offset = 0;
 				while ($offset < $dataLen) {
+					if ($offset + 4 > $dataLen) {
+						$this->lastBuffer = substr($data, $offset);
+						break;
+					}
 					$len = unpack('N', substr($data, $offset, 4));
 					$len = $len[1];
 					if ($offset + $len + 4 > $dataLen) {
