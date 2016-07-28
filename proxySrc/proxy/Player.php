@@ -44,8 +44,7 @@ class Player {
 		$this->ip = $ip;
 		$this->port = $port;
 		$this->clientID = $clientID;
-		$servers = ['lobby1.lbsg.net', 'lobby2.lbsg.net'];
-		$this->socket = $this->server->getSocket($servers[array_rand($servers)], $this->server->getProxyPort());
+		$this->socket = $this->server->getSocket($this->server->getDefaultServer(), $this->server->getProxyPort());
 	}
 
 	public function getAddress() {

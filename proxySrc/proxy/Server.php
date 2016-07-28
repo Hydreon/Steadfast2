@@ -74,6 +74,10 @@ class Server {
 	public function getIp() {
 		return $this->getConfigString("server-ip", "0.0.0.0");
 	}
+	
+	public function getDefaultServer() {
+		return $this->getConfigString("default-server", "0.0.0.0");
+	}
 
 	public function getOnlinePlayers() {
 		return $this->players;
@@ -102,7 +106,8 @@ class Server {
 			"server-port" => 19132,
 			"server-ip" => '0.0.0.0',
 			"proxy-port" => 10305,
-			"max-players" => 200
+			"max-players" => 200,
+			"default-server" => '0.0.0.0'
 		]);
 		self::$instance = $this;
 		$this->autoloader = $autoloader;
