@@ -82,6 +82,7 @@ class ProxyServer extends Worker {
 
 	public function shutdown() {
 		$this->shutdown = true;
+		@socket_close($this->socket);
 		var_dump("ProxyServer thread shutdown!");
 	}
 
@@ -157,6 +158,7 @@ class ProxyServer extends Worker {
 		if ($this->shutdown !== true) {
 			var_dump("ProxyServer thread crashed!");
 		}
+		@socket_close($this->socket);
 	}
 
 }
