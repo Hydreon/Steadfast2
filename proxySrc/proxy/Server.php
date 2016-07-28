@@ -6,6 +6,7 @@ use proxy\network\Network;
 use proxy\network\RakLibInterface;
 use proxy\network\SourceInterface;
 use proxy\utils\TextFormat;
+use proxy\utils\Config;
 
 class Server {
 
@@ -24,6 +25,7 @@ class Server {
 	private $autoloader;
 	private $players = [];
 	private $sockets = [];
+	private $properties;
 
 	public function getLoader() {
 		return $this->autoloader;
@@ -57,11 +59,22 @@ class Server {
 		return $this->network;
 	}
 
-
 	public function getMaxPlayers() {
-		return 200;
+		return $this->getConfigInt("max-players", 100);		
+	}
+
+	public function getPort() {
+		return $this->getConfigInt("server-port", 19132);
 	}
 	
+	public function getProxyPort() {
+		return $this->getConfigInt("proxy-port", 10305);
+	}
+
+	public function getIp() {
+		return $this->getConfigString("server-ip", "0.0.0.0");
+	}
+
 	public function getOnlinePlayers() {
 		return $this->players;
 	}
@@ -84,6 +97,13 @@ class Server {
 	}
 
 	public function __construct(\ClassLoader $autoloader, \ThreadedLogger $logger) {
+		$this->properties = new Config("./proxy.properties", Config::PROPERTIES, [
+			"motd" => "Minecraft: PE Proxy Server",
+			"server-port" => 19132,
+			"server-ip" => '0.0.0.0',
+			"proxy-port" => 10305,
+			"max-players" => 200
+		]);
 		self::$instance = $this;
 		$this->autoloader = $autoloader;
 		$this->logger = $logger;
@@ -106,7 +126,7 @@ class Server {
 			$this->tickAverage[] = 20;
 			$this->useAverage[] = 0;
 		}
-		$this->logger->info("Server started");
+		$this->logger->info("Server started on " . ($this->getIp() === "" ? "*" : $this->getIp()) . ":" . $this->getPort());		
 		$this->tickProcessor();
 	}
 
@@ -133,9 +153,9 @@ class Server {
 			$this->titleTick();
 		}
 		if ($this->tickCounter % 5 == 0) {
-			pcntl_signal_dispatch();			
+			pcntl_signal_dispatch();
 		}
-		
+
 		$this->network->processInterfaces();
 		$this->checkSockets();
 
@@ -174,6 +194,7 @@ class Server {
 				$interface->shutdown();
 				$this->network->unregisterInterface($interface);
 			}
+			$this->properties->save();
 		} catch (\Exception $e) {
 			$this->logger->emergency("Crashed while crashing, killing process");
 			@kill(getmypid());
@@ -237,6 +258,46 @@ class Server {
 		} else {
 			return $this->createSockets($address, $port);
 		}
+	}
+
+	public function getConfigBoolean($variable, $defaultValue = false) {
+		$v = getopt("", ["$variable::"]);
+		if (isset($v[$variable])) {
+			$value = $v[$variable];
+		} else {
+			$value = $this->properties->exists($variable) ? $this->properties->get($variable) : $defaultValue;
+		}
+
+		if (is_bool($value)) {
+			return $value;
+		}
+		switch (strtolower($value)) {
+			case "on":
+			case "true":
+			case "1":
+			case "yes":
+				return true;
+		}
+
+		return false;
+	}
+
+	public function getConfigInt($variable, $defaultValue = 0) {
+		$v = getopt("", ["$variable::"]);
+		if (isset($v[$variable])) {
+			return (int) $v[$variable];
+		}
+
+		return $this->properties->exists($variable) ? (int) $this->properties->get($variable) : (int) $defaultValue;
+	}
+
+	public function getConfigString($variable, $defaultValue = "") {
+		$v = getopt("", ["$variable::"]);
+		if (isset($v[$variable])) {
+			return (string) $v[$variable];
+		}
+
+		return $this->properties->exists($variable) ? $this->properties->get($variable) : $defaultValue;
 	}
 
 }

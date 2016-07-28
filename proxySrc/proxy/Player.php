@@ -45,7 +45,7 @@ class Player {
 		$this->port = $port;
 		$this->clientID = $clientID;
 		$servers = ['lobby1.lbsg.net', 'lobby2.lbsg.net'];
-		$this->socket = $this->server->getSocket($servers[array_rand($servers)], 10305);
+		$this->socket = $this->server->getSocket($servers[array_rand($servers)], $this->server->getProxyPort());
 	}
 
 	public function getAddress() {
@@ -164,10 +164,11 @@ class Player {
 			$task->cancel();
 		}
 		$this->tasks = [];
-		if ($this->connected and ! $this->closed) {
+		if ($this->connected && !$this->closed) {
 			$this->connected = false;
 			$this->interface->close($this, $reason);
 			$this->spawned = false;
+			$this->closed = false;
 			$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . $this->ip . " logged out due to " . str_replace(["\n", "\r"], [" ", ""], $reason));
 		}
 
