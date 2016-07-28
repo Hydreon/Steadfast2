@@ -268,6 +268,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public $proxyId = '';
 	public $proxySessionId = '';
+	
+	protected $closeFromProxy = false;
 
 	public function getLeaveMessage(){
 		return "";
@@ -879,10 +881,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function dataPacket(DataPacket $packet, $needACK = false){	
 		if (!($this->interface instanceof ProxyInterface) && ($packet instanceof ProxyPacket)) {
 			return;
-		}
-		if ($packet instanceof RedirectPacket) {
-			$this->removeAllEffects();
-			$this->server->clearPlayerList($this);
 		}
 		
 		if($this->connected === false){
@@ -2835,15 +2833,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if(!$ev->isCancelled()){
 			$message = $reason;
 			$this->sendMessage($message);
-			if ($this->interface instanceof ProxyInterface) {
-				$pk = new ProxyDisconnectPacket();
-				$pk->reason = $message;
-				$this->dataPacket($pk);
-			} else {
-				$pk = new DisconnectPacket;
-				$pk->message = $message;
-				$this->directDataPacket($pk);
-			}
 			$this->close($ev->getQuitMessage(), $message);
 
 			return true;
@@ -2901,6 +2890,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		$this->tasks = [];
 		if($this->connected and !$this->closed){
+			if (!$this->closeFromProxy) {
+				if ($this->interface instanceof ProxyInterface) {
+					$pk = new ProxyDisconnectPacket();
+					$pk->reason = $reason;
+					$this->dataPacket($pk);
+				} else {
+					$pk = new DisconnectPacket;
+					$pk->message = $reason;
+					$this->directDataPacket($pk);
+				}		
+			}
 			$this->connected = false;
 			if($this->username != ""){
 				$this->server->getPluginManager()->callEvent($ev = new PlayerQuitEvent($this, $message, $reason));
@@ -3647,6 +3647,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->port = $packet->port;
 			$this->processLogin();
 		} elseif ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
+			$this->removeAllEffects();
+			$this->server->clearPlayerList($this);
+			$this->closeFromProxy = true;
 			$this->close('', $packet->reason);
 		}
 	}

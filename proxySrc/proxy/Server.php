@@ -181,8 +181,15 @@ class Server {
 	}
 
 	public function checkSockets() {
-		foreach ($this->sockets as $socket) {
-			$socket->checkMessages();
+		foreach ($this->sockets as $key => $socket) {
+			if (!$socket->checkMessages()) {
+				foreach ($this->players as $player) {
+					if ($player->getSocket() == $socket) {
+						$player->close('', 'Lost remote server');
+					}
+				}
+				unset($this->sockets[$key]);
+			}
 		}
 	}
 

@@ -281,5 +281,9 @@ class Player {
 			}
 		}
 	}
+	
+	public function getSocket() {
+		return $this->socket;
+	}
 
 }

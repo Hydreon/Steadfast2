@@ -28,11 +28,16 @@ class ProxySocket {
 	public function writeMessage($msg) {
 		if (strlen($msg) > 0) {
 			$data = zlib_encode($msg, ZLIB_ENCODING_DEFLATE, 7);
-			socket_write($this->socket, pack('N', strlen($data)) . $data);
+			@socket_write($this->socket, pack('N', strlen($data)) . $data);
 		}
 	}
 
 	public function checkMessages() {
+		$err = socket_last_error($this->socket);
+		if ($err !== 0 && $err !== 35 && $err !== 11) {
+			@socket_close($this->socket);
+			return false;
+		}		
 		$data = $this->lastMessage;
 		$this->lastMessage = '';
 		while (strlen($buffer = @socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
@@ -57,6 +62,7 @@ class ProxySocket {
 				$offset += $len;
 			}
 		}
+		return true;
 	}
 
 	private function checkPacket($buffer) {
