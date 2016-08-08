@@ -156,7 +156,7 @@ class SessionManager{
 
     private function receivePacket(){
         if(($len = $this->socket->readPacket($buffer, $source, $port)) > 0){
-            $this->receiveBytes += $len;
+			$this->receiveBytes += $len;
             if(isset($this->block[$source])){
                 return true;
             }

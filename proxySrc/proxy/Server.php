@@ -12,6 +12,8 @@ class Server {
 
 	const STANDART_PACKET_ID = 0x01;
 	const PROXY_PACKET_ID = 0x02;
+	const PLAYER_PACKET_ID = 0x03;
+	const SYSTEM_PACKET_ID = 0x04;
 
 	public static $lastPlayerId = 1;
 	private static $instance = null;
@@ -303,6 +305,15 @@ class Server {
 		}
 
 		return $this->properties->exists($variable) ? $this->properties->get($variable) : $defaultValue;
+	}
+	
+	public function handlePacket($packet) {
+		$socket = $this->getSocket($this->getDefaultServer(), $this->getProxyPort());
+		$socket->writeMessage(chr(static::SYSTEM_PACKET_ID) . $packet);
+	}
+	
+	public function sendRawPacket($address, $port, $payload) {
+		$this->network->sendPacket($address, $port, $payload);
 	}
 
 }

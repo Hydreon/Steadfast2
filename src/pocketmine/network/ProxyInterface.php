@@ -8,16 +8,26 @@ use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\Player;
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\proxy\ProxyPacket;
+use raklib\Binary;
+use raklib\RakLib;
+use pocketmine\network\AdvancedSourceInterface;
+use pocketmine\network\Network;
 
-class ProxyInterface implements SourceInterface {
+//class ProxyInterface implements SourceInterface {
+class ProxyInterface implements AdvancedSourceInterface {
 
 	const STANDART_PACKET_ID = 0x01;
 	const PROXY_PACKET_ID = 0x02;
+	const PLAYER_PACKET_ID = 0x03;
+	const SYSTEM_PACKET_ID = 0x04;
 
 	private $identifiers;
 	private $server;
 	private $proxyServer;
 	private $session = array();
+	private $network;
+	// for raw packets. key - response recipient identifier , value - session iddentifier
+	private $nonPlayerSessionMap = array();
 
 	public function __construct(Server $server) {
 		$this->server = $server;
@@ -53,35 +63,61 @@ class ProxyInterface implements SourceInterface {
 				return;
 			}
 			$offset = 0;
-			$sessionId = unpack('N', substr($data['data'], 0, 4));
-			$sessionId = $sessionId[1];
-			$buffer = substr($data['data'], 4);
-			$id = $data['id'];
-			$identifier = $id . $sessionId;
-			if (!isset($this->session[$identifier])) {
-				$this->openSession($id, $sessionId);
-			}
-			if (isset($this->session[$identifier])) {
-				$type = ord($buffer{0});
-				$buffer = substr($buffer, 1);
-				if ($type == self::STANDART_PACKET_ID) {
-					$pk = $this->getPacket($buffer);
-					if ($pk === false) {
-						return;
+			$packetType = ord($data['data']{0});
+			if ($packetType == static::PLAYER_PACKET_ID) {
+				$sessionId = unpack('N', substr($data['data'], 1, 4));
+				$sessionId = $sessionId[1];
+				$buffer = substr($data['data'], 5);
+				$id = $data['id'];
+				$identifier = $id . $sessionId;
+				if (!isset($this->session[$identifier])) {
+					$this->openSession($id, $sessionId);
+				}
+				if (isset($this->session[$identifier])) {
+					$type = ord($buffer{0});
+					$buffer = substr($buffer, 1);
+					if ($type == self::STANDART_PACKET_ID) {
+						$pk = $this->getPacket($buffer);
+						if ($pk === false) {
+							return;
+						}
+						if (!is_null($pk)) {
+							$pk->decode();
+							$this->session[$identifier]->handleDataPacket($pk);
+						}
+					} elseif ($type == self::PROXY_PACKET_ID) {
+						$pk = $this->getProxyPacket($buffer);
+						if ($pk === false) {
+							return;
+						}
+						if (!is_null($pk)) {
+							$pk->decode();
+							$this->session[$identifier]->handleProxyDataPacket($pk);
+						}
 					}
-					if (!is_null($pk)) {
-						$pk->decode();
-						$this->session[$identifier]->handleDataPacket($pk);
+				}
+			} else if ($packetType == static::SYSTEM_PACKET_ID) {
+				$packet = substr($data['data'], 1);
+				$id = ord($packet{0});
+				$offset = 1;
+				if ($id === RakLib::PACKET_RAW) {
+					$len = ord($packet{$offset++});
+					$address = substr($packet, $offset, $len);
+					$offset += $len;
+					$port = Binary::readShort(substr($packet, $offset, 2));
+					$offset += 2;
+					$payload = substr($packet, $offset);
+					
+					$endPointId = $address . ':' . $port;
+					if (isset($this->nonPlayerSessionMap[$endPointId]) && 
+						$this->nonPlayerSessionMap[$endPointId] != $data['id']) {
+						
+						return true;
+					} else if (!isset($this->nonPlayerSessionMap[$endPointId])) {
+						$this->nonPlayerSessionMap[$endPointId] = $data['id'];
 					}
-				} elseif ($type == self::PROXY_PACKET_ID) {
-					$pk = $this->getProxyPacket($buffer);
-					if ($pk === false) {
-						return;
-					}
-					if (!is_null($pk)) {
-						$pk->decode();
-						$this->session[$identifier]->handleProxyDataPacket($pk);
-					}
+					
+					Server::getInstance()->handlePacket($address, $port, $payload);
 				}
 			}
 		}
@@ -116,7 +152,7 @@ class ProxyInterface implements SourceInterface {
 			$packet->updateBuffer($player->getAdditionalChar());
 			$info = array(
 				'id' => $player->proxyId,
-				'data' => pack('N', $player->proxySessionId) . $type . $packet->buffer
+				'data' => chr(static::PLAYER_PACKET_ID) . pack('N', $player->proxySessionId) . $type . $packet->buffer
 			);
 			$this->proxyServer->writeToProxyServer(serialize($info));
 		}
@@ -130,7 +166,7 @@ class ProxyInterface implements SourceInterface {
 		if (isset($this->session[$player->getIdentifier()])) {	
 			$info = array(
 				'id' => $player->proxyId,
-				'data' => pack('N', $player->proxySessionId) . chr(self::STANDART_PACKET_ID) . $buffer
+				'data' => chr(static::PLAYER_PACKET_ID) . pack('N', $player->proxySessionId) . chr(self::STANDART_PACKET_ID) . $buffer
 			);
 			$this->proxyServer->writeToProxyServer(serialize($info));	
 		}
@@ -173,4 +209,25 @@ class ProxyInterface implements SourceInterface {
 		return $data;
 	}
 
+	public function blockAddress($address, $timeout = 300) {}
+	
+	public function setNetwork(Network $network) {
+		$this->network = $network;
+	}
+	
+	public function sendRawPacket($address, $port, $payload) {
+		$endPointId = $address . ':' . $port;
+		if (!isset($this->nonPlayerSessionMap[$endPointId])) {
+			return;
+		}
+		
+		$payload = chr(static::SYSTEM_PACKET_ID) . chr(RakLib::PACKET_RAW) . chr(strlen($address)) . $address . Binary::writeShort($port) . $payload;
+		$data = array(
+			'id' => $this->nonPlayerSessionMap[$endPointId],
+			'type' => 'raw',
+			'data' => $payload
+		);
+		$this->proxyServer->writeToProxyServer(serialize($data));
+		unset($this->nonPlayerSessionMap[$endPointId]);
+	}
 }

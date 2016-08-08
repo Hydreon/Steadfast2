@@ -251,7 +251,7 @@ class Player {
 	}
 	
 	public function sendProxyPacket($packet) {
-		$this->socket->writeMessage(pack('N', $this->proxyIdentifier) . $packet);
+		$this->socket->writeMessage(chr(Server::PLAYER_PACKET_ID) . pack('N', $this->proxyIdentifier) . $packet);
 	}
 	
 	public function sendFromProxyPacket($buffer){
@@ -266,7 +266,7 @@ class Player {
 	public function handleProxyDataPacket($packet) {
 		if ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
 			$this->kick($packet->reason);
-		} elseif ($packet->pid() === ProtocolProxyInfo::REDIRECT_PACKET) {	
+		} elseif ($packet->pid() === ProtocolProxyInfo::REDIRECT_PACKET) {
 			if ($this->socket->getIdentifier() == $packet->ip . $packet->port) {
 				return;
 			}			

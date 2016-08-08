@@ -41,7 +41,7 @@ class RemoteProxyServer {
 		} else {
 			$data = $this->lastBuffer;
 			$this->lastBuffer = '';
-
+			
 			while (strlen($buffer = @socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
 				$data .= $buffer;
 			}
@@ -72,7 +72,7 @@ class RemoteProxyServer {
 	public function checkPacket($data) {
 		$info = array(
 			'id' => $this->getIdentifier(),
-			'data' => zlib_decode($data)
+			'data' => zlib_decode($data),
 		);
 		$this->proxyManager->getProxyServer()->pushToExternalQueue(serialize($info));
 	}
@@ -80,6 +80,12 @@ class RemoteProxyServer {
 	public function putPacket($buffer) {
 		$data = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
 		@socket_write($this->socket, pack('N', strlen($data)) . $data);
+	}
+	
+	public function sendRawData($buffer) {
+		$data = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
+		$data = pack('N', strlen($data)) . $data;
+		socket_sendto($this->socket, $data, strlen($data), 0, $this->ip, $this->port);
 	}
 
 }

@@ -2,6 +2,10 @@
 
 namespace proxy;
 
+use proxy\Server;
+use raklib\RakLib;
+use raklib\Binary;
+
 class ProxySocket {
 
 	private $address;
@@ -58,7 +62,10 @@ class ProxySocket {
 				}
 				$offset += 4;
 				$msg = substr($data, $offset, $len);
-				$this->checkPacket($msg);
+				$res = $this->checkPacket($msg);
+				if (!$res) {
+					var_dump('Not zlib packet');
+				}
 				$offset += $len;
 			}
 		}
@@ -67,12 +74,36 @@ class ProxySocket {
 
 	private function checkPacket($buffer) {
 		$buffer = zlib_decode($buffer);
-		$id = unpack('N', substr($buffer, 0, 4));
-		$id = $id[1];
-		$buffer = substr($buffer, 4);
-		$type = ord($buffer{0});
+		if ($buffer === FALSE) {
+			return false;
+		}
+		$packetType = ord($buffer{0});
 		$buffer = substr($buffer, 1);
-		$this->server->checkPacket($id, $buffer, $type);
+		if ($packetType == Server::PLAYER_PACKET_ID) {
+			$id = unpack('N', substr($buffer, 0, 4));
+			$id = $id[1];
+			$buffer = substr($buffer, 4);
+			$type = ord($buffer{0});
+			$buffer = substr($buffer, 1);
+			$this->server->checkPacket($id, $buffer, $type);
+		} else if ($packetType == Server::SYSTEM_PACKET_ID) {
+			$offset = 0;
+			$id = ord($buffer{$offset});
+			$offset++;
+			if ($id = RakLib::PACKET_RAW) {
+				$len = ord($buffer{$offset++});
+				$address = substr($buffer, $offset, $len);
+				$offset += $len;
+				$port = Binary::readShort(substr($buffer, $offset, 2));
+				$offset += 2;
+				$payload = substr($buffer, $offset);
+				$this->server->sendRawPacket($address, $port, $payload);
+			}
+		} else {
+			echo 'UNKNOWN PACKET TYPE'.PHP_EOL;
+			var_dump($buffer);
+		}
+		return true;
 	}
 
 	

@@ -55,7 +55,7 @@ class ProxyServer extends Worker {
 	public function getNewServer() {
 		return socket_accept($this->socket);
 	}
-
+	
 	public function readFromProxyServer() {
 		return $this->externalQueue->shift();
 	}
