@@ -45,6 +45,10 @@ class Player {
 		$this->port = $port;
 		$this->clientID = $clientID;
 		$this->socket = $this->server->getSocket($this->server->getDefaultServer(), $this->server->getProxyPort());
+		
+		if (!($this->socket instanceof ProxySocket)) {
+			throw new \Exception('[Plaer creaton] : Socket problem');
+		}
 	}
 
 	public function getAddress() {

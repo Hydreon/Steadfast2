@@ -32,7 +32,12 @@ class ProxySocket {
 	public function writeMessage($msg) {
 		if (strlen($msg) > 0) {
 			$data = zlib_encode($msg, ZLIB_ENCODING_DEFLATE, 7);
-			@socket_write($this->socket, pack('N', strlen($data)) . $data);
+			socket_clear_error($this->socket);
+			$writeResult = @socket_write($this->socket, pack('N', strlen($data)) . $data);
+			if ($writeResult === false) {
+				$errno = socket_last_error($this->socket);
+				echo $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
+			}
 		}
 	}
 

@@ -23,6 +23,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 
 	private $identifiers;
 	private $server;
+	/** @var ProxyServer */
 	private $proxyServer;
 	private $session = array();
 	private $network;

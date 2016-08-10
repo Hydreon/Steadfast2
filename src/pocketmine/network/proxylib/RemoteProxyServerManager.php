@@ -29,9 +29,14 @@ class RemoteProxyServerManager {
 		}
 
 		foreach ($this->remoteProxyServer as $remoteServer) {
+			$remoteId = $remoteServer->getIdentifier();
 			if (!$remoteServer->update()) {
-				$remoteServer->close();
-				unset($this->remoteProxyServer[$remoteServer->getIdentifier()]);
+				$isClosed = $remoteServer->close();
+				if ($isClosed) {
+					unset($this->remoteProxyServer[$remoteId]);
+				} else {
+					var_dump($remoteServer->getIdentifier().' is not close yet');
+				}
 			}
 		}
 		$this->getNewPacket();	
@@ -61,5 +66,5 @@ class RemoteProxyServerManager {
 			}
 		}
 	}
-
+	
 }
