@@ -20,7 +20,9 @@ class ProxySocket {
 		$this->port = $port;
 		$this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 		if (!@socket_connect($this->socket, $address, $port)) {
-			throw new \Exception('Socket can\'t connect');
+			$errno = socket_last_error();
+			$error = socket_strerror($errno);
+			throw new \Exception("Socket can't connect : {$errno} - {$error}");
 		}
 		socket_set_nonblock($this->socket);
 	}

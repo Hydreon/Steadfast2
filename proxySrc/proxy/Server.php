@@ -309,7 +309,9 @@ class Server {
 	
 	public function handlePacket($packet) {
 		$socket = $this->getSocket($this->getDefaultServer(), $this->getProxyPort());
-		$socket->writeMessage(chr(static::SYSTEM_PACKET_ID) . $packet);
+		if ($socket !== false) {
+			$socket->writeMessage(chr(static::SYSTEM_PACKET_ID) . $packet);
+		}
 	}
 	
 	public function sendRawPacket($address, $port, $payload) {

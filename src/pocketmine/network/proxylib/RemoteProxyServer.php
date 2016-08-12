@@ -97,11 +97,21 @@ class RemoteProxyServer {
 
 	public function putPacket($buffer) {
 		$data = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
+		$dataLength = strlen($data);
+
 		socket_clear_error($this->socket);
-		$writeResult = @socket_write($this->socket, pack('N', strlen($data)) . $data);
-		if ($writeResult === false) {
-			$errno = socket_last_error($this->socket);
-			echo 'SOCKET WRITE ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
+		while (true) {
+			$sentBytes = @socket_write($this->socket, pack('N', $dataLength) . $data);
+			if ($sentBytes === false) {
+				$errno = socket_last_error($this->socket);
+				echo 'SOCKET WRITE ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
+				break;
+			} else if ($sentBytes < $dataLength) {
+				$buffer = substr($dataLength, $sentBytes);
+				$dataLength -= $sentBytes;
+			} else {
+				break;
+			}
 		}
 	}
 	

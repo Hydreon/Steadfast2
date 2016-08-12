@@ -119,8 +119,7 @@ class RakLibServer extends \Thread{
         return $this->internalQueue;
     }
 
-    public function pushMainToThreadPacket($str){
-		var_dump(__CLASS__.'::'.__METHOD__);
+    public function pushMainToThreadPacket($str){	
         $this->internalQueue[] = $str;
     }
 

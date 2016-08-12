@@ -3659,7 +3659,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->interface;
 	}
 	
-	public function transfer($address, $port = 10305) {							
+	public function transfer($address, $port = 10305) {
 		$pk = new RedirectPacket();
 		$pk->ip = $address;
 		$pk->port = $port;
