@@ -271,18 +271,18 @@ class Player {
 		if ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
 			$this->kick($packet->reason);
 		} elseif ($packet->pid() === ProtocolProxyInfo::REDIRECT_PACKET) {
-			if ($this->socket->getIdentifier() == $packet->ip . $packet->port) {
-				return;
-			}			
-			$pk = new ProxyDisconnectPacket();
-			$pk->reason = 'Change Server';
-			$pk->encode();
-			$socket = $this->server->getSocket($packet->ip, $packet->port);
-			if ($socket) {
-				$this->sendProxyPacket(chr(Server::PROXY_PACKET_ID) . $pk->buffer);			
-				$this->socket = $socket;
-				$this->sendConnectPacket();
-			}
+//			if ($this->socket->getIdentifier() == $packet->ip . $packet->port) {
+//				return;
+//			}			
+//			$pk = new ProxyDisconnectPacket();
+//			$pk->reason = 'Change Server';
+//			$pk->encode();
+//			$socket = $this->server->getSocket($packet->ip, $packet->port);
+//			if ($socket) {
+//				$this->sendProxyPacket(chr(Server::PROXY_PACKET_ID) . $pk->buffer);			
+//				$this->socket = $socket;
+//				$this->sendConnectPacket();
+//			}
 		}
 	}
 	

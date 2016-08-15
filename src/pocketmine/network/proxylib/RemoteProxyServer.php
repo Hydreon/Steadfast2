@@ -32,7 +32,7 @@ class RemoteProxyServer {
 		);
 		$this->proxyManager->getProxyServer()->pushToExternalQueue(serialize($info));
 		socket_clear_error($this->socket);
-		@socket_close($this->socket);
+		socket_close($this->socket);
 		if (get_resource_type($this->socket) == 'Socket') {
 			$err = socket_last_error($this->socket);
 			var_dump('Close error :' . $err);
@@ -51,7 +51,7 @@ class RemoteProxyServer {
 			$this->lastBuffer = '';
 			
 			$atLeastOneRecived = false;
-			while (strlen($buffer = @socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
+			while (strlen($buffer = socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
 				$data .= $buffer;
 				$atLeastOneRecived = true;
 			}
@@ -101,7 +101,7 @@ class RemoteProxyServer {
 
 		socket_clear_error($this->socket);
 		while (true) {
-			$sentBytes = @socket_write($this->socket, pack('N', $dataLength) . $data);
+			$sentBytes = socket_write($this->socket, pack('N', $dataLength) . $data);
 			if ($sentBytes === false) {
 				$errno = socket_last_error($this->socket);
 				echo 'SOCKET WRITE ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
@@ -114,6 +114,7 @@ class RemoteProxyServer {
 			}
 		}
 	}
+
 	
 	public function sendRawData($buffer) {
 		$data = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);

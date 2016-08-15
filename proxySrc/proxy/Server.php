@@ -20,14 +20,16 @@ class Server {
 	private $isRunning = true;
 	private $tickCounter;
 	private $nextTick = 0;
-	private $tickAverage = [20, 20, 20, 20, 20];
-	private $useAverage = [20, 20, 20, 20, 20];
+	private $tickAverage = [];
+	private $useAverage = [];
 	private $logger;
 	private $network;
 	private $autoloader;
 	private $players = [];
 	private $sockets = [];
 	private $properties;
+	private $tps = 200;
+	private $tickTime;
 
 	public function getLoader() {
 		return $this->autoloader;
@@ -126,11 +128,12 @@ class Server {
 			pcntl_signal(SIGHUP, [$this, "handleSignal"]);
 		}
 
+		$this->tickTime = 1 / $this->tps;
 		$this->tickCounter = 0;
 		$this->tickAverage = array();
 		$this->useAverage = array();
 		for ($i = 0; $i < 1200; $i++) {
-			$this->tickAverage[] = 20;
+			$this->tickAverage[] = $this->tps;
 			$this->useAverage[] = 0;
 		}
 		$this->logger->info("Server started on " . ($this->getIp() === "" ? "*" : $this->getIp()) . ":" . $this->getPort());		
@@ -168,14 +171,14 @@ class Server {
 
 		$now = microtime(true);
 		array_shift($this->tickAverage);
-		$this->tickAverage[] = min(20, 1 / max(0.001, $now - $tickTime));
+		$this->tickAverage[] = min($this->tps, 1 / max(0.001, $now - $tickTime));
 		array_shift($this->useAverage);
-		$this->useAverage[] = min(1, ($now - $tickTime) / 0.05);
+		$this->useAverage[] = min(1, ($now - $tickTime) / $this->tickTime);
 
 		if (($this->nextTick - $tickTime) < -1) {
 			$this->nextTick = $tickTime;
 		}
-		$this->nextTick += 0.05;
+		$this->nextTick += $this->tickTime;
 
 		return true;
 	}
@@ -216,6 +219,7 @@ class Server {
 						$player->close('', 'Lost remote server');
 					}
 				}
+				echo 'REMOVE SOCKET: ' . $key . PHP_EOL;
 				unset($this->sockets[$key]);
 			}
 		}
@@ -263,6 +267,7 @@ class Server {
 		if (isset($this->sockets[$address . $port])) {
 			return $this->sockets[$address . $port];
 		} else {
+			echo 'CREATE NEW SOCKET: ' . $address . ' : ' . $port . PHP_EOL;
 			return $this->createSockets($address, $port);
 		}
 	}

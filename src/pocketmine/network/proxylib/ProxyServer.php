@@ -38,7 +38,7 @@ class ProxyServer extends Worker {
 
 
 		$this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-		if (@socket_bind($this->socket, $this->interface, $this->port) !== true) {
+		if (socket_bind($this->socket, $this->interface, $this->port) !== true) {
 			$this->logger->critical("FAILED TO BIND TO " . $this->interface . ":" . $this->port . "!");
 			exit(1);
 		}
@@ -82,7 +82,7 @@ class ProxyServer extends Worker {
 
 	public function shutdown() {
 		$this->shutdown = true;
-		@socket_close($this->socket);
+		socket_close($this->socket);
 		var_dump("ProxyServer thread shutdown!");
 	}
 
@@ -158,7 +158,7 @@ class ProxyServer extends Worker {
 		if ($this->shutdown !== true) {
 			var_dump("ProxyServer thread crashed!");
 		}
-		@socket_close($this->socket);
+		socket_close($this->socket);
 	}
 
 }

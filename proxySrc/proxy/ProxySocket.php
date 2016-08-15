@@ -19,12 +19,14 @@ class ProxySocket {
 		$this->address = $address;
 		$this->port = $port;
 		$this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-		if (!@socket_connect($this->socket, $address, $port)) {
+		if (!socket_connect($this->socket, $address, $port)) {
 			$errno = socket_last_error();
 			$error = socket_strerror($errno);
 			throw new \Exception("Socket can't connect : {$errno} - {$error}");
 		}
 		socket_set_nonblock($this->socket);
+		socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, 1024 * 1024 * 8);
+ 		socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, 1024 * 1024 * 8);
 	}
 
 	public function getIdentifier() {
@@ -34,11 +36,21 @@ class ProxySocket {
 	public function writeMessage($msg) {
 		if (strlen($msg) > 0) {
 			$data = zlib_encode($msg, ZLIB_ENCODING_DEFLATE, 7);
+			$dataLength = strlen($data);
+
 			socket_clear_error($this->socket);
-			$writeResult = @socket_write($this->socket, pack('N', strlen($data)) . $data);
-			if ($writeResult === false) {
-				$errno = socket_last_error($this->socket);
-				echo $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
+			while (true) {
+				$sentBytes = socket_write($this->socket, pack('N', $dataLength) . $data);
+				if ($sentBytes === false) {
+					$errno = socket_last_error($this->socket);
+					echo 'PROXY SOCKET WRITE ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
+					break;
+				} else if ($sentBytes < $dataLength) {
+					$buffer = substr($dataLength, $sentBytes);
+					$dataLength -= $sentBytes;
+				} else {
+					break;
+				}
 			}
 		}
 	}
@@ -46,12 +58,12 @@ class ProxySocket {
 	public function checkMessages() {
 		$err = socket_last_error($this->socket);
 		if ($err !== 0 && $err !== 35 && $err !== 11) {
-			@socket_close($this->socket);
+			socket_close($this->socket);
 			return false;
 		}		
 		$data = $this->lastMessage;
 		$this->lastMessage = '';
-		while (strlen($buffer = @socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
+		while (strlen($buffer = socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
 			$data .= $buffer;
 		}
 		if (($dataLen = strlen($data)) > 0) {

@@ -16,8 +16,8 @@ class RemoteProxyServerManager {
 			$start = microtime(true);
 			$this->tick();
 			$time = microtime(true) - $start;
-			if ($time < 0.01) {
-				time_sleep_until(microtime(true) + 0.01 - $time);
+			if ($time < 0.005) {
+				@time_sleep_until(microtime(true) + 0.005 - $time);
 			}
 		}
 	}
