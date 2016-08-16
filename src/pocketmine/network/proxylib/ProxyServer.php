@@ -41,9 +41,10 @@ class ProxyServer extends Worker {
 		if (socket_bind($this->socket, $this->interface, $this->port) !== true) {
 			$this->logger->critical("FAILED TO BIND TO " . $this->interface . ":" . $this->port . "!");
 			exit(1);
-		}
-		socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, 1024 * 1024 * 8);
- 		socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, 1024 * 1024 * 8);
+		}	
+		socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, 1024 * 1024 * 64);
+ 		socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, 1024 * 1024 * 64);
+		socket_set_option($this->socket, SOL_SOCKET, SO_LINGER, ["l_onoff" => 1, "l_linger" => 0]);
 		socket_listen($this->socket);
 		$this->logger->info("ProxyServer is running on $this->interface:$this->port");
 		socket_set_nonblock($this->socket);

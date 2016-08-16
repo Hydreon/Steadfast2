@@ -27,6 +27,7 @@ class ProxySocket {
 		socket_set_nonblock($this->socket);
 		socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, 1024 * 1024 * 8);
  		socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, 1024 * 1024 * 8);
+		socket_set_option($this->socket, SOL_SOCKET, SO_LINGER, ["l_onoff" => 1, "l_linger" => 0]);
 	}
 
 	public function getIdentifier() {
