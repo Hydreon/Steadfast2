@@ -24,7 +24,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface {
 	private $interface;
 	public $count = 0;
 	public $maxcount = 31360;
-	public $name = TextFormat::AQUA . "Life" . TextFormat::RED . "Boat " . TextFormat::BOLD . TextFormat::GOLD . "Proxy Alpha";
+	public $name = TextFormat::AQUA . "Life" . TextFormat::RED . "Boat ";
 
 	public function setCount($count, $maxcount) {
 		$this->count = $count;
@@ -35,6 +35,10 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface {
 				\proxy\MINECRAFT_VERSION_NETWORK . ";" .
 				$this->count . ";" . $maxcount
 		);
+	}
+	
+	public function setFullName($data) {
+		$this->interface->sendOption("name", $data);
 	}
 
 	public function __construct(Server $server) {

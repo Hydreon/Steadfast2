@@ -14,6 +14,7 @@ class Server {
 	const PROXY_PACKET_ID = 0x02;
 	const PLAYER_PACKET_ID = 0x03;
 	const SYSTEM_PACKET_ID = 0x04;
+	const SYSTEM_DATA_PACKET_ID = 0x05;
 
 	public static $lastPlayerId = 1;
 	private static $instance = null;
@@ -32,6 +33,8 @@ class Server {
 	private $tps = 40;
 	private $tickTime;
 	private $lastTick = 0;
+	
+	public $raklibInterface;
 
 	public function getLoader() {
 		return $this->autoloader;
@@ -119,7 +122,8 @@ class Server {
 		$this->autoloader = $autoloader;
 		$this->logger = $logger;
 		$this->network = new Network($this);
-		$this->addInterface(new RakLibInterface($this));
+		$this->raklibInterface = new RakLibInterface($this);
+		$this->addInterface($this->raklibInterface);
 		$this->start();
 	}
 
@@ -172,6 +176,12 @@ class Server {
 		$this->checkSockets();
 		
 		if ($this->lastTick < time()) {
+			if ($this->lastTick % 5 == 0) {
+				if (($socket = $this->getDefaultSocket())) {
+					$socket->writeMessage(chr(self::SYSTEM_DATA_PACKET_ID) . chr(0x01));
+				}
+			}			
+			
 			$this->lastTick = time();
 			foreach ($this->waitSockets as $key => $socket) {
 				try {

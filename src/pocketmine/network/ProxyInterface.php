@@ -12,6 +12,8 @@ use raklib\Binary;
 use raklib\RakLib;
 use pocketmine\network\AdvancedSourceInterface;
 use pocketmine\network\Network;
+use pocketmine\utils\TextFormat;
+use pocketmine\network\protocol\Info;
 
 //class ProxyInterface implements SourceInterface {
 class ProxyInterface implements AdvancedSourceInterface {
@@ -20,6 +22,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 	const PROXY_PACKET_ID = 0x02;
 	const PLAYER_PACKET_ID = 0x03;
 	const SYSTEM_PACKET_ID = 0x04;
+	const SYSTEM_DATA_PACKET_ID = 0x05;
 
 	private $identifiers;
 	private $server;
@@ -29,6 +32,10 @@ class ProxyInterface implements AdvancedSourceInterface {
 	private $network;
 	// for raw packets. key - response recipient identifier , value - session iddentifier
 	private $nonPlayerSessionMap = array();
+	
+	public $count = 0;
+	public $maxcount = 200;
+	public $name = TextFormat::AQUA . "Life" . TextFormat::RED . "Boat ";
 
 	public function __construct(Server $server) {
 		$this->server = $server;
@@ -41,7 +48,9 @@ class ProxyInterface implements AdvancedSourceInterface {
 	}
 
 	public function setName($name) {
-		
+		if (strlen($name) > 1) {
+			$this->name = $name;
+		}
 	}
 
 	public function shutdown() {
@@ -49,7 +58,8 @@ class ProxyInterface implements AdvancedSourceInterface {
 	}
 
 	public function setCount($count, $maxcount) {
-		
+		$this->count = $count;
+		$this->maxcount = $maxcount;
 	}
 
 	public function process() {
@@ -119,6 +129,20 @@ class ProxyInterface implements AdvancedSourceInterface {
 					}
 					
 					Server::getInstance()->handlePacket($address, $port, $payload);
+				}
+			} else if ($packetType == self::SYSTEM_DATA_PACKET_ID) {
+				$packet = substr($data['data'], 1);
+				$id = ord($packet{0});
+				if ($id = 0x01) {					
+					$name = "MCPE;" . addcslashes($this->name, ";") . ";" .
+							(Info::CURRENT_PROTOCOL) . ";" .
+							\pocketmine\MINECRAFT_VERSION_NETWORK . ";" .
+							$this->count . ";" . $this->maxcount;
+					$info = array(
+						'id' => $data['id'],
+						'data' => chr(self::SYSTEM_DATA_PACKET_ID) . chr(0x02) . $name
+					);
+					$this->proxyServer->writeToProxyServer(serialize($info));
 				}
 			}
 		}

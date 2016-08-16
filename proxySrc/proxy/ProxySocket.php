@@ -138,6 +138,14 @@ class ProxySocket {
 				$payload = substr($buffer, $offset);
 				$this->server->sendRawPacket($address, $port, $payload);
 			}
+		} else if ($packetType == Server::SYSTEM_DATA_PACKET_ID) {		
+			$offset = 0;
+			$id = ord($buffer{$offset});			
+			$offset++;
+			if ($id == 0x02) {
+				$name = substr($buffer, $offset);
+				$this->server->raklibInterface->setFullName($name);
+			}
 		} else {
 			echo 'UNKNOWN PACKET TYPE' . PHP_EOL;
 			var_dump($buffer);
