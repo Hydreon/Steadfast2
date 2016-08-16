@@ -13,21 +13,40 @@ class ProxySocket {
 	private $socket;
 	private $lastMessage = '';
 	private $server;
+	private $connectTimeout = 5;
+	private $waitPlayers = [];
+	private $connectTime = 0;
 
-	public function __construct($server, $address, $port) {
+	public function __construct($server, $address, $port, $wait = false) {
 		$this->server = $server;
 		$this->address = $address;
 		$this->port = $port;
 		$this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-		if (!socket_connect($this->socket, $address, $port)) {
-			$errno = socket_last_error();
-			$error = socket_strerror($errno);
-			throw new \Exception("Socket can't connect : {$errno} - {$error}");
-		}
 		socket_set_nonblock($this->socket);
 		socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, 1024 * 1024 * 8);
- 		socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, 1024 * 1024 * 8);
+		socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, 1024 * 1024 * 8);
 		socket_set_option($this->socket, SOL_SOCKET, SO_LINGER, ["l_onoff" => 1, "l_linger" => 0]);
+		$startTime = microtime(true);
+		if ($wait) {
+			while (!@socket_connect($this->socket, $address, $port)) {
+				$err = socket_last_error($this->socket);
+				$timeDiff = microtime(true) - $startTime;
+				if (($err == 115 || $err == 114) && $timeDiff < $this->connectTimeout) {
+					socket_clear_error($this->socket);
+					continue;
+				}
+				if ($timeDiff < $this->connectTimeout) {
+					$errno = socket_last_error();
+					$error = socket_strerror($errno);
+					throw new \Exception("Socket can't connect : {$errno} - {$error}");
+				} else {
+					throw new \Exception("Socket can't connect : timeout");
+				}
+			}
+		} else {
+			@socket_connect($this->socket, $address, $port);
+			$this->connectTime = microtime(true);
+		}
 	}
 
 	public function getIdentifier() {
@@ -61,7 +80,7 @@ class ProxySocket {
 		if ($err !== 0 && $err !== 35 && $err !== 11) {
 			socket_close($this->socket);
 			return false;
-		}		
+		}
 		$data = $this->lastMessage;
 		$this->lastMessage = '';
 		while (strlen($buffer = socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
@@ -120,12 +139,38 @@ class ProxySocket {
 				$this->server->sendRawPacket($address, $port, $payload);
 			}
 		} else {
-			echo 'UNKNOWN PACKET TYPE'.PHP_EOL;
+			echo 'UNKNOWN PACKET TYPE' . PHP_EOL;
 			var_dump($buffer);
 		}
 		return true;
 	}
 
-	
+	public function addWaitPlayer($player) {
+		$this->waitPlayers[$player->proxyIdentifier] = $player;
+	}
+
+	public function checkConnect() {
+		if (!@socket_connect($this->socket, $this->address, $this->port)) {
+			$err = socket_last_error($this->socket);
+			$timeDiff = microtime(true) - $this->connectTime;
+			if (($err == 115 || $err == 114) && $timeDiff < $this->connectTimeout) {
+				socket_clear_error($this->socket);
+				return false;
+			}
+			if ($timeDiff < $this->connectTimeout) {
+				$errno = socket_last_error();
+				$error = socket_strerror($errno);
+				throw new \Exception("Socket can't connect : {$errno} - {$error}");
+			} else {
+				throw new \Exception("Socket can't connect : timeout");
+			}
+		} else {
+			foreach ($this->waitPlayers as $player) {
+				$player->changeServer($this);
+			}
+			$this->waitPlayers = [];
+			return true;
+		}
+	}
 
 }

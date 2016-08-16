@@ -37,6 +37,7 @@ class Player {
 	private $skinName;
 	private $skin;
 	private $socket;
+	public $proxyIdentifier;
 
 	public function __construct(SourceInterface $interface, $clientID, $ip, $port) {
 		$this->interface = $interface;
@@ -44,7 +45,7 @@ class Player {
 		$this->ip = $ip;
 		$this->port = $port;
 		$this->clientID = $clientID;
-		$this->socket = $this->server->getSocket($this->server->getDefaultServer(), $this->server->getProxyPort());
+		$this->socket = $this->server->getDefaultSocket();
 		
 		if (!($this->socket instanceof ProxySocket)) {
 			throw new \Exception('[Plaer creaton] : Socket problem');
@@ -271,19 +272,20 @@ class Player {
 		if ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
 			$this->kick($packet->reason);
 		} elseif ($packet->pid() === ProtocolProxyInfo::REDIRECT_PACKET) {
-//			if ($this->socket->getIdentifier() == $packet->ip . $packet->port) {
-//				return;
-//			}			
-//			$pk = new ProxyDisconnectPacket();
-//			$pk->reason = 'Change Server';
-//			$pk->encode();
-//			$socket = $this->server->getSocket($packet->ip, $packet->port);
-//			if ($socket) {
-//				$this->sendProxyPacket(chr(Server::PROXY_PACKET_ID) . $pk->buffer);			
-//				$this->socket = $socket;
-//				$this->sendConnectPacket();
-//			}
+			if ($this->socket->getIdentifier() == $packet->ip . $packet->port) {
+				return;
+			}			
+			$this->server->checkRedirect($packet->ip, $packet->port, $this);			
 		}
+	}
+	
+	public function changeServer($socket) {
+		$pk = new ProxyDisconnectPacket();
+		$pk->reason = 'Change Server';
+		$pk->encode();
+		$this->sendProxyPacket(chr(Server::PROXY_PACKET_ID) . $pk->buffer);			
+		$this->socket = $socket;
+		$this->sendConnectPacket();
 	}
 	
 	public function getSocket() {

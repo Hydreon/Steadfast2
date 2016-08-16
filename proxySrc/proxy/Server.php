@@ -27,9 +27,11 @@ class Server {
 	private $autoloader;
 	private $players = [];
 	private $sockets = [];
+	private $waitSockets = [];
 	private $properties;
-	private $tps = 200;
+	private $tps = 40;
 	private $tickTime;
+	private $lastTick = 0;
 
 	public function getLoader() {
 		return $this->autoloader;
@@ -64,13 +66,13 @@ class Server {
 	}
 
 	public function getMaxPlayers() {
-		return $this->getConfigInt("max-players", 100);		
+		return $this->getConfigInt("max-players", 100);
 	}
 
 	public function getPort() {
 		return $this->getConfigInt("server-port", 19132);
 	}
-	
+
 	public function getProxyPort() {
 		return $this->getConfigInt("proxy-port", 10305);
 	}
@@ -78,7 +80,7 @@ class Server {
 	public function getIp() {
 		return $this->getConfigString("server-ip", "0.0.0.0");
 	}
-	
+
 	public function getDefaultServer() {
 		return $this->getConfigString("default-server", "0.0.0.0");
 	}
@@ -136,7 +138,7 @@ class Server {
 			$this->tickAverage[] = $this->tps;
 			$this->useAverage[] = 0;
 		}
-		$this->logger->info("Server started on " . ($this->getIp() === "" ? "*" : $this->getIp()) . ":" . $this->getPort());		
+		$this->logger->info("Server started on " . ($this->getIp() === "" ? "*" : $this->getIp()) . ":" . $this->getPort());
 		$this->tickProcessor();
 	}
 
@@ -168,6 +170,21 @@ class Server {
 
 		$this->network->processInterfaces();
 		$this->checkSockets();
+		
+		if ($this->lastTick < time()) {
+			$this->lastTick = time();
+			foreach ($this->waitSockets as $key => $socket) {
+				try {
+					if ($socket->checkConnect()) {
+						$this->sockets[$socket->getIdentifier()] = $socket;
+						unset($this->waitSockets[$key]);
+					}
+				} catch (\Exception $e) {
+					$this->logger->warning($e->getMessage());
+					unset($this->waitSockets[$key]);
+				}
+			}
+		}
 
 		$now = microtime(true);
 		array_shift($this->tickAverage);
@@ -225,10 +242,12 @@ class Server {
 		}
 	}
 
-	public function createSockets($address, $port) {
+	public function createSockets($address, $port, $wait = false) {
 		try {
-			$socket = new ProxySocket($this, $address, $port);
-			$this->sockets[$socket->getIdentifier()] = $socket;
+			$socket = new ProxySocket($this, $address, $port, $wait);
+			if ($wait) {
+				$this->sockets[$socket->getIdentifier()] = $socket;
+			}
 			return $socket;
 		} catch (\Exception $e) {
 			$this->logger->warning($e->getMessage());
@@ -261,15 +280,6 @@ class Server {
 		}
 		$data->setBuffer($buffer, 1);
 		return $data;
-	}
-
-	public function getSocket($address, $port) {
-		if (isset($this->sockets[$address . $port])) {
-			return $this->sockets[$address . $port];
-		} else {
-			echo 'CREATE NEW SOCKET: ' . $address . ' : ' . $port . PHP_EOL;
-			return $this->createSockets($address, $port);
-		}
 	}
 
 	public function getConfigBoolean($variable, $defaultValue = false) {
@@ -311,16 +321,42 @@ class Server {
 
 		return $this->properties->exists($variable) ? $this->properties->get($variable) : $defaultValue;
 	}
-	
+
 	public function handlePacket($packet) {
-		$socket = $this->getSocket($this->getDefaultServer(), $this->getProxyPort());
+		$socket = $this->getDefaultSocket();
 		if ($socket !== false) {
 			$socket->writeMessage(chr(static::SYSTEM_PACKET_ID) . $packet);
 		}
 	}
-	
+
 	public function sendRawPacket($address, $port, $payload) {
 		$this->network->sendPacket($address, $port, $payload);
+	}
+
+	public function getDefaultSocket() {
+		$address = $this->getDefaultServer();
+		$port = $this->getProxyPort();
+		if (isset($this->sockets[$address . $port])) {
+			return $this->sockets[$address . $port];
+		} else {
+			echo 'CREATE DEFAULT SOCKET: ' . $address . ' : ' . $port . PHP_EOL;
+			return $this->createSockets($address, $port, true);
+		}
+	}
+
+	public function checkRedirect($address, $port, $player) {
+		if (isset($this->sockets[$address . $port])) {
+			$player->changeServer($this->sockets[$address . $port]);
+		} elseif (isset($this->waitSockets[$address . $port])) {
+			$this->waitSockets[$address . $port]->addWaitPlayer($player);
+		} else {
+			echo 'CREATE SOCKET: ' . $address . ' : ' . $port . PHP_EOL;
+			$socket = $this->createSockets($address, $port, false);
+			if ($socket) {
+				$socket->addWaitPlayer($player);
+				$this->waitSockets[$address . $port] = $socket;
+			}
+		}
 	}
 
 }
