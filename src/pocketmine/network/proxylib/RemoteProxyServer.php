@@ -65,6 +65,7 @@ class RemoteProxyServer {
 	public function putPacket($buffer) {
 		$data = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
 		$this->writeQueue[] = $data;
+		$this->checkWriteQueue();
 	}
 
 	private function checkWriteQueue() {

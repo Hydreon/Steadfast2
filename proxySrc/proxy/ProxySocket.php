@@ -58,6 +58,7 @@ class ProxySocket {
 		if (strlen($msg) > 0) {
 			$data = zlib_encode($msg, ZLIB_ENCODING_DEFLATE, 7);
 			$this->writeQueue[] = $data;
+			$this->checkWriteQueue();
 		}
 	}
 
