@@ -110,7 +110,7 @@ class LoginPacket extends DataPacket {
 		
 			$this->playerData = self::load($this->playerData);
 			$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
-			$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
+			$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];			
 //			if(isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
 //				$this->clientUUID = UUID::fromBinary($this->chains['data'][$dataIndex]['extraData']['XUID']);
 //			} else {
@@ -127,6 +127,7 @@ class LoginPacket extends DataPacket {
 			$this->serverAddress = $this->playerData['ServerAddress'];
 			$this->skinName = $this->playerData['SkinId'];
 			$this->skin = base64_decode($this->playerData['SkinData']);
+			$this->clientSecret = $this->playerData['ClientRandomId'];
 		} else {
 			$this->username = $this->getString();
 			$this->protocol1 = $this->getInt();

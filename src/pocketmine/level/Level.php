@@ -1518,13 +1518,19 @@ class Level implements ChunkManager, Metadatable{
 		if($hand->isSolid() === true and $hand->getBoundingBox() !== null){
 			$entities = $this->getCollidingEntities($hand->getBoundingBox());
 			$realCount = 0;
-			foreach($entities as $e){
-				if($e instanceof Arrow or $e instanceof DroppedItem){
+			foreach ($entities as $e) {
+				if ($e instanceof Arrow or $e instanceof DroppedItem) {
 					continue;
 				}
-				if($e instanceof Player && ($e->isSpectator() || $e == $player)){
+				if ($e instanceof Player && $e->isSpectator()) {
 					continue;
 				}
+				if ($e == $player) {
+					if (round($player->getY()) != round($hand->getY()) && round($player->getY() + 1) != round($hand->getY())) {
+						continue;
+					}
+				}
+
 				++$realCount;
 			}
 
@@ -1532,7 +1538,6 @@ class Level implements ChunkManager, Metadatable{
 				return false; //Entity in block
 			}
 		}
-
 
 		if($player instanceof Player){
 			if($player->isSpectator()){
