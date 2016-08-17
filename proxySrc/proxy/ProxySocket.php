@@ -16,6 +16,7 @@ class ProxySocket {
 	private $connectTimeout = 5;
 	private $waitPlayers = [];
 	private $connectTime = 0;
+	private $writeQueue = [];
 
 	public function __construct($server, $address, $port, $wait = false) {
 		$this->server = $server;
@@ -56,22 +57,7 @@ class ProxySocket {
 	public function writeMessage($msg) {
 		if (strlen($msg) > 0) {
 			$data = zlib_encode($msg, ZLIB_ENCODING_DEFLATE, 7);
-			$dataLength = strlen($data);
-
-			socket_clear_error($this->socket);
-			while (true) {
-				$sentBytes = socket_write($this->socket, pack('N', $dataLength) . $data);
-				if ($sentBytes === false) {
-					$errno = socket_last_error($this->socket);
-					echo 'PROXY SOCKET WRITE ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
-					break;
-				} else if ($sentBytes < $dataLength) {
-					$buffer = substr($dataLength, $sentBytes);
-					$dataLength -= $sentBytes;
-				} else {
-					break;
-				}
-			}
+			$this->writeQueue[] = $data;
 		}
 	}
 
@@ -81,11 +67,54 @@ class ProxySocket {
 			socket_close($this->socket);
 			return false;
 		}
+		
+		$this->checkReadQueue();
+		$this->checkWriteQueue();
+		
+		return true;
+	}
+	
+	private function checkWriteQueue() {
+		foreach ($this->writeQueue as $key => $data) {
+			$dataLength = strlen($data);
+			socket_clear_error($this->socket);
+			while (true) {
+				$sentBytes = socket_write($this->socket, pack('N', $dataLength) . $data);
+				if ($sentBytes === false) {
+					$errno = socket_last_error($this->socket);
+					echo 'PROXY SOCKET WRITE ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
+					return;
+				} else if ($sentBytes < $dataLength) {
+					$buffer = substr($dataLength, $sentBytes);
+					$dataLength -= $sentBytes;
+				} else {
+					break;
+				}
+			}
+			unset($this->writeQueue[$key]);
+		}
+	}
+	
+	
+	
+	private function checkReadQueue() {
 		$data = $this->lastMessage;
 		$this->lastMessage = '';
+		
+		$atLeastOneRecived = false;
 		while (strlen($buffer = socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
 			$data .= $buffer;
+			$atLeastOneRecived = true;
 		}
+		
+		if (!$atLeastOneRecived) {
+			$errno = socket_last_error($this->socket);
+			if ($errno !== 11) {
+				echo 'PROXY SOCKET READ ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
+			}
+			return;
+		}
+		
 		if (($dataLen = strlen($data)) > 0) {
 			$offset = 0;
 			while ($offset < $dataLen) {
@@ -108,8 +137,8 @@ class ProxySocket {
 				$offset += $len;
 			}
 		}
-		return true;
 	}
+	
 
 	private function checkPacket($buffer) {
 		$buffer = zlib_decode($buffer);

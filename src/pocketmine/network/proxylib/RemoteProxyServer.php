@@ -9,6 +9,7 @@ class RemoteProxyServer {
 	private $ip;
 	private $port;
 	private $lastBuffer = '';
+	private $writeQueue = [];
 
 	public function __construct($proxyManager, $socket) {
 		$this->proxyManager = $proxyManager;
@@ -47,42 +48,8 @@ class RemoteProxyServer {
 		if ($err !== 0 && $err !== 35 && $err !== 11) {
 			return false;
 		} else {
-			$data = $this->lastBuffer;
-			$this->lastBuffer = '';
-			
-			$atLeastOneRecived = false;
-			while (strlen($buffer = socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
-				$data .= $buffer;
-				$atLeastOneRecived = true;
-			}
-			
-			if (!$atLeastOneRecived) {
-				$errno = socket_last_error($this->socket);
-				if ($errno !== 11) {
-					echo 'SOCKET READ ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
-				}
-			}
-			
-			if (($dataLen = strlen($data)) > 0) {
-				$offset = 0;
-				while ($offset < $dataLen) {
-					if ($offset + 4 > $dataLen) {
-						$this->lastBuffer = substr($data, $offset);
-						break;
-					}
-					$len = unpack('N', substr($data, $offset, 4));
-					$len = $len[1];
-					if ($offset + $len + 4 > $dataLen) {
-						$this->lastBuffer = substr($data, $offset);
-						break;
-					}
-					$offset += 4;
-					$msg = substr($data, $offset, $len);
-					$this->checkPacket($msg);
-					$offset += $len;
-				}
-			}
-
+			$this->checkReadQueue();
+			$this->checkWriteQueue();
 			return true;
 		}
 	}
@@ -97,25 +64,69 @@ class RemoteProxyServer {
 
 	public function putPacket($buffer) {
 		$data = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
-		$dataLength = strlen($data);
+		$this->writeQueue[] = $data;
+	}
 
-		socket_clear_error($this->socket);
-		while (true) {
-			$sentBytes = socket_write($this->socket, pack('N', $dataLength) . $data);
-			if ($sentBytes === false) {
-				$errno = socket_last_error($this->socket);
-				echo 'SOCKET WRITE ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
-				break;
-			} else if ($sentBytes < $dataLength) {
-				$buffer = substr($dataLength, $sentBytes);
-				$dataLength -= $sentBytes;
-			} else {
-				break;
+	private function checkWriteQueue() {
+		foreach ($this->writeQueue as $key => $data) {
+			$dataLength = strlen($data);
+			socket_clear_error($this->socket);
+			while (true) {
+				$sentBytes = socket_write($this->socket, pack('N', $dataLength) . $data);
+				if ($sentBytes === false) {
+					$errno = socket_last_error($this->socket);
+					echo 'SOCKET WRITE ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
+					return;
+				} else if ($sentBytes < $dataLength) {
+					$buffer = substr($dataLength, $sentBytes);
+					$dataLength -= $sentBytes;
+				} else {
+					break;
+				}
+			}
+			unset($this->writeQueue[$key]);
+		}
+	}
+
+	private function checkReadQueue() {
+		$data = $this->lastBuffer;
+		$this->lastBuffer = '';
+
+		$atLeastOneRecived = false;
+		while (strlen($buffer = socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
+			$data .= $buffer;
+			$atLeastOneRecived = true;
+		}
+
+		if (!$atLeastOneRecived) {
+			$errno = socket_last_error($this->socket);
+			if ($errno !== 11) {
+				echo 'SOCKET READ ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
+			}
+			return;
+		}
+
+		if (($dataLen = strlen($data)) > 0) {
+			$offset = 0;
+			while ($offset < $dataLen) {
+				if ($offset + 4 > $dataLen) {
+					$this->lastBuffer = substr($data, $offset);
+					break;
+				}
+				$len = unpack('N', substr($data, $offset, 4));
+				$len = $len[1];
+				if ($offset + $len + 4 > $dataLen) {
+					$this->lastBuffer = substr($data, $offset);
+					break;
+				}
+				$offset += 4;
+				$msg = substr($data, $offset, $len);
+				$this->checkPacket($msg);
+				$offset += $len;
 			}
 		}
 	}
 
-	
 	public function sendRawData($buffer) {
 		$data = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
 		$data = pack('N', strlen($data)) . $data;
