@@ -736,6 +736,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		if($this->chunkLoadCount >= 36 and $this->spawned === false){
+			$this->server->getPluginManager()->callEvent($ev = new PlayerLoginEvent($this, "Plugin reason"));
+			if ($ev->isCancelled()) {
+				$this->close(TextFormat::YELLOW . $this->username . " has left the game", $ev->getKickMessage());
+				return;
+			}
+			
 			$this->spawned = true;
 
 			$this->sendSettings();
@@ -3543,13 +3549,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$nbt->lastPlayed = new LongTag("lastPlayed", floor(microtime(true) * 1000));
 		parent::__construct($this->level->getChunk($nbt["Pos"][0] >> 4, $nbt["Pos"][2] >> 4, true), $nbt);
 		$this->loggedIn = true;
-		$this->server->addOnlinePlayer($this);
-
-		$this->server->getPluginManager()->callEvent($ev = new PlayerLoginEvent($this, "Plugin reason"));
-		if ($ev->isCancelled()) {
-			$this->close(TextFormat::YELLOW . $this->username . " has left the game", $ev->getKickMessage());
-			return;
-		}
+		$this->server->addOnlinePlayer($this);		
 
 		if ($this->isCreative()) {
 			$this->inventory->setHeldItemSlot(0);
