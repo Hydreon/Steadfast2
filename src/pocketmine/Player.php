@@ -2902,6 +2902,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$pk->message = $reason;
 					$this->directDataPacket($pk);
 				}		
+			} elseif ($reason == 'Change Server') {
+				$this->server->despawnEntitiesForPlayer($this);
 			}
 			$this->connected = false;
 			if($this->username != ""){

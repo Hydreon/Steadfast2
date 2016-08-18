@@ -232,13 +232,14 @@ abstract class Entity extends Location implements Metadatable{
 			$this->eyeHeight = $this->height / 2 + 0.1;
 		}
 
-		$this->id = Entity::$entityCount++;
+		$this->id = Entity::$entityCount++;		
 		$this->justCreated = true;	
 		$this->namedtag = $nbt;
 		
 		$this->chunk = $chunk;
 		$this->setLevel($chunk->getProvider()->getLevel());
 		$this->server = $chunk->getProvider()->getLevel()->getServer();
+		$this->server->addSpawnedEntity($this);
 
 		$this->boundingBox = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
 		$this->setPositionAndRotation(
@@ -1604,6 +1605,7 @@ abstract class Entity extends Location implements Metadatable{
 
 	public function close(){
 		if(!$this->closed){
+			$this->server->removeSpawnedEntity($this);
 			$this->server->getPluginManager()->callEvent(new EntityDespawnEvent($this));
 			$this->closed = true;
 			$this->despawnFromAll();

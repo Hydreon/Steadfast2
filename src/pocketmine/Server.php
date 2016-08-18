@@ -286,6 +286,27 @@ class Server{
 		'y' => 10,
 		'z' => -1000000
 	);
+	
+	private $spawnedEntity = [];
+
+	public function addSpawnedEntity($entity) {
+		if ($entity instanceof Player) {
+			return;
+		}
+		$this->spawnedEntity[$entity->getId()] = $entity;
+	}
+
+	public function removeSpawnedEntity($entity) {
+		unset($this->spawnedEntity[$entity->getId()]);
+	}
+	
+	public function despawnEntitiesForPlayer($player) {
+		foreach ($this->spawnedEntity as $entity) {
+			if ($entity->isSpawned($player)) {
+				$entity->despawnFrom($player);
+			}
+		}
+	}
 
 	public function isUseAnimal() {
 		return $this->useAnimal;
