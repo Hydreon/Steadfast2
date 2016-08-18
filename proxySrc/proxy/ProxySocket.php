@@ -44,6 +44,7 @@ class ProxySocket {
 					throw new \Exception("Socket can't connect : timeout");
 				}
 			}
+			socket_clear_error($this->socket);
 		} else {
 			@socket_connect($this->socket, $address, $port);
 			$this->connectTime = microtime(true);
@@ -57,8 +58,7 @@ class ProxySocket {
 	public function writeMessage($msg) {
 		if (strlen($msg) > 0) {
 			$data = zlib_encode($msg, ZLIB_ENCODING_DEFLATE, 7);
-			$this->writeQueue[] = $data;
-			$this->checkWriteQueue();
+			$this->writeQueue[] = $data;			
 		}
 	}
 
@@ -68,13 +68,13 @@ class ProxySocket {
 			socket_close($this->socket);
 			return false;
 		}
-		
+
 		$this->checkReadQueue();
 		$this->checkWriteQueue();
-		
+
 		return true;
 	}
-	
+
 	private function checkWriteQueue() {
 		foreach ($this->writeQueue as $key => $data) {
 			$dataLength = strlen($data);
@@ -95,19 +95,17 @@ class ProxySocket {
 			unset($this->writeQueue[$key]);
 		}
 	}
-	
+
 	
 	
 	private function checkReadQueue() {
 		$data = $this->lastMessage;
-		$this->lastMessage = '';
-		
 		$atLeastOneRecived = false;
 		while (strlen($buffer = socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
 			$data .= $buffer;
 			$atLeastOneRecived = true;
 		}
-		
+
 		if (!$atLeastOneRecived) {
 			$errno = socket_last_error($this->socket);
 			if ($errno !== 11) {
@@ -116,6 +114,7 @@ class ProxySocket {
 			return;
 		}
 		
+		$this->lastMessage = '';
 		if (($dataLen = strlen($data)) > 0) {
 			$offset = 0;
 			while ($offset < $dataLen) {
@@ -139,7 +138,7 @@ class ProxySocket {
 			}
 		}
 	}
-	
+
 
 	private function checkPacket($buffer) {
 		$buffer = zlib_decode($buffer);
@@ -168,9 +167,9 @@ class ProxySocket {
 				$payload = substr($buffer, $offset);
 				$this->server->sendRawPacket($address, $port, $payload);
 			}
-		} else if ($packetType == Server::SYSTEM_DATA_PACKET_ID) {		
+		} else if ($packetType == Server::SYSTEM_DATA_PACKET_ID) {
 			$offset = 0;
-			$id = ord($buffer{$offset});			
+			$id = ord($buffer{$offset});
 			$offset++;
 			if ($id == 0x02) {
 				$name = substr($buffer, $offset);
@@ -207,6 +206,7 @@ class ProxySocket {
 				$player->changeServer($this);
 			}
 			$this->waitPlayers = [];
+			socket_clear_error($this->socket);
 			return true;
 		}
 	}
