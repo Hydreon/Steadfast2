@@ -201,7 +201,14 @@ class ProxyInterface implements AdvancedSourceInterface {
 		if (ord($buffer{0}) == 254) {
 			$buffer = substr($buffer, 1);
 			$additionalChar = chr(0xfe);
-			$pid = DataPacket::$pkKeys[ord($buffer{0})];
+			if (empty($buffer)) {
+				return false;
+			}
+			$oldPid = ord($buffer{0});
+			if (!isset(DataPacket::$pkKeys[$oldPid])) {
+				return false;
+			}
+			$pid = DataPacket::$pkKeys[$oldPid];
 		} elseif (ord($buffer{0}) == 142) {
 			$buffer = substr($buffer, 1);
 			$additionalChar = chr(0x8e);
@@ -223,6 +230,9 @@ class ProxyInterface implements AdvancedSourceInterface {
 	}
 
 	private function getProxyPacket($buffer) {
+		if (empty($buffer)) {
+			return false;
+		}
 		$pid = ord($buffer{0});
 
 		if (($data = $this->server->getNetwork()->getProxyPacket($pid)) === null) {

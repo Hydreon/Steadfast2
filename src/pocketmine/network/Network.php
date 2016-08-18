@@ -236,6 +236,9 @@ class Network {
 				$pkLen = Binary::readInt(substr($str, $offset, 4));
 				$offset += 4;
 				$buf = substr($str, $offset, $pkLen);
+				if(empty($buf)) {
+					return;
+				}
 				$offset += $pkLen;
 				$pid = ord($buf{0});
 				if(isset(DataPacket::$pkKeys[$pid])) {

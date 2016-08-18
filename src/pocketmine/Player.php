@@ -3456,7 +3456,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		if (count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers()) {
 			$this->close("", "Server is Full", false);
-			;
 			return;
 		}
 
