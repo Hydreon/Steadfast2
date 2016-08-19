@@ -2948,7 +2948,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 
 
-				if($this->currentTransaction === null or $this->currentTransaction->getCreationTime() < (microtime(true) - 8)){
+				if($this->currentTransaction === null or $this->currentTransaction->getCreationTime() < (microtime(true) - 0.8)){
 					if($this->currentTransaction !== null){
 						foreach($this->currentTransaction->getInventories() as $inventory){
 							if($inventory instanceof PlayerInventory){
