@@ -81,7 +81,7 @@ class NBT{
 	 * @return Compound
 	 */
 	public static function putItemHelper(Item $item, $slot = null){
-		$tag = new Compound(null, [
+		$tag = new Compound('Item', [
 			"id" => new ShortTag("id", $item->getId()),
 			"Count" => new ByteTag("Count", $item->getCount()),
 			"Damage" => new ShortTag("Damage", $item->getDamage())

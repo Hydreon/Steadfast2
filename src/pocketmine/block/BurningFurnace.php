@@ -125,7 +125,8 @@ class BurningFurnace extends Solid{
 			}
 
 			if(isset($furnace->namedtag->Lock) and $furnace->namedtag->Lock instanceof String){
-				if($furnace->namedtag->Lock->getValue() !== $item->getCustomName()){
+				$furnaceName = $furnace->namedtag->Lock->getValue() ;
+				if (!empty($furnaceName) && $furnaceName !== $item->getCustomName()){
 					return true;
 				}
 			}

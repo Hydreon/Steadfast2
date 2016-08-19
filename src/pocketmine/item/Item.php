@@ -1305,7 +1305,7 @@ class Item{
 	public function getCompound(){
 		return $this->tags;
 	}
-
+	
 	public function hasCompound(){
 		return $this->tags !== "" and $this->tags !== null;
 	}
@@ -1491,12 +1491,12 @@ class Item{
 		return "";
 	}
 
-	public function setCustomName($name){
+	public function setCustomName($name){		
 		if((string) $name === ""){
 			$this->clearCustomName();
 		}
 
-		if(!$this->hasCompound()){
+		if(!($hadCompound = $this->hasCompound())){
 			$tag = new Compound("", []);
 		}else{
 			$tag = $this->getNamedTag();
@@ -1508,6 +1508,10 @@ class Item{
 			$tag->display = new Compound("display", [
 				"Name" => new StringTag("Name", $name)
 			]);
+		}
+		
+		if(!$hadCompound){
+			$this->setCompound($tag);
 		}
 
 		return $this;
