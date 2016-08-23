@@ -259,10 +259,10 @@ class Player {
 		$this->socket->writeMessage(chr(Server::PLAYER_PACKET_ID) . pack('N', $this->proxyIdentifier) . $packet);
 	}
 	
-	public function sendFromProxyPacket($buffer){
+	public function sendFromProxyPacket($buffer){		
 		$pk = new EncapsulatedPacket();			
 		$pk->buffer = $this->additionalChar . $buffer;
-		$pk->reliability = 2;
+		$pk->reliability = 3;
 		$flags = (RakLib::PRIORITY_NORMAL) | (RakLib::PRIORITY_NORMAL);
 		$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($this->identifier)) . $this->identifier . chr($flags) . $pk->toBinary(true);
 		$this->interface->putReadyPacket($buffer);
