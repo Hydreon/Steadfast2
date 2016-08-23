@@ -36,6 +36,7 @@ use pocketmine\level\Level;
 use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\Player;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\NBT;
@@ -1305,7 +1306,7 @@ class Item{
 	public function getCompound(){
 		return $this->tags;
 	}
-
+	
 	public function hasCompound(){
 		return $this->tags !== "" and $this->tags !== null;
 	}
@@ -1491,7 +1492,7 @@ class Item{
 		return "";
 	}
 
-	public function setCustomName($name){
+	public function setCustomName($name){		
 		if((string) $name === ""){
 			$this->clearCustomName();
 		}
@@ -1509,6 +1510,28 @@ class Item{
 				"Name" => new StringTag("Name", $name)
 			]);
 		}
+		
+		$this->setCompound($tag);
+
+		return $this;
+	}
+	
+	public function setCustomColor($colorCode){	
+		if(!$this->hasCompound()){
+			if (!is_int($colorCode)) {
+				return $this;
+			}
+			$tag = new Compound("", []);
+		}else{
+			$tag = $this->getNamedTag();
+		}
+		if (!is_int($colorCode)) {
+			unset($tag->customColor);			
+		} else {
+			$tag->customColor = new IntTag("customColor", $colorCode);
+		}
+		
+		$this->setCompound($tag);
 
 		return $this;
 	}

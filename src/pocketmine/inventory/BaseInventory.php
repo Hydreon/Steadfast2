@@ -163,7 +163,7 @@ abstract class BaseInventory implements Inventory{
 	public function contains(Item $item){
 		$count = max(1, $item->getCount());
 		$checkDamage = $item->getDamage() === null ? false : true;
-		$checkTags = $item->getCompound() === null ? false : true;
+		$checkTags = ($item->getId() == Item::ARROW || ($item->getCompound() === null)) ? false : true;
 		foreach($this->getContents() as $i){
 			if($item->equals($i, $checkDamage, $checkTags)){
 				$count -= $i->getCount();

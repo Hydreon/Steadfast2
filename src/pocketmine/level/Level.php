@@ -111,6 +111,7 @@ use pocketmine\level\generator\LightPopulationTask;
 use pocketmine\level\generator\PopulationTask;
 use pocketmine\entity\monster\Monster;
 use pocketmine\entity\animal\Animal;
+use pocketmine\nbt\NBT;
 
 
 
@@ -1330,11 +1331,7 @@ class Level implements ChunkManager, Metadatable{
 					new FloatTag("", 0)
 				]),
 				"Health" => new ShortTag("Health", 5),
-				"Item" => new Compound("Item", [
-					"id" => new ShortTag("id", $item->getId()),
-					"Damage" => new ShortTag("Damage", $item->getDamage()),
-					"Count" => new ByteTag("Count", $item->getCount())
-				]),
+				"Item" => NBT::putItemHelper($item),
 				"PickupDelay" => new ShortTag("PickupDelay", $delay)
 			]));
 
