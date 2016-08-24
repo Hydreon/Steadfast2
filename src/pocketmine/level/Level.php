@@ -634,7 +634,7 @@ class Level implements ChunkManager, Metadatable{
 							/** @var Block $b */
 							foreach($blocks as $b){
 								foreach ($this->getUsingChunk($b->x >> 4, $b->z >> 4) as $player) {								
-									$pk = new UpdateBlockPacket($player->getAdditionalChar());
+									$pk = new UpdateBlockPacket();
 									$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
 									$player->dataPacket($pk);
 								}
@@ -691,7 +691,7 @@ class Level implements ChunkManager, Metadatable{
 				continue;
 			}
 			foreach ($target as $player) {
-				$pk = new UpdateBlockPacket($player->getAdditionalChar());
+				$pk = new UpdateBlockPacket();
 				if ($b instanceof Block) {
 					$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), $flags];
 				} else {
@@ -2542,8 +2542,7 @@ class Level implements ChunkManager, Metadatable{
 		foreach ($viewers as $p) {
 			if(!isset($this->motionToSend[$p->getIdentifier()])){
 				$this->motionToSend[$p->getIdentifier()] = array(
-					'data' => array(),
-					'additionalChar' => $p->getAdditionalChar()
+					'data' => array()
 				);
 			}
 			$this->motionToSend[$p->getIdentifier()]['data'][] = $motion;
@@ -2555,8 +2554,7 @@ class Level implements ChunkManager, Metadatable{
 		foreach ($viewers as $p) {
 			if(!isset($this->moveToSend[$p->getIdentifier()])){
 				$this->moveToSend[$p->getIdentifier()] = array(
-					'data' => array(),
-					'additionalChar' => $p->getAdditionalChar()
+					'data' => array()
 				);
 			}
 			$this->moveToSend[$p->getIdentifier()]['data'][] = $move;

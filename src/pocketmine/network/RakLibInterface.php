@@ -38,7 +38,7 @@ use raklib\server\ServerHandler;
 use raklib\server\ServerInstance;
 
 class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
-
+	
 	/** @var Server */
 	private $server;
 
@@ -237,9 +237,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	 * $player - packet recipient
 	 */
 	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
-		if(isset($this->identifiers[$player])){
-			$additionalChar = $player->getAdditionalChar();
-			
+		if(isset($this->identifiers[$player])){			
 			$identifier = $this->identifiers[$player];
 			$pk = null;
 			if(!$packet->isEncoded){
@@ -248,10 +246,9 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				if (isset($packet->__encapsulatedPacket)) {
 					unset($packet->__encapsulatedPacket);
 				}
-				$packet->updateBuffer($additionalChar);
 				$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
 				$packet->__encapsulatedPacket->identifierACK = null;
-				$packet->__encapsulatedPacket->buffer = $additionalChar . $packet->buffer;
+				$packet->__encapsulatedPacket->buffer = chr(0xfe) . $packet->buffer;
 				$packet->__encapsulatedPacket->reliability = 2;
 				$pk = $packet->__encapsulatedPacket;
 			}
@@ -264,9 +261,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			}
 
 			if($pk === null){
-				$packet->updateBuffer($additionalChar);
 				$pk = new EncapsulatedPacket();
-				$pk->buffer = $additionalChar . $packet->buffer;
+				$pk->buffer = chr(0xfe) . $packet->buffer;
 				$pk->reliability = 2;
 
 				if($needACK === true){
@@ -281,26 +277,15 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	}
 	
 	private function getPacket($buffer){
-		if(ord($buffer{0}) == 254){
+		if(ord($buffer{0}) == 0xfe){
 			$buffer = substr($buffer, 1);	
-			$additionalChar = chr(0xfe);
-			$pid = DataPacket::$pkKeys[ord($buffer{0})];			
-		} elseif(ord($buffer{0}) == 142) {
-			$buffer = substr($buffer, 1);	
-			$additionalChar = chr(0x8e);
-			$pid = ord($buffer{0});
+			$pid = ord($buffer{0});			
 		} else {
 			return;
-//			$additionalChar = chr(0);
-//			$pid = ord($buffer{0});
 		}
 
 		if(($data = $this->network->getPacket($pid)) === null){
 			return null;
-		}
-		
-		if($pid == 0x8f) {
-			$buffer = chr($pid) . $additionalChar . substr($buffer, 1);
 		}
 		
 		$data->setBuffer($buffer, 1);

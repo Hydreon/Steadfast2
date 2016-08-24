@@ -139,7 +139,6 @@ use pocketmine\tile\Tile;
 use pocketmine\utils\TextFormat;
 use pocketmine\network\protocol\SetPlayerGameTypePacket;
 use pocketmine\block\Liquid;
-use pocketmine\network\protocol\ATestPacket;
 
 use raklib\Binary;
 
@@ -257,8 +256,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastMessageReceivedFrom = "";
 	
 	protected $identifier;
-	
-	protected $additionalChar;
 	
 	/**@var string*/
 	public $language = 'English';
@@ -666,12 +663,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($this->connected === false){
 			return;
 		}		
-		
-		$resIndex = $this->getAdditionalChar() == chr(0xfe) ? 'result15' : 'result';
+
 		if(isset($payload[$this->language])) {
-			$data = $payload[$this->language][$resIndex];
+			$data = $payload[$this->language];
 		} else {
-			$data = $payload['English'][$resIndex];
+			$data = $payload['English'];
 		}
 
 		$this->usedChunks[Level::chunkHash($x, $z)] = true;
@@ -1478,7 +1474,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if(parent::setMotion($mot)){
 			if($this->chunk !== null){
 				$this->level->addEntityMotion($this->getViewers(), $this->getId(), $this->motionX, $this->motionY, $this->motionZ);
-				$pk = new SetEntityMotionPacket($this->additionalChar);
+				$pk = new SetEntityMotionPacket();
 				$pk->entities[] = [0, $mot->x, $mot->y, $mot->z];
 				$this->dataPacket($pk);
 			}
@@ -1716,8 +1712,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 				
-				$this->additionalChar = $packet->additionalChar;
-				
 				if($packet->isValidProtocol === false) {
 					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
 					break;
@@ -1837,23 +1831,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->close(TextFormat::YELLOW . $this->username . " has left the game", "Corrupt joining data, check your connection.");
 					//Timings::$timerLoginPacket->stopTiming();
 					return;
-				}
+				}		
 			
-			
-				
-				$s = '';
-				for ($i = 0; $i < 128; $i++){
-					$s .= '0';
-				}
-//			var_dump($packet->identityPublicKey);	
-//			while(empty($test = file_get_contents('test.txt'))) {}
-//				
-//				$pk = new ATestPacket();
-//				$pk->key1 = 'MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEqofKIr6LBTeOscce8yCtdG4dO2KLp5uYWfdB4IJUKjhVAvJdv1UpbDpUXjhydgq3NhfeSpYmLG9dnpi/kpLcKfj0Hb0omhR86doxE7XwuMAKYLHOHX6BnXpDHXyQ6g5f';
-//				$pk->key2 = $s;
-//				$this->dataPacket($pk);
-//
-//					return;
 				$pk = new PlayStatusPacket();
 				$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
 				$this->dataPacket($pk);
@@ -2060,7 +2039,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerMobEqipmentPacket->stopTiming();
 				break;
 			case ProtocolInfo::USE_ITEM_PACKET:
-				$packet->decodeAddational($this->protocol); //hack for 0.14.3
 				//Timings::$timerUseItemPacket->startTiming();
 				if($this->spawned === false or $this->dead === true or $this->blocked){
 					//Timings::$timerUseItemPacket->stopTiming();
@@ -3632,11 +3610,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public function getIdentifier(){
 		return $this->identifier;
-	}
-	
-	public function getAdditionalChar() {
-		return $this->additionalChar;
-	}
+	}	
 	
 	public function getVisibleEyeHeight() {
 		return $this->eyeHeight;

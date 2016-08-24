@@ -37,11 +37,8 @@ class UpdateBlockPacket extends DataPacket{
 	const FLAG_ALL_PRIORITY = (self::FLAG_ALL | self::FLAG_PRIORITY);
 
 	public $records = []; //x, z, y, blockId, blockData, flags
-
-	private $addChar = '';
 	
-	public function __construct($addChar = "") {
-		$this->addChar = $addChar;
+	public function __construct() {
 		parent::__construct("", 0);
 	}
 	
@@ -51,9 +48,6 @@ class UpdateBlockPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		if($this->addChar != chr(0xfe)) {
-			$this->putInt(count($this->records));			
-		}
 		foreach($this->records as $r){
 			$this->putInt($r[0]);
 			$this->putInt($r[1]);

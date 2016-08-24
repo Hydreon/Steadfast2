@@ -31,10 +31,8 @@ class MoveEntityPacket extends DataPacket{
 	// eid, x, y, z, yaw, pitch
 	/** @var array[] */
 	public $entities = [];
-	private $addChar = '';
 	
-	public function __construct($addChar = "") {
-		$this->addChar = $addChar;
+	public function __construct() {
 		parent::__construct("", 0);
 	}
 
@@ -49,23 +47,14 @@ class MoveEntityPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		if($this->addChar != chr(0xfe)) {
-			$this->putInt(count($this->entities));
-		}
 		foreach($this->entities as $d){
 			$this->putLong($d[0]); //eid
 			$this->putFloat($d[1]); //x
 			$this->putFloat($d[2]); //y
 			$this->putFloat($d[3]); //z
-			if($this->addChar != chr(0xfe)) {
-				$this->putFloat($d[4]); //yaw
-				$this->putFloat($d[5]); //headYaw
-				$this->putFloat($d[6]); //pitch
-			} else {
-				$this->putByte($d[6] * 0.71111); //pitch
-				$this->putByte($d[5] * 0.71111); //headYaw
-				$this->putByte($d[4] * 0.71111); //yaw
-			}
+			$this->putByte($d[6] * 0.71111); //pitch
+			$this->putByte($d[5] * 0.71111); //headYaw
+			$this->putByte($d[4] * 0.71111); //yaw
 		}
 	}
 }

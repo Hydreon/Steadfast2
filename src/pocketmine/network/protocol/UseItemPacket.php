@@ -50,18 +50,11 @@ class UseItemPacket extends DataPacket{
 		$this->posX = $this->getFloat();
 		$this->posY = $this->getFloat();
 		$this->posZ = $this->getFloat();
-		//$this->item = $this->getSlot(); //hack for 0.14.3
+		$this->getInt();
+		$this->item = $this->getSlot();
 	}
 
 	public function encode(){
 
-	}
-
-	
-	public function decodeAddational($protocol) { //hack for 0.14.3 TODO15
-		if($protocol >= 70) {
-			$this->getInt();
-		}
-		$this->item = $this->getSlot();
 	}
 }
