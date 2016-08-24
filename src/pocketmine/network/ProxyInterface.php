@@ -174,7 +174,6 @@ class ProxyInterface implements AdvancedSourceInterface {
 			} else {
 				$type = chr(self::STANDART_PACKET_ID);
 			}
-			$packet->updateBuffer($player->getAdditionalChar());
 			$info = array(
 				'id' => $player->proxyId,
 				'data' => chr(static::PLAYER_PACKET_ID) . pack('N', $player->proxySessionId) . $type . $packet->buffer
@@ -198,20 +197,11 @@ class ProxyInterface implements AdvancedSourceInterface {
 	}
 
 	private function getPacket($buffer) {
-		if (ord($buffer{0}) == 254) {
+		if (ord($buffer{0}) == 0xfe) {
 			$buffer = substr($buffer, 1);
-			$additionalChar = chr(0xfe);
 			if (empty($buffer)) {
 				return false;
 			}
-			$oldPid = ord($buffer{0});
-			if (!isset(DataPacket::$pkKeys[$oldPid])) {
-				return false;
-			}
-			$pid = DataPacket::$pkKeys[$oldPid];
-		} elseif (ord($buffer{0}) == 142) {
-			$buffer = substr($buffer, 1);
-			$additionalChar = chr(0x8e);
 			$pid = ord($buffer{0});
 		} else {
 			return false;
@@ -219,9 +209,6 @@ class ProxyInterface implements AdvancedSourceInterface {
 
 		if (($data = $this->server->getNetwork()->getPacket($pid)) === null) {
 			return null;
-		}
-		if ($pid == 0x8f) {
-			$buffer = chr($pid) . $additionalChar . substr($buffer, 1);
 		}
 
 		$data->setBuffer($buffer, 1);

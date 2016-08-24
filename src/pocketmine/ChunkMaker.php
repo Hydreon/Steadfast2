@@ -116,12 +116,8 @@ class ChunkMaker extends Worker {
 			$pk->encode();
 			if(!empty($pk->buffer)) {
 				$str = Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
-				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
-				$pk->updateBuffer(chr(0xfe));
-				$str = Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
-				$ordered15 = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);			
-				$result[$lang]['result'] = $ordered;
-				$result[$lang]['result15'] = $ordered15;				
+				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);		
+				$result[$lang] = $ordered;			
 			}
 		}
 		$this->externalQueue[] = serialize($result);		

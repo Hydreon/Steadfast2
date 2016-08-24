@@ -28,7 +28,6 @@ class Player {
 	private $viewDistance = 64;
 	private $tasks = [];
 	private $identifier;
-	private $additionalChar;
 	public $closed = false;
 	private $connected = false;
 	private $loggedIn = false;
@@ -80,8 +79,6 @@ class Player {
 				if ($this->loggedIn === true) {
 					break;
 				}
-
-				$this->additionalChar = $packet->additionalChar;
 				
 				$this->connected = true;
 				if ($packet->isValidProtocol === false) {
@@ -127,7 +124,6 @@ class Player {
 				$pk = new PlayStatusPacket();
 				$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
 				$pk->encode();
-				$pk->updateBuffer($this->additionalChar);
 				$this->dataPacket($pk);
 				
 				$this->sendFromProxyPacket($pk->buffer);
@@ -140,8 +136,7 @@ class Player {
 			case ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET:
 				$this->viewDistance = $packet->radius ** 2;
 				$packet->encode();
-				$packet->updateBuffer($this->additionalChar);
-				$this->sendProxyPacket(chr(Server::STANDART_PACKET_ID) . $this->additionalChar . $packet->buffer);
+				$this->sendProxyPacket(chr(Server::STANDART_PACKET_ID) . chr(0xfe) . $packet->buffer);
 				break;
 			default:
 				break;
@@ -194,10 +189,6 @@ class Player {
 		return $this->identifier;
 	}
 
-	public function getAdditionalChar() {
-		return $this->additionalChar;
-	}
-
 	public function checkPacket($buffer) {
 		$pk = $this->getPacket($buffer);
 		if ($pk === false) {
@@ -212,13 +203,8 @@ class Player {
 	}
 
 	private function getPacket($buffer) {
-		if (ord($buffer{0}) == 254) {
+		if (ord($buffer{0}) == 0xfe) {
 			$buffer = substr($buffer, 1);
-			$additionalChar = chr(0xfe);
-			$pid = DataPacket::$pkKeys[ord($buffer{0})];
-		} elseif (ord($buffer{0}) == 142) {
-			$buffer = substr($buffer, 1);
-			$additionalChar = chr(0x8e);
 			$pid = ord($buffer{0});
 		} else {
 			return false;
@@ -226,10 +212,6 @@ class Player {
 
 		if (($data = $this->server->getNetwork()->getPacket($pid)) === null) {
 			return null;
-		}
-
-		if ($pid == 0x8f) {
-			$buffer = chr($pid) . $additionalChar . substr($buffer, 1);
 		}
 
 		$data->setBuffer($buffer, 1);
@@ -240,7 +222,6 @@ class Player {
 	public function sendConnectPacket() {
 		$pk = new ConnectPacket();
 		$pk->identifier = $this->identifier;
-		$pk->additionalChar = $this->additionalChar;
 		$pk->protocol = $this->protocol;
 		$pk->clientId = $this->randomClientId;
 		$pk->clientUUID = $this->uuid;
@@ -261,7 +242,7 @@ class Player {
 	
 	public function sendFromProxyPacket($buffer){		
 		$pk = new EncapsulatedPacket();			
-		$pk->buffer = $this->additionalChar . $buffer;
+		$pk->buffer = chr(0xfe) . $buffer;
 		$pk->reliability = 3;
 		$flags = (RakLib::PRIORITY_NORMAL) | (RakLib::PRIORITY_NORMAL);
 		$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($this->identifier)) . $this->identifier . chr($flags) . $pk->toBinary(true);

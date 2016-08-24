@@ -22,7 +22,6 @@ class LoginPacket extends DataPacket {
 	public $chainsDataLength;
 	public $chains;
 	public $playerData;
-	public $additionalChar = "";
 	public $isValidProtocol = true;
 
 	private function getFromString(&$body, $len) {
@@ -32,71 +31,49 @@ class LoginPacket extends DataPacket {
 	}
 
 	public function decode() {
-		$addCharNumber = $this->getByte();
-		if ($addCharNumber > 0) {
-			$this->additionalChar = chr($addCharNumber);
-		}
 		$acceptedProtocols = Info::ACCEPTED_PROTOCOLS;
-		if ($addCharNumber == 0xfe) {
-			$this->protocol1 = $this->getInt();
-			if (!in_array($this->protocol1, $acceptedProtocols)) {
-				$this->isValidProtocol = false;
-				return;
-			}
-
-			$bodyLength = $this->getInt();
-
-			$body = \zlib_decode($this->get($bodyLength));
-
-			$this->chainsDataLength = Binary::readLInt($this->getFromString($body, 4));
-
-			$this->chains = json_decode($this->getFromString($body, $this->chainsDataLength), true);
-
-
-
-			$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));
-			$this->playerData = $this->getFromString($body, $this->playerDataLength);
-
-
-			$this->chains['data'] = array();
-			$index = 0;
-			foreach ($this->chains['chain'] as $key => $jwt) {
-				$data = self::load($jwt);
-				if (isset($data['extraData'])) {
-					$dataIndex = $index;
-				}
-				$this->chains['data'][$index] = $data;
-				$index++;
-			}
-
-
-			$this->playerData = self::load($this->playerData);
-			$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
-			$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
-
-			$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
-			$this->identityPublicKey = $this->chains['data'][$dataIndex]['identityPublicKey'];
-			$this->serverAddress = $this->playerData['ServerAddress'];
-			$this->skinName = $this->playerData['SkinId'];
-			$this->skin = base64_decode($this->playerData['SkinData']);
-			$this->clientSecret = $this->playerData['ClientRandomId'];
-		} else {
-			$this->username = $this->getString();
-			$this->protocol1 = $this->getInt();
-			$this->protocol2 = $this->getInt();
-			if (!in_array($this->protocol1, $acceptedProtocols)) {
-				$this->isValidProtocol = false;
-				return;
-			}
-
-			$this->clientId = $this->getLong();
-			$this->clientUUID = $this->getUUID();
-			$this->serverAddress = $this->getString();
-			$this->clientSecret = $this->getString();
-
-			$this->skinName = $this->getString();
-			$this->skin = $this->getString();
+		$this->protocol1 = $this->getInt();
+		if (!in_array($this->protocol1, $acceptedProtocols)) {
+			$this->isValidProtocol = false;
+			return;
 		}
+
+		$bodyLength = $this->getInt();
+
+		$body = \zlib_decode($this->get($bodyLength));
+
+		$this->chainsDataLength = Binary::readLInt($this->getFromString($body, 4));
+
+		$this->chains = json_decode($this->getFromString($body, $this->chainsDataLength), true);
+
+
+
+		$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));
+		$this->playerData = $this->getFromString($body, $this->playerDataLength);
+
+
+		$this->chains['data'] = array();
+		$index = 0;
+		foreach ($this->chains['chain'] as $key => $jwt) {
+			$data = self::load($jwt);
+			if (isset($data['extraData'])) {
+				$dataIndex = $index;
+			}
+			$this->chains['data'][$index] = $data;
+			$index++;
+		}
+
+
+		$this->playerData = self::load($this->playerData);
+		$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
+		$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
+
+		$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
+		$this->identityPublicKey = $this->chains['data'][$dataIndex]['identityPublicKey'];
+		$this->serverAddress = $this->playerData['ServerAddress'];
+		$this->skinName = $this->playerData['SkinId'];
+		$this->skin = base64_decode($this->playerData['SkinData']);
+		$this->clientSecret = $this->playerData['ClientRandomId'];
 	}
 
 	public function encode() {

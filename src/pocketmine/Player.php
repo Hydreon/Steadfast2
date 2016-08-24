@@ -261,8 +261,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $identifier;
 	
-	protected $additionalChar;
-	
 	/**@var string*/
 	public $language = 'English';
 	
@@ -674,12 +672,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($this->connected === false){
 			return;
 		}		
-		
-		$resIndex = $this->getAdditionalChar() == chr(0xfe) ? 'result15' : 'result';
+
 		if(isset($payload[$this->language])) {
-			$data = $payload[$this->language][$resIndex];
+			$data = $payload[$this->language];
 		} else {
-			$data = $payload['English'][$resIndex];
+			$data = $payload['English'];
 		}
 
 		$this->usedChunks[Level::chunkHash($x, $z)] = true;
@@ -1496,7 +1493,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if(parent::setMotion($mot)){
 			if($this->chunk !== null){
 				$this->level->addEntityMotion($this->getViewers(), $this->getId(), $this->motionX, $this->motionY, $this->motionZ);
-				$pk = new SetEntityMotionPacket($this->additionalChar);
+				$pk = new SetEntityMotionPacket();
 				$pk->entities[] = [0, $mot->x, $mot->y, $mot->z];
 				$this->dataPacket($pk);
 			}
@@ -1728,9 +1725,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($this->loggedIn === true){
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
-				}
-				
-				$this->additionalChar = $packet->additionalChar;
+				}				
 				$this->username = TextFormat::clean($packet->username);
 				$this->displayName = $this->username;
 				$this->setNameTag($this->username);
@@ -1746,6 +1741,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($packet->isValidProtocol === false) {
 					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
 					//Timings::$timerLoginPacket->stopTiming();
+
 					break;
 				}		
 				$this->processLogin();
@@ -1852,7 +1848,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerMobEqipmentPacket->stopTiming();
 				break;
 			case ProtocolInfo::USE_ITEM_PACKET:
-				$packet->decodeAddational($this->protocol); //hack for 0.14.3
 				//Timings::$timerUseItemPacket->startTiming();
 				if($this->spawned === false or $this->dead === true or $this->blocked){
 					//Timings::$timerUseItemPacket->stopTiming();
@@ -3426,11 +3421,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public function getIdentifier(){
 		return $this->identifier;
-	}
-	
-	public function getAdditionalChar() {
-		return $this->additionalChar;
-	}
+	}	
 	
 	public function getVisibleEyeHeight() {
 		return $this->eyeHeight;
@@ -3631,8 +3622,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if ($this->loggedIn === true) {
 				return;
 			}
-
-			$this->additionalChar = $packet->additionalChar;		
+		
 			$this->username = TextFormat::clean($packet->username);
 			$this->displayName = $this->username;
 			$this->setNameTag($this->username);

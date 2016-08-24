@@ -9,7 +9,6 @@ class ConnectPacket extends ProxyPacket {
 	const NETWORK_ID = Info::CONNECT_PACKET;
 
 	public $identifier;
-	public $additionalChar;
 	public $protocol;
 	public $clientId;
 	public $clientUUID;
@@ -23,7 +22,6 @@ class ConnectPacket extends ProxyPacket {
 
 	public function decode() {
 		$this->identifier = $this->getString();
-		$this->additionalChar = chr($this->getByte());
 		$this->protocol = $this->getInt();
 		$this->clientId = $this->getLong();
 		$this->clientUUID = $this->getUUID();
@@ -39,7 +37,6 @@ class ConnectPacket extends ProxyPacket {
 	public function encode() {
 		$this->reset();
 		$this->putString($this->identifier);
-		$this->putByte(ord($this->additionalChar));
 		$this->putInt($this->protocol);
 		$this->putLong($this->clientId);
 		$this->putUUID($this->clientUUID);

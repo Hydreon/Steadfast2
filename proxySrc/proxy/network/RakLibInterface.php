@@ -181,7 +181,6 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface {
 
 	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false) {
 		if (isset($this->identifiers[$player])) {
-			$additionalChar = $player->getAdditionalChar();
 
 			$identifier = $this->identifiers[$player];
 			$pk = null;
@@ -191,19 +190,17 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface {
 				if (isset($packet->__encapsulatedPacket)) {
 					unset($packet->__encapsulatedPacket);
 				}
-				$packet->updateBuffer($additionalChar);
 				$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
 				$packet->__encapsulatedPacket->identifierACK = null;
-				$packet->__encapsulatedPacket->buffer = $additionalChar . $packet->buffer;
+				$packet->__encapsulatedPacket->buffer = chr(0xfe) . $packet->buffer;
 				$packet->__encapsulatedPacket->reliability = 2;
 				$pk = $packet->__encapsulatedPacket;
 			}
 
 
 			if ($pk === null) {
-				$packet->updateBuffer($additionalChar);
 				$pk = new EncapsulatedPacket();
-				$pk->buffer = $additionalChar . $packet->buffer;
+				$pk->buffer = chr(0xfe) . $packet->buffer;
 				$pk->reliability = 2;
 
 				if ($needACK === true) {

@@ -61,7 +61,6 @@ use pocketmine\network\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\network\protocol\RemoveBlockPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
-use pocketmine\network\protocol\RemovePlayerPacket;
 use pocketmine\network\protocol\RespawnPacket;
 use pocketmine\network\protocol\SetDifficultyPacket;
 use pocketmine\network\protocol\SetEntityDataPacket;
@@ -232,7 +231,6 @@ class Network {
 		$offset = 0;
 		try{
 			while($offset < $len){
-				$updatetedPid = false;
 				$pkLen = Binary::readInt(substr($str, $offset, 4));
 				$offset += 4;
 				$buf = substr($str, $offset, $pkLen);
@@ -241,17 +239,10 @@ class Network {
 				}
 				$offset += $pkLen;
 				$pid = ord($buf{0});
-				if(isset(DataPacket::$pkKeys[$pid])) {
-					$pid = DataPacket::$pkKeys[$pid];
-					$updatetedPid = true;
-				}
 				$buf = substr($buf, 1);
 				if(($pk = $this->getPacket($pid)) !== null){
 					if($pk::NETWORK_ID === Info::BATCH_PACKET){
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
-					}
-					if($updatetedPid && $pid == 0x8f) {
-						$buf = chr(0xfe) . $buf;
 					}
 					$pk->setBuffer($buf);
 					$pk->decode();
@@ -334,7 +325,6 @@ class Network {
 		$this->registerPacket(ProtocolInfo::SET_TIME_PACKET, SetTimePacket::class);
 		$this->registerPacket(ProtocolInfo::START_GAME_PACKET, StartGamePacket::class);
 		$this->registerPacket(ProtocolInfo::ADD_PLAYER_PACKET, AddPlayerPacket::class);
-		$this->registerPacket(ProtocolInfo::REMOVE_PLAYER_PACKET, RemovePlayerPacket::class);
 		$this->registerPacket(ProtocolInfo::ADD_ENTITY_PACKET, AddEntityPacket::class);
 		$this->registerPacket(ProtocolInfo::REMOVE_ENTITY_PACKET, RemoveEntityPacket::class);
 		$this->registerPacket(ProtocolInfo::ADD_ITEM_ENTITY_PACKET, AddItemEntityPacket::class);

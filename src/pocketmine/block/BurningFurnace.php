@@ -102,10 +102,10 @@ class BurningFurnace extends Solid{
 
 	public function onActivate(Item $item, Player $player = null){
 		if($player instanceof Player){
-			$pk = new UpdateBlockPacket($player->getAdditionalChar());
+			$pk = new UpdateBlockPacket();
 			$pk->records[] = [$this->x, $this->z, $this->y, 0, 0, UpdateBlockPacket::FLAG_ALL];
 			$player->dataPacket($pk);
-			$pk = new UpdateBlockPacket($player->getAdditionalChar());
+			$pk = new UpdateBlockPacket();
 			$pk->records[] = [$this->x, $this->z, $this->y, $this->getId(), $this->getDamage(), UpdateBlockPacket::FLAG_ALL];
 			$player->dataPacket($pk);		
 			$t = $this->getLevel()->getTile($this);

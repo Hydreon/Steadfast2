@@ -1851,7 +1851,7 @@ class Server{
 	public function batchPackets(array $players, array $packets, $forceSync = true){
 		$targets = [];
 		foreach($players as $p){
-			$targets[] = array($p->getIdentifier(), $p->getAdditionalChar());
+			$targets[] = array($p->getIdentifier());
 		}
 		$newPackets = array();
 		foreach($packets as $p){
