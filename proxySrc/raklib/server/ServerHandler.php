@@ -101,7 +101,9 @@ class ServerHandler{
                 $address = substr($packet, $offset, $len);
                 $offset += $len;
                 $port = Binary::readShort(substr($packet, $offset, 2));
-                $this->instance->redirectRaw($packet);
+				$offset += 2;
+				$payload = substr($packet, $offset);
+				$this->instance->handleRaw($address, $port, $payload);
             }elseif($id === RakLib::PACKET_SET_OPTION){
                 $len = ord($packet{$offset++});
                 $name = substr($packet, $offset, $len);

@@ -12,8 +12,13 @@ use raklib\server\RakLibServer;
 use raklib\server\ServerHandler;
 use raklib\server\ServerInstance;
 use proxy\utils\TextFormat;
+use proxy\utils\Binary;
+use proxy\utils\Utils;
 
 class RakLibInterface implements ServerInstance, AdvancedSourceInterface {
+
+	const HANDSHAKE = 9;
+	const STATISTICS = 0;
 
 	private $server;
 	private $network;
@@ -25,6 +30,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface {
 	public $count = 0;
 	public $maxcount = 31360;
 	public $name = TextFormat::AQUA . "Life" . TextFormat::RED . "Boat ";
+	private $token;
 
 	public function setCount($count, $maxcount) {
 		$this->count = $count;
@@ -36,7 +42,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface {
 				$this->count . ";" . $maxcount
 		);
 	}
-	
+
 	public function setFullName($data) {
 		$this->interface->sendOption("name", $data);
 	}
@@ -52,7 +58,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface {
 		for ($i = 0; $i < 256; ++$i) {
 			$this->channelCounts[$i] = 0;
 		}
-
+		$this->token = Utils::getRandomBytes(16, false);
 		$this->setCount(count($this->server->getOnlinePlayers()), $this->server->getMaxPlayers());
 	}
 
@@ -143,13 +149,45 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface {
 	public function blockAddress($address, $timeout = 300) {
 		$this->interface->blockAddress($address, $timeout);
 	}
-
-	public function handleRaw($address, $port, $payload) {
-		$this->server->handlePacket($address, $port, $payload);
-	}
 	
-	public function redirectRaw($packet) {
-		$this->server->handlePacket($packet);
+	public static function getTokenString($token, $salt){
+		return Binary::readInt(substr(hash("sha512", $salt . ":" . $token, true), 7, 4));
+	}
+
+	public function handleRaw($address, $port, $packet) {
+		if (strlen($packet) > 2 && substr($packet, 0, 2) === "\xfe\xfd" && $this->server->getDefaultSocket() !== false) {
+			$offset = 2;
+			$packetType = ord($packet{$offset++});
+			$sessionID = Binary::readInt(substr($packet, $offset, 4));
+			$offset += 4;
+			$payload = substr($packet, $offset);
+
+			switch ($packetType) {
+				case self::HANDSHAKE:
+					$reply = chr(self::HANDSHAKE);
+					$reply .= Binary::writeInt($sessionID);
+					$reply .= self::getTokenString($this->token, $address) . "\x00";
+
+					$this->server->getNetwork()->sendPacket($address, $port, $reply);
+					break;
+				case self::STATISTICS:
+					$token = Binary::readInt(substr($payload, 0, 4));
+					if ($token !== self::getTokenString($this->token, $address)) {
+						break;
+					}
+					$reply = chr(self::STATISTICS);
+					$reply .= Binary::writeInt($sessionID);
+
+
+					if (strlen($payload) === 8) {
+						$reply .= $this->server->getLongData();
+					} else {
+						$reply .= $this->server->getShortData();
+					}
+					$this->server->getNetwork()->sendPacket($address, $port, $reply);
+					break;
+			}
+		}
 	}
 
 	public function sendRawPacket($address, $port, $payload) {

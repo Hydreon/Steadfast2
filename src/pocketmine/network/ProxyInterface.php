@@ -14,6 +14,7 @@ use pocketmine\network\AdvancedSourceInterface;
 use pocketmine\network\Network;
 use pocketmine\utils\TextFormat;
 use pocketmine\network\protocol\Info;
+use pocketmine\event\server\QueryRegenerateEvent;
 
 //class ProxyInterface implements SourceInterface {
 class ProxyInterface implements AdvancedSourceInterface {
@@ -133,16 +134,21 @@ class ProxyInterface implements AdvancedSourceInterface {
 			} else if ($packetType == self::SYSTEM_DATA_PACKET_ID) {
 				$packet = substr($data['data'], 1);
 				$id = ord($packet{0});
-				if ($id = 0x01) {					
-					$name = "MCPE;" . addcslashes($this->name, ";") . ";" .
+				if ($id = 0x01) {	
+					$this->server->getPluginManager()->callEvent($ev = new QueryRegenerateEvent($this->server, 5));
+					$outputData = array();
+					$outputData['longData'] = $ev->getLongQuery();
+					$outputData['shortData'] = $ev->getShortQuery();
+					$outputData['name'] = "MCPE;" . addcslashes($this->name, ";") . ";" .
 							(Info::CURRENT_PROTOCOL) . ";" .
 							\pocketmine\MINECRAFT_VERSION_NETWORK . ";" .
 							$this->count . ";" . $this->maxcount;
+					
 					$info = array(
 						'id' => $data['id'],
-						'data' => chr(self::SYSTEM_DATA_PACKET_ID) . chr(0x02) . $name
+						'data' => chr(self::SYSTEM_DATA_PACKET_ID) . chr(0x02) . serialize($outputData)
 					);
-					$this->proxyServer->writeToProxyServer(serialize($info));
+					$this->proxyServer->writeToProxyServer(serialize($info));				
 				}
 			}
 		}

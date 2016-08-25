@@ -33,6 +33,8 @@ class Server {
 	private $tps = 40;
 	private $tickTime;
 	private $lastTick = 0;
+	private $shortData = '';
+	private $longData = '';
 	
 	public $raklibInterface;
 
@@ -368,5 +370,23 @@ class Server {
 			}
 		}
 	}
+	
+	public function setLongData($data) {
+		$this->longData = $data;
+	}
+	
+	public function setShortData($data) {
+		$this->shortData = $data;
+	}
+	
+	public function getLongData() {
+		return $this->longData;
+	}
+	
+	public function getShortData() {
+		return $this->shortData;
+	}
+	
+	
 
 }

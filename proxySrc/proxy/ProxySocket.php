@@ -165,15 +165,23 @@ class ProxySocket {
 				$port = Binary::readShort(substr($buffer, $offset, 2));
 				$offset += 2;
 				$payload = substr($buffer, $offset);
-				$this->server->sendRawPacket($address, $port, $payload);
+				$this->server->saveRawPacket($address, $port, $payload);
 			}
 		} else if ($packetType == Server::SYSTEM_DATA_PACKET_ID) {
 			$offset = 0;
 			$id = ord($buffer{$offset});
 			$offset++;
 			if ($id == 0x02) {
-				$name = substr($buffer, $offset);
-				$this->server->raklibInterface->setFullName($name);
+				$data = unserialize(substr($buffer, $offset));
+				if (isset($data['longData'])) {
+					$this->server->setLongData($data['longData']);
+				}
+				if (isset($data['shortData'])) {
+					$this->server->setShortData($data['shortData']);
+				}
+				if (isset($data['name'])) {
+					$this->server->raklibInterface->setFullName($data['name']);
+				}
 			}
 		} else {
 			echo 'UNKNOWN PACKET TYPE' . PHP_EOL;
