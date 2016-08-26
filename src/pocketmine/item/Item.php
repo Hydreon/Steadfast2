@@ -418,9 +418,14 @@ class Item{
 	const RAW_CHICKEN = 365;
 	const COOKED_CHICKEN = 366;
 
+	const BLAZE_ROD = 369;
+	
 	const GOLD_NUGGET = 371;
 	const GOLDEN_NUGGET = 371;
 	const POTION = 373;
+	
+	const MAGMA_CREAM = 378;
+	
 	const SPAWN_EGG = 383;
 
 	const EMERALD = 388;
@@ -673,6 +678,7 @@ class Item{
 		364 => "Steak",
 		365 => "Raw Chicken",
 		366 => "Cooked Chicken",
+		369 => "Blaze Rod",
 		371 => "Gold Nugget",
 		373 => "Potion",
 		378 => "Magma Cream",
