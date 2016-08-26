@@ -235,6 +235,7 @@ const AIR = 0;
 	const ACACIA_WOODEN_STAIRS = 163;
 	const DARK_OAK_WOOD_STAIRS = 164;
 	const DARK_OAK_WOODEN_STAIRS = 164;
+	const SLIME_BLOCK = 165;
 
 	const HAY_BALE = 170;
 	const CARPET = 171;
@@ -469,6 +470,8 @@ const AIR = 0;
 			self::$list[self::STONECUTTER] = Stonecutter::class;
 			self::$list[self::GLOWING_OBSIDIAN] = GlowingObsidian::class;
 			self::$list[self::NETHER_REACTOR] = NetherReactor::class;
+			
+			self::$list[self::SLIME_BLOCK] = SlimeBlock::class;
 
 			foreach(self::$list as $id => $class){
 				if($class !== null){
