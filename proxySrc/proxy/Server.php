@@ -111,7 +111,7 @@ class Server {
 		unset($this->players[$player->proxyIdentifier]);
 	}
 
-	public function __construct(\ClassLoader $autoloader, \ThreadedLogger $logger) {
+	public function __construct(\ClassLoader $autoloader, \ThreadedLogger $logger) {		
 		$this->properties = new Config("./proxy.properties", Config::PROPERTIES, [
 			"motd" => "Minecraft: PE Proxy Server",
 			"server-port" => 19132,
@@ -357,6 +357,7 @@ class Server {
 	}
 
 	public function checkRedirect($address, $port, $player) {
+		$address = gethostbyname($address);
 		if (isset($this->sockets[$address . $port])) {
 			$player->changeServer($this->sockets[$address . $port]);
 		} elseif (isset($this->waitSockets[$address . $port])) {

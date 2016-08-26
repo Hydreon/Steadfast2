@@ -63,8 +63,8 @@ class Player {
 		return $this->username;
 	}
 
-	public function dataPacket(DataPacket $packet, $needACK = false) {
-		$this->interface->putPacket($this, $packet, $needACK, false);
+	public function dataPacket(DataPacket $packet, $needACK = false, $direct = false) {
+		$this->interface->putPacket($this, $packet, $needACK, $direct);
 	}
 
 	public function handleDataPacket(DataPacket $packet) {
@@ -149,7 +149,7 @@ class Player {
 			if ($reason != "") {
 				$pk = new DisconnectPacket;
 				$pk->message = $reason;
-				$this->dataPacket($pk);
+				$this->dataPacket($pk, false, true);
 			}
 		}
 		$this->close($reason, $message);
