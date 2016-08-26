@@ -1317,7 +1317,11 @@ class Level implements ChunkManager, Metadatable{
 	public function dropItem(Vector3 $source, Item $item, Vector3 $motion = null, $delay = 10){
 		$motion = $motion === null ? new Vector3(lcg_value() * 0.2 - 0.1, 0.2, lcg_value() * 0.2 - 0.1) : $motion;
 		if($item->getId() > 0 and $item->getCount() > 0){
-			$itemEntity = Entity::createEntity("Item", $this->getChunk($source->getX() >> 4, $source->getZ() >> 4), new Compound("", [
+			$chunk = $this->getChunk($source->getX() >> 4, $source->getZ() >> 4);
+			if(is_null($chunk)){
+				return;
+			}
+			$itemEntity = Entity::createEntity("Item", $chunk, new Compound("", [
 				"Pos" => new Enum("Pos", [
 					new DoubleTag("", $source->getX()),
 					new DoubleTag("", $source->getY()),
