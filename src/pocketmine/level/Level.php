@@ -85,6 +85,7 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\Network;
+use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\MoveEntityPacket;
 use pocketmine\network\protocol\SetEntityMotionPacket;
 use pocketmine\network\protocol\SetTimePacket;
@@ -94,7 +95,9 @@ use pocketmine\plugin\Plugin;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\tile\Chest;
+use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
+use pocketmine\utils\BinaryStream;
 use pocketmine\utils\Cache;
 use pocketmine\utils\LevelException;
 use pocketmine\utils\MainLogger;
@@ -1314,7 +1317,11 @@ class Level implements ChunkManager, Metadatable{
 	public function dropItem(Vector3 $source, Item $item, Vector3 $motion = null, $delay = 10){
 		$motion = $motion === null ? new Vector3(lcg_value() * 0.2 - 0.1, 0.2, lcg_value() * 0.2 - 0.1) : $motion;
 		if($item->getId() > 0 and $item->getCount() > 0){
-			$itemEntity = Entity::createEntity("Item", $this->getChunk($source->getX() >> 4, $source->getZ() >> 4), new Compound("", [
+			$chunk = $this->getChunk($source->getX() >> 4, $source->getZ() >> 4);
+			if(is_null($chunk)){
+				return;
+			}
+			$itemEntity = Entity::createEntity("Item", $chunk, new Compound("", [
 				"Pos" => new Enum("Pos", [
 					new DoubleTag("", $source->getX()),
 					new DoubleTag("", $source->getY()),
@@ -2616,5 +2623,47 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		return true;
+	}
+	
+	public function updateChunk($x, $z) {
+		$chunk = $this->getProvider()->getChunk($x, $z, false);
+		if (!($chunk instanceof BaseFullChunk)) {
+			return;
+		}
+		$tiles = "";
+		$nbt = new NBT(NBT::LITTLE_ENDIAN);
+		foreach ($chunk->getTiles() as $tile) {
+			if ($tile instanceof Spawnable) {
+				$nbt->setData($tile->getSpawnCompound());
+				$tiles .= $nbt->write();
+			}
+		}
+
+		$extraData = new BinaryStream();
+		$extraData->putLInt(count($chunk->getBlockExtraDataArray()));
+		foreach ($chunk->getBlockExtraDataArray() as $key => $value) {
+			$extraData->putLInt($key);
+			$extraData->putLShort($value);
+		}
+
+		$data = $chunk->getBlockIdArray() .
+				$chunk->getBlockDataArray() .
+				$chunk->getBlockSkyLightArray() .
+				$chunk->getBlockLightArray() .
+				pack("C*", ...$chunk->getHeightMapArray()) .
+				pack("N*", ...$chunk->getBiomeColorArray()) .
+				$extraData->getBuffer() .
+				$tiles;
+
+		$pk = new FullChunkDataPacket();
+		$pk->chunkX = $x;
+		$pk->chunkZ = $z;
+		$pk->data = $data;
+		$pk->encode();
+
+
+		foreach ($this->level->getUsingChunk($x, $z) as $player) {
+			$player->dataPacket($pk);
+		}
 	}
 }

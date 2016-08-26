@@ -264,6 +264,7 @@ class Item{
 	const ACACIA_WOODEN_STAIRS = 163;
 	const DARK_OAK_WOOD_STAIRS = 164;
 	const DARK_OAK_WOODEN_STAIRS = 164;
+	const SLIME_BLOCK = 165;
 
 	const HAY_BALE = 170;
 	const CARPET = 171;
@@ -418,9 +419,14 @@ class Item{
 	const RAW_CHICKEN = 365;
 	const COOKED_CHICKEN = 366;
 
+	const BLAZE_ROD = 369;
+	
 	const GOLD_NUGGET = 371;
 	const GOLDEN_NUGGET = 371;
 	const POTION = 373;
+	
+	const MAGMA_CREAM = 378;
+	
 	const SPAWN_EGG = 383;
 
 	const EMERALD = 388;
@@ -554,6 +560,7 @@ class Item{
 		162 => "Wood2",
 		163 => "Acacia Wood Stairs",
 		164 => "Dark Oak Wood Stairs",
+		165 => "Slime Block",
 		170 => "Hay Bale",
 		171 => "Carpet",
 		172 => "Hardened CLay",
@@ -673,6 +680,7 @@ class Item{
 		364 => "Steak",
 		365 => "Raw Chicken",
 		366 => "Cooked Chicken",
+		369 => "Blaze Rod",
 		371 => "Gold Nugget",
 		373 => "Potion",
 		378 => "Magma Cream",
@@ -872,6 +880,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::JUNGLE_WOODEN_STAIRS, 0));
 		self::addCreativeItem(Item::get(Item::ACACIA_WOODEN_STAIRS, 0));
 		self::addCreativeItem(Item::get(Item::DARK_OAK_WOODEN_STAIRS, 0));
+		self::addCreativeItem(Item::get(Item::SLIME_BLOCK, 0));
 		self::addCreativeItem(Item::get(Item::BRICK_STAIRS, 0));
 		self::addCreativeItem(Item::get(Item::SANDSTONE_STAIRS, 0));
 		self::addCreativeItem(Item::get(Item::STONE_BRICK_STAIRS, 0));
