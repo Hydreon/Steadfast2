@@ -92,7 +92,6 @@ use pocketmine\plugin\PluginLoadOrder;
 use pocketmine\plugin\PluginManager;
 use pocketmine\scheduler\CallbackTask;
 use pocketmine\scheduler\GarbageCollectionTask;
-use pocketmine\scheduler\SendUsageTask;
 use pocketmine\scheduler\ServerScheduler;
 use pocketmine\tile\Chest;
 use pocketmine\tile\EnchantTable;
@@ -167,9 +166,6 @@ class Server{
 	/** @var PluginManager */
 	private $pluginManager = null;
 
-	/** @var AutoUpdater */
-	private $updater = null;
-
 	/** @var ServerScheduler */
 	private $scheduler = null;
 
@@ -238,8 +234,6 @@ class Server{
 	private $filePath;
 	private $dataPath;
 	private $pluginPath;
-
-	private $lastSendUsage = null;
 
 	/** @var QueryHandler */
 	private $queryHandler;
@@ -1601,28 +1595,6 @@ class Server{
 
 		$plugins = $this->pluginManager->loadPlugins($this->pluginPath);
 
-		$configPlugins = $this->getAdvancedProperty("plugins", []);
-		if(count($configPlugins) > 0){
-			$this->getLogger()->info("Checking extra plugins");
-			$loadNew = false;
-			foreach($configPlugins as $plugin => $download){
-				if(!isset($plugins[$plugin])){
-					$path = $this->pluginPath . "/". $plugin . ".phar";
-					if(substr($download, 0, 4) === "http"){
-						$this->getLogger()->info("Downloading ". $plugin);
-						file_put_contents($path, Utils::getURL($download));
-					}else{
-						file_put_contents($path, file_get_contents($download));
-					}
-					$loadNew = true;
-				}
-			}
-
-			if($loadNew){
-				$this->pluginManager->loadPlugins($this->pluginPath);
-			}
-		}
-
 		$this->enablePlugins(PluginLoadOrder::STARTUP);
 
 		LevelProviderManager::addProvider($this, Anvil::class);
@@ -2037,12 +2009,6 @@ class Server{
 			$this->network->blockAddress($entry->getName(), -1);
 		}
 
-//		if($this->getProperty("settings.send-usage", true) !== false){
-//			$this->scheduler->scheduleDelayedRepeatingTask(new CallbackTask([$this, "sendUsage"]), 6000, 6000);
-//			$this->sendUsage();
-//		}
-
-
 		if($this->getProperty("settings.upnp-forwarding", false) == true){
 			$this->logger->info("[UPnP] Trying to port forward...");
 			UPnP::PortForward($this->getPort());
@@ -2056,9 +2022,6 @@ class Server{
 			pcntl_signal(SIGHUP, [$this, "handleSignal"]);
 			$this->getScheduler()->scheduleRepeatingTask(new CallbackTask("pcntl_signal_dispatch"), 5);
 		}
-
-
-		$this->getScheduler()->scheduleRepeatingTask(new CallbackTask([$this, "checkTicks"]), 20 * 5);
 
 		$this->logger->info("Default game type: " . self::getGamemodeString($this->getGamemode()));
 
@@ -2084,12 +2047,6 @@ class Server{
 	public function handleSignal($signo){
 		if($signo === SIGTERM or $signo === SIGINT or $signo === SIGHUP){
 			$this->shutdown();
-		}
-	}
-
-	public function checkTicks(){
-		if($this->getTicksPerSecond() < 12){
-			$this->logger->warning("Can't keep up! Is the server overloaded?");
 		}
 	}
 
@@ -2328,40 +2285,6 @@ class Server{
 			$level->doChunkGarbageCollection();
 		}
 	}
-
-//	public function sendUsage(){
-//		if($this->lastSendUsage instanceof SendUsageTask){
-//			if(!$this->lastSendUsage->isGarbage()){ //do not call multiple times
-//				return;
-//			}
-//		}
-//
-//		$plist = "";
-//		foreach($this->getPluginManager()->getPlugins() as $p){
-//			$d = $p->getDescription();
-//			$plist .= str_replace([";", ":"], "", $d->getName()) . ":" . str_replace([";", ":"], "", $d->getVersion()) . ";";
-//		}
-//
-//		$version = new VersionString();
-//		$this->lastSendUsage = new SendUsageTask("http://stats.pocketmine.net/usage.php", [
-//			"serverid" => 0, // todo: fix for real
-//			"port" => $this->getPort(),
-//			"os" => Utils::getOS(),
-//			"name" => $this->getName(),
-//			"memory_total" => $this->getConfigString("memory-limit"),
-//			"memory_usage" => memory_get_usage(),
-//			"php_version" => PHP_VERSION,
-//			"version" => $version->get(true),
-//			"build" => $version->getBuild(),
-//			"mc_version" => \pocketmine\MINECRAFT_VERSION,
-//			"protocol" => \pocketmine\network\protocol\Info::CURRENT_PROTOCOL,
-//			"online" => count($this->players),
-//			"max" => $this->getMaxPlayers(),
-//			"plugins" => $plist,
-//		]);
-//
-//		$this->scheduler->scheduleAsyncTask($this->lastSendUsage);
-//	}
 
 	/**
 	 * @return Network
