@@ -55,17 +55,21 @@ class RemoteProxyServer {
 	}
 
 	public function checkPacket($data) {
+		$data = zlib_decode($data);
+		if ($data === false) {
+			return false;
+		}
 		$info = array(
 			'id' => $this->getIdentifier(),
-			'data' => zlib_decode($data),
+			'data' => $data,
 		);
 		$this->proxyManager->getProxyServer()->pushToExternalQueue(serialize($info));
+		return true;
 	}
 
 	public function putPacket($buffer) {
 		$data = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
-		$this->writeQueue[] = $data;
-		$this->checkWriteQueue();
+		$this->writeQueue[] = pack('N',  strlen($data)) . $data;
 	}
 
 	private function checkWriteQueue() {
@@ -73,13 +77,14 @@ class RemoteProxyServer {
 			$dataLength = strlen($data);
 			socket_clear_error($this->socket);
 			while (true) {
-				$sentBytes = socket_write($this->socket, pack('N', $dataLength) . $data);
+				$sentBytes = socket_write($this->socket, $data);
 				if ($sentBytes === false) {
 					$errno = socket_last_error($this->socket);
 					echo 'SOCKET WRITE ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
+					$this->writeQueue[$key] = $data;
 					return;
 				} else if ($sentBytes < $dataLength) {
-					$buffer = substr($dataLength, $sentBytes);
+					$data = substr($data, $sentBytes);
 					$dataLength -= $sentBytes;
 				} else {
 					break;
@@ -121,7 +126,10 @@ class RemoteProxyServer {
 				}
 				$offset += 4;
 				$msg = substr($data, $offset, $len);
-				$this->checkPacket($msg);
+				$res = $this->checkPacket($msg);
+				if (!$res) {
+					var_dump('FATAL: Not zlib packet');
+				}
 				$offset += $len;
 			}
 		}
