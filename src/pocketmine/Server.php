@@ -306,6 +306,11 @@ class Server{
 				$entity->despawnFrom($player);
 			}
 		}
+		foreach ($this->playerList as $p) {
+			if ($p->isSpawned($player)) {
+				$p->despawnFrom($player);
+			}
+		}
 	}
 
 	public function isUseAnimal() {

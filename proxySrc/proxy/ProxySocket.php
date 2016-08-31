@@ -58,7 +58,7 @@ class ProxySocket {
 	public function writeMessage($msg) {
 		if (strlen($msg) > 0) {
 			$data = zlib_encode($msg, ZLIB_ENCODING_DEFLATE, 7);
-			$this->writeQueue[] = $data;			
+			$this->writeQueue[] = pack('N',  strlen($data)) . $data;
 		}
 	}
 
@@ -80,13 +80,14 @@ class ProxySocket {
 			$dataLength = strlen($data);
 			socket_clear_error($this->socket);
 			while (true) {
-				$sentBytes = socket_write($this->socket, pack('N', $dataLength) . $data);
+				$sentBytes = socket_write($this->socket, $data);
 				if ($sentBytes === false) {
 					$errno = socket_last_error($this->socket);
 					echo 'PROXY SOCKET WRITE ERROR: ' . $errno . ' - ' . socket_strerror($errno) . PHP_EOL;
+					$this->writeQueue[$key] = $data;
 					return;
 				} else if ($sentBytes < $dataLength) {
-					$buffer = substr($dataLength, $sentBytes);
+					$data = substr($data, $sentBytes);
 					$dataLength -= $sentBytes;
 				} else {
 					break;
@@ -132,7 +133,7 @@ class ProxySocket {
 				$msg = substr($data, $offset, $len);
 				$res = $this->checkPacket($msg);
 				if (!$res) {
-					var_dump('Not zlib packet');
+					var_dump('PROXY FATAL: Not zlib packet');
 				}
 				$offset += $len;
 			}
@@ -142,7 +143,7 @@ class ProxySocket {
 
 	private function checkPacket($buffer) {
 		$buffer = zlib_decode($buffer);
-		if ($buffer === FALSE) {
+		if ($buffer === false) {
 			return false;
 		}
 		$packetType = ord($buffer{0});
