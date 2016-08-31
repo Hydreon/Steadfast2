@@ -2276,7 +2276,7 @@ class Server{
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_REMOVE;
 		foreach ($this->playerList as $onlinePlayer) {
-			if($player != $onlinePlayer) {
+			if($player !== $onlinePlayer) {
 				$pk->entries[] = [$onlinePlayer->getUniqueId()];
 			}
 		}
