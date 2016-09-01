@@ -45,21 +45,43 @@ class StartGamePacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putInt($this->seed);
-		$this->putByte($this->dimension);
-		$this->putInt($this->generator);
-		$this->putInt($this->gamemode);
-		$this->putLong($this->eid);
-		$this->putInt($this->spawnX);
-		$this->putInt($this->spawnY);
-		$this->putInt($this->spawnZ);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putByte(1);
-		$this->putByte(1);
-		$this->putByte(0);
-		$this->putString('iX8AANxLbgA=');
+		$this->putVarInt(0); //EntityUniqueID
+		$this->putVarInt($this->eid); //EntityUniqueID
+		
+		$this->putLFloat($this->x); // default position (4)
+		$this->putLFloat($this->y); // (4)
+		$this->putLFloat($this->z); // (4)
+		
+		$this->putVarInt($this->seed);
+		
+		$this->putVarInt($this->dimension);
+		
+		$this->putVarInt($this->generator);
+		
+		$this->putVarInt($this->gamemode);
+		
+		$this->putVarInt(0); // Difficulty, i don't know how use it
+		
+		// default spawn 3x VarInt
+		$this->putVarInt(0);
+		$this->putVarInt(0);
+		$this->putVarInt(0);
+//		$this->putVarInt(abs($this->spawnX));
+//		$this->putVarInt(abs($this->spawnY));
+//		$this->putVarInt(abs($this->spawnZ));
+		
+		$this->putByte(0); //has been loaded in creative (1)
+		
+		$this->putVarInt(0); // DayCycleStopTyme 1x VarInt
+		
+		$this->putByte(0); //edu mode the same type as loaded in creative (1)
+
+		$this->putLFloat(0); //rain level the same type as loaded in creative (4 bytes)
+
+		$this->putLFloat(0); //lightning level the same type as loaded in creative (4 bytes)
+		
+		$this->putByte(0);	//commands enabled the same type as loaded in creative (1)
+//		$this->putString('iX8AANxLbgA=');
 	}
 
 }

@@ -521,6 +521,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->lastBreak = PHP_INT_MAX;
 		$this->ip = $ip;
 		$this->port = $port;
+		
+		var_dump($ip, $port);
+		
 		$this->clientID = $clientID;
 		$this->chunksPerTick = (int) $this->server->getProperty("chunk-sending.per-tick", 4);
 		$this->spawnPosition = null;
@@ -662,8 +665,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function sendChunk($x, $z, $payload){
 		if($this->connected === false){
 			return;
-		}		
-
+		}
+		
 		if(isset($payload[$this->language])) {
 			$data = $payload[$this->language];
 		} else {
@@ -870,12 +873,29 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($this->connected === false){
 			return false;
 		}
+		
+//		$allowedPackets = [
+//			'pocketmine\network\protocol\BatchPacket',
+//			'pocketmine\network\protocol\PlayStatusPacket',
+//			'pocketmine\network\protocol\StartGamePacket',
+////			'pocketmine\network\protocol\MovePlayerPacket',
+////			'pocketmine\network\protocol\SetEntityMotionPacket',
+////			'pocketmine\network\protocol\PlayerActionPacket',
+////			'pocketmine\network\protocol\AnimatePacket',
+////			'pocketmine\network\protocol\SetSpawnPositionPacket',
+////			'pocketmine\network\protocol\ChunkRadiusUpdatePacket',
+//		];
+//		if (!in_array(get_class($packet), $allowedPackets)) {
+////			var_dump(get_class($packet));
+//			return;
+//		}
+		
 		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
 		if($ev->isCancelled()){
 			return false;
 		}
 		
-			$this->interface->putPacket($this, $packet, $needACK, false);	
+		$this->interface->putPacket($this, $packet, $needACK, false);	
 		return true;
 	}
 
@@ -1877,7 +1897,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$compassPosition = $this->server->getGlobalCompassPosition();
 				
 				$pk = new StartGamePacket();
-				$pk->seed = -1;
+//				$pk->seed = -1;
+				$pk->seed = 0; // not shure that this sh*t may be negative
 				$pk->dimension = 0;
 				$pk->x = $this->x;
 				$pk->y = $this->y;
@@ -1889,7 +1910,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->spawnX = $compassPosition['x'];
 				$pk->spawnY = $compassPosition['y'];
 				$pk->spawnZ = $compassPosition['z'];
-				$pk->generator = 1; //0 old, 1 infinite, 2 flat
+				$pk->generator = 2; //0 old, 2 infinite, 4 flat
 				$pk->gamemode = $this->gamemode & 0x01;
 				$pk->eid = 0;//$this->getId(); //Always use EntityID as zero for the actual player
 				$this->dataPacket($pk);
@@ -2167,7 +2188,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->craftingType = 0;
 				$packet->eid = $this->id;
 				$pos = new Vector3($packet->x, $packet->y, $packet->z);
-
+				
 				switch($packet->action){
 					case PlayerActionPacket::ACTION_START_BREAK:
 						if($this->lastBreak !== PHP_INT_MAX or $pos->distanceSquared($this) > 10000){

@@ -34,6 +34,7 @@ class ContainerClosePacket extends DataPacket{
 	}
 
 	public function encode(){
+		var_dump(__CLASS__);
 		$this->reset();
 		$this->putByte($this->windowid);
 	}

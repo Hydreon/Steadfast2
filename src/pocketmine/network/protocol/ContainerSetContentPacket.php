@@ -56,16 +56,17 @@ class ContainerSetContentPacket extends DataPacket{
 	}
 
 	public function encode(){
+		var_dump(__CLASS__);
 		$this->reset();
 		$this->putByte($this->windowid);
-		$this->putShort(count($this->slots));
+		$this->putVarInt(count($this->slots));
 		foreach($this->slots as $slot){
 			$this->putSlot($slot);
 		}
 		if($this->windowid === self::SPECIAL_INVENTORY and count($this->hotbar) > 0){
-			$this->putShort(count($this->hotbar));
+			$this->putVarInt(count($this->hotbar));
 			foreach($this->hotbar as $slot){
-				$this->putInt($slot);
+				$this->putVarInt($slot);
 			}
 		}else{
 			$this->putShort(0);

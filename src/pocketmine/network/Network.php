@@ -79,6 +79,7 @@ use pocketmine\utils\MainLogger;
 use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
 use pocketmine\network\protocol\RequestChunkRadiusPacket;
 use pocketmine\utils\Binary;
+use pocketmine\utils\BinaryStream;
 
 class Network {
 
@@ -215,24 +216,28 @@ class Network {
 		$len = strlen($str);
 		$offset = 0;
 		try{
-			while($offset < $len){
-				$pkLen = Binary::readInt(substr($str, $offset, 4));
-				$offset += 4;
-				$buf = substr($str, $offset, $pkLen);
-				$offset += $pkLen;
-				$pid = ord($buf{0});
-				$buf = substr($buf, 1);
-				if(($pk = $this->getPacket($pid)) !== null){
-					if($pk::NETWORK_ID === Info::BATCH_PACKET){
-						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
-					}
-					$pk->setBuffer($buf);
-					$pk->decode();
-					$p->handleDataPacket($pk);
-					if($pk->getOffset() <= 0){
-						return;
-					}
+			$stream = new BinaryStream($str);
+			$buf = $stream->getString();
+			
+			if(strlen($buf) === 0){
+ 				throw new \InvalidStateException("Empty or invalid BatchPacket received");
+ 			}
+			
+			if (($pk = $this->getPacket(ord($buf{0}))) !== null) {
+				if ($pk::NETWORK_ID === Info::BATCH_PACKET) {
+					throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
 				}
+				
+//				var_dump(get_class($pk));
+				
+				$pk->setBuffer($buf, 1);
+				$pk->decode();
+				$p->handleDataPacket($pk);
+				if ($pk->getOffset() <= 0) {
+					return;
+				}
+			} else {
+				echo "UNKNOWN PACKET: ".ord($buf{0}).PHP_EOL;
 			}
 		}catch(\Exception $e){
 			if(\pocketmine\DEBUG > 1){

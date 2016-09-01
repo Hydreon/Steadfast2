@@ -283,11 +283,9 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		} else {
 			return;
 		}
-
 		if(($data = $this->network->getPacket($pid)) === null){
 			return null;
 		}
-		
 		$data->setBuffer($buffer, 1);
 
 		return $data;
