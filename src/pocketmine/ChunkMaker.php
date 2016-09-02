@@ -114,34 +114,14 @@ class ChunkMaker extends Worker {
 			$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
 			$pk->data = $chunkData;
 			$pk->encode();
-			if(!empty($pk->buffer)) {
-				$str = $this->putVarInt(strlen($pk->buffer)) . $pk->buffer;
-//				$str = Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
+			if(!empty($pk->buffer)) {				
+				$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
 				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);		
 				$result[$lang] = $ordered;			
 			}
 		}
 		$this->externalQueue[] = serialize($result);		
 	}
-	
-	public function putVarInt($v){
-		// Small values do not need to be encoded
-		if ($v < 0x80) {
-			return chr($v);
-		} else {
-			$values = array();
-			while ($v > 0) {
-				$values[] = 0x80 | ($v & 0x7f);
-				$v = $v >> 7;
-			}
-			// Remove the MSB flag from the last byte
-			$values[count($values)-1] &= 0x7f;
-			$bytes = call_user_func_array('pack', array_merge(array('C*'), $values));;
-			return $bytes;
-		}
-	}
-
-	
 	
 	public function shutdown(){		
 		$this->shutdown = true;

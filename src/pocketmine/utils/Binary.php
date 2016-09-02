@@ -447,4 +447,30 @@ class Binary{
 	public static function writeLLong($value){
 		return strrev(self::writeLong($value));
 	}
+	
+	public static function writeSignedVarInt($v){
+		if ($v >= 0) {
+			$v = 2 * $v;
+		} else {
+			$v = 2 * abs($v) - 1;
+		}
+		return self::writeVarInt($v);
+	}
+
+	
+	public static function writeVarInt($v){		
+		if ($v < 0x80) {
+			return chr($v);
+		} else {
+			$values = array();
+			while ($v > 0) {
+				$values[] = 0x80 | ($v & 0x7f);
+				$v = $v >> 7;
+			}
+			$values[count($values)-1] &= 0x7f;
+			$bytes = call_user_func_array('pack', array_merge(array('C*'), $values));
+			return $bytes;
+		}
+	}
+	
 }

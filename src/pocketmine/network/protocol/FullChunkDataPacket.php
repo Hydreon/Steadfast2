@@ -41,8 +41,8 @@ class FullChunkDataPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putVarInt($this->chunkX);
-		$this->putVarInt($this->chunkZ);
+		$this->putSignedVarInt($this->chunkX);
+		$this->putSignedVarInt($this->chunkZ);
 		$this->putByte($this->order);
 		$this->putString($this->data);
 	}
