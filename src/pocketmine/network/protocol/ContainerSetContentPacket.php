@@ -56,9 +56,8 @@ class ContainerSetContentPacket extends DataPacket{
 	}
 
 	public function encode(){
-		var_dump(__CLASS__);
 		$this->reset();
-		$this->putByte($this->windowid);
+		$this->putVarInt($this->windowid);
 		$this->putVarInt(count($this->slots));
 		foreach($this->slots as $slot){
 			$this->putSlot($slot);

@@ -33,10 +33,8 @@ class MobEquipmentPacket extends DataPacket{
 	public $selectedSlot;
 
 	public function decode(){
-		$this->eid = $this->getLong();
+		$this->eid = $this->getVarInt();
 		$this->item = $this->getSlot();
-//		$this->slot = $this->getByte();
-//		$this->selectedSlot = $this->getByte();
 		$slot = $this->getByte();
 		$this->slot = ($slot !== false) ? $slot : -1;
 		$selectedSlot = $this->getByte();
@@ -45,10 +43,11 @@ class MobEquipmentPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putLong($this->eid);
+		$this->putVarInt($this->eid);
 		$this->putSlot($this->item);
 		$this->putByte($this->slot);
 		$this->putByte($this->selectedSlot);
+		$this->putByte(0); // mystery
 	}
 	
 	/* 

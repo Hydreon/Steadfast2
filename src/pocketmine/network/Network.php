@@ -217,27 +217,29 @@ class Network {
 		$offset = 0;
 		try{
 			$stream = new BinaryStream($str);
-			$buf = $stream->getString();
-			
-			if(strlen($buf) === 0){
- 				throw new \InvalidStateException("Empty or invalid BatchPacket received");
- 			}
-			
-			if (($pk = $this->getPacket(ord($buf{0}))) !== null) {
-				if ($pk::NETWORK_ID === Info::BATCH_PACKET) {
-					throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
+			$length = strlen($str);
+			while ($stream->getOffset() < $length) {
+				$buf = $stream->getString();
+				if(strlen($buf) === 0){
+					throw new \InvalidStateException("Empty or invalid BatchPacket received");
 				}
-				
-//				var_dump(get_class($pk));
-				
-				$pk->setBuffer($buf, 1);
-				$pk->decode();
-				$p->handleDataPacket($pk);
-				if ($pk->getOffset() <= 0) {
-					return;
+
+				if (($pk = $this->getPacket(ord($buf{0}))) !== null) {
+					if ($pk::NETWORK_ID === Info::BATCH_PACKET) {
+						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
+					}
+
+	//				var_dump(get_class($pk));
+
+					$pk->setBuffer($buf, 1);
+					$pk->decode();
+					$p->handleDataPacket($pk);
+					if ($pk->getOffset() <= 0) {
+						return;
+					}
+				} else {
+					echo "UNKNOWN PACKET: ".ord($buf{0}).PHP_EOL;
 				}
-			} else {
-				echo "UNKNOWN PACKET: ".ord($buf{0}).PHP_EOL;
 			}
 		}catch(\Exception $e){
 			if(\pocketmine\DEBUG > 1){

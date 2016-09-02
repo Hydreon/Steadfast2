@@ -188,28 +188,24 @@ class BinaryStream extends \stdClass{
 	}
 
 	public function getSlot(){
-		$id = $this->getShort(true);
+		$id = $this->getSignedVarInt();
 		
 		if($id <= 0){
 			return Item::get(0, 0, 0);
 		}
 		
-		$cnt = $this->getByte();
+		$aux = $this->getSignedVarInt();
+		$meta = $aux >> 8;
+		$count = $aux & 0xff;
 		
-		$data = $this->getShort();
+		$this->getByte();
 		
-		$nbtLen = $this->getLShort();
+		$nbt = $this->getString();
 		
-		$nbt = "";
-		
-		if($nbtLen > 0){
-			$nbt = $this->get($nbtLen);
-		}
-
 		return Item::get(
 			$id,
-			$data,
-			$cnt,
+			$meta,
+			$count,
 			$nbt
 		);
 	}
@@ -219,14 +215,15 @@ class BinaryStream extends \stdClass{
 			$this->putShort(0);
 			return;
 		}
-		
-		$this->putShort($item->getId());
-		$this->putByte($item->getCount());
-		$this->putShort($item->getDamage() === null ? -1 : $item->getDamage());
+	
+		$this->putSignedVarInt($item->getId());
+		$aux = $item->getDamage() === null ? 0 : $item->getDamage();
+		$aux = $aux << 8;
+		$aux = $aux | $item->getCount();
+		$this->putSignedVarInt($aux);
+		$this->putByte(0);
 		$nbt = $item->getCompound();
-		$this->putLShort(strlen($nbt));
-		$this->put($nbt);
-		
+		$this->putString($nbt);
 	}
 
 	public function feof(){

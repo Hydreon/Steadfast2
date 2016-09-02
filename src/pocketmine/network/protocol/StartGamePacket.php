@@ -52,27 +52,27 @@ class StartGamePacket extends DataPacket{
 		$this->putLFloat($this->y); // (4)
 		$this->putLFloat($this->z); // (4)
 		
-		$this->putVarInt($this->seed);
+		$this->putSignedVarInt($this->seed);
 		
-		$this->putVarInt($this->dimension);
+		$this->putSignedVarInt($this->dimension);
 		
-		$this->putVarInt($this->generator);
+		$this->putSignedVarInt($this->generator);
 		
-		$this->putVarInt($this->gamemode);
+		$this->putSignedVarInt($this->gamemode);
 		
-		$this->putVarInt(0); // Difficulty, i don't know how use it
+		$this->putSignedVarInt(0); // Difficulty, i don't know how use it
 		
 		// default spawn 3x VarInt
-		$this->putVarInt(0);
-		$this->putVarInt(0);
-		$this->putVarInt(0);
+		$this->putSignedVarInt(0);
+		$this->putSignedVarInt(0);
+		$this->putSignedVarInt(0);
 //		$this->putVarInt(abs($this->spawnX));
 //		$this->putVarInt(abs($this->spawnY));
 //		$this->putVarInt(abs($this->spawnZ));
 		
 		$this->putByte(0); //has been loaded in creative (1)
 		
-		$this->putVarInt(0); // DayCycleStopTyme 1x VarInt
+		$this->putSignedVarInt(0); // DayCycleStopTyme 1x VarInt
 		
 		$this->putByte(0); //edu mode the same type as loaded in creative (1)
 
