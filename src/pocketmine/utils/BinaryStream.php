@@ -187,46 +187,40 @@ class BinaryStream extends \stdClass{
 		$this->put($uuid->toBinary());
 	}
 
-	public function getSlot(){
-		$id = $this->getShort(true);
-		
+	public function getSlot(){		
+		$id = $this->getSignedVarInt();		
 		if($id <= 0){
 			return Item::get(0, 0, 0);
 		}
-		
-		$cnt = $this->getByte();
-		
-		$data = $this->getShort();
-		
-		$nbtLen = $this->getLShort();
-		
-		$nbt = "";
-		
+	
+		$aux = $this->getSignedVarInt();
+		$meta = $aux >> 8;
+		$count = $aux & 0xff;
+				
+		$nbtLen = $this->getLShort();		
+		$nbt = "";		
 		if($nbtLen > 0){
 			$nbt = $this->get($nbtLen);
 		}
-
+		
 		return Item::get(
 			$id,
-			$data,
-			$cnt,
+			$meta,
+			$count,
 			$nbt
 		);
 	}
 
 	public function putSlot(Item $item){
 		if($item->getId() === 0){
-			$this->putShort(0);
+			$this->putSignedVarInt(0);
 			return;
 		}
-		
-		$this->putShort($item->getId());
-		$this->putByte($item->getCount());
-		$this->putShort($item->getDamage() === null ? -1 : $item->getDamage());
-		$nbt = $item->getCompound();
+		$this->putSignedVarInt($item->getId());
+		$this->putSignedVarInt(($item->getDamage() === null ? 0  : ($item->getDamage() << 8)) + $item->getCount());	
+		$nbt = $item->getCompound();		
 		$this->putLShort(strlen($nbt));
-		$this->put($nbt);
-		
+		$this->put($nbt);		
 	}
 
 	public function feof(){

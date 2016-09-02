@@ -33,10 +33,9 @@ class RemoveBlockPacket extends DataPacket{
 	public $z;
 
 	public function decode(){
-		$this->eid = $this->getLong();
-		$this->x = $this->getInt();
-		$this->z = $this->getInt();
+		$this->x = $this->getSignedVarInt();
 		$this->y = $this->getByte();
+		$this->z = $this->getSignedVarInt();
 	}
 
 	public function encode(){
