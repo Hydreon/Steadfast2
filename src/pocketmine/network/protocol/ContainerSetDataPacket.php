@@ -32,7 +32,6 @@ class ContainerSetDataPacket extends DataPacket{
 	public $value;
 
 	public function decode(){
-
 	}
 
 	public function encode(){

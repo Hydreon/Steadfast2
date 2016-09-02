@@ -279,7 +279,7 @@ class Binary{
 	public static function readSignedShort($str){
 		self::checkLength($str, 2);
 		if(PHP_INT_SIZE === 8){
-			return unpack("n", $str)[1] << 48 >> 48;
+			return @unpack("n", $str)[1] << 48 >> 48;
 		}else{
 			return unpack("n", $str)[1] << 16 >> 16;
 		}
@@ -404,7 +404,7 @@ class Binary{
 	public static function readLong($x){
 		self::checkLength($x, 8);
 		if(PHP_INT_SIZE === 8){
-			$int = unpack("N*", $x);
+			$int = @unpack("N*", $x);
 			return ($int[1] << 32) | $int[2];
 		}else{
 			$value = "0";

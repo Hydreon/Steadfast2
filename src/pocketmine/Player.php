@@ -1897,8 +1897,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$compassPosition = $this->server->getGlobalCompassPosition();
 				
 				$pk = new StartGamePacket();
-//				$pk->seed = -1;
-				$pk->seed = 0; // not shure that this sh*t may be negative
+				$pk->seed = -1;
 				$pk->dimension = 0;
 				$pk->x = $this->x;
 				$pk->y = $this->y;
@@ -1910,7 +1909,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->spawnX = $compassPosition['x'];
 				$pk->spawnY = $compassPosition['y'];
 				$pk->spawnZ = $compassPosition['z'];
-				$pk->generator = 2; //0 old, 2 infinite, 4 flat
+				$pk->generator = 1; //0 old, 1 infinite, 2 flat
 				$pk->gamemode = $this->gamemode & 0x01;
 				$pk->eid = 0;//$this->getId(); //Always use EntityID as zero for the actual player
 				$this->dataPacket($pk);

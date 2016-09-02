@@ -41,9 +41,10 @@ class MobEquipmentPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putLong($this->eid);
+		$this->putVarInt($this->eid);
 		$this->putSlot($this->item);
 		$this->putByte($this->slot);
 		$this->putByte($this->selectedSlot);
+		$this->putByte(0); // mystery
 	}
 }
