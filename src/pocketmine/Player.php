@@ -1148,15 +1148,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}*/
 
 		if($this->autoJump){
-			$flags |= 0x40;
+			$flags |= 0x20;
 		}
 
 		if($this->allowFlight){
-			$flags |= 0x80;
+			$flags |= 0x40;
 		}
 
 		if($this->isSpectator()){
-			$flags |= 0x100;
+			$flags |= 80;
 		}
 		
 		$flags |= 0x02;

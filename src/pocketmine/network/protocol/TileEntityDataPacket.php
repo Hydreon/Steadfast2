@@ -33,17 +33,17 @@ class TileEntityDataPacket extends DataPacket{
 	public $namedtag;
 
 	public function decode(){
-		$this->x = $this->getInt();
-		$this->y = $this->getInt();
-		$this->z = $this->getInt();
+		$this->x = $this->getSignedVarInt();
+		$this->y = $this->getByte();
+		$this->z = $this->getSignedVarInt();
 		$this->namedtag = $this->get(true);
 	}
 
 	public function encode(){
 		$this->reset();
-		$this->putInt($this->x);
-		$this->putInt($this->y);
-		$this->putInt($this->z);
+		$this->putSignedVarInt($this->x);
+		$this->putByte($this->y);
+		$this->putSignedVarInt($this->z);
 		$this->put($this->namedtag);
 	}
 

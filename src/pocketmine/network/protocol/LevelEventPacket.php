@@ -78,11 +78,11 @@ class LevelEventPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putShort($this->evid);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putInt($this->data);
+		$this->putVarInt($this->evid);
+		$this->putLFloat($this->x);
+		$this->putLFloat($this->y);
+		$this->putLFloat($this->z);
+		$this->putSignedVarInt($this->data);
 	}
 
 }

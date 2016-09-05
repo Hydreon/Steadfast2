@@ -39,14 +39,13 @@ class ContainerOpenPacket extends DataPacket{
 	}
 
 	public function encode(){
-		var_dump(__CLASS__);
 		$this->reset();
 		$this->putByte($this->windowid);
 		$this->putByte($this->type);
-		$this->putVarInt($this->slots);
-		$this->putVarInt($this->x);
-		$this->putVarInt($this->y);
-		$this->putVarInt($this->z);
+		$this->putSignedVarInt($this->slots);
+		$this->putSignedVarInt($this->x);
+		$this->putByte($this->y);
+		$this->putSignedVarInt($this->z);
 	}
 
 }

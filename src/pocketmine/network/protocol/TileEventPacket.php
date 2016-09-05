@@ -39,11 +39,11 @@ class TileEventPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putInt($this->x);
-		$this->putInt($this->y);
-		$this->putInt($this->z);
-		$this->putInt($this->case1);
-		$this->putInt($this->case2);
+		$this->putSignedVarInt($this->x);
+		$this->putByte($this->y);
+		$this->putSignedVarInt($this->z);
+		$this->putSignedVarInt($this->case1);
+		$this->putSignedVarInt($this->case2);
 	}
 
 }
