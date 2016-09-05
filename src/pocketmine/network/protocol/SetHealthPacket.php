@@ -21,40 +21,18 @@
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
 
-
-class UseItemPacket extends DataPacket{
-	const NETWORK_ID = Info::USE_ITEM_PACKET;
-
-	public $x;
-	public $y;
-	public $z;
-	public $face;
-	public $item;
-	public $fx;
-	public $fy;
-	public $fz;
-	public $posX;
-	public $posY;
-	public $posZ;
+class SetHealthPacket extends DataPacket{	
+	const NETWORK_ID =  Info::SET_HEALTH_PACKET;
+	
+    public $value;
 
 	public function decode(){
-		$this->x = $this->getSignedVarInt();
-		$this->y = $this->getByte();
-		$this->z = $this->getSignedVarInt();
-		$this->face = $this->getSignedVarInt();
-		$this->fx = $this->getLFloat();
-		$this->fy = $this->getLFloat();
-		$this->fz = $this->getLFloat();
-		$this->posX = $this->getLFloat();
-		$this->posY = $this->getLFloat();
-		$this->posZ = $this->getLFloat();
-		$this->getVarInt();
-		$this->item = $this->getSlot();
+
 	}
 
 	public function encode(){
-
+		$this->reset();
+		$this->putSignedVarInt($this->value);
 	}
 }

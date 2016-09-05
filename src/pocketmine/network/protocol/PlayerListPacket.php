@@ -48,11 +48,11 @@ class PlayerListPacket extends DataPacket{
 	public function encode(){
 		$this->reset();
 		$this->putByte($this->type);
-		$this->putInt(count($this->entries));
+		$this->putVarInt(count($this->entries));
 		foreach($this->entries as $d){
 			if($this->type === self::TYPE_ADD){
 				$this->putUUID($d[0]);
-				$this->putLong($d[1]);
+				$this->putVarInt($d[1]);
 				$this->putString(TextFormat::clean($d[2]));				
 				$this->putString($d[3]);
 				$this->putString($d[4]);

@@ -126,6 +126,7 @@ use pocketmine\network\protocol\SetTimePacket;
 use pocketmine\network\protocol\StartGamePacket;
 use pocketmine\network\protocol\TakeItemEntityPacket;
 use pocketmine\network\protocol\UpdateAttributesPacket;
+use pocketmine\network\protocol\SetHealthPacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
 use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
 use pocketmine\network\SourceInterface;
@@ -849,9 +850,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //			if(!$packet->isEncoded){
 //				$packet->encode();
 //			}
-//			$str .= Binary::writeInt(strlen($packet->buffer)) . $packet->buffer;
+//			$str .= Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer;
 //		}else{
-//			$str .= Binary::writeInt(strlen($packet)) . $packet;
+//			$str .= Binary::writeVarInt(strlen($packet)) . $packet;
 //		}
 //
 //		$pk = new BatchPacket();
@@ -3358,12 +3359,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setHealth($amount){
 		parent::setHealth($amount);
 		if($this->spawned === true){
-			$pk = new UpdateAttributesPacket();
-			$this->foodTick = 0;
-			$pk->minValue = 0;
-			$pk->maxValue = $this->getMaxHealth();
+//			$pk = new UpdateAttributesPacket();
+//			$this->foodTick = 0;
+//			$pk->minValue = 0;
+//			$pk->maxValue = $this->getMaxHealth();
+//			$pk->value = $amount;
+//			$pk->name = UpdateAttributesPacket::HEALTH;
+//			$this->dataPacket($pk);
+			$pk = new SetHealthPacket();
 			$pk->value = $amount;
-			$pk->name = UpdateAttributesPacket::HEALTH;
 			$this->dataPacket($pk);
 		}
 	}
