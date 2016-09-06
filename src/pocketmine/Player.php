@@ -1601,19 +1601,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->subtractFood(1);
 			}
 
-			if($this->foodTick >= 80) {
-				if($this->getHealth() < $this->getMaxHealth() && $this->getFood() >= 18) {
-					$ev = new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_EATING);
-					$this->heal(1, $ev);
-					if($this->hungerDepletion >=2) {
-						$this->subtractFood(1);
-						$this->foodDepletion = 0;
-					} else {
-						$this->hungerDepletion++;
-					}
-				}
-				$this->foodTick = 0;
-			}
+			// regeneration
+//			if($this->foodTick >= 80) {
+//				if($this->getHealth() < $this->getMaxHealth() && $this->getFood() >= 18) {
+//					$ev = new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_EATING);
+//					$this->heal(1, $ev);
+//					if($this->hungerDepletion >=2) {
+//						$this->subtractFood(1);
+//						$this->foodDepletion = 0;
+//					} else {
+//						$this->hungerDepletion++;
+//					}
+//				}
+//				$this->foodTick = 0;
+//			}
 			if($this->getHealth() < $this->getMaxHealth()) {
 				$this->foodTick++;
 			}
@@ -1974,7 +1975,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}else{
 					$packet->yaw %= 360;
 					$packet->pitch %= 360;
-
+					
 					if($packet->yaw < 0){
 						$packet->yaw += 360;
 					}
@@ -2110,7 +2111,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->level->sendBlocks([$this], [$target, $block], UpdateBlockPacket::FLAG_ALL_PRIORITY);
 					//Timings::$timerUseItemPacket->stopTiming();
 					break;
-				}elseif($packet->face === 0xff){
+				}elseif($packet->face === 0xff || $packet->face === -1){  // -1 for 0.16
 					$aimPos = (new Vector3($packet->x / 32768, $packet->y / 32768, $packet->z / 32768))->normalize();
 
 					if($this->isCreative()){
