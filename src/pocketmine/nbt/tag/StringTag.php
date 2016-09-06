@@ -32,11 +32,13 @@ class StringTag extends NamedTag{
 	}
 
 	public function read(NBT $nbt){
-		$this->value = $nbt->get($nbt->endianness === 1 ? unpack("n", $nbt->get(2))[1] : unpack("v", $nbt->get(2))[1]);
+//		$this->value = $nbt->get($nbt->endianness === 1 ? unpack("n", $nbt->get(2))[1] : unpack("v", $nbt->get(2))[1]);
+		$this->value = $nbt->getString();
 	}
 
 	public function write(NBT $nbt){
-		$nbt->buffer .= $nbt->endianness === 1 ? pack("n", strlen($this->value)) : pack("v", strlen($this->value));
-		$nbt->buffer .= $this->value;
+//		$nbt->buffer .= $nbt->endianness === 1 ? pack("n", strlen($this->value)) : pack("v", strlen($this->value));
+//		$nbt->buffer .= $this->value;
+		$nbt->putString($this->value);
 	}
 }

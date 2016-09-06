@@ -503,7 +503,8 @@ class NBT{
 	}
 
 	public function readTag(){
-		switch($this->getByte()){
+		$tagType = $this->getByte();
+		switch($tagType){
 			case NBT::TAG_Byte:
 				$tag = new ByteTag($this->getString());
 				$tag->read($this);
@@ -582,11 +583,13 @@ class NBT{
 	}
 
 	public function getInt(){
+//		return $this->getSignedVarInt($v);
 		return $this->endianness === self::BIG_ENDIAN ? (PHP_INT_SIZE === 8 ? unpack("N", $this->get(4))[1] << 32 >> 32 : unpack("N", $this->get(4))[1]) : (PHP_INT_SIZE === 8 ? unpack("V", $this->get(4))[1] << 32 >> 32 : unpack("V", $this->get(4))[1]);
 	}
 
 	public function putInt($v){
-		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? pack("N", $v) : pack("V", $v);
+		$this->putSignedVarInt($v);
+//		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? pack("N", $v) : pack("V", $v);
 	}
 
 	public function getLong(){
@@ -614,12 +617,48 @@ class NBT{
 	}
 
 	public function getString(){
+//		$len = $this->getByte();
+//		return $this->get($len);
 		return $this->get($this->endianness === 1 ? unpack("n", $this->get(2))[1] : unpack("v", $this->get(2))[1]);
 	}
 
 	public function putString($v){
-		$this->buffer .= $this->endianness === 1 ? pack("n", strlen($v)) : pack("v", strlen($v));
+//		$this->buffer .= $this->endianness === 1 ? pack("n", strlen($v)) : pack("v", strlen($v));
+		$this->putByte(strlen($v));
 		$this->buffer .= $v;
+	}
+	
+	public function getSignedVarInt() {
+		// get var int
+		$result = $shift = 0;
+		do {
+			$byte = $this->getByte();
+			$result |= ($byte & 0x7f) << $shift;
+			$shift += 7;
+		} while ($byte > 0x7f);
+		
+		if ($result % 2 == 0) {
+			$result = $result / 2;
+		} else {
+			$result = (-1) * ($result + 1) / 2;
+		}
+		return $result;
+	}
+	
+	public function putSignedVarInt($v) {
+		$v = ($v >= 0) ? 2 * $v : 2 * abs($v) - 1;
+		if ($v < 0x80) {
+			$this->putByte($v);
+		} else {
+			$values = array();
+			while ($v > 0) {
+				$values[] = 0x80 | ($v & 0x7f);
+				$v = $v >> 7;
+			}
+			$values[count($values)-1] &= 0x7f;
+			$bytes = call_user_func_array('pack', array_merge(array('C*'), $values));
+			$this->buffer .= $bytes;
+		}
 	}
 
 	public function getArray(){
