@@ -59,8 +59,8 @@ class AddEntityPacket extends DataPacket{
 		$this->putLFloat($this->speedX);
 		$this->putLFloat($this->speedY);
 		$this->putLFloat($this->speedZ);
-		$this->putLFloat($this->yaw);
 		$this->putLFloat($this->pitch);
+		$this->putLFloat($this->yaw);
 		$this->putVarInt(0);
 		if(!empty($this->metadata)) {
 			$meta = Binary::writeMetadata($this->metadata);

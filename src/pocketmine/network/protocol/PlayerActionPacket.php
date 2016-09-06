@@ -51,7 +51,7 @@ class PlayerActionPacket extends DataPacket{
 
 	public function decode(){
 		$this->eid = $this->getVarInt();
-		$this->action = $this->getVarInt();
+		$this->action = $this->getSignedVarInt();
 		$this->x = $this->getSignedVarInt();
 		$this->y = $this->getByte();
 		$this->z = $this->getSignedVarInt();
@@ -61,7 +61,7 @@ class PlayerActionPacket extends DataPacket{
 	public function encode(){
 		$this->reset();
 		$this->putVarInt($this->eid);
-		$this->putVarInt($this->action);
+		$this->putSignedVarInt($this->action);
 		$this->putSignedVarInt($this->x);
 		$this->putByte($this->y);
 		$this->putSignedVarInt($this->z);
