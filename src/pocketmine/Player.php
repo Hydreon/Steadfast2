@@ -1602,19 +1602,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 
 			// regeneration
-//			if($this->foodTick >= 80) {
-//				if($this->getHealth() < $this->getMaxHealth() && $this->getFood() >= 18) {
-//					$ev = new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_EATING);
-//					$this->heal(1, $ev);
-//					if($this->hungerDepletion >=2) {
-//						$this->subtractFood(1);
-//						$this->foodDepletion = 0;
-//					} else {
-//						$this->hungerDepletion++;
-//					}
-//				}
-//				$this->foodTick = 0;
-//			}
+			if($this->foodTick >= 80) {
+				if($this->getHealth() < $this->getMaxHealth() && $this->getFood() >= 18) {
+					$ev = new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_EATING);
+					$this->heal(1, $ev);
+					if($this->hungerDepletion >=2) {
+						$this->subtractFood(1);
+						$this->foodDepletion = 0;
+					} else {
+						$this->hungerDepletion++;
+					}
+				}
+				$this->foodTick = 0;
+			}
 			if($this->getHealth() < $this->getMaxHealth()) {
 				$this->foodTick++;
 			}
@@ -3360,16 +3360,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setHealth($amount){
 		parent::setHealth($amount);
 		if($this->spawned === true){
-//			$pk = new UpdateAttributesPacket();
-//			$this->foodTick = 0;
-//			$pk->minValue = 0;
-//			$pk->maxValue = $this->getMaxHealth();
-//			$pk->value = $amount;
-//			$pk->name = UpdateAttributesPacket::HEALTH;
-//			$this->dataPacket($pk);
-			$pk = new SetHealthPacket();
+			$pk = new UpdateAttributesPacket();
+			$this->foodTick = 0;
+			$pk->minValue = 0;
+			$pk->maxValue = $this->getMaxHealth();
 			$pk->value = $amount;
+			$pk->name = UpdateAttributesPacket::HEALTH;
 			$this->dataPacket($pk);
+//			$pk = new SetHealthPacket();
+//			$pk->value = $amount;
+//			$this->dataPacket($pk);
 		}
 	}
 

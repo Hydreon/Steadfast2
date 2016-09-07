@@ -48,10 +48,8 @@ class UpdateAttributesPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-
 		$this->putVarInt($this->entityId);
-		$this->putVarInt($this->entityId);
-
+		$this->putVarInt(1);
         $this->putLFloat($this->minValue);
         $this->putLFloat($this->maxValue);
         $this->putLFloat($this->value);

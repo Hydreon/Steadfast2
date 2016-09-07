@@ -46,6 +46,7 @@ class ContainerOpenPacket extends DataPacket{
 		$this->putSignedVarInt($this->x);
 		$this->putByte($this->y);
 		$this->putSignedVarInt($this->z);
+		$this->putSignedVarInt(-1);
 	}
 
 }
