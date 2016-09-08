@@ -80,7 +80,7 @@ class StartGamePacket extends DataPacket{
 
 		$this->putLFloat(0); //lightning level the same type as loaded in creative (4 bytes)
 		
-		$this->putByte(0);	//commands enabled the same type as loaded in creative (1)
+		$this->putByte(1);	//commands enabled the same type as loaded in creative (1)
 //		$this->putString('iX8AANxLbgA=');
 	}
 
