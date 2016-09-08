@@ -141,6 +141,9 @@ use pocketmine\utils\TextFormat;
 use pocketmine\network\protocol\SetPlayerGameTypePacket;
 use pocketmine\block\Liquid;
 
+use pocketmine\network\protocol\SetCommandsEnabledPacket;
+use pocketmine\network\protocol\AvailableCommandsPacket;
+
 use raklib\Binary;
 
 /**
@@ -1927,6 +1930,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->z = (int) $spawnPosition->z;
 				$this->dataPacket($pk);
 				
+//				$pk = new SetCommandsEnabledPacket();
+//				$pk->enabled = 1;
+//				$this->dataPacket($pk);
+				
+//				$pk = new AvailableCommandsPacket();
+//				$pk->commands = file_get_contents('standard.json');
+//				$this->dataPacket($pk);
+				
 				if($this->getHealth() <= 0){
 					$this->dead = true;
 				}
@@ -3037,6 +3048,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->radius = $packet->radius;
 				$this->dataPacket($pk);
 				//Timings::$timerChunkRudiusPacket->stopTiming();
+				break;
+			case ProtocolInfo::COMMAND_STEP_PACKET:
 				break;
 			default:
 				break;
