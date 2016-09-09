@@ -3070,11 +3070,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				// facepalm : This needs for right params order
 				$params = self::$availableCommands[$commandName]['versions'][0]['overloads'][$commandOverload]['input']['parameters'];
 				foreach ($params as $param) {
-					if (!isset($commandParams[$param['name']]) && (!isset($param['name']['optional']) || $param['name']['optional'] == false)) {
+					if (!isset($commandParams[$param['name']]) && (!isset($param['optional']) || $param['optional'] == false)) {
 						$this->sendMessage('Bad arguments for ' . $commandName . ' command.');
 						break(2);
 					}
-					$commandLine .= ' ' . $commandParams[$param['name']];
+					if (isset($commandParams[$param['name']])) {
+						$commandLine .= ' ' . $commandParams[$param['name']];
+					}
 				}
 				
 				
