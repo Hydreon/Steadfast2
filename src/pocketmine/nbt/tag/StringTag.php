@@ -31,14 +31,19 @@ class StringTag extends NamedTag{
 		return NBT::TAG_String;
 	}
 
-	public function read(NBT $nbt){
-//		$this->value = $nbt->get($nbt->endianness === 1 ? unpack("n", $nbt->get(2))[1] : unpack("v", $nbt->get(2))[1]);
-		$this->value = $nbt->getString();
+	public function read(NBT $nbt, $new = false){
+		if ($new) {
+			$this->value = $nbt->getNewString($this->value);
+		} else {
+			$this->value = $nbt->getString($this->value);
+		}
 	}
 
-	public function write(NBT $nbt){
-//		$nbt->buffer .= $nbt->endianness === 1 ? pack("n", strlen($this->value)) : pack("v", strlen($this->value));
-//		$nbt->buffer .= $this->value;
-		$nbt->putString($this->value);
+	public function write(NBT $nbt, $old = false){
+		if ($old) {
+			$nbt->putOldString($this->value);
+		} else {
+			$nbt->putString($this->value);
+		}
 	}
 }

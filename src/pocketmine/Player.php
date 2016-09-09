@@ -522,9 +522,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->lastBreak = PHP_INT_MAX;
 		$this->ip = $ip;
 		$this->port = $port;
-		
-		var_dump($ip, $port);
-		
 		$this->clientID = $clientID;
 		$this->chunksPerTick = (int) $this->server->getProperty("chunk-sending.per-tick", 4);
 		$this->spawnPosition = null;
@@ -3004,7 +3001,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$t = $this->level->getTile($pos);
 				if($t instanceof Sign){
 					$nbt = new NBT(NBT::LITTLE_ENDIAN);
-					$nbt->read($packet->namedtag);
+					$nbt->read($packet->namedtag, false, true);
 					$nbt = $nbt->getData();
 					if($nbt["id"] !== Tile::SIGN){
 						$t->spawnTo($this);
