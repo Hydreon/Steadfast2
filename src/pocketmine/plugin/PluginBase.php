@@ -53,6 +53,9 @@ abstract class PluginBase implements Plugin{
 
 	/** @var PluginLogger */
 	private $logger;
+	
+	/** @var array */
+	private $jsonCommands = [];
 
 	/**
 	 * Called when the plugin is loaded, before calling onEnable()
@@ -115,7 +118,39 @@ abstract class PluginBase implements Plugin{
 			$this->file = rtrim($file, "\\/") . "/";
 			$this->configFile = $this->dataFolder . "config.yml";
 			$this->logger = new PluginLogger($this);
+			$this->initCommands();
 		}
+	}
+	
+	protected final function initCommands() {
+		$jsonFilePath = 'commands.json';
+		
+		// костыль для devtools
+		if (substr($this->file, 0, 4) === 'phar') {
+			// ordinary situation
+			$phar = new \Phar($this->file);
+			if (!isset($phar[$jsonFilePath]) || !($phar[$jsonFilePath] instanceof \PharFileInfo)) {
+				return;
+			}
+			$json = $phar[$jsonFilePath]->getContent();
+		} else {
+			// using devtools
+			if (!file_exists($this->file . $jsonFilePath) || ($json = file_get_contents($this->file . $jsonFilePath)) === false) {
+				return;
+			}
+		}
+
+		if (is_null($commands = json_decode($json, true))) {
+			return;
+		}
+		$this->jsonCommands = $commands;
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getJsonCommands() {
+		return $this->jsonCommands;
 	}
 
 	/**

@@ -141,6 +141,9 @@ use pocketmine\utils\TextFormat;
 use pocketmine\network\protocol\SetPlayerGameTypePacket;
 use pocketmine\block\Liquid;
 
+use pocketmine\network\protocol\SetCommandsEnabledPacket;
+use pocketmine\network\protocol\AvailableCommandsPacket;
+
 use raklib\Binary;
 
 /**
@@ -260,6 +263,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	/**@var string*/
 	public $language = 'English';
+	
+	protected static $availableCommands = [];
 
 	public function getLeaveMessage(){
 		return "";
@@ -536,6 +541,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->rawUUID = null;
 
 		$this->creationTime = microtime(true);
+		
+		if (empty(self::$availableCommands)) {
+			$plugins = $this->server->getPluginManager()->getPlugins();
+			foreach ($plugins as $pluginName => $plugin) {
+				$pluginCommands = $plugin->getJsonCommands();
+				self::$availableCommands = array_merge(self::$availableCommands, $pluginCommands);
+			}
+		}
 	}
 
 	/**
@@ -1924,6 +1937,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->z = (int) $spawnPosition->z;
 				$this->dataPacket($pk);
 				
+//				$pk = new SetCommandsEnabledPacket();
+//				$pk->enabled = 1;
+//				$this->dataPacket($pk);
+				
+				if (!empty(self::$availableCommands)) {
+					$pk = new AvailableCommandsPacket();
+					$pk->commands = json_encode(self::$availableCommands);
+					$this->dataPacket($pk);
+				}
+				
 				if($this->getHealth() <= 0){
 					$this->dead = true;
 				}
@@ -3034,6 +3057,28 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->radius = $packet->radius;
 				$this->dataPacket($pk);
 				//Timings::$timerChunkRudiusPacket->stopTiming();
+				break;
+			case ProtocolInfo::COMMAND_STEP_PACKET:
+				$commandName = $packet->name;
+				$commandOverload = $packet->overload;
+				$commandParams = json_decode($packet->outputFormat, true);
+				if (!isset(self::$availableCommands[$commandName])) {
+					$this->sendMessage('Unknown command.');
+				}
+				
+				$commandLine = $commandName;
+				// facepalm : This needs for right params order
+				$params = self::$availableCommands[$commandName]['versions'][0]['overloads'][$commandOverload]['input']['parameters'];
+				foreach ($params as $param) {
+					if (!isset($commandParams[$param['name']]) && (!isset($param['name']['optional']) || $param['name']['optional'] == false)) {
+						$this->sendMessage('Bad arguments for ' . $commandName . ' command.');
+						break(2);
+					}
+					$commandLine .= ' ' . $commandParams[$param['name']];
+				}
+				
+				
+				$this->server->dispatchCommand($this, $commandLine);
 				break;
 			default:
 				break;
