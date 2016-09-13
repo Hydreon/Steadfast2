@@ -584,14 +584,16 @@ class PluginManager{
 		
 		if (!empty($jsonCommands = $plugin->getJsonCommands())) {
 			foreach ($jsonCommands as $name => $options) {
-				$newCmd = new PluginCommand($name, $plugin);
-				if(isset($options['versions'][0]['descriptions'])){
-					$newCmd->setDescription($options['versions'][0]['descriptions']);
+				if (!isset($options['shouldBeRegistered']) || $options['shouldBeRegistered'] === true) {
+					$newCmd = new PluginCommand($name, $plugin);
+					if(isset($options['versions'][0]['descriptions'])){
+						$newCmd->setDescription($options['versions'][0]['descriptions']);
+					}
+					if(isset($options['versions'][0]['aliases']) && is_array($options['versions'][0]['aliases'])){
+						$newCmd->setAliases($options['versions'][0]['aliases']);
+					}
+					$pluginCmds[] = $newCmd;
 				}
-				if(isset($options['versions'][0]['aliases']) && is_array($options['versions'][0]['aliases'])){
-					$newCmd->setAliases($options['versions'][0]['aliases']);
-				}
-				$pluginCmds[] = $newCmd;
 			}
 		} else {
 			foreach($plugin->getDescription()->getCommands() as $key => $data){
