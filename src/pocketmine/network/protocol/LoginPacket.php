@@ -60,7 +60,7 @@ class LoginPacket extends DataPacket {
 			$this->isValidProtocol = false;
 			return;
 		}
-		
+		$this->getByte();	
 		$body = \zlib_decode($this->getString());
 		$this->chainsDataLength = Binary::readLInt($this->getFromString($body, 4));
 		$this->chains = json_decode($this->getFromString($body, $this->chainsDataLength), true);
@@ -78,7 +78,7 @@ class LoginPacket extends DataPacket {
 			$this->chains['data'][$index] = $data;
 			$index++;
 		}
-
+		
 		$this->playerData = self::load($this->playerData);
 		$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
 		$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];

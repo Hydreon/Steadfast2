@@ -52,6 +52,9 @@ class StartGamePacket extends DataPacket{
 		$this->putLFloat($this->y); // (4)
 		$this->putLFloat($this->z); // (4)
 		
+		$this->putLFloat(0);
+		$this->putLFloat(0);
+		
 		$this->putSignedVarInt($this->seed);
 		
 		$this->putSignedVarInt($this->dimension);
