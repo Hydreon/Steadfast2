@@ -71,7 +71,7 @@ abstract class Entity extends Location implements Metadatable{
 
 	const NETWORK_ID = -1;
 
-
+	
 	const DATA_TYPE_BYTE = 0;
 	const DATA_TYPE_SHORT = 1;
 	const DATA_TYPE_INT = 2;
@@ -85,13 +85,13 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAGS = 0;//is entity burning or not
 	const DATA_AIR = 1;//air under water
 	const DATA_NAMETAG = 2;
-	const DATA_SHOW_NAMETAG = 3;//is name permanent visible or not
+	const DATA_SHOW_NAMETAG = 3;//is name permanent visible or not //remove 1 flag (1 << 14)
 	const DATA_SILENT = 4;
 	const DATA_POTION_COLOR = 7;
 	const DATA_POTION_AMBIENT = 8;//is potion ambient or not
-	const DATA_NO_AI = 15;//can move or not
-	const DATA_LEAD_HOLDER = 23;
-	const DATA_LEAD = 24;
+	const DATA_NO_AI = 15;//can move or not //remove flag (1 << 15)
+	const DATA_LEAD_HOLDER = 19; //23
+	const DATA_LEAD = 24;//remove
 	//other dataProperty values:
 	//14 - age (0 - baby, 130000 - parent)
 	//16 - sheep color (the same as wool meta)
@@ -126,15 +126,15 @@ abstract class Entity extends Location implements Metadatable{
 	protected $id;
 
 	protected $dataFlags = 0;
-	protected $dataProperties = [
-		self::DATA_FLAGS => [self::DATA_TYPE_BYTE, 0],
+	protected $dataProperties = [	
+		self::DATA_FLAGS => [self::DATA_TYPE_INT, (1 << 14)],		
 		self::DATA_AIR => [self::DATA_TYPE_SHORT, 300],
 		self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""],
-		self::DATA_SHOW_NAMETAG => [self::DATA_TYPE_BYTE, 1],
-		self::DATA_SILENT => [self::DATA_TYPE_BYTE, 0],
-		self::DATA_NO_AI => [self::DATA_TYPE_BYTE, 0],
+//		self::DATA_SHOW_NAMETAG => [self::DATA_TYPE_BYTE, 1],
+//		self::DATA_SILENT => [self::DATA_TYPE_BYTE, 0],
+//		self::DATA_NO_AI => [self::DATA_TYPE_BYTE, 0],
 		self::DATA_LEAD_HOLDER => [self::DATA_TYPE_LONG, -1],
-		self::DATA_LEAD => [self::DATA_TYPE_BYTE, 0],
+//		self::DATA_LEAD => [self::DATA_TYPE_BYTE, 0],
 	];
 	
 	public $passenger = null;
@@ -1629,7 +1629,7 @@ abstract class Entity extends Location implements Metadatable{
 			if($this instanceof Player){
 				if(!$this->spawned){
 					return;
-				}
+	}
 				$targets[] = $this;
 			}
 

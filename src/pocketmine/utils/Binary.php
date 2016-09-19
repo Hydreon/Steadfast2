@@ -87,10 +87,12 @@ class Binary{
 	 * @return string
 	 */
 	public static function writeMetadata(array $data){		
+		unset($data[17]);
+		unset($data[15]);
 		$m = "";
 		$m .= self::writeVarInt(count($data));
 		foreach($data as $bottom => $d){
-			$m .= self::writeVarInt($bottom);
+			$m .= self::writeSignedVarInt($bottom);
 			$m .= self::writeVarInt($d[0]);
 			switch($d[0]){
 				case Entity::DATA_TYPE_BYTE:
@@ -99,7 +101,7 @@ class Binary{
 				case Entity::DATA_TYPE_SHORT:
 					$m .= self::writeSignedVarInt($d[1]);
 					break;
-				case Entity::DATA_TYPE_INT:
+				case Entity::DATA_TYPE_INT:					
 					$m .= self::writeSignedVarInt($d[1]);
 					break;
 				case Entity::DATA_TYPE_FLOAT:
