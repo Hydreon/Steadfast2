@@ -86,7 +86,7 @@ class Binary{
 	 *
 	 * @return string
 	 */
-	public static function writeMetadata(array $data){		
+	public static function writeMetadata(array $data){
 		unset($data[17]);
 		unset($data[15]);
 		$m = "";

@@ -1975,7 +1975,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				$pk = new SetEntityDataPacket();
 				$pk->eid = 0;
-				$pk->metadata = [self::DATA_LEAD_HOLDER => [self::DATA_TYPE_LONG, -1]];
+//				$pk->metadata = [self::DATA_LEAD_HOLDER => [self::DATA_TYPE_LONG, -1]];
+				$pk->metadata = $this->dataProperties;
+				$this->dataPacket($pk);
+				
+				$pk = new UpdateAttributesPacket();
+				$pk->name = UpdateAttributesPacket::SPEED;
+				$pk->minValue = 0.1;
+				$pk->maxValue = 0.5;
+				$pk->value = 0.1;
 				$this->dataPacket($pk);
 				
 				//Timings::$timerLoginPacket->stopTiming();
@@ -3404,16 +3412,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setHealth($amount){
 		parent::setHealth($amount);
 		if($this->spawned === true){
-			$pk = new UpdateAttributesPacket();
-			$this->foodTick = 0;
-			$pk->minValue = 0;
-			$pk->maxValue = $this->getMaxHealth();
-			$pk->value = $amount;
-			$pk->name = UpdateAttributesPacket::HEALTH;
-			$this->dataPacket($pk);
-//			$pk = new SetHealthPacket();
+//			$pk = new UpdateAttributesPacket();
+//			$this->foodTick = 0;
+//			$pk->minValue = 0;
+//			$pk->maxValue = $this->getMaxHealth();
 //			$pk->value = $amount;
+//			$pk->name = UpdateAttributesPacket::HEALTH;
 //			$this->dataPacket($pk);
+			$pk = new SetHealthPacket();
+			$pk->value = $amount;
+			$this->dataPacket($pk);
 		}
 	}
 

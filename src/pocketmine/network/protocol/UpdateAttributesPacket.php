@@ -29,10 +29,11 @@ use pocketmine\entity\Attribute;
 class UpdateAttributesPacket extends DataPacket{
 	const NETWORK_ID = Info::UPDATE_ATTRIBUTES_PACKET;
 
-    const HEALTH = "generic.health";
-    const HUNGER = "player.hunger";
-    const EXPERIENCE = "player.experience";
-    const EXPERIENCE_LEVEL = "player.level";
+    const HEALTH = "minecraft:generic.health";
+    const HUNGER = "minecraft:player.hunger";
+    const EXPERIENCE = "minecraft:player.experience";
+    const EXPERIENCE_LEVEL = "minecraft:player.level";
+	const SPEED = "minecraft:movement";
 
 
     public $entityId;
@@ -53,6 +54,7 @@ class UpdateAttributesPacket extends DataPacket{
         $this->putLFloat($this->minValue);
         $this->putLFloat($this->maxValue);
         $this->putLFloat($this->value);
-        $this->putString($this->name);
+		$this->putLFloat(0.1);
+		$this->putString($this->name);
 	}
 }

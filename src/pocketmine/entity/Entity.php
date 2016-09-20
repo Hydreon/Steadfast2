@@ -108,7 +108,9 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_SPRINTING = 3;
 	const DATA_FLAG_ACTION = 4;
 	const DATA_FLAG_INVISIBLE = 5;
-
+	
+	const DATA_FLAG_ANIMAL_SIT = 20;
+	const DATA_FLAG_NOT_IN_WATER = 30;
 
 	public static $entityCount = 1;
 	/** @var Entity[] */
@@ -127,9 +129,12 @@ abstract class Entity extends Location implements Metadatable{
 
 	protected $dataFlags = 0;
 	protected $dataProperties = [	
-		self::DATA_FLAGS => [self::DATA_TYPE_INT, (1 << 14)],		
-		self::DATA_AIR => [self::DATA_TYPE_SHORT, 300],
+//		self::DATA_FLAGS => [self::DATA_TYPE_INT, ((2 ** 49) - 1) ^ ((2 ** 15) + (2 ** 30) + 33)],
+//		self::DATA_FLAGS => [self::DATA_TYPE_INT, (1 << 30)],
+		self::DATA_FLAGS => [self::DATA_TYPE_INT, (1 << 14)],
+//		self::DATA_AIR => [self::DATA_TYPE_SHORT, 300],
 		self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""],
+//		4 => [self::DATA_TYPE_FLOAT, 80], // potion particles
 //		self::DATA_SHOW_NAMETAG => [self::DATA_TYPE_BYTE, 1],
 //		self::DATA_SILENT => [self::DATA_TYPE_BYTE, 0],
 //		self::DATA_NO_AI => [self::DATA_TYPE_BYTE, 0],
@@ -231,7 +236,9 @@ abstract class Entity extends Location implements Metadatable{
 		if($this->eyeHeight === null){
 			$this->eyeHeight = $this->height / 2 + 0.1;
 		}
-
+		
+		$this->dataProperties[22] = [self::DATA_TYPE_SHORT, 100];
+		
 		$this->id = Entity::$entityCount++;
 		$this->justCreated = true;	
 		$this->namedtag = $nbt;
