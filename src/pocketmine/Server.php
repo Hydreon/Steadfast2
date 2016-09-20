@@ -137,6 +137,8 @@ use pocketmine\entity\monster\walking\Zombie;
 use pocketmine\entity\monster\walking\ZombieVillager;
 use pocketmine\entity\projectile\FireBall;
 
+use synapse\Synapse;
+
 /**
  * The class that manages everything
  */
@@ -279,6 +281,10 @@ class Server{
 	public $packetMaker = null;
 	
 	private $signTranslation = [];
+	
+	public $synapseConfig = [];
+	
+	private $synapse = null;
 	
 	private $globalCompasPosition = array(
 		'x' => 15000,
@@ -686,6 +692,19 @@ class Server{
 	 * @return float
 	 */
 	public function getTickUsage(){
+		return round((array_sum($this->useAverage) / count($this->useAverage)) * 100, 2);
+	}
+	
+	public function getTicksPerSecondAverage(){
+		return round(array_sum($this->tickAverage) / count($this->tickAverage), 2);
+	}
+
+	/**
+	 * Returns the TPS usage/load in %
+	 *
+	 * @return float
+	 */
+	public function getTickUsageAverage(){
 		return round((array_sum($this->useAverage) / count($this->useAverage)) * 100, 2);
 	}
 
@@ -1498,8 +1517,24 @@ class Server{
 			"rcon.password" => substr(base64_encode(@Utils::getRandomBytes(20, false)), 3, 10),
 			"auto-save" => true,
 			"auto-generate" => false,
-			"save-player-data" => false
+			"save-player-data" => false,
+			
+			"synapse-enabled" => false,
+			"synapse-server-ip" => "127.0.0.1",
+			"synapse-server-port" => 10305,
+			"synapse-is-main-server" => false,
+			"synapse-server-password" => "123456",
+			"synapse-description" => "A Synapse client"
 		]);
+		
+		$this->synapseConfig = [
+			"enabled" => $this->getConfigBoolean("synapse-enabled", false),
+			"server-ip" => $this->getConfigString("synapse-server-ip", "127.0.0.1"),
+			"server-port" => $this->getConfigInt("synapse-server-port", 10305),
+			"isMainServer" => $this->getConfigBoolean("synapse-is-main-server", true),
+			"password" => $this->getConfigString("synapse-server-password", "123456"),
+			"description" => $this->getConfigString("synapse-description", "A Synapse client"),
+		];
 
 		ServerScheduler::$WORKERS = 4;
 
@@ -1622,6 +1657,10 @@ class Server{
 				$this->pluginManager->loadPlugins($this->pluginPath);
 			}
 		}
+		
+		if($this->isSynapseEnabled()){
+			$this->synapse = new Synapse($this, $this->synapseConfig);
+		}
 
 		$this->enablePlugins(PluginLoadOrder::STARTUP);
 
@@ -1686,6 +1725,15 @@ class Server{
 		}
 		
 		$this->start();
+		
+	}
+	
+	public function isSynapseEnabled() : bool {
+		return (bool) $this->synapseConfig["enabled"];
+	}
+	
+	public function getSynapse(){
+		return $this->synapse;
 	}
 
 	/**
@@ -2016,6 +2064,11 @@ class Server{
 			foreach($this->network->getInterfaces() as $interface){
 				$interface->shutdown();
 				$this->network->unregisterInterface($interface);
+			}
+			
+			if($this->isSynapseEnabled()){
+				$this->getLogger()->debug("Stopping Synapse client");
+				$this->synapse->shutdown();
 			}
 		}catch(\Exception $e){
 			$this->logger->emergency("Crashed while crashing, killing process");
@@ -2423,6 +2476,10 @@ class Server{
 	
 		//Timings::$connectionTimer->startTiming();
 		$this->network->processInterfaces();
+		
+		if($this->isSynapseEnabled()){
+			$this->synapse->tick();
+		}
 		//Timings::$connectionTimer->stopTiming();
 
 		//Timings::$schedulerTimer->startTiming();
