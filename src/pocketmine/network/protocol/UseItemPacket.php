@@ -38,6 +38,7 @@ class UseItemPacket extends DataPacket{
 	public $posX;
 	public $posY;
 	public $posZ;
+	public $hotbarSlot;
 
 	public function decode(){
 		$this->x = $this->getSignedVarInt();
@@ -50,7 +51,7 @@ class UseItemPacket extends DataPacket{
 		$this->posX = $this->getLFloat();
 		$this->posY = $this->getLFloat();
 		$this->posZ = $this->getLFloat();
-		$this->getVarInt();
+		$this->hotbarSlot = $this->getSignedVarInt();
 		$this->item = $this->getSlot();
 	}
 
