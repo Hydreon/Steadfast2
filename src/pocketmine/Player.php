@@ -2095,7 +2095,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerUseItemPacket->stopTiming();
 					break;
 				}
-
+				
 				$blockVector = new Vector3($packet->x, $packet->y, $packet->z);
 
 				$this->craftingType = 0;
@@ -2105,7 +2105,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 
 					if($blockVector->distance($this) > 10 or ($this->isCreative() and $this->isAdventure())){
-
+						
 					}elseif($this->isCreative()){
 						$item = $this->inventory->getItemInHand();
 						if($this->level->useItemOn($blockVector, $item, $packet->face, $packet->fx, $packet->fy, $packet->fz, $this) === true){
@@ -2127,7 +2127,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							break;
 						}
 					}
-
+					
 					$this->inventory->sendHeldItem($this);
 
 					if($blockVector->distanceSquared($this) > 10000){
