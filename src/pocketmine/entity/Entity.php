@@ -276,6 +276,7 @@ abstract class Entity extends Location implements Metadatable{
 			$this->namedtag->Air = new ShortTag("Air", 300);
 		}
 		$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_INT, false);
 //		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $this->namedtag["Air"]);
 
 		if(!isset($this->namedtag->OnGround)){
@@ -1627,10 +1628,13 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param int   $type
 	 * @param mixed $value
 	 */
-	public function setDataProperty($id, $type, $value){
+	public function setDataProperty($id, $type, $value, $send = true){
 		if($this->getDataProperty($id) !== $value){
 			$this->dataProperties[$id] = [$type, $value];
-
+			if (!$send) {
+				return;
+			}
+		
 			$targets = $this->hasSpawned;
 			if($this instanceof Player){
 				if(!$this->spawned){
@@ -1666,11 +1670,11 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param int  $id
 	 * @param bool $value
 	 */
-	public function setDataFlag($propertyId, $id, $value = true, $type = self::DATA_TYPE_BYTE){
+	public function setDataFlag($propertyId, $id, $value = true, $type = self::DATA_TYPE_INT, $send = true){
 		if($this->getDataFlag($propertyId, $id) !== $value){
 			$flags = (int) $this->getDataProperty($propertyId);
 			$flags ^= 1 << $id;
-			$this->setDataProperty($propertyId, $type, $flags);
+			$this->setDataProperty($propertyId, $type, $flags, $send);
 		}
 	}
 
@@ -1706,6 +1710,10 @@ abstract class Entity extends Location implements Metadatable{
 
 	public function __toString(){
 		return (new \ReflectionClass($this))->getShortName() . "(" . $this->getId() . ")";
+	}
+	
+	public function setAirTick($val){
+		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $val, false);
 	}
 
 }

@@ -3693,4 +3693,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->eyeHeight;
 	}
 	
+	public function sendSelfData() {
+		$pk = new SetEntityDataPacket();
+		$pk->eid = 0;
+		$pk->metadata = $this->dataProperties;
+		$this->dataPacket($pk);
+	}
+
 }
