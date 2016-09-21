@@ -82,21 +82,22 @@ abstract class Entity extends Location implements Metadatable{
 //	const DATA_TYPE_ROTATION = 7;
 	const DATA_TYPE_LONG = 7;
 
-	const DATA_FLAGS = 0;//is entity burning or not
-	const DATA_AIR = 1;//air under water
-	const DATA_NAMETAG = 2;
-	const DATA_SHOW_NAMETAG = 3;//is name permanent visible or not //remove 1 flag (1 << 14)
+	const DATA_FLAGS = 0; //is entity burning or not
+	const DATA_ANIMAL_VARIANT = 1; // type: int
+	const DATA_NAMETAG = 2; // type: string
 	const DATA_SILENT = 4;
 	const DATA_POTION_COLOR = 7;
-	const DATA_POTION_AMBIENT = 8;//is potion ambient or not
-	const DATA_NO_AI = 15;//can move or not //remove flag (1 << 15)
+	const DATA_POTION_AMBIENT = 8; //is potion ambient or not
 	const DATA_LEAD_HOLDER = 19; //23
-	const DATA_LEAD = 24;//remove
+	const DATA_AIR = 22; //air under water type: short
+	const DATA_LEAD = 24; //remove
+	
+	const DATA_NO_AI = 231321;
+	
 	//other dataProperty values:
 	//14 - age (0 - baby, 130000 - parent)
 	//16 - sheep color (the same as wool meta)
 	//17 - shooter id (for throwable entities)
-	//18 - type/variant (for ocelots, bats, sheep)
 	//19 - charge value for creaper
 	//20 - boat color
 	//21 - in love (for those who can breed)
@@ -108,7 +109,8 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_SPRINTING = 3;
 	const DATA_FLAG_ACTION = 4;
 	const DATA_FLAG_INVISIBLE = 5;
-	
+	const DATA_FLAG_SHOW_NAMETAG = 14;
+	const DATA_FLAG_NOT_MOVE = 15;
 	const DATA_FLAG_ANIMAL_SIT = 20;
 	const DATA_FLAG_NOT_IN_WATER = 30;
 
