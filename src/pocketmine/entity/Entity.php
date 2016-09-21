@@ -133,7 +133,7 @@ abstract class Entity extends Location implements Metadatable{
 	protected $dataProperties = [	
 //		self::DATA_FLAGS => [self::DATA_TYPE_INT, ((2 ** 49) - 1) ^ ((2 ** 15) + (2 ** 30) + 33)],
 //		self::DATA_FLAGS => [self::DATA_TYPE_INT, (1 << 30)],
-		self::DATA_FLAGS => [self::DATA_TYPE_INT, (1 << 14)],
+		self::DATA_FLAGS => [self::DATA_TYPE_INT, 0],
 		self::DATA_AIR => [self::DATA_TYPE_SHORT, 300],
 		self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""],
 //		4 => [self::DATA_TYPE_FLOAT, 80], // potion particles
@@ -278,6 +278,7 @@ abstract class Entity extends Location implements Metadatable{
 		}
 		$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_INT, false);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SHOW_NAMETAG, true, self::DATA_TYPE_INT, false);
 //		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $this->namedtag["Air"]);
 
 		if(!isset($this->namedtag->OnGround)){
