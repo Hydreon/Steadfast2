@@ -26,6 +26,9 @@ namespace pocketmine\network\protocol;
 
 class InteractPacket extends DataPacket{
 	const NETWORK_ID = Info::INTERACT_PACKET;
+	
+	const ACTION_DAMAGE = 2;
+	const ACTION_SEE = 4;
 
 	public $action;
 	public $eid;

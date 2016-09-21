@@ -232,8 +232,6 @@ class Network {
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
 					}
 
-	//				var_dump(get_class($pk));
-
 					$pk->setBuffer($buf, 1);
 					$pk->decode();
 					$p->handleDataPacket($pk);

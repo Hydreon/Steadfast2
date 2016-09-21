@@ -129,6 +129,7 @@ use pocketmine\network\protocol\UpdateAttributesPacket;
 use pocketmine\network\protocol\SetHealthPacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
 use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
+use pocketmine\network\protocol\InteractPacket;
 use pocketmine\network\SourceInterface;
 use pocketmine\permission\PermissibleBase;
 use pocketmine\permission\PermissionAttachment;
@@ -2481,15 +2482,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				$cancelled = false;
 
-				if(
-					$target instanceof Player and
-					$this->server->getConfigBoolean("pvp", true) === false
-
-				){
+				if($target instanceof Player && $this->server->getConfigBoolean("pvp", true) === false){
 					$cancelled = true;
 				}
-
-				if($target instanceof Entity and $this->getGamemode() !== Player::VIEW and $this->dead !== true and $target->dead !== true){
+				
+				if ($packet->action === InteractPacket::ACTION_DAMAGE && 
+					$target instanceof Entity && $this->getGamemode() !== Player::VIEW && 
+					$this->dead !== true and $target->dead !== true) {
+					
 					if($target instanceof DroppedItem or $target instanceof Arrow){
 						$this->kick("Attempting to attack an invalid entity");
 						$this->server->getLogger()->warning("Player " . $this->getName() . " tried to attack an invalid entity");

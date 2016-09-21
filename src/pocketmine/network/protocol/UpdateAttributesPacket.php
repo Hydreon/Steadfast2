@@ -54,7 +54,7 @@ class UpdateAttributesPacket extends DataPacket{
         $this->putLFloat($this->minValue);
         $this->putLFloat($this->maxValue);
         $this->putLFloat($this->value);
-		$this->putLFloat(0.1);
+		$this->putLFloat($this->value);
 		$this->putString($this->name);
 	}
 }
