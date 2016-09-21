@@ -36,6 +36,7 @@ use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\BlockIterator;
+use pocketmine\network\protocol\SetEntityDataPacket;
 
 abstract class Living extends Entity implements Damageable{
 
@@ -194,9 +195,15 @@ abstract class Living extends Entity implements Damageable{
 					$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_DROWNING, 2);
 					$this->attack($ev->getFinalDamage(), $ev);
 				}
-				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, $airTicks];			
+				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, $airTicks];	
+				if ($this instanceof Player) {
+					$pk = new SetEntityDataPacket();
+					$pk->eid = 0;
+					$pk->metadata = $this->dataProperties;
+					$this->dataPacket($pk);
+				}
 			}
-		}else{
+		}else{			
 			if($this instanceof WaterAnimal){
 				$hasUpdate = true;
 				$airTicks = $this->getDataProperty(self::DATA_AIR) - $tickDiff;
@@ -208,7 +215,14 @@ abstract class Living extends Entity implements Damageable{
 				}
 				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, $airTicks];
 			}else{
+				$oldAir = $this->getDataProperty(self::DATA_AIR);
 				$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
+				if (($this instanceof Player) && $oldAir != 300) {
+					$pk = new SetEntityDataPacket();
+					$pk->eid = 0;
+					$pk->metadata = $this->dataProperties;
+					$this->dataPacket($pk);
+				}
 			}
 		}
 

@@ -83,7 +83,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_TYPE_LONG = 7;
 
 	const DATA_FLAGS = 0;//is entity burning or not
-	const DATA_AIR = 1;//air under water
+	const DATA_AIR = 22;//air under water
 	const DATA_NAMETAG = 2;
 	const DATA_SHOW_NAMETAG = 3;//is name permanent visible or not //remove 1 flag (1 << 14)
 	const DATA_SILENT = 4;
@@ -126,13 +126,13 @@ abstract class Entity extends Location implements Metadatable{
 	protected $effects = [];
 
 	protected $id;
-
+	
 	protected $dataFlags = 0;
 	protected $dataProperties = [	
 //		self::DATA_FLAGS => [self::DATA_TYPE_INT, ((2 ** 49) - 1) ^ ((2 ** 15) + (2 ** 30) + 33)],
 //		self::DATA_FLAGS => [self::DATA_TYPE_INT, (1 << 30)],
 		self::DATA_FLAGS => [self::DATA_TYPE_INT, (1 << 14)],
-//		self::DATA_AIR => [self::DATA_TYPE_SHORT, 300],
+		self::DATA_AIR => [self::DATA_TYPE_SHORT, 300],
 		self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""],
 //		4 => [self::DATA_TYPE_FLOAT, 80], // potion particles
 //		self::DATA_SHOW_NAMETAG => [self::DATA_TYPE_BYTE, 1],
@@ -237,8 +237,7 @@ abstract class Entity extends Location implements Metadatable{
 			$this->eyeHeight = $this->height / 2 + 0.1;
 		}
 		
-		$this->dataProperties[22] = [self::DATA_TYPE_SHORT, 100];
-		
+
 		$this->id = Entity::$entityCount++;
 		$this->justCreated = true;	
 		$this->namedtag = $nbt;
@@ -1636,7 +1635,7 @@ abstract class Entity extends Location implements Metadatable{
 			if($this instanceof Player){
 				if(!$this->spawned){
 					return;
-	}
+				}
 				$targets[] = $this;
 			}
 
