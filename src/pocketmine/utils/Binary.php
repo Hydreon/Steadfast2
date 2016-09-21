@@ -89,6 +89,15 @@ class Binary{
 	public static function writeMetadata(array $data){
 		unset($data[17]);
 		unset($data[15]);
+		if (isset($data[Entity::DATA_AIR])) {
+			$air = $data[Entity::DATA_AIR][1];
+			if ($air > 0) {
+				$air = (int) (3086 * 30 / ($air));
+			} else {
+				$air = 0;
+			}
+			$data[Entity::DATA_AIR][1] = $air;
+		}
 		$m = "";
 		$m .= self::writeVarInt(count($data));
 		foreach($data as $bottom => $d){
@@ -99,7 +108,7 @@ class Binary{
 					$m .= self::writeByte($d[1]);
 					break;
 				case Entity::DATA_TYPE_SHORT:
-					$m .= self::writeSignedVarInt($d[1]);
+					$m .= self::writeLShort($d[1]);
 					break;
 				case Entity::DATA_TYPE_INT:					
 					$m .= self::writeSignedVarInt($d[1]);
