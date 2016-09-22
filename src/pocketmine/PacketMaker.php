@@ -149,14 +149,14 @@ class PacketMaker extends Worker {
 			$fullPacket->__encapsulatedPacket = new CachedEncapsulatedPacket();
 			$fullPacket->__encapsulatedPacket->identifierACK = null;
 			$fullPacket->__encapsulatedPacket->buffer = chr(0xfe) . $fullPacket->buffer;
-			$fullPacket->__encapsulatedPacket->reliability = 2;
+			$fullPacket->__encapsulatedPacket->reliability = 3;
 			$pk = $fullPacket->__encapsulatedPacket;
 		}
 
 		if ($pk === null) {
 			$pk = new EncapsulatedPacket();			
 			$pk->buffer = chr(0xfe) . $fullPacket->buffer;
-			$pk->reliability = 2;
+			$pk->reliability = 3;
 
 			if ($needACK === true && $identifierACK !== false) {
 				$pk->identifierACK = $identifierACK;

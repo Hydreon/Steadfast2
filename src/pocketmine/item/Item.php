@@ -68,7 +68,7 @@ class Item{
 		}
 
 		self::$cachedParser->setData($tag);
-		return self::$cachedParser->write();
+		return self::$cachedParser->write(true);
 	}
 
 	//All Block IDs are here too
