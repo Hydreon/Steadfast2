@@ -78,6 +78,7 @@ use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\inventory\SimpleTransactionGroup;
+use pocketmine\inventory\TransactionPair;
 
 use pocketmine\item\Item;
 use pocketmine\level\format\FullChunk;
@@ -188,8 +189,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public $blocked = false;
 	public $achievements = [];
 	public $lastCorrect;
-	/** @var SimpleTransactionGroup */
-	protected $currentTransaction = null;
+	/** @var TransactionPair[] */
+	protected $currentTransactions = [];
 	public $craftingType = 0; //0 = 2x2 crafting, 1 = 3x3 crafting, 2 = stonecutter
 
 	protected $isCrafting = false;
@@ -1631,6 +1632,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 			$this->checkChunks();
 		}
+		
+		foreach ($this->currentTransactions as $pairKey => $pair) {
+			if ($pair->getCreationTime() < (microtime(true) - 1)) {
+				$pair->sendInventories();
+				unset($this->currentTransactions[$pairKey]);
+			}
+		}
 
 		$this->timings->stopTiming();
 
@@ -1985,6 +1993,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->minValue = 0.1;
 				$pk->maxValue = 0.5;
 				$pk->value = 0.1;
+				$pk->strangeValue = 0.1;
 				$this->dataPacket($pk);
 				
 				//Timings::$timerLoginPacket->stopTiming();
@@ -2975,44 +2984,38 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 
+				$this->addTransaction($transaction);
 
-				if($this->currentTransaction === null or $this->currentTransaction->getCreationTime() < (microtime(true) - 0.8)){
-					if($this->currentTransaction !== null){
-						foreach($this->currentTransaction->getInventories() as $inventory){
-							if($inventory instanceof PlayerInventory){
-								$inventory->sendArmorContents($this);
-							}
-							$inventory->sendContents($this);
-						}
-					}
-					$this->currentTransaction = new SimpleTransactionGroup($this);
-				}
-
-				$this->currentTransaction->addTransaction($transaction);
-
-				if($this->currentTransaction->canExecute()){
-					$achievements = [];
-					foreach($this->currentTransaction->getTransactions() as $ts){
-						$inv = $ts->getInventory();
-						if($inv instanceof FurnaceInventory){
-							if($ts->getSlot() === 2){
-								switch($inv->getResult()->getId()){
-									case Item::IRON_INGOT:
-										$achievements[] = "acquireIron";
-										break;
+				foreach ($this->currentTransactions as $pairKey => $pair) {
+					if ($pair->canExecute()) {
+						$achievements = [];
+						foreach ($pair->getTransactions() as $ts) {
+							$inv = $ts->getInventory();
+							if ($inv instanceof FurnaceInventory) {
+								if ($ts->getSlot() === 2) {
+									switch ($inv->getResult()->getId()) {
+										case Item::IRON_INGOT:
+											$achievements[] = "acquireIron";
+											break;
+									}
 								}
 							}
 						}
-					}
 
-					if($this->currentTransaction->execute()){
-						foreach($achievements as $a){
-							$this->awardAchievement($a);
+						if ($pair->execute()) {
+							var_dump('HERE');
+							foreach($achievements as $a){
+								$this->awardAchievement($a);
+							}
+						} else {
+							echo 'Transaction execute fail.'.PHP_EOL;
 						}
+						
+						unset($this->currentTransactions[$pairKey]);
+					} else {
+						break;
 					}
-
-					$this->currentTransaction = null;
-				}
+				}				
 				//Timings::$timerConteinerSetSlotPacket->stopTiming();
 				break;
 			case ProtocolInfo::TILE_ENTITY_DATA_PACKET:
@@ -3698,6 +3701,35 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->eid = 0;
 		$pk->metadata = $this->dataProperties;
 		$this->dataPacket($pk);
+	}
+	
+	/**
+	 * Create new transaction pair for transaction or add it to suitable one
+	 * 
+	 * @param Transaction $transaction
+	 * @return null
+	 */
+	protected function addTransaction($transaction) {
+		// trying to find suitable pair
+		foreach ($this->currentTransactions as $pairKey => $pair) {
+			if ($this->currentTransactions[$pairKey]->addTransaction($transaction)) {
+				return;
+			}
+		}
+		// if not found pair or player doesn't have transaction's pair then create new
+		$transactionPair = new TransactionPair($this);
+		$result = $transactionPair->addTransaction($transaction);
+		if ($result === true) {
+			$this->currentTransactions[] = $transactionPair;
+		} else {
+			// if something went wrong send current inventory
+			$inv = $transaction->getInventory();
+			if ($inventory instanceof PlayerInventory) {
+				$inventory->sendArmorContents($this);
+			}
+			$inventory->sendContents($this);
+			echo 'Bad transaction'.PHP_EOL;
+		}
 	}
 
 }
