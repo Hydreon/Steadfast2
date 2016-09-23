@@ -68,4 +68,12 @@ class BaseTransaction implements Transaction{
 	public function getTargetItem(){
 		return clone $this->targetItem;
 	}
+	
+	/**
+	 * 
+	 * @param Player $target
+	 */
+	public function revert($target) {
+		$this->inventory->sendContents($target);
+	}
 }

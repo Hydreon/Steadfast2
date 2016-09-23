@@ -78,9 +78,11 @@ use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\inventory\SimpleTransactionGroup;
-use pocketmine\inventory\TransactionPair;
+use pocketmine\inventory\transactions\PairTransaction;
+use pocketmine\inventory\transactions\ArmorSwapTransaction;
 
 use pocketmine\item\Item;
+use pocketmine\item\Armor;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\format\LevelProvider;
 use pocketmine\level\Level;
@@ -189,8 +191,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public $blocked = false;
 	public $achievements = [];
 	public $lastCorrect;
-	/** @var TransactionPair[] */
-	protected $currentTransactions = [];
+	/** @var SimpleTransactionGroup[] */
+	protected $transactionGroupQueue = [];
+	/** @var Transaction[] */
+	protected $transactionQueue = [];
+	
 	public $craftingType = 0; //0 = 2x2 crafting, 1 = 3x3 crafting, 2 = stonecutter
 
 	protected $isCrafting = false;
@@ -1631,12 +1636,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->checkChunks();
 		}
 		
-		foreach ($this->currentTransactions as $pairKey => $pair) {
-			if ($pair->getCreationTime() < (microtime(true) - 1)) {
-				$pair->sendInventories();
-				unset($this->currentTransactions[$pairKey]);
-			}
-		}
+		$this->executeTransuctions();
 
 		$this->timings->stopTiming();
 
@@ -2955,18 +2955,24 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->inventory->setHotbarSlotIndex($packet->slot, $packet->slot); //links $hotbar[$packet->slot] to $slots[$packet->slot]
 						}
 					}
-					$transaction = new BaseTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
+					$transaction = new PairTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
 				}elseif($packet->windowid === ContainerSetContentPacket::SPECIAL_ARMOR){ //Our armor
 					if($packet->slot >= 4){
 						//Timings::$timerConteinerSetSlotPacket->stopTiming();
 						break;
 					}
-
-					$transaction = new BaseTransaction($this->inventory, $packet->slot + $this->inventory->getSize(), $this->inventory->getArmorItem($packet->slot), $packet->item);
+					
+					$currentArmor = $this->inventory->getArmorItem($packet->slot);
+					$slot = $packet->slot + $this->inventory->getSize();
+					if ($currentArmor instanceof Armor && $packet->item instanceof Armor) {
+						$transaction = new ArmorSwapTransaction($this->inventory, $slot, $currentArmor, $packet->item);
+					} else {
+						$transaction = new PairTransaction($this->inventory, $slot, $currentArmor, $packet->item);
+					}
 				}elseif(isset($this->windowIndex[$packet->windowid])){
 					$this->craftingType = 0;
 					$inv = $this->windowIndex[$packet->windowid];
-					$transaction = new BaseTransaction($inv, $packet->slot, $inv->getItem($packet->slot), $packet->item);
+					$transaction = new PairTransaction($inv, $packet->slot, $inv->getItem($packet->slot), $packet->item);
 				}else{
 					//Timings::$timerConteinerSetSlotPacket->stopTiming();
 					break;
@@ -2979,37 +2985,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 
 				$this->addTransaction($transaction);
-
-				foreach ($this->currentTransactions as $pairKey => $pair) {
-					if ($pair->canExecute()) {
-						$achievements = [];
-						foreach ($pair->getTransactions() as $ts) {
-							$inv = $ts->getInventory();
-							if ($inv instanceof FurnaceInventory) {
-								if ($ts->getSlot() === 2) {
-									switch ($inv->getResult()->getId()) {
-										case Item::IRON_INGOT:
-											$achievements[] = "acquireIron";
-											break;
-									}
-								}
-							}
-						}
-
-						if ($pair->execute()) {
-							var_dump('HERE');
-							foreach($achievements as $a){
-								$this->awardAchievement($a);
-							}
-						} else {
-							echo 'Transaction execute fail.'.PHP_EOL;
-						}
-						
-						unset($this->currentTransactions[$pairKey]);
-					} else {
-						break;
-					}
-				}				
 				//Timings::$timerConteinerSetSlotPacket->stopTiming();
 				break;
 			case ProtocolInfo::TILE_ENTITY_DATA_PACKET:
@@ -3702,29 +3677,85 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/**
 	 * Create new transaction pair for transaction or add it to suitable one
 	 * 
-	 * @param Transaction $transaction
+	 * @param BaseTransaction $transaction
 	 * @return null
 	 */
 	protected function addTransaction($transaction) {
-		// trying to find suitable pair
-		foreach ($this->currentTransactions as $pairKey => $pair) {
-			if ($this->currentTransactions[$pairKey]->addTransaction($transaction)) {
-				return;
+		// trying to find suitable transactions
+		$foundAll = false;
+		$suitableTransactions = [];
+		foreach ($this->transactionQueue as $trKey => $tr) {
+			if ($transaction->isSuitable($tr)) {
+				$suitableTransactions[] = $trKey;
+				if ($transaction instanceof ArmorSwapTransaction) {
+					if ($transaction->isFoundAll()) {
+						$foundAll = true;
+						break;
+					}
+				} else {
+					if (count($suitableTransactions) === $transaction->getRequiredTransactionNumber()) {
+						$foundAll = true;
+						break;
+					}
+				}
 			}
 		}
-		// if not found pair or player doesn't have transaction's pair then create new
-		$transactionPair = new TransactionPair($this);
-		$result = $transactionPair->addTransaction($transaction);
-		if ($result === true) {
-			$this->currentTransactions[] = $transactionPair;
-		} else {
-			// if something went wrong send current inventory
-			$inv = $transaction->getInventory();
-			if ($inventory instanceof PlayerInventory) {
-				$inventory->sendArmorContents($this);
+		
+		if ($foundAll === true) {
+			$trGroup = new SimpleTransactionGroup($this);
+			$trGroup->addTransaction($transaction);
+			foreach ($suitableTransactions as $trKey) {
+				$trGroup->addTransaction($this->transactionQueue[$trKey]);
+				unset($this->transactionQueue[$trKey]);
 			}
-			$inventory->sendContents($this);
-			echo 'Bad transaction'.PHP_EOL;
+			$this->transactionGroupQueue[] = $trGroup;
+		} else {
+			if ($transaction instanceof ArmorSwapTransaction) {
+				$transaction->revert($this);
+				return;
+			} else {
+				$this->transactionQueue[] = $transaction;
+			}
+		}
+	}
+	
+	protected function executeTransuctions() {
+		foreach ($this->transactionGroupQueue as $key => $group) {
+			$achievements = [];
+			// check inventories for achievements
+			foreach ($group->getTransactions() as $ts) {
+				$inv = $ts->getInventory();
+				if ($inv instanceof FurnaceInventory && $ts->getSlot() === 2) {
+					switch ($inv->getResult()->getId()) {
+						case Item::IRON_INGOT:
+							$achievements[] = "acquireIron";
+							break 2;
+					}
+				}
+			}
+
+			// execute transactions group
+			if ($group->execute()) {
+				foreach ($achievements as $a) {
+					$this->awardAchievement($a);
+				}
+				unset($this->transactionGroupQueue[$key]);
+			} else {
+				echo 'Transaction execute fail.'.PHP_EOL;
+				// if group too old, revert it
+				if ($group->getCreationTime() < (microtime(true) - 1)) {
+					$group->sendInventories();
+					unset($this->transactionGroupQueue[$key]);
+				}
+			}
+		}
+		
+		foreach ($this->transactionQueue as $trKey => $tr) {
+			if ($tr->getCreationTime() < (microtime(true) - 1)) {
+				$tr->revert($this);
+				unset($this->transactionQueue[$trKey]);
+				continue;
+			}
 		}
 	}
 
