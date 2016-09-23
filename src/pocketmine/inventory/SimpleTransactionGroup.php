@@ -143,7 +143,7 @@ class SimpleTransactionGroup implements TransactionGroup {
 		Server::getInstance()->getPluginManager()->callEvent($ev = new InventoryTransactionEvent($this));
 		if ($ev->isCancelled()) {
 			$this->sendInventories();
-			return false;
+			throw new \Exception('Event was canceled');
 		}
 
 		foreach ($this->transactions as $transaction) {
