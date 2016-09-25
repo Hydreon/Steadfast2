@@ -161,6 +161,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	const SPECTATOR = 3;
 	const VIEW = Player::SPECTATOR;
 
+        const CRAFTING_DEFAULT = 0;
+	const CRAFTING_WORKBENCH = 1;
+	const CRAFTING_ANVIL = 2;
+	const CRAFTING_ENCHANT = 3;
+        
 	const SURVIVAL_SLOTS = 36;
 	const CREATIVE_SLOTS = 112;
 
