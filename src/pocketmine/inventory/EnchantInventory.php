@@ -17,31 +17,69 @@
  * @link http://www.pocketmine.net/
  *
  *
-*/
+ */
 
 namespace pocketmine\inventory;
 
 use pocketmine\level\Position;
 use pocketmine\Player;
 
-class EnchantInventory extends ContainerInventory{
-	public function __construct(Position $pos){
-		parent::__construct(new FakeBlockMenu($this, $pos), InventoryType::get(InventoryType::ENCHANT_TABLE));
-	}
+class EnchantInventory extends ContainerInventory {
 
-	/**
-	 * @return FakeBlockMenu
-	 */
-	public function getHolder(){
-		return $this->holder;
-	}
+    private $bookshelfAmount = 0;
+    
+    private $levels = [];
 
-	public function onClose(Player $who){
-		parent::onClose($who);
+    public function __construct(Position $pos) {
+        parent::__construct(new FakeBlockMenu($this, $pos), InventoryType::get(InventoryType::ENCHANT_TABLE));
+    }
 
-		for($i = 0; $i < 2; ++$i){
-			$this->getHolder()->getLevel()->dropItem($this->getHolder()->add(0.5, 0.5, 0.5), $this->getItem($i));
-			$this->clear($i);
-		}
-	}
+    /**
+     * @return FakeBlockMenu
+     */
+    public function getHolder() {
+        return $this->holder;
+    }
+
+    public function onOpen(Player $who) {
+        parent::onOpen($who);
+        if ($this->levels == null) {
+            $this->bookshelfAmount = $this->countBookshelf();
+            $base = mt_rand(1, 8) + ($this->bookshelfAmount / 2) + mt_rand(0, $this->bookshelfAmount);
+            $this->levels = [
+                0 => max($base / 3, 1),
+                1 => (($base * 2) / 3 + 1),
+                2 => max($base, $this->bookshelfAmount * 2)
+            ];
+        }
+    }
+
+    public function onClose(Player $who) {
+        debug_print_backtrace(2, 20);
+
+        parent::onClose($who);
+
+        for ($i = 0; $i < 2; ++$i) {
+            $this->getHolder()->getLevel()->dropItem($this->getHolder()->add(0.5, 0.5, 0.5), $this->getItem($i));
+            $this->clear($i);
+        }
+    }
+
+    public function countBookshelf() {
+        $count = 0;
+        $pos = $this->getHolder();
+        $offsets = [[2, 0], [-2, 0], [0, 2], [0, -2], [2, 1], [2, -1], [-2, 1], [-2, 1], [1, 2], [-1, 2], [1, -2], [-1, -2]];
+        for ($i = 0; $i < 3; $i++) {
+            foreach ($offsets as $offset) {
+                if ($pos->getLevel()->getBlockIdAt($pos->x + $offset[0], $pos->y + $i, $pos->z + $offset[1]) == Block::BOOKSHELF) {
+                    $count++;
+                }
+                if ($count === 15) {
+                    break 2;
+                }
+            }
+        }
+        return $count;
+    }
+
 }
