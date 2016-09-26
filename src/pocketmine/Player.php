@@ -3656,18 +3656,24 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 
 			// execute transactions group
-			if ($group->execute()) {
-				foreach ($achievements as $a) {
-					$this->awardAchievement($a);
-				}
-				unset($this->transactionGroupQueue[$key]);
-			} else {
-				echo 'Transaction execute fail.'.PHP_EOL;
-				// if group too old, revert it
-				if ($group->getCreationTime() < (microtime(true) - 1)) {
-					$group->sendInventories();
+			try {
+				$isExecute = $group->execute();
+				if ($isExecute) {
+					foreach ($achievements as $a) {
+						$this->awardAchievement($a);
+					}
 					unset($this->transactionGroupQueue[$key]);
+				} else {
+					echo 'Transaction execute fail.'.PHP_EOL;
+					// if group too old, revert it
+					if ($group->getCreationTime() < (microtime(true) - 1)) {
+						$group->sendInventories();
+						unset($this->transactionGroupQueue[$key]);
+					}
 				}
+			} catch (\Exception $ex) {
+				$group->sendInventories();
+				unset($this->transactionGroupQueue[$key]);
 			}
 		}
 		
