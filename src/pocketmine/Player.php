@@ -2125,6 +2125,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					}
 
+//					if($item->getId() === Item::SNOWBALL || $item->getId() === Item::EGG){
 					if($item->getId() === Item::SNOWBALL){
 						$nbt = new Compound("", [
 							"Pos" => new Enum("Pos", [
@@ -2144,22 +2145,29 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						]);
 
 						$f = 1.5;
-						$snowball = Entity::createEntity("Snowball", $this->chunk, $nbt, $this);
-						$snowball->setMotion($snowball->getMotion()->multiply($f));
+						switch ($item->getId()) {
+							case Item::SNOWBALL:
+								$projectile = Entity::createEntity("Snowball", $this->chunk, $nbt, $this);
+								break;
+							case Item::EGG:
+								$projectile = Entity::createEntity("Egg", $this->chunk, $nbt, $this);
+								break;
+						}
+						$projectile->setMotion($projectile->getMotion()->multiply($f));
 						if($this->isSurvival()){
 							$item->setCount($item->getCount() - 1);
 							$this->inventory->setItemInHand($item->getCount() > 0 ? $item : Item::get(Item::AIR));
 						}
-						if($snowball instanceof Projectile){
-							$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($snowball));
+						if($projectile instanceof Projectile){
+							$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($projectile));
 							if($projectileEv->isCancelled()){
-								$snowball->kill();
+								$projectile->kill();
 							}else{
-								$snowball->spawnToAll();
+								$projectile->spawnToAll();
 								$this->level->addSound(new LaunchSound($this), $this->getViewers());
 							}
 						}else{
-							$snowball->spawnToAll();
+							$projectile->spawnToAll();
 						}
 					}
 
