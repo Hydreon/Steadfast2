@@ -532,7 +532,7 @@ class Session{
     }
 
     public function close(){
-        $this->addEncapsulatedToQueue(EncapsulatedPacket::fromBinary("\x60\x00\x08\x00\x00\x00\x00\x00\x00\x00\x15")); //CLIENT_DISCONNECT packet 0x15 //Credits to Genisys for this fix
+        $this->addEncapsulatedToQueue(EncapsulatedPacket::fromBinary("\x60\x00\x08\x00\x00\x00\x00\x00\x00\x00\x15")); //CLIENT_DISCONNECT packet 0x15 Credits to Genisys for this fix
         $this->sessionManager = null;
     }
 }
