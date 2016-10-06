@@ -123,21 +123,25 @@ class Item extends Entity{
 			$this->motionZ *= $friction;
 
 			$this->updateMovement();
+			
+			if ($this->y < 1) {
+				$this->kill();
+				$hasUpdate = true;
+			} else {
+				if ($this->onGround) {
+					$this->motionY *= -0.5;
+				}
 
-			if($this->onGround){
-				$this->motionY *= -0.5;
-			}
-
-			if($this->age > 6000){
-				$this->server->getPluginManager()->callEvent($ev = new ItemDespawnEvent($this));
-				if($ev->isCancelled()){
-					$this->age = 0;
-				}else{
-					$this->kill();
-					$hasUpdate = true;
+				if ($this->age > 1200) {
+					$this->server->getPluginManager()->callEvent($ev = new ItemDespawnEvent($this));
+					if ($ev->isCancelled()) {
+						$this->age = 0;
+					} else {
+						$this->kill();
+						$hasUpdate = true;
+					}
 				}
 			}
-
 		}
 
 		$this->timings->stopTiming();

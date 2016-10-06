@@ -1594,7 +1594,8 @@ class Server{
 
 		$this->pluginManager = new PluginManager($this, $this->commandMap);
 		$this->pluginManager->subscribeToPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, $this->consoleSender);
-		$this->pluginManager->setUseTimings($this->getProperty("settings.enable-profiling", false));
+//		$this->pluginManager->setUseTimings($this->getProperty("settings.enable-profiling", false));
+		$this->pluginManager->setUseTimings(true);
 		$this->pluginManager->registerInterface(PharPluginLoader::class);
 
 		\set_exception_handler([$this, "exceptionHandler"]);
@@ -2410,6 +2411,8 @@ class Server{
 		if($tickTime < $this->nextTick){
 			return false;
 		}
+		
+		//TimingsHandler::reload();
 
 		//Timings::$serverTickTimer->startTiming();
 
@@ -2457,7 +2460,7 @@ class Server{
 		}
 		//Timings::$serverTickTimer->stopTiming();
 
-//		TimingsHandler::tick();
+		//TimingsHandler::tick();
 
 		$now = microtime(true);
 		array_shift($this->tickAverage);
@@ -2470,6 +2473,15 @@ class Server{
 		}
 		$this->nextTick += 0.05;
 
+//		if(microtime(true) - $tickTime > 0.06){
+//			$timingFolder = $this->getDataPath() . "timings/";
+//
+//			if(!file_exists($timingFolder)){
+//				mkdir($timingFolder, 0777);
+//			}
+//			$timings = $timingFolder . "timings.txt";
+//			TimingsHandler::printTimings($timings);
+//		}
 		return true;
 	}
 
