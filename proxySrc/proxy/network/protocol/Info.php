@@ -4,8 +4,8 @@ namespace proxy\network\protocol;
 
 interface Info {
 
-	const CURRENT_PROTOCOL = 82;
-	const ACCEPTED_PROTOCOLS = [81, 82];
+	const CURRENT_PROTOCOL = 83;
+	const ACCEPTED_PROTOCOLS = [81, 82, 83];
 	
 	const LOGIN_PACKET = 0x01;
 	const PLAY_STATUS_PACKET = 0x02;

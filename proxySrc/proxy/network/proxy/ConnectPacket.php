@@ -28,8 +28,7 @@ class ConnectPacket extends ProxyPacket {
 		$this->reset();
 		$this->putString($this->identifier);
 		$this->putInt($this->protocol);
-		$this->putLong($this->clientId);
-		$this->putUUID($this->clientUUID);
+		$this->putString($this->clientId);
 		$this->putString($this->clientSecret);
 		$this->putString($this->username);
 		$this->putString($this->skinName);

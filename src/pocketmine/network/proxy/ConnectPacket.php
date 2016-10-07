@@ -3,6 +3,7 @@
 namespace pocketmine\network\proxy;
 
 use pocketmine\network\proxy\Info;
+use pocketmine\utils\UUID;
 
 class ConnectPacket extends ProxyPacket {
 
@@ -23,8 +24,8 @@ class ConnectPacket extends ProxyPacket {
 	public function decode() {
 		$this->identifier = $this->getString();
 		$this->protocol = $this->getInt();
-		$this->clientId = $this->getLong();
-		$this->clientUUID = $this->getUUID();
+		$this->clientId = $this->getString();
+		$this->clientUUID = UUID::fromString($this->clientId);
 		$this->clientSecret = $this->getString();
 		$this->username = $this->getString();
 		$this->skinName = $this->getString();

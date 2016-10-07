@@ -146,7 +146,10 @@ class ProxyInterface implements AdvancedSourceInterface {
 					
 					$info = array(
 						'id' => $data['id'],
-						'data' => chr(self::SYSTEM_DATA_PACKET_ID) . chr(0x02) . serialize($outputData)
+						'data' => chr(self::SYSTEM_DATA_PACKET_ID) . chr(0x02) . 
+						pack('N', strlen($outputData['name'])) . $outputData['name'] .
+						pack('N', strlen($outputData['longData'])) . $outputData['longData'] .
+						pack('N', strlen($outputData['shortData'])) . $outputData['shortData']
 					);
 					$this->proxyServer->writeToProxyServer(serialize($info));				
 				}
