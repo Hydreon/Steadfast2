@@ -56,22 +56,28 @@ class TimingsHandler{
 	}
 
 	public static function printTimings($fp){
-		fwrite($fp, "Minecraft" . PHP_EOL);
-
+//		fwrite($fp, "Minecraft" . PHP_EOL);
+		$log = "----------------------------------------------------------------". PHP_EOL;
 		foreach(self::$HANDLERS as $timings){
 			$time = $timings->totalTime;
 			$count = $timings->count;
 			if($count === 0){
 				continue;
 			}
-
-			$avg = $time / $count;
-
-			fwrite($fp, "    " . $timings->name . " Time: " . round($time * 1000000000) . " Count: " . $count . " Avg: " . round($avg * 1000000000) . " Violations: " . $timings->violations . PHP_EOL);
+			if($timings->violations > 0) {
+			//	$avg = $time / $count;
+				if($count == 1){
+					$log .= "    " . $timings->name . " Time: " . ($time) . PHP_EOL;
+				} else {
+					$avg = $time / $count;
+					$log .= "    " . $timings->name . " Time: " . ($time) . " Count: " . $count . " Avg: " . ($avg) . PHP_EOL;
+				}
+			}
+			//fwrite($fp, "    " . $timings->name . " Time: " . ($time) . " Count: " . $count . " Avg: " . ($avg) . " Violations: " . $timings->violations . PHP_EOL);
 		}
 
-		fwrite($fp, "# Version " . Server::getInstance()->getVersion() . PHP_EOL);
-		fwrite($fp, "# " . Server::getInstance()->getName() . " " . Server::getInstance()->getPocketMineVersion() . PHP_EOL);
+//		fwrite($fp, "# Version " . Server::getInstance()->getVersion() . PHP_EOL);
+//		fwrite($fp, "# " . Server::getInstance()->getName() . " " . Server::getInstance()->getPocketMineVersion() . PHP_EOL);
 
 		$entities = 0;
 		$livingEntities = 0;
@@ -83,9 +89,11 @@ class TimingsHandler{
 				}
 			}
 		}
-
-		fwrite($fp, "# Entities " . $entities . PHP_EOL);
-		fwrite($fp, "# LivingEntities " . $livingEntities . PHP_EOL);
+		$log .= "# Entities " . $entities . PHP_EOL;
+		$log .= "# LivingEntities " . $livingEntities . PHP_EOL;
+		file_put_contents($fp, $log, FILE_APPEND | LOCK_EX);
+//		fwrite($fp, "# Entities " . $entities . PHP_EOL);
+//		fwrite($fp, "# LivingEntities " . $livingEntities . PHP_EOL);
 	}
 
 	public static function reload(){
@@ -100,8 +108,8 @@ class TimingsHandler{
 	public static function tick(){
 		if(PluginManager::$useTimings){
 			foreach(self::$HANDLERS as $timings){
-				if($timings->curTickTotal > 0.05){
-					$timings->violations += round($timings->curTickTotal / 0.05);
+				if($timings->curTickTotal > 0.01){
+					$timings->violations ++;//= round($timings->curTickTotal / 0.05);
 				}
 				$timings->curTickTotal = 0;
 				$timings->timingDepth = 0;

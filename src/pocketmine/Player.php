@@ -78,8 +78,11 @@ use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\inventory\SimpleTransactionGroup;
+use pocketmine\inventory\transactions\PairTransaction;
+use pocketmine\inventory\transactions\ArmorSwapTransaction;
 
 use pocketmine\item\Item;
+use pocketmine\item\Armor;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\format\LevelProvider;
 use pocketmine\level\Level;
@@ -264,10 +267,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/**@var string*/
 	public $language = 'English';
 	
+
 	public $proxyId = '';
 	public $proxySessionId = '';
 	
 	protected $closeFromProxy = false;
+
+	/** @var SimpleTransactionGroup[] */
+ 	protected $transactionGroupQueue = [];
+ 	
+	/** @var Transaction[] */
+ 	protected $transactionQueue = [];
+
 
 	public function getLeaveMessage(){
 		return "";
@@ -1617,6 +1628,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 			$this->checkChunks();
 		}
+		
+		$this->executeTransuctions();
 
 		$this->timings->stopTiming();
 
@@ -1923,6 +1936,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					}
 
+//					if($item->getId() === Item::SNOWBALL || $item->getId() === Item::EGG){
 					if($item->getId() === Item::SNOWBALL){
 						$nbt = new Compound("", [
 							"Pos" => new Enum("Pos", [
@@ -1942,22 +1956,29 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						]);
 
 						$f = 1.5;
-						$snowball = Entity::createEntity("Snowball", $this->chunk, $nbt, $this);
-						$snowball->setMotion($snowball->getMotion()->multiply($f));
+						switch ($item->getId()) {
+							case Item::SNOWBALL:
+								$projectile = Entity::createEntity("Snowball", $this->chunk, $nbt, $this);
+								break;
+							case Item::EGG:
+								$projectile = Entity::createEntity("Egg", $this->chunk, $nbt, $this);
+								break;
+						}
+						$projectile->setMotion($projectile->getMotion()->multiply($f));
 						if($this->isSurvival()){
 							$item->setCount($item->getCount() - 1);
 							$this->inventory->setItemInHand($item->getCount() > 0 ? $item : Item::get(Item::AIR));
 						}
-						if($snowball instanceof Projectile){
-							$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($snowball));
+						if($projectile instanceof Projectile){
+							$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($projectile));
 							if($projectileEv->isCancelled()){
-								$snowball->kill();
+								$projectile->kill();
 							}else{
-								$snowball->spawnToAll();
+								$projectile->spawnToAll();
 								$this->level->addSound(new LaunchSound($this), $this->getViewers());
 							}
 						}else{
-							$snowball->spawnToAll();
+							$projectile->spawnToAll();
 						}
 					}
 
@@ -2711,18 +2732,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->inventory->setHotbarSlotIndex($packet->slot, $packet->slot); //links $hotbar[$packet->slot] to $slots[$packet->slot]
 						}
 					}
-					$transaction = new BaseTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
+					$transaction = new PairTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
 				}elseif($packet->windowid === ContainerSetContentPacket::SPECIAL_ARMOR){ //Our armor
 					if($packet->slot >= 4){
 						//Timings::$timerConteinerSetSlotPacket->stopTiming();
 						break;
 					}
-
-					$transaction = new BaseTransaction($this->inventory, $packet->slot + $this->inventory->getSize(), $this->inventory->getArmorItem($packet->slot), $packet->item);
+					$currentArmor = $this->inventory->getArmorItem($packet->slot);
+					$slot = $packet->slot + $this->inventory->getSize();
+					if ($currentArmor instanceof Armor && $packet->item instanceof Armor) {
+						$transaction = new ArmorSwapTransaction($this->inventory, $slot, $currentArmor, $packet->item);
+					} else {
+						$transaction = new PairTransaction($this->inventory, $slot, $currentArmor, $packet->item);
+					}
 				}elseif(isset($this->windowIndex[$packet->windowid])){
 					$this->craftingType = 0;
 					$inv = $this->windowIndex[$packet->windowid];
-					$transaction = new BaseTransaction($inv, $packet->slot, $inv->getItem($packet->slot), $packet->item);
+					$transaction = new PairTransaction($inv, $packet->slot, $inv->getItem($packet->slot), $packet->item);
 				}else{
 					//Timings::$timerConteinerSetSlotPacket->stopTiming();
 					break;
@@ -2733,45 +2759,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerConteinerSetSlotPacket->stopTiming();
 					break;
 				}
-
-
-				if($this->currentTransaction === null or $this->currentTransaction->getCreationTime() < (microtime(true) - 0.8)){
-					if($this->currentTransaction !== null){
-						foreach($this->currentTransaction->getInventories() as $inventory){
-							if($inventory instanceof PlayerInventory){
-								$inventory->sendArmorContents($this);
-							}
-							$inventory->sendContents($this);
-						}
-					}
-					$this->currentTransaction = new SimpleTransactionGroup($this);
-				}
-
-				$this->currentTransaction->addTransaction($transaction);
-
-				if($this->currentTransaction->canExecute()){
-					$achievements = [];
-					foreach($this->currentTransaction->getTransactions() as $ts){
-						$inv = $ts->getInventory();
-						if($inv instanceof FurnaceInventory){
-							if($ts->getSlot() === 2){
-								switch($inv->getResult()->getId()){
-									case Item::IRON_INGOT:
-										$achievements[] = "acquireIron";
-										break;
-								}
-							}
-						}
-					}
-
-					if($this->currentTransaction->execute()){
-						foreach($achievements as $a){
-							$this->awardAchievement($a);
-						}
-					}
-
-					$this->currentTransaction = null;
-				}
+				
+				$this->addTransaction($transaction);
 				//Timings::$timerConteinerSetSlotPacket->stopTiming();
 				break;
 			case ProtocolInfo::TILE_ENTITY_DATA_PACKET:
@@ -3658,4 +3647,96 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->port = $port;
 		$this->dataPacket($pk);
 	}
+
+	/**
+	 * Create new transaction pair for transaction or add it to suitable one
+	 * 
+	 * @param BaseTransaction $transaction
+	 * @return null
+	 */
+	protected function addTransaction($transaction) {
+		// trying to find suitable transactions
+		$foundAll = false;
+		$suitableTransactions = [];
+		foreach ($this->transactionQueue as $trKey => $tr) {
+			if ($transaction->isSuitable($tr)) {
+				$suitableTransactions[] = $trKey;
+				if ($transaction instanceof ArmorSwapTransaction) {
+					if ($transaction->isFoundAll()) {
+						$foundAll = true;
+						break;
+					}
+				} else {
+					if (count($suitableTransactions) === $transaction->getRequiredTransactionNumber()) {
+						$foundAll = true;
+						break;
+					}
+				}
+			}
+		}
+		
+		if ($foundAll === true) {
+			$trGroup = new SimpleTransactionGroup($this);
+			$trGroup->addTransaction($transaction);
+			foreach ($suitableTransactions as $trKey) {
+				$trGroup->addTransaction($this->transactionQueue[$trKey]);
+				unset($this->transactionQueue[$trKey]);
+			}
+			$this->transactionGroupQueue[] = $trGroup;
+		} else {
+			if ($transaction instanceof ArmorSwapTransaction) {
+				$transaction->revert($this);
+				return;
+			} else {
+				$this->transactionQueue[] = $transaction;
+			}
+		}
+	}
+	
+	protected function executeTransuctions() {
+		foreach ($this->transactionGroupQueue as $key => $group) {
+			$achievements = [];
+			// check inventories for achievements
+			foreach ($group->getTransactions() as $ts) {
+				$inv = $ts->getInventory();
+				if ($inv instanceof FurnaceInventory && $ts->getSlot() === 2) {
+					switch ($inv->getResult()->getId()) {
+						case Item::IRON_INGOT:
+							$achievements[] = "acquireIron";
+							break 2;
+					}
+				}
+			}
+
+			// execute transactions group
+			try {
+				$isExecute = $group->execute();
+				if ($isExecute) {
+					foreach ($achievements as $a) {
+						$this->awardAchievement($a);
+					}
+					unset($this->transactionGroupQueue[$key]);
+				} else {
+					echo 'Transaction execute fail.'.PHP_EOL;
+					// if group too old, revert it
+					if ($group->getCreationTime() < (microtime(true) - 1)) {
+						$group->sendInventories();
+						unset($this->transactionGroupQueue[$key]);
+					}
+				}
+			} catch (\Exception $ex) {
+				$group->sendInventories();
+				unset($this->transactionGroupQueue[$key]);
+			}
+		}
+		
+		foreach ($this->transactionQueue as $trKey => $tr) {
+			if ($tr->getCreationTime() < (microtime(true) - 1)) {
+				$tr->revert($this);
+				unset($this->transactionQueue[$trKey]);
+				continue;
+			}
+		}
+	}
+	
 }

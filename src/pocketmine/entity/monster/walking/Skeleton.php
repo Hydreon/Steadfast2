@@ -88,7 +88,7 @@ class Skeleton extends WalkingMonster implements ProjectileSource{
 	}
 
 	public function entityBaseTick($tickDiff = 1){
-		Timings::$timerEntityBaseTick->startTiming();
+		//Timings::$timerEntityBaseTick->startTiming();
 
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
@@ -100,7 +100,7 @@ class Skeleton extends WalkingMonster implements ProjectileSource{
 			$this->setOnFire(100);
 		}
 
-		Timings::$timerEntityBaseTick->startTiming();
+		//Timings::$timerEntityBaseTick->startTiming();
 		return $hasUpdate;
 	}
 

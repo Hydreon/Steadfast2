@@ -64,7 +64,7 @@ class Zombie extends WalkingMonster implements Ageable{
 	}
 
 	public function entityBaseTick($tickDiff = 1){
-		Timings::$timerEntityBaseTick->startTiming();
+		//Timings::$timerEntityBaseTick->startTiming();
 
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
@@ -76,7 +76,7 @@ class Zombie extends WalkingMonster implements Ageable{
 			$this->setOnFire(100);
 		}
 
-		Timings::$timerEntityBaseTick->startTiming();
+		//Timings::$timerEntityBaseTick->startTiming();
 		return $hasUpdate;
 	}
 

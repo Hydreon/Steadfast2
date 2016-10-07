@@ -146,7 +146,7 @@ abstract class WalkingMonster extends WalkingEntity implements Monster{
 	}
 
 	public function entityBaseTick($tickDiff = 1){
-		Timings::$timerEntityBaseTick->startTiming();
+		//Timings::$timerEntityBaseTick->startTiming();
 
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
@@ -172,7 +172,7 @@ abstract class WalkingMonster extends WalkingEntity implements Monster{
 			}
 		}
 
-		Timings::$timerEntityBaseTick->stopTiming();
+		//Timings::$timerEntityBaseTick->stopTiming();
 		return $hasUpdate;
 	}
 
