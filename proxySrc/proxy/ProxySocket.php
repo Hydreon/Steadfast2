@@ -172,17 +172,21 @@ class ProxySocket {
 			$offset = 0;
 			$id = ord($buffer{$offset});
 			$offset++;
-			if ($id == 0x02) {
-				$data = unserialize(substr($buffer, $offset));
-				if (isset($data['longData'])) {
-					$this->server->setLongData($data['longData']);
-				}
-				if (isset($data['shortData'])) {
-					$this->server->setShortData($data['shortData']);
-				}
-				if (isset($data['name'])) {
-					$this->server->raklibInterface->setFullName($data['name']);
-				}
+			if ($id == 0x02) {				
+				$len = unpack('N', substr($buffer,$offset ,4))[1];
+
+				$offset += 4;
+				$this->server->raklibInterface->setFullName(substr($buffer,$offset, $len));
+				$offset += $len;
+
+				$len = unpack('N', substr($buffer,$offset ,4))[1];
+				$offset += 4;
+				$this->server->setLongData(substr($buffer,$offset, $len));
+				$offset += $len;
+				
+				$len = unpack('N', substr($buffer,$offset ,4))[1];
+				$offset += 4;
+				$this->server->setShortData(substr($buffer,$offset, $len));
 			}
 		} else {
 			echo 'UNKNOWN PACKET TYPE' . PHP_EOL;
