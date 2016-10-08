@@ -168,16 +168,8 @@ class SessionManager{
             }
 
             $pid = ord($buffer{0});
-            
-            if($pid == UNCONNECTED_PONG::$ID){
-                return false;
-            }
 
-            if(($packet = $this->getPacketFromPool($pid)) !== null){
-                $packet->buffer = $buffer;
-                $this->getSession($source, $port)->handlePacket($packet);
-	            return true;
-            }elseif($pid === UNCONNECTED_PING::$ID){
+            if($pid === UNCONNECTED_PING::$ID){
                 //No need to create a session for just pings
                 $packet = new UNCONNECTED_PING;
                 $packet->buffer = $buffer;
@@ -188,16 +180,17 @@ class SessionManager{
                 $pk->pingID = $packet->pingID;
                 $pk->serverName = $this->getName();
                 $this->sendPacket($pk, $source, $port);
-				return true;
-            }elseif($buffer !== ""){
-                $this->streamRaw($source, $port, $buffer);
-	            return true;
+            }elseif($pid === UNCONNECTED_PONG::$ID){
+                //ignored
+            }elseif(($packet = $this->getPacketFromPool($pid)) !== null){
+                $packet->buffer = $buffer;
+                $this->getSession($source, $port)->handlePacket($packet);
             }else{
-	            return true;
+                $this->streamRaw($source, $port, $buffer);
             }
         }
 
-        return false;
+        return $buffer !== null;
     }
 
     public function sendPacket(Packet $packet, $dest, $port){
