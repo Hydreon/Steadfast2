@@ -55,6 +55,8 @@ class StartGamePacket extends DataPacket{
 		$this->putLFloat(0);
 		$this->putLFloat(0);
 		
+		// Level settings
+		
 		$this->putSignedVarInt($this->seed);
 		
 		$this->putSignedVarInt($this->dimension);
@@ -63,7 +65,7 @@ class StartGamePacket extends DataPacket{
 		
 		$this->putSignedVarInt($this->gamemode);
 		
-		$this->putSignedVarInt(0); // Difficulty, i don't know how use it
+		$this->putSignedVarInt(0); // Difficulty
 		
 		// default spawn 3x VarInt
 		$this->putSignedVarInt(0);
@@ -73,17 +75,19 @@ class StartGamePacket extends DataPacket{
 //		$this->putVarInt(abs($this->spawnY));
 //		$this->putVarInt(abs($this->spawnZ));
 		
-		$this->putByte(0); //has been loaded in creative (1)
+		$this->putByte(1); // hasAchievementsDisabled
 		
 		$this->putSignedVarInt(0); // DayCycleStopTyme 1x VarInt
 		
-		$this->putByte(0); //edu mode the same type as loaded in creative (1)
+		$this->putByte(0); //edu mode
 
-		$this->putLFloat(0); //rain level the same type as loaded in creative (4 bytes)
+		$this->putLFloat(0); //rain level
 
-		$this->putLFloat(0); //lightning level the same type as loaded in creative (4 bytes)
+		$this->putLFloat(0); //lightning level
 		
-		$this->putByte(1);	//commands enabled the same type as loaded in creative (1)
+		$this->putByte(1);	//commands enabled
+		
+		$this->putByte(0); // isTexturepacksRequired 1x Byte
 //		$this->putString('iX8AANxLbgA=');
 	}
 

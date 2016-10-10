@@ -314,7 +314,8 @@ abstract class Entity extends Location implements Metadatable{
 	 * @return bool
 	 */
 	public function isNameTagVisible(){
-		return $this->getDataProperty(self::DATA_SHOW_NAMETAG) > 0;
+//		return $this->getDataProperty(self::DATA_SHOW_NAMETAG) > 0;
+		return $this->getDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_SHOW_NAMETAG);
 	}
 
 	/**
@@ -328,7 +329,8 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param bool $value
 	 */
 	public function setNameTagVisible($value = true){
-		$this->setDataProperty(self::DATA_SHOW_NAMETAG, self::DATA_TYPE_BYTE, $value ? 1 : 0);
+		$this->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_SHOW_NAMETAG, $value ? true : false);
+//		$this->setDataProperty(self::DATA_SHOW_NAMETAG, self::DATA_TYPE_BYTE, $value ? 1 : 0);
 	}
 
 	public function isSneaking(){

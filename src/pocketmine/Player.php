@@ -1948,11 +1948,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				$pk->enabled = 1;
 //				$this->dataPacket($pk);
 				
-				if (!empty(self::$availableCommands)) {
-					$pk = new AvailableCommandsPacket();
-					$pk->commands = json_encode(self::$availableCommands);
-					$this->dataPacket($pk);
-				}
+//				if (!empty(self::$availableCommands)) {
+//					$pk = new AvailableCommandsPacket();
+//					$pk->commands = json_encode(self::$availableCommands);
+//					$this->dataPacket($pk);
+//				}
 				
 				if($this->getHealth() <= 0){
 					$this->dead = true;
