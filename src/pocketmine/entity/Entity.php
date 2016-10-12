@@ -131,9 +131,7 @@ abstract class Entity extends Location implements Metadatable{
 	
 	protected $dataFlags = 0;
 	protected $dataProperties = [	
-//		self::DATA_FLAGS => [self::DATA_TYPE_INT, ((2 ** 49) - 1) ^ ((2 ** 15) + (2 ** 30) + 33)],
-//		self::DATA_FLAGS => [self::DATA_TYPE_INT, (1 << 30)],
-		self::DATA_FLAGS => [self::DATA_TYPE_INT, 0],
+		self::DATA_FLAGS => [self::DATA_TYPE_LONG, 0],
 		self::DATA_AIR => [self::DATA_TYPE_SHORT, 300],
 		self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""],
 //		4 => [self::DATA_TYPE_FLOAT, 80], // potion particles
@@ -277,8 +275,8 @@ abstract class Entity extends Location implements Metadatable{
 			$this->namedtag->Air = new ShortTag("Air", 300);
 		}
 		$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
-		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_INT, false);
-		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SHOW_NAMETAG, true, self::DATA_TYPE_INT, false);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SHOW_NAMETAG, true, self::DATA_TYPE_LONG, false);
 //		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $this->namedtag["Air"]);
 
 		if(!isset($this->namedtag->OnGround)){
@@ -1674,7 +1672,7 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param int  $id
 	 * @param bool $value
 	 */
-	public function setDataFlag($propertyId, $id, $value = true, $type = self::DATA_TYPE_INT, $send = true){
+	public function setDataFlag($propertyId, $id, $value = true, $type = self::DATA_TYPE_LONG, $send = true){
 		if($this->getDataFlag($propertyId, $id) !== $value){
 			$flags = (int) $this->getDataProperty($propertyId);
 			$flags ^= 1 << $id;

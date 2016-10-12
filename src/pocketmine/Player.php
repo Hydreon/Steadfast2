@@ -1876,7 +1876,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			
 				$pk = new PlayStatusPacket();
 				$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
-				$this->dataPacket($pk);
+				$this->dataPacket($pk);				
+								
+				$pk = new ResourcePacksInfoPacket();
+				$this->dataPacket($pk);				
 				
 				$this->achievements = [];
 
@@ -1948,9 +1951,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				
 //				$pk = new ResourcePackDataInfoPacket();
 //				$this->dataPacket($pk);
-				
-				$pk = new ResourcePacksInfoPacket();
-				$this->dataPacket($pk);
 				
 //				$pk = new SetCommandsEnabledPacket();
 //				$pk->enabled = 1;

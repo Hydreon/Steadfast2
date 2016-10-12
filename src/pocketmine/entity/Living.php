@@ -196,7 +196,7 @@ abstract class Living extends Entity implements Damageable{
 				}
 				$this->setAirTick($airTicks);
 				if ($this instanceof Player) {
-					$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, false, self::DATA_TYPE_INT, false);
+					$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, false, self::DATA_TYPE_LONG, false);
 					$this->sendSelfData();
 				}
 			}
@@ -215,7 +215,7 @@ abstract class Living extends Entity implements Damageable{
 				if($this->getDataProperty(self::DATA_AIR) != 300) {
 					$this->setAirTick(300);					
 					if (($this instanceof Player)) {
-						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_INT, false);
+						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
 						$this->sendSelfData();
 					}
 				}
