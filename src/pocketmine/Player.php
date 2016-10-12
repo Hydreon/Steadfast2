@@ -147,6 +147,8 @@ use pocketmine\block\Liquid;
 
 use pocketmine\network\protocol\SetCommandsEnabledPacket;
 use pocketmine\network\protocol\AvailableCommandsPacket;
+use pocketmine\network\protocol\ResourcePackDataInfoPacket;
+use pocketmine\network\protocol\ResourcePacksInfoPacket;
 
 use raklib\Binary;
 
@@ -1944,15 +1946,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->z = (int) $spawnPosition->z;
 				$this->dataPacket($pk);
 				
+//				$pk = new ResourcePackDataInfoPacket();
+//				$this->dataPacket($pk);
+				
+				$pk = new ResourcePacksInfoPacket();
+				$this->dataPacket($pk);
+				
 //				$pk = new SetCommandsEnabledPacket();
 //				$pk->enabled = 1;
 //				$this->dataPacket($pk);
 				
-//				if (!empty(self::$availableCommands)) {
-//					$pk = new AvailableCommandsPacket();
-//					$pk->commands = json_encode(self::$availableCommands);
-//					$this->dataPacket($pk);
-//				}
+				if (!empty(self::$availableCommands)) {
+					$pk = new AvailableCommandsPacket();
+					$pk->commands = json_encode(self::$availableCommands);
+					$this->dataPacket($pk);
+				}
 				
 				if($this->getHealth() <= 0){
 					$this->dead = true;
