@@ -110,10 +110,11 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_ACTION = 4;
 	const DATA_FLAG_INVISIBLE = 5;
 	const DATA_FLAG_SHOW_NAMETAG = 14;
-	const DATA_FLAG_NOT_MOVE = 15;
+	const DATA_FLAG_ALWAYS_SHOW_NAMETAG = 15;
+	const DATA_FLAG_NOT_MOVE = 16;
 	const DATA_FLAG_ANIMAL_SIT = 20;
 	const DATA_FLAG_NOT_IN_WATER = 30;
-
+	
 	public static $entityCount = 1;
 	/** @var Entity[] */
 	private static $knownEntities = [];
@@ -277,6 +278,7 @@ abstract class Entity extends Location implements Metadatable{
 		$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SHOW_NAMETAG, true, self::DATA_TYPE_LONG, false);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ALWAYS_SHOW_NAMETAG, true, self::DATA_TYPE_LONG, false);
 //		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $this->namedtag["Air"]);
 
 		if(!isset($this->namedtag->OnGround)){
