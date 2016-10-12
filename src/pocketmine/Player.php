@@ -2005,25 +2005,25 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$newPos = new Vector3($packet->x, $packet->y - $this->getEyeHeight(), $packet->z);
 
 				$revert = false;
-				if($this->dead === true or $this->spawned !== true){
+				if ($this->dead === true || $this->spawned !== true) {
 					$revert = true;
 					$this->forceMovement = new Vector3($this->x, $this->y, $this->z);
 				}
 
-				if($this->forceMovement instanceof Vector3 and (($dist = $newPos->distanceSquared($this->forceMovement)) > 0.04 or $revert)){
+
+				if ($revert) {
 					$this->sendPosition($this->forceMovement, $packet->yaw, $packet->pitch);
-				}else{
+				} elseif (!($this->forceMovement instanceof Vector3) || $newPos->distanceSquared($this->forceMovement) <= 0.1) {
 					$packet->yaw %= 360;
 					$packet->pitch %= 360;
-					
-					if($packet->yaw < 0){
+
+					if ($packet->yaw < 0) {
 						$packet->yaw += 360;
 					}
-
 					$this->setRotation($packet->yaw, $packet->pitch);
-					$this->newPosition = $newPos;
+					$this->newPosition = $newPos;	
 					$this->forceMovement = null;
-				}
+				}			
 				//Timings::$timerMovePacket->stopTiming();
 				break;
 			case ProtocolInfo::MOB_EQUIPMENT_PACKET:
