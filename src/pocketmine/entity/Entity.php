@@ -110,6 +110,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_SPRINTING = 3;
 	const DATA_FLAG_ACTION = 4;
 	const DATA_FLAG_INVISIBLE = 5;
+	const DATA_FLAG_SADDLE = 8;
 	const DATA_FLAG_ANIMAL_LONG_NECK = 11;
 	const DATA_FLAG_SHOW_NAMETAG = 14;
 	const DATA_FLAG_ALWAYS_SHOW_NAMETAG = 15;
@@ -117,6 +118,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_ANIMAL_SIT = 20;
 	const DATA_FLAG_ANGRY_WOLF = 21;
 	const DATA_FLAG_ANGRY_BLAZE = 23;
+	const DATA_FLAG_SHAVED_SHIP = 26;
 	const DATA_FLAG_NOT_IN_WATER = 30;
 	
 	public static $entityCount = 1;
