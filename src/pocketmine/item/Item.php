@@ -425,6 +425,7 @@ class Item{
 	const GOLDEN_NUGGET = 371;
 	const POTION = 373;
 	
+	const BLAZE_POWDER = 377;
 	const MAGMA_CREAM = 378;
 	
 	const SPAWN_EGG = 383;
@@ -683,6 +684,7 @@ class Item{
 		369 => "Blaze Rod",
 		371 => "Gold Nugget",
 		373 => "Potion",
+		377 => "Blaze powder",
 		378 => "Magma Cream",
 		383 => "Spawn Egg",
 		388 => "Emerald",
@@ -798,6 +800,7 @@ class Item{
 
 			self::$list[self::RAW_FISH] = Fish::class;
 			self::$list[self::COOKED_FISH] = CookedFish::class;
+			self::$list[self::BLAZE_POWDER] = BlazePowder::class;
 
 			for($i = 0; $i < 256; ++$i){
 				if(Block::$list[$i] !== null){
