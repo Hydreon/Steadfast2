@@ -235,33 +235,43 @@ class Effect{
 	public function setColor($r, $g, $b){
 		$this->color = (($r & 0xff) << 16) + (($g & 0xff) << 8) + ($b & 0xff);
 	}
-
-	public function add(Entity $entity, $modify = false){
-		if($entity instanceof Player){
+	
+	public function add(Entity $entity, $modify = false) {
+		$isPlayer = $entity instanceof Player;
+		if ($isPlayer) {
 			$pk = new MobEffectPacket();
 			$pk->eid = 0;
 			$pk->effectId = $this->getId();
 			$pk->amplifier = $this->getAmplifier();
 			$pk->particles = $this->isVisible();
 			$pk->duration = $this->getDuration();
-			if($modify){
-				$pk->eventId = MobEffectPacket::EVENT_MODIFY;
-			}else{
-				$pk->eventId = MobEffectPacket::EVENT_ADD;
-			}
-
+			$pk->eventId = $modify ? MobEffectPacket::EVENT_MODIFY : MobEffectPacket::EVENT_ADD;
 			$entity->dataPacket($pk);
 		}
 
-		if($this->id === Effect::INVISIBILITY){
-			$entity->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_INVISIBLE, true);
-			$entity->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_SHOW_NAMETAG, false);
-//			$entity->setDataProperty(Entity::DATA_SHOW_NAMETAG, Entity::DATA_TYPE_BYTE, 0);
+		switch ($this->id) {
+			case Effect::INVISIBILITY:
+				$entity->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_INVISIBLE, true);
+				$entity->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_SHOW_NAMETAG, false);
+				break;
+			case Effect::SPEED:
+				if ($isPlayer) {
+					$newSpeedValue = $entity::DEFAULT_SPEED * (1 + ($this->amplifier + 1) * 0.2);
+					$entity->updateSpeed($newSpeedValue);
+				}
+				break;
+			case Effect::SLOWNESS:
+				if ($isPlayer) {
+					$newSpeedValue = $entity::DEFAULT_SPEED * (1 - ($this->amplifier + 1) * 0.15);
+					$entity->updateSpeed($newSpeedValue);
+				}
+				break;
 		}
 	}
-
-	public function remove(Entity $entity){
-		if($entity instanceof Player){
+	
+	public function remove(Entity $entity) {
+		$isPlayer = $entity instanceof Player;
+		if ($isPlayer) {
 			$pk = new MobEffectPacket();
 			$pk->eid = 0;
 			$pk->eventId = MobEffectPacket::EVENT_REMOVE;
@@ -269,11 +279,18 @@ class Effect{
 
 			$entity->dataPacket($pk);
 		}
-
-		if($this->id === Effect::INVISIBILITY){
-			$entity->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_INVISIBLE, false);
-			$entity->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_SHOW_NAMETAG, true);
-//			$entity->setDataProperty(Entity::DATA_SHOW_NAMETAG, Entity::DATA_TYPE_BYTE, 1);
+		
+		switch ($this->id) {
+			case Effect::INVISIBILITY:
+				$entity->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_INVISIBLE, false);
+				$entity->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_SHOW_NAMETAG, true);
+				break;
+			case Effect::SPEED:
+			case Effect::SLOWNESS:
+				if ($isPlayer) {
+					$entity->updateSpeed($entity::DEFAULT_SPEED);
+				}
+				break;
 		}
 	}
 }

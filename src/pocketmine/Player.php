@@ -165,6 +165,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	const SURVIVAL_SLOTS = 36;
 	const CREATIVE_SLOTS = 112;
+	
+	const DEFAULT_SPEED = 0.1;
+	const MAXIMUM_SPEED = 0.5;
 
 	/** @var SourceInterface */
 	protected $interface;
@@ -274,6 +277,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public $language = 'English';
 	
 	protected static $availableCommands = [];
+	
+	protected $movementSpeed = self::DEFAULT_SPEED;
 
 	public function getLeaveMessage(){
 		return "";
@@ -1990,13 +1995,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				
 				$this->sendSelfData();
 				
-				$pk = new UpdateAttributesPacket();
-				$pk->name = UpdateAttributesPacket::SPEED;
-				$pk->minValue = 0.1;
-				$pk->maxValue = 0.5;
-				$pk->value = 0.1;
-				$pk->defaulValue = 0.1;
-				$this->dataPacket($pk);
+				$this->updateSpeed(self::DEFAULT_SPEED);
 				
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
@@ -3771,6 +3770,32 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				continue;
 			}
 		}
+	}
+	
+	protected function updateAttribute($name, $value, $minValue, $maxValue, $defaultValue) {
+		$pk = new UpdateAttributesPacket();
+		$pk->name = $name;
+		$pk->value = $value;
+		$pk->minValue = $minValue;
+		$pk->maxValue = $maxValue;
+		$pk->defaulValue = $defaultValue;
+		$this->dataPacket($pk);
+	}
+	
+	public function updateSpeed($value) {
+		$this->movementSpeed = $value;
+		$this->updateAttribute(UpdateAttributesPacket::SPEED, $this->movementSpeed, 0, self::MAXIMUM_SPEED, $this->movementSpeed);
+	}
+
+	public function setSprinting($value = true) {
+		parent::setSprinting($value);
+		
+		$sprintSpeedChange = self::DEFAULT_SPEED * 0.3;
+		if ($value === false) {
+			$sprintSpeedChange *= -1;
+		}
+		$this->movementSpeed += $sprintSpeedChange;
+		$this->updateSpeed($this->movementSpeed);
 	}
 
 }
