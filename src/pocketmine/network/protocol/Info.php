@@ -33,7 +33,7 @@ interface Info{
 	const CURRENT_PROTOCOL = 90;
 //	const NEWEST_PROTOCOL = 82;
 //	const OLDEST_PROTOCOL = 81;
-	const ACCEPTED_PROTOCOLS = [81, 82, 90];
+	const ACCEPTED_PROTOCOLS = [90];
 
 	/**
 	 * Minecraft: PE packets
