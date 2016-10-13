@@ -33,7 +33,7 @@ class UpdateAttributesPacket extends DataPacket{
     const HUNGER = "player.hunger";
     const EXPERIENCE = "player.experience";
     const EXPERIENCE_LEVEL = "player.level";
-
+	const MOVEMENT_SPEED = "generic.movementSpeed";
 
     public $entityId;
 
