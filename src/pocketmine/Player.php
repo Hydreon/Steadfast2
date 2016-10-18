@@ -2640,7 +2640,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$packet->message = TextFormat::clean($packet->message, $this->removeFormat);
 					foreach(explode("\n", $packet->message) as $message){
 						if(trim($message) != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){
-							$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $ev->getMessage()));
+							$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $message));
 							if(!$ev->isCancelled()){
 								$this->server->broadcastMessage($ev->getPlayer()->getDisplayName() . ": " . $ev->getMessage(), $ev->getRecipients());
 							}
@@ -2942,8 +2942,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$commandName = $packet->name;
 				$commandOverload = $packet->overload;
 				$commandParams = json_decode($packet->outputFormat, true);
+				// trying to find command or her alias
+				if (!isset(self::$availableCommands[$commandName])) {
+					foreach(self::$availableCommands as $name => $data) {
+						if (in_array($commandName, $data['versions'][0]['aliases'])) {
+							$commandName = $name;
+							break;
+						}
+					}
+				}
 				if (!isset(self::$availableCommands[$commandName])) {
 					$this->sendMessage('Unknown command.');
+					break;
 				}
 				
 				$commandLine = $commandName;
@@ -2961,7 +2971,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				
 				$ev = new PlayerCommandPreprocessEvent($this, $commandLine);
 				$this->server->getPluginManager()->callEvent($ev);
-				if($ev->isCancelled()){
+				if ($ev->isCancelled()) {
 					break;
 				}
 				
