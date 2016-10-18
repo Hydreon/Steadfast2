@@ -77,7 +77,7 @@ abstract class Projectile extends Entity{
 				$this->motionY -= $this->gravity;
 			}
 			$moveVector = new Vector3($this->x + $this->motionX, $this->y + $this->motionY, $this->z + $this->motionZ);
-			$list = $this->getLevel()->getCollidingEntities($this->boundingBox->addCoord($this->motionX, $this->motionY, $this->motionZ)->expand(1, 1, 1), $this);
+			$list = $this->getLevel()->getCollidingEntities($this->getBoundingBox()->addCoord($this->motionX, $this->motionY, $this->motionZ), $this);
 			$nearDistance = PHP_INT_MAX;
 			$nearEntity = null;
 			foreach($list as $entity){

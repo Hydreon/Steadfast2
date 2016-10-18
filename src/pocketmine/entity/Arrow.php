@@ -75,4 +75,9 @@ class Arrow extends Projectile{
 		$player->dataPacket($pk);
 		parent::spawnTo($player);
 	}
+	
+	public function getBoundingBox() {
+		$bb = clone parent::getBoundingBox();
+		return $bb->expand(1, 1, 1);
+	}
 }
