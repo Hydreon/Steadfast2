@@ -2640,30 +2640,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$packet->message = TextFormat::clean($packet->message, $this->removeFormat);
 					foreach(explode("\n", $packet->message) as $message){
 						if(trim($message) != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){
-							$ev = new PlayerCommandPreprocessEvent($this, $message);
-
-							if(mb_strlen($ev->getMessage(), "UTF-8") > 320){
-								$ev->setCancelled();
+							$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $ev->getMessage()));
+							if(!$ev->isCancelled()){
+								$this->server->broadcastMessage($ev->getPlayer()->getDisplayName() . ": " . $ev->getMessage(), $ev->getRecipients());
 							}
-							$this->server->getPluginManager()->callEvent($ev);
-
-							if($ev->isCancelled()){
-								break;
-							}
-							if(substr($ev->getMessage(), 0, 1) === "/"){ //Command
-								//Timings::$playerCommandTimer->startTiming();
-								$this->server->dispatchCommand($ev->getPlayer(), substr($ev->getMessage(), 1));
-								//Timings::$playerCommandTimer->stopTiming();
-							}else{
-								$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $ev->getMessage()));
-								if(!$ev->isCancelled()){
-									$this->server->broadcastMessage($ev->getPlayer()->getDisplayName() . ": " . $ev->getMessage(), $ev->getRecipients());
-								}
-							}
-							$ev = new PlayerCommandPostprocessEvent($this, $message);
-							$this->server->getPluginManager()->callEvent($ev);
 						}
 					}
+				} else {
+					echo "Recive message with type ".$packet->type.PHP_EOL;
 				}
 				//Timings::$timerTextPacket->stopTiming();
 				break;
@@ -2975,8 +2959,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 				}
 				
+				$ev = new PlayerCommandPreprocessEvent($this, $commandLine);
+				$this->server->getPluginManager()->callEvent($ev);
+				if($ev->isCancelled()){
+					break;
+				}
 				
 				$this->server->dispatchCommand($this, $commandLine);
+				
+				$ev = new PlayerCommandPostprocessEvent($this, $commandLine);
+				$this->server->getPluginManager()->callEvent($ev);
 				break;
 			default:
 				break;
