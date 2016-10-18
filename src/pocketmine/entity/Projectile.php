@@ -77,7 +77,7 @@ abstract class Projectile extends Entity{
 				$this->motionY -= $this->gravity;
 			}
 			$moveVector = new Vector3($this->x + $this->motionX, $this->y + $this->motionY, $this->z + $this->motionZ);
-			$list = $this->getLevel()->getCollidingEntities($this->boundingBox->addCoord($this->motionX, $this->motionY, $this->motionZ)->expand(1, 1, 1), $this);
+			$list = $this->getLevel()->getCollidingEntities($this->getBoundingBox()->addCoord($this->motionX, $this->motionY, $this->motionZ), $this);
 			$nearDistance = PHP_INT_MAX;
 			$nearEntity = null;
 			foreach($list as $entity){
@@ -126,6 +126,34 @@ abstract class Projectile extends Entity{
 					return true;
 				}
 			}
+			
+			$blockList = $this->getLevel()->getCollisionBlocks($this->boundingBox->addCoord($this->motionX, $this->motionY, $this->motionZ)->expand(1, 1, 1), $this);
+			$nearBlockDistance = PHP_INT_MAX;
+			$nearBlock = null;
+			foreach ($blockList as $block) {
+				$axisalignedbb = $block->boundingBox;
+				if (is_null($axisalignedbb)) {
+					continue;
+				}
+				$ob = $axisalignedbb->calculateIntercept($this, $moveVector);
+				if ($ob === null) {
+					continue;
+				}
+				$distance = $this->distanceSquared($ob->hitVector);
+				if ($distance < $nearBlockDistance) {
+					$nearDistance = $distance;
+					$nearBlock = $block;
+				}
+			}
+
+			if ($nearBlock !== null) {
+				$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
+				$this->kill();
+				return true;
+			}
+
+
+
 			$this->move($this->motionX, $this->motionY, $this->motionZ);
 			if($this->isCollided and !$this->hadCollision){
 				$this->hadCollision = true;
@@ -133,6 +161,8 @@ abstract class Projectile extends Entity{
 				$this->motionY = 0;
 				$this->motionZ = 0;
 				$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
+				$this->kill();
+				return true;
 			}elseif(!$this->isCollided and $this->hadCollision){
 				$this->hadCollision = false;
 			}

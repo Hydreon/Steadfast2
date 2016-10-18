@@ -54,6 +54,9 @@ class Arrow extends Projectile{
 		if($this->age > 1200){
 			$this->kill();
 			$hasUpdate = true;
+		} elseif ($this->y < 1) {
+			$this->kill();
+			$hasUpdate = true;
 		}
 		$this->timings->stopTiming();
 		return $hasUpdate;
@@ -71,5 +74,10 @@ class Arrow extends Projectile{
 //		$pk->metadata = $this->dataProperties;
 		$player->dataPacket($pk);
 		parent::spawnTo($player);
+	}
+	
+	public function getBoundingBox() {
+		$bb = clone parent::getBoundingBox();
+		return $bb->expand(1, 1, 1);
 	}
 }

@@ -3,14 +3,12 @@
 namespace pocketmine\inventory\transactions;
 
 use pocketmine\inventory\BaseTransaction;
-use pocketmine\inventory\Inventory;
-use pocketmine\inventory\Transaction;
 use pocketmine\item\Item;
 
 class PairTransaction extends BaseTransaction {
 
 	protected $requiredTransactionNumber = 1;
-	
+
 	/**
 	 * 
 	 * @param BaseTransaction $ts

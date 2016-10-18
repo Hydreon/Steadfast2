@@ -596,13 +596,13 @@ class Level implements ChunkManager, Metadatable{
 		$this->timings->tileEntityTick->startTiming();
 		//Update tiles that need update
 		if(count($this->updateTiles) > 0){
-			////Timings::$tickTileEntityTimer->startTiming();
+			//Timings::$tickTileEntityTimer->startTiming();
 			foreach($this->updateTiles as $id => $tile){
 				if($tile->onUpdate() !== true){
 					unset($this->updateTiles[$id]);
 				}
 			}
-			////Timings::$tickTileEntityTimer->stopTiming();
+			//Timings::$tickTileEntityTimer->stopTiming();
 		}
 		$this->timings->tileEntityTick->stopTiming();
 
@@ -2444,11 +2444,11 @@ class Level implements ChunkManager, Metadatable{
 			return;
 		}
 		if(!isset($this->chunkGenerationQueue[$index = Level::chunkHash($x, $z)])){
-			Timings::$generationTimer->startTiming();
+			//Timings::$generationTimer->startTiming();
 			$this->chunkGenerationQueue[$index] = true;
 			$task = new GenerationTask($this, $this->getChunk($x, $z, true));
 			$this->server->getScheduler()->scheduleAsyncTask($task);			
-			Timings::$generationTimer->stopTiming();
+			//Timings::$generationTimer->stopTiming();
 		}
 	}
 	

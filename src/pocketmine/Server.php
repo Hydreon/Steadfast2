@@ -40,6 +40,7 @@ use pocketmine\entity\Human;
 use pocketmine\entity\Item as DroppedItem;
 use pocketmine\entity\PrimedTNT;
 use pocketmine\entity\Snowball;
+use pocketmine\entity\Egg;
 use pocketmine\entity\Squid;
 use pocketmine\entity\Villager;
 use pocketmine\event\HandlerList;
@@ -1476,7 +1477,6 @@ class Server{
 			"server-port" => 19132,
 			"memory-limit" => "256M",
 			"white-list" => false,
-			"announce-player-achievements" => true,
 			"spawn-protection" => 16,
 			"max-players" => 20,
 			"allow-flight" => false,
@@ -1593,7 +1593,8 @@ class Server{
 
 		$this->pluginManager = new PluginManager($this, $this->commandMap);
 		$this->pluginManager->subscribeToPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, $this->consoleSender);
-		$this->pluginManager->setUseTimings($this->getProperty("settings.enable-profiling", false));
+//		$this->pluginManager->setUseTimings($this->getProperty("settings.enable-profiling", false));
+		$this->pluginManager->setUseTimings(true);
 		$this->pluginManager->registerInterface(PharPluginLoader::class);
 
 		\set_exception_handler([$this, "exceptionHandler"]);
@@ -2409,6 +2410,8 @@ class Server{
 		if($tickTime < $this->nextTick){
 			return false;
 		}
+		
+		//TimingsHandler::reload();
 
 		//Timings::$serverTickTimer->startTiming();
 
@@ -2456,7 +2459,7 @@ class Server{
 		}
 		//Timings::$serverTickTimer->stopTiming();
 
-//		TimingsHandler::tick();
+		//TimingsHandler::tick();
 
 		$now = microtime(true);
 		array_shift($this->tickAverage);
@@ -2469,6 +2472,15 @@ class Server{
 		}
 		$this->nextTick += 0.05;
 
+//		if(microtime(true) - $tickTime > 0.06){
+//			$timingFolder = $this->getDataPath() . "timings/";
+//
+//			if(!file_exists($timingFolder)){
+//				mkdir($timingFolder, 0777);
+//			}
+//			$timings = $timingFolder . "timings.txt";
+//			TimingsHandler::printTimings($timings);
+//		}
 		return true;
 	}
 
@@ -2478,6 +2490,7 @@ class Server{
 		Entity::registerEntity(FallingSand::class);
 		Entity::registerEntity(PrimedTNT::class);
 		Entity::registerEntity(Snowball::class);
+		Entity::registerEntity(Egg::class);
 		Entity::registerEntity(Villager::class);
 		Entity::registerEntity(Squid::class);
 		Entity::registerEntity(Human::class, true);		

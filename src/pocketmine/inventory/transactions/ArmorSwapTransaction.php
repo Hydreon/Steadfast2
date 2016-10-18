@@ -12,7 +12,7 @@ class ArmorSwapTransaction extends BaseTransaction {
 		'source' => false,
 		'target' => false,
 	];
-	
+
 	public function __construct(Inventory $inventory, $slot, Item $sourceItem, Item $targetItem) {
 		parent::__construct($inventory, $slot, $sourceItem, $targetItem);
 		$this->requiredTransactionNumber = 2;
@@ -46,7 +46,7 @@ class ArmorSwapTransaction extends BaseTransaction {
 		if ($this->targetItem->deepEquals($sourceItem)) {
 			$targetFound = true;
 		}
-		
+
 		// 2 transaction case
 		if ($sourceFound && $targetFound && !$this->foundTransactions['source'] && !$this->foundTransactions['target']) {
 			$this->foundTransactions['source'] = true;

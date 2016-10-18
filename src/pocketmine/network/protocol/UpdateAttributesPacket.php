@@ -35,7 +35,6 @@ class UpdateAttributesPacket extends DataPacket{
     const EXPERIENCE_LEVEL = "minecraft:player.level";
 	const SPEED = "minecraft:movement";
 
-
     public $entityId;
 
     public $minValue;

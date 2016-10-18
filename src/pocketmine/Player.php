@@ -41,7 +41,6 @@ use pocketmine\event\inventory\CraftItemEvent;
 use pocketmine\event\inventory\InventoryCloseEvent;
 use pocketmine\event\inventory\InventoryPickupArrowEvent;
 use pocketmine\event\inventory\InventoryPickupItemEvent;
-use pocketmine\event\player\PlayerAchievementAwardedEvent;
 use pocketmine\event\player\PlayerAnimationEvent;
 use pocketmine\event\player\PlayerBedEnterEvent;
 use pocketmine\event\player\PlayerBedLeaveEvent;
@@ -194,7 +193,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public $speed = null;
 
 	public $blocked = false;
-	public $achievements = [];
 	public $lastCorrect;
 	/** @var SimpleTransactionGroup[] */
 	protected $transactionGroupQueue = [];
@@ -563,34 +561,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				self::$availableCommands = array_merge(self::$availableCommands, $pluginCommands);
 			}
 		}
-	}
-
-	/**
-	 * @param string $achievementId
-	 */
-	public function removeAchievement($achievementId){
-		if($this->hasAchievement($achievementId)){
-			$this->achievements[$achievementId] = false;
-		}
-	}
-
-	/**
-	 * @param string $achievementId
-	 *
-	 * @return bool
-	 */
-	public function hasAchievement($achievementId){
-		if(!isset(Achievement::$list[$achievementId]) or !isset($this->achievements)){
-			$this->achievements = [];
-
-			return false;
-		}
-
-		if(!isset($this->achievements[$achievementId]) or $this->achievements[$achievementId] == false){
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
@@ -1039,32 +1009,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	/**
-	 * @param string $achievementId
-	 *
-	 * @return bool
-	 */
-	public function awardAchievement($achievementId){
-		if(isset(Achievement::$list[$achievementId]) and !$this->hasAchievement($achievementId)){
-			foreach(Achievement::$list[$achievementId]["requires"] as $requerimentId){
-				if(!$this->hasAchievement($requerimentId)){
-					return false;
-				}
-			}
-			$this->server->getPluginManager()->callEvent($ev = new PlayerAchievementAwardedEvent($this, $achievementId));
-			if(!$ev->isCancelled()){
-				$this->achievements[$achievementId] = true;
-				Achievement::broadcast($this, $achievementId);
-
-				return true;
-			}else{
-				return false;
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * @return int
 	 */
 	public function getGamemode(){
@@ -1301,15 +1245,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->server->getPluginManager()->callEvent($ev = new InventoryPickupItemEvent($this->inventory, $entity));
 						if($ev->isCancelled()){
 							continue;
-						}
-
-						switch($item->getId()){
-							case Item::WOOD:
-								$this->awardAchievement("mineWood");
-								break;
-							case Item::DIAMOND:
-								$this->awardAchievement("diamond");
-								break;
 						}
 
 						$pk = new TakeItemEntityPacket();
@@ -2175,6 +2110,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					}
 
+//					if($item->getId() === Item::SNOWBALL || $item->getId() === Item::EGG){
 					if($item->getId() === Item::SNOWBALL){
 						$nbt = new Compound("", [
 							"Pos" => new Enum("Pos", [
@@ -2194,22 +2130,29 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						]);
 
 						$f = 1.5;
-						$snowball = Entity::createEntity("Snowball", $this->chunk, $nbt, $this);
-						$snowball->setMotion($snowball->getMotion()->multiply($f));
+						switch ($item->getId()) {
+							case Item::SNOWBALL:
+								$projectile = Entity::createEntity("Snowball", $this->chunk, $nbt, $this);
+								break;
+							case Item::EGG:
+								$projectile = Entity::createEntity("Egg", $this->chunk, $nbt, $this);
+								break;
+						}
+						$projectile->setMotion($projectile->getMotion()->multiply($f));
 						if($this->isSurvival()){
 							$item->setCount($item->getCount() - 1);
 							$this->inventory->setItemInHand($item->getCount() > 0 ? $item : Item::get(Item::AIR));
 						}
-						if($snowball instanceof Projectile){
-							$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($snowball));
+						if($projectile instanceof Projectile){
+							$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($projectile));
 							if($projectileEv->isCancelled()){
-								$snowball->kill();
+								$projectile->kill();
 							}else{
-								$snowball->spawnToAll();
+								$projectile->spawnToAll();
 								$this->level->addSound(new LaunchSound($this), $this->getViewers());
 							}
 						}else{
-							$snowball->spawnToAll();
+							$projectile->spawnToAll();
 						}
 					}
 
@@ -2902,40 +2845,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 				}
 
-				switch($recipe->getResult()->getId()){
-					case Item::WORKBENCH:
-						$this->awardAchievement("buildWorkBench");
-						break;
-					case Item::WOODEN_PICKAXE:
-						$this->awardAchievement("buildPickaxe");
-						break;
-					case Item::FURNACE:
-						$this->awardAchievement("buildFurnace");
-						break;
-					case Item::WOODEN_HOE:
-						$this->awardAchievement("buildHoe");
-						break;
-					case Item::BREAD:
-						$this->awardAchievement("makeBread");
-						break;
-					case Item::CAKE:
-						//TODO: detect complex recipes like cake that leave remains
-						$this->awardAchievement("bakeCake");
-						$this->inventory->addItem(Item::get(Item::BUCKET, 0, 3));
-						break;
-					case Item::STONE_PICKAXE:
-					case Item::GOLD_PICKAXE:
-					case Item::IRON_PICKAXE:
-					case Item::DIAMOND_PICKAXE:
-						$this->awardAchievement("buildBetterPickaxe");
-						break;
-					case Item::WOODEN_SWORD:
-						$this->awardAchievement("buildSword");
-						break;
-					case Item::DIAMOND:
-						$this->awardAchievement("diamond");
-						break;
-				}
 				//Timings::$timerCraftingEventPacket->stopTiming();
 				break;
 
@@ -2990,7 +2899,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerConteinerSetSlotPacket->stopTiming();
 					break;
 				}
-
+				
 				$this->addTransaction($transaction);
 				//Timings::$timerConteinerSetSlotPacket->stopTiming();
 				break;
@@ -3225,10 +3134,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->namedtag["SpawnX"] = (int) $this->spawnPosition->x;
 				$this->namedtag["SpawnY"] = (int) $this->spawnPosition->y;
 				$this->namedtag["SpawnZ"] = (int) $this->spawnPosition->z;
-			}
-
-			foreach($this->achievements as $achievement => $status){
-				$this->namedtag->Achievements[$achievement] = new ByteTag($achievement, $status === true ? 1 : 0);
 			}
 
 			$this->namedtag["playerGameType"] = $this->gamemode;
@@ -3728,26 +3633,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected function executeTransuctions() {
 		foreach ($this->transactionGroupQueue as $key => $group) {
-			$achievements = [];
-			// check inventories for achievements
-			foreach ($group->getTransactions() as $ts) {
-				$inv = $ts->getInventory();
-				if ($inv instanceof FurnaceInventory && $ts->getSlot() === 2) {
-					switch ($inv->getResult()->getId()) {
-						case Item::IRON_INGOT:
-							$achievements[] = "acquireIron";
-							break 2;
-					}
-				}
-			}
-
 			// execute transactions group
 			try {
 				$isExecute = $group->execute();
 				if ($isExecute) {
-					foreach ($achievements as $a) {
-						$this->awardAchievement($a);
-					}
 					unset($this->transactionGroupQueue[$key]);
 				} else {
 					echo 'Transaction execute fail.'.PHP_EOL;
@@ -3797,5 +3686,4 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->movementSpeed += $sprintSpeedChange;
 		$this->updateSpeed($this->movementSpeed);
 	}
-
 }
