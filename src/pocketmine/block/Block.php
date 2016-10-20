@@ -272,10 +272,10 @@ class Block extends Position implements Metadatable{
 	const FENCE_GATE_DARK_OAK = 186;
 	const FENCE_GATE_ACACIA = 187;
 	const SPRUCE_DOOR_BLOCK = 193;
-	const BIRCH_DOOR = 194;
-	const JUNGLE_DOOR = 195;
-	const ACACIA_DOOR = 196;
-	const DARK_OAK_DOOR = 197;
+	const BIRCH_DOOR_BLOCK = 194;
+	const JUNGLE_DOOR_BLOCK = 195;
+	const ACACIA_DOOR_BLOCK = 196;
+	const DARK_OAK_DOOR_BLOCK = 197;
 	const GRASS_PATH = 198;
 	const ITEM_FRAME_BLOCK = 199;
 	const PODZOL = 243;
@@ -496,6 +496,22 @@ class Block extends Position implements Metadatable{
 			self::$list[self::NETHER_REACTOR] = NetherReactor::class;
 			
 			self::$list[self::SLIME_BLOCK] = SlimeBlock::class;
+			
+			self::$list[self::WOODEN_BUTTON] = WoodenButton::class;
+			self::$list[self::STONE_BUTTON] = StoneButton::class;
+			
+			self::$list[self::ACACIA_DOOR_BLOCK] = AcaciaDoor::class;
+			self::$list[self::BIRCH_DOOR_BLOCK] = BirchDoor::class;
+			self::$list[self::DARK_OAK_DOOR_BLOCK] = DarkOakDoor::class;
+			self::$list[self::JUNGLE_DOOR_BLOCK] = JungleDoor::class;
+			
+			self::$list[self::TRIPWIRE] = Tripwire::class;
+			self::$list[self::TRIPWIRE_HOOK] = TripwireHook::class;
+			
+			self::$list[self::LEVER] = Lever::class;
+			
+			self::$list[self::WOODEN_PRESSURE_PLATE] = WoodenPressurePlate::class;
+			self::$list[self::STONE_PRESSURE_PLATE] = StonePressurePlate::class;
 
 			foreach(self::$list as $id => $class){
 				if($class !== null){
