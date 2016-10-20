@@ -3303,7 +3303,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->minValue = 0;
 			$pk->maxValue = $this->getMaxHealth();
 			$pk->value = $amount;
-			$pk->defaulValue = $pk->maxValue;
+			$pk->defaultValue = $pk->maxValue;
 			$pk->name = UpdateAttributesPacket::HEALTH;
 			$this->dataPacket($pk);
 //			$pk = new SetHealthPacket();
