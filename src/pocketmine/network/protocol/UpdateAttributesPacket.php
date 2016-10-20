@@ -41,7 +41,7 @@ class UpdateAttributesPacket extends DataPacket{
     public $maxValue;
     public $value;
     public $name;
-	public $defaulValue;
+	public $defaultValue;
 
 	public function decode(){
 
@@ -54,7 +54,7 @@ class UpdateAttributesPacket extends DataPacket{
         $this->putLFloat($this->minValue);
         $this->putLFloat($this->maxValue);
         $this->putLFloat($this->value);
-		$this->putLFloat($this->defaulValue);
+		$this->putLFloat($this->defaultValue);
 		$this->putString($this->name);
 	}
 }

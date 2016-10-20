@@ -3332,7 +3332,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->minValue = 0;
 			$pk->maxValue = 20;
 			$pk->value = $amount;
-			$pk->defaulValue = $pk->maxValue;
+			$pk->defaultValue = $pk->maxValue;
 			$pk->name = UpdateAttributesPacket::HUNGER;
 			$this->dataPacket($pk);
 		}
@@ -3669,7 +3669,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->value = $value;
 		$pk->minValue = $minValue;
 		$pk->maxValue = $maxValue;
-		$pk->defaulValue = $defaultValue;
+		$pk->defaultValue = $defaultValue;
 		$this->dataPacket($pk);
 	}
 	
