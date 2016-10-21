@@ -43,6 +43,10 @@ class StonePressurePlate extends Transparent{
 	public function getHardness(){
 		return 2;
 	}
+	
+	public function canBeFlowedInto(){
+		return true;
+	}
 
 	public function getToolType(){
 		return Tool::TYPE_PICKAXE;

@@ -24,37 +24,29 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class WoodenPressurePlate extends Transparent{
+class DetectorRail extends Rail{
 
-	protected $id = self::WOODEN_PRESSURE_PLATE;
+	protected $id = self::DETECTOR_RAIL;
 
 	public function __construct($meta = 0){
 		$this->meta = $meta;
 	}
 
 	public function getName(){
-		return "Wooden Pressure Plate";
-	}
-
-	public function canBeActivated(){
-		return true;
+		return "Detector Rail";
 	}
 
 	public function getHardness(){
 		return 2;
 	}
-	
-	public function canBeFlowedInto(){
-		return true;
-	}
 
 	public function getToolType(){
-		return Tool::TYPE_AXE;
+		return Tool::TYPE_PICKAXE;
 	}
 
 	public function getDrops(Item $item){
 		return [
-			[Item::WOODEN_PRESSURE_PLATE, 0, 1],
+			[Item::DETECTOR_RAIL, 0, 1],
 		];
 	}
 }
