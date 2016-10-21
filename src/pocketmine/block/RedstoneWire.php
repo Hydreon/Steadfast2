@@ -24,29 +24,25 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class WoodenButton extends Button{
+class RedstoneWire extends Transparent{
 
-	protected $id = self::WOODEN_BUTTON;
+	protected $id = self::REDSTONE_WIRE;
 
-	public function __construct($meta = 0){
-		$this->meta = $meta;
+	public function __construct(){
+
 	}
 
-	public function getName(){
-		return "Wooden Button";
-	}
-	
 	public function getHardness(){
 		return 1;
 	}
-
-	public function getToolType(){
-		return Tool::TYPE_AXE;
+	
+	public function getName(){
+		return "Redstone Wire";
 	}
 
 	public function getDrops(Item $item){
 		return [
-			[Item::WOODEN_BUTTON, 0, 1],
+			[Item::REDSTONE_WIRE, 0, 1],
 		];
 	}
 }

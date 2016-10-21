@@ -36,10 +36,6 @@ class StoneButton extends Button{
 		return "Stone Button";
 	}
 
-	public function canBeActivated(){
-		return true;
-	}
-
 	public function getHardness(){
 		return 1;
 	}

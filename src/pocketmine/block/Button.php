@@ -33,6 +33,10 @@ abstract class Button extends Transparent{
 	public function getHardness(){
 		return 1;
 	}
+	
+	public function canBeActivated(){
+		return true;
+	}
 
 	public function getResistance(){
 		return 0;

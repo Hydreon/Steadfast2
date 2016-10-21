@@ -22,31 +22,42 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\item\Tool;
 
-class WoodenButton extends Button{
-
-	protected $id = self::WOODEN_BUTTON;
+class RedstoneRepeater extends Transparent{
+	
+	protected $id = self::REDSTONE_REPEATER_BLOCK;
 
 	public function __construct($meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function getName(){
-		return "Wooden Button";
+	public function canBeFlowedInto(){
+		return true;
 	}
 	
+	public function canBeActivated(){
+		return true;
+	}
+
 	public function getHardness(){
 		return 1;
 	}
 
-	public function getToolType(){
-		return Tool::TYPE_AXE;
+	public function getResistance(){
+		return 0;
 	}
 
+	public function isSolid(){
+		return false;
+	}
+
+	public function getBoundingBox(){
+		return null;
+	}
+	
 	public function getDrops(Item $item){
 		return [
-			[Item::WOODEN_BUTTON, 0, 1],
+			[Item::REDSTONE_REPEATER, 0, 1],
 		];
 	}
 }

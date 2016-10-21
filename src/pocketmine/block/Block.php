@@ -512,7 +512,18 @@ class Block extends Position implements Metadatable{
 			
 			self::$list[self::WOODEN_PRESSURE_PLATE] = WoodenPressurePlate::class;
 			self::$list[self::STONE_PRESSURE_PLATE] = StonePressurePlate::class;
-
+			
+			self::$list[self::REDSTONE_WIRE] = RedstoneWire::class;
+			self::$list[self::REDSTONE_REPEATER_BLOCK] = RedstoneRepeater::class;
+			self::$list[self::REDSTONE_REPEATER_BLOCK_ACTIVE] = RedstoneRepeaterActive::class;
+			
+			self::$list[self::POWERED_RAIL] = PoweredRail::class;
+			self::$list[self::DETECTOR_RAIL] = DetectorRail::class;
+			self::$list[self::ACTIVATOR_RAIL] = ActivatorRail::class;
+			
+			self::$list[self::WEIGHTED_PRESSURE_PLATE_HEAVY] = WeightedPressurePlateHeavy::class;
+			self::$list[self::WEIGHTED_PRESSURE_PLATE_LIGHT] = WeightedPressurePlateLight::class;
+			
 			foreach(self::$list as $id => $class){
 				if($class !== null){
 					/** @var Block $block */

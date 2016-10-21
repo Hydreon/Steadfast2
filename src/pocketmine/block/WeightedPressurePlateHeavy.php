@@ -24,29 +24,21 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class WoodenButton extends Button{
+class WeightedPressurePlateHeavy extends StonePressurePlate{
 
-	protected $id = self::WOODEN_BUTTON;
+	protected $id = self::WEIGHTED_PRESSURE_PLATE_HEAVY;
 
 	public function __construct($meta = 0){
 		$this->meta = $meta;
 	}
 
 	public function getName(){
-		return "Wooden Button";
-	}
-	
-	public function getHardness(){
-		return 1;
-	}
-
-	public function getToolType(){
-		return Tool::TYPE_AXE;
+		return "Weighted Pressure Plate Heavy";
 	}
 
 	public function getDrops(Item $item){
 		return [
-			[Item::WOODEN_BUTTON, 0, 1],
+			[Item::WEIGHTED_PRESSURE_PLATE_HEAVY, 0, 1],
 		];
 	}
 }
