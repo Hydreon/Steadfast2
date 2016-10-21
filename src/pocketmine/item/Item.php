@@ -921,7 +921,8 @@ class Item{
 
 			self::$list[self::RAW_FISH] = Fish::class;
 			self::$list[self::COOKED_FISH] = CookedFish::class;
-
+			
+			self::$list[self::MOB_HEAD] = MobHead::class;
 			for($i = 0; $i < 256; ++$i){
 				if(Block::$list[$i] !== null){
 					self::$list[$i] = Block::$list[$i];
