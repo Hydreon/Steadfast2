@@ -128,6 +128,7 @@ class RakLibServer extends \Thread{
     }
 
     public function pushThreadToMainPacket($str){
+//		var_dump(debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20));
         $this->externalQueue[] = $str;
     }
 

@@ -89,7 +89,7 @@ class PacketMaker extends Worker {
 					$pk = new MoveEntityPacket();
 					$pk->entities = [$singleMoveData];
 					$pk->encode();
-					$moveStr .= Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;					
+					$moveStr .= Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;					
 				}
 				$buffer = zlib_encode($moveStr, ZLIB_ENCODING_DEFLATE, 7);
 				$pkBatch = new BatchPacket();
@@ -104,7 +104,7 @@ class PacketMaker extends Worker {
 					$pk = new SetEntityMotionPacket();
 					$pk->entities = [$singleMotionData];
 					$pk->encode();
-					$motionStr .= Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;		
+					$motionStr .= Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;		
 				}
 				$buffer = zlib_encode($motionStr, ZLIB_ENCODING_DEFLATE, 7);
 				$pkBatch = new BatchPacket();
@@ -120,9 +120,9 @@ class PacketMaker extends Worker {
 					if(!$p->isEncoded){					
 						$p->encode();
 					}
-					$str .= Binary::writeInt(strlen($p->buffer)) . $p->buffer;					
+					$str .= Binary::writeVarInt(strlen($p->buffer)) . $p->buffer;					
 				}else{					
-					$str .= Binary::writeInt(strlen($p)) . $p;
+					$str .= Binary::writeVarInt(strlen($p)) . $p;
 				}
 			}
 			$buffer = zlib_encode($str, ZLIB_ENCODING_DEFLATE, $data['networkCompressionLevel']);
@@ -149,14 +149,14 @@ class PacketMaker extends Worker {
 			$fullPacket->__encapsulatedPacket = new CachedEncapsulatedPacket();
 			$fullPacket->__encapsulatedPacket->identifierACK = null;
 			$fullPacket->__encapsulatedPacket->buffer = chr(0xfe) . $fullPacket->buffer;
-			$fullPacket->__encapsulatedPacket->reliability = 2;
+			$fullPacket->__encapsulatedPacket->reliability = 3;
 			$pk = $fullPacket->__encapsulatedPacket;
 		}
 
 		if ($pk === null) {
 			$pk = new EncapsulatedPacket();			
 			$pk->buffer = chr(0xfe) . $fullPacket->buffer;
-			$pk->reliability = 2;
+			$pk->reliability = 3;
 
 			if ($needACK === true && $identifierACK !== false) {
 				$pk->identifierACK = $identifierACK;

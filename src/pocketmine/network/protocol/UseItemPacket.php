@@ -38,19 +38,20 @@ class UseItemPacket extends DataPacket{
 	public $posX;
 	public $posY;
 	public $posZ;
+	public $hotbarSlot;
 
 	public function decode(){
-		$this->x = $this->getInt();
-		$this->y = $this->getInt();
-		$this->z = $this->getInt();
-		$this->face = $this->getByte();
-		$this->fx = $this->getFloat();
-		$this->fy = $this->getFloat();
-		$this->fz = $this->getFloat();
-		$this->posX = $this->getFloat();
-		$this->posY = $this->getFloat();
-		$this->posZ = $this->getFloat();
-		$this->getInt();
+		$this->x = $this->getSignedVarInt();
+		$this->y = $this->getByte();
+		$this->z = $this->getSignedVarInt();
+		$this->face = $this->getSignedVarInt();
+		$this->fx = $this->getLFloat();
+		$this->fy = $this->getLFloat();
+		$this->fz = $this->getLFloat();
+		$this->posX = $this->getLFloat();
+		$this->posY = $this->getLFloat();
+		$this->posZ = $this->getLFloat();
+		$this->hotbarSlot = $this->getSignedVarInt();
 		$this->item = $this->getSlot();
 	}
 

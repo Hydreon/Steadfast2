@@ -220,11 +220,10 @@ class PluginManager{
 								$apiVersion = array_map("intval", explode(".", $this->server->getApiVersion()));
 								//Completely different API version
 								if($version[0] !== $apiVersion[0]){
-									continue;
 								}
 								//If the plugin requires new API features, being backwards compatible
 								if($version[1] > $apiVersion[1]){
-									continue;
+
 								}
 
 								$compatible = true;
@@ -581,44 +580,59 @@ class PluginManager{
 	 */
 	protected function parseYamlCommands(Plugin $plugin){
 		$pluginCmds = [];
-
-		foreach($plugin->getDescription()->getCommands() as $key => $data){
-			if(strpos($key, ":") !== false){
-				$this->server->getLogger()->critical("Could not load command " . $key . " for plugin " . $plugin->getDescription()->getName());
-				continue;
+		
+		if (!empty($jsonCommands = $plugin->getJsonCommands())) {
+			foreach ($jsonCommands as $name => $options) {
+				if (!isset($options['shouldBeRegistered']) || $options['shouldBeRegistered'] === true) {
+					$newCmd = new PluginCommand($name, $plugin);
+					if(isset($options['versions'][0]['descriptions'])){
+						$newCmd->setDescription($options['versions'][0]['descriptions']);
+					}
+					if(isset($options['versions'][0]['aliases']) && is_array($options['versions'][0]['aliases'])){
+						$newCmd->setAliases($options['versions'][0]['aliases']);
+					}
+					$pluginCmds[] = $newCmd;
+				}
 			}
-			if(is_array($data)){
-				$newCmd = new PluginCommand($key, $plugin);
-				if(isset($data["description"])){
-					$newCmd->setDescription($data["description"]);
+		} else {
+			foreach($plugin->getDescription()->getCommands() as $key => $data){
+				if(strpos($key, ":") !== false){
+					$this->server->getLogger()->critical("Could not load command " . $key . " for plugin " . $plugin->getDescription()->getName());
+					continue;
 				}
-
-				if(isset($data["usage"])){
-					$newCmd->setUsage($data["usage"]);
-				}
-
-				if(isset($data["aliases"]) and is_array($data["aliases"])){
-					$aliasList = [];
-					foreach($data["aliases"] as $alias){
-						if(strpos($alias, ":") !== false){
-							$this->server->getLogger()->critical("Could not load alias " . $alias . " for plugin " . $plugin->getDescription()->getName());
-							continue;
-						}
-						$aliasList[] = $alias;
+				if(is_array($data)){
+					$newCmd = new PluginCommand($key, $plugin);
+					if(isset($data["description"])){
+						$newCmd->setDescription($data["description"]);
 					}
 
-					$newCmd->setAliases($aliasList);
-				}
+					if(isset($data["usage"])){
+						$newCmd->setUsage($data["usage"]);
+					}
 
-				if(isset($data["permission"])){
-					$newCmd->setPermission($data["permission"]);
-				}
+					if(isset($data["aliases"]) and is_array($data["aliases"])){
+						$aliasList = [];
+						foreach($data["aliases"] as $alias){
+							if(strpos($alias, ":") !== false){
+								$this->server->getLogger()->critical("Could not load alias " . $alias . " for plugin " . $plugin->getDescription()->getName());
+								continue;
+							}
+							$aliasList[] = $alias;
+						}
 
-				if(isset($data["permission-message"])){
-					$newCmd->setPermissionMessage($data["permission-message"]);
-				}
+						$newCmd->setAliases($aliasList);
+					}
 
-				$pluginCmds[] = $newCmd;
+					if(isset($data["permission"])){
+						$newCmd->setPermission($data["permission"]);
+					}
+
+					if(isset($data["permission-message"])){
+						$newCmd->setPermissionMessage($data["permission-message"]);
+					}
+
+					$pluginCmds[] = $newCmd;
+				}
 			}
 		}
 

@@ -44,12 +44,12 @@ class MobEffectPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putLong($this->eid);
+		$this->putVarInt($this->eid);
 		$this->putByte($this->eventId);
-		$this->putByte($this->effectId);
-		$this->putByte($this->amplifier);
+		$this->putSignedVarInt($this->effectId);
+		$this->putSignedVarInt($this->amplifier);
 		$this->putByte($this->particles ? 1 : 0);
-		$this->putInt($this->duration);
+		$this->putSignedVarInt($this->duration);
 	}
 
 }

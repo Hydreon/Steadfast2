@@ -21,25 +21,18 @@
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
 
-
-class DisconnectPacket extends DataPacket {
+class SetHealthPacket extends DataPacket{	
+	const NETWORK_ID =  Info::SET_HEALTH_PACKET;
 	
-	const NETWORK_ID = Info::DISCONNECT_PACKET;
+    public $value;
 
-	public $hideDisconnectReason = false;
-	public $message;
+	public function decode(){
 
-	public function decode() {
-		$this->hideDisconnectReason = $this->getByte();
-		$this->message = $this->getString();
 	}
 
-	public function encode() {
+	public function encode(){
 		$this->reset();
-		$this->putByte($this->hideDisconnectReason);
-		$this->putString($this->message);
+		$this->putSignedVarInt($this->value);
 	}
-
 }

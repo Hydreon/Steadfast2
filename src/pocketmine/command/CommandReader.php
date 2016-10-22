@@ -70,6 +70,10 @@ class CommandReader extends Thread{
 		return null;
 	}
 
+	public function unstack() {
+		
+	}
+
 	public function run(){
 		$opts = getopt("", ["disable-readline"]);
 		if(extension_loaded("readline") and !isset($opts["disable-readline"])){

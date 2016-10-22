@@ -79,6 +79,13 @@ use pocketmine\utils\MainLogger;
 use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
 use pocketmine\network\protocol\RequestChunkRadiusPacket;
 use pocketmine\utils\Binary;
+use pocketmine\utils\BinaryStream;
+use pocketmine\network\protocol\SetCommandsEnabledPacket;
+use pocketmine\network\protocol\AvailableCommandsPacket;
+use pocketmine\network\protocol\CommandStepPacket;
+
+use pocketmine\network\protocol\ResourcePackDataInfoPacket;
+use pocketmine\network\protocol\ResourcePacksInfoPacket;
 
 class Network {
 
@@ -211,27 +218,41 @@ class Network {
 	}
 			
 	public function processBatch(BatchPacket $packet, Player $p){
-		$str = \zlib_decode($packet->payload, 1024 * 1024 * 64); //Max 64MB
+		$str = @\zlib_decode($packet->payload, 1024 * 1024 * 64); //Max 64MB
+		if ($str === false) {
+			$p->checkVersion();
+			return;
+		}
 		$len = strlen($str);
 		$offset = 0;
 		try{
-			while($offset < $len){
-				$pkLen = Binary::readInt(substr($str, $offset, 4));
-				$offset += 4;
-				$buf = substr($str, $offset, $pkLen);
-				$offset += $pkLen;
-				$pid = ord($buf{0});
-				$buf = substr($buf, 1);
-				if(($pk = $this->getPacket($pid)) !== null){
-					if($pk::NETWORK_ID === Info::BATCH_PACKET){
+			$stream = new BinaryStream($str);
+			$length = strlen($str);
+			while ($stream->getOffset() < $length) {
+				$buf = $stream->getString();
+				if(strlen($buf) === 0){
+					throw new \InvalidStateException("Empty or invalid BatchPacket received");
+				}
+				
+//				if (ord($buf{0}) !== 0x14) {
+//					echo 'Recive: 0x'. bin2hex($buf{0}).PHP_EOL;
+//				}
+				
+				if (($pk = $this->getPacket(ord($buf{0}))) !== null) {
+					if ($pk::NETWORK_ID === Info::BATCH_PACKET) {
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
 					}
-					$pk->setBuffer($buf);
+
+					$pk->setBuffer($buf, 1);
 					$pk->decode();
 					$p->handleDataPacket($pk);
-					if($pk->getOffset() <= 0){
+					if ($pk->getOffset() <= 0) {
 						return;
 					}
+				} else {
+					echo "UNKNOWN PACKET: ".bin2hex($buf{0}).PHP_EOL;
+//					echo "Buffer DEC: ".$buf.PHP_EOL;
+//					echo "Buffer HEX: ".bin2hex($buf).PHP_EOL;
 				}
 			}
 		}catch(\Exception $e){
@@ -330,9 +351,19 @@ class Network {
 		$this->registerPacket(ProtocolInfo::ADVENTURE_SETTINGS_PACKET, AdventureSettingsPacket::class);
 		$this->registerPacket(ProtocolInfo::TILE_ENTITY_DATA_PACKET, TileEntityDataPacket::class);
 		$this->registerPacket(ProtocolInfo::FULL_CHUNK_DATA_PACKET, FullChunkDataPacket::class);
+		$this->registerPacket(ProtocolInfo::SET_COMMANDS_ENABLED_PACKET, SetCommandsEnabledPacket::class);
 		$this->registerPacket(ProtocolInfo::SET_DIFFICULTY_PACKET, SetDifficultyPacket::class);
 		$this->registerPacket(ProtocolInfo::PLAYER_LIST_PACKET, PlayerListPacket::class);
 		$this->registerPacket(ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET, RequestChunkRadiusPacket::class);
 		$this->registerPacket(ProtocolInfo::CHUNK_RADIUS_UPDATE_PACKET, ChunkRadiusUpdatePacket::class);
+		$this->registerPacket(ProtocolInfo::AVAILABLE_COMMANDS_PACKET, AvailableCommandsPacket::class);
+		$this->registerPacket(ProtocolInfo::COMMAND_STEP_PACKET, CommandStepPacket::class);
+		
+		
+		
+		$this->registerPacket(ProtocolInfo::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
+		$this->registerPacket(ProtocolInfo::RESOURCE_PACKS_INFO_PACKET, ResourcePackDataInfoPacket::class);
+		
+		
 	}
 }

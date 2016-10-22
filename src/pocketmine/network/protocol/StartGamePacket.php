@@ -45,21 +45,50 @@ class StartGamePacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putInt($this->seed);
-		$this->putByte($this->dimension);
-		$this->putInt($this->generator);
-		$this->putInt($this->gamemode);
-		$this->putLong($this->eid);
-		$this->putInt($this->spawnX);
-		$this->putInt($this->spawnY);
-		$this->putInt($this->spawnZ);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putByte(1);
-		$this->putByte(1);
-		$this->putByte(0);
-		$this->putString('iX8AANxLbgA=');
+		$this->putVarInt(0); //EntityUniqueID
+		$this->putVarInt($this->eid); //EntityUniqueID
+		
+		$this->putLFloat($this->x); // default position (4)
+		$this->putLFloat($this->y); // (4)
+		$this->putLFloat($this->z); // (4)
+		
+		$this->putLFloat(0);
+		$this->putLFloat(0);
+		
+		// Level settings
+		
+		$this->putSignedVarInt($this->seed);
+		
+		$this->putSignedVarInt($this->dimension);
+		
+		$this->putSignedVarInt($this->generator);
+		
+		$this->putSignedVarInt($this->gamemode);
+		
+		$this->putSignedVarInt(0); // Difficulty
+		
+		// default spawn 3x VarInt
+		$this->putSignedVarInt(0);
+		$this->putSignedVarInt(0);
+		$this->putSignedVarInt(0);
+//		$this->putVarInt(abs($this->spawnX));
+//		$this->putVarInt(abs($this->spawnY));
+//		$this->putVarInt(abs($this->spawnZ));
+		
+		$this->putByte(1); // hasAchievementsDisabled
+		
+		$this->putSignedVarInt(0); // DayCycleStopTyme 1x VarInt
+		
+		$this->putByte(0); //edu mode
+
+		$this->putLFloat(0); //rain level
+
+		$this->putLFloat(0); //lightning level
+		
+		$this->putByte(1);	//commands enabled
+		
+		$this->putByte(0); // isTexturepacksRequired 1x Byte
+//		$this->putString('iX8AANxLbgA=');
 	}
 
 }

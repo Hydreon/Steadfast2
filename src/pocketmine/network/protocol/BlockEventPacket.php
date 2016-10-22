@@ -19,48 +19,32 @@
  *
 */
 
-namespace pocketmine\inventory;
+namespace pocketmine\network\protocol;
 
-interface TransactionGroup{
+#include <rules/DataPacket.h>
 
-	/**
-	 * @return float
-	 */
-	function getCreationTime();
 
-	/**
-	 * @return Transaction[]
-	 */
-	function getTransactions();
+class BlockEventPacket extends DataPacket{
+    const NETWORK_ID = Info::BLOCK_EVENT_PACKET;
 
-	/**
-	 * @return Inventory[]
-	 */
-	function getInventories();
+    public $x;
+    public $y;
+    public $z;
+    public $case1;
+    public $case2;
 
-	/**
-	 * @param Transaction $transaction
-	 */
-	function addTransaction(Transaction $transaction);
 
-	/**
-	 * @return bool
-	 */
-	function canExecute();
+    public function decode(){
 
-	/**
-	 * @return bool
-	 */
-	function execute();
+    }
 
-	/**
-	 * @return bool
-	 */
-	function hasExecuted();
-	
-	/**
-	 * 
-	 */
-	function sendInventories();
+    public function encode(){
+        $this->reset();
+        $this->putVarInt($this->x);
+        $this->putByte($this->y);
+        $this->putVarInt($this->z);
+        $this->putVarInt($this->case1);
+        $this->putVarInt($this->case2);
+    }
 
 }

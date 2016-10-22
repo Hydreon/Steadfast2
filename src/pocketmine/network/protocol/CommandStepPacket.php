@@ -17,29 +17,32 @@
  * @link http://www.pocketmine.net/
  * 
  *
-*/
+ */
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
+class CommandStepPacket extends DataPacket {
 
+	const NETWORK_ID = Info::COMMAND_STEP_PACKET;
 
-class DisconnectPacket extends DataPacket {
-	
-	const NETWORK_ID = Info::DISCONNECT_PACKET;
-
-	public $hideDisconnectReason = false;
-	public $message;
+	public $name;
+	public $overload;
+	public $outputFormat;
 
 	public function decode() {
-		$this->hideDisconnectReason = $this->getByte();
-		$this->message = $this->getString();
+		$this->name = $this->getString();
+		$this->overload = $this->getString();
+
+		$this->getVarInt();
+		$this->getVarInt();
+		$this->getByte();
+		$this->getVarInt();
+
+		$this->outputFormat = $this->getString();
 	}
 
 	public function encode() {
-		$this->reset();
-		$this->putByte($this->hideDisconnectReason);
-		$this->putString($this->message);
+		
 	}
 
 }
