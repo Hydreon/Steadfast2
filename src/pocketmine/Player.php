@@ -3688,4 +3688,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->movementSpeed += $sprintSpeedChange;
 		$this->updateSpeed($this->movementSpeed);
 	}
+	
+	public function checkVersion() {
+		if (!$this->loggedIn) {
+			$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
+		} else {
+			var_dump('zlib_decode error');
+		}
+	}
 }
