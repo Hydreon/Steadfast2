@@ -79,12 +79,12 @@ class FloatingTextParticle extends Particle{
 
 		if(!$this->invisible){
 			
-			$pk = new AddEntityPacket();
-			//$pk->uuid = UUID::fromRandom();
-			$pk->type = 21;
+			$pk = new AddPlayerPacket();
+			$pk->uuid = UUID::fromRandom();
+			//$pk->type = 77;
 			$pk->eid = $this->entityId;
 			$pk->x = $this->x;
-			$pk->y = $this->y-1;
+			$pk->y = $this->y-1.62;
 			$pk->z = $this->z;
 			$pk->speedX = 0;
 			$pk->speedY = 0;
