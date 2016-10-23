@@ -23,6 +23,7 @@ namespace pocketmine\level\particle;
 
 use pocketmine\entity\Entity;
 use pocketmine\entity\Item as ItemEntity;
+use pocketmine\entity\Villager;
 use pocketmine\math\Vector3;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
@@ -78,11 +79,12 @@ class FloatingTextParticle extends Particle{
 
 		if(!$this->invisible){
 			
-			$pk = new AddPlayerPacket();
-			$pk->uuid = UUID::fromRandom();
+			$pk = new AddEntityPacket();
+			//$pk->uuid = UUID::fromRandom();
+			$pk->type = 21;
 			$pk->eid = $this->entityId;
 			$pk->x = $this->x;
-			$pk->y = $this->y - 1.65;
+			$pk->y = $this->y-1;
 			$pk->z = $this->z;
 			$pk->speedX = 0;
 			$pk->speedY = 0;
