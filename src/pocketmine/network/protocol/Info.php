@@ -46,7 +46,7 @@ interface Info{
 	const BATCH_PACKET = 0x06;
 	const RESOURCE_PACKS_INFO_PACKET = 0x07;
 //	const RESOURCE_PACKS_STACK_PACKET = 0x08;
-//	const RESOURCE_PACKS_CLIENT_RESPONSE_PACKET = 0x09
+	const RESOURCE_PACKS_CLIENT_RESPONSE_PACKET = 0x09;
 	const TEXT_PACKET = 0x0a;
 	const SET_TIME_PACKET = 0x0b;
 	const START_GAME_PACKET = 0x0c;
@@ -63,7 +63,7 @@ interface Info{
 	const UPDATE_BLOCK_PACKET = 0x17;
 	const ADD_PAINTING_PACKET = 0x18;
 	const EXPLODE_PACKET = 0x19;
-//	const LEVEL_SOUND_EVENT_PACKET = 0x1a;
+	const LEVEL_SOUND_EVENT_PACKET = 0x1a;
 	const LEVEL_EVENT_PACKET = 0x1b;
 	const TILE_EVENT_PACKET = 0x1c;
 	const ENTITY_EVENT_PACKET = 0x1d;
@@ -119,14 +119,3 @@ interface Info{
 //	const RESOURCE_PACK_CHUNK_REQUEST_PACKET = 0x4f;
 	
 }
-
-
-
-
-
-
-
-
-
-
-
