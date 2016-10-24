@@ -24,33 +24,21 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class Redstone extends Transparent{
+class WeightedPressurePlateLight extends StonePressurePlate{
 
-	protected $id = self::REDSTONE_BLOCK;
+	protected $id = self::WEIGHTED_PRESSURE_PLATE_LIGHT;
 
-	public function __construct(){
-
-	}
-
-	public function getHardness(){
-		return 5;
-	}
-
-	public function getToolType(){
-		return Tool::TYPE_PICKAXE;
+	public function __construct($meta = 0){
+		$this->meta = $meta;
 	}
 
 	public function getName(){
-		return "Redstone Block";
+		return "Weighted Pressure Plate Light";
 	}
 
 	public function getDrops(Item $item){
-		if($item->isPickaxe() >= 1){
-			return [
-				[Item::REDSTONE_BLOCK, 0, 1],
-			];
-		}else{
-			return [];
-		}
+		return [
+			[Item::WEIGHTED_PRESSURE_PLATE_LIGHT, 0, 1],
+		];
 	}
 }

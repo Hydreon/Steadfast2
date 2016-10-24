@@ -24,33 +24,49 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class Redstone extends Transparent{
+class Lever extends Transparent{
 
-	protected $id = self::REDSTONE_BLOCK;
+	protected $id = self::LEVER;
 
-	public function __construct(){
+	public function __construct($meta = 0){
+		$this->meta = $meta;
+	}
 
+	public function getName(){
+		return "Lever";
+	}
+
+	public function canBeActivated(){
+		return true;
 	}
 
 	public function getHardness(){
-		return 5;
+		return 1;
 	}
 
 	public function getToolType(){
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getName(){
-		return "Redstone Block";
+	public function getDrops(Item $item){
+		return [
+			[Item::LEVER, 0, 1],
+		];
+	}
+	
+	public function canBeFlowedInto(){
+		return true;
+	}
+	
+	public function getResistance(){
+		return 0;
 	}
 
-	public function getDrops(Item $item){
-		if($item->isPickaxe() >= 1){
-			return [
-				[Item::REDSTONE_BLOCK, 0, 1],
-			];
-		}else{
-			return [];
-		}
+	public function isSolid(){
+		return false;
+	}
+
+	public function getBoundingBox(){
+		return null;
 	}
 }

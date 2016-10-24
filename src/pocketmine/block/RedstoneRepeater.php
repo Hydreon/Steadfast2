@@ -22,35 +22,42 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\item\Tool;
 
-class Redstone extends Transparent{
+class RedstoneRepeater extends Transparent{
+	
+	protected $id = self::REDSTONE_REPEATER_BLOCK;
 
-	protected $id = self::REDSTONE_BLOCK;
+	public function __construct($meta = 0){
+		$this->meta = $meta;
+	}
 
-	public function __construct(){
-
+	public function canBeFlowedInto(){
+		return true;
+	}
+	
+	public function canBeActivated(){
+		return true;
 	}
 
 	public function getHardness(){
-		return 5;
+		return 1;
 	}
 
-	public function getToolType(){
-		return Tool::TYPE_PICKAXE;
+	public function getResistance(){
+		return 0;
 	}
 
-	public function getName(){
-		return "Redstone Block";
+	public function isSolid(){
+		return false;
 	}
 
+	public function getBoundingBox(){
+		return null;
+	}
+	
 	public function getDrops(Item $item){
-		if($item->isPickaxe() >= 1){
-			return [
-				[Item::REDSTONE_BLOCK, 0, 1],
-			];
-		}else{
-			return [];
-		}
+		return [
+			[Item::REDSTONE_REPEATER, 0, 1],
+		];
 	}
 }

@@ -24,33 +24,25 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class Redstone extends Transparent{
+class RedstoneWire extends Transparent{
 
-	protected $id = self::REDSTONE_BLOCK;
+	protected $id = self::REDSTONE_WIRE;
 
 	public function __construct(){
 
 	}
 
 	public function getHardness(){
-		return 5;
+		return 1;
 	}
-
-	public function getToolType(){
-		return Tool::TYPE_PICKAXE;
-	}
-
+	
 	public function getName(){
-		return "Redstone Block";
+		return "Redstone Wire";
 	}
 
 	public function getDrops(Item $item){
-		if($item->isPickaxe() >= 1){
-			return [
-				[Item::REDSTONE_BLOCK, 0, 1],
-			];
-		}else{
-			return [];
-		}
+		return [
+			[Item::REDSTONE_WIRE, 0, 1],
+		];
 	}
 }

@@ -21,36 +21,32 @@
 
 namespace pocketmine\block;
 
-use pocketmine\item\Item;
-use pocketmine\item\Tool;
 
-class Redstone extends Transparent{
 
-	protected $id = self::REDSTONE_BLOCK;
 
-	public function __construct(){
+abstract class Button extends Transparent{
 
+	public function canBeFlowedInto(){
+		return true;
 	}
 
 	public function getHardness(){
-		return 5;
+		return 1;
+	}
+	
+	public function canBeActivated(){
+		return true;
 	}
 
-	public function getToolType(){
-		return Tool::TYPE_PICKAXE;
+	public function getResistance(){
+		return 0;
 	}
 
-	public function getName(){
-		return "Redstone Block";
+	public function isSolid(){
+		return false;
 	}
 
-	public function getDrops(Item $item){
-		if($item->isPickaxe() >= 1){
-			return [
-				[Item::REDSTONE_BLOCK, 0, 1],
-			];
-		}else{
-			return [];
-		}
+	public function getBoundingBox(){
+		return null;
 	}
 }
