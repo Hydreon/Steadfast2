@@ -114,16 +114,14 @@ class ChunkMaker extends Worker {
 			$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
 			$pk->data = $chunkData;
 			$pk->encode();
-			if(!empty($pk->buffer)) {
-				$str = Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;
+			if(!empty($pk->buffer)) {				
+				$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
 				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);		
 				$result[$lang] = $ordered;			
 			}
 		}
 		$this->externalQueue[] = serialize($result);		
 	}
-
-	
 	
 	public function shutdown(){		
 		$this->shutdown = true;

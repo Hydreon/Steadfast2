@@ -17,14 +17,14 @@ class ArmorSwapTransaction extends BaseTransaction {
 		parent::__construct($inventory, $slot, $sourceItem, $targetItem);
 		$this->requiredTransactionNumber = 2;
 	}
-
+	
 	public function resetFountTransaction() {
 		$this->foundTransactions = [
 			'source' => false,
 			'target' => false,
 		];
 	}
-
+	
 	/**
 	 * 
 	 * @param BaseTransaction $ts
@@ -33,15 +33,15 @@ class ArmorSwapTransaction extends BaseTransaction {
 	public function isSuitable($ts) {
 		$sourceFound = false;
 		$targetFound = false;
-
+		
 		$sourceItem = $ts->getSourceItem();
 		$targetItem = $ts->getTargetItem();
-
+		
 		// check for source transaction
 		if ($this->sourceItem->deepEquals($targetItem)) {
 			$sourceFound = true;
 		}
-
+		
 		// check for target transaction
 		if ($this->targetItem->deepEquals($sourceItem)) {
 			$targetFound = true;
@@ -63,12 +63,11 @@ class ArmorSwapTransaction extends BaseTransaction {
 			$this->foundTransactions['target'] = true;
 			return true;
 		}
-
+		
 		return false;
 	}
 
 	public function isFoundAll() {
 		return $this->foundTransactions['source'] && $this->foundTransactions['target'];
 	}
-
 }

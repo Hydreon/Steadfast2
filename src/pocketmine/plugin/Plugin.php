@@ -110,5 +110,10 @@ interface Plugin extends CommandExecutor{
 	 * @return PluginLoader
 	 */
 	public function getPluginLoader();
+	
+	/**
+	 * @return array
+	 */
+	public function getJsonCommands();
 
 }

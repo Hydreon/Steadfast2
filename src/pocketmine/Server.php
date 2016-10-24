@@ -99,6 +99,7 @@ use pocketmine\tile\Chest;
 use pocketmine\tile\EnchantTable;
 use pocketmine\tile\Furnace;
 use pocketmine\tile\Sign;
+use pocketmine\tile\Skull;
 use pocketmine\tile\Tile;
 use pocketmine\utils\Binary;
 use pocketmine\utils\Cache;
@@ -1512,7 +1513,6 @@ class Server{
 			"proxy-port" => 10305,
 			"memory-limit" => "256M",
 			"white-list" => false,
-			"announce-player-achievements" => true,
 			"spawn-protection" => 16,
 			"max-players" => 20,
 			"allow-flight" => false,
@@ -2588,6 +2588,7 @@ class Server{
 		Tile::registerTile(Furnace::class);
 		Tile::registerTile(Sign::class);
 		Tile::registerTile(EnchantTable::class);
+		Tile::registerTile(Skull::class);
 	}
 
 	public function shufflePlayers(){

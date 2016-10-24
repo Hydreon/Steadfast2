@@ -187,58 +187,81 @@ class BinaryStream extends \stdClass{
 		$this->put($uuid->toBinary());
 	}
 
-	public function getSlot(){
-		$id = $this->getShort(true);
-		
+	public function getSlot(){		
+		$id = $this->getSignedVarInt();		
 		if($id <= 0){
 			return Item::get(0, 0, 0);
 		}
-		
-		$cnt = $this->getByte();
-		
-		$data = $this->getShort();
-		
-		$nbtLen = $this->getLShort();
-		
-		$nbt = "";
-		
+	
+		$aux = $this->getSignedVarInt();
+		$meta = $aux >> 8;
+		$count = $aux & 0xff;
+				
+		$nbtLen = $this->getLShort();		
+		$nbt = "";		
 		if($nbtLen > 0){
 			$nbt = $this->get($nbtLen);
 		}
-
+		
 		return Item::get(
 			$id,
-			$data,
-			$cnt,
+			$meta,
+			$count,
 			$nbt
 		);
 	}
 
 	public function putSlot(Item $item){
 		if($item->getId() === 0){
-			$this->putShort(0);
+			$this->putSignedVarInt(0);
 			return;
 		}
-		
-		$this->putShort($item->getId());
-		$this->putByte($item->getCount());
-		$this->putShort($item->getDamage() === null ? -1 : $item->getDamage());
-		$nbt = $item->getCompound();
+		$this->putSignedVarInt($item->getId());
+		$this->putSignedVarInt(($item->getDamage() === null ? 0  : ($item->getDamage() << 8)) + $item->getCount());	
+		$nbt = $item->getCompound();		
 		$this->putLShort(strlen($nbt));
-		$this->put($nbt);
-		
-	}
-
-	public function getString(){
-		return $this->get($this->getShort());
-	}
-
-	public function putString($v){
-		$this->putShort(strlen($v));
-		$this->put($v);
+		$this->put($nbt);		
 	}
 
 	public function feof(){
 		return !isset($this->buffer{$this->offset});
 	}
+	
+	
+	public function getSignedVarInt() {
+		$result = $this->getVarInt();
+		if ($result % 2 == 0) {
+			$result = $result / 2;
+		} else {
+			$result = (-1) * ($result + 1) / 2;
+		}
+		return $result;
+	}
+
+	public function getVarInt() {
+		$result = $shift = 0;
+		do {
+			$byte = $this->getByte();
+			$result |= ($byte & 0x7f) << $shift;
+			$shift += 7;
+		} while ($byte > 0x7f);
+		return $result;
+	}
+
+	public function putSignedVarInt($v) {
+		$this->put(Binary::writeSignedVarInt($v));
+	}
+
+	public function putVarInt($v) {
+		$this->put(Binary::writeVarInt($v));
+	}
+
+	public function getString(){
+		return $this->get($this->getVarInt());
+	}
+	public function putString($v){
+		$this->putVarInt(strlen($v));
+		$this->put($v);
+	}
+	
 }

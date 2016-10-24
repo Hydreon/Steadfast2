@@ -89,7 +89,7 @@ class PacketMaker extends Worker {
 					$pk = new MoveEntityPacket();
 					$pk->entities = [$singleMoveData];
 					$pk->encode();
-					$moveStr .= Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;					
+					$moveStr .= Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;					
 				}
 				$buffer = zlib_encode($moveStr, ZLIB_ENCODING_DEFLATE, 7);
 				$pkBatch = new BatchPacket();
@@ -104,7 +104,7 @@ class PacketMaker extends Worker {
 					$pk = new SetEntityMotionPacket();
 					$pk->entities = [$singleMotionData];
 					$pk->encode();
-					$motionStr .= Binary::writeInt(strlen($pk->buffer)) . $pk->buffer;		
+					$motionStr .= Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;		
 				}
 				$buffer = zlib_encode($motionStr, ZLIB_ENCODING_DEFLATE, 7);
 				$pkBatch = new BatchPacket();
@@ -120,9 +120,9 @@ class PacketMaker extends Worker {
 					if(!$p->isEncoded){					
 						$p->encode();
 					}
-					$str .= Binary::writeInt(strlen($p->buffer)) . $p->buffer;					
+					$str .= Binary::writeVarInt(strlen($p->buffer)) . $p->buffer;					
 				}else{					
-					$str .= Binary::writeInt(strlen($p)) . $p;
+					$str .= Binary::writeVarInt(strlen($p)) . $p;
 				}
 			}
 			$buffer = zlib_encode($str, ZLIB_ENCODING_DEFLATE, $data['networkCompressionLevel']);
@@ -143,6 +143,7 @@ class PacketMaker extends Worker {
 		if (!$fullPacket->isEncoded) {
 			$fullPacket->encode();
 		}
+
 		$data = array(
 			'identifier' => $identifier,
 			'buffer' => $fullPacket->buffer

@@ -19,7 +19,7 @@ class PairTransaction extends BaseTransaction {
 		$itemsData['items'] = [];
 		$itemsData['currentItemsSum'] = 0;
 		$itemsData['newItemsSum'] = 0;
-
+		
 		if ($ts->getInventory() === $this->inventory && $ts->getSlot() === $this->slot) {
 			return false;
 		}
@@ -30,7 +30,7 @@ class PairTransaction extends BaseTransaction {
 		$this->collectItemCount($ts->getTargetItem(), $itemsData, true);
 		$this->collectItemCount($this->sourceItem, $itemsData, false);
 		$this->collectItemCount($this->targetItem, $itemsData, true);
-
+		
 		if ($itemsData['currentItemsSum'] !== $itemsData['newItemsSum']) {
 			return false;
 		}
@@ -40,14 +40,14 @@ class PairTransaction extends BaseTransaction {
 				return false;
 			}
 		}
-
+		
 		return true;
 	}
-
+	
 	protected function collectItemCount($item, &$itemsData, $isNew = false) {
 		$itemId = $item->getId();
 		$itemCount = $item->getCount();
-
+		
 		if ($itemId !== Item::AIR) {
 			if (!isset($itemsData['items'][$itemId])) {
 				$itemsData['items'][$itemId] = 0;
@@ -60,7 +60,7 @@ class PairTransaction extends BaseTransaction {
 			}
 		}
 	}
-
+	
 	public function getRequiredTransactionNumber() {
 		return $this->requiredTransactionNumber;
 	}

@@ -456,14 +456,14 @@ class NBT{
 		$this->endianness = $endianness & 0x01;
 	}
 
-	public function read($buffer, $doMultiple = false){
+	public function read($buffer, $doMultiple = false, $new = false){
 		$this->offset = 0;
 		$this->buffer = $buffer;
-		$this->data = $this->readTag();
+		$this->data = $this->readTag($new);
 		if($doMultiple and $this->offset < strlen($this->buffer)){
 			$this->data = [$this->data];
 			do{
-				$this->data[] = $this->readTag();
+				$this->data[] = $this->readTag($new);
 			}while($this->offset < strlen($this->buffer));
 		}
 		$this->buffer = "";
@@ -476,17 +476,17 @@ class NBT{
 	/**
 	 * @return string|bool
 	 */
-	public function write(){
+	public function write($old = false){
 		$this->offset = 0;
 		$this->buffer = "";
 
 		if($this->data instanceof Compound){
-			$this->writeTag($this->data);
+			$this->writeTag($this->data, $old);
 
 			return $this->buffer;
 		}elseif(is_array($this->data)){
 			foreach($this->data as $tag){
-				$this->writeTag($tag);
+				$this->writeTag($tag, $old);
 			}
 			return $this->buffer;
 		}
@@ -495,57 +495,67 @@ class NBT{
 	}
 
 	public function writeCompressed($compression = ZLIB_ENCODING_GZIP, $level = 7){
-		if(($write = $this->write()) !== false){
+		if(($write = $this->write(true)) !== false){
 			return zlib_encode($write, $compression, $level);
 		}
 
 		return false;
 	}
+	
+	private function checkGetString($new = false) {
+		if ($new) {
+			$data = $this->getNewString();
+		} else {
+			$data = $this->getString();
+		}
+		return $data;
+	}
 
-	public function readTag(){
-		switch($this->getByte()){
+	public function readTag($new = false){
+		$tagType = $this->getByte();
+		switch($tagType){
 			case NBT::TAG_Byte:
-				$tag = new ByteTag($this->getString());
+				$tag = new ByteTag($this->checkGetString($new));
 				$tag->read($this);
 				break;
 			case NBT::TAG_Short:
-				$tag = new ShortTag($this->getString());
+				$tag = new ShortTag($this->checkGetString($new));
 				$tag->read($this);
 				break;
 			case NBT::TAG_Int:
-				$tag = new IntTag($this->getString());
-				$tag->read($this);
+				$tag = new IntTag($this->checkGetString($new));
+				$tag->read($this, $new);
 				break;
 			case NBT::TAG_Long:
-				$tag = new LongTag($this->getString());
+				$tag = new LongTag($this->checkGetString($new));
 				$tag->read($this);
 				break;
 			case NBT::TAG_Float:
-				$tag = new FloatTag($this->getString());
+				$tag = new FloatTag($this->checkGetString($new));
 				$tag->read($this);
 				break;
 			case NBT::TAG_Double:
-				$tag = new DoubleTag($this->getString());
+				$tag = new DoubleTag($this->checkGetString($new));
 				$tag->read($this);
 				break;
 			case NBT::TAG_ByteArray:
-				$tag = new ByteArray($this->getString());
+				$tag = new ByteArray($this->checkGetString($new));
 				$tag->read($this);
 				break;
 			case NBT::TAG_String:
-				$tag = new StringTag($this->getString());
-				$tag->read($this);
+				$tag = new StringTag($this->checkGetString($new));
+				$tag->read($this, $new);
 				break;
 			case NBT::TAG_Enum:
-				$tag = new Enum($this->getString());
-				$tag->read($this);
+				$tag = new Enum($this->checkGetString($new));
+				$tag->read($this, $new);
 				break;
 			case NBT::TAG_Compound:
-				$tag = new Compound($this->getString());
-				$tag->read($this);
+				$tag = new Compound($this->checkGetString($new));
+				$tag->read($this, $new);
 				break;
 			case NBT::TAG_IntArray:
-				$tag = new IntArray($this->getString());
+				$tag = new IntArray($this->checkGetString($new));
 				$tag->read($this);
 				break;
 
@@ -557,12 +567,16 @@ class NBT{
 		return $tag;
 	}
 
-	public function writeTag(Tag $tag){
+	public function writeTag(Tag $tag, $old = false){
 		$this->buffer .= chr($tag->getType());
 		if($tag instanceof NamedTAG){
-			$this->putString($tag->getName());
+			if ($old) {
+				$this->putOldString($tag->getName());
+			} else {
+				$this->putString($tag->getName());
+			}
 		}
-		$tag->write($this);
+		$tag->write($this, $old);
 	}
 
 	public function getByte(){
@@ -584,9 +598,18 @@ class NBT{
 	public function getInt(){
 		return $this->endianness === self::BIG_ENDIAN ? (PHP_INT_SIZE === 8 ? unpack("N", $this->get(4))[1] << 32 >> 32 : unpack("N", $this->get(4))[1]) : (PHP_INT_SIZE === 8 ? unpack("V", $this->get(4))[1] << 32 >> 32 : unpack("V", $this->get(4))[1]);
 	}
+	
+	public function getNewInt(){
+		return $this->getSignedVarInt();
+		
+	}
 
-	public function putInt($v){
+	public function putOldInt($v){
 		$this->buffer .= $this->endianness === self::BIG_ENDIAN ? pack("N", $v) : pack("V", $v);
+	}
+	
+	public function putInt($v){
+		$this->putSignedVarInt($v);
 	}
 
 	public function getLong(){
@@ -616,10 +639,53 @@ class NBT{
 	public function getString(){
 		return $this->get($this->endianness === 1 ? unpack("n", $this->get(2))[1] : unpack("v", $this->get(2))[1]);
 	}
+	
+	public function getNewString(){
+		$len = $this->getByte();
+		return $this->get($len);
+	}
 
-	public function putString($v){
+	public function putOldString($v){
 		$this->buffer .= $this->endianness === 1 ? pack("n", strlen($v)) : pack("v", strlen($v));
 		$this->buffer .= $v;
+	}
+	
+	public function putString($v){
+		$this->putByte(strlen($v));
+		$this->buffer .= $v;
+	}
+	
+	public function getSignedVarInt() {
+		// get var int
+		$result = $shift = 0;
+		do {
+			$byte = $this->getByte();
+			$result |= ($byte & 0x7f) << $shift;
+			$shift += 7;
+		} while ($byte > 0x7f);
+		
+		if ($result % 2 == 0) {
+			$result = $result / 2;
+		} else {
+			$result = (-1) * ($result + 1) / 2;
+		}
+		return $result;
+	}
+	
+	public function putSignedVarInt($v) {
+		$v = ($v >= 0) ? 2 * $v : 2 * abs($v) - 1;
+		if ($v < 0x80) {
+			$this->putByte($v);
+		} else {
+			$values = array();
+			while ($v > 0) {
+				$values[] = 0x80 | ($v & 0x7f);
+				$v = $v >> 7;
+			}
+			$values[count($values)-1] &= 0x7f;
+			$bytes = call_user_func_array('pack', array_merge(array('C*'), $values));
+			$this->buffer .= $bytes;
+		}
 	}
 
 	public function getArray(){
