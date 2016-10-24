@@ -220,9 +220,8 @@ class Network {
 				$offset += 4;
 				$buf = substr($str, $offset, $pkLen);
 				$offset += $pkLen;
-				$pid = ord($buf{0});
-				$buf = substr($buf, 1);
-				if(($pk = $this->getPacket($pid)) !== null){
+				if(($pk = $this->getPacket(ord($buf{0}))) !== null){
+					$buf = substr($buf, 1);
 					if($pk::NETWORK_ID === Info::BATCH_PACKET){
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
 					}
