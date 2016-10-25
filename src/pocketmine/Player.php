@@ -1899,6 +1899,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 					if($ev->isCancelled()){
 						$this->inventory->sendHeldItem($this);
+						if ($this->inventory->getHeldItemSlot() !== -1) {
+							$this->inventory->sendContents($this);
+						}
 						//Timings::$timerUseItemPacket->stopTiming();
 						break;
 					}
@@ -3389,7 +3392,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		for ($i = 0; $i < $len and $valid; ++$i) {
 			$c = ord($this->username{$i});
-			if (($c >= ord("a") and $c <= ord("z")) or ( $c >= ord("A") and $c <= ord("Z")) or ( $c >= ord("0") and $c <= ord("9")) or $c === ord("_")
+			if (($c >= ord("a") and $c <= ord("z")) or ( $c >= ord("A") and $c <= ord("Z")) or ( $c >= ord("0") and $c <= ord("9")) or $c === ord("_") or $c === ord(" ")
 			) {
 				continue;
 			}

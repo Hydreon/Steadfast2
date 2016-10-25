@@ -68,12 +68,9 @@ class StartGamePacket extends DataPacket{
 		$this->putSignedVarInt(0); // Difficulty
 		
 		// default spawn 3x VarInt
-		$this->putSignedVarInt(0);
-		$this->putSignedVarInt(0);
-		$this->putSignedVarInt(0);
-//		$this->putVarInt(abs($this->spawnX));
-//		$this->putVarInt(abs($this->spawnY));
-//		$this->putVarInt(abs($this->spawnZ));
+		$this->putSignedVarInt($this->spawnX);
+		$this->putSignedVarInt($this->spawnY);
+		$this->putSignedVarInt($this->spawnZ);
 		
 		$this->putByte(1); // hasAchievementsDisabled
 		
