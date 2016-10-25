@@ -48,10 +48,10 @@ class SetEntityMotionPacket extends DataPacket{
 	public function encode(){
 		$this->reset();
 		foreach($this->entities as $d){
-			$this->putLong($d[0]); //eid
-			$this->putFloat($d[1]); //motX
-			$this->putFloat($d[2]); //motY
-			$this->putFloat($d[3]); //motZ
+			$this->putVarInt($d[0]); //eid
+			$this->putLFloat($d[1]); //motX
+			$this->putLFloat($d[2]); //motY
+			$this->putLFloat($d[3]); //motZ
 		}
 	}
 

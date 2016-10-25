@@ -71,7 +71,7 @@ abstract class Entity extends Location implements Metadatable{
 
 	const NETWORK_ID = -1;
 
-
+	
 	const DATA_TYPE_BYTE = 0;
 	const DATA_TYPE_SHORT = 1;
 	const DATA_TYPE_INT = 2;
@@ -82,21 +82,23 @@ abstract class Entity extends Location implements Metadatable{
 //	const DATA_TYPE_ROTATION = 7;
 	const DATA_TYPE_LONG = 7;
 
-	const DATA_FLAGS = 0;//is entity burning or not
-	const DATA_AIR = 1;//air under water
-	const DATA_NAMETAG = 2;
-	const DATA_SHOW_NAMETAG = 3;//is name permanent visible or not
+	const DATA_FLAGS = 0; //is entity burning or not
+	const DATA_ANIMAL_VARIANT = 1; // type: int
+	const DATA_NAMETAG = 2; // type: string
+	const DATA_POTION_COLOR = 4; // type: int data: rgb
+	const DATA_LEAD_HOLDER = 19; // type: long
+	
 	const DATA_SILENT = 4;
-	const DATA_POTION_COLOR = 7;
-	const DATA_POTION_AMBIENT = 8;//is potion ambient or not
-	const DATA_NO_AI = 15;//can move or not
-	const DATA_LEAD_HOLDER = 23;
-	const DATA_LEAD = 24;
+	const DATA_POTION_AMBIENT = 8; //is potion ambient or not
+	const DATA_AIR = 22; //air under water type: short
+	const DATA_LEAD = 24; //remove
+	
+	const DATA_NO_AI = 231321;
+	
 	//other dataProperty values:
 	//14 - age (0 - baby, 130000 - parent)
 	//16 - sheep color (the same as wool meta)
 	//17 - shooter id (for throwable entities)
-	//18 - type/variant (for ocelots, bats, sheep)
 	//19 - charge value for creaper
 	//20 - boat color
 	//21 - in love (for those who can breed)
@@ -108,8 +110,17 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_SPRINTING = 3;
 	const DATA_FLAG_ACTION = 4;
 	const DATA_FLAG_INVISIBLE = 5;
-
-
+	const DATA_FLAG_SADDLE = 8;
+	const DATA_FLAG_ANIMAL_LONG_NECK = 11;
+	const DATA_FLAG_SHOW_NAMETAG = 14;
+	const DATA_FLAG_ALWAYS_SHOW_NAMETAG = 15;
+	const DATA_FLAG_NOT_MOVE = 16;
+	const DATA_FLAG_ANIMAL_SIT = 20;
+	const DATA_FLAG_ANGRY_WOLF = 21;
+	const DATA_FLAG_ANGRY_BLAZE = 23;
+	const DATA_FLAG_SHAVED_SHIP = 26;
+	const DATA_FLAG_NOT_IN_WATER = 30;
+	
 	public static $entityCount = 1;
 	/** @var Entity[] */
 	private static $knownEntities = [];
@@ -124,17 +135,18 @@ abstract class Entity extends Location implements Metadatable{
 	protected $effects = [];
 
 	protected $id;
-
+	
 	protected $dataFlags = 0;
-	protected $dataProperties = [
-		self::DATA_FLAGS => [self::DATA_TYPE_BYTE, 0],
+	protected $dataProperties = [	
+		self::DATA_FLAGS => [self::DATA_TYPE_LONG, 0],
 		self::DATA_AIR => [self::DATA_TYPE_SHORT, 300],
 		self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""],
-		self::DATA_SHOW_NAMETAG => [self::DATA_TYPE_BYTE, 1],
-		self::DATA_SILENT => [self::DATA_TYPE_BYTE, 0],
-		self::DATA_NO_AI => [self::DATA_TYPE_BYTE, 0],
+//		4 => [self::DATA_TYPE_FLOAT, 80], // potion particles
+//		self::DATA_SHOW_NAMETAG => [self::DATA_TYPE_BYTE, 1],
+//		self::DATA_SILENT => [self::DATA_TYPE_BYTE, 0],
+//		self::DATA_NO_AI => [self::DATA_TYPE_BYTE, 0],
 		self::DATA_LEAD_HOLDER => [self::DATA_TYPE_LONG, -1],
-		self::DATA_LEAD => [self::DATA_TYPE_BYTE, 0],
+//		self::DATA_LEAD => [self::DATA_TYPE_BYTE, 0],
 	];
 	
 	public $passenger = null;
@@ -231,7 +243,7 @@ abstract class Entity extends Location implements Metadatable{
 		if($this->eyeHeight === null){
 			$this->eyeHeight = $this->height / 2 + 0.1;
 		}
-
+		
 		$this->id = Entity::$entityCount++;
 		$this->justCreated = true;	
 		$this->namedtag = $nbt;
@@ -270,6 +282,9 @@ abstract class Entity extends Location implements Metadatable{
 			$this->namedtag->Air = new ShortTag("Air", 300);
 		}
 		$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SHOW_NAMETAG, true, self::DATA_TYPE_LONG, false);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ALWAYS_SHOW_NAMETAG, true, self::DATA_TYPE_LONG, false);
 //		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $this->namedtag["Air"]);
 
 		if(!isset($this->namedtag->OnGround)){
@@ -305,7 +320,8 @@ abstract class Entity extends Location implements Metadatable{
 	 * @return bool
 	 */
 	public function isNameTagVisible(){
-		return $this->getDataProperty(self::DATA_SHOW_NAMETAG) > 0;
+//		return $this->getDataProperty(self::DATA_SHOW_NAMETAG) > 0;
+		return $this->getDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_SHOW_NAMETAG);
 	}
 
 	/**
@@ -319,7 +335,8 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param bool $value
 	 */
 	public function setNameTagVisible($value = true){
-		$this->setDataProperty(self::DATA_SHOW_NAMETAG, self::DATA_TYPE_BYTE, $value ? 1 : 0);
+		$this->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_SHOW_NAMETAG, $value ? true : false);
+//		$this->setDataProperty(self::DATA_SHOW_NAMETAG, self::DATA_TYPE_BYTE, $value ? 1 : 0);
 	}
 
 	public function isSneaking(){
@@ -1621,10 +1638,13 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param int   $type
 	 * @param mixed $value
 	 */
-	public function setDataProperty($id, $type, $value){
+	public function setDataProperty($id, $type, $value, $send = true){
 		if($this->getDataProperty($id) !== $value){
 			$this->dataProperties[$id] = [$type, $value];
-
+			if (!$send) {
+				return;
+			}
+		
 			$targets = $this->hasSpawned;
 			if($this instanceof Player){
 				if(!$this->spawned){
@@ -1660,11 +1680,11 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param int  $id
 	 * @param bool $value
 	 */
-	public function setDataFlag($propertyId, $id, $value = true, $type = self::DATA_TYPE_BYTE){
+	public function setDataFlag($propertyId, $id, $value = true, $type = self::DATA_TYPE_LONG, $send = true){
 		if($this->getDataFlag($propertyId, $id) !== $value){
 			$flags = (int) $this->getDataProperty($propertyId);
 			$flags ^= 1 << $id;
-			$this->setDataProperty($propertyId, $type, $flags);
+			$this->setDataProperty($propertyId, $type, $flags, $send);
 		}
 	}
 
@@ -1700,6 +1720,10 @@ abstract class Entity extends Location implements Metadatable{
 
 	public function __toString(){
 		return (new \ReflectionClass($this))->getShortName() . "(" . $this->getId() . ")";
+	}
+	
+	public function setAirTick($val){
+		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $val, false);
 	}
 
 }

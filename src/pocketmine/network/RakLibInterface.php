@@ -183,6 +183,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 					}
 				}
 			}catch(\Exception $e){
+				var_dump($e->getMessage());
 				if(\pocketmine\DEBUG > 1 and isset($pk)){
 					$logger = $this->server->getLogger();
 					if($logger instanceof MainLogger){
@@ -249,7 +250,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
 				$packet->__encapsulatedPacket->identifierACK = null;
 				$packet->__encapsulatedPacket->buffer = chr(0xfe) . $packet->buffer;
-				$packet->__encapsulatedPacket->reliability = 2;
+				$packet->__encapsulatedPacket->reliability = 3;
 				$pk = $packet->__encapsulatedPacket;
 			}
 
@@ -263,7 +264,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			if($pk === null){
 				$pk = new EncapsulatedPacket();
 				$pk->buffer = chr(0xfe) . $packet->buffer;
-				$pk->reliability = 2;
+				$pk->reliability = 3;
 
 				if($needACK === true){
 					$pk->identifierACK = $this->identifiersACK[$identifier]++;
@@ -283,11 +284,9 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		} else {
 			return;
 		}
-
 		if(($data = $this->network->getPacket($pid)) === null){
 			return null;
 		}
-		
 		$data->setBuffer($buffer, 1);
 
 		return $data;

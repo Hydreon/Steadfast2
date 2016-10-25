@@ -202,7 +202,7 @@ class SessionManager{
 
     public function sendPacket(Packet $packet, $dest, $port){
         $packet->encode();
-        $this->sendBytes += $this->socket->writePacket($packet->buffer, $dest, $port);
+		$this->sendBytes += $this->socket->writePacket($packet->buffer, $dest, $port);    
     }
 
     public function streamEncapsulated(Session $session, EncapsulatedPacket $packet, $flags = RakLib::PRIORITY_NORMAL){

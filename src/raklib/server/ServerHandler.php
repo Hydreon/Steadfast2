@@ -90,6 +90,7 @@ class ServerHandler{
             $id = ord($packet{0});
             $offset = 1;
             if($id === RakLib::PACKET_ENCAPSULATED){
+//				var_dump(debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20));
                 $len = ord($packet{$offset++});
                 $identifier = substr($packet, $offset, $len);
                 $offset += $len;

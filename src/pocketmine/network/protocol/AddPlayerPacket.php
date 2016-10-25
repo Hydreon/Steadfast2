@@ -53,17 +53,18 @@ class AddPlayerPacket extends DataPacket{
 		$this->reset();
 		$this->putUUID($this->uuid);
 		$this->putString($this->username);
-		$this->putLong($this->eid);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putFloat($this->speedX);
-		$this->putFloat($this->speedY);
-		$this->putFloat($this->speedZ);
-		$this->putFloat($this->yaw);
-		$this->putFloat($this->yaw); //TODO headrot
-		$this->putFloat($this->pitch);
-		$this->putShort(0);
+		$this->putVarInt($this->eid);
+		$this->putVarInt($this->eid);
+		$this->putLFloat($this->x);
+		$this->putLFloat($this->y);
+		$this->putLFloat($this->z);
+		$this->putLFloat($this->speedX);
+		$this->putLFloat($this->speedY);
+		$this->putLFloat($this->speedZ);
+		$this->putLFloat($this->pitch);
+		$this->putLFloat($this->yaw);
+		$this->putLFloat($this->yaw);//TODO headrot	
+		$this->putSignedVarInt(0);
 //		$this->putSlot($this->item);
 
 		$meta = Binary::writeMetadata($this->metadata);

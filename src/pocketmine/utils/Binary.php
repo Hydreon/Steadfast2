@@ -29,6 +29,9 @@ class Binary{
 	const BIG_ENDIAN = 0x00;
 	const LITTLE_ENDIAN = 0x01;
 
+	private static function checkLength($str, $expect){
+//		if(($len = strlen($str)) !== $expect) throw new \RuntimeException("Unexpected length: expected ".$expect.", got ".$len);
+	}
 
 	/**
 	 * Reads a 3-byte big-endian number
@@ -38,7 +41,8 @@ class Binary{
 	 * @return mixed
 	 */
 	public static function readTriad($str){
-		return @unpack("N", "\x00" . $str)[1];
+		self::checkLength($str, 3);
+		return unpack("N", "\x00" . $str)[1];
 	}
 
 	/**
@@ -60,7 +64,8 @@ class Binary{
 	 * @return mixed
 	 */
 	public static function readLTriad($str){
-		return @unpack("V", $str . "\x00")[1];
+		self::checkLength($str, 3);
+		return unpack("V", $str . "\x00")[1];
 	}
 
 	/**
@@ -82,9 +87,22 @@ class Binary{
 	 * @return string
 	 */
 	public static function writeMetadata(array $data){
+		unset($data[17]);
+		unset($data[15]);
+		if (isset($data[Entity::DATA_AIR])) {
+			$air = $data[Entity::DATA_AIR][1];
+			if ($air > 0) {
+				$air = (int) (3086 * 30 / ($air));
+			} else {
+				$air = 0;
+			}
+			$data[Entity::DATA_AIR][1] = $air;
+		}
 		$m = "";
+		$m .= self::writeVarInt(count($data));
 		foreach($data as $bottom => $d){
-			$m .= chr(($d[0] << 5) | ($bottom & 0x1F));
+			$m .= self::writeSignedVarInt($bottom);
+			$m .= self::writeVarInt($d[0]);
 			switch($d[0]){
 				case Entity::DATA_TYPE_BYTE:
 					$m .= self::writeByte($d[1]);
@@ -92,32 +110,31 @@ class Binary{
 				case Entity::DATA_TYPE_SHORT:
 					$m .= self::writeLShort($d[1]);
 					break;
-				case Entity::DATA_TYPE_INT:
-					$m .= self::writeLInt($d[1]);
+				case Entity::DATA_TYPE_INT:					
+					$m .= self::writeSignedVarInt($d[1]);
 					break;
 				case Entity::DATA_TYPE_FLOAT:
 					$m .= self::writeLFloat($d[1]);
 					break;
 				case Entity::DATA_TYPE_STRING:
-					$m .= self::writeLShort(strlen($d[1])) . $d[1];
+					$m .= self::writeVarInt(strlen($d[1])) . $d[1];
 					break;
 				case Entity::DATA_TYPE_SLOT:
-					$m .= self::writeLShort($d[1][0]);
-					$m .= self::writeByte($d[1][1]);
-					$m .= self::writeLShort($d[1][2]);
+					$m .= "\x7f";
+//					$m .= self::writeLShort($d[1][0]);
+//					$m .= self::writeByte($d[1][1]);
+//					$m .= self::writeLShort($d[1][2]);
 					break;
 				case Entity::DATA_TYPE_POS:
-					$m .= self::writeLInt($d[1][0]);
-					$m .= self::writeLInt($d[1][1]);
-					$m .= self::writeLInt($d[1][2]);
+					$m .= self::writeSignedVarInt($d[1][0]);
+					$m .= self::writeByte($d[1][1]);
+					$m .= self::writeSignedVarInt($d[1][2]);
 					break;
 				case Entity::DATA_TYPE_LONG:
-					$m .= self::writeLLong($d[1]);
+					$m .= self::writeSignedVarInt($d[1]);
 					break;
 			}
 		}
-		$m .= "\x7f";
-
 		return $m;
 	}
 
@@ -129,72 +146,72 @@ class Binary{
 	 *
 	 * @return array
 	 */
-	public static function readMetadata($value, $types = false){
-		$offset = 0;
-		$m = [];
-		$b = ord($value{$offset});
-		++$offset;
-		while($b !== 127 and isset($value{$offset})){
-			$bottom = $b & 0x1F;
-			$type = $b >> 5;
-			switch($type){
-				case Entity::DATA_TYPE_BYTE:
-					$r = self::readByte($value{$offset});
-					++$offset;
-					break;
-				case Entity::DATA_TYPE_SHORT:
-					$r = self::readLShort(substr($value, $offset, 2));
-					$offset += 2;
-					break;
-				case Entity::DATA_TYPE_INT:
-					$r = self::readLInt(substr($value, $offset, 4));
-					$offset += 4;
-					break;
-				case Entity::DATA_TYPE_FLOAT:
-					$r = self::readLFloat(substr($value, $offset, 4));
-					$offset += 4;
-					break;
-				case Entity::DATA_TYPE_STRING:
-					$len = self::readLShort(substr($value, $offset, 2));
-					$offset += 2;
-					$r = substr($value, $offset, $len);
-					$offset += $len;
-					break;
-				case Entity::DATA_TYPE_SLOT:
-					$r = [];
-					$r[] = self::readLShort(substr($value, $offset, 2));
-					$offset += 2;
-					$r[] = ord($value{$offset});
-					++$offset;
-					$r[] = self::readLShort(substr($value, $offset, 2));
-					$offset += 2;
-					break;
-				case Entity::DATA_TYPE_POS:
-					$r = [];
-					for($i = 0; $i < 3; ++$i){
-						$r[] = self::readLInt(substr($value, $offset, 4));
-						$offset += 4;
-					}
-					break;
-				case Entity::DATA_TYPE_LONG:
-					$r = self::readLLong(substr($value, $offset, 4));
-					$offset += 8;
-					break;
-				default:
-					return [];
-
-			}
-			if($types === true){
-				$m[$bottom] = [$r, $type];
-			}else{
-				$m[$bottom] = $r;
-			}
-			$b = ord($value{$offset});
-			++$offset;
-		}
-
-		return $m;
-	}
+//	public static function readMetadata($value, $types = false){
+//		$offset = 0;
+//		$m = [];
+//		$b = ord($value{$offset});
+//		++$offset;
+//		while($b !== 127 and isset($value{$offset})){
+//			$bottom = $b & 0x1F;
+//			$type = $b >> 5;
+//			switch($type){
+//				case Entity::DATA_TYPE_BYTE:
+//					$r = self::readByte($value{$offset});
+//					++$offset;
+//					break;
+//				case Entity::DATA_TYPE_SHORT:
+//					$r = self::readLShort(substr($value, $offset, 2));
+//					$offset += 2;
+//					break;
+//				case Entity::DATA_TYPE_INT:
+//					$r = self::readLInt(substr($value, $offset, 4));
+//					$offset += 4;
+//					break;
+//				case Entity::DATA_TYPE_FLOAT:
+//					$r = self::readLFloat(substr($value, $offset, 4));
+//					$offset += 4;
+//					break;
+//				case Entity::DATA_TYPE_STRING:
+//					$len = self::readLShort(substr($value, $offset, 2));
+//					$offset += 2;
+//					$r = substr($value, $offset, $len);
+//					$offset += $len;
+//					break;
+//				case Entity::DATA_TYPE_SLOT:
+//					$r = [];
+//					$r[] = self::readLShort(substr($value, $offset, 2));
+//					$offset += 2;
+//					$r[] = ord($value{$offset});
+//					++$offset;
+//					$r[] = self::readLShort(substr($value, $offset, 2));
+//					$offset += 2;
+//					break;
+//				case Entity::DATA_TYPE_POS:
+//					$r = [];
+//					for($i = 0; $i < 3; ++$i){
+//						$r[] = self::readLInt(substr($value, $offset, 4));
+//						$offset += 4;
+//					}
+//					break;
+//				case Entity::DATA_TYPE_LONG:
+//					$r = self::readLLong(substr($value, $offset, 4));
+//					$offset += 8;
+//					break;
+//				default:
+//					return [];
+//
+//			}
+//			if($types === true){
+//				$m[$bottom] = [$r, $type];
+//			}else{
+//				$m[$bottom] = $r;
+//			}
+//			$b = ord($value{$offset});
+//			++$offset;
+//		}
+//
+//		return $m;
+//	}
 
 	/**
 	 * Reads a byte boolean
@@ -227,6 +244,7 @@ class Binary{
 	 * @return int
 	 */
 	public static function readByte($c, $signed = true){
+		self::checkLength($c, 1);
 		$b = ord($c{0});
 
 		if($signed){
@@ -259,7 +277,8 @@ class Binary{
 	 * @return int
 	 */
 	public static function readShort($str){
-		return @unpack("n", $str)[1];
+		self::checkLength($str, 2);
+		return unpack("n", $str)[1];
 	}
 
 	/**
@@ -270,10 +289,11 @@ class Binary{
 	 * @return int
 	 */
 	public static function readSignedShort($str){
+		self::checkLength($str, 2);
 		if(PHP_INT_SIZE === 8){
 			return @unpack("n", $str)[1] << 48 >> 48;
 		}else{
-			return @unpack("n", $str)[1] << 16 >> 16;
+			return unpack("n", $str)[1] << 16 >> 16;
 		}
 	}
 
@@ -296,7 +316,8 @@ class Binary{
 	 * @return int
 	 */
 	public static function readLShort($str){
-		return @unpack("v", $str)[1];
+		self::checkLength($str, 2);
+		return unpack("v", $str)[1];
 	}
 
 	/**
@@ -307,10 +328,11 @@ class Binary{
 	 * @return int
 	 */
 	public static function readSignedLShort($str){
+		self::checkLength($str, 2);
 		if(PHP_INT_SIZE === 8){
-			return @unpack("v", $str)[1] << 48 >> 48;
+			return unpack("v", $str)[1] << 48 >> 48;
 		}else{
-			return @unpack("v", $str)[1] << 16 >> 16;
+			return unpack("v", $str)[1] << 16 >> 16;
 		}
 	}
 
@@ -326,10 +348,11 @@ class Binary{
 	}
 
 	public static function readInt($str){
+		self::checkLength($str, 4);
 		if(PHP_INT_SIZE === 8){
-			return @unpack("N", $str)[1] << 32 >> 32;
+			return unpack("N", $str)[1] << 32 >> 32;
 		}else{
-			return @unpack("N", $str)[1];
+			return unpack("N", $str)[1];
 		}
 	}
 
@@ -338,10 +361,11 @@ class Binary{
 	}
 
 	public static function readLInt($str){
+		self::checkLength($str, 4);
 		if(PHP_INT_SIZE === 8){
-			return @unpack("V", $str)[1] << 32 >> 32;
+			return unpack("V", $str)[1] << 32 >> 32;
 		}else{
-			return @unpack("V", $str)[1];
+			return unpack("V", $str)[1];
 		}
 	}
 
@@ -350,7 +374,8 @@ class Binary{
 	}
 
 	public static function readFloat($str){
-		return ENDIANNESS === self::BIG_ENDIAN ? @unpack("f", $str)[1] : @unpack("f", strrev($str))[1];
+		self::checkLength($str, 4);
+		return ENDIANNESS === self::BIG_ENDIAN ? unpack("f", $str)[1] : unpack("f", strrev($str))[1];
 	}
 
 	public static function writeFloat($value){
@@ -358,7 +383,8 @@ class Binary{
 	}
 
 	public static function readLFloat($str){
-		return ENDIANNESS === self::BIG_ENDIAN ? @unpack("f", strrev($str))[1] : @unpack("f", $str)[1];
+		self::checkLength($str, 4);
+		return ENDIANNESS === self::BIG_ENDIAN ? unpack("f", strrev($str))[1] : unpack("f", $str)[1];
 	}
 
 	public static function writeLFloat($value){
@@ -370,7 +396,8 @@ class Binary{
 	}
 
 	public static function readDouble($str){
-		return ENDIANNESS === self::BIG_ENDIAN ? @unpack("d", $str)[1] : @unpack("d", strrev($str))[1];
+		self::checkLength($str, 8);
+		return ENDIANNESS === self::BIG_ENDIAN ? unpack("d", $str)[1] : unpack("d", strrev($str))[1];
 	}
 
 	public static function writeDouble($value){
@@ -378,7 +405,8 @@ class Binary{
 	}
 
 	public static function readLDouble($str){
-		return ENDIANNESS === self::BIG_ENDIAN ? @unpack("d", strrev($str))[1] : @unpack("d", $str)[1];
+		self::checkLength($str, 8);
+		return ENDIANNESS === self::BIG_ENDIAN ? unpack("d", strrev($str))[1] : unpack("d", $str)[1];
 	}
 
 	public static function writeLDouble($value){
@@ -386,6 +414,7 @@ class Binary{
 	}
 
 	public static function readLong($x){
+		self::checkLength($x, 8);
 		if(PHP_INT_SIZE === 8){
 			$int = @unpack("N*", $x);
 			return ($int[1] << 32) | $int[2];
@@ -430,5 +459,30 @@ class Binary{
 	public static function writeLLong($value){
 		return strrev(self::writeLong($value));
 	}
+	
+	public static function writeSignedVarInt($v){
+		if ($v >= 0) {
+			$v = 2 * $v;
+		} else {
+			$v = 2 * abs($v) - 1;
+		}
+		return self::writeVarInt($v);
+	}
 
+	
+	public static function writeVarInt($v){		
+		if ($v < 0x80) {
+			return chr($v);
+		} else {
+			$values = array();
+			while ($v > 0) {
+				$values[] = 0x80 | ($v & 0x7f);
+				$v = $v >> 7;
+			}
+			$values[count($values)-1] &= 0x7f;
+			$bytes = call_user_func_array('pack', array_merge(array('C*'), $values));
+			return $bytes;
+		}
+	}
+	
 }

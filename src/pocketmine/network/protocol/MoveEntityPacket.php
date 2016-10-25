@@ -48,10 +48,10 @@ class MoveEntityPacket extends DataPacket{
 	public function encode(){
 		$this->reset();
 		foreach($this->entities as $d){
-			$this->putLong($d[0]); //eid
-			$this->putFloat($d[1]); //x
-			$this->putFloat($d[2]); //y
-			$this->putFloat($d[3]); //z
+			$this->putVarInt($d[0]); //eid
+			$this->putLFloat($d[1]); //x
+			$this->putLFloat($d[2]); //y
+			$this->putLFloat($d[3]); //z
 			$this->putByte($d[6] * 0.71111); //pitch
 			$this->putByte($d[5] * 0.71111); //headYaw
 			$this->putByte($d[4] * 0.71111); //yaw

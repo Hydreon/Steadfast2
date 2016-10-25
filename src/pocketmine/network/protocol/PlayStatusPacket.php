@@ -31,7 +31,9 @@ class PlayStatusPacket extends DataPacket{
 	const LOGIN_FAILED_CLIENT = 1;
 	const LOGIN_FAILED_SERVER = 2;
 	const PLAYER_SPAWN = 3;
-
+	const EDU_NO_ACCESS = 4;
+	const EDU_LEVEL_TYPE = 5;
+	
 	public $status;
 
 	public function decode(){

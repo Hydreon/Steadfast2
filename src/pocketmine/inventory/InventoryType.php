@@ -55,7 +55,11 @@ class InventoryType{
 		if(count(static::$default) > 0){
 			return;
 		}
-
+		
+		// 5 - ANVIL
+		// 4 - BREWING_STAND
+		// 3 - ENCHANT_TABLE
+		// 2 - FURNACE
 		static::$default[static::CHEST] = new InventoryType(27, "Chest", 0);
 		static::$default[static::DOUBLE_CHEST] = new InventoryType(27 + 27, "Double Chest", 0);
 		static::$default[static::PLAYER] = new InventoryType(40, "Player", 0); //27 CONTAINER, 4 ARMOR (9 reference HOTBAR slots)

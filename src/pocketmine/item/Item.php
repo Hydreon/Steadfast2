@@ -68,7 +68,7 @@ class Item{
 		}
 
 		self::$cachedParser->setData($tag);
-		return self::$cachedParser->write();
+		return self::$cachedParser->write(true);
 	}
 
 	//All Block IDs are here too
@@ -774,6 +774,7 @@ class Item{
 		369 => "Blaze Rod",
 		371 => "Gold Nugget",
 		373 => "Potion",
+		377 => "Blaze powder",
 		378 => "Magma Cream",
 		383 => "Spawn Egg",
 		388 => "Emerald",
@@ -923,6 +924,8 @@ class Item{
 			self::$list[self::COOKED_FISH] = CookedFish::class;
 			
 			self::$list[self::MOB_HEAD] = MobHead::class;
+			self::$list[self::BLAZE_POWDER] = BlazePowder::class;
+
 			for($i = 0; $i < 256; ++$i){
 				if(Block::$list[$i] !== null){
 					self::$list[$i] = Block::$list[$i];
