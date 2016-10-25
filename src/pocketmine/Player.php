@@ -2106,6 +2106,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 					if($ev->isCancelled()){
 						$this->inventory->sendHeldItem($this);
+						if ($this->inventory->getHeldItemSlot() !== -1) {
+							$this->inventory->sendContents($this);
+						}
 						//Timings::$timerUseItemPacket->stopTiming();
 						break;
 					}

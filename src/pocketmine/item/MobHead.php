@@ -17,6 +17,7 @@ class MobHead extends Item{
 	static $names = [
 		self::SKELETON => "Skeleton Head",
 		self::WITHER_SKELETON => "Wither Skeleton Head",
+		self::ZOMBIE => "Zombie Head",
 		self::STEVE => "Steve Head",
 		self::CREEPER => "Creeper Head",
 	];
