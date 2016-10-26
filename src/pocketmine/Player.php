@@ -563,6 +563,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->creationTime = microtime(true);
 		
 		if (empty(self::$availableCommands)) {
+			self::$availableCommands = $this->server->getJsonCommands();
 			$plugins = $this->server->getPluginManager()->getPlugins();
 			foreach ($plugins as $pluginName => $plugin) {
 				$pluginCommands = $plugin->getJsonCommands();
