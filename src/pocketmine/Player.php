@@ -555,6 +555,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->creationTime = microtime(true);
 		
 		if (empty(self::$availableCommands)) {
+			self::$availableCommands = $this->server->getJsonCommands();
 			$plugins = $this->server->getPluginManager()->getPlugins();
 			foreach ($plugins as $pluginName => $plugin) {
 				$pluginCommands = $plugin->getJsonCommands();
@@ -3351,17 +3352,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 		
-		if($this->getFood()-$amount <= 6 && !($this->getFood() <= 6)) {
-//			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, false);
-			$this->removeEffect(Effect::SLOWNESS);
-		} elseif($this->getFood()-$amount < 6 && !($this->getFood() > 6)) {
-//			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, true);
-			$effect = Effect::getEffect(Effect::SLOWNESS);
-			$effect->setDuration(0x7fffffff);
-			$effect->setAmplifier(2);
-			$effect->setVisible(false);
-			$this->addEffect($effect);
-		}
+//		if($this->getFood()-$amount <= 6 && !($this->getFood() <= 6)) {
+////			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, false);
+//			$this->removeEffect(Effect::SLOWNESS);
+//		} elseif($this->getFood()-$amount < 6 && !($this->getFood() > 6)) {
+////			$this->setDataProperty(self::DATA_FLAG_SPRINTING, self::DATA_TYPE_BYTE, true);
+//			$effect = Effect::getEffect(Effect::SLOWNESS);
+//			$effect->setDuration(0x7fffffff);
+//			$effect->setAmplifier(2);
+//			$effect->setVisible(false);
+//			$this->addEffect($effect);
+//		}
 		if($this->hunger - $amount < 0) return;
 		$this->setFood($this->getFood() - $amount);
 	}
