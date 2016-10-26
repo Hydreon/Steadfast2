@@ -287,6 +287,8 @@ class Server{
 		'y' => 10,
 		'z' => -1000000
 	);
+	
+	private $jsonCommands = [];
 
 	public function isUseAnimal() {
 		return $this->useAnimal;
@@ -2031,6 +2033,10 @@ class Server{
 	 */
 	public function start(){
 		$this->loadSignTranslation();		
+		$jsonCommands = @json_decode(@file_get_contents(__DIR__ . "/command/commands.json"), true);
+		if ($jsonCommands) {
+			$this->jsonCommands = $jsonCommands;
+		}
 		if($this->getConfigBoolean("enable-query", true) === true){
 			$this->queryHandler = new QueryHandler();
 		}
@@ -2585,5 +2591,9 @@ class Server{
 	public function getGlobalCompassPosition() {
 		return $this->globalCompasPosition;
 	}	
+	
+	public function getJsonCommands() {
+		return $this->jsonCommands;
+	}
 
 }
