@@ -101,7 +101,7 @@ class Binary{
 		$m = "";
 		$m .= self::writeVarInt(count($data));
 		foreach($data as $bottom => $d){
-			$m .= self::writeSignedVarInt($bottom);
+			$m .= self::writeVarInt($bottom);
 			$m .= self::writeVarInt($d[0]);
 			switch($d[0]){
 				case Entity::DATA_TYPE_BYTE:
