@@ -94,8 +94,12 @@ class ProxyInterface implements AdvancedSourceInterface {
 							return;
 						}
 						if (!is_null($pk)) {
-							$pk->decode();
-							$this->session[$identifier]->handleDataPacket($pk);
+							try {
+								$pk->decode();
+								$this->session[$identifier]->handleDataPacket($pk);
+							} catch (\Exception $e) {
+								echo "DECODE ERROR: " . $e->getMessage() . ", PACKET ID: " . $pk->pid();
+							}
 						}
 					} elseif ($type == self::PROXY_PACKET_ID) {
 						$pk = $this->getProxyPacket($buffer);
@@ -103,8 +107,12 @@ class ProxyInterface implements AdvancedSourceInterface {
 							return;
 						}
 						if (!is_null($pk)) {
-							$pk->decode();
-							$this->session[$identifier]->handleProxyDataPacket($pk);
+							try {
+								$pk->decode();
+								$this->session[$identifier]->handleProxyDataPacket($pk);
+							} catch (\Exception $e) {
+								echo "DECODE ERROR: " . $e->getMessage() . ", PROXY PACKET ID: " . $pk->pid();
+							}
 						}
 					}
 				}
