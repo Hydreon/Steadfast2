@@ -2306,7 +2306,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 						$this->teleport($ev->getRespawnPosition());
 
-						$this->setSprinting(false);
+						$this->setSprinting(false, true);
 						$this->setSneaking(false);
 
 						$this->extinguish();
@@ -3682,17 +3682,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->updateAttribute(UpdateAttributesPacket::SPEED, $this->movementSpeed, 0, self::MAXIMUM_SPEED, $this->movementSpeed);
 	}
 
-	public function setSprinting($value = true) {
+	public function setSprinting($value = true, $setDefault = false) {
 		parent::setSprinting($value);
-		
-		$sprintSpeedChange = self::DEFAULT_SPEED * 0.3;
-		if ($value === false) {
-			$sprintSpeedChange *= -1;
+		if ($setDefault) {
+			$this->movementSpeed = self::DEFAULT_SPEED;
+		} else {
+			$sprintSpeedChange = self::DEFAULT_SPEED * 0.3;
+			if ($value === false) {
+				$sprintSpeedChange *= -1;
+			}
+			$this->movementSpeed += $sprintSpeedChange;
 		}
-		$this->movementSpeed += $sprintSpeedChange;
 		$this->updateSpeed($this->movementSpeed);
 	}
-	
+
 	public function checkVersion() {
 		if (!$this->loggedIn) {
 			$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
