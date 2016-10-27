@@ -40,6 +40,7 @@ use pocketmine\network\Network;
 use pocketmine\network\protocol\ExplodePacket;
 use pocketmine\Server;
 use pocketmine\utils\Random;
+use pocketmine\block\Air;
 
 class Explosion{
 
@@ -205,7 +206,7 @@ class Explosion{
 					$this->level->dropItem($block->add(0.5, 0.5, 0.5), Item::get(...$drop));
 				}
 			}
-			$this->level->setBlockIdAt($block->x, $block->y, $block->z, 0);
+			$this->level->setBlock(new Vector3($block->x, $block->y, $block->z), new Air());
 			$send[] = new Vector3($block->x - $source->x, $block->y - $source->y, $block->z - $source->z);
 		}
 		$pk = new ExplodePacket();
