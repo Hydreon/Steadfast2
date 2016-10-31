@@ -51,9 +51,9 @@ class ExplodePacket extends DataPacket{
 		$this->putVarInt(count($this->records));
 		if(count($this->records) > 0){
 			foreach($this->records as $record){
-				$this->putByte($record->x);
+				$this->putSignedVarInt($record->x);
 				$this->putByte($record->y);
-				$this->putByte($record->z);
+				$this->putSignedVarInt($record->z);
 			}
 		}
 	}
