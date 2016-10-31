@@ -89,23 +89,20 @@ class Cake extends Transparent{
 		return [];
 	}
 
-	public function onActivate(Item $item, Player $player = null){
-		if($player instanceof Player and $player->getHealth() < $player->getMaxHealth()){
-			++$this->meta;
-
+	public function onActivate(Item $item, Player $player = null) {
+		if ($player instanceof Player and $player->getHealth() < $player->getMaxHealth()) {		
 			$ev = new EntityRegainHealthEvent($player, 3, EntityRegainHealthEvent::CAUSE_EATING);
 			$player->heal($ev->getAmount(), $ev);
-
-			if($this->meta >= 0x06){
-				$this->getLevel()->setBlock($this, new Air(), true);
-			}else{
-				$this->getLevel()->setBlock($this, $this, true);
-			}
-
-			return true;
+		}
+		++$this->meta;
+		$player->setFood($player->getFood());
+		if ($this->meta >= 0x06) {
+			$this->getLevel()->setBlock($this, new Air(), true);
+		} else {
+			$this->getLevel()->setBlock($this, $this, true);
 		}
 
-		return false;
+		return true;
 	}
 
 }

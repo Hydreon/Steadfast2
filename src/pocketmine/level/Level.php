@@ -1493,6 +1493,11 @@ class Level implements ChunkManager, Metadatable{
 						return true;
 					}
 				}
+			} else {
+				$player->getInventory()->sendHeldItem($player);
+				if ($player->getInventory()->getHeldItemSlot() !== -1) {
+					$player->getInventory()->sendContents($player);
+				}
 			}
 		}elseif($target->canBeActivated() === true and $target->onActivate($item, $player) === true){
 			return true;
