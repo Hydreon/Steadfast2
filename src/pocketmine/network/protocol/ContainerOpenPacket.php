@@ -27,6 +27,7 @@ namespace pocketmine\network\protocol;
 class ContainerOpenPacket extends DataPacket{
 	const NETWORK_ID = Info::CONTAINER_OPEN_PACKET;
 
+	public $entityId;
 	public $windowid;
 	public $type;
 	public $slots;
@@ -46,7 +47,7 @@ class ContainerOpenPacket extends DataPacket{
 		$this->putSignedVarInt($this->x);
 		$this->putByte($this->y);
 		$this->putSignedVarInt($this->z);
-		$this->putSignedVarInt(-1);
+		$this->putVarInt($this->entityId);
 	}
 
 }

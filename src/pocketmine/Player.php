@@ -82,6 +82,7 @@ use pocketmine\inventory\transactions\ArmorSwapTransaction;
 
 use pocketmine\item\Item;
 use pocketmine\item\Armor;
+use pocketmine\item\Tool;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\format\LevelProvider;
 use pocketmine\level\Level;
@@ -161,6 +162,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	const ADVENTURE = 2;
 	const SPECTATOR = 3;
 	const VIEW = Player::SPECTATOR;
+	
+	const CRAFTING_DEFAULT = 0;
+	const CRAFTING_WORKBENCH = 1;
+	const CRAFTING_ANVIL = 2;
+	const CRAFTING_ENCHANT = 3;
 
 	const SURVIVAL_SLOTS = 36;
 	const CREATIVE_SLOTS = 112;
@@ -199,7 +205,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/** @var Transaction[] */
 	protected $transactionQueue = [];
 	
-	public $craftingType = 0; //0 = 2x2 crafting, 1 = 3x3 crafting, 2 = stonecutter
+	public $craftingType = self::CRAFTING_DEFAULT;
 
 	protected $isCrafting = false;
 
@@ -277,6 +283,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected static $availableCommands = [];
 	
 	protected $movementSpeed = self::DEFAULT_SPEED;
+	
+	/** enchanting field */
+	protected $enchantingQueue = [];
+	protected $enchantingLevel = 0;
 
 	public function getLeaveMessage(){
 		return "";
@@ -1932,6 +1942,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->sendSelfData();
 				
 				$this->updateSpeed(self::DEFAULT_SPEED);
+				$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
 				
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
@@ -2044,7 +2055,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				
 				$blockVector = new Vector3($packet->x, $packet->y, $packet->z);
 
-				$this->craftingType = 0;
+//				$this->craftingType = self::CRAFTING_DEFAULT;
 
 				if($packet->face >= 0 and $packet->face <= 5){ //Use Block, place
 
@@ -2172,7 +2183,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 
-				$this->craftingType = 0;
+//				$this->craftingType = self::CRAFTING_DEFAULT;
 				$packet->eid = $this->id;
 				$pos = new Vector3($packet->x, $packet->y, $packet->z);
 				
@@ -2300,7 +2311,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							break;
 						}
 
-						$this->craftingType = 0;
+						$this->craftingType = self::CRAFTING_DEFAULT;
 
 						$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
 
@@ -2385,7 +2396,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerRemoveBlockPacket->stopTiming();
 					break;
 				}
-				$this->craftingType = 0;
+//				$this->craftingType = self::CRAFTING_DEFAULT;
 
 				$vector = new Vector3($packet->x, $packet->y, $packet->z);
 
@@ -2433,7 +2444,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 
-				$this->craftingType = 0;
+//				$this->craftingType = self::CRAFTING_DEFAULT;
 
 				$target = $this->level->getEntity($packet->target);
 
@@ -2580,13 +2591,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerEntityEventPacket->stopTiming();
 					break;
 				}
-				$this->craftingType = 0;
+//				$this->craftingType = self::CRAFTING_DEFAULT;
 
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false); //TODO: check if this should be true
 
 				switch($packet->event){
 					case 9: //Eating
 						$this->eatFoodInHand();
+						break;
+					case EntityEventPacket::ENCHANT:
+						$enchantLevel = $packet->theThing;
 						break;
 				}
 				//Timings::$timerEntityEventPacket->stopTiming();
@@ -2639,7 +2653,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerTextPacket->stopTiming();
 					break;
 				}
-				$this->craftingType = 0;
+//				$this->craftingType = self::CRAFTING_DEFAULT;
 				if($packet->type === TextPacket::TYPE_CHAT){
 					$packet->message = TextFormat::clean($packet->message, $this->removeFormat);
 					foreach(explode("\n", $packet->message) as $message){
@@ -2660,7 +2674,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($this->spawned === false or $packet->windowid === 0){
 					break;
 				}
-				$this->craftingType = 0;
+				$this->craftingType = self::CRAFTING_DEFAULT;
 				$this->currentTransaction = null;
 				if(isset($this->windowIndex[$packet->windowid])){
 					$this->server->getPluginManager()->callEvent(new InventoryCloseEvent($this->windowIndex[$packet->windowid], $this));
@@ -2683,10 +2697,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerCraftingEventPacket->stopTiming();
 					break;
 				}
-				$this->craftingType = 1;
+				// может зря
+//				$this->craftingType = 1;
 				$recipe = $this->server->getCraftingManager()->getRecipe($packet->id);
 
-				if($recipe === null or (($recipe instanceof BigShapelessRecipe or $recipe instanceof BigShapedRecipe) and $this->craftingType === 0)){
+				// переделать эту проверку
+				if ($recipe === null || (($recipe instanceof BigShapelessRecipe || $recipe instanceof BigShapedRecipe) && $this->craftingType === self::CRAFTING_DEFAULT)) {
 					$this->inventory->sendContents($this);
 					//Timings::$timerCraftingEventPacket->stopTiming();
 					break;
@@ -2847,7 +2863,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerConteinerSetSlotPacket->stopTiming();
 					break;
 				}
-
+				
 				if($packet->windowid === 0){ //Our inventory
 					if($packet->slot >= $this->inventory->getSize()){
 						//Timings::$timerConteinerSetSlotPacket->stopTiming();
@@ -2859,7 +2875,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->inventory->setHotbarSlotIndex($packet->slot, $packet->slot); //links $hotbar[$packet->slot] to $slots[$packet->slot]
 						}
 					}
-					$transaction = new PairTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
+					if ($this->craftingType === self::CRAFTING_ENCHANT) {
+						$transaction = new BaseTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
+					} else {
+						$transaction = new PairTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
+					}
 				}elseif($packet->windowid === ContainerSetContentPacket::SPECIAL_ARMOR){ //Our armor
 					if($packet->slot >= 4){
 						//Timings::$timerConteinerSetSlotPacket->stopTiming();
@@ -2874,7 +2894,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$transaction = new PairTransaction($this->inventory, $slot, $currentArmor, $packet->item);
 					}
 				}elseif(isset($this->windowIndex[$packet->windowid])){
-					$this->craftingType = 0;
+//					$this->craftingType = self::CRAFTING_DEFAULT;
 					$inv = $this->windowIndex[$packet->windowid];
 					$transaction = new PairTransaction($inv, $packet->slot, $inv->getItem($packet->slot), $packet->item);
 				}else{
@@ -2888,7 +2908,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 				
-				$this->addTransaction($transaction);
+				if ($this->craftingType === self::CRAFTING_ENCHANT) {
+					$this->enchantTransaction($transaction);
+				} else {
+					$this->addTransaction($transaction);
+				}
 				//Timings::$timerConteinerSetSlotPacket->stopTiming();
 				break;
 			case ProtocolInfo::TILE_ENTITY_DATA_PACKET:
@@ -2897,7 +2921,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerTileEntityPacket->stopTiming();
 					break;
 				}
-				$this->craftingType = 0;
+//				$this->craftingType = self::CRAFTING_DEFAULT;
 
 				$pos = new Vector3($packet->x, $packet->y, $packet->z);
 				if($pos->distanceSquared($this) > 10000){
@@ -3635,6 +3659,86 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->transactionQueue[] = $transaction;
 			}
 		}
+	}
+	
+	protected function enchantTransaction(BaseTransaction $transaction) {
+		// if not in enchanting mode, return
+		if ($this->craftingType !== self::CRAFTING_ENCHANT) {
+			$this->getInventory()->sendContents($this);
+			return;
+		}
+		$oldItem = $transaction->getSourceItem();
+		$newItem = $transaction->getTargetItem();
+		$enchantInv = $this->windowIndex[$this->windowCnt];
+		
+		if ($newItem->getId() === Item::AIR) {
+			if ($oldItem->getId() === Item::DYE && $oldItem->getDamage() === 4) {
+				$catalyst = $enchantInv->getItem(1);
+				if ($catalyst->getId() !== Item::AIR) {
+					$newCount = $oldItem->getCount() + $catalyst->getCount();
+					$oldItem->setCount($newCount);
+				}
+				$enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $oldItem);
+				
+			} else if ($oldItem instanceof Armor || $oldItem instanceof Tool) {
+				$source = $enchantInv->getItem(0);
+				if ($source->getId() !== Item::AIR) {
+					$enchantInv->sendContents($this);
+					$this->inventory->sendContents($this);
+					return;
+				}
+				$enchTransaction = new BaseTransaction($enchantInv, 0, $source, $oldItem);
+			}
+		} else {
+			if ($newItem->getId() === Item::DYE && $newItem->getDamage() === 4) {
+				$catalyst = $enchantInv->getItem(1);
+				if ($newItem->getCount() < $oldItem->getCount()) {
+					$newCount = $oldItem->getCount() - $newItem->getCount();
+					if ($catalyst->getId() !== Item::AIR) {
+						$newCount += $catalyst->getCount();
+					}
+					$newItem->setCount($newCount);
+					$enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $newItem);
+				} else {
+					$countDiff = $newItem->getCount() - $oldItem->getCount();
+					if ($countDiff > $catalyst->getCount()) {
+						$enchantInv->sendContents($this);
+						$this->inventory->sendContents($this);
+						return;
+					}
+					if ($catalyst->getCount() - $countDiff != 0) {
+						$newItem->setCount($catalyst->getCount() - $countDiff);
+					} else {
+						$newItem = Item::get(Item::AIR);
+					}
+					$enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $newItem);
+				}
+			} else if ($newItem instanceof Armor || $newItem instanceof Tool) {
+				if (!$enchantInv->isItemWasEnchant()) {
+					$source = $enchantInv->getItem(0);
+					if ($newItem->deepEquals($source, true, false) && $source->getCount() === $newItem->getCount()) {
+						$enchTransaction = new BaseTransaction($enchantInv, 0, $source, Item::get(Item::AIR));
+					} else {
+						$enchantInv->sendContents($this);
+						$this->inventory->sendContents($this);
+						return;
+					}
+				} else {
+					// get enchanting item logic
+				}
+			} else {
+				$enchantInv->sendContents($this);
+				$this->inventory->sendContents($this);
+				return;
+			}
+		}
+		// execute transaction
+		$trGroup = new SimpleTransactionGroup($this);
+		$trGroup->addTransaction($transaction);
+		if (isset($enchTransaction)) {
+			$trGroup->addTransaction($enchTransaction);
+		}
+		$this->transactionGroupQueue[] = $trGroup;
 	}
 	
 	protected function executeTransuctions() {
