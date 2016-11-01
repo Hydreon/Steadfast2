@@ -260,7 +260,7 @@ class Network {
 						return;
 					}
 				} else {
-					echo "UNKNOWN PACKET: ".bin2hex($buf{0}).PHP_EOL;
+//					echo "UNKNOWN PACKET: ".bin2hex($buf{0}).PHP_EOL;
 //					echo "Buffer DEC: ".$buf.PHP_EOL;
 //					echo "Buffer HEX: ".bin2hex($buf).PHP_EOL;
 				}
