@@ -1594,11 +1594,11 @@ class Item{
 		}
 
 		$enchantments = [];
-
+		
 		foreach($this->getNamedTag()->ench as $entry){
 			$e = Enchantment::getEnchantment($entry["id"]);
 			$e->setLevel($entry["lvl"]);
-			$enchantments[] = $e;
+			$enchantments[$e->getId()] = $e;
 		}
 
 		return $enchantments;

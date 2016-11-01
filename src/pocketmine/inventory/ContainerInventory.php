@@ -43,9 +43,6 @@ abstract class ContainerInventory extends BaseInventory{
 		}else{
 			$pk->x = $pk->y = $pk->z = 0;
 		}
-		
-		var_dump($pk);
-		
 		$who->dataPacket($pk);
 		$this->sendContents($who);
 	}

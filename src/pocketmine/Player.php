@@ -70,6 +70,7 @@ use pocketmine\inventory\BaseTransaction;
 use pocketmine\inventory\BigShapedRecipe;
 use pocketmine\inventory\BigShapelessRecipe;
 use pocketmine\inventory\CraftingTransactionGroup;
+use pocketmine\inventory\EnchantInventory;
 use pocketmine\inventory\FurnaceInventory;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\InventoryHolder;
@@ -283,10 +284,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected static $availableCommands = [];
 	
 	protected $movementSpeed = self::DEFAULT_SPEED;
-	
-	/** enchanting field */
-	protected $enchantingQueue = [];
-	protected $enchantingLevel = 0;
 
 	public function getLeaveMessage(){
 		return "";
@@ -2601,6 +2598,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					case EntityEventPacket::ENCHANT:
 						$enchantLevel = $packet->theThing;
+						$enchantInventory = $this->windowIndex[$this->windowCnt];
+						if ($enchantInventory instanceof EnchantInventory) {
+							if (!$enchantInventory->setEnchantingLevel($enchantLevel)) {
+								$enchantInventory->sendContents($this);
+							}
+						}
 						break;
 				}
 				//Timings::$timerEntityEventPacket->stopTiming();
@@ -3682,7 +3685,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				
 			} else if ($oldItem instanceof Armor || $oldItem instanceof Tool) {
 				$source = $enchantInv->getItem(0);
-				if ($source->getId() !== Item::AIR) {
+				if ($source->getId() !== Item::AIR || $oldItem->hasEnchantments()) {
 					$enchantInv->sendContents($this);
 					$this->inventory->sendContents($this);
 					return;
@@ -3714,17 +3717,24 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $newItem);
 				}
 			} else if ($newItem instanceof Armor || $newItem instanceof Tool) {
-				if (!$enchantInv->isItemWasEnchant()) {
-					$source = $enchantInv->getItem(0);
-					if ($newItem->deepEquals($source, true, false) && $source->getCount() === $newItem->getCount()) {
-						$enchTransaction = new BaseTransaction($enchantInv, 0, $source, Item::get(Item::AIR));
-					} else {
+				$source = $enchantInv->getItem(0);
+				$itemsIsEqual = !$enchantInv->isItemWasEnchant() ? $newItem->deepEquals($source) : $newItem->deepEquals($source, true, false);
+				if ($itemsIsEqual && $enchantInv->isItemWasEnchant()) {
+					$updateResult = $enchantInv->updateResultItem($newItem);
+					if (!$updateResult) {
 						$enchantInv->sendContents($this);
 						$this->inventory->sendContents($this);
 						return;
 					}
+					$source = $enchantInv->getItem(0);
+				}
+				
+				if ($itemsIsEqual && $source->getCount() === $newItem->getCount()) {
+					$enchTransaction = new BaseTransaction($enchantInv, 0, $source, Item::get(Item::AIR));
 				} else {
-					// get enchanting item logic
+					$enchantInv->sendContents($this);
+					$this->inventory->sendContents($this);
+					return;
 				}
 			} else {
 				$enchantInv->sendContents($this);

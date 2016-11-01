@@ -22,6 +22,7 @@
 namespace pocketmine\inventory;
 
 use pocketmine\inventory\InventoryType;
+use pocketmine\item\Item;
 use pocketmine\level\Position;
 use pocketmine\Player;
 
@@ -82,7 +83,13 @@ class EnchantInventory extends ContainerInventory {
 	}
 	
 	public function setEnchantingLevel($level) {
-		$this->enchantingLevel = $level;
+		$level = abs($level);
+		if ($this->slots[1]->getId() === Item::DYE && $this->slots[1]->getCount() >= $level) {
+			$this->enchantingLevel = $level;
+			return true;
+		}
+		return false;
+		
 	}
 	
 	public function getEnchanringLevel($level) {
@@ -91,6 +98,25 @@ class EnchantInventory extends ContainerInventory {
 	
 	public function isItemWasEnchant() {
 		return $this->enchantingLevel !== 0;
+	}
+	
+	public function updateResultItem(Item $item) {
+		if ($this->enchantingLevel !== 0) {
+			$catalystCount = $this->slots[1]->getCount();
+			if ($catalystCount > $this->enchantingLevel) {
+				$this->slots[1]->setCount($catalystCount - $this->enchantingLevel);
+			} else if ($catalystCount === $this->enchantingLevel) {
+				$this->slots[1] = Item::get(Item::AIR);
+			} else {
+				echo '[Enchant]: Catalyst count problem'.PHP_EOL;
+				return false;
+			}
+			$this->slots[0] = $item;
+			$this->enchantingLevel = 0;
+			return true;
+		}
+		echo '[Enchant]: Cheaters activity'.PHP_EOL;
+		return false;
 	}
 
 }
