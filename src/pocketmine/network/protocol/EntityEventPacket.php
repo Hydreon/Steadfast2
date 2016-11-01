@@ -42,15 +42,18 @@ class EntityEventPacket extends DataPacket{
 	const SQUID_INK_CLOUD = 15;
 	const AMBIENT_SOUND = 16;
 	const RESPAWN = 17;
+	const ENCHANT = 34;
 
 	//TODO add new events
 
 	public $eid;
 	public $event;
+	public $theThing;
 
 	public function decode(){
 		$this->eid = $this->getVarInt();
 		$this->event = $this->getByte();
+		$this->theThing = $this->getSignedVarInt();
 	}
 
 	public function encode(){

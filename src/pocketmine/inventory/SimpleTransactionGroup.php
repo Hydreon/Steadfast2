@@ -132,7 +132,8 @@ class SimpleTransactionGroup implements TransactionGroup {
 		$haveItems = [];
 		$needItems = [];
 
-		return $this->matchItems($haveItems, $needItems) and count($haveItems) === 0 and count($needItems) === 0 and count($this->transactions) > 0;
+		$matchResult = $this->matchItems($haveItems, $needItems);		
+		return $matchResult && empty($haveItems) && empty($needItems) && !empty($this->transactions);
 	}
 
 	public function execute() {

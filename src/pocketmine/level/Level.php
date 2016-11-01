@@ -1363,12 +1363,12 @@ class Level implements ChunkManager, Metadatable{
 		if($item === null){
 			$item = Item::get(Item::AIR, 0, 0);
 		}
-
+		$drops = $target->getDrops($item); 
 		if($player instanceof Player){
 			if($player->isSpectator()){
 				return false;
 			}
-			$ev = new BlockBreakEvent($player, $target, $item, ($player->getGamemode() & 0x01) === 1 ? true : false);
+			$ev = new BlockBreakEvent($player, $target, $item, ($player->getGamemode() & 0x01) === 1 ? true : false, $drops);
 
 			if($player->isSurvival() and $item instanceof Item and !$target->isBreakable($item)){
 				$ev->setCancelled();
@@ -1391,7 +1391,7 @@ class Level implements ChunkManager, Metadatable{
 			if(!$ev->getInstaBreak() and ($player->lastBreak + $breakTime) >= microtime(true)){
 				return false;
 			}
-
+			$drops = $ev->getDrops();
 			$player->lastBreak = microtime(true);
 		}elseif($item instanceof Item and !$target->isBreakable($item)){
 			return false;
@@ -1406,8 +1406,7 @@ class Level implements ChunkManager, Metadatable{
 					$level->setBlock($above, new Air(), true);
 				}
 			}
-		}
-		$drops = $target->getDrops($item); //Fixes tile entities being deleted before getting drops
+		}		
 		$target->onBreak($item);
 		$tile = $this->getTile($target);
 		if($tile instanceof Tile){
@@ -1492,6 +1491,11 @@ class Level implements ChunkManager, Metadatable{
 
 						return true;
 					}
+				}
+			} else {
+				$player->getInventory()->sendHeldItem($player);
+				if ($player->getInventory()->getHeldItemSlot() !== -1) {
+					$player->getInventory()->sendContents($player);
 				}
 			}
 		}elseif($target->canBeActivated() === true and $target->onActivate($item, $player) === true){

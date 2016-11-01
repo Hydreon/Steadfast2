@@ -597,6 +597,7 @@ class Item{
 		110 => "Mycelium",
 		111 => "Water Lily",
 		112 => "Nether Brick",
+		113 => "Nether Brick Fence",
 		114 => "Nether Brick Stairs",
 		116 => "Enchantment Table",
 		117 => "Brewing Stand",
@@ -1593,11 +1594,11 @@ class Item{
 		}
 
 		$enchantments = [];
-
+		
 		foreach($this->getNamedTag()->ench as $entry){
 			$e = Enchantment::getEnchantment($entry["id"]);
 			$e->setLevel($entry["lvl"]);
-			$enchantments[] = $e;
+			$enchantments[$e->getId()] = $e;
 		}
 
 		return $enchantments;

@@ -27,6 +27,7 @@ namespace pocketmine\network\protocol;
 class ContainerOpenPacket extends DataPacket{
 	const NETWORK_ID = Info::CONTAINER_OPEN_PACKET;
 
+	public $entityId;
 	public $windowid;
 	public $type;
 	public $slots;
