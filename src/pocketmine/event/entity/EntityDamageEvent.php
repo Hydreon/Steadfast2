@@ -202,7 +202,7 @@ class EntityDamageEvent extends EntityEvent implements Cancellable{
 			$damage += $d;
 		}
 
-		return $damage;
+		return max($damage, 0);
 	}
 
 }

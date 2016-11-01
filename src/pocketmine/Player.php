@@ -1946,7 +1946,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				
 				$this->updateSpeed(self::DEFAULT_SPEED);
 //				$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
-				
+//				
 //				$ironSword = Item::get(Item::IRON_SWORD);
 //				$effect = Enchantment::getEnchantment(Enchantment::TYPE_WEAPON_SHARPNESS)->setLevel(5);
 //				$ironSword->addEnchantment($effect);
@@ -1955,6 +1955,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				$effect = Enchantment::getEnchantment(Enchantment::TYPE_WEAPON_KNOCKBACK)->setLevel(2);
 //				$ironSword->addEnchantment($effect);
 //				$this->inventory->addItem($ironSword);
+//				
+//				$ironSword = Item::get(Item::DIAMOND_CHESTPLATE);
+//				$effect = Enchantment::getEnchantment(Enchantment::TYPE_ARMOR_PROTECTION)->setLevel(4);
+//				$ironSword->addEnchantment($effect);
+//				$effect = Enchantment::getEnchantment(Enchantment::TYPE_ARMOR_EXPLOSION_PROTECTION)->setLevel(4);
+//				$ironSword->addEnchantment($effect);
+//				$effect = Enchantment::getEnchantment(Enchantment::TYPE_ARMOR_FALL_PROTECTION)->setLevel(4);
+//				$ironSword->addEnchantment($effect);
+//				$effect = Enchantment::getEnchantment(Enchantment::TYPE_ARMOR_FIRE_PROTECTION)->setLevel(4);
+//				$ironSword->addEnchantment($effect);
+//				$effect = Enchantment::getEnchantment(Enchantment::TYPE_ARMOR_PROJECTILE_PROTECTION)->setLevel(4);
+//				$ironSword->addEnchantment($effect);
+//				$this->inventory->addItem($ironSword);
+//				
 //				$this->inventory->sendContents($this);
 				
 				//Timings::$timerLoginPacket->stopTiming();
@@ -3843,7 +3857,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 	
-	protected function getProtectionEnchantments() {
+	public function getProtectionEnchantments() {
 		$result = [
 			Enchantment::TYPE_ARMOR_PROTECTION => null,
 			Enchantment::TYPE_ARMOR_FIRE_PROTECTION => null,
