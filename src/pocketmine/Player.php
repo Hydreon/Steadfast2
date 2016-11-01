@@ -284,6 +284,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected static $availableCommands = [];
 	
 	protected $movementSpeed = self::DEFAULT_SPEED;
+	
+	private static $damegeTimeList = ['0.05' => 0, '0.1' => 0.2, '0.15' => 0.4, '0.2' => 0.6, '0.25' => 0.8];
+	
+	protected $lastDamegeTime = 0;
 
 	public function getLeaveMessage(){
 		return "";
@@ -2534,7 +2538,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 						$damage[EntityDamageEvent::MODIFIER_ARMOR] = -floor($damage[EntityDamageEvent::MODIFIER_BASE] * $points * 0.04);
 					}
-
+					
+					$timeDiff = microtime(true) - $this->lastDamegeTime;					
+					$this->lastDamegeTime = microtime(true);
+					
+					foreach (self::$damegeTimeList as $time => $koef) {
+						if ($timeDiff <= $time) {							
+							$damage[EntityDamageEvent::MODIFIER_BASE] *= $koef;
+							break;
+						}
+					}
 					$ev = new EntityDamageByEntityEvent($this, $target, EntityDamageEvent::CAUSE_ENTITY_ATTACK, $damage);
 					if($cancelled){
 						$ev->setCancelled();
