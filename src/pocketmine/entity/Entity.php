@@ -27,6 +27,7 @@ namespace pocketmine\entity;
 use pocketmine\block\Block;
 use pocketmine\block\Water;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDespawnEvent;
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\entity\EntityMotionEvent;
@@ -34,6 +35,8 @@ use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\EntitySpawnEvent;
 use pocketmine\event\entity\EntityTeleportEvent;
 use pocketmine\event\Timings;
+use pocketmine\item\enchantment\Enchantment;
+use pocketmine\item\Tool;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\Level;
@@ -239,6 +242,8 @@ abstract class Entity extends Location implements Metadatable{
 
 	/** @var \pocketmine\event\TimingsHandler */
 	protected $timings;
+	
+	protected $fireDamage = 1;
 
 
 	public function __construct(FullChunk $chunk, Compound $nbt){
@@ -652,6 +657,20 @@ abstract class Entity extends Location implements Metadatable{
 			and $source->getCause() === EntityDamageEvent::CAUSE_LAVA){
 			$source->setCancelled();
 		}
+		
+		if ($source instanceof EntityDamageByEntityEvent) {
+			$damager = $source->getDamager();
+			if ($damager instanceof Player) {
+				$weapon = $damager->getInventory()->getItemInHand();
+				if ($weapon instanceof Tool) {
+					$enchantment = $weapon->getEnchantment(Enchantment::TYPE_WEAPON_FIRE_ASPECT);
+					if (!is_null($enchantment)) {
+						$fireDamage = max(($enchantment->getLevel() * 4) - 1, 1);
+						$this->setOnFire(4, $fireDamage);
+					}
+				}
+			}
+		}
 
 		$this->server->getPluginManager()->callEvent($source);
 		if($source->isCancelled()){
@@ -882,7 +901,7 @@ abstract class Entity extends Location implements Metadatable{
 				}
 			}else{
 				if(!$this->hasEffect(Effect::FIRE_RESISTANCE) and ($this->fireTicks % 20) === 0 or $tickDiff > 20){
-					$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_FIRE_TICK, 1);
+					$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_FIRE_TICK, $this->fireDamage);
 					$this->attack($ev->getFinalDamage(), $ev);
 				}
 				$this->fireTicks -= $tickDiff;
@@ -978,11 +997,12 @@ abstract class Entity extends Location implements Metadatable{
 		return $this->fireTicks > 0;
 	}
 
-	public function setOnFire($seconds){
+	public function setOnFire($seconds, $damage = 1){
 		$ticks = $seconds * 20;
 		if($ticks > $this->fireTicks){
 			$this->fireTicks = $ticks;
 		}
+		$this->fireDamage = $damage;
 	}
 
 	public function getDirection(){
@@ -1005,6 +1025,7 @@ abstract class Entity extends Location implements Metadatable{
 
 	public function extinguish(){
 		$this->fireTicks = 0;
+		$this->fireDamage = 1;
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ONFIRE, false);
 	}
 

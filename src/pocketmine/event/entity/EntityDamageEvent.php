@@ -24,6 +24,8 @@ namespace pocketmine\event\entity;
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
 use pocketmine\event\Cancellable;
+use pocketmine\Player;
+use pocketmine\item\enchantment\Enchantment;
 
 class EntityDamageEvent extends EntityEvent implements Cancellable{
 	public static $handlerList = null;
@@ -33,6 +35,17 @@ class EntityDamageEvent extends EntityEvent implements Cancellable{
 	const MODIFIER_STRENGTH = 2;
 	const MODIFIER_WEAKNESS = 3;
 	const MODIFIER_RESISTANCE = 4;
+	// attack effect modifiers
+	const MODIFIER_EFFECT_SHARPNESS = 5;
+	const MODIFIER_EFFECT_SMITE = 6;
+	const MODIFIER_EFFECT_ARTHROPODOS = 7;
+	const MODIFIER_EFFECT_KNOCKBACK = 8;
+	// defence effect modifiers
+	const MODIFIER_EFFECT_PROTECTION = 9;
+	const MODIFIER_EFFECT_FIRE_PROTECTION = 10;
+	const MODIFIER_EFFECT_BLAST_PROTECTION = 11;
+	const MODIFIER_EFFECT_PROJECTILE_PROTECTION = 12;
+	const MODIFIER_EFFECT_FALL_PROTECTION = 13;
 
 	
 	const CAUSE_ENTITY_ATTACK = 1;
@@ -84,6 +97,47 @@ class EntityDamageEvent extends EntityEvent implements Cancellable{
 
 		if($entity->hasEffect(Effect::DAMAGE_RESISTANCE)){
 			$this->setDamage(-($this->getDamage(self::MODIFIER_BASE) * 0.20 * ($entity->getEffect(Effect::DAMAGE_RESISTANCE)->getAmplifier() + 1)), self::MODIFIER_RESISTANCE);
+		}
+		
+		if ($entity instanceof Player && $cause !== self::CAUSE_VOID) {
+			$enchantments = $entity->getProtectionEnchantments();
+			if (!is_null($enchantments[Enchantment::TYPE_ARMOR_PROTECTION])) {
+				$enchantment = $enchantments[Enchantment::TYPE_ARMOR_PROTECTION];
+				$this->setDamage(-1 * $enchantment->getLevel(), self::MODIFIER_EFFECT_PROTECTION);
+			}
+			
+			$enchantment = null;
+			$multiplier = 2;
+			$modifierId = 0;
+			switch($cause) {
+				case self::CAUSE_FIRE:
+				case self::CAUSE_FIRE_TICK:
+				case self::CAUSE_LAVA:
+					$enchantment = $enchantments[Enchantment::TYPE_ARMOR_FIRE_PROTECTION];
+					$multiplier = 2;
+					$modifierId = self::MODIFIER_EFFECT_FIRE_PROTECTION;
+					break;
+				case self::CAUSE_FALL:
+					$enchantment = $enchantments[Enchantment::TYPE_ARMOR_FALL_PROTECTION];
+					$multiplier = 3;
+					$modifierId = self::MODIFIER_EFFECT_FALL_PROTECTION;
+					break;
+				case self::CAUSE_ENTITY_EXPLOSION:
+				case self::CAUSE_BLOCK_EXPLOSION:
+					$enchantment = $enchantments[Enchantment::TYPE_ARMOR_EXPLOSION_PROTECTION];
+					$multiplier = 2;
+					$modifierId = self::MODIFIER_EFFECT_BLAST_PROTECTION;
+					break;
+				case self::CAUSE_PROJECTILE:
+					$enchantment = $enchantments[Enchantment::TYPE_ARMOR_PROJECTILE_PROTECTION];
+					$multiplier = 2;
+					$modifierId = self::MODIFIER_EFFECT_PROJECTILE_PROTECTION;
+					break;
+			}
+			
+			if (!is_null($enchantment)) {
+				$this->setDamage(-1 * $enchantment->getLevel() * $multiplier, $modifierId);
+			}
 		}
 	}
 

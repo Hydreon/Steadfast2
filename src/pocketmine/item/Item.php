@@ -1526,7 +1526,7 @@ class Item{
 
 		return false;
 	}
-
+	
 	/**
 	 * @param $id
 	 * @return Enchantment|null
@@ -1563,8 +1563,11 @@ class Item{
 		}
 
 		$found = false;
-
+		$maxIntIndex = -1;
 		foreach($tag->ench as $k => $entry){
+			if (is_numeric($k) && $k > $maxIntIndex) {
+				$maxIntIndex = $k;
+			}
 			if($entry["id"] === $ench->getId()){
 				$tag->ench->{$k} = new Compound("", [
 					"id" => new ShortTag("id", $ench->getId()),
@@ -1576,7 +1579,8 @@ class Item{
 		}
 
 		if(!$found){
-			$tag->ench->{count($tag->ench) + 1} = new Compound("", [
+//			$tag->ench->{count($tag->ench) + 1} = new Compound("", [
+			$tag->ench->{$maxIntIndex + 1} = new Compound("", [
 				"id" => new ShortTag("id", $ench->getId()),
 				"lvl" => new ShortTag("lvl", $ench->getLevel())
 			]);

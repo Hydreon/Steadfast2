@@ -153,6 +153,8 @@ use pocketmine\network\protocol\ResourcePacksInfoPacket;
 
 use raklib\Binary;
 
+use pocketmine\item\enchantment\Enchantment;
+
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
  */
@@ -1939,7 +1941,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->sendSelfData();
 				
 				$this->updateSpeed(self::DEFAULT_SPEED);
-				$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
+//				$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
+				
+//				$ironSword = Item::get(Item::IRON_SWORD);
+//				$effect = Enchantment::getEnchantment(Enchantment::TYPE_WEAPON_SHARPNESS)->setLevel(5);
+//				$ironSword->addEnchantment($effect);
+//				$effect = Enchantment::getEnchantment(Enchantment::TYPE_WEAPON_FIRE_ASPECT)->setLevel(2);
+//				$ironSword->addEnchantment($effect);
+//				$effect = Enchantment::getEnchantment(Enchantment::TYPE_WEAPON_KNOCKBACK)->setLevel(2);
+//				$ironSword->addEnchantment($effect);
+//				$this->inventory->addItem($ironSword);
+//				$this->inventory->sendContents($this);
 				
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
@@ -3817,4 +3829,27 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			var_dump('zlib_decode error');
 		}
 	}
+	
+	protected function getProtectionEnchantments() {
+		$result = [
+			Enchantment::TYPE_ARMOR_PROTECTION => null,
+			Enchantment::TYPE_ARMOR_FIRE_PROTECTION => null,
+			Enchantment::TYPE_ARMOR_EXPLOSION_PROTECTION => null,
+			Enchantment::TYPE_ARMOR_FALL_PROTECTION => null,
+			Enchantment::TYPE_ARMOR_PROJECTILE_PROTECTION => null
+		];
+		$armor = $this->getInventory()->getArmorContents();
+		foreach ($armor as $item) {
+			if ($item->getId() !== Item::AIR) {
+				$enchantments = $item->getEnchantments();
+				foreach ($result as $id => $enchantment) {
+					if (isset($enchantments[$id]) && (is_null($enchantment) || $enchantments[$id]->getLevel() > $enchantment->getLevel())) {
+						$result[$id] = $enchantments[$id];
+					}
+				}
+			}
+		}
+		return $result;
+	}
+	
 }
