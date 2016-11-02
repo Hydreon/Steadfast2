@@ -23,6 +23,8 @@ namespace pocketmine\event\entity;
 
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
+use pocketmine\item\enchantment\Enchantment;
+use pocketmine\Player;
 
 class EntityDamageByEntityEvent extends EntityDamageEvent{
 
@@ -52,6 +54,40 @@ class EntityDamageByEntityEvent extends EntityDamageEvent{
 
 		if($damager->hasEffect(Effect::WEAKNESS)){
 			$this->setDamage(-($this->getDamage(self::MODIFIER_BASE) * 0.2 * ($damager->getEffect(Effect::WEAKNESS)->getAmplifier() + 1)), self::MODIFIER_WEAKNESS);
+		}
+		
+		if ($damager instanceof Player) {
+			$baseDamage = $this->getDamage(self::MODIFIER_BASE);
+			$weapon = $damager->getInventory()->getItemInHand();
+			$weaponEnchantments = $weapon->getEnchantments();
+			if (isset($weaponEnchantments[Enchantment::TYPE_WEAPON_SHARPNESS])) {
+				$effect = $weaponEnchantments[Enchantment::TYPE_WEAPON_SHARPNESS];
+				$effectLevel = $effect->getLevel();
+				if ($effectLevel > 0) {
+					$additionalDamage = 1;
+					if ($effectLevel > 1) {
+						$additionalDamage += ($effectLevel - 1) * 0.25;
+					}
+					$this->setDamage($additionalDamage, self::MODIFIER_EFFECT_SHARPNESS);
+				}
+			}
+			if (isset($weaponEnchantments[Enchantment::TYPE_WEAPON_SMITE])) {
+				/** @todo add check for entity on arthropod */
+				$effect = $weaponEnchantments[Enchantment::TYPE_WEAPON_SMITE];
+				$additionalDamage = 0;
+				$this->setDamage($additionalDamage, self::MODIFIER_EFFECT_SMITE);
+			}
+			if (isset($weaponEnchantments[Enchantment::TYPE_WEAPON_ARTHROPODS])) {
+				/** @todo add check for entity on undead */
+				$effect = $weaponEnchantments[Enchantment::TYPE_WEAPON_ARTHROPODS];
+				$additionalDamage = 0;
+				$this->setDamage($additionalDamage, self::MODIFIER_EFFECT_ARTHROPODOS);
+			}
+			if (isset($weaponEnchantments[Enchantment::TYPE_WEAPON_KNOCKBACK])) {
+				$effect = $weaponEnchantments[Enchantment::TYPE_WEAPON_KNOCKBACK];
+				// not sure
+				$this->knockBack += $effect->getLevel() * 0.3;
+			}
 		}
 	}
 

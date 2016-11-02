@@ -1636,6 +1636,7 @@ class Server{
 
 		InventoryType::init();
 		Block::init();
+		Enchantment::init();
 		Item::init();
 		Biome::init();
 		TextWrapper::init();
