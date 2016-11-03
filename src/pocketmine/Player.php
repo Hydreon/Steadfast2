@@ -2950,7 +2950,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 				
-				if ($this->craftingType === self::CRAFTING_ENCHANT) {
+				$enchantInv = $this->windowIndex[$this->windowCnt];
+				if ($this->craftingType === self::CRAFTING_ENCHANT && $enchantInv instanceof EnchantInventory) {
 					$this->enchantTransaction($transaction);
 				} else {
 					$this->addTransaction($transaction);
@@ -3713,83 +3714,81 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$newItem = $transaction->getTargetItem();
 		$enchantInv = $this->windowIndex[$this->windowCnt];
 
-        if($enchantInv instanceof EnchantInventory){
-            if ($newItem->getId() === Item::AIR) {
-                if ($oldItem->getId() === Item::DYE && $oldItem->getDamage() === 4) {
-                    $catalyst = $enchantInv->getItem(1);
-                    if ($catalyst->getId() !== Item::AIR) {
-                        $newCount = $oldItem->getCount() + $catalyst->getCount();
-                        $oldItem->setCount($newCount);
-                    }
-                    $enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $oldItem);
+		if ($newItem->getId() === Item::AIR) {
+			if ($oldItem->getId() === Item::DYE && $oldItem->getDamage() === 4) {
+				$catalyst = $enchantInv->getItem(1);
+				if ($catalyst->getId() !== Item::AIR) {
+					$newCount = $oldItem->getCount() + $catalyst->getCount();
+					$oldItem->setCount($newCount);
+				}
+				$enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $oldItem);
 
-                } else if ($oldItem instanceof Armor || $oldItem instanceof Tool) {
-                    $source = $enchantInv->getItem(0);
-                    if ($source->getId() !== Item::AIR || $oldItem->hasEnchantments()) {
-                        $enchantInv->sendContents($this);
-                        $this->inventory->sendContents($this);
-                        return;
-                    }
-                    $enchTransaction = new BaseTransaction($enchantInv, 0, $source, $oldItem);
-                }
-            } else {
-                if ($newItem->getId() === Item::DYE && $newItem->getDamage() === 4) {
-                    $catalyst = $enchantInv->getItem(1);
-                    if ($newItem->getCount() < $oldItem->getCount()) {
-                        $newCount = $oldItem->getCount() - $newItem->getCount();
-                        if ($catalyst->getId() !== Item::AIR) {
-                            $newCount += $catalyst->getCount();
-                        }
-                        $newItem->setCount($newCount);
-                        $enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $newItem);
-                    } else {
-                        $countDiff = $newItem->getCount() - $oldItem->getCount();
-                        if ($countDiff > $catalyst->getCount()) {
-                            $enchantInv->sendContents($this);
-                            $this->inventory->sendContents($this);
-                            return;
-                        }
-                        if ($catalyst->getCount() - $countDiff != 0) {
-                            $newItem->setCount($catalyst->getCount() - $countDiff);
-                        } else {
-                            $newItem = Item::get(Item::AIR);
-                        }
-                        $enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $newItem);
-                    }
-                } else if ($newItem instanceof Armor || $newItem instanceof Tool) {
-                    $source = $enchantInv->getItem(0);
-                    $itemsIsEqual = !$enchantInv->isItemWasEnchant() ? $newItem->deepEquals($source) : $newItem->deepEquals($source, true, false);
-                    if ($itemsIsEqual && $enchantInv->isItemWasEnchant()) {
-                        $updateResult = $enchantInv->updateResultItem($newItem);
-                        if (!$updateResult) {
-                            $enchantInv->sendContents($this);
-                            $this->inventory->sendContents($this);
-                            return;
-                        }
-                        $source = $enchantInv->getItem(0);
-                    }
+			} else if ($oldItem instanceof Armor || $oldItem instanceof Tool) {
+				$source = $enchantInv->getItem(0);
+				if ($source->getId() !== Item::AIR || $oldItem->hasEnchantments()) {
+					$enchantInv->sendContents($this);
+					$this->inventory->sendContents($this);
+					return;
+				}
+				$enchTransaction = new BaseTransaction($enchantInv, 0, $source, $oldItem);
+			}
+		} else {
+			if ($newItem->getId() === Item::DYE && $newItem->getDamage() === 4) {
+				$catalyst = $enchantInv->getItem(1);
+				if ($newItem->getCount() < $oldItem->getCount()) {
+					$newCount = $oldItem->getCount() - $newItem->getCount();
+					if ($catalyst->getId() !== Item::AIR) {
+						$newCount += $catalyst->getCount();
+					}
+					$newItem->setCount($newCount);
+					$enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $newItem);
+				} else {
+					$countDiff = $newItem->getCount() - $oldItem->getCount();
+					if ($countDiff > $catalyst->getCount()) {
+						$enchantInv->sendContents($this);
+						$this->inventory->sendContents($this);
+						return;
+					}
+					if ($catalyst->getCount() - $countDiff != 0) {
+						$newItem->setCount($catalyst->getCount() - $countDiff);
+					} else {
+						$newItem = Item::get(Item::AIR);
+					}
+					$enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $newItem);
+				}
+			} else if ($newItem instanceof Armor || $newItem instanceof Tool) {
+				$source = $enchantInv->getItem(0);
+				$itemsIsEqual = !$enchantInv->isItemWasEnchant() ? $newItem->deepEquals($source) : $newItem->deepEquals($source, true, false);
+				if ($itemsIsEqual && $enchantInv->isItemWasEnchant()) {
+					$updateResult = $enchantInv->updateResultItem($newItem);
+					if (!$updateResult) {
+						$enchantInv->sendContents($this);
+						$this->inventory->sendContents($this);
+						return;
+					}
+					$source = $enchantInv->getItem(0);
+				}
 
-                    if ($itemsIsEqual && $source->getCount() === $newItem->getCount()) {
-                        $enchTransaction = new BaseTransaction($enchantInv, 0, $source, Item::get(Item::AIR));
-                    } else {
-                        $enchantInv->sendContents($this);
-                        $this->inventory->sendContents($this);
-                        return;
-                    }
-                } else {
-                    $enchantInv->sendContents($this);
-                    $this->inventory->sendContents($this);
-                    return;
-                }
-            }
-            // execute transaction
-            $trGroup = new SimpleTransactionGroup($this);
-            $trGroup->addTransaction($transaction);
-            if (isset($enchTransaction)) {
-                $trGroup->addTransaction($enchTransaction);
-            }
-            $this->transactionGroupQueue[] = $trGroup;
-        }
+				if ($itemsIsEqual && $source->getCount() === $newItem->getCount()) {
+					$enchTransaction = new BaseTransaction($enchantInv, 0, $source, Item::get(Item::AIR));
+				} else {
+					$enchantInv->sendContents($this);
+					$this->inventory->sendContents($this);
+					return;
+				}
+			} else {
+				$enchantInv->sendContents($this);
+				$this->inventory->sendContents($this);
+				return;
+			}
+		}
+		// execute transaction
+		$trGroup = new SimpleTransactionGroup($this);
+		$trGroup->addTransaction($transaction);
+		if (isset($enchTransaction)) {
+			$trGroup->addTransaction($enchTransaction);
+		}
+		$this->transactionGroupQueue[] = $trGroup;
 	}
 	
 	protected function executeTransuctions() {
