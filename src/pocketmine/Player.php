@@ -2718,7 +2718,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 				
-				if ($this->craftingType === self::CRAFTING_ENCHANT) {
+				$enchantInv = $this->windowIndex[$this->windowCnt];
+				if ($this->craftingType === self::CRAFTING_ENCHANT && $enchantInv instanceof EnchantInventory) {
 					$this->enchantTransaction($transaction);
 				} else {
 					$this->addTransaction($transaction);
@@ -3732,7 +3733,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$oldItem = $transaction->getSourceItem();
 		$newItem = $transaction->getTargetItem();
 		$enchantInv = $this->windowIndex[$this->windowCnt];
-		
+
 		if ($newItem->getId() === Item::AIR) {
 			if ($oldItem->getId() === Item::DYE && $oldItem->getDamage() === 4) {
 				$catalyst = $enchantInv->getItem(1);
@@ -3741,7 +3742,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$oldItem->setCount($newCount);
 				}
 				$enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $oldItem);
-				
+
 			} else if ($oldItem instanceof Armor || $oldItem instanceof Tool) {
 				$source = $enchantInv->getItem(0);
 				if ($source->getId() !== Item::AIR || $oldItem->hasEnchantments()) {
@@ -3787,7 +3788,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 					$source = $enchantInv->getItem(0);
 				}
-				
+
 				if ($itemsIsEqual && $source->getCount() === $newItem->getCount()) {
 					$enchTransaction = new BaseTransaction($enchantInv, 0, $source, Item::get(Item::AIR));
 				} else {
