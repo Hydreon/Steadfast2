@@ -3167,9 +3167,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->loggedIn = false;
 
-			if(isset($ev) and $this->username != "" and $this->spawned !== false and $ev->getQuitMessage() != ""){
-				$this->server->broadcastMessage($ev->getQuitMessage());
-			}
+//			if(isset($ev) and $this->username != "" and $this->spawned !== false and $ev->getQuitMessage() != ""){
+//				$this->server->broadcastMessage($ev->getQuitMessage());
+//			}
 
 			$this->server->getPluginManager()->unsubscribeFromPermission(Server::BROADCAST_CHANNEL_USERS, $this);
 			$this->spawned = false;
