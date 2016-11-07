@@ -2950,9 +2950,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 				
-				$enchantInv = $this->windowIndex[$this->windowCnt];
-				if ($this->craftingType === self::CRAFTING_ENCHANT && $enchantInv instanceof EnchantInventory) {
-					$this->enchantTransaction($transaction);
+				if ($this->craftingType === self::CRAFTING_ENCHANT) {
+					$enchantInv = isset($this->windowIndex[$this->windowCnt]) ? $this->windowIndex[$this->windowCnt] : null;
+					if ($enchantInv instanceof EnchantInventory) {
+						$this->enchantTransaction($transaction);
+					}
 				} else {
 					$this->addTransaction($transaction);
 				}
