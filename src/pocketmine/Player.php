@@ -2718,9 +2718,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 				
-				$enchantInv = $this->windowIndex[$this->windowCnt];
-				if ($this->craftingType === self::CRAFTING_ENCHANT && $enchantInv instanceof EnchantInventory) {
-					$this->enchantTransaction($transaction);
+				if ($this->craftingType === self::CRAFTING_ENCHANT) {
+					$enchantInv = isset($this->windowIndex[$this->windowCnt]) ? $this->windowIndex[$this->windowCnt] : null;
+					if ($enchantInv instanceof EnchantInventory) {
+						$this->enchantTransaction($transaction);
+					}
 				} else {
 					$this->addTransaction($transaction);
 				}
@@ -2768,8 +2770,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerTileEntityPacket->stopTiming();
 				break;
 			case ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET:
+				//Timings::$timerChunkRudiusPacket->startTiming();
+				if ($packet->radius > 20) {
+					$packet->radius = 20;
+				} elseif ($packet->radius < 4) {
+					$packet->radius = 4;
+				}
 				$this->viewDistance = $packet->radius ** 2;
-				//}
 				$pk = new ChunkRadiusUpdatePacket();
 				$pk->radius = $packet->radius;
 				$this->dataPacket($pk);
@@ -2940,9 +2947,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->loggedIn = false;
 
-			if(isset($ev) and $this->username != "" and $this->spawned !== false and $ev->getQuitMessage() != ""){
-				$this->server->broadcastMessage($ev->getQuitMessage());
-			}
+//			if(isset($ev) and $this->username != "" and $this->spawned !== false and $ev->getQuitMessage() != ""){
+//				$this->server->broadcastMessage($ev->getQuitMessage());
+//			}
 
 			$this->server->getPluginManager()->unsubscribeFromPermission(Server::BROADCAST_CHANNEL_USERS, $this);
 			$this->spawned = false;

@@ -2666,7 +2666,7 @@ class Level implements ChunkManager, Metadatable{
 		$pk->encode();
 
 
-		foreach ($this->level->getUsingChunk($x, $z) as $player) {
+		foreach ($this->getUsingChunk($x, $z) as $player) {
 			$player->dataPacket($pk);
 		}
 	}

@@ -172,10 +172,17 @@ class SimpleCommandMap implements CommandMap{
 	}
 
 	public function dispatch(CommandSender $sender, $commandLine){
-		$args = explode(" ", $commandLine);
-
-		if(count($args) === 0){
+		$args = preg_split("/\s(?=[^\']*(\'[^\']*\'[^\']*)*$)(?=[^\"]*(\"[^\"]*\"[^\"]*)*$)/", $commandLine);
+		if ($args === false) {
 			return false;
+		}
+
+		if (count($args) === 0) {
+			return false;
+		}
+
+		foreach ($args as $key => $arg) {
+			$args[$key] = trim($arg, " '\"");
 		}
 
 		$sentCommandLabel = strtolower(array_shift($args));
