@@ -185,13 +185,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public $dead = false;
 	public $gamemode;
 	public $lastBreak;
-
-	protected $windowCnt = 2;
-	/** @var \SplObjectStorage<Inventory> */
-	protected $windows;
-	/** @var Inventory[] */
-	protected $windowIndex = [];
-
+	
+	/** @var Inventory */
+	protected $currentWindow = null;
+	protected $currentWindowId = -1;
+	const MIN_WINDOW_ID = 2;
+	
 	protected $messageCounter = 2;
 
 	protected $sendIndex = 0;
@@ -205,8 +204,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public $lastCorrect;
 	/** @var SimpleTransactionGroup[] */
 	protected $transactionGroupQueue = [];
-	/** @var Transaction[] */
-	protected $transactionQueue = [];
 	
 	public $craftingType = self::CRAFTING_DEFAULT;
 
@@ -545,7 +542,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 */
 	public function __construct(SourceInterface $interface, $clientID, $ip, $port){
 		$this->interface = $interface;
-		$this->windows = new \SplObjectStorage();
 		$this->perm = new PermissibleBase($this);
 		$this->namedtag = new Compound();
 		$this->server = Server::getInstance();
@@ -2637,7 +2633,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					case EntityEventPacket::ENCHANT:
 						$enchantLevel = $packet->theThing;
-						$enchantInventory = $this->windowIndex[$this->windowCnt];
+						$enchantInventory = $this->currentWindow;
 						if ($enchantInventory instanceof EnchantInventory) {
 							if (!$enchantInventory->setEnchantingLevel($enchantLevel)) {
 								$enchantInventory->sendContents($this);
@@ -2718,20 +2714,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				$this->craftingType = self::CRAFTING_DEFAULT;
 				$this->currentTransaction = null;
-				if(isset($this->windowIndex[$packet->windowid])){
-					$this->server->getPluginManager()->callEvent(new InventoryCloseEvent($this->windowIndex[$packet->windowid], $this));
-					$this->removeWindow($this->windowIndex[$packet->windowid]);
-				}else{
-					unset($this->windowIndex[$packet->windowid]);
+				// @todo добавить обычный инвентарь и броню
+				if ($packet->windowid === $this->currentWindowId) {
+					$this->server->getPluginManager()->callEvent(new InventoryCloseEvent($this->currentWindow, $this));
+					$this->removeWindow($this->currentWindow);
 				}
 				//Timings::$timerContainerClosePacket->stopTiming();
 				break;
 			case ProtocolInfo::CRAFTING_EVENT_PACKET:
 				//Timings::$timerCraftingEventPacket->startTiming();
-				if($this->spawned === false or $this->dead){
+				if ($this->spawned === false or $this->dead) {
 					//Timings::$timerCraftingEventPacket->stopTiming();
 					break;
-				}elseif(!isset($this->windowIndex[$packet->windowId])){
+				} else if ($packet->windowId > 0 && $packet->windowId !== $this->currentWindowId) {
 					$this->inventory->sendContents($this);
 					$pk = new ContainerClosePacket();
 					$pk->windowid = $packet->windowId;
@@ -2827,7 +2822,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				/** @var Item[] $ingredients */
 				$ingredients = $packet->input;
 				$result = $packet->output[0];
-
+				
 				if(!$canCraft or !$recipe->getResult() === $result){
 					$this->server->getLogger()->debug("Unmatched recipe ". $recipe->getId() ." from player ". $this->getName() .": expected " . $recipe->getResult() . ", got ". $result .", using: " . implode(", ", $ingredients));
 					$this->inventory->sendContents($this);
@@ -2896,63 +2891,55 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			case ProtocolInfo::CONTAINER_SET_SLOT_PACKET:
 				//Timings::$timerConteinerSetSlotPacket->startTiming();
-				if($this->spawned === false or $this->blocked === true or !$this->isAlive()){
-					//Timings::$timerConteinerSetSlotPacket->stopTiming();
-					break;
-				}
-
-				if($packet->slot < 0){
+				$isPlayerNotNormal = $this->spawned === false || $this->blocked === true || !$this->isAlive();
+				if ($isPlayerNotNormal || $packet->slot < 0) {
 					//Timings::$timerConteinerSetSlotPacket->stopTiming();
 					break;
 				}
 				
-				if($packet->windowid === 0){ //Our inventory
-					if($packet->slot >= $this->inventory->getSize()){
+				if ($packet->windowid === 0) { //Our inventory
+					if ($packet->slot >= $this->inventory->getSize()) {
 						//Timings::$timerConteinerSetSlotPacket->stopTiming();
 						break;
 					}
-					if($this->isCreative()){
-						if(Item::getCreativeItemIndex($packet->item) !== -1){
-							$this->inventory->setItem($packet->slot, $packet->item);
-							$this->inventory->setHotbarSlotIndex($packet->slot, $packet->slot); //links $hotbar[$packet->slot] to $slots[$packet->slot]
-						}
+					if ($this->isCreative() && Item::getCreativeItemIndex($packet->item) !== -1) {
+						$this->inventory->setItem($packet->slot, $packet->item);
+						$this->inventory->setHotbarSlotIndex($packet->slot, $packet->slot); //links $hotbar[$packet->slot] to $slots[$packet->slot]
 					}
-					if ($this->craftingType === self::CRAFTING_ENCHANT) {
-						$transaction = new BaseTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
-					} else {
-						$transaction = new PairTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
-					}
-				}elseif($packet->windowid === ContainerSetContentPacket::SPECIAL_ARMOR){ //Our armor
-					if($packet->slot >= 4){
+//					if ($this->craftingType === self::CRAFTING_ENCHANT) {
+//						$transaction = new BaseTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
+//					} else {
+//						$transaction = new PairTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
+//					}
+					$transaction = new BaseTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
+				} else if ($packet->windowid === ContainerSetContentPacket::SPECIAL_ARMOR) { //Our armor
+					if ($packet->slot >= 4) {
 						//Timings::$timerConteinerSetSlotPacket->stopTiming();
 						break;
 					}
 					
 					$currentArmor = $this->inventory->getArmorItem($packet->slot);
 					$slot = $packet->slot + $this->inventory->getSize();
-					if ($currentArmor instanceof Armor && $packet->item instanceof Armor) {
-						$transaction = new ArmorSwapTransaction($this->inventory, $slot, $currentArmor, $packet->item);
-					} else {
-						$transaction = new PairTransaction($this->inventory, $slot, $currentArmor, $packet->item);
-					}
-				}elseif(isset($this->windowIndex[$packet->windowid])){
+					$transaction = new BaseTransaction($this->inventory, $slot, $currentArmor, $packet->item);
+				} else if ($packet->windowid === $this->currentWindowId) {
 //					$this->craftingType = self::CRAFTING_DEFAULT;
-					$inv = $this->windowIndex[$packet->windowid];
-					$transaction = new PairTransaction($inv, $packet->slot, $inv->getItem($packet->slot), $packet->item);
+					$inv = $this->currentWindow;
+					$transaction = new BaseTransaction($inv, $packet->slot, $inv->getItem($packet->slot), $packet->item);
 				}else{
 					//Timings::$timerConteinerSetSlotPacket->stopTiming();
 					break;
 				}
 
-				if($transaction->getSourceItem()->getId() === $transaction->getTargetItem()->getId() and $transaction->getSourceItem()->getDamage() === $transaction->getTargetItem()->getDamage() and $transaction->getTargetItem()->getCount() === $transaction->getSourceItem()->getCount()){ //No changes!
+				$oldItem = $transaction->getSourceItem();
+				$newItem = $transaction->getTargetItem();
+				if ($oldItem->deepEquals($newItem) && $oldItem->getCount() === $newItem->getCount()) { //No changes!
 					//No changes, just a local inventory update sent by the server
 					//Timings::$timerConteinerSetSlotPacket->stopTiming();
 					break;
 				}
 				
 				if ($this->craftingType === self::CRAFTING_ENCHANT) {
-					$enchantInv = isset($this->windowIndex[$this->windowCnt]) ? $this->windowIndex[$this->windowCnt] : null;
-					if ($enchantInv instanceof EnchantInventory) {
+					if ($this->currentWindow instanceof EnchantInventory) {
 						$this->enchantTransaction($transaction);
 					}
 				} else {
@@ -3149,9 +3136,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$player->despawnFrom($this);
 			}
 			$this->hiddenPlayers = [];
-
-			foreach($this->windowIndex as $window){
-				$this->removeWindow($window);
+			
+			if (!is_null($this->currentWindow)) {
+				$this->removeWindow($this->currentWindow);
 			}
 
 			$this->interface->close($this, $reason);
@@ -3176,8 +3163,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->server->getPluginManager()->unsubscribeFromPermission(Server::BROADCAST_CHANNEL_USERS, $this);
 			$this->spawned = false;
 			$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . $this->ip . " logged out due to " . str_replace(["\n", "\r"], [" ", ""], $reason));
-			$this->windows = new \SplObjectStorage();
-			$this->windowIndex = [];
 			$this->usedChunks = [];
 			$this->loadQueue = [];
 			$this->hasSpawned = [];
@@ -3545,20 +3530,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$oldPos = $this->getPosition();
 		if(parent::teleport($pos, $yaw, $pitch)){
-
-			foreach($this->windowIndex as $window){
-				if($window === $this->inventory){
-					continue;
-				}
-				$this->removeWindow($window);
+			if (!is_null($this->currentWindow)) {
+				$this->removeWindow($this->currentWindow);
 			}
-
 			$this->teleportPosition = new Vector3($this->x, $this->y, $this->z);
 
 			if(!$this->checkTeleportPosition()){
 				$this->forceMovement = $oldPos;
 			}
-
 
 			$this->resetFallDistance();
 			$this->nextChunkOrderRun = 0;
@@ -3572,11 +3551,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 *
 	 * @return int
 	 */
-	public function getWindowId(Inventory $inventory){
-		if($this->windows->contains($inventory)){
-			return $this->windows[$inventory];
+	public function getWindowId(Inventory $inventory) {
+		if ($inventory === $this->currentWindow) {
+			return $this->currentWindowId;
+		} else if ($inventory === $this->inventory) {
+			return 0;
 		}
-
 		return -1;
 	}
 
@@ -3588,33 +3568,29 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 *
 	 * @return int
 	 */
-	public function addWindow(Inventory $inventory, $forceId = null){
-		if($this->windows->contains($inventory)){
-			return $this->windows[$inventory];
+	public function addWindow(Inventory $inventory, $forceId = null) {
+		if ($this->currentWindow === $inventory) {
+			return $this->currentWindowId;
 		}
-
-		if($forceId === null){
-			$this->windowCnt = $cnt = max(2, ++$this->windowCnt % 99);
-		}else{
-			$cnt = (int) $forceId;
+		if (!is_null($this->currentWindow)) {
+			echo '[INFO] Trying to open window when previous inventory still open'.PHP_EOL;
+			$this->removeWindow($this->currentWindow);
 		}
-		$this->windowIndex[$cnt] = $inventory;
-		$this->windows->attach($inventory, $cnt);
-		if($inventory->open($this)){
-			return $cnt;
-		}else{
+		$this->currentWindow = $inventory;
+		$this->currentWindowId = !is_null($forceId) ? $forceId : rand(self::MIN_WINDOW_ID, 98);
+		if (!$inventory->open($this)) {
 			$this->removeWindow($inventory);
-
-			return -1;
 		}
+		return $this->currentWindowId;
 	}
 
-	public function removeWindow(Inventory $inventory){
-		$inventory->close($this);
-		if($this->windows->contains($inventory)){
-			$id = $this->windows[$inventory];
-			$this->windows->detach($this->windowIndex[$id]);
-			unset($this->windowIndex[$id]);
+	public function removeWindow(Inventory $inventory) {
+		if ($this->currentWindow !== $inventory) {
+			echo '[INFO] Trying to close not open window'.PHP_EOL;
+		} else {
+			$inventory->close($this);
+			$this->currentWindow = null;
+			$this->currentWindowId = -1;
 		}
 	}
 
@@ -3668,41 +3644,60 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @return null
 	 */
 	protected function addTransaction($transaction) {
-		// trying to find suitable transactions
-		$foundAll = false;
-		$suitableTransactions = [];
-		foreach ($this->transactionQueue as $trKey => $tr) {
-			if ($transaction->isSuitable($tr)) {
-				$suitableTransactions[] = $trKey;
-				if ($transaction instanceof ArmorSwapTransaction) {
-					if ($transaction->isFoundAll()) {
-						$foundAll = true;
-						break;
-					}
-				} else {
-					if (count($suitableTransactions) === $transaction->getRequiredTransactionNumber()) {
-						$foundAll = true;
-						break;
-					}
-				}
+		$newItem = $transaction->getTargetItem();
+		$oldItem = $transaction->getSourceItem();
+		// if decreasing transaction drop down
+		if ($newItem->getId() === Item::AIR || ($oldItem->deepEquals($newItem) && $oldItem->count > $newItem->count)) {
+
+			return;
+		}
+		// if increasing create pair manualy
+
+		// trying to find inventory
+		$inventory = $this->currentWindow;
+		if (is_null($this->currentWindow) || $this->currentWindow === $transaction->getInventory()) {
+			$inventory = $this->inventory;
+		}
+		// get item difference
+		if ($oldItem->deepEquals($newItem)) {
+			$newItem->count -= $oldItem->count;
+		}
+
+		$items = $inventory->getContents();
+		$targetSlot = -1;
+		foreach ($items as $slot => $item) {
+			if ($item->deepEquals($newItem) && $newItem->count <= $item->count) {
+				$targetSlot = $slot;
+				break;
 			}
 		}
-		
-		if ($foundAll === true) {
+		if ($targetSlot !== -1) {
 			$trGroup = new SimpleTransactionGroup($this);
 			$trGroup->addTransaction($transaction);
-			foreach ($suitableTransactions as $trKey) {
-				$trGroup->addTransaction($this->transactionQueue[$trKey]);
-				unset($this->transactionQueue[$trKey]);
-			}
-			$this->transactionGroupQueue[] = $trGroup;
-		} else {
-			if ($transaction instanceof ArmorSwapTransaction) {
-				$transaction->revert($this);
-				return;
+			// create pair for the first transaction
+			if (!$oldItem->deepEquals($newItem) && $oldItem->getId() !== Item::AIR && $inventory === $transaction->getInventory()) { // for swap
+				$targetItem = clone $oldItem;
+			} else if ($newItem->count === $items[$targetSlot]->count) {
+				$targetItem = Item::get(Item::AIR);
 			} else {
-				$this->transactionQueue[] = $transaction;
+				$targetItem = clone $items[$targetSlot];
+				$targetItem->count -= $newItem->count;
 			}
+			$pairTransaction = new BaseTransaction($inventory, $targetSlot, $items[$targetSlot], $targetItem);
+			$trGroup->addTransaction($pairTransaction);
+
+			try {
+				$isExecute = $trGroup->execute();
+				if (!$isExecute) {
+					echo '[INFO] Transaction execute fail 1.'.PHP_EOL;
+					$trGroup->sendInventories();
+				}
+			} catch (\Exception $ex) {
+				echo '[INFO] Transaction execute fail 2.'.PHP_EOL;
+				$trGroup->sendInventories();
+			}
+		} else {
+			echo '[INFO] Suiteble item not found in the current inventory.'.PHP_EOL;
 		}
 	}
 	
@@ -3714,7 +3709,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		$oldItem = $transaction->getSourceItem();
 		$newItem = $transaction->getTargetItem();
-		$enchantInv = $this->windowIndex[$this->windowCnt];
+		$enchantInv = $this->currentWindow;
 
 		if ($newItem->getId() === Item::AIR) {
 			if ($oldItem->getId() === Item::DYE && $oldItem->getDamage() === 4) {
@@ -3811,14 +3806,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			} catch (\Exception $ex) {
 				$group->sendInventories();
 				unset($this->transactionGroupQueue[$key]);
-			}
-		}
-		
-		foreach ($this->transactionQueue as $trKey => $tr) {
-			if ($tr->getCreationTime() < (microtime(true) - 1)) {
-				$tr->revert($this);
-				unset($this->transactionQueue[$trKey]);
-				continue;
 			}
 		}
 	}

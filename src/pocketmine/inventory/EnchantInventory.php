@@ -84,7 +84,7 @@ class EnchantInventory extends ContainerInventory {
 	
 	public function setEnchantingLevel($level) {
 		$level = abs($level);
-		if ($this->slots[1]->getId() === Item::DYE && $this->slots[1]->getCount() >= $level) {
+		if (!is_null($this->slots[1]) && $this->slots[1]->getId() === Item::DYE && $this->slots[1]->getCount() >= $level) {
 			$this->enchantingLevel = $level;
 			return true;
 		}
@@ -101,7 +101,7 @@ class EnchantInventory extends ContainerInventory {
 	}
 	
 	public function updateResultItem(Item $item) {
-		if ($this->enchantingLevel !== 0) {
+		if ($this->enchantingLevel !== 0 && !is_null($this->slots[1])) {
 			$catalystCount = $this->slots[1]->getCount();
 			if ($catalystCount > $this->enchantingLevel) {
 				$this->slots[1]->setCount($catalystCount - $this->enchantingLevel);
