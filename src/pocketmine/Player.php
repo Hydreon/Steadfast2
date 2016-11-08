@@ -78,8 +78,6 @@ use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\inventory\SimpleTransactionGroup;
-use pocketmine\inventory\transactions\PairTransaction;
-use pocketmine\inventory\transactions\ArmorSwapTransaction;
 
 use pocketmine\item\Item;
 use pocketmine\item\Armor;
@@ -202,8 +200,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	public $blocked = false;
 	public $lastCorrect;
-	/** @var SimpleTransactionGroup[] */
-	protected $transactionGroupQueue = [];
 	
 	public $craftingType = self::CRAFTING_DEFAULT;
 
@@ -1587,8 +1583,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 			$this->checkChunks();
 		}
-		
-		$this->executeTransuctions();
 
 		$this->timings->stopTiming();
 
@@ -1941,7 +1935,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->sendSelfData();
 				
 				$this->updateSpeed(self::DEFAULT_SPEED);
-//				$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
+				$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
 //				
 //				$ironSword = Item::get(Item::IRON_SWORD);
 //				$effect = Enchantment::getEnchantment(Enchantment::TYPE_WEAPON_SHARPNESS)->setLevel(5);
@@ -2632,12 +2626,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->eatFoodInHand();
 						break;
 					case EntityEventPacket::ENCHANT:
-						$enchantLevel = $packet->theThing;
-						$enchantInventory = $this->currentWindow;
-						if ($enchantInventory instanceof EnchantInventory) {
-							if (!$enchantInventory->setEnchantingLevel($enchantLevel)) {
-								$enchantInventory->sendContents($this);
+						if ($this->currentWindow instanceof EnchantInventory) {
+							$enchantLevel = abs($packet->theThing);
+							$items = $this->inventory->getContents();
+							foreach ($items as $slot => $item) {
+								if ($item->getId() === Item::DYE && $item->getDamage() === 4 && $item->getCount() >= $enchantLevel) {
+									$this->currentWindow->setEnchantingLevel($enchantLevel);
+									break 2;
+								}
 							}
+							$this->currentWindow->setItem(0, Item::get(Item::AIR));
+							$this->currentWindow->setEnchantingLevel(0);
+							$this->currentWindow->sendContents($this);
+							$this->inventory->sendContents($this);
 						}
 						break;
 				}
@@ -2758,69 +2759,79 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$canCraft = true;
 
 
-				if($recipe instanceof ShapedRecipe){
-					for($x = 0; $x < 3 and $canCraft; ++$x){
-						for($y = 0; $y < 3; ++$y){						
-							$ingredient = $recipe->getIngredient($x, $y);
-							if(isset($ingredient) && $ingredient->getId() != Item::AIR && !isset($packet->input[$y * 3 + $x])){
-								$canCraft = false;
-								break;
-							}
-							if(!isset($packet->input[$y * 3 + $x])){
-								continue;
-							}
-							$item = $packet->input[$y * 3 + $x];
-							if(!is_null($item) && $item->getCount() > 0 && $ingredient->getId() > 0){
-								if($ingredient === null or !$ingredient->deepEquals($item, false, false)){
-									$canCraft = false;
-									break;
-								}
-							}
-						}
+//				if($recipe instanceof ShapedRecipe){
+//					for($x = 0; $x < 3 and $canCraft; ++$x){
+//						for($y = 0; $y < 3; ++$y){						
+//							$ingredient = $recipe->getIngredient($x, $y);
+//							if(isset($ingredient) && $ingredient->getId() != Item::AIR && !isset($packet->input[$y * 3 + $x])){
+//								$canCraft = false;
+//								break;
+//							}
+//							if(!isset($packet->input[$y * 3 + $x])){
+//								continue;
+//							}
+//							$item = $packet->input[$y * 3 + $x];
+//							if(!is_null($item) && $item->getCount() > 0 && $ingredient->getId() > 0){
+//								if($ingredient === null or !$ingredient->deepEquals($item, false, false)){
+//									$canCraft = false;
+//									break;
+//								}
+//							}
+//						}
+//					}
+//				}elseif($recipe instanceof ShapelessRecipe){
+//					$needed = $recipe->getIngredientList();
+//
+//					for($x = 0; $x < 3 and $canCraft; ++$x){
+//						for($y = 0; $y < 3; ++$y){
+//							if (!isset($packet->input[$y * 3 + $x])) {
+//								continue;
+//							}
+//							
+//							$item = clone $packet->input[$y * 3 + $x];
+//							
+//							if (is_null($item)) {
+//								continue;
+//							}
+//
+//							foreach($needed as $k => $n){
+//								if($n->deepEquals($item, false, false)){
+//									$remove = min($n->getCount(), $item->getCount());
+//									$n->setCount($n->getCount() - $remove);
+//									$item->setCount($item->getCount() - $remove);
+//
+//									if($n->getCount() === 0){
+//										unset($needed[$k]);
+//									}
+//								}
+//							}
+//
+//							if($item->getCount() > 0){
+//								$canCraft = false;
+//								break;
+//							}
+//						}
+//					}
+//
+//					if(count($needed) > 0){
+//						$canCraft = false;
+//					}
+//				}else{
+//					$canCraft = false;
+//				}
+				
+				/** @var Item[] $ingredients */
+				$ingredients = [];
+				if ($recipe instanceof ShapedRecipe) {
+					$ingredientMap = $recipe->getIngredientMap();
+					foreach ($ingredientMap as $row) {
+						$ingredients = array_merge($ingredients, $row);
 					}
-				}elseif($recipe instanceof ShapelessRecipe){
-					$needed = $recipe->getIngredientList();
-
-					for($x = 0; $x < 3 and $canCraft; ++$x){
-						for($y = 0; $y < 3; ++$y){
-							if (!isset($packet->input[$y * 3 + $x])) {
-								continue;
-							}
-							
-							$item = clone $packet->input[$y * 3 + $x];
-							
-							if (is_null($item)) {
-								continue;
-							}
-
-							foreach($needed as $k => $n){
-								if($n->deepEquals($item, false, false)){
-									$remove = min($n->getCount(), $item->getCount());
-									$n->setCount($n->getCount() - $remove);
-									$item->setCount($item->getCount() - $remove);
-
-									if($n->getCount() === 0){
-										unset($needed[$k]);
-									}
-								}
-							}
-
-							if($item->getCount() > 0){
-								$canCraft = false;
-								break;
-							}
-						}
-					}
-
-					if(count($needed) > 0){
-						$canCraft = false;
-					}
-				}else{
+				} else if ($recipe instanceof ShapelessRecipe) {
+					$ingredients = $recipe->getIngredientList();
+				} else {
 					$canCraft = false;
 				}
-
-				/** @var Item[] $ingredients */
-				$ingredients = $packet->input;
 				$result = $packet->output[0];
 				
 				if(!$canCraft or !$recipe->getResult() === $result){
@@ -2832,17 +2843,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				$used = array_fill(0, $this->inventory->getSize(), 0);
 
-				foreach($ingredients as $ingredient){
+				$playerInventoryItems = $this->inventory->getContents();
+				foreach ($ingredients as $ingredient) {
 					$slot = -1;
-					foreach($this->inventory->getContents() as $index => $i){						
-						if($ingredient->getId() !== 0 and $ingredient->deepEquals($i, false, false) and ($i->getCount() - $used[$index]) >= 1){
+					foreach ($playerInventoryItems as $index => $i) {
+						if ($ingredient->getId() !== Item::AIR && $ingredient->deepEquals($i) && ($i->getCount() - $used[$index]) >= 1) {
 							$slot = $index;
 							$used[$index]++;
 							break;
 						}
 					}
 
-					if($ingredient->getId() !== 0 and $slot === -1){
+					if($ingredient->getId() !== Item::AIR and $slot === -1){
 						$canCraft = false;
 						break;
 					}
@@ -2867,8 +2879,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						continue;
 					}
 
-					$item = $this->inventory->getItem($slot);
-
+					$item = $playerInventoryItems[$slot];
+					
 					if($item->getCount() > $count){
 						$newItem = clone $item;
 						$newItem->setCount($item->getCount() - $count);
@@ -2885,6 +2897,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->level->dropItem($this, $item);
 					}
 				}
+				$this->inventory->sendContents($this);
 
 				//Timings::$timerCraftingEventPacket->stopTiming();
 				break;
@@ -2906,11 +2919,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->inventory->setItem($packet->slot, $packet->item);
 						$this->inventory->setHotbarSlotIndex($packet->slot, $packet->slot); //links $hotbar[$packet->slot] to $slots[$packet->slot]
 					}
-//					if ($this->craftingType === self::CRAFTING_ENCHANT) {
-//						$transaction = new BaseTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
-//					} else {
-//						$transaction = new PairTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
-//					}
 					$transaction = new BaseTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
 				} else if ($packet->windowid === ContainerSetContentPacket::SPECIAL_ARMOR) { //Our armor
 					if ($packet->slot >= 4) {
@@ -3702,7 +3710,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	protected function enchantTransaction(BaseTransaction $transaction) {
-		// if not in enchanting mode, return
 		if ($this->craftingType !== self::CRAFTING_ENCHANT) {
 			$this->getInventory()->sendContents($this);
 			return;
@@ -3710,103 +3717,46 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$oldItem = $transaction->getSourceItem();
 		$newItem = $transaction->getTargetItem();
 		$enchantInv = $this->currentWindow;
-
-		if ($newItem->getId() === Item::AIR) {
-			if ($oldItem->getId() === Item::DYE && $oldItem->getDamage() === 4) {
-				$catalyst = $enchantInv->getItem(1);
-				if ($catalyst->getId() !== Item::AIR) {
-					$newCount = $oldItem->getCount() + $catalyst->getCount();
-					$oldItem->setCount($newCount);
-				}
-				$enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $oldItem);
-
-			} else if ($oldItem instanceof Armor || $oldItem instanceof Tool) {
-				$source = $enchantInv->getItem(0);
-				if ($source->getId() !== Item::AIR || $oldItem->hasEnchantments()) {
-					$enchantInv->sendContents($this);
-					$this->inventory->sendContents($this);
-					return;
-				}
-				$enchTransaction = new BaseTransaction($enchantInv, 0, $source, $oldItem);
-			}
-		} else {
-			if ($newItem->getId() === Item::DYE && $newItem->getDamage() === 4) {
-				$catalyst = $enchantInv->getItem(1);
-				if ($newItem->getCount() < $oldItem->getCount()) {
-					$newCount = $oldItem->getCount() - $newItem->getCount();
-					if ($catalyst->getId() !== Item::AIR) {
-						$newCount += $catalyst->getCount();
+		
+		if (($newItem instanceof Armor || $newItem instanceof Tool) && $transaction->getInventory() === $this->inventory) {
+			// get enchanting data
+			$source = $enchantInv->getItem(0);
+			$enchantingLevel = $enchantInv->getEnchantingLevel();
+			
+			if ($enchantInv->isItemWasEnchant() && $newItem->deepEquals($source, true, false)) {
+				// reset enchanting data
+				$enchantInv->setItem(0, Item::get(Item::AIR));
+				$enchantInv->setEnchantingLevel(0);
+				
+				$playerItems = $this->inventory->getContents();
+				$dyeSlot = -1;
+				$targetItemSlot = -1;
+				foreach ($playerItems as $slot => $item) {
+					if ($item->getId() === Item::DYE && $item->getDamage() === 4 && $item->getCount() >= $enchantingLevel) {
+						$dyeSlot = $slot;
+					} else if ($item->deepEquals($source)) {
+						$targetItemSlot = $slot;
 					}
-					$newItem->setCount($newCount);
-					$enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $newItem);
-				} else {
-					$countDiff = $newItem->getCount() - $oldItem->getCount();
-					if ($countDiff > $catalyst->getCount()) {
-						$enchantInv->sendContents($this);
-						$this->inventory->sendContents($this);
-						return;
-					}
-					if ($catalyst->getCount() - $countDiff != 0) {
-						$newItem->setCount($catalyst->getCount() - $countDiff);
+				}
+				if ($dyeSlot !== -1 && $targetItemSlot !== -1) {
+					$this->inventory->setItem($targetItemSlot, $newItem);
+					if ($playerItems[$dyeSlot]->getCount() > $enchantingLevel) {
+						$playerItems[$dyeSlot]->count -= $enchantingLevel;
+						$this->inventory->setItem($dyeSlot, $playerItems[$dyeSlot]);
 					} else {
-						$newItem = Item::get(Item::AIR);
+						$this->inventory->setItem($dyeSlot, Item::get(Item::AIR));
 					}
-					$enchTransaction = new BaseTransaction($enchantInv, 1, $catalyst, $newItem);
 				}
-			} else if ($newItem instanceof Armor || $newItem instanceof Tool) {
-				$source = $enchantInv->getItem(0);
-				$itemsIsEqual = !$enchantInv->isItemWasEnchant() ? $newItem->deepEquals($source) : $newItem->deepEquals($source, true, false);
-				if ($itemsIsEqual && $enchantInv->isItemWasEnchant()) {
-					$updateResult = $enchantInv->updateResultItem($newItem);
-					if (!$updateResult) {
-						$enchantInv->sendContents($this);
-						$this->inventory->sendContents($this);
-						return;
-					}
-					$source = $enchantInv->getItem(0);
-				}
-
-				if ($itemsIsEqual && $source->getCount() === $newItem->getCount()) {
-					$enchTransaction = new BaseTransaction($enchantInv, 0, $source, Item::get(Item::AIR));
-				} else {
-					$enchantInv->sendContents($this);
-					$this->inventory->sendContents($this);
-					return;
-				}
-			} else {
-				$enchantInv->sendContents($this);
-				$this->inventory->sendContents($this);
-				return;
+			} else if (!$enchantInv->isItemWasEnchant()) {
+				$enchantInv->setItem(0, Item::get(Item::AIR));
 			}
+			$enchantInv->sendContents($this);
+			$this->inventory->sendContents($this);
+			return;
 		}
-		// execute transaction
-		$trGroup = new SimpleTransactionGroup($this);
-		$trGroup->addTransaction($transaction);
-		if (isset($enchTransaction)) {
-			$trGroup->addTransaction($enchTransaction);
-		}
-		$this->transactionGroupQueue[] = $trGroup;
-	}
-	
-	protected function executeTransuctions() {
-		foreach ($this->transactionGroupQueue as $key => $group) {
-			// execute transactions group
-			try {
-				$isExecute = $group->execute();
-				if ($isExecute) {
-					unset($this->transactionGroupQueue[$key]);
-				} else {
-					echo 'Transaction execute fail.'.PHP_EOL;
-					// if group too old, revert it
-					if ($group->getCreationTime() < (microtime(true) - 1)) {
-						$group->sendInventories();
-						unset($this->transactionGroupQueue[$key]);
-					}
-				}
-			} catch (\Exception $ex) {
-				$group->sendInventories();
-				unset($this->transactionGroupQueue[$key]);
-			}
+		
+		if (($oldItem instanceof Armor || $oldItem instanceof Tool) && $transaction->getInventory() === $this->inventory) {
+			$enchantInv->setItem(0, $oldItem);
 		}
 	}
 	

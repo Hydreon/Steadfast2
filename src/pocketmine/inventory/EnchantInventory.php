@@ -83,21 +83,15 @@ class EnchantInventory extends ContainerInventory {
 	}
 	
 	public function setEnchantingLevel($level) {
-		$level = abs($level);
-		if (!is_null($this->slots[1]) && $this->slots[1]->getId() === Item::DYE && $this->slots[1]->getCount() >= $level) {
-			$this->enchantingLevel = $level;
-			return true;
-		}
-		return false;
-		
+		$this->enchantingLevel = $level;
 	}
 	
-	public function getEnchanringLevel($level) {
+	public function getEnchantingLevel() {
 		return $this->enchantingLevel;
 	}
 	
 	public function isItemWasEnchant() {
-		return $this->enchantingLevel !== 0;
+		return $this->enchantingLevel > 0;
 	}
 	
 	public function updateResultItem(Item $item) {
