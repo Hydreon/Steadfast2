@@ -89,12 +89,12 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_ANIMAL_VARIANT = 2; // type: int
 	const DATA_COLOR = 3; // type: byte
 	const DATA_NAMETAG = 4; // type: string
+	const DATA_AIR = 7; //air under water type: short
 	const DATA_POTION_COLOR = 8; // type: int data: rgb
+	const DATA_POTION_AMBIENT = 9; //is potion ambient or not
 	const DATA_LEAD_HOLDER = 38; // type: long
 	
 	const DATA_SILENT = 4;
-	const DATA_POTION_AMBIENT = 8; //is potion ambient or not
-	const DATA_AIR = 22; //air under water type: short
 	const DATA_LEAD = 24; //remove
 	
 	const DATA_NO_AI = 231321;
