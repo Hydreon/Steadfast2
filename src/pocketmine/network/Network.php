@@ -79,11 +79,13 @@ use pocketmine\utils\MainLogger;
 use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
 use pocketmine\network\protocol\RequestChunkRadiusPacket;
 use pocketmine\utils\Binary;
+use pocketmine\network\proxy\ConnectPacket;
+use pocketmine\network\proxy\DisconnectPacket as ProxyDisconnectPacket;
+use pocketmine\network\proxy\Info as ProtocolProxyInfo;
 use pocketmine\utils\BinaryStream;
 use pocketmine\network\protocol\SetCommandsEnabledPacket;
 use pocketmine\network\protocol\AvailableCommandsPacket;
 use pocketmine\network\protocol\CommandStepPacket;
-
 use pocketmine\network\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
 
@@ -93,6 +95,9 @@ class Network {
 
 	/** @var \SplFixedArray */
 	private $packetPool;
+	
+	/** @var \SplFixedArray */
+	private $proxyPacketPool;
 
 	/** @var Server */
 	private $server;
@@ -111,6 +116,7 @@ class Network {
 	public function __construct(Server $server){
 
 		$this->registerPackets();
+		$this->registerProxyPackets();
 
 		$this->server = $server;
 
@@ -212,6 +218,14 @@ class Network {
 	public function registerPacket($id, $class){
 		$this->packetPool[$id] = new $class;
 	}
+	
+	/**
+	 * @param int        $id 0-255
+	 * @param DataPacket $class
+	 */
+	public function registerProxyPacket($id, $class){
+		$this->proxyPacketPool[$id] = new $class;
+	}
 
 	public function getServer(){
 		return $this->server;
@@ -233,11 +247,7 @@ class Network {
 				if(strlen($buf) === 0){
 					throw new \InvalidStateException("Empty or invalid BatchPacket received");
 				}
-				
-//				if (ord($buf{0}) !== 0x14) {
-//					echo 'Recive: 0x'. bin2hex($buf{0}).PHP_EOL;
-//				}
-				
+
 				if (($pk = $this->getPacket(ord($buf{0}))) !== null) {
 					if ($pk::NETWORK_ID === Info::BATCH_PACKET) {
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
@@ -279,7 +289,20 @@ class Network {
 		}
 		return null;
 	}
-
+	
+		/**
+	 * @param $id
+	 *
+	 * @return DataPacket
+	 */
+	public function getProxyPacket($id){
+		/** @var DataPacket $class */
+		$class = $this->proxyPacketPool[$id];
+		if($class !== null){
+			return clone $class;
+		}
+		return null;
+	}
 
 	/**
 	 * @param string $address
@@ -364,6 +387,13 @@ class Network {
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACKS_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		
+		
+	}
+	
+	private function registerProxyPackets(){
+		$this->proxyPacketPool = new \SplFixedArray(256);
+		$this->registerProxyPacket(ProtocolProxyInfo::CONNECT_PACKET, ConnectPacket::class);
+		$this->registerProxyPacket(ProtocolProxyInfo::DISCONNECT_PACKET, ProxyDisconnectPacket::class);
 		
 	}
 }
