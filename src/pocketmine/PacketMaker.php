@@ -138,36 +138,17 @@ class PacketMaker extends Worker {
 		
 	}
 
+
 	protected function makeBuffer($identifier, $fullPacket, $needACK, $identifierACK) {		
-		$pk = null;
 		if (!$fullPacket->isEncoded) {
 			$fullPacket->encode();
-		} elseif (!$needACK) {
-			if (isset($fullPacket->__encapsulatedPacket)) {
-				unset($fullPacket->__encapsulatedPacket);
-			}
-			$fullPacket->__encapsulatedPacket = new CachedEncapsulatedPacket();
-			$fullPacket->__encapsulatedPacket->identifierACK = null;
-			$fullPacket->__encapsulatedPacket->buffer = chr(0xfe) . $fullPacket->buffer;
-			$fullPacket->__encapsulatedPacket->reliability = 3;
-			$pk = $fullPacket->__encapsulatedPacket;
 		}
 
-		if ($pk === null) {
-			$pk = new EncapsulatedPacket();			
-			$pk->buffer = chr(0xfe) . $fullPacket->buffer;
-			$pk->reliability = 3;
-
-			if ($needACK === true && $identifierACK !== false) {
-				$pk->identifierACK = $identifierACK;
-			}
-		}
-
-		$flags = ($needACK === true ? RakLib::FLAG_NEED_ACK : RakLib::PRIORITY_NORMAL) | (RakLib::PRIORITY_NORMAL);
-
-		$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($identifier)) . $identifier . chr($flags) . $pk->toBinary(true);
-
-		return $buffer;
+		$data = array(
+			'identifier' => $identifier,
+			'buffer' => $fullPacket->buffer
+		);
+		return serialize($data);
 	}
 	
 	public function shutdown(){		

@@ -119,7 +119,7 @@ class RakLibServer extends \Thread{
         return $this->internalQueue;
     }
 
-    public function pushMainToThreadPacket($str){
+    public function pushMainToThreadPacket($str){	
         $this->internalQueue[] = $str;
     }
 
