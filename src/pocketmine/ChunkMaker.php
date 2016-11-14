@@ -116,7 +116,7 @@ class ChunkMaker extends Worker {
 		}
 		
 		$chunkDataWithoutSigns .= pack("C*", ...$heightMapArray) .
-				pack("N*", ...$biomeColorArray) .
+				pack("n*", ...$biomeColorArray) . ///TODO check it
 				Binary::writeLInt(0) .
 				$data['tiles'];
 
