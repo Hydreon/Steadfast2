@@ -61,7 +61,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	public $eyeHeight = 1.62;
 
 	protected $skin;
-	protected $skinName = false;
+	protected $skinName = 'Standard_Custom';
 
 	public function getSkinData(){
 		return $this->skin;
@@ -91,7 +91,9 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	 */
 	public function setSkin($str, $skinName){
 		$this->skin = $str;
-		$this->skinName = $skinName;
+		if (is_string($skinName)) {
+			$this->skinName = $skinName;
+		}
 	}
 
 	public function getInventory(){
