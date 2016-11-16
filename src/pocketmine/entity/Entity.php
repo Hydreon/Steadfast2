@@ -84,6 +84,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_TYPE_POS = 6;
 //	const DATA_TYPE_ROTATION = 7;
 	const DATA_TYPE_LONG = 7;
+	const DATA_TYPE_VECTOR3 = 8;
 
 	const DATA_FLAGS = 0; //is entity burning or not
 	const DATA_ANIMAL_VARIANT = 2; // type: int
@@ -1684,6 +1685,13 @@ abstract class Entity extends Location implements Metadatable{
 			}
 
 			$this->sendData($targets, [$id => $this->dataProperties[$id]]);
+		}
+	}
+	
+	public function removeDataProperty($id, $send = true) {
+		unset($this->dataProperties[$id]);
+		if ($send) {
+			$this->sendData($this->hasSpawned);
 		}
 	}
 

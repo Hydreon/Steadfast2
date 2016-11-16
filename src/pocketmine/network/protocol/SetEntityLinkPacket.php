@@ -30,7 +30,7 @@ class SetEntityLinkPacket extends DataPacket{
 	public $from;
 	public $to;
 	public $type;
-
+	
 	public function decode(){
 
 	}
@@ -40,6 +40,7 @@ class SetEntityLinkPacket extends DataPacket{
 		$this->putVarInt($this->from);
 		$this->putVarInt($this->to);
 		$this->putByte($this->type);
+		$this->putByte(0);
 	}
 
 }
