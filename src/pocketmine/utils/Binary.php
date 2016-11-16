@@ -133,6 +133,11 @@ class Binary{
 				case Entity::DATA_TYPE_LONG:
 					$m .= self::writeSignedVarInt($d[1]);
 					break;
+				case Entity::DATA_TYPE_VECTOR3:
+					$m .= self::writeLFloat($d[1][0]);
+					$m .= self::writeLFloat($d[1][1]);
+					$m .= self::writeLFloat($d[1][2]);
+					break;
 			}
 		}
 		return $m;
