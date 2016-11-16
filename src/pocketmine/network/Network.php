@@ -248,6 +248,10 @@ class Network {
 					throw new \InvalidStateException("Empty or invalid BatchPacket received");
 				}
 
+//				if (ord($buf{0}) !== 0x14) {
+//					echo 'Recive: 0x'. bin2hex($buf{0}).PHP_EOL;
+//				}
+				
 				if (($pk = $this->getPacket(ord($buf{0}))) !== null) {
 					if ($pk::NETWORK_ID === Info::BATCH_PACKET) {
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
