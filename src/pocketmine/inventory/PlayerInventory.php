@@ -53,6 +53,16 @@ class PlayerInventory extends BaseInventory{
 		parent::setSize($size + 4);
 		$this->sendContents($this->getViewers());
 	}
+	
+	/**
+	 * 
+	 * @param int $index
+	 * @return Item
+	 */
+	public function getHotbatSlotItem($index) {
+		$slot = $this->getHotbarSlotIndex($index);
+		return $this->getItem($slot);
+	}
 
 	public function getHotbarSlotIndex($index){
 		return ($index >= 0 and $index < $this->getHotbarSize()) ? $this->hotbar[$index] : -1;
@@ -68,14 +78,13 @@ class PlayerInventory extends BaseInventory{
 		return $this->itemInHandIndex;
 	}
 
-	public function setHeldItemIndex($index){
+	public function setHeldItemIndex($index, $isNeedSendToHolder = true){
 		if($index >= 0 and $index < $this->getHotbarSize()){
 			$this->itemInHandIndex = $index;
-
-			if($this->getHolder() instanceof Player){
+			
+			if ($isNeedSendToHolder === true && $this->getHolder() instanceof Player) {
 				$this->sendHeldItem($this->getHolder());
 			}
-
 			$this->sendHeldItem($this->getHolder()->getViewers());
 		}
 	}

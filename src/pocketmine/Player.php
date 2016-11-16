@@ -1802,10 +1802,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							break;
 						}
 					}else{
-						if($packet->selectedSlot >= 0 and $packet->selectedSlot < 9){
-							$this->inventory->setHeldItemIndex($packet->selectedSlot);
+						if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
+							$hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);
+							$isNeedSendToHolder = !($hotbarItem->deepEquals($packet->item));
+							$this->inventory->setHeldItemIndex($packet->selectedSlot, $isNeedSendToHolder);
 							$this->inventory->setHeldItemSlot($packet->slot);
-						}else{
+							$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
+							break;
+						} else {
 							$this->inventory->sendContents($this);
 							//Timings::$timerMobEqipmentPacket->stopTiming();
 							break;
@@ -1820,10 +1824,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->inventory->setItem($packet->selectedSlot, $item);
 					$this->inventory->setHeldItemSlot($packet->selectedSlot);
 				}else{
-					if($packet->selectedSlot >= 0 and $packet->selectedSlot < 9){
-						$this->inventory->setHeldItemIndex($packet->selectedSlot);
+					if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
+						$hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);
+						$isNeedSendToHolder = !($hotbarItem->deepEquals($packet->item));
+						$this->inventory->setHeldItemIndex($packet->selectedSlot, $isNeedSendToHolder);
 						$this->inventory->setHeldItemSlot($slot);
-					}else{
+						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
+						break;
+					} else {
 						$this->inventory->sendContents($this);
 						//Timings::$timerMobEqipmentPacket->stopTiming();
 						break;
@@ -3726,15 +3734,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			try {
 				$isExecute = $trGroup->execute();
 				if (!$isExecute) {
-					echo '[INFO] Transaction execute fail 1.'.PHP_EOL;
+//					echo '[INFO] Transaction execute fail 1.'.PHP_EOL;
 					$trGroup->sendInventories();
 				}
 			} catch (\Exception $ex) {
-				echo '[INFO] Transaction execute fail 2.'.PHP_EOL;
+//				echo '[INFO] Transaction execute fail 2.'.PHP_EOL;
 				$trGroup->sendInventories();
 			}
 		} else {
-			echo '[INFO] Suiteble item not found in the current inventory.'.PHP_EOL;
+//			echo '[INFO] Suiteble item not found in the current inventory.'.PHP_EOL;
+			$transaction->getInventory()->sendContents($this);
 		}
 	}
 	

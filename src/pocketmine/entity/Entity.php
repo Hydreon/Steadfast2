@@ -103,6 +103,8 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_MAX_AIR = 44; // type: short
 	const DATA_SEAT_RIDER_OFFSET = 56; // type: vector3
 	
+	const DATA_EXPLODE_TIMER = 55;
+	
 	const DATA_SILENT = 4;
 	const DATA_LEAD = 24; //remove
 	
