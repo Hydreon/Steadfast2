@@ -94,6 +94,8 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_POTION_AMBIENT = 9; //is potion ambient or not
 	const DATA_LEAD_HOLDER = 38; // type: long
 	
+	const DATA_EXPLODE_TIMER = 55;
+	
 	const DATA_SILENT = 4;
 	const DATA_LEAD = 24; //remove
 	
