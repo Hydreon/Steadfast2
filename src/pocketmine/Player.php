@@ -1717,6 +1717,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->randomClientId = $packet->clientId;
 				$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
 				$this->uuid = $packet->clientUUID;
+				if (is_null($this->uuid)) {
+					$this->close("", "Sorry, your client is broken.");
+					//Timings::$timerLoginPacket->stopTiming();
+					break;
+				}
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
 				$this->protocol = $packet->protocol1;

@@ -87,8 +87,8 @@ class Binary{
 	 * @return string
 	 */
 	public static function writeMetadata(array $data){
-		unset($data[17]);
-		unset($data[15]);
+//		unset($data[17]);
+//		unset($data[15]);
 //		if (isset($data[Entity::DATA_AIR])) {
 //			$air = $data[Entity::DATA_AIR][1];
 //			if ($air > 0) {
@@ -132,6 +132,11 @@ class Binary{
 					break;
 				case Entity::DATA_TYPE_LONG:
 					$m .= self::writeSignedVarInt($d[1]);
+					break;
+				case Entity::DATA_TYPE_VECTOR3:
+					$m .= self::writeLFloat($d[1][0]);
+					$m .= self::writeLFloat($d[1][1]);
+					$m .= self::writeLFloat($d[1][2]);
 					break;
 			}
 		}

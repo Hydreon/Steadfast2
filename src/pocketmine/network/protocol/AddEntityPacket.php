@@ -43,13 +43,14 @@ class AddEntityPacket extends DataPacket{
 	public $pitch;
 	public $metadata = [];
 	public $links = [];
+	public $attributes = [];
 
 	public function decode(){
 
 	}
 
 	public function encode(){
-		$this->reset();
+		$this->reset();		
 		$this->putVarInt($this->eid);
 		$this->putVarInt($this->eid);
 		$this->putVarInt($this->type);
@@ -61,10 +62,23 @@ class AddEntityPacket extends DataPacket{
 		$this->putLFloat($this->speedZ);
 		$this->putLFloat($this->pitch);
 		$this->putLFloat($this->yaw);
-		$this->putVarInt(0);
+		$this->putVarInt(count($this->attributes));
+		foreach ($this->attributes as $attribute) {
+			$this->putString($attribute['name']);
+			$this->putLFloat($attribute['min']);
+			$this->putLFloat($attribute['default']);
+			$this->putLFloat($attribute['max']);			
+		}
 		if(!empty($this->metadata)) {
 			$meta = Binary::writeMetadata($this->metadata);
 			$this->put($meta);
+		}
+		$this->putVarInt(count($this->links));
+		foreach ($this->links as $link) {
+			$this->putVarInt($link['from']);
+			$this->putVarInt($link['to']);
+			$this->putByte($link['type']);
+			$this->putByte(0);
 		}
 	}
 }

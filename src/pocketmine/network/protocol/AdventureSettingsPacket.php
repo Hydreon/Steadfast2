@@ -37,7 +37,8 @@ class AdventureSettingsPacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putVarInt($this->flags);		
+		$this->putVarInt($this->flags);	
+		$this->putVarInt(0);
 	}
 
 }
