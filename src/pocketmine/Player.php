@@ -3729,15 +3729,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			try {
 				$isExecute = $trGroup->execute();
 				if (!$isExecute) {
-					echo '[INFO] Transaction execute fail 1.'.PHP_EOL;
+//					echo '[INFO] Transaction execute fail 1.'.PHP_EOL;
 					$trGroup->sendInventories();
 				}
 			} catch (\Exception $ex) {
-				echo '[INFO] Transaction execute fail 2.'.PHP_EOL;
+//				echo '[INFO] Transaction execute fail 2.'.PHP_EOL;
 				$trGroup->sendInventories();
 			}
 		} else {
-			echo '[INFO] Suiteble item not found in the current inventory.'.PHP_EOL;
+//			echo '[INFO] Suiteble item not found in the current inventory.'.PHP_EOL;
+			$transaction->getInventory()->sendContents($this);
 		}
 	}
 	
