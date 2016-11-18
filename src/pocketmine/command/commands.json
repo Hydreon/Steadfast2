@@ -20,5 +20,48 @@
                 }
             }
         ]
+    },
+	"help": {
+        "versions": [
+            {
+                "description": "Show list of available commands",
+                "permission": "any",
+                "overloads": {
+                    "total": {
+                        "input": {
+							"parameters": [
+								{
+									"name": "pageNumber",
+									"type": "int",
+									"optional": true
+								}
+							]
+						},
+                        "output": {
+                            "parameters": []
+                        }
+                    },
+					"byName": {
+                        "input": {
+							"parameters": [
+								{
+									"name": "topic",
+									"type": "rawtext",
+									"optional": true
+								},
+								{
+									"name": "pageNumber",
+									"type": "int",
+									"optional": true
+								}
+							]
+						},
+                        "output": {
+                            "parameters": []
+                        }
+					}
+                }
+            }
+        ]
     }
 }
