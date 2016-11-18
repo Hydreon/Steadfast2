@@ -586,8 +586,8 @@ class PluginManager{
 			foreach ($jsonCommands as $name => $options) {
 				if (!isset($options['shouldBeRegistered']) || $options['shouldBeRegistered'] === true) {
 					$newCmd = new PluginCommand($name, $plugin);
-					if(isset($options['versions'][0]['descriptions'])){
-						$newCmd->setDescription($options['versions'][0]['descriptions']);
+					if(isset($options['versions'][0]['description'])){
+						$newCmd->setDescription($options['versions'][0]['description']);
 					}
 					if(isset($options['versions'][0]['aliases']) && is_array($options['versions'][0]['aliases'])){
 						$newCmd->setAliases($options['versions'][0]['aliases']);

@@ -97,7 +97,7 @@ class RemoteProxyServer {
 	private function checkReadQueue() {
 		$data = $this->lastBuffer;
 		$atLeastOneRecived = false;
-		while (strlen($buffer = socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
+		while (strlen($buffer = @socket_read($this->socket, 65535, PHP_BINARY_READ)) > 0) {
 			$data .= $buffer;
 			$atLeastOneRecived = true;
 		}
