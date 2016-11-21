@@ -82,6 +82,7 @@ use pocketmine\inventory\SimpleTransactionGroup;
 use pocketmine\item\Item;
 use pocketmine\item\Armor;
 use pocketmine\item\Tool;
+use pocketmine\item\Potion;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\format\LevelProvider;
 use pocketmine\level\Level;
@@ -2402,8 +2403,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false); //TODO: check if this should be true
 
 				switch($packet->event){
-					case 9: //Eating
-						$this->eatFoodInHand();
+					case EntityEventPacket::USE_ITEM: //Eating
+						$slot = $this->inventory->getItemInHand();
+						if($slot instanceof Potion && $slot->canBeConsumed()){
+							$ev = new PlayerItemConsumeEvent($this, $slot);
+							$this->server->getPluginManager()->callEvent($ev);
+							if(!$ev->isCancelled()){
+								$slot->onConsume($this);
+							}else{
+								$this->inventory->sendContents($this);
+							}
+						} else {
+							$this->eatFoodInHand();
+						}
 						break;
 					case EntityEventPacket::ENCHANT:
 						if ($this->currentWindow instanceof EnchantInventory) {

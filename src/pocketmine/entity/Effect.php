@@ -37,8 +37,8 @@ class Effect{
 	const FATIGUE = 4;
 	const MINING_FATIGUE = 4;
 	const STRENGTH = 5;
-	//TODO: const HEALING = 6;
-	//TODO: const HARMING = 7;
+	const HEALING = 6;
+//	const HARMING = 7;
 	const JUMP = 8;
 	const NAUSEA = 9;
 	const CONFUSION = 9;
@@ -47,15 +47,15 @@ class Effect{
 	const FIRE_RESISTANCE = 12;
 	const WATER_BREATHING = 13;
 	const INVISIBILITY = 14;
-	//const BLINDNESS = 15;
+	const BLINDNESS = 15;
 	const NIGHT_VISION = 16;
-	//const HUNGER = 17;
+	const HUNGER = 17;
 	const WEAKNESS = 18;
 	const POISON = 19;
 	const WITHER = 20;
 	const HEALTH_BOOST = 21;
-	//const ABSORPTION = 22;
-	//const SATURATION = 23;
+	const ABSORPTION = 22;
+	const SATURATION = 23;
 
 	/** @var Effect[] */
 	protected static $effects;
@@ -68,8 +68,8 @@ class Effect{
 		self::$effects[Effect::SWIFTNESS] = new Effect(Effect::SWIFTNESS, "%potion.digSpeed", 217, 192, 67);
 		self::$effects[Effect::FATIGUE] = new Effect(Effect::FATIGUE, "%potion.digSlowDown", 74, 66, 23, true);
 		self::$effects[Effect::STRENGTH] = new Effect(Effect::STRENGTH, "%potion.damageBoost", 147, 36, 35);
-		//self::$effects[Effect::HEALING] = new InstantEffect(Effect::HEALING, "%potion.heal", 248, 36, 35);
-		//self::$effects[Effect::HARMING] = new InstantEffect(Effect::HARMING, "%potion.harm", 67, 10, 9, true);
+		self::$effects[Effect::HEALING] = new InstantEffect(Effect::HEALING, "%potion.heal", 248, 36, 35);
+//		self::$effects[Effect::HARMING] = new InstantEffect(Effect::HARMING, "%potion.harm", 67, 10, 9, true);
 		self::$effects[Effect::NIGHT_VISION] = new Effect(Effect::NIGHT_VISION, "%potion.nightVision", 147, 36, 35);
 		self::$effects[Effect::JUMP] = new Effect(Effect::JUMP, "%potion.jump", 34, 255, 76);
 		self::$effects[Effect::NAUSEA] = new Effect(Effect::NAUSEA, "%potion.confusion", 85, 29, 74, true);
@@ -186,6 +186,7 @@ class Effect{
 	}
 
 	public function canTick(){
+		if($this->amplifier < 0) $this->amplifier = 0;
 		switch($this->id){
 			case Effect::POISON:
 				if(($interval = (25 >> $this->amplifier)) > 0){
@@ -199,6 +200,22 @@ class Effect{
 				return true;
 			case Effect::REGENERATION:
 				if(($interval = (40 >> $this->amplifier)) > 0){
+					return ($this->duration % $interval) === 0;
+				}
+				return true;
+			case Effect::HUNGER:
+				if($this->amplifier < 0){ // prevents hacking with amplifier -1
+					return false;
+				}
+				if(($interval = 20) > 0){
+					return ($this->duration % $interval) === 0;
+				}
+				return true;
+			case Effect::HEALING:
+//			case Effect::HARMING:
+				return true;
+			case Effect::SATURATION:
+				if(($interval = (20 >> $this->amplifier)) > 0){
 					return ($this->duration % $interval) === 0;
 				}
 				return true;
@@ -224,6 +241,38 @@ class Effect{
 				if($entity->getHealth() < $entity->getMaxHealth()){
 					$ev = new EntityRegainHealthEvent($entity, 1, EntityRegainHealthEvent::CAUSE_MAGIC);
 					$entity->heal($ev->getAmount(), $ev);
+				}
+				break;
+			case Effect::HUNGER:
+//				if($entity instanceof Human){
+//					$entity->exhaust(0.5 * $this->amplifier, PlayerExhaustEvent::CAUSE_POTION);
+//				}
+				break;
+			case Effect::HEALING:
+				$level = $this->amplifier + 1;
+				if(($entity->getHealth() + 4 * $level) <= $entity->getMaxHealth()) {
+					$ev = new EntityRegainHealthEvent($entity, 4 * $level, EntityRegainHealthEvent::CAUSE_MAGIC);
+					$entity->heal($ev->getAmount(), $ev);
+				} else {
+					$ev = new EntityRegainHealthEvent($entity, $entity->getMaxHealth() - $entity->getHealth(), EntityRegainHealthEvent::CAUSE_MAGIC);
+					$entity->heal($ev->getAmount(), $ev);
+				}
+				break;
+//			case Effect::HARMING:
+//				$level = $this->amplifier + 1;
+//				if(($entity->getHealth() - 6 * $level) >= 0) {
+//					$ev = new EntityDamageEvent($entity, EntityDamageEvent::CAUSE_MAGIC, 6 * $level);
+//					$entity->attack($ev->getFinalDamage(), $ev);
+//				} else {
+//					$ev = new EntityDamageEvent($entity, EntityDamageEvent::CAUSE_MAGIC, $entity->getHealth());
+//					$entity->attack($ev->getFinalDamage(), $ev);
+//				}
+//				break;
+			case Effect::SATURATION:
+				if($entity instanceof Player){
+					if($entity->getServer()->foodEnabled) {
+						$entity->setFood($entity->getFood() + 1);
+					}
 				}
 				break;
 		}

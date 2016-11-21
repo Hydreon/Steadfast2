@@ -26,6 +26,7 @@
             {
                 "description": "Show list of available commands",
                 "permission": "any",
+				"aliases": [],
                 "overloads": {
                     "total": {
                         "input": {
