@@ -32,8 +32,6 @@ use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
 use pocketmine\network\protocol\SetEntityDataPacket;
 use pocketmine\Server;
-use pocketmine\level\particle\HugeExplodeParticle;
-use pocketmine\math\Vector3;
 
 class PrimedTNT extends Entity implements Explosive{
 	const NETWORK_ID = 65;
@@ -119,7 +117,6 @@ class PrimedTNT extends Entity implements Explosive{
 			}
 			
 			if($this->fuse <= 0){
-				$this->level->addParticle(new HugeExplodeParticle(new Vector3($this->x, $this->y - 2, $this->z)));	
 				$this->kill();
 				$this->explode();
 			}

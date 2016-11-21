@@ -41,6 +41,7 @@ use pocketmine\network\protocol\ExplodePacket;
 use pocketmine\Server;
 use pocketmine\utils\Random;
 use pocketmine\block\Air;
+use pocketmine\level\particle\HugeExplodeParticle;
 
 class Explosion{
 
@@ -215,7 +216,8 @@ class Explosion{
 		$pk->z = $this->source->z;
 		$pk->radius = $this->size;
 		$pk->records = $send;
-		Server::broadcastPacket($this->level->getUsingChunk($source->x >> 4, $source->z >> 4), $pk);
+		Server::broadcastPacket($this->level->getUsingChunk($source->x >> 4, $source->z >> 4), $pk);		
+		$this->level->addParticle(new HugeExplodeParticle(new Vector3($this->source->x,  $this->source->y, $this->source->z)));	
 
 		return true;
 	}
