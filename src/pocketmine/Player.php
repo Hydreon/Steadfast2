@@ -1710,7 +1710,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($this->loggedIn === true){
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
-				}				
+				}		
+				if($packet->isValidProtocol === false) {
+					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
+					//Timings::$timerLoginPacket->stopTiming();
+					break;
+				}
+				
 				$this->username = TextFormat::clean($packet->username);
 				$this->displayName = $this->username;
 				$this->setNameTag($this->username);
@@ -1727,12 +1733,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->clientSecret = $packet->clientSecret;
 				$this->protocol = $packet->protocol1;
 				$this->setSkin($packet->skin, $packet->skinName);
-				
-				if($packet->isValidProtocol === false) {
-					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
-					//Timings::$timerLoginPacket->stopTiming();
-					break;
-				}		
+					
 				$this->processLogin();
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
