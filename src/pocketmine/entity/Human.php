@@ -97,6 +97,15 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	}
 
 	public function getInventory(){
+		if($this instanceof Player && $this->inventory === null){
+			$text = $this->getName()." ".date("H:i:s");
+			$text .= "\n"."Spawned: ".$this->spawned;
+			$text .= "\n"."Alive: ".$this->isAlive();
+			$text .= "\n"."Gamemode: ".$this->gamemode;
+			$text .= "\n"."Logged: ".$this->loggedIn;
+			$text .= "\n"."Position: ".$this->x." ".$this->y." ".$this->z;
+			file_put_contents("logs/inventory_crash_".$this->getName()."_".date("H:i:s"), $text);
+		}
 		return $this->inventory;
 	}
 
