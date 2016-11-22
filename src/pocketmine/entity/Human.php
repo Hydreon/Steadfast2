@@ -46,7 +46,6 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	const DATA_PLAYER_FLAGS = 16;
 	const DATA_PLAYER_BED_POSITION = 17;
 
-	protected $nameTag = "TESTIFICATE";
 	/** @var PlayerInventory */
 	protected $inventory;
 
