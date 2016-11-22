@@ -3499,8 +3499,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if ($p->kick("You connected from somewhere else.") === false) {
 					$this->close(TextFormat::YELLOW . $this->getName() . " has left the game", "You connected from somewhere else.");
 					return;
-				} else {
-					return;
 				}
 			}
 		}
