@@ -115,9 +115,9 @@ abstract class Living extends Entity implements Damageable{
 				$this->setOnFire(2 * $this->server->getDifficulty());
 			}
 
-			$deltaX = $this->x - $e->x;
+		/*	$deltaX = $this->x - $e->x;
 			$deltaZ = $this->z - $e->z;
-			$this->knockBack($e, $damage, $deltaX, $deltaZ, $source->getKnockBack());
+			$this->knockBack($e, $damage, $deltaX, $deltaZ, $source->getKnockBack()); */
 		}
 
 		$pk = new EntityEventPacket();
@@ -129,7 +129,7 @@ abstract class Living extends Entity implements Damageable{
 	}
 
 	public function knockBack(Entity $attacker, $damage, $x, $z, $base = 0.4){
-		$f = sqrt($x ** 2 + $z ** 2);
+	/*	$f = sqrt($x ** 2 + $z ** 2);
 
 		$motion = new Vector3($this->motionX, $this->motionY, $this->motionZ);
 
@@ -144,7 +144,7 @@ abstract class Living extends Entity implements Damageable{
 			$motion->y = $base;
 		}
 
-		$this->setMotion($motion);
+		$this->setMotion($motion); */
 	}
 
 	public function kill(){
