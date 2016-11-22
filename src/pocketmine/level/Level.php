@@ -1533,7 +1533,7 @@ class Level implements ChunkManager, Metadatable{
 				if ($e instanceof Player && $e->isSpectator()) {
 					continue;
 				}
-				if ($e == $player) {
+				if ($e === $player) {
 					if (round($player->getY()) != round($hand->getY()) && round($player->getY() + 1) != round($hand->getY())) {
 						continue;
 					}
