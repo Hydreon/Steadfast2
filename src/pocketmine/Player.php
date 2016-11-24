@@ -550,7 +550,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->perm = new PermissibleBase($this);
 		$this->namedtag = new Compound();
 		$this->server = Server::getInstance();
-		$this->lastBreak = PHP_INT_MAX;
+		$this->lastBreak = 0;
 		$this->ip = $ip;
 		$this->port = $port;
 		$this->clientID = $clientID;
@@ -1986,25 +1986,25 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pos = new Vector3($packet->x, $packet->y, $packet->z);
 				
 				switch($packet->action){
-					case PlayerActionPacket::ACTION_START_BREAK:
-						if($this->lastBreak !== PHP_INT_MAX or $pos->distanceSquared($this) > 10000){
-							break;
-						}
-						$target = $this->level->getBlock($pos);
-						$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $target, $packet->face, $target->getId() === 0 ? PlayerInteractEvent::LEFT_CLICK_AIR : PlayerInteractEvent::LEFT_CLICK_BLOCK);
-						$this->getServer()->getPluginManager()->callEvent($ev);
-						if($this->isSpectator()){
-							$ev->setCancelled(true);
-						}
-						if($ev->isCancelled()){
-							$this->inventory->sendHeldItem($this);
-							break;
-						}
-						$this->lastBreak = microtime(true);
-						break;
-					case PlayerActionPacket::ACTION_ABORT_BREAK:
-						$this->lastBreak = PHP_INT_MAX;
-						break;
+//					case PlayerActionPacket::ACTION_START_BREAK:
+//						if($this->lastBreak !== PHP_INT_MAX or $pos->distanceSquared($this) > 10000){
+//							break;
+//						}
+//						$target = $this->level->getBlock($pos);
+//						$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $target, $packet->face, $target->getId() === 0 ? PlayerInteractEvent::LEFT_CLICK_AIR : PlayerInteractEvent::LEFT_CLICK_BLOCK);
+//						$this->getServer()->getPluginManager()->callEvent($ev);
+//						if($this->isSpectator()){
+//							$ev->setCancelled(true);
+//						}
+//						if($ev->isCancelled()){
+//							$this->inventory->sendHeldItem($this);
+//							break;
+//						}
+////						$this->lastBreak = microtime(true);
+//						break;
+//					case PlayerActionPacket::ACTION_ABORT_BREAK:
+//						$this->lastBreak = PHP_INT_MAX;
+//						break;
 					case PlayerActionPacket::ACTION_RELEASE_ITEM:
 						if($this->startAction > -1 and $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION)){
 							if($this->inventory->getItemInHand()->getId() === Item::BOW) {

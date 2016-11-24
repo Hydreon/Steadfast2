@@ -1381,16 +1381,19 @@ class Level implements ChunkManager, Metadatable{
 					$ev->setCancelled();
 				}
 			}
+			
+			$breakTime = $player->isCreative() ? 0.15 : $target->getBreakTime($item);
+			$delta = 0.1;
+			
+			if (!$ev->getInstaBreak() && ($player->lastBreak + $breakTime) >= microtime(true) - $delta) {
+				return false;
+			}
+			
 			$this->server->getPluginManager()->callEvent($ev);
 			if($ev->isCancelled()){
 				return false;
 			}
-
-			$breakTime = $player->isCreative() ? 0.15 : $target->getBreakTime($item);
-
-			if(!$ev->getInstaBreak() and ($player->lastBreak + $breakTime) >= microtime(true)){
-				return false;
-			}
+			
 			$drops = $ev->getDrops();
 			$player->lastBreak = microtime(true);
 		}elseif($item instanceof Item and !$target->isBreakable($item)){
@@ -2630,44 +2633,13 @@ class Level implements ChunkManager, Metadatable{
 	}
 	
 	public function updateChunk($x, $z) {
-		$chunk = $this->getProvider()->getChunk($x, $z, false);
-		if (!($chunk instanceof BaseFullChunk)) {
-			return;
-		}
-		$tiles = "";
-		$nbt = new NBT(NBT::LITTLE_ENDIAN);
-		foreach ($chunk->getTiles() as $tile) {
-			if ($tile instanceof Spawnable) {
-				$nbt->setData($tile->getSpawnCompound());
-				$tiles .= $nbt->write();
-			}
-		}
-
-		$extraData = new BinaryStream();
-		$extraData->putLInt(count($chunk->getBlockExtraDataArray()));
-		foreach ($chunk->getBlockExtraDataArray() as $key => $value) {
-			$extraData->putLInt($key);
-			$extraData->putLShort($value);
-		}
-
-		$data = $chunk->getBlockIdArray() .
-				$chunk->getBlockDataArray() .
-				$chunk->getBlockSkyLightArray() .
-				$chunk->getBlockLightArray() .
-				pack("C*", ...$chunk->getHeightMapArray()) .
-				pack("N*", ...$chunk->getBiomeColorArray()) .
-				$extraData->getBuffer() .
-				$tiles;
-
-		$pk = new FullChunkDataPacket();
-		$pk->chunkX = $x;
-		$pk->chunkZ = $z;
-		$pk->data = $data;
-		$pk->encode();
-
-
+		var_dump($x, $z);
+		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
+		$this->chunkSendTasks[$index] = true;		
+		$this->provider->requestChunkTask($x, $z);
+		$this->chunkSendQueue[$index] = [];
 		foreach ($this->getUsingChunk($x, $z) as $player) {
-			$player->dataPacket($pk);
+			$this->chunkSendQueue[$index][spl_object_hash($player)] = $player;
 		}
 	}
 }
