@@ -794,8 +794,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //			}
 			
 			$this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));
+			if (($this->interface instanceof ProxyInterface) && self::DATA_SEAT_RIDER_OFFSET == 56) { //TODO hack				
+				$this->about17MessageTime = time();
+			}
+			
 		}
 	}
+	
+	private $about17MessageTime = 0; //TODO hack
 
 	protected function orderChunks(){
 		if($this->connected === false){
@@ -2001,7 +2007,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //							$this->inventory->sendHeldItem($this);
 //							break;
 //						}
-////						$this->lastBreak = microtime(true);
+//						$this->lastBreak = microtime(true);
 //						break;
 //					case PlayerActionPacket::ACTION_ABORT_BREAK:
 //						$this->lastBreak = PHP_INT_MAX;
@@ -2490,6 +2496,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$packet->message = TextFormat::clean($packet->message, $this->removeFormat);
 					foreach(explode("\n", $packet->message) as $message){
 						if(trim($message) != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){
+							if ((time() - $this->about17MessageTime <= 30)) { //TODO hack
+								if (strtolower($message) == 'y' || strtolower($message) == 'yes') {
+									$this->transfer('beta.lbsg.net');
+									break;
+								} elseif (strtolower($message) == 'n' || strtolower($message) == 'no') {
+									$this->about17MessageTime = 0;
+									break;
+								}
+							}
 							$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $message));
 							if(!$ev->isCancelled()){
 								$this->server->broadcastMessage($ev->getPlayer()->getDisplayName() . ": " . $ev->getMessage(), $ev->getRecipients());

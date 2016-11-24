@@ -1384,7 +1384,7 @@ class Level implements ChunkManager, Metadatable{
 			
 			$breakTime = $player->isCreative() ? 0.15 : $target->getBreakTime($item);
 			$delta = 0.1;
-			
+
 			if (!$ev->getInstaBreak() && ($player->lastBreak + $breakTime) >= microtime(true) - $delta) {
 				return false;
 			}
@@ -2633,7 +2633,6 @@ class Level implements ChunkManager, Metadatable{
 	}
 	
 	public function updateChunk($x, $z) {
-		var_dump($x, $z);
 		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
 		$this->chunkSendTasks[$index] = true;		
 		$this->provider->requestChunkTask($x, $z);
