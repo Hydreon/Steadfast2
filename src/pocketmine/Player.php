@@ -794,8 +794,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //			}
 			
 			$this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));
+			if (($this->interface instanceof ProxyInterface) && self::DATA_SEAT_RIDER_OFFSET == 56) { //TODO hack				
+				$this->about17MessageTime = time();
+			}
+			
 		}
 	}
+	
+	private $about17MessageTime = 0; //TODO hack
 
 	protected function orderChunks(){
 		if($this->connected === false){
@@ -1710,7 +1716,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($this->loggedIn === true){
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
-				}				
+				}		
+				if($packet->isValidProtocol === false) {
+					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
+					//Timings::$timerLoginPacket->stopTiming();
+					break;
+				}
+				
 				$this->username = TextFormat::clean($packet->username);
 				$this->displayName = $this->username;
 				$this->setNameTag($this->username);
@@ -1727,12 +1739,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->clientSecret = $packet->clientSecret;
 				$this->protocol = $packet->protocol1;
 				$this->setSkin($packet->skin, $packet->skinName);
-				
-				if($packet->isValidProtocol === false) {
-					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
-					//Timings::$timerLoginPacket->stopTiming();
-					break;
-				}		
+					
 				$this->processLogin();
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
@@ -2489,6 +2496,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$packet->message = TextFormat::clean($packet->message, $this->removeFormat);
 					foreach(explode("\n", $packet->message) as $message){
 						if(trim($message) != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){
+							if ((time() - $this->about17MessageTime <= 30)) { //TODO hack
+								if (strtolower($message) == 'y' || strtolower($message) == 'yes') {
+									$this->transfer('beta.lbsg.net');
+									break;
+								} elseif (strtolower($message) == 'n' || strtolower($message) == 'no') {
+									$this->about17MessageTime = 0;
+									break;
+								}
+							}
 							$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $message));
 							if(!$ev->isCancelled()){
 								$this->server->broadcastMessage($ev->getPlayer()->getDisplayName() . ": " . $ev->getMessage(), $ev->getRecipients());
@@ -3497,8 +3513,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if ($p !== $this and strtolower($p->getName()) === strtolower($this->getName())) {
 				if ($p->kick("You connected from somewhere else.") === false) {
 					$this->close(TextFormat::YELLOW . $this->getName() . " has left the game", "You connected from somewhere else.");
-					return;
-				} else {
 					return;
 				}
 			}
