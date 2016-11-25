@@ -550,7 +550,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->perm = new PermissibleBase($this);
 		$this->namedtag = new Compound();
 		$this->server = Server::getInstance();
-		$this->lastBreak = PHP_INT_MAX;
+		$this->lastBreak = 0;
 		$this->ip = $ip;
 		$this->port = $port;
 		$this->clientID = $clientID;
@@ -794,8 +794,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //			}
 			
 			$this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));
+			if (($this->interface instanceof ProxyInterface) && self::DATA_SEAT_RIDER_OFFSET == 56) { //TODO hack				
+				$this->about17MessageTime = time();
+			}
+			
 		}
 	}
+	
+	private $about17MessageTime = 0; //TODO hack
 
 	protected function orderChunks(){
 		if($this->connected === false){
@@ -1710,7 +1716,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($this->loggedIn === true){
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
-				}				
+				}		
+				if($packet->isValidProtocol === false) {
+					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
+					//Timings::$timerLoginPacket->stopTiming();
+					break;
+				}
+				
 				$this->username = TextFormat::clean($packet->username);
 				$this->displayName = $this->username;
 				$this->setNameTag($this->username);
@@ -1727,12 +1739,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->clientSecret = $packet->clientSecret;
 				$this->protocol = $packet->protocol1;
 				$this->setSkin($packet->skin, $packet->skinName);
-				
-				if($packet->isValidProtocol === false) {
-					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
-					//Timings::$timerLoginPacket->stopTiming();
-					break;
-				}		
+					
 				$this->processLogin();
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
@@ -1822,18 +1829,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}elseif($this->isCreative()){
 					$this->inventory->setHeldItemIndex($packet->selectedSlot);
-					$this->inventory->setItem($packet->slot, $packet->item);
-					$this->inventory->setHotbarSlotIndex($packet->slot, $packet->slot);
+					$this->inventory->setItem($packet->selectedSlot, $item);
+					$this->inventory->setHeldItemSlot($packet->selectedSlot);
 				}else{
 					if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
-						$hotbarItem = $this->inventory->setHotbarSlotIndex($packet->selectedSlot);
+						$hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);
 						$isNeedSendToHolder = !($hotbarItem->deepEquals($packet->item));
 						$this->inventory->setHeldItemIndex($packet->selectedSlot, $isNeedSendToHolder);
 						$this->inventory->setHeldItemSlot($slot);
 						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 						break;
 					} else {
-						//$this->inventory->sendContents($this);
+						$this->inventory->sendContents($this);
 						//Timings::$timerMobEqipmentPacket->stopTiming();
 						break;
 					}
@@ -1986,25 +1993,25 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pos = new Vector3($packet->x, $packet->y, $packet->z);
 				
 				switch($packet->action){
-					case PlayerActionPacket::ACTION_START_BREAK:
-						if($this->lastBreak !== PHP_INT_MAX or $pos->distanceSquared($this) > 10000){
-							break;
-						}
-						$target = $this->level->getBlock($pos);
-						$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $target, $packet->face, $target->getId() === 0 ? PlayerInteractEvent::LEFT_CLICK_AIR : PlayerInteractEvent::LEFT_CLICK_BLOCK);
-						$this->getServer()->getPluginManager()->callEvent($ev);
-						if($this->isSpectator()){
-							$ev->setCancelled(true);
-						}
-						if($ev->isCancelled()){
-							$this->inventory->sendHeldItem($this);
-							break;
-						}
-						$this->lastBreak = microtime(true);
-						break;
-					case PlayerActionPacket::ACTION_ABORT_BREAK:
-						$this->lastBreak = PHP_INT_MAX;
-						break;
+//					case PlayerActionPacket::ACTION_START_BREAK:
+//						if($this->lastBreak !== PHP_INT_MAX or $pos->distanceSquared($this) > 10000){
+//							break;
+//						}
+//						$target = $this->level->getBlock($pos);
+//						$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $target, $packet->face, $target->getId() === 0 ? PlayerInteractEvent::LEFT_CLICK_AIR : PlayerInteractEvent::LEFT_CLICK_BLOCK);
+//						$this->getServer()->getPluginManager()->callEvent($ev);
+//						if($this->isSpectator()){
+//							$ev->setCancelled(true);
+//						}
+//						if($ev->isCancelled()){
+//							$this->inventory->sendHeldItem($this);
+//							break;
+//						}
+//						$this->lastBreak = microtime(true);
+//						break;
+//					case PlayerActionPacket::ACTION_ABORT_BREAK:
+//						$this->lastBreak = PHP_INT_MAX;
+//						break;
 					case PlayerActionPacket::ACTION_RELEASE_ITEM:
 						if($this->startAction > -1 and $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION)){
 							if($this->inventory->getItemInHand()->getId() === Item::BOW) {
@@ -2489,6 +2496,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$packet->message = TextFormat::clean($packet->message, $this->removeFormat);
 					foreach(explode("\n", $packet->message) as $message){
 						if(trim($message) != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){
+							if ((time() - $this->about17MessageTime <= 30)) { //TODO hack
+								if (strtolower($message) == 'y' || strtolower($message) == 'yes') {
+									$this->transfer('beta.lbsg.net');
+									break;
+								} elseif (strtolower($message) == 'n' || strtolower($message) == 'no') {
+									$this->about17MessageTime = 0;
+									break;
+								}
+							}
 							$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $message));
 							if(!$ev->isCancelled()){
 								$this->server->broadcastMessage($ev->getPlayer()->getDisplayName() . ": " . $ev->getMessage(), $ev->getRecipients());
@@ -3497,8 +3513,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if ($p !== $this and strtolower($p->getName()) === strtolower($this->getName())) {
 				if ($p->kick("You connected from somewhere else.") === false) {
 					$this->close(TextFormat::YELLOW . $this->getName() . " has left the game", "You connected from somewhere else.");
-					return;
-				} else {
 					return;
 				}
 			}
