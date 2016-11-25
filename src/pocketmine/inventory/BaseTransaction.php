@@ -81,5 +81,14 @@ class BaseTransaction implements Transaction {
 	public function revert($target) {
 		$this->inventory->sendContents($target);
 	}
+	
+	public function clearCustomNames($target = 'both') {
+		if ($target === 'source' || $target === 'both') {
+			$this->sourceItem->clearCustomName();
+		}
+		if ($target === 'target' || $target === 'both') {
+			$this->targetItem->clearCustomName();
+		}
+	}
 
 }
