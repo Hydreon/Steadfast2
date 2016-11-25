@@ -25,7 +25,6 @@ use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityInventoryChangeEvent;
 use pocketmine\event\inventory\InventoryOpenEvent;
 use pocketmine\item\Item;
-use pocketmine\network\Network;
 use pocketmine\network\protocol\ContainerSetContentPacket;
 use pocketmine\network\protocol\ContainerSetSlotPacket;
 use pocketmine\Player;
@@ -49,8 +48,6 @@ abstract class BaseInventory implements Inventory{
 	protected $viewers = [];
 	/** @var InventoryHolder */
 	protected $holder;
-	
-	protected $air;
 
 	/**
 	 * @param InventoryHolder $holder
@@ -78,7 +75,6 @@ abstract class BaseInventory implements Inventory{
 		$this->name = $this->type->getDefaultTitle();
 
 		$this->setContents($items);
-		$this->air =  Item::get(Item::AIR, null, 0);
 	}
 
 	public function __destruct(){
@@ -107,7 +103,7 @@ abstract class BaseInventory implements Inventory{
 	}
 
 	public function getItem($index){
-		return isset($this->slots[$index]) ? clone $this->slots[$index] : clone $this->air;
+		return isset($this->slots[$index]) ? clone $this->slots[$index] : Item::get(Item::AIR, null, 0);
 	}
 
 	public function getContents(){
@@ -128,7 +124,7 @@ abstract class BaseInventory implements Inventory{
 					$this->clear($i);
 				}
 			}else{
-				if (!$this->setItem($i, $items[$i])){
+				if(!$this->setItem($i, $items[$i])){
 					$this->clear($i);
 				}
 			}
@@ -163,7 +159,7 @@ abstract class BaseInventory implements Inventory{
 	public function contains(Item $item){
 		$count = max(1, $item->getCount());
 		$checkDamage = $item->getDamage() === null ? false : true;
-		$checkTags = ($item->getId() == Item::ARROW || ($item->getCompound() === null)) ? false : true;
+		$checkTags = $item->getCompoundTag() === null ? false : true;
 		foreach($this->getContents() as $i){
 			if($item->equals($i, $checkDamage, $checkTags)){
 				$count -= $i->getCount();
@@ -179,7 +175,7 @@ abstract class BaseInventory implements Inventory{
 	public function all(Item $item){
 		$slots = [];
 		$checkDamage = $item->getDamage() === null ? false : true;
-		$checkTags = $item->getCompound() === null ? false : true;
+		$checkTags = $item->getCompoundTag() === null ? false : true;
 		foreach($this->getContents() as $index => $i){
 			if($item->equals($i, $checkDamage, $checkTags)){
 				$slots[$index] = $i;
@@ -191,7 +187,7 @@ abstract class BaseInventory implements Inventory{
 
 	public function remove(Item $item){
 		$checkDamage = $item->getDamage() === null ? false : true;
-		$checkTags = $item->getCompound() === null ? false : true;
+		$checkTags = $item->getCompoundTag() === null ? false : true;
 
 		foreach($this->getContents() as $index => $i){
 			if($item->equals($i, $checkDamage, $checkTags)){
@@ -203,7 +199,7 @@ abstract class BaseInventory implements Inventory{
 	public function first(Item $item){
 		$count = max(1, $item->getCount());
 		$checkDamage = $item->getDamage() === null ? false : true;
-		$checkTags = $item->getCompound() === null ? false : true;
+		$checkTags = $item->getCompoundTag() === null ? false : true;
 
 		foreach($this->getContents() as $index => $i){
 			if($item->equals($i, $checkDamage, $checkTags) and $i->getCount() >= $count){
@@ -227,7 +223,7 @@ abstract class BaseInventory implements Inventory{
 	public function canAddItem(Item $item){
 		$item = clone $item;
 		$checkDamage = $item->getDamage() === null ? false : true;
-		$checkTags = $item->getCompound() === null ? false : true;
+		$checkTags = $item->getCompoundTag() === null ? false : true;
 		for($i = 0; $i < $this->getSize(); ++$i){
 			$slot = $this->getItem($i);
 			if($item->equals($slot, $checkDamage, $checkTags)){
@@ -252,7 +248,7 @@ abstract class BaseInventory implements Inventory{
 		$itemSlots = [];
 		foreach($slots as $slot){
 			if(!($slot instanceof Item)){
-				throw new \InvalidArgumentException("Expected Item[], got ".gettype($slot));
+				throw new \InvalidArgumentException("Expected Item[], got " . gettype($slot));
 			}
 			if($slot->getId() !== 0 and $slot->getCount() > 0){
 				$itemSlots[] = clone $slot;
@@ -312,7 +308,7 @@ abstract class BaseInventory implements Inventory{
 		$itemSlots = [];
 		foreach($slots as $slot){
 			if(!($slot instanceof Item)){
-				throw new \InvalidArgumentException("Expected Item[], got ".gettype($slot));
+				throw new \InvalidArgumentException("Expected Item[], got " . gettype($slot));
 			}
 			if($slot->getId() !== 0 and $slot->getCount() > 0){
 				$itemSlots[] = clone $slot;
@@ -326,7 +322,7 @@ abstract class BaseInventory implements Inventory{
 			}
 
 			foreach($itemSlots as $index => $slot){
-				if($slot->equals($item, $slot->getDamage() === null ? false : true, $slot->getCompound() === null ? false : true)){
+				if($slot->equals($item, $slot->getDamage() === null ? false : true, $slot->getCompoundTag() === null ? false : true)){
 					$amount = min($item->getCount(), $slot->getCount());
 					$slot->setCount($slot->getCount() - $amount);
 					$item->setCount($item->getCount() - $amount);
