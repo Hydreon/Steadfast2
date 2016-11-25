@@ -417,6 +417,16 @@ class PlayerInventory extends BaseInventory{
 			$player->dataPacket(clone $pk);
 		}
 	}
+		public function sendCreativeContents(){
+ 		$pk = new ContainerSetContentPacket();
+ 		$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
+ 		if($this->getHolder()->getGamemode() === Player::CREATIVE){
+ 			foreach(Item::getCreativeItems() as $i => $item){
+ 				$pk->slots[$i] = clone $item;
+ 			}
+ 		}
+ 		$this->getHolder()->dataPacket($pk);
+ 	}
 
 	/**
 	 * @param int             $index
