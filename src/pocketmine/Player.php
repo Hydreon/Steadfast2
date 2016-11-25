@@ -1822,8 +1822,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}elseif($this->isCreative()){
 					$this->inventory->setHeldItemIndex($packet->selectedSlot);
-					$this->inventory->setItem($packet->selectedSlot, $item);
-					$this->inventory->setHeldItemSlot($packet->selectedSlot);
+					$this->inventory->setItem($packet->slot, $packet->item);
+					$this->inventory->setHotbarSlotIndex($packet->slot, $packet->slot);
 				}else{
 					if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
 						$hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);
