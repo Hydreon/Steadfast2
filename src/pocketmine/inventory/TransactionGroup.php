@@ -57,10 +57,5 @@ interface TransactionGroup{
 	 * @return bool
 	 */
 	function hasExecuted();
-	
-	/**
-	 * 
-	 */
-	function sendInventories();
 
 }

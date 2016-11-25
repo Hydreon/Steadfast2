@@ -26,7 +26,6 @@ use pocketmine\event\entity\EntityArmorChangeEvent;
 use pocketmine\event\entity\EntityInventoryChangeEvent;
 use pocketmine\event\player\PlayerItemHeldEvent;
 use pocketmine\item\Item;
-use pocketmine\network\Network;
 use pocketmine\network\protocol\ContainerSetContentPacket;
 use pocketmine\network\protocol\ContainerSetSlotPacket;
 use pocketmine\network\protocol\MobArmorEquipmentPacket;
@@ -53,16 +52,6 @@ class PlayerInventory extends BaseInventory{
 		parent::setSize($size + 4);
 		$this->sendContents($this->getViewers());
 	}
-	
-	/**
-	 * 
-	 * @param int $index
-	 * @return Item
-	 */
-	public function getHotbatSlotItem($index) {
-		$slot = $this->getHotbarSlotIndex($index);
-		return $this->getItem($slot);
-	}
 
 	public function getHotbarSlotIndex($index){
 		return ($index >= 0 and $index < $this->getHotbarSize()) ? $this->hotbar[$index] : -1;
@@ -78,13 +67,14 @@ class PlayerInventory extends BaseInventory{
 		return $this->itemInHandIndex;
 	}
 
-	public function setHeldItemIndex($index, $isNeedSendToHolder = true){
+	public function setHeldItemIndex($index, $send = true){
 		if($index >= 0 and $index < $this->getHotbarSize()){
 			$this->itemInHandIndex = $index;
-			
-			if ($isNeedSendToHolder === true && $this->getHolder() instanceof Player) {
+
+			if($this->getHolder() instanceof Player and $send){
 				$this->sendHeldItem($this->getHolder());
 			}
+
 			$this->sendHeldItem($this->getHolder()->getViewers());
 		}
 	}
@@ -94,7 +84,7 @@ class PlayerInventory extends BaseInventory{
 		if($item instanceof Item){
 			return $item;
 		}else{
-			return clone $this->air;
+			return Item::get(Item::AIR, 0, 0);
 		}
 	}
 
@@ -141,21 +131,17 @@ class PlayerInventory extends BaseInventory{
 		$pk->slot = $this->getHeldItemSlot();
 		$pk->selectedSlot = $this->getHeldItemIndex();
 
-		$level = $this->getHolder()->getLevel();
 		if(!is_array($target)){
-			if($level->mayAddPlayerHandItem($this->getHolder(), $target)) {
-				$target->dataPacket($pk);
-				if($target === $this->getHolder()){
-					$this->sendSlot($this->getHeldItemSlot(), $target);
-				}
+			$target->dataPacket($pk);
+			if($target === $this->getHolder()){
+				$this->sendSlot($this->getHeldItemSlot(), $target);
 			}
 		}else{
+			Server::broadcastPacket($target, $pk);
 			foreach($target as $player){
-				if($level->mayAddPlayerHandItem($this->getHolder(), $player)) {
-					$player->dataPacket($pk);
-					if($player === $this->getHolder()){
-						$this->sendSlot($this->getHeldItemSlot(), $player);
-					}
+				if($player === $this->getHolder()){
+					$this->sendSlot($this->getHeldItemSlot(), $player);
+					break;
 				}
 			}
 		}
@@ -239,7 +225,6 @@ class PlayerInventory extends BaseInventory{
 				$this->sendSlot($index, $this->getViewers());
 				return false;
 			}
-			$index = $ev->getSlot();
 			$item = $ev->getNewItem();
 		}
 
@@ -253,7 +238,7 @@ class PlayerInventory extends BaseInventory{
 
 	public function clear($index){
 		if(isset($this->slots[$index])){
-			$item = clone $this->air;
+			$item = Item::get(Item::AIR, null, 0);
 			$old = $this->slots[$index];
 			if($index >= $this->getSize() and $index < $this->size){ //Armor change
 				Server::getInstance()->getPluginManager()->callEvent($ev = new EntityArmorChangeEvent($this->getHolder(), $old, $item, $index));
@@ -344,7 +329,7 @@ class PlayerInventory extends BaseInventory{
 	public function setArmorContents(array $items){
 		for($i = 0; $i < 4; ++$i){
 			if(!isset($items[$i]) or !($items[$i] instanceof Item)){
-				$items[$i] = clone $this->air;
+				$items[$i] = Item::get(Item::AIR, null, 0);
 			}
 
 			if($items[$i]->getId() === Item::AIR){
@@ -386,7 +371,7 @@ class PlayerInventory extends BaseInventory{
 			}
 		}
 	}
-	
+
 	/**
 	 * @param Player|Player[] $target
 	 */
@@ -397,8 +382,14 @@ class PlayerInventory extends BaseInventory{
 
 		$pk = new ContainerSetContentPacket();
 		$pk->slots = [];
+
 		for($i = 0; $i < $this->getSize(); ++$i){ //Do not send armor by error here
 			$pk->slots[$i] = $this->getItem($i);
+		}
+
+		//Because PE is stupid and shows 9 less slots than you send it, give it 9 dummy slots so it shows all the REAL slots.
+		for($i = $this->getSize(); $i < $this->getSize() + $this->getHotbarSize(); ++$i){
+			$pk->slots[$i] = Item::get(Item::AIR, 0, 0);
 		}
 
 		foreach($target as $player){
@@ -406,7 +397,7 @@ class PlayerInventory extends BaseInventory{
 			if($player === $this->getHolder()){
 				for($i = 0; $i < $this->getHotbarSize(); ++$i){
 					$index = $this->getHotbarSlotIndex($i);
-					$pk->hotbar[] = $index <= -1 ? -1 : $index + 9;
+					$pk->hotbar[] = $index <= -1 ? -1 : $index + $this->getHotbarSize();
 				}
 			}
 			if(($id = $player->getWindowId($this)) === -1 or $player->spawned !== true){
@@ -416,6 +407,17 @@ class PlayerInventory extends BaseInventory{
 			$pk->windowid = $id;
 			$player->dataPacket(clone $pk);
 		}
+	}
+
+	public function sendCreativeContents(){
+		$pk = new ContainerSetContentPacket();
+		$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
+		if($this->getHolder()->getGamemode() === Player::CREATIVE){
+			foreach(Item::getCreativeItems() as $i => $item){
+				$pk->slots[$i] = clone $item;
+			}
+		}
+		$this->getHolder()->dataPacket($pk);
 	}
 
 	/**
