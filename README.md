@@ -9,7 +9,8 @@ Things you might want to change before building:
 Known bugs:
    - Performance isn't as good as 1.4, some profiling needs to be done
    - Players can sometimes glitch into the ground
-  is fixt -> Player inventory can't be saved
+   
+  - is fixt -> Player inventory can't be saved
 
 Things you'll want to change on your plugins:
    - Players don't fall out of the world naturally, you'll want to handle PlayerMoveEvent as needed to kill them
