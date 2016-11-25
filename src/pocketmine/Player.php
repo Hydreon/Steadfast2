@@ -3652,7 +3652,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->dataPacket($pk);
 		}
 
-		$this->server->sendFullPlayerListData($this);
+//		$this->server->sendFullPlayerListData($this);
 		$this->server->sendRecipeList($this);
 
 		$this->sendSelfData();				
