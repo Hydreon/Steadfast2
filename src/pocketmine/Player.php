@@ -1833,7 +1833,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 						break;
 					} else {
-						$this->inventory->sendContents($this);
+						//$this->inventory->sendContents($this);
 						//Timings::$timerMobEqipmentPacket->stopTiming();
 						break;
 					}
