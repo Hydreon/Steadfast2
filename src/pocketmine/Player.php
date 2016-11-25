@@ -3665,7 +3665,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if ($this->loggedIn === true) {
 				return;
 			}
-		
+			if ($packet->isValidProtocol === false) {
+				$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
+				return;
+			}
+
 			$this->username = TextFormat::clean($packet->username);
 			$this->displayName = $this->username;
 			$this->setNameTag($this->username);
