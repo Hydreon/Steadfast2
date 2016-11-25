@@ -106,7 +106,7 @@ class SessionManager{
 	        while($this->receiveStream());
 			$time = microtime(true) - $start;
 			if($time < 0.025){
-				time_sleep_until(microtime(true) + 0.025 - $time);
+				@time_sleep_until(microtime(true) + 0.025 - $time);
 			}
 			$this->tick();
         }
