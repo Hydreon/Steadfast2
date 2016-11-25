@@ -20,6 +20,8 @@
 */
 
 namespace pocketmine\utils;
+
+use pocketmine\scheduler\FileWriteTask;
 use pocketmine\Server;
 
 
@@ -41,6 +43,9 @@ class Config{
 
 	/** @var array */
 	private $config = [];
+
+	private $nestedCache = [];
+
 	/** @var string */
 	private $file;
 	/** @var boolean */
@@ -69,7 +74,7 @@ class Config{
 	/**
 	 * @param string $file     Path of the file to be loaded
 	 * @param int    $type     Config type to load, -1 by default (detect)
-	 * @param array  $default  Array with the default values, will be set if not existent
+	 * @param array  $default  Array with the default values that will be written to the file if it did not exist
 	 * @param null   &$correct Sets correct to true if everything has been loaded correctly
 	 */
 	public function __construct($file, $type = Config::DETECT, $default = [], &$correct = null){
@@ -82,9 +87,9 @@ class Config{
 	 */
 	public function reload(){
 		$this->config = [];
+		$this->nestedCache = [];
 		$this->correct = false;
-		unset($this->type);
-		$this->load($this->file);
+		$this->load($this->file, $this->type);
 	}
 
 	/**
@@ -93,7 +98,7 @@ class Config{
 	 * @return mixed
 	 */
 	public static function fixYAMLIndexes($str){
-		return preg_replace("#^([ ]*)([a-zA-Z_]{1}[^\:]*)\:#m", "$1\"$2\":", $str);
+		return preg_replace("#^([ ]*)([a-zA-Z_]{1}[ ]*)\\:$#m", "$1\"$2\":", $str);
 	}
 
 	/**
@@ -124,7 +129,7 @@ class Config{
 				}
 			}
 			if($this->correct === true){
-				$content = @file_get_contents($this->file);
+				$content = file_get_contents($this->file);
 				switch($this->type){
 					case Config::PROPERTIES:
 					case Config::CNF:
@@ -170,30 +175,45 @@ class Config{
 	}
 
 	/**
+	 * @param bool $async
+	 *
 	 * @return boolean
 	 */
-	public function save(){
+	public function save($async = false){
 		if($this->correct === true){
-			$content = null;
-			switch($this->type){
-				case Config::PROPERTIES:
-				case Config::CNF:
-					$content = $this->writeProperties();
-					break;
-				case Config::JSON:
-					$content = json_encode($this->config, JSON_PRETTY_PRINT | JSON_BIGINT_AS_STRING);
-					break;
-				case Config::YAML:
-					$content = yaml_emit($this->config, YAML_UTF8_ENCODING);
-					break;
-				case Config::SERIALIZED:
-					$content = @serialize($this->config);
-					break;
-				case Config::ENUM:
-					$content = implode("\r\n", array_keys($this->config));
-					break;
+			try{
+				$content = null;
+				switch($this->type){
+					case Config::PROPERTIES:
+					case Config::CNF:
+						$content = $this->writeProperties();
+						break;
+					case Config::JSON:
+						$content = json_encode($this->config, JSON_PRETTY_PRINT | JSON_BIGINT_AS_STRING);
+						break;
+					case Config::YAML:
+						$content = yaml_emit($this->config, YAML_UTF8_ENCODING);
+						break;
+					case Config::SERIALIZED:
+						$content = serialize($this->config);
+						break;
+					case Config::ENUM:
+						$content = implode("\r\n", array_keys($this->config));
+						break;
+				}
+
+				if($async){
+					Server::getInstance()->getScheduler()->scheduleAsyncTask(new FileWriteTask($this->file, $content));
+				}else{
+					file_put_contents($this->file, $content);
+				}
+			}catch(\Throwable $e){
+				$logger = Server::getInstance()->getLogger();
+				$logger->critical("Could not save Config " . $this->file . ": " . $e->getMessage());
+				if(\pocketmine\DEBUG > 1){
+					$logger->logException($e);
+				}
 			}
-			@file_put_contents($this->file, $content, LOCK_EX);
 
 			return true;
 		}else{
@@ -257,15 +277,20 @@ class Config{
 		}
 
 		$base = $value;
+		$this->nestedCache[$key] = $value;
 	}
 
 	/**
-	 * @param      $key
-	 * @param null $default
+	 * @param       $key
+	 * @param mixed $default
 	 *
 	 * @return mixed
 	 */
 	public function getNested($key, $default = null){
+		if(isset($this->nestedCache[$key])){
+			return $this->nestedCache[$key];
+		}
+
 		$vars = explode(".", $key);
 		$base = array_shift($vars);
 		if(isset($this->config[$base])){
@@ -283,12 +308,12 @@ class Config{
 			}
 		}
 
-		return $base;
+		return $this->nestedCache[$key] = $base;
 	}
 
 	/**
-	 * @param $k
-	 * @param $default
+	 * @param       $k
+	 * @param mixed $default
 	 *
 	 * @return boolean|mixed
 	 */
@@ -297,51 +322,16 @@ class Config{
 	}
 
 	/**
-	 * @param string $path
-	 *
-	 * @deprecated
-	 *
-	 * @return mixed
-	 */
-	public function getPath($path){
-		$currPath =& $this->config;
-		foreach(explode(".", $path) as $component){
-			if(isset($currPath[$component])){
-				$currPath =& $currPath[$component];
-			}else{
-				$currPath = null;
-			}
-		}
-
-		return $currPath;
-	}
-
-	/**
-	 *
-	 * @deprecated
-	 *
-	 * @param string $path
-	 * @param mixed  $value
-	 */
-	public function setPath($path, $value){
-		$currPath =& $this->config;
-		$components = explode(".", $path);
-		$final = array_pop($components);
-		foreach($components as $component){
-			if(!isset($currPath[$component])){
-				$currPath[$component] = [];
-			}
-			$currPath =& $currPath[$component];
-		}
-		$currPath[$final] = $value;
-	}
-
-	/**
 	 * @param string $k key to be set
 	 * @param mixed  $v value to set key
 	 */
 	public function set($k, $v = true){
 		$this->config[$k] = $v;
+		foreach($this->nestedCache as $nestedKey => $nvalue){
+			if(substr($nestedKey, 0, strlen($k) + 1) === ($k . ".")){
+				unset($this->nestedCache[$nestedKey]);
+			}
+		}
 	}
 
 	/**
