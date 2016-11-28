@@ -1681,7 +1681,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->addEffect(Effect::getEffect(Effect::HUNGER)->setAmplifier(2)->setDuration(15 * 20));
 					//$this->addEffect(Effect::getEffect(Effect::NAUSEA)->setAmplifier(1)->setDuration(15 * 20));
 					$this->addEffect(Effect::getEffect(Effect::POISON)->setAmplifier(3)->setDuration(60 * 20));
-				}
+				} elseif ($slot->getId() === Item::GOLDEN_APPLE) {
+                    $this->addEffect(Effect::getEffect(Effect::REGENERATION)->setAmplifier(1)->setDuration(5 * 20));
+                    $this->addEffect(Effect::getEffect(Effect::ABSORPTION)->setAmplifier(0)->setDuration(120 * 20));
+                } elseif ($slot->getId() === Item::ENCHANTED_GOLDEN_APPLE) {
+                    $this->addEffect(Effect::getEffect(Effect::REGENERATION)->setAmplifier(4)->setDuration(30 * 20));
+                    $this->addEffect(Effect::getEffect(Effect::ABSORPTION)->setAmplifier(0)->setDuration(120 * 20));
+                    $this->addEffect(Effect::getEffect(Effect::DAMAGE_RESISTANCE)->setAmplifier(0)->setDuration(300 * 20));
+                    $this->addEffect(Effect::getEffect(Effect::FIRE_RESISTANCE)->setAmplifier(0)->setDuration(300 * 20));
+                }
 			}
 		}
 	}
@@ -3655,7 +3663,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->dataPacket($pk);
 		}
 
-		$this->server->sendFullPlayerListData($this);
+//		$this->server->sendFullPlayerListData($this);
 		$this->server->sendRecipeList($this);
 
 		$this->sendSelfData();				
@@ -3668,7 +3676,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if ($this->loggedIn === true) {
 				return;
 			}
-		
+			if ($packet->isValidProtocol === false) {
+				$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
+				return;
+			}
+
 			$this->username = TextFormat::clean($packet->username);
 			$this->displayName = $this->username;
 			$this->setNameTag($this->username);

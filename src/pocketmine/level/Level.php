@@ -2248,10 +2248,17 @@ class Level implements ChunkManager, Metadatable{
 		$this->timings->doChunkUnload->startTiming();
 
 		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
-
-		$chunk = $this->getChunk($x, $z);
+		if (isset($this->chunks[$index])) {
+			$chunk = $this->chunks[$index];
+		} else {
+			unset($this->chunks[$index]);
+			unset($this->usedChunks[$index]);
+			unset($this->chunkTickList[$index]);
+			Cache::remove("world:" . $this->getId() . ":$index");
+			$this->timings->doChunkUnload->stopTiming();
+			return true;
+		}
 		
-
 		if($chunk !== null){
 			/* @var BaseFullChunk $chunk */
 			if(!$chunk->allowUnload) {
