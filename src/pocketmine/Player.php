@@ -1601,8 +1601,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						} else {
 							$this->hungerDepletion++;
 						}
+					}else{
+						$pk = new UpdateAttributesPacket();
+						$pk->minValue = 0;
+						$pk->maxValue = $this->getMaxHealth();
+						$pk->value = $this->getHealth();
+						$pk->defaultValue = $pk->maxValue;
+						$pk->name = UpdateAttributesPacket::HEALTH;
+						$this->dataPacket($pk);
 					}
-					
 				}
 				$this->foodTick = 0;
 			}
