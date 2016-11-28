@@ -1594,12 +1594,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($this->getHealth() < $this->getMaxHealth() && $this->getFood() >= 18) {
 					$ev = new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_EATING);
 					$this->heal(1, $ev);
-					if($this->hungerDepletion >=2) {
-						$this->subtractFood(1);
-						$this->foodDepletion = 0;
-					} else {
-						$this->hungerDepletion++;
+					if(!$ev->isCancelled()){
+						if($this->hungerDepletion >=2) {
+							$this->subtractFood(1);
+							$this->foodDepletion = 0;
+						} else {
+							$this->hungerDepletion++;
+						}
 					}
+					
 				}
 				$this->foodTick = 0;
 			}
