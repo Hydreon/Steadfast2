@@ -708,6 +708,7 @@ abstract class Entity extends Location implements Metadatable{
 	public function heal($amount, EntityRegainHealthEvent $source){
 		$this->server->getPluginManager()->callEvent($source);
 		if($source->isCancelled()){
+			$this->setHealth($this->health);
 			return;
 		}
 
