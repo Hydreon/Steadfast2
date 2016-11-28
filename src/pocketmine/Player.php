@@ -2561,9 +2561,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerCraftingEventPacket->stopTiming();
 					break;
 				}
-				// может зря
-//				$this->craftingType = 1;
+				
 				$recipe = $this->server->getCraftingManager()->getRecipe($packet->id);
+				$result = $packet->output[0];
+				if (!$result->deepEquals($recipe->getResult(), true, false) ) { //hack for win10
+					$newRecipe = $this->server->getCraftingManager()->getRecipeByHash($result->getId() . ":" . $result->getDamage());
+					if (!is_null($newRecipe)) {
+						$recipe = $newRecipe;
+					}
+				}
 
 				// переделать эту проверку
 				if ($recipe === null || (($recipe instanceof BigShapelessRecipe || $recipe instanceof BigShapedRecipe) && $this->craftingType === self::CRAFTING_DEFAULT)) {
@@ -2572,79 +2578,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 
-				foreach($packet->input as $i => $item){
-					if($item->getDamage() === -1 or $item->getDamage() === 0xffff){
-						$item->setDamage(null);
-					}
-
-					if($i < 9 and $item->getId() > 0){
-						$item->setCount(1);
-					}
-				}
+//				foreach($packet->input as $i => $item){
+//					if($item->getDamage() === -1 or $item->getDamage() === 0xffff){
+//						$item->setDamage(null);
+//					}
+//
+//					if($i < 9 and $item->getId() > 0){
+//						$item->setCount(1);
+//					}
+//				}
 
 				$canCraft = true;
 
-
-//				if($recipe instanceof ShapedRecipe){
-//					for($x = 0; $x < 3 and $canCraft; ++$x){
-//						for($y = 0; $y < 3; ++$y){						
-//							$ingredient = $recipe->getIngredient($x, $y);
-//							if(isset($ingredient) && $ingredient->getId() != Item::AIR && !isset($packet->input[$y * 3 + $x])){
-//								$canCraft = false;
-//								break;
-//							}
-//							if(!isset($packet->input[$y * 3 + $x])){
-//								continue;
-//							}
-//							$item = $packet->input[$y * 3 + $x];
-//							if(!is_null($item) && $item->getCount() > 0 && $ingredient->getId() > 0){
-//								if($ingredient === null or !$ingredient->deepEquals($item, false, false)){
-//									$canCraft = false;
-//									break;
-//								}
-//							}
-//						}
-//					}
-//				}elseif($recipe instanceof ShapelessRecipe){
-//					$needed = $recipe->getIngredientList();
-//
-//					for($x = 0; $x < 3 and $canCraft; ++$x){
-//						for($y = 0; $y < 3; ++$y){
-//							if (!isset($packet->input[$y * 3 + $x])) {
-//								continue;
-//							}
-//							
-//							$item = clone $packet->input[$y * 3 + $x];
-//							
-//							if (is_null($item)) {
-//								continue;
-//							}
-//
-//							foreach($needed as $k => $n){
-//								if($n->deepEquals($item, false, false)){
-//									$remove = min($n->getCount(), $item->getCount());
-//									$n->setCount($n->getCount() - $remove);
-//									$item->setCount($item->getCount() - $remove);
-//
-//									if($n->getCount() === 0){
-//										unset($needed[$k]);
-//									}
-//								}
-//							}
-//
-//							if($item->getCount() > 0){
-//								$canCraft = false;
-//								break;
-//							}
-//						}
-//					}
-//
-//					if(count($needed) > 0){
-//						$canCraft = false;
-//					}
-//				}else{
-//					$canCraft = false;
-//				}
 				
 				/** @var Item[] $ingredients */
 				$ingredients = [];
@@ -2658,9 +2603,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				} else {
 					$canCraft = false;
 				}
-				$result = $packet->output[0];
 				
-				if(!$canCraft or !$recipe->getResult() === $result){
+				if(!$canCraft || !$result->deepEquals($recipe->getResult(), true, false)){
 					$this->server->getLogger()->debug("Unmatched recipe ". $recipe->getId() ." from player ". $this->getName() .": expected " . $recipe->getResult() . ", got ". $result .", using: " . implode(", ", $ingredients));
 					$this->inventory->sendContents($this);
 					//Timings::$timerCraftingEventPacket->stopTiming();
