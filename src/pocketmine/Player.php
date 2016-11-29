@@ -292,6 +292,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	private static $damegeTimeList = ['0.05' => 0, '0.1' => 0.2, '0.15' => 0.4, '0.2' => 0.6, '0.25' => 0.8];
 	
 	protected $lastDamegeTime = 0;
+	
+	protected $lastTeleportTime = 0;
 
 	public function getLeaveMessage(){
 		return "";
@@ -1784,7 +1786,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->setRotation($packet->yaw, $packet->pitch);
 					$this->newPosition = $newPos;	
 					$this->forceMovement = null;
-				}			
+				} elseif (microtime(true) - $this->lastTeleportTime > 2) {
+					$this->forceMovement = new Vector3($this->x, $this->y, $this->z);
+					$this->sendPosition($this->forceMovement, $packet->yaw, $packet->pitch);
+					$this->lastTeleportTime = microtime(true);
+				}
 				//Timings::$timerMovePacket->stopTiming();
 				break;
 			case ProtocolInfo::MOB_EQUIPMENT_PACKET:
@@ -3330,6 +3336,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->resetFallDistance();
 			$this->nextChunkOrderRun = 0;
 			$this->newPosition = null;
+			$this->lastTeleportTime = microtime(true);
 		}
 	}
 
@@ -3806,6 +3813,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function setSprinting($value = true, $setDefault = false) {
+		if(!$setDefault && $this->isSprinting() == $value) {
+			return;
+		}
 		parent::setSprinting($value);
 		if ($setDefault) {
 			$this->movementSpeed = self::DEFAULT_SPEED;
