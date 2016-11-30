@@ -795,6 +795,15 @@ class CraftingManager{
 
 		$this->recipeLookup[$result->getId() . ":" . $result->getDamage()][$hash] = $recipe;
 	}
+	
+	public function getRecipeByHash($hash) {
+		if (isset($this->recipeLookup[$hash])) {
+			foreach ($this->recipeLookup[$hash] as $recipe) {
+				return $recipe;
+			}			
+		}
+		return null;
+	}
 
 	/**
 	 * @param ShapelessRecipe $recipe

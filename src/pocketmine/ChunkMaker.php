@@ -63,7 +63,7 @@ class ChunkMaker extends Worker {
 			$this->tick();
 			$time = microtime(true) - $start;
 			if ($time < 0.025) {
-				time_sleep_until(microtime(true) + 0.025 - $time);
+				@time_sleep_until(microtime(true) + 0.025 - $time);
 			}
 		}
 	}
