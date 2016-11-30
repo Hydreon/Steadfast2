@@ -228,9 +228,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $ip;
 	protected $removeFormat = true;
 	protected $port;
-	protected $username;
-	protected $iusername;
-	protected $displayName;
+	protected $username = '';
+	protected $iusername = '';
+	protected $displayName = '';
 	protected $startAction = -1;
 	public $protocol;
 	/** @var Vector3 */
