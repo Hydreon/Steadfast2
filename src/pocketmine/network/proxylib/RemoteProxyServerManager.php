@@ -20,6 +20,10 @@ class RemoteProxyServerManager {
 				@time_sleep_until(microtime(true) + 0.025 - $time);
 			}
 		}
+		foreach ($this->remoteProxyServer as $remoteServer) {			
+			$remoteServer->close();
+		}
+		$this->remoteProxyServer = [];
 	}
 
 	private function tick() {
