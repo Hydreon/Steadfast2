@@ -294,6 +294,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastDamegeTime = 0;
 	
 	protected $lastTeleportTime = 0;
+	
+	private $isFirstConnect = true;
 
 	public function getLeaveMessage(){
 		return "";
@@ -738,7 +740,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 		}
 		
-		if($this->chunkLoadCount >= 36 and $this->spawned === false){
+		if((!$this->isFirstConnect || $this->chunkLoadCount >= $this->viewDistance) && $this->spawned === false){
 			$this->server->getPluginManager()->callEvent($ev = new PlayerLoginEvent($this, "Plugin reason"));
 			if ($ev->isCancelled()) {
 				$this->close(TextFormat::YELLOW . $this->username . " has left the game", $ev->getKickMessage());
@@ -3654,6 +3656,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->viewDistance = $packet->viewDistance;
 			$this->ip = $packet->ip;
 			$this->port = $packet->port;
+			$this->isFirstConnect = $packet->isFirst;
 			$this->processLogin();
 		} elseif ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
 			$this->removeAllEffects();
