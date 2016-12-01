@@ -40,6 +40,7 @@ class ConnectPacket extends ProxyPacket {
 		$this->viewDistance = $this->getInt();
 		$this->ip = $this->getString();
 		$this->port = $this->getInt();
+		$this->isFirst = (bool) @$this->getByte();
 	}
 
 	public function encode() {
