@@ -2035,6 +2035,11 @@ class Server{
 		try{
 			$this->hasStopped = true;
 
+			foreach($this->network->getInterfaces() as $interface){
+				$interface->shutdown();
+				$this->network->unregisterInterface($interface);
+			}
+
 			$this->shutdown();
 			if($this->rcon instanceof RCON){
 				$this->rcon->stop();
@@ -2063,12 +2068,7 @@ class Server{
 			$this->properties->save();
 
 			$this->console->shutdown();
-			$this->console->notify();
-
-			foreach($this->network->getInterfaces() as $interface){
-				$interface->shutdown();
-				$this->network->unregisterInterface($interface);
-			}
+			$this->console->notify();			
 		}catch(\Exception $e){
 			$this->logger->emergency("Crashed while crashing, killing process");
 			@kill(getmypid());

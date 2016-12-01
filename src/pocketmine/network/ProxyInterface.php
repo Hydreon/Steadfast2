@@ -55,7 +55,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 	}
 
 	public function shutdown() {
-		
+		$this->proxyServer->shutdown();
 	}
 
 	public function setCount($count, $maxcount) {

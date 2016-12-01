@@ -51,6 +51,7 @@ class ProxyServer extends Worker {
 		$this->remoteProxyServerManager = new RemoteProxyServerManager($this);
 		$this->remoteProxyServerManager->tickProcessor();
 		socket_close($this->socket);
+		var_dump("ProxyServer thread shutdown!");
 	}
 
 	public function getNewServer() {
@@ -83,8 +84,6 @@ class ProxyServer extends Worker {
 
 	public function shutdown() {
 		$this->shutdown = true;
-		socket_close($this->socket);
-		var_dump("ProxyServer thread shutdown!");
 	}
 
 	public function errorHandler($errno, $errstr, $errfile, $errline, $context, $trace = null) {
