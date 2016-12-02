@@ -39,11 +39,13 @@ class UseItemPacket extends DataPacket{
 	public $posY;
 	public $posZ;
 	public $hotbarSlot;
+	public $interactBlockId;
 
 	public function decode(){
 		$this->x = $this->getSignedVarInt();
 		$this->y = $this->getByte();
 		$this->z = $this->getSignedVarInt();
+		$this->interactBlockId =  $this->getVarInt();
 		$this->face = $this->getSignedVarInt();
 		$this->fx = $this->getLFloat();
 		$this->fy = $this->getLFloat();
