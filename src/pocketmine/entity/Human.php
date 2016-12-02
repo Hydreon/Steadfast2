@@ -43,8 +43,8 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	const DATA_PLAYER_FLAG_SLEEP = 1;
 	const DATA_PLAYER_FLAG_DEAD = 2;
 
-	const DATA_PLAYER_FLAGS = 16;
-	const DATA_PLAYER_BED_POSITION = 17;
+	const DATA_PLAYER_FLAGS = 27;
+	const DATA_PLAYER_BED_POSITION = 29;
 
 	protected $nameTag = "TESTIFICATE";
 	/** @var PlayerInventory */
@@ -97,15 +97,6 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	}
 
 	public function getInventory(){
-		if($this instanceof Player && $this->inventory === null){
-			$text = $this->getName()." ".date("H:i:s");
-			$text .= "\n"."Spawned: ".$this->spawned;
-			$text .= "\n"."Alive: ".$this->isAlive();
-			$text .= "\n"."Gamemode: ".$this->gamemode;
-			$text .= "\n"."Logged: ".$this->loggedIn;
-			$text .= "\n"."Position: ".$this->x." ".$this->y." ".$this->z;
-			file_put_contents("logs/inventory_crash_".$this->getName()."_".date("H:i:s"), $text);
-		}
 		return $this->inventory;
 	}
 
