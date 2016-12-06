@@ -254,6 +254,8 @@ class Level implements ChunkManager, Metadatable{
 	protected static $isMemoryLeakHappend = false;
 	
 	public $chunkMaker = null;
+	
+	private $closed = false;
 
 		/**
 	 * Returns the chunk unique hash/key
@@ -389,11 +391,14 @@ class Level implements ChunkManager, Metadatable{
 		
 		$this->unregisterGenerator();
 
+		$this->closed = true;
 		$this->provider->close();
 		$this->provider = null;
 		$this->blockMetadata = null;
 		$this->blockCache = [];
 		$this->temporalPosition = null;
+		$this->chunkSendQueue = [];
+		$this->chunkSendTasks = [];
 	}
 
 	public function addSound(Sound $sound, array $players = null){
@@ -1948,6 +1953,9 @@ class Level implements ChunkManager, Metadatable{
 	
 	
 	public function generateChunkCallback($x, $z, FullChunk $chunk){
+		if ($this->closed) {
+			return;
+		} 
 		$oldChunk = $this->getChunk($x, $z, false);
 		$index = Level::chunkHash($x, $z);
 		
@@ -2093,6 +2101,9 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public function chunkRequestCallback($x, $z, $payload){
+		if ($this->closed) {
+			return;
+		} 
 		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
 		if(isset($this->chunkSendTasks[$index])){
 
