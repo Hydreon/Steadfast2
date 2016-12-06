@@ -1725,7 +1725,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($ev->isCancelled()){
 			return;
 		}
-
+		
+		$beforeLoginAvailablePackets = [ProtocolInfo::LOGIN_PACKET, ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET];
+		if (!$this->isOnline() && !in_array($packet->pid(), $beforeLoginAvailablePackets)) {
+			return;
+		}
+		
 		switch($packet->pid()){
 			case ProtocolInfo::LOGIN_PACKET:
 				//Timings::$timerLoginPacket->startTiming();
@@ -2772,7 +2777,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->dataPacket($pk);
 				//Timings::$timerChunkRudiusPacket->stopTiming();
 				break;
-			case ProtocolInfo::COMMAND_STEP_PACKET:
+			case ProtocolInfo::COMMAND_STEP_PACKET:				
 				$commandName = $packet->name;
 				$commandOverload = $packet->overload;
 				$commandParams = json_decode($packet->outputFormat, true);
