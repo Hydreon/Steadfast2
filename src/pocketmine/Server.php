@@ -291,6 +291,8 @@ class Server{
 	
 	private $jsonCommands = [];
 	private $spawnedEntity = [];
+	
+	private $unloadLevelQueue = [];
 
 	public function addSpawnedEntity($entity) {
 		if ($entity instanceof Player) {
@@ -1048,11 +1050,14 @@ class Server{
 	 *
 	 * @return bool
 	 */
-	public function unloadLevel(Level $level, $forceUnload = false){
-		if($level->unload($forceUnload) === true){
-			unset($this->levels[$level->getId()]);
-
-			return true;
+	public function unloadLevel(Level $level, $forceUnload = false, $direct = false){
+		if ($direct) {
+			if($level->unload($forceUnload) === true){
+				unset($this->levels[$level->getId()]);
+				return true;
+			}
+		} else {
+			$this->unloadLevelQueue[$level->getId()] = ['level' => $level, 'force' => $forceUnload];
 		}
 
 		return false;
@@ -2034,6 +2039,10 @@ class Server{
 
 		try{
 			$this->hasStopped = true;
+			
+			foreach($this->players as $player){
+				$player->close(TextFormat::YELLOW . $player->getName() . " has left the game", $this->getProperty("settings.shutdown-message", "Server closed"));
+			}
 
 			foreach($this->network->getInterfaces() as $interface){
 				$interface->shutdown();
@@ -2052,12 +2061,8 @@ class Server{
 
 			$this->pluginManager->disablePlugins();
 
-			foreach($this->players as $player){
-				$player->close(TextFormat::YELLOW . $player->getName() . " has left the game", $this->getProperty("settings.shutdown-message", "Server closed"));
-			}
-
 			foreach($this->getLevels() as $level){
-				$this->unloadLevel($level, true);
+				$this->unloadLevel($level, true, true);
 			}
 
 			HandlerList::unregisterAll();
@@ -2485,6 +2490,10 @@ class Server{
 		
 		$this->checkConsole();
 		
+		foreach ($this->unloadLevelQueue as $levelForUnload) {
+			$this->unloadLevel($levelForUnload['level'], $levelForUnload['force'], true);
+		}
+		$this->unloadLevelQueue = [];
 
 		while(strlen($str = $this->packetMaker->readThreadToMainPacket()) > 0){
 			$data = unserialize($str);

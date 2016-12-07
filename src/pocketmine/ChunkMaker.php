@@ -85,7 +85,7 @@ class ChunkMaker extends Worker {
 		$offset += 16384;
 		$blockLightArray = substr($data['chunk'], $offset, 16384);
 		$offset += 16384;
-		$heightMapArray = array_values(unpack("C*", substr($data['chunk'], $offset, 256)));
+		$heightMapArray = substr($data['chunk'], $offset, 256);
 		$offset += 256;
 		$biomeColorArray = array_values(unpack("N*", substr($data['chunk'], $offset, 1024)));
 
@@ -114,11 +114,20 @@ class ChunkMaker extends Worker {
 			}
 			
 		}
-		
-		$chunkDataWithoutSigns .= pack("C*", ...$heightMapArray) .
-				pack("n*", ...$biomeColorArray) . ///TODO check it
+
+		//hack for snow
+		$chunkDataWithoutSignsWithSnow = $chunkDataWithoutSigns.
+				$heightMapArray .
+				hex2bin('000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c') .
 				Binary::writeLInt(0) .
-				$data['tiles'];
+				$data['tiles'];		
+		
+		
+		$chunkDataWithoutSigns .= $heightMapArray .
+				pack("n*", ...$biomeColorArray) .
+				Binary::writeLInt(0) .
+				$data['tiles'];		
+		
 
 		$result = array();
 		$result['chunkX'] = $data['chunkX'];
@@ -138,6 +147,20 @@ class ChunkMaker extends Worker {
 				$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
 				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
 				$result[$lang] = $ordered;
+			}
+			
+			
+			$chunkData = $chunkDataWithoutSignsWithSnow . $data['signTiles'][$lang];
+			$pk = new FullChunkDataPacket();
+			$pk->chunkX = $data['chunkX'];
+			$pk->chunkZ = $data['chunkZ'];
+			$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
+			$pk->data = $chunkData;
+			$pk->encode();
+			if(!empty($pk->buffer)) {				
+				$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
+				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);		
+				$result['snow'][$lang] = $ordered;			
 			}
 		}
 		$this->externalQueue[] = serialize($result);

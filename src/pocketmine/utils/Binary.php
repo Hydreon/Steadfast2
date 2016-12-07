@@ -127,7 +127,7 @@ class Binary{
 					break;
 				case Entity::DATA_TYPE_POS:
 					$m .= self::writeSignedVarInt($d[1][0]);
-					$m .= self::writeByte($d[1][1]);
+					$m .= self::writeSignedVarInt($d[1][1]);
 					$m .= self::writeSignedVarInt($d[1][2]);
 					break;
 				case Entity::DATA_TYPE_LONG:
