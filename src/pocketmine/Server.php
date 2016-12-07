@@ -2039,6 +2039,10 @@ class Server{
 
 		try{
 			$this->hasStopped = true;
+			
+			foreach($this->players as $player){
+				$player->close(TextFormat::YELLOW . $player->getName() . " has left the game", $this->getProperty("settings.shutdown-message", "Server closed"));
+			}
 
 			foreach($this->network->getInterfaces() as $interface){
 				$interface->shutdown();
@@ -2056,10 +2060,6 @@ class Server{
 			}
 
 			$this->pluginManager->disablePlugins();
-
-			foreach($this->players as $player){
-				$player->close(TextFormat::YELLOW . $player->getName() . " has left the game", $this->getProperty("settings.shutdown-message", "Server closed"));
-			}
 
 			foreach($this->getLevels() as $level){
 				$this->unloadLevel($level, true, true);
