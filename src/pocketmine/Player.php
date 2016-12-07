@@ -1725,7 +1725,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($ev->isCancelled()){
 			return;
 		}
-		
+
 		$beforeLoginAvailablePackets = [ProtocolInfo::LOGIN_PACKET, ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET];
 		if (!$this->isOnline() && !in_array($packet->pid(), $beforeLoginAvailablePackets)) {
 			return;
@@ -2562,7 +2562,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				
 				$recipe = $this->server->getCraftingManager()->getRecipe($packet->id);
 				$result = $packet->output[0];
-				if (!$result->deepEquals($recipe->getResult(), true, false) ) { //hack for win10
+				
+				if (!($result instanceof Item)) {
+					$this->inventory->sendContents($this);
+					//Timings::$timerCraftingEventPacket->stopTiming();
+					break;
+				}
+				
+				if (is_null($recipe) || !$result->deepEquals($recipe->getResult(), true, false) ) { //hack for win10
 					$newRecipe = $this->server->getCraftingManager()->getRecipeByHash($result->getId() . ":" . $result->getDamage());
 					if (!is_null($newRecipe)) {
 						$recipe = $newRecipe;
@@ -2608,8 +2615,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerCraftingEventPacket->stopTiming();
 					break;
 				}
-
-				$used = array_fill(0, $this->inventory->getSize(), 0);
+				
+				$used = array_fill(0, $this->inventory->getSize() + 4, 0);
 
 				$playerInventoryItems = $this->inventory->getContents();
 				foreach ($ingredients as $ingredient) {
@@ -2777,7 +2784,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->dataPacket($pk);
 				//Timings::$timerChunkRudiusPacket->stopTiming();
 				break;
-			case ProtocolInfo::COMMAND_STEP_PACKET:				
+			case ProtocolInfo::COMMAND_STEP_PACKET:
 				$commandName = $packet->name;
 				$commandOverload = $packet->overload;
 				$commandParams = json_decode($packet->outputFormat, true);
