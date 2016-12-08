@@ -67,10 +67,12 @@ class TextPacket extends DataPacket{
 		switch($this->type){
 			case self::TYPE_POPUP:
 			case self::TYPE_CHAT:
+            case self::TYPE_WHISPER:
 				$this->putString($this->source);
 			case self::TYPE_RAW:
 			case self::TYPE_TIP:
 			case self::TYPE_SYSTEM:
+            case self::TYPE_WHISPER:
 				$this->putString($this->message);
 				break;
 
