@@ -526,7 +526,7 @@ class Block extends Position implements Metadatable{
 			self::$list[self::WEIGHTED_PRESSURE_PLATE_LIGHT] = WeightedPressurePlateLight::class;
 			
 			self::$list[self::MOB_HEAD_BLOCK] = MobHead::class;
-			
+			self::$list[self::FLOWER_POT_BLOCK] = FlowerPot::class;
 			foreach(self::$list as $id => $class){
 				if($class !== null){
 					/** @var Block $block */
