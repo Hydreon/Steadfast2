@@ -779,6 +779,7 @@ class Item{
 		378 => "Magma Cream",
 		383 => "Spawn Egg",
 		388 => "Emerald",
+		390 => "Flower Pot",
 		391 => "Carrot",
 		392 => "Potato",
 		393 => "Baked Potato",
@@ -920,12 +921,11 @@ class Item{
 			self::$list[self::FLINT_STEEL] = FlintSteel::class;
 			self::$list[self::SHEARS] = Shears::class;
 			self::$list[self::BOW] = Bow::class;
-
 			self::$list[self::RAW_FISH] = Fish::class;
 			self::$list[self::COOKED_FISH] = CookedFish::class;
-			
 			self::$list[self::MOB_HEAD] = MobHead::class;
 			self::$list[self::BLAZE_POWDER] = BlazePowder::class;
+			self::$list[self::FLOWER_POT] = FlowerPot::class;
 
 			for($i = 0; $i < 256; ++$i){
 				if(Block::$list[$i] !== null){
