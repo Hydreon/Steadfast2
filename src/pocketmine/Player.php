@@ -2915,9 +2915,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$pk = new DisconnectPacket;
 					$pk->message = $reason;
 					$this->directDataPacket($pk);
-				}		
-			} elseif ($reason == 'Change Server') {
-				$this->server->despawnEntitiesForPlayer($this);
+				}
 			}
 			$this->connected = false;
 			if($this->username != ""){
@@ -2927,6 +2925,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 			}
 
+            $this->server->despawnEntitiesForPlayer($this);
 			foreach($this->server->getOnlinePlayers() as $player){
 				if(!$player->canSee($this)){
 					$player->showPlayer($this);
