@@ -297,6 +297,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	private $isFirstConnect = true;
 
+	const MAX_EXPERIENCE = 2147483648;
+	const MAX_EXPERIENCE_LEVEL = 21863;
+	private $exp = 0;
+	private $expLevel = 0;
+
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -2910,9 +2915,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$pk = new DisconnectPacket;
 					$pk->message = $reason;
 					$this->directDataPacket($pk);
-				}		
-			} elseif ($reason == 'Change Server') {
-				$this->server->despawnEntitiesForPlayer($this);
+				}
 			}
 			$this->connected = false;
 			if($this->username != ""){
@@ -2922,6 +2925,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 			}
 
+            $this->server->despawnEntitiesForPlayer($this);
 			foreach($this->server->getOnlinePlayers() as $player){
 				if(!$player->canSee($this)){
 					$player->showPlayer($this);
@@ -3858,5 +3862,63 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		return $result;
 	}
+
+
+	public function getExperience()
+	{
+		return $this->exp;
+	}
+
+	public function getExperienceLevel()
+	{
+		return $this->expLevel;
+	}
 	
+	public function updateExperience($exp = 0, $level = 0, $checkNextLevel = true)
+	{
+		$this->exp = $exp;
+		$this->expLevel = $level;
+
+		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE, $exp, 0, self::MAX_EXPERIENCE, 100);
+		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, $level, 0, self::MAX_EXPERIENCE_LEVEL, 100);
+
+		if($this->hasEnoughExperience() && $checkNextLevel){
+			$exp = 0; // TODO - Calculate the amount of XP for the next level
+			$level = $this->getExperienceLevel() + 1;
+			$this->updateExperience($exp, $level, false);
+		}
+	}
+
+	public function addExperience($exp = 0, $level = 0, $checkNextLevel = true)
+	{
+		$this->updateExperience($this->getExperience() + $exp, $this->getExperienceLevel() + $level, $checkNextLevel);
+	}
+
+	public function removeExperience($exp = 0, $level = 0, $checkNextLevel = true)
+	{
+		$this->updateExperience($this->getExperience() - $exp, $this->getExperienceLevel() - $level, $checkNextLevel);
+	}
+
+	// http://minecraft.gamepedia.com/Experience
+	public function getExperienceNeeded()
+	{
+		$level = $this->getExperienceLevel();
+		if ($level <= 16) {
+			return (2 * $level) + 7;
+		} elseif ($level <= 31) {
+			return (5 * $level) - 38;
+		} elseif ($level <= 21863) {
+			return (9 * $level) - 158;
+		}
+		return PHP_INT_MAX;
+	}
+
+	public function hasEnoughExperience()
+	{
+		return $this->getExperienceNeeded() - $this->getRealExperience() <= 0;
+	}
+
+	public function getRealExperience(){
+		return $this->getExperienceNeeded() * $this->getExperience();
+	}
 }

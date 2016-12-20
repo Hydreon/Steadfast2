@@ -34,7 +34,7 @@ class GlowingRedstoneOre extends Solid{
 	}
 
 	public function getHardness(){
-		return 15;
+		return 3;
 	}
 
 	public function getName(){
