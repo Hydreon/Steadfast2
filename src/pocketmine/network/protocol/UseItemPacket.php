@@ -43,7 +43,7 @@ class UseItemPacket extends DataPacket{
 
 	public function decode(){
 		$this->x = $this->getSignedVarInt();
-		$this->y = $this->getByte();
+		$this->y = $this->getVarInt();
 		$this->z = $this->getSignedVarInt();
 		$this->interactBlockId =  $this->getVarInt();
 		$this->face = $this->getSignedVarInt();

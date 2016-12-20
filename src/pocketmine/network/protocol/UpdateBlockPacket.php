@@ -50,7 +50,7 @@ class UpdateBlockPacket extends DataPacket{
 		$this->reset();
 		foreach($this->records as $r){
 			$this->putSignedVarInt($r[0]);			
-			$this->putByte($r[2]);
+			$this->putVarInt($r[2]);
 			$this->putSignedVarInt($r[1]);
 			$this->putVarInt($r[3]);
 			$this->putVarInt(($r[5] << 4) | $r[4]);
