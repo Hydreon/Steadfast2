@@ -215,5 +215,5 @@ interface Inventory{
 	 * @param int    $index
 	 * @param Item   $before
 	 */
-	public function onSlotChange($index, $before);
+	public function onSlotChange($index, $before, $sendPacket = true);
 }

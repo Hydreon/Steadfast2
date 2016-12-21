@@ -12,7 +12,7 @@ class ChunkMaker extends Worker {
 	protected $shutdown;
 	
 	protected $externalQueue;
-	protected $internalQueue;		
+	protected $internalQueue;
 
 	public function __construct(\ClassLoader $loader = null) {
 		$this->externalQueue = new \Threaded;
@@ -21,7 +21,7 @@ class ChunkMaker extends Worker {
 		$this->classLoader = $loader;
 		$this->start(PTHREADS_INHERIT_CONSTANTS);
 	}
-	
+
 	
 	public function registerClassLoader(){
 		if(!interface_exists("ClassLoader", false)){
@@ -33,7 +33,7 @@ class ChunkMaker extends Worker {
 			$this->classLoader->register(true);
 		}
 	}
-	
+
 	public function run() {
 		$this->registerClassLoader();
 		gc_enable();
@@ -57,7 +57,7 @@ class ChunkMaker extends Worker {
 	}
 
 	protected function tickProcessor() {
-		while (!$this->shutdown) {			
+		while (!$this->shutdown) {
 			$start = microtime(true);
 			$count = count($this->internalQueue);
 			$this->tick();
@@ -68,13 +68,13 @@ class ChunkMaker extends Worker {
 		}
 	}
 
-	protected function tick() {				
+	protected function tick() {
 		while(count($this->internalQueue) > 0){
 			$data = unserialize($this->readMainToThreadPacket());
 			$this->doChunk($data);
 		}
 	}
-	
+
 	protected function doChunk($data) {
 		$offset = 8;
 		$blockIdArray = substr($data['chunk'], $offset, 32768);
@@ -87,28 +87,48 @@ class ChunkMaker extends Worker {
 		$offset += 16384;
 		$heightMapArray = substr($data['chunk'], $offset, 256);
 		$offset += 256;
-		$biomeColorArray = substr($data['chunk'], $offset, 1024);
+		$biomeColorArray = array_values(unpack("N*", substr($data['chunk'], $offset, 1024)));
 
 		$languages = ['English', 'German', 'Spanish'];
 		
-		$chunkDataWithoutSigns = $blockIdArray .
-				$blockDataArray .
-				$skyLightArray .
-				$blockLightArray .
-				$heightMapArray .
-				$biomeColorArray .
-				Binary::writeLInt(0) .
-				$data['tiles'];		
+		
+		$countBlocksInChunk = 8;
+		$chunkDataWithoutSigns = chr($countBlocksInChunk);		
+		
+		for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
+			$chunkDataWithoutSigns .= chr($blockIndex);
+			for ($i = 0; $i < 256; $i++) {
+				$chunkDataWithoutSigns .= substr($blockIdArray, $blockIndex * 16 + $i * 128, 16);
+			}
+			
+			for ($i = 0; $i < 256; $i++) {
+				$chunkDataWithoutSigns .= substr($blockDataArray, $blockIndex * 8 + $i * 64, 8);
+			}
+			
+			for ($i = 0; $i < 256; $i++) {
+				$chunkDataWithoutSigns .= substr($skyLightArray, $blockIndex * 8 + $i * 64, 8);
+			}
+			
+			for ($i = 0; $i < 256; $i++) {
+				$chunkDataWithoutSigns .= substr($blockLightArray, $blockIndex * 8 + $i * 64, 8);
+			}
+			
+		}
+
 		//hack for snow
-		$chunkDataWithoutSignsWithSnow = $blockIdArray .
-				$blockDataArray .
-				$skyLightArray .
-				$blockLightArray .
+		$chunkDataWithoutSignsWithSnow = $chunkDataWithoutSigns.
 				$heightMapArray .
-				hex2bin('0c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c000000') .
+				hex2bin('000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c') .
 				Binary::writeLInt(0) .
 				$data['tiles'];		
 		
+		
+		$chunkDataWithoutSigns .= $heightMapArray .
+				pack("n*", ...$biomeColorArray) .
+				Binary::writeLInt(0) .
+				$data['tiles'];		
+		
+
 		$result = array();
 		$result['chunkX'] = $data['chunkX'];
 		$result['chunkZ'] = $data['chunkZ'];
@@ -125,8 +145,8 @@ class ChunkMaker extends Worker {
 			$pk->encode();
 			if(!empty($pk->buffer)) {				
 				$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
-				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);		
-				$result[$lang] = $ordered;			
+				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
+				$result[$lang] = $ordered;
 			}
 			
 			
@@ -143,13 +163,13 @@ class ChunkMaker extends Worker {
 				$result['snow'][$lang] = $ordered;			
 			}
 		}
-		$this->externalQueue[] = serialize($result);		
+		$this->externalQueue[] = serialize($result);
 	}
-	
+
 	public function shutdown(){		
 		$this->shutdown = true;
 	}
-	
+
 	
 	public function errorHandler($errno, $errstr, $errfile, $errline, $context, $trace = null){
 		$errorConversion = [
@@ -173,8 +193,8 @@ class ChunkMaker extends Worker {
 		if(($pos = strpos($errstr, "\n")) !== false){
 			$errstr = substr($errstr, 0, $pos);
 		}
-		
-		var_dump("An $errno error happened: \"$errstr\" in \"$errfile\" at line $errline");		
+
+		var_dump("An $errno error happened: \"$errstr\" in \"$errfile\" at line $errline");
 
 		foreach(($trace = $this->getTrace($trace === null ? 3 : 0, $trace)) as $i => $line){
 			var_dump($line);
@@ -182,7 +202,7 @@ class ChunkMaker extends Worker {
 
 		return true;
 	}
-	
+
 	
 	public function getTrace($start = 1, $trace = null){
 		if($trace === null){
