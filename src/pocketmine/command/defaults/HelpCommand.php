@@ -24,6 +24,7 @@ namespace pocketmine\command\defaults;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\ConsoleCommandSender;
+use pocketmine\command\PluginCommand;
 use pocketmine\utils\TextFormat;
 
 class HelpCommand extends VanillaCommand{
@@ -71,7 +72,8 @@ class HelpCommand extends VanillaCommand{
 					$commands[$command->getName()] = $command;
 				}
 			}
-			ksort($commands, SORT_NATURAL | SORT_FLAG_CASE);
+//			ksort($commands, SORT_NATURAL | SORT_FLAG_CASE);
+			usort($commands, array('pocketmine\command\defaults\HelpCommand', 'pluginSort'));
 			$commands = array_chunk($commands, $pageHeight);
 			$pageNumber = (int) min(count($commands), $pageNumber);
 			if($pageNumber < 1){
@@ -103,6 +105,38 @@ class HelpCommand extends VanillaCommand{
 
 			return true;
 		}
+	}
+	
+	/**
+	 * Sort commands by plugin (game plugin first, then LbCore, then SteadFast
+	 * @param PluginCommand $a
+	 * @param PluginCommand $b
+	 * @return int
+	 */
+	public static function pluginSort($a, $b) {
+		$aIsPlugin = $a instanceof PluginCommand;
+		$bIsPlugin = $b instanceof PluginCommand;
+		if ($aIsPlugin) {
+			if ($bIsPlugin) {
+				$aPlugin = $a->getPlugin()->getName();
+				$bPlugin = $b->getPlugin()->getName();
+				if ($aPlugin !== $bPlugin) {
+					if ($aPlugin == 'LbCore') {
+						return 1;
+					} elseif ($bPlugin == 'LbCore') {
+						return -1;
+					}
+				}
+			} else {
+				return -1;
+			}
+		} elseif ($bIsPlugin) {
+			return 1;
+		}
+		//if $a from the same plugin as $b sort by a-z
+		$aName = $a->getName();
+		$bName = $b->getName();
+		return strcmp($aName, $bName);
 	}
 
 }
