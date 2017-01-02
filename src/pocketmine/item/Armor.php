@@ -23,8 +23,33 @@
 namespace pocketmine\item;
 
 abstract class Armor extends Item{
+    const TIER_NONE = 0;
+    const TIER_LEATHER = 1;
+	const TIER_GOLD = 2;
+	const TIER_CHAIN = 3;
+	const TIER_IRON = 4;
+	const TIER_DIAMOND = 5;
+    
+	const TYPE_NONE = 0;
+	const TYPE_HELMET = 1;
+	const TYPE_CHESTPLATE = 2;
+	const TYPE_LEGGINS = 3;
+	const TYPE_BOOTS = 4;
+    
+    protected $type = Armor::TYPE_NONE;
+    protected $tier = Armor::TIER_NONE;
+    
+    public function getType () {
+        return $this->type;
+    }
+    
+    public function getTier () {
+        return $this->tier;
+    }
 
 	public function getMaxStackSize(){
 		return 1;
 	}
+    
+    
 }

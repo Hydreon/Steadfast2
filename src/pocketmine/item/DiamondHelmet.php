@@ -27,5 +27,7 @@ class DiamondHelmet extends Armor{
 	
 	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::DIAMOND_HELMET, $meta, $count, "Diamond Helmet");
+        $this->type = Armor::TYPE_HELMET;
+        $this->tier = Armor::TIER_DIAMOND;
 	}
 }

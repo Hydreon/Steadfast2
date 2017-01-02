@@ -28,5 +28,7 @@ class LeatherPants extends Armor{
 	
 	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::LEATHER_PANTS, $meta, $count, "Leather Pants");
+        $this->type = Armor::TYPE_LEGGINS;
+        $this->tier = Armor::TIER_LEATHER;
 	}
 }
