@@ -156,6 +156,7 @@ use pocketmine\network\proxy\RedirectPacket;
 use pocketmine\network\proxy\ProxyPacket;
 
 use pocketmine\item\enchantment\Enchantment;
+use pocketmine\item\Elytra;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -1543,7 +1544,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($this->spawned){
 			$this->processMovement($tickDiff);
 
-			$this->entityBaseTick($tickDiff);
+			$this->entityBaseTick($tickDiff);			
 
 			if(!$this->isSpectator() and $this->speed !== null){
 				if($this->onGround || $this->isCollideWithLiquid()){
@@ -1552,7 +1553,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 					$this->inAirTicks = 0;
 				}else{
-					if(!$this->allowFlight and $this->inAirTicks > 10 and !$this->isSleeping() and $this->getDataProperty(self::DATA_NO_AI) !== 1){
+					if(!$this->isUseElytra() and !$this->allowFlight and $this->inAirTicks > 10 and !$this->isSleeping() and $this->getDataProperty(self::DATA_NO_AI) !== 1){
 						$expectedVelocity = (-$this->gravity) / $this->drag - ((-$this->gravity) / $this->drag) * exp(-$this->drag * ($this->inAirTicks - $this->startAirTicks));
 						$diff = ($this->speed->y - $expectedVelocity) ** 2;
 
@@ -1564,9 +1565,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								return false;
 							}
 						}
-					}
-
-					++$this->inAirTicks;
+						++$this->inAirTicks;
+					}					
 				}
 			}
 			
@@ -3920,5 +3920,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	public function getRealExperience(){
 		return $this->getExperienceNeeded() * $this->getExperience();
+	}
+	
+	public function isUseElytra() {
+		if ($this->getInventory()->getArmorItem(Elytra::SLOT_NUMBER) instanceof Elytra) {
+			return true;
+		}
+		return false;
 	}
 }

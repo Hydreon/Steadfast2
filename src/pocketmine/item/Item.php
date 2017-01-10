@@ -493,6 +493,7 @@ class Item{
 	const ACACIA_DOOR = 430;
 	const DARK_OAK_DOOR = 431;
 	const SPLASH_POTION = 438;
+	const ELYTRA = 444;
 	const BEETROOT = 457;
 	const BEETROOT_SEEDS = 458;
 	const BEETROOT_SEED = 458;
@@ -926,6 +927,7 @@ class Item{
 			self::$list[self::MOB_HEAD] = MobHead::class;
 			self::$list[self::BLAZE_POWDER] = BlazePowder::class;
 			self::$list[self::FLOWER_POT] = FlowerPot::class;
+			self::$list[self::ELYTRA] = Elytra::class;
 
 			for($i = 0; $i < 256; ++$i){
 				if(Block::$list[$i] !== null){
