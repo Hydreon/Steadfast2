@@ -114,13 +114,6 @@ class ChunkMaker extends Worker {
 			}
 			
 		}
-
-		//hack for snow
-		$chunkDataWithoutSignsWithSnow = $chunkDataWithoutSigns.
-				$heightMapArray .
-				hex2bin('000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c') .
-				Binary::writeLInt(0) .
-				$data['tiles'];		
 		
 		
 		$chunkDataWithoutSigns .= $heightMapArray .
@@ -147,20 +140,6 @@ class ChunkMaker extends Worker {
 				$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
 				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
 				$result[$lang] = $ordered;
-			}
-			
-			
-			$chunkData = $chunkDataWithoutSignsWithSnow . $data['signTiles'][$lang];
-			$pk = new FullChunkDataPacket();
-			$pk->chunkX = $data['chunkX'];
-			$pk->chunkZ = $data['chunkZ'];
-			$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
-			$pk->data = $chunkData;
-			$pk->encode();
-			if(!empty($pk->buffer)) {				
-				$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
-				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);		
-				$result['snow'][$lang] = $ordered;			
 			}
 		}
 		$this->externalQueue[] = serialize($result);
