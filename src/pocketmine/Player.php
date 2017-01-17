@@ -627,7 +627,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setSkin($str, $skinName){
 		parent::setSkin($str, $skinName);
 		if($this->spawned === true){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $skinName, $str);
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->skinName, $this->skin);
 		}
 	}
 
