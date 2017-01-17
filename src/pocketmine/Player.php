@@ -1660,6 +1660,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				2 => 1,
 				3 => 1
 			],
+            Item::CHORUS_FRUIT => 2,
 		];
 
 		$slot = $this->inventory->getItemInHand();

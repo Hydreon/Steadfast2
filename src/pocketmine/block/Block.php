@@ -196,8 +196,10 @@ class Block extends Position implements Metadatable{
 	const ENCHANTMENT_TABLE = 116;
 	const BREWING_STAND_BLOCK = 117;
 	const CAULDRON_BLOCK = 118;
+	const END_PORTAL = 119;
 	const END_PORTAL_FRAME = 120;
 	const END_STONE = 121;
+	const DRAGON_EGG = 122;
 	const REDSTONE_LAMP = 123;
 	const REDSTONE_LAMP_ACTIVE = 124;
 	const DROPPER = 125;
@@ -205,6 +207,7 @@ class Block extends Position implements Metadatable{
 	const COCOA = 127;
 	const SANDSTONE_STAIRS = 128;
 	const EMERALD_ORE = 129;
+    const ENDER_CHEST = 130;
 	const TRIPWIRE_HOOK = 131;
 	const TRIPWIRE = 132;
 	const EMERALD_BLOCK = 133;
@@ -244,6 +247,7 @@ class Block extends Position implements Metadatable{
 	const WOODEN_SLABS = 158;
 	const STAINED_CLAY = 159;
 	const STAINED_HARDENED_CLAY = 159;
+	const STAINED_GLASS_PANE = 160;
 	const LEAVES2 = 161;
 	const LEAVE2 = 161;
 	const WOOD2 = 162;
@@ -278,6 +282,13 @@ class Block extends Position implements Metadatable{
 	const DARK_OAK_DOOR_BLOCK = 197;
 	const GRASS_PATH = 198;
 	const ITEM_FRAME_BLOCK = 199;
+    const CHORUS_FLOWER = 200;
+    const PURPUR_BLOCK = 201;
+    const END_BRICKS = 206;
+    const END_ROD = 208;
+    const END_GATEWAY = 209;
+    const CHORUS_PLANT = 240;
+    const STAINED_GLASS = 241;
 	const PODZOL = 243;
 	const BEETROOT_BLOCK = 244;
 	const STONECUTTER = 245;
@@ -527,6 +538,20 @@ class Block extends Position implements Metadatable{
 			
 			self::$list[self::MOB_HEAD_BLOCK] = MobHead::class;
 			self::$list[self::FLOWER_POT_BLOCK] = FlowerPot::class;
+            
+            // update 1.0
+            self::$list[self::CHORUS_FLOWER] = ChorusFlower::class;
+            self::$list[self::CHORUS_PLANT] = ChorusPlant::class;
+//            self::$list[self::ENDER_CHEST] = EnderChest::class;
+            self::$list[self::END_GATEWAY] = EndGateway::class;
+            self::$list[self::END_PORTAL] = EndPortal::class;
+            self::$list[self::END_BRICKS] = EndBricks::class;
+            self::$list[self::END_ROD] = EndRod::class;
+            self::$list[self::DRAGON_EGG] = DragonEgg::class;
+            self::$list[self::PURPUR_BLOCK] = PurpurBlock::class;
+            self::$list[self::STAINED_GLASS] = StainedGlass::class;
+            self::$list[self::STAINED_GLASS_PANE] = StainedGlassPane::class;
+            
 			foreach(self::$list as $id => $class){
 				if($class !== null){
 					/** @var Block $block */
