@@ -492,6 +492,7 @@ class Item{
 	const JUNGLE_DOOR = 429;
 	const ACACIA_DOOR = 430;
 	const DARK_OAK_DOOR = 431;
+	const CHORUS_FRUIT = 432;
 	const SPLASH_POTION = 438;
 	const ELYTRA = 444;
 	const BEETROOT = 457;
@@ -814,6 +815,7 @@ class Item{
 		429 => "Jungle Door",
 		430 => "Acacia Door",
 		431 => "Dark Oak Door",
+		431 => "Chorus Fruit",
 		438 => "Splash Potion",
 		457 => "Beetroot",
 		458 => "Beetroot Seed",
@@ -928,6 +930,9 @@ class Item{
 			self::$list[self::BLAZE_POWDER] = BlazePowder::class;
 			self::$list[self::FLOWER_POT] = FlowerPot::class;
 			self::$list[self::ELYTRA] = Elytra::class;
+            
+            // update for 1.0
+			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;
 
 			for($i = 0; $i < 256; ++$i){
 				if(Block::$list[$i] !== null){
@@ -1321,6 +1326,7 @@ class Item{
 		self::$food[] = Item::RAW_SALMON;
 		self::$food[] = Item::COOKED_SALMON;
 		self::$food[] = Item::RABBIT_STEW;
+		self::$food[] = Item::CHORUS_FRUIT;
 	}
 
 	public static function clearCreativeItems(){

@@ -905,8 +905,8 @@ abstract class Entity extends Location implements Metadatable{
 			$block->onEntityCollide($this);
 		}
 		
-		if($this->y <= -16 and $this->dead !== true){
-			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_VOID, 10);
+		if($this->y < 0 && $this->dead !== true){
+			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_VOID, 20);
 			$this->attack($ev->getFinalDamage(), $ev);
 			$hasUpdate = true;
 		}

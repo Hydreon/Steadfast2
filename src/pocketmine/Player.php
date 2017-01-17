@@ -1553,7 +1553,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 					$this->inAirTicks = 0;
 				}else{
-					if(!$this->isUseElytra() and !$this->allowFlight and $this->inAirTicks > 10 and !$this->isSleeping() and $this->getDataProperty(self::DATA_NO_AI) !== 1){
+					if(!$this->isUseElytra() && !$this->allowFlight && !$this->isSleeping()){
 						$expectedVelocity = (-$this->gravity) / $this->drag - ((-$this->gravity) / $this->drag) * exp(-$this->drag * ($this->inAirTicks - $this->startAirTicks));
 						$diff = ($this->speed->y - $expectedVelocity) ** 2;
 
@@ -1566,7 +1566,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							}
 						}
 						++$this->inAirTicks;
-					}					
+					}	
 				}
 			}
 			
@@ -1660,6 +1660,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				2 => 1,
 				3 => 1
 			],
+            Item::CHORUS_FRUIT => 2,
 		];
 
 		$slot = $this->inventory->getItemInHand();

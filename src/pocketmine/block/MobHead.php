@@ -20,6 +20,7 @@ class MobHead extends Transparent{
 	const ZOMBIE_HEAD = 2;
 	const STEVE_HEAD = 3;
 	const CREEPER_HEAD = 4;
+	const DRAGON_HEAD = 5;
 	
 	protected $id = self::MOB_HEAD_BLOCK;
 	
