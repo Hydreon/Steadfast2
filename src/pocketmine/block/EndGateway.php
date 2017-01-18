@@ -4,7 +4,7 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 
-class EndGateway extends Solid {
+class EndGateway extends Transparent {
     
     protected $id = self::END_GATEWAY;
     

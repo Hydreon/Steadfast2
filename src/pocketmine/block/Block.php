@@ -542,7 +542,7 @@ class Block extends Position implements Metadatable{
             // update 1.0
             self::$list[self::CHORUS_FLOWER] = ChorusFlower::class;
             self::$list[self::CHORUS_PLANT] = ChorusPlant::class;
-//            self::$list[self::ENDER_CHEST] = EnderChest::class;
+            self::$list[self::ENDER_CHEST] = EnderChest::class;
             self::$list[self::END_GATEWAY] = EndGateway::class;
             self::$list[self::END_PORTAL] = EndPortal::class;
             self::$list[self::END_BRICKS] = EndBricks::class;

@@ -447,6 +447,7 @@ class Item{
 	const MAGMA_CREAM = 378;
 	const BREWING_STAND = 379;
 	const CAULDRON = 380;
+	const EYE_OF_ENDER = 381;
 	const GLISTERING_MELON = 382;
 	const SPAWN_EGG = 383;
 	const BOTTLE_ENCHANTING = 384;
@@ -487,14 +488,19 @@ class Item{
 	const NAME_TAG = 421;
 	const RAW_MUTTON = 423;
 	const COOKED_MUTTON = 424;
+	const END_CRYSTAL = 426;
 	const SPRUCE_DOOR = 427;
 	const BIRCH_DOOR = 428;
 	const JUNGLE_DOOR = 429;
 	const ACACIA_DOOR = 430;
 	const DARK_OAK_DOOR = 431;
 	const CHORUS_FRUIT = 432;
+	const POPPED_CHORUS_FRUIT = 433;
+	const DRAGONS_BREATH = 437;
 	const SPLASH_POTION = 438;
+	const LINGERING_POTION = 441;
 	const ELYTRA = 444;
+	const SHULKER_SHELL = 445;
 	const BEETROOT = 457;
 	const BEETROOT_SEEDS = 458;
 	const BEETROOT_SEED = 458;
@@ -504,6 +510,7 @@ class Item{
 	const PUFFERFISH = 462;
 	const COOKED_SALMON = 463;
 	const ENCHANTED_GOLDEN_APPLE = 466;
+	const END_PEARL = 468;
 	const CAMERA = 498;
 	
 	protected static $names = [
