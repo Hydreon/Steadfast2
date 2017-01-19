@@ -42,6 +42,9 @@ class PlayerActionPacket extends DataPacket{
 	const ACTION_STOP_SNEAK = 12;
 	const ACTION_DIMENSION_CHANGE = 13;
 
+	const ACTION_START_ELYTRA = 15;
+	const ACTION_STOP_ELYTRA = 16;
+
 	public $eid;
 	public $action;
 	public $x;
