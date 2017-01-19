@@ -225,6 +225,7 @@ class Item{
 	const CAULDRON_BLOCK = 118;
 	const END_PORTAL = 120;
 	const END_STONE = 121;
+	const DRAGON_EGG = 122;
 	const REDSTONE_LAMP = 123;
 	const REDSTONE_LAMP_ACTIVE = 124;
 	const DROPPER = 125;
@@ -232,6 +233,7 @@ class Item{
 	const COCOA = 127;
 	const SANDSTONE_STAIRS = 128;
 	const EMERALD_ORE = 129;
+	const ENDER_CHEST = 130;
 	const TRIPWIRE_HOOK = 131;
 	const TRIPWIRE = 132;
 	const EMERALD_BLOCK = 133;
@@ -271,6 +273,7 @@ class Item{
 	const WOODEN_SLABS = 158;
 	const STAINED_CLAY = 159;
 	const STAINED_HARDENED_CLAY = 159;
+	const STAINED_GLASS_PANE = 160;
 	const LEAVES2 = 161;
 	const LEAVE2 = 161;
 	const WOOD2 = 162;
@@ -305,6 +308,12 @@ class Item{
 	const DARK_OAK_DOOR_BLOCK = 197;
 	const GRASS_PATH = 198;
 	const ITEM_FRAME_BLOCK = 199;
+	const CHORUS_FLOWER = 200;
+	const PURPUR_BLOCK = 201;
+	const END_BRICKS = 206;
+	const END_ROD = 208;
+	const CHORUS_PLANT = 240;
+	const STAINED_GLASS = 241;
 	const PODZOL = 243;
 	const BEETROOT_BLOCK = 244;
 	const STONECUTTER = 245;
@@ -613,6 +622,7 @@ class Item{
 		118 => "Cauldron Block",
 		120 => "End Portal",
 		121 => "End Stone",
+        self::DRAGON_EGG => 'Dragon Egg',
 		123 => "Redstone Lamp",
 		124 => "Redstone Lamp Active",
 		125 => "Dropper",
@@ -620,6 +630,7 @@ class Item{
 		127 => "Cocoa",
 		128 => "Sendstone Stairs",
 		129 => "Emerald Ore",
+        self::ENDER_CHEST => 'Ender Chest',
 		131 => "Tripwire Hook",
 		132 => "Tripwire",
 		133 => "Emerald Block",
@@ -647,6 +658,7 @@ class Item{
 		157 => "Double Wood Slab",
 		158 => "Wooden Slab",
 		159 => "Stained Clay",
+        self::STAINED_GLASS_PANE => 'Stained Glass Pane',
 		161 => "Leaves2",
 		162 => "Wood2",
 		163 => "Acacia Wood Stairs",
@@ -674,6 +686,12 @@ class Item{
 		196 => "Acacia Door",
 		197 => "Dark Oak Door",
 		198 => "Grass Path",
+        self::CHORUS_FLOWER => 'Chorus Flower',
+        self::PURPUR_BLOCK => 'Purpur Block',
+        self::END_BRICKS => 'End Brick',
+        self::END_ROD => 'End Rod',
+        self::CHORUS_PLANT => 'Chorus Plant',
+        self::STAINED_GLASS => 'Stained Glass',
 		243 => "Podzol",
 		244 => "Beetroot Block",
 		245 => "Stonecutter",
@@ -1304,7 +1322,14 @@ class Item{
 		self::addCreativeItem(Item::get(Item::DYE, 10));
 		self::addCreativeItem(Item::get(Item::DYE, 9));
 		self::addCreativeItem(Item::get(Item::DYE, 8));
-		
+        
+        // update for 1.0
+        self::addCreativeItem(Item::get(Item::CHORUS_FLOWER, 0));
+        self::addCreativeItem(Item::get(Item::CHORUS_PLANT, 0));
+        self::addCreativeItem(Item::get(Item::ENDER_CHEST, 0));
+        self::addCreativeItem(Item::get(Item::END_BRICKS, 0));
+        self::addCreativeItem(Item::get(Item::END_ROD, 0));
+        self::addCreativeItem(Item::get(Item::PURPUR_BLOCK, 0));
 	}
 	
 	private static function initFood(){
