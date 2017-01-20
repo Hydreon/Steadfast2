@@ -155,7 +155,8 @@ class SessionManager{
 
 
     private function receivePacket(){
-        if(($len = $this->socket->readPacket($buffer, $source, $port)) > 0){
+        $len = $this->socket->readPacket($buffer, $source, $port);
+        if($buffer !== null){
             $this->receiveBytes += $len;
             if(isset($this->block[$source])){
                 return true;
@@ -167,34 +168,30 @@ class SessionManager{
                 $this->ipSec[$source] = 1;
             }
 
-            $pid = ord($buffer{0});
-            
-            if($pid == UNCONNECTED_PONG::$ID){
-                return false;
-            }
+            if($len > 0){
+                $pid = ord($buffer{0});
 
-            if(($packet = $this->getPacketFromPool($pid)) !== null){
-                $packet->buffer = $buffer;
-                $this->getSession($source, $port)->handlePacket($packet);
-	            return true;
-            }elseif($pid === UNCONNECTED_PING::$ID){
-                //No need to create a session for just pings
-                $packet = new UNCONNECTED_PING;
-                $packet->buffer = $buffer;
-                $packet->decode();
+                if($pid === UNCONNECTED_PING::$ID){
+                    //No need to create a session for just pings
+                    $packet = new UNCONNECTED_PING;
+                    $packet->buffer = $buffer;
+                    $packet->decode();
 
-                $pk = new UNCONNECTED_PONG();
-                $pk->serverID = $this->getID();
-                $pk->pingID = $packet->pingID;
-                $pk->serverName = $this->getName();
-                $this->sendPacket($pk, $source, $port);
-				return true;
-            }elseif($buffer !== ""){
-                $this->streamRaw($source, $port, $buffer);
-	            return true;
-            }else{
-	            return true;
+                    $pk = new UNCONNECTED_PONG();
+                    $pk->serverID = $this->getID();
+                    $pk->pingID = $packet->pingID;
+                    $pk->serverName = $this->getName();
+                    $this->sendPacket($pk, $source, $port);
+                }elseif($pid === UNCONNECTED_PONG::$ID){
+                    //ignored
+                }elseif(($packet = $this->getPacketFromPool($pid)) !== null){
+                    $packet->buffer = $buffer;
+                    $this->getSession($source, $port)->handlePacket($packet);
+                }else{
+                    $this->streamRaw($source, $port, $buffer);
+                }
             }
+            return true;
         }
 
         return false;
