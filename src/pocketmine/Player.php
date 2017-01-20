@@ -1173,11 +1173,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function isSurvival(){
-		return $this->gamemode === 0;
+		return ($this->gamemode & 0x01) === 0;
 	}
 
 	public function isCreative(){
-		return $this->gamemode === 1;
+		return ($this->gamemode & 0x01) > 0;
 	}
 
 	public function isSpectator(){
@@ -1185,7 +1185,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function isAdventure(){
-		return $this->gamemode === 2;
+		return ($this->gamemode & 0x02) > 0;
 	}
 
 	public function getDrops(){
