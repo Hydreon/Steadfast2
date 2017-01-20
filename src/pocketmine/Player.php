@@ -303,6 +303,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	private $exp = 0;
 	private $expLevel = 0;
 
+	private $elytraIsActivated = false;
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1552,6 +1554,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->startAirTicks = 5;
 					}
 					$this->inAirTicks = 0;
+					if ($this->elytraIsActivated) {
+						$this->setFlyingFlag(false);
+						$this->elytraIsActivated = false;
+					}
 				}else{
 					if(!$this->isUseElytra() && !$this->allowFlight && !$this->isSleeping()){
 						$expectedVelocity = (-$this->gravity) / $this->drag - ((-$this->gravity) / $this->drag) * exp(-$this->drag * ($this->inAirTicks - $this->startAirTicks));
@@ -2219,6 +2225,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}else{
 							$this->setSneaking(false);
 						}
+						break;
+					case PlayerActionPacket::ACTION_START_ELYTRA:
+						if ($this->isHaveElytra()) {
+							$this->setFlyingFlag(true);
+							$this->elytraIsActivated = true;
+						}
+						break;
+					case PlayerActionPacket::ACTION_STOP_ELYTRA:
+						$this->setFlyingFlag(false);
+						$this->elytraIsActivated = false;
 						break;
 				}
 
@@ -3924,6 +3940,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function isUseElytra() {
+		return ($this->isHaveElytra() && $this->elytraIsActivated);
+	}
+	
+	public function isHaveElytra() {
 		if ($this->getInventory()->getArmorItem(Elytra::SLOT_NUMBER) instanceof Elytra) {
 			return true;
 		}

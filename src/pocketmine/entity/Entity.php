@@ -385,6 +385,10 @@ abstract class Entity extends Location implements Metadatable{
 	public function setSprinting($value = true){
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SPRINTING, (bool) $value);
 	}
+	
+	public function setFlyingFlag($value = true){
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_FALL_FLYING, (bool) $value);
+	}
 
 	/**
 	 * @return Effect[]
