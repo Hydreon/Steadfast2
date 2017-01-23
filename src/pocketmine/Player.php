@@ -1822,7 +1822,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				/** @var Item $item */
 				$item = null;
 
-				if($this->isCreative()){ //Creative mode match
+				if($this->isCreative() && !$this->isSpectator()){ //Creative mode match
 					$item = $packet->item;
 					$slot = Item::getCreativeItemIndex($item);
 				}else{
@@ -1864,7 +1864,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->inventory->sendContents($this);
 					//Timings::$timerMobEqipmentPacket->stopTiming();
 					break;
-				}elseif($this->isCreative()){
+				}elseif($this->isCreative() && !$this->isSpectator()){
 					$this->inventory->setHeldItemIndex($packet->selectedSlot);
 					$this->inventory->setItem($packet->selectedSlot, $item);
 					$this->inventory->setHeldItemSlot($packet->selectedSlot);
@@ -1905,7 +1905,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 					if($blockVector->distance($this) > 10 or ($this->isCreative() and $this->isAdventure())){
 						
-					}elseif($this->isCreative()){
+					}elseif($this->isCreative() && !$this->isSpectator()){
 						$item = $this->inventory->getItemInHand();
 						if($this->level->useItemOn($blockVector, $item, $packet->face, $packet->fx, $packet->fy, $packet->fz, $this) === true){
 							//Timings::$timerUseItemPacket->stopTiming();
@@ -1942,7 +1942,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}elseif($packet->face === 0xff || $packet->face === -1){  // -1 for 0.16
 					$aimPos = (new Vector3($packet->x / 32768, $packet->y / 32768, $packet->z / 32768))->normalize();
 
-					if($this->isCreative()){
+					if($this->isCreative() && !$this->isSpectator()){
 						$item = $this->inventory->getItemInHand();
 					}elseif(!$this->inventory->getItemInHand()->deepEquals($packet->item)){
 						$this->inventory->sendHeldItem($this);
@@ -2712,7 +2712,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						//Timings::$timerConteinerSetSlotPacket->stopTiming();
 						break;
 					}
-					if ($this->isCreative() && Item::getCreativeItemIndex($packet->item) !== -1) {
+					if ($this->isCreative() && !$this->isSpectator() && Item::getCreativeItemIndex($packet->item) !== -1) {
 						$this->inventory->setItem($packet->slot, $packet->item);
 						$this->inventory->setHotbarSlotIndex($packet->slot, $packet->slot); //links $hotbar[$packet->slot] to $slots[$packet->slot]
 					}
