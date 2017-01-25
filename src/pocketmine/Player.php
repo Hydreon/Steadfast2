@@ -3272,7 +3272,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->bodyYaw = $yaw;
 		$pk->pitch = $pitch;
 		$pk->yaw = $yaw;
-		$pk->mode = $mode;
+		$pk->mode = MovePlayerPacket::MODE_RESET;
 
 		if($targets !== null) {
 			Server::broadcastPacket($targets, $pk);
