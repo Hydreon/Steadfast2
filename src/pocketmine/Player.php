@@ -1755,7 +1755,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                     (!$this->isSpectator() && ($packet->flags >> 7) & 0x01 === 1);
                 if ($isHacker) {
                     file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " ADVENTURE_SETTINGS_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
-                    $this->kick("Sorry, the hack mods are not permitted on Lifeboat.. at all");
+                    $this->kick("Sorry, hack mods are not permitted on Lifeboat... at all.");
                 }
                 break;
 			case ProtocolInfo::LOGIN_PACKET:
