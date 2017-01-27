@@ -1744,6 +1744,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		switch($packet->pid()){
+            case ProtocolInfo::SET_PLAYER_GAMETYPE_PACKET:
+                file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " SET_PLAYER_GAMETYPE_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
+                break;
+            case ProtocolInfo::UPDATE_ATTRIBUTES_PACKET:
+                file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " UPDATE_ATTRIBUTES_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
+                break;
+            case ProtocolInfo::ADVENTURE_SETTINGS_PACKET:
+                $isHacker = ($this->allowFlight === false && ($packet->flags >> 9) & 0x01 === 1) || 
+                    (!$this->isSpectator() && ($packet->flags >> 7) & 0x01 === 1);
+                if ($isHacker) {
+                    file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " ADVENTURE_SETTINGS_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
+                    $this->kick("Sorry, hack mods are not permitted on Steadfast... at all.");
+                }
+                break;
 			case ProtocolInfo::LOGIN_PACKET:
 				//Timings::$timerLoginPacket->startTiming();
 				if($this->loggedIn === true){
@@ -2864,10 +2878,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function kick($reason = "Disconnected from server."){
 		$this->server->getPluginManager()->callEvent($ev = new PlayerKickEvent($this, $reason, TextFormat::YELLOW . $this->username . " has left the game"));
 		if(!$ev->isCancelled()){
-			$message = $reason;
-			$this->sendMessage($message);
-			$this->close($ev->getQuitMessage(), $message);
-
+			$this->close($ev->getQuitMessage(), $reason);
 			return true;
 		}
 
@@ -2917,8 +2928,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param string $reason  Reason showed in console
 	 */
 	public function close($message = "", $reason = "generic reason"){
-		
-		foreach($this->tasks as $task){
+        
+        foreach($this->tasks as $task){
 			$task->cancel();
 		}
 		$this->tasks = [];
