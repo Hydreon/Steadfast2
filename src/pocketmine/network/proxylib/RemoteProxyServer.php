@@ -27,11 +27,8 @@ class RemoteProxyServer {
 
 	public function close() {
 		$this->proxyManager->getLogger()->notice("RemoteProxyServer [$this->ip:$this->port] has disconnected.");
-		$info = array(
-			'id' => $this->getIdentifier(),
-			'data' => 'close'
-		);
-		$this->proxyManager->getProxyServer()->pushToExternalQueue(serialize($info));
+		$info = chr(strlen($this->getIdentifier())) . $this->getIdentifier() . 'close';
+		$this->proxyManager->getProxyServer()->pushToExternalQueue($info);
 		socket_clear_error($this->socket);
 		socket_close($this->socket);
 		if (get_resource_type($this->socket) == 'Socket') {
@@ -58,12 +55,9 @@ class RemoteProxyServer {
 		$data = zlib_decode($data);
 		if ($data === false) {
 			return false;
-		}
-		$info = array(
-			'id' => $this->getIdentifier(),
-			'data' => $data,
-		);
-		$this->proxyManager->getProxyServer()->pushToExternalQueue(serialize($info));
+		}	
+		$info = chr(strlen($this->getIdentifier())) . $this->getIdentifier() . $data;
+		$this->proxyManager->getProxyServer()->pushToExternalQueue($info);
 		return true;
 	}
 

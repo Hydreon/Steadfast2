@@ -55,18 +55,12 @@ class RemoteProxyServerManager {
 	}
 
 	public function getNewPacket() {
-		while (($info = $this->proxyServer->readFromInternaQueue())) {
-			$data = unserialize($info);
-			if (isset($this->remoteProxyServer[$data['id']])) {
-				if (!isset($data['type'])) {
-					$this->remoteProxyServer[$data['id']]->putPacket($data['data']);
-				} else {
-					if ($data['type'] === 'raw') {
-						$this->remoteProxyServer[$data['id']]->sendRawData($data['data']);
-					} else {
-						echo 'Unknown packet type';
-					}
-				}
+		while (($info = $this->proxyServer->readFromInternaQueue())) {		
+			$idlen = ord($info{0});
+			$dataIdentifier = substr($info, 1, $idlen);
+			$data = substr($info, 1 + $idlen);
+			if (isset($this->remoteProxyServer[$dataIdentifier])) {
+				$this->remoteProxyServer[$dataIdentifier]->putPacket($data);
 			}
 		}
 	}
