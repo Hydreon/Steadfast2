@@ -2321,7 +2321,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				
 				if ($packet->action === InteractPacket::ACTION_DAMAGE && 
-					$target instanceof Entity && $this->getGamemode() !== Player::VIEW && 
+					$target instanceof Entity && !$this->isSpectator() && 
 					$this->dead !== true and $target->dead !== true) {
 					
 					if($target instanceof DroppedItem or $target instanceof Arrow){
