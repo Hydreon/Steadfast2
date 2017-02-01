@@ -1,4 +1,33 @@
 {
+    "transfer": {
+        "versions": [
+            {
+                "description": "Transfer command",
+                "permission": "op",
+
+                "overloads": {
+                    "default": {
+                        "input": {
+                            "parameters": [
+                                {
+                                    "name": "address",
+                                    "type": "rawtext"
+                                },
+                                {
+                                    "name": "port",
+                                    "type": "int",
+                                    "optional": true
+                                }
+                            ]
+                        },
+                        "output": {
+                            "parameters": []
+                        }
+                    }
+                }
+            }
+        ]
+    },
     "version": {
         "versions": [
             {
