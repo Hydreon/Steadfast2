@@ -3715,7 +3715,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
-	private function isAvailableTansferPacket() {
+	public function isAvailableTansferPacket() {
 		return ($this->protocol >= 101);
 	}
 
