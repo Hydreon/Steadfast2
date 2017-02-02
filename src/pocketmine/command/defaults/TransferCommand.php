@@ -53,7 +53,7 @@ class TransferCommand extends VanillaCommand{
 		}
 
 		$address = $args[0];
-		$port = isset($args[1]) ? $args[1] : 10305;
+		$port = isset($args[1]) ? (int) $args[1] : false;
 		
 		$sender->transfer($address, $port);
 		

@@ -128,6 +128,7 @@ use pocketmine\network\protocol\SetSpawnPositionPacket;
 use pocketmine\network\protocol\SetTimePacket;
 use pocketmine\network\protocol\StartGamePacket;
 use pocketmine\network\protocol\TakeItemEntityPacket;
+use pocketmine\network\protocol\TransferPacket;
 use pocketmine\network\protocol\UpdateAttributesPacket;
 use pocketmine\network\protocol\SetHealthPacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
@@ -3700,11 +3701,22 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->interface;
 	}
 	
-	public function transfer($address, $port = 10305) {
-		$pk = new RedirectPacket();
-		$pk->ip = $address;
-		$pk->port = $port;
-		$this->dataPacket($pk);
+	public function transfer($address, $port = false) {
+		if ($this->isAvailableTansferPacket()) {
+			$pk = new TransferPacket();
+			$pk->ip = $address;
+			$pk->port = ($port === false ? 19132 : $port);
+			$this->dataPacket($pk);
+		} else {
+			$pk = new RedirectPacket();
+			$pk->ip = $address;
+			$pk->port = ($port === false ? 10305 : $port);
+			$this->dataPacket($pk);
+		}
+	}
+
+	private function isAvailableTansferPacket() {
+		return ($this->protocol >= 101);
 	}
 
 	public function sendSelfData() {
