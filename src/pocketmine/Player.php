@@ -3976,4 +3976,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setElytraActivated($value) {
 		$this->elytraIsActivated = $value;
 	}
+
+	public function isElytraActivated() {
+		return $this->elytraIsActivated;
+	}
 }
