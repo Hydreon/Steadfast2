@@ -2828,9 +2828,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				// trying to find command or her alias
 				if (!isset(self::$availableCommands[$commandName])) {
 					foreach(self::$availableCommands as $name => $data) {
-						if (in_array($commandName, $data['versions'][0]['aliases'])) {
-							$commandName = $name;
-							break;
+						if (isset($data[0]['aliases'])) {
+							if (in_array($commandName, $data['versions'][0]['aliases'])) {
+								$commandName = $name;
+								break;
+							}
 						}
 					}
 				}
