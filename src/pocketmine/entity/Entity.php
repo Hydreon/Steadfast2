@@ -1195,10 +1195,10 @@ abstract class Entity extends Location implements Metadatable{
 	
 	public function isCollideWithTransparent() {
 		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
-		if(!($block instanceof \pocketmine\block\Ladder) && !($block instanceof \pocketmine\block\Fire)) {
+		if(!($block instanceof \pocketmine\block\Ladder) && !($block instanceof \pocketmine\block\Fire) && !($block instanceof \pocketmine\block\Vine)) {
 			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
 		}
-		if($block instanceof \pocketmine\block\Ladder || $block instanceof \pocketmine\block\Fire) {			
+		if($block instanceof \pocketmine\block\Ladder || $block instanceof \pocketmine\block\Fire || $block instanceof \pocketmine\block\Vine) {		
 			return $block;
 		}
 		return false;
