@@ -539,18 +539,21 @@ class Block extends Position implements Metadatable{
 			self::$list[self::MOB_HEAD_BLOCK] = MobHead::class;
 			self::$list[self::FLOWER_POT_BLOCK] = FlowerPot::class;
             
-            // update 1.0
-            self::$list[self::CHORUS_FLOWER] = ChorusFlower::class;
-            self::$list[self::CHORUS_PLANT] = ChorusPlant::class;
-            self::$list[self::ENDER_CHEST] = EnderChest::class;
-            self::$list[self::END_GATEWAY] = EndGateway::class;
-            self::$list[self::END_PORTAL] = EndPortal::class;
-            self::$list[self::END_BRICKS] = EndBricks::class;
-            self::$list[self::END_ROD] = EndRod::class;
-            self::$list[self::DRAGON_EGG] = DragonEgg::class;
-            self::$list[self::PURPUR_BLOCK] = PurpurBlock::class;
-            self::$list[self::STAINED_GLASS] = StainedGlass::class;
-            self::$list[self::STAINED_GLASS_PANE] = StainedGlassPane::class;
+                        // update 1.0
+                        self::$list[self::CHORUS_FLOWER] = ChorusFlower::class;
+                        self::$list[self::CHORUS_PLANT] = ChorusPlant::class;
+                        self::$list[self::ENDER_CHEST] = EnderChest::class;
+                        self::$list[self::END_GATEWAY] = EndGateway::class;
+                        self::$list[self::END_PORTAL] = EndPortal::class;
+                        self::$list[self::END_BRICKS] = EndBricks::class;
+                        self::$list[self::END_ROD] = EndRod::class;
+                        self::$list[self::DRAGON_EGG] = DragonEgg::class;
+                        self::$list[self::PURPUR_BLOCK] = PurpurBlock::class;
+                        self::$list[self::STAINED_GLASS] = StainedGlass::class;
+                        self::$list[self::STAINED_GLASS_PANE] = StainedGlassPane::class;
+            
+                        self::$list[self::REDSTONE_LAMP] = RedstoneLamp::class;
+                        self::$list[self::REDSTONE_LAMP_ACTIVE] = RedstoneLampActive::class;
             
 			foreach(self::$list as $id => $class){
 				if($class !== null){

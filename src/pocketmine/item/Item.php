@@ -1330,6 +1330,9 @@ class Item{
         self::addCreativeItem(Item::get(Item::END_BRICKS, 0));
         self::addCreativeItem(Item::get(Item::END_ROD, 0));
         self::addCreativeItem(Item::get(Item::PURPUR_BLOCK, 0));
+        
+            self::addCreativeItem(Item::get(Item::REDSTONE_LAMP, 0));
+            self::addCreativeItem(Item::get(Item::REDSTONE_LAMP_ACTIVE, 0));
 	}
 	
 	private static function initFood(){
