@@ -41,7 +41,10 @@ class PlayerInventory extends BaseInventory{
 	protected $hotbar;
 
 	public function __construct(Human $player){
-		$this->hotbar = array_fill(0, $this->getHotbarSize(), -1);
+		for ($i = 0; $i < $this->getHotbarSize(); $i++) {
+			$this->hotbar[$i] = $i;
+		}
+//		$this->hotbar = array_fill(0, $this->getHotbarSize(), -1);
 		parent::__construct($player, InventoryType::get(InventoryType::PLAYER));
 	}
 
