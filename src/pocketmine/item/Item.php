@@ -495,6 +495,7 @@ class Item{
 	const DIAMOND_HORSE_ARMOR = 419;
 	const LEAD = 420;
 	const NAME_TAG = 421;
+	const PRISMARINE_CRYSTAL = 422;
 	const RAW_MUTTON = 423;
 	const COOKED_MUTTON = 424;
 	const END_CRYSTAL = 426;
@@ -833,6 +834,7 @@ class Item{
 		419 => "Diamond Horse Armor",
 		420 => "Lead",
 		421 => "Name Tag",
+		self::PRISMARINE_CRYSTAL => "Prismarine Crystal",
 		423 => "Raw Mutton",
 		424 => "Cooked Mutton",
 		427 => "Spruce Door",
@@ -955,6 +957,7 @@ class Item{
 			self::$list[self::BLAZE_POWDER] = BlazePowder::class;
 			self::$list[self::FLOWER_POT] = FlowerPot::class;
 			self::$list[self::ELYTRA] = Elytra::class;
+			self::$list[self::PRISMARINE_CRYSTAL] = PrismarineCrystal::class;
             
             // update for 1.0
 			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;
@@ -1331,8 +1334,9 @@ class Item{
         self::addCreativeItem(Item::get(Item::END_ROD, 0));
         self::addCreativeItem(Item::get(Item::PURPUR_BLOCK, 0));
         
-            self::addCreativeItem(Item::get(Item::REDSTONE_LAMP, 0));
-            self::addCreativeItem(Item::get(Item::REDSTONE_LAMP_ACTIVE, 0));
+		self::addCreativeItem(Item::get(Item::REDSTONE_LAMP, 0));
+		self::addCreativeItem(Item::get(Item::REDSTONE_LAMP_ACTIVE, 0));
+		self::addCreativeItem(Item::get(Item::PRISMARINE_CRYSTAL, 0));
 	}
 	
 	private static function initFood(){
