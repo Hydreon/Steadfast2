@@ -45,7 +45,7 @@ class ProxyServer extends Worker {
 		socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, 1024 * 1024 * 64);
  		socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, 1024 * 1024 * 64);
 		socket_set_option($this->socket, SOL_SOCKET, SO_LINGER, ["l_onoff" => 1, "l_linger" => 0]);
-		socket_listen($this->socket);
+		socket_listen($this->socket, 20);
 		$this->logger->info("ProxyServer is running on $this->interface:$this->port");
 		socket_set_nonblock($this->socket);
 		$this->remoteProxyServerManager = new RemoteProxyServerManager($this);
