@@ -155,7 +155,7 @@ use pocketmine\network\proxy\DisconnectPacket as ProxyDisconnectPacket;
 use pocketmine\network\ProxyInterface;
 use pocketmine\network\proxy\RedirectPacket;
 use pocketmine\network\proxy\ProxyPacket;
-
+use pocketmine\network\protocol\ServerToClientHandshakePacket;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Elytra;
 
@@ -305,6 +305,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	private $expLevel = 0;
 
 	private $elytraIsActivated = false;
+	
+	private $encryptEnabled = false;
+	private $sendPacketCounter = 0;
+	private $finalSecretKey = "";
+	private $encryptChiper;
+	private $decryptChiper;
 	
 	public function getLeaveMessage(){
 		return "";
@@ -1788,7 +1794,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->protocol = $packet->protocol1;
 				$this->setSkin($packet->skin, $packet->skinName);
 					
-				$this->processLogin();
+				$this->processLogin($packet->identityPublicKey);
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
 			case ProtocolInfo::MOVE_PLAYER_PACKET:
@@ -2865,6 +2871,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$ev = new PlayerCommandPostprocessEvent($this, $commandLine);
 				$this->server->getPluginManager()->callEvent($ev);
 				break;
+			case ProtocolInfo::CLIENT_TO_SERVER_HANDSHAKE_PACKET:
+				break;
 			default:
 				break;
 		}
@@ -3461,7 +3469,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->eyeHeight;
 	}
 	
-	public function processLogin() {
+	public function processLogin($identityPublicKey = '') {
 		$valid = true;
 		$len = strlen($this->username);
 		if ($len > 16 or $len < 3) {
@@ -3559,6 +3567,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		
 		$pk = new ResourcePacksInfoPacket();
 		$this->dataPacket($pk);		
+		
+		if (!empty($identityPublicKey) && $this->server->isUseEncrypt()) {		
+			$token =  $this->server->getServerToken();
+			$pk = new ServerToClientHandshakePacket();
+			$pk->publicKey = $this->server->getServerPublicKey();
+			$pk->serverToken = $token;
+			$this->dataPacket($pk);
+			$this->enableEncrypt($token,  $this->server->generateSecret($identityPublicKey));
+		}
 
 		$this->achievements = [];
 
@@ -3982,4 +3999,32 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function isElytraActivated() {
 		return $this->elytraIsActivated;
 	}
+	
+	public function isEncryptEnable() {
+		return $this->encryptEnabled;
+	}
+
+	public function getEncrypt($sStr) {
+		return mcrypt_generic($this->encryptChiper, $sStr . $this->getCheckSum($sStr));
+	}
+
+	public function getDecrypt($sStr) {
+		return mdecrypt_generic($this->decryptChiper, $sStr);
+	}
+
+	private function enableEncrypt($token, $secret) {
+		$this->finalSecretKey = hex2bin(hash("sha256", $token . $secret));
+		$finalIV = substr($this->finalSecretKey, 0, 16);
+		$this->encryptEnabled = true;
+		$this->encryptChiper = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CFB, '');
+		mcrypt_generic_init($this->encryptChiper, $this->finalSecretKey, $finalIV);
+		$this->decryptChiper = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CFB, '');
+		mcrypt_generic_init($this->decryptChiper, $this->finalSecretKey, $finalIV);
+	}
+
+	private function getCheckSum($packetPlaintext) {
+		$pkNumber = pack("P", $this->sendPacketCounter++);
+		return hex2bin(substr(hash("sha256", $pkNumber . $packetPlaintext . $this->finalSecretKey), 0, 16));
+	}
+
 }

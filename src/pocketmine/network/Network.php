@@ -89,6 +89,7 @@ use pocketmine\network\protocol\AvailableCommandsPacket;
 use pocketmine\network\protocol\CommandStepPacket;
 use pocketmine\network\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
+use pocketmine\network\protocol\ClientToServerHandshakePacket;
 
 class Network {
 
@@ -387,6 +388,7 @@ class Network {
 		$this->registerPacket(ProtocolInfo::AVAILABLE_COMMANDS_PACKET, AvailableCommandsPacket::class);
 		$this->registerPacket(ProtocolInfo::COMMAND_STEP_PACKET, CommandStepPacket::class);
 		$this->registerPacket(ProtocolInfo::TRANSFER_PACKET, TransferPacket::class);
+		$this->registerPacket(ProtocolInfo::CLIENT_TO_SERVER_HANDSHAKE_PACKET, ClientToServerHandshakePacket::class);
 		
 		
 		

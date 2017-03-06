@@ -2671,5 +2671,27 @@ class Server{
 	public function getJsonCommands() {
 		return $this->jsonCommands;
 	}
+	
+	public function isUseEncrypt() {
+		return true;
+	}
+	
+	public function getServerPublicKey() {
+		return 'MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEVDUmq9/Ec5Sj8mRbDUhlGp86TUbYdAvjIpFRB/BQJQxzDKQLN+HcheCCtLsYG4hHvW0Poni65escBUdMmk4r7sKMlwvknBlJ8J6Wl5onelFIMOMqW53h7GirmfSS3TAK';
+	}
+	
+	public function getServerPrivateKey() {
+		return 'MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDAamStb0Xep3y3sWw2uSSAdUPkgQ9Rvhlnx8XEVOYy2teh69T0on77ja02m03n8t8WhZANiAARUNSar38RzlKPyZFsNSGUanzpNRth0C+MikVEH8FAlDHMMpAs34dyF4IK0uxgbiEe9bQ+ieLrl6xwFR0yaTivuwoyXC+ScGUnwnpaXmid6UUgw4ypbneHsaKuZ9JLdMAo=';
+	}
+	public function getServerToken() {
+		$token = 'hksdYI3has';		
+		return $token;
+	}
+	public function generateSecret($clientPublicKey) {
+		$serverPrivateKey = $this->getServerPrivateKey();
+		$path = $this->dataPath . "keyGen";
+		exec($path . "/createSharedSecret.sh '{$clientPublicKey}' '{$serverPrivateKey}' '{$path}'");
+		return file_get_contents($path . "/result.dat");
+	}
 
 }
