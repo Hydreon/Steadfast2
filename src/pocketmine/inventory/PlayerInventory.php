@@ -403,13 +403,16 @@ class PlayerInventory extends BaseInventory{
 		for($i = 0; $i < $this->getSize(); ++$i){ //Do not send armor by error here
 			$pk->slots[$i] = $this->getItem($i);
 		}
+		for ($i = $this->getSize(); $i < $this->getSize() + 9; ++$i) {
+			$pk->slots[$i] = clone $this->air;
+		}
 
 		foreach($target as $player){
 			$pk->hotbar = [];
 			if($player === $this->getHolder()){
 				for($i = 0; $i < $this->getHotbarSize(); ++$i){
 					$index = $this->getHotbarSlotIndex($i);
-					$pk->hotbar[] = $index <= -1 ? -1 : $index + 9;
+					$pk->hotbar[] = $index <= -1 ? -1 : $index + 9;					
 				}
 			}
 			if(($id = $player->getWindowId($this)) === -1 or $player->spawned !== true){
