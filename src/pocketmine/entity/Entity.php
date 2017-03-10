@@ -623,7 +623,7 @@ abstract class Entity extends Location implements Metadatable{
 	public function sendPotionEffects(Player $player){
 		foreach($this->effects as $effect){
 			$pk = new MobEffectPacket();
-			$pk->eid = 0;
+			$pk->eid = $player->getId();
 			$pk->effectId = $effect->getId();
 			$pk->amplifier = $effect->getAmplifier();
 			$pk->particles = $effect->isVisible();

@@ -1013,7 +1013,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->level->sleepTicks = 0;
 
 			$pk = new AnimatePacket();
-			$pk->eid = 0;
+			$pk->eid = $this->id;
 			$pk->action = 3; //Wake up
 			$this->dataPacket($pk);
 		}
@@ -1265,7 +1265,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				Server::broadcastPacket($entity->getViewers(), $pk);
 
 				$pk = new TakeItemEntityPacket();
-				$pk->eid = 0;
+				$pk->eid = $this->id;
 				$pk->target = $entity->getId();
 				$this->dataPacket($pk);
 
@@ -1291,7 +1291,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						Server::broadcastPacket($entity->getViewers(), $pk);
 
 						$pk = new TakeItemEntityPacket();
-						$pk->eid = 0;
+						$pk->eid = $this->id;
 						$pk->target = $entity->getId();
 						$this->dataPacket($pk);
 
@@ -1491,7 +1491,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if($this->chunk !== null){
 				$this->level->addEntityMotion($this->getViewers(), $this->getId(), $this->motionX, $this->motionY, $this->motionZ);
 				$pk = new SetEntityMotionPacket();
-				$pk->entities[] = [0, $mot->x, $mot->y, $mot->z];
+				$pk->entities[] = [$this->id, $mot->x, $mot->y, $mot->z];
 				$this->dataPacket($pk);
 			}
 
@@ -1613,6 +1613,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}
 					}else{
 						$pk = new UpdateAttributesPacket();
+						$pk->entityId = $this->id;
 						$pk->minValue = 0;
 						$pk->maxValue = $this->getMaxHealth();
 						$pk->value = $this->getHealth();
@@ -2041,7 +2042,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 
 //				$this->craftingType = self::CRAFTING_DEFAULT;
-				$packet->eid = $this->id;
 				$pos = new Vector3($packet->x, $packet->y, $packet->z);
 				
 				switch($packet->action){
@@ -2454,7 +2454,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 
 				$pk = new AnimatePacket();
-				$pk->eid = $this->getId();
+				$pk->eid = $this->id;
 				$pk->action = $ev->getAnimationType();
 				Server::broadcastPacket($this->getViewers(), $pk);
 				//Timings::$timerAnimatePacket->stopTiming();
@@ -3186,6 +3186,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		parent::setHealth($amount);
 		if($this->spawned === true){
 			$pk = new UpdateAttributesPacket();
+			$pk->entityId = $this->id;
 			$this->foodTick = 0;
 			$pk->minValue = 0;
 			$pk->maxValue = $this->getMaxHealth();
@@ -3216,6 +3217,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setFood($amount){
 		if($this->spawned === true){			
 			$pk = new UpdateAttributesPacket();
+			$pk->entityId = $this->id;
 			$pk->minValue = 0;
 			$pk->maxValue = 20;
 			$pk->value = $amount;
@@ -3269,7 +3271,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}elseif($this->getLastDamageCause() === $source and $this->spawned){
 			$pk = new EntityEventPacket();
-			$pk->eid = 0;
+			$pk->eid = $this->id;
 			$pk->event = EntityEventPacket::HURT_ANIMATION;
 			$this->dataPacket($pk);
 		}
@@ -3292,7 +3294,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($targets !== null) {
 			Server::broadcastPacket($targets, $pk);
 		} else {
-			$pk->eid = 0;
 			$this->dataPacket($pk);
 		}
 	}
@@ -3602,7 +3603,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->spawnZ = $compassPosition['z'];
 		$pk->generator = 1; //0 old, 1 infinite, 2 flat
 		$pk->gamemode = $this->gamemode & 0x01;
-		$pk->eid = 0;
+		$pk->eid = $this->id;
 		$this->dataPacket($pk);
 
 		$pk = new SetTimePacket();
@@ -3724,7 +3725,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	public function sendSelfData() {
 		$pk = new SetEntityDataPacket();
-		$pk->eid = 0;
+		$pk->eid = $this->id;
 		$pk->metadata = $this->dataProperties;
 		$this->dataPacket($pk);
 	}
@@ -3846,6 +3847,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected function updateAttribute($name, $value, $minValue, $maxValue, $defaultValue) {
 		$pk = new UpdateAttributesPacket();
+		$pk->entityId = $this->id;
 		$pk->name = $name;
 		$pk->value = $value;
 		$pk->minValue = $minValue;
