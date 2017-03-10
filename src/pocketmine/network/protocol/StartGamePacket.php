@@ -45,7 +45,7 @@ class StartGamePacket extends DataPacket{
 
 	public function encode(){
 		$this->reset();
-		$this->putVarInt(0); //EntityUniqueID
+		$this->putVarInt($this->eid); //EntityUniqueID
 		$this->putVarInt($this->eid); //EntityUniqueID
 		
 		$this->putLFloat($this->x); // default position (4)
