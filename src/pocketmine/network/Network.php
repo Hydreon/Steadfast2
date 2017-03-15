@@ -66,6 +66,7 @@ use pocketmine\network\protocol\SetDifficultyPacket;
 use pocketmine\network\protocol\SetEntityDataPacket;
 use pocketmine\network\protocol\SetEntityMotionPacket;
 use pocketmine\network\protocol\SetSpawnPositionPacket;
+use pocketmine\network\protocol\SetTitlePacket;
 use pocketmine\network\protocol\SetTimePacket;
 use pocketmine\network\protocol\StartGamePacket;
 use pocketmine\network\protocol\TakeItemEntityPacket;
@@ -392,6 +393,7 @@ class Network {
 		
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACKS_INFO_PACKET, ResourcePackDataInfoPacket::class);
+		$this->registerPacket(ProtocolInfo::SET_TITLE_PACKET, SetTitlePacket::class);
 		
 		
 	}

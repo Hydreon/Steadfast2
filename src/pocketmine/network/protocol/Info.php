@@ -125,6 +125,6 @@ interface Info{
     const TRANSFER_PACKET = 0x55;
 //  const PLAY_SOUND_PACKET = 0x56;
 //  const STOP_SOUND_PACKET = 0x57;
-//  const SET_TILE_PACKET = 0x58;
+    const SET_TITLE_PACKET = 0x58;
 	
 }

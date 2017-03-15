@@ -34,6 +34,7 @@ class TextPacket extends DataPacket{
 	const TYPE_TIP = 4;
 	const TYPE_SYSTEM = 5;
 	const TYPE_WHISPER = 6;
+	const TYPE_ANNOUNCEMENT = 7;
 
 	public $type;
 	public $source;
@@ -43,21 +44,23 @@ class TextPacket extends DataPacket{
 	public function decode(){
 		$this->type = $this->getByte();
 		switch($this->type){
-			case self::TYPE_POPUP:
 			case self::TYPE_CHAT:
+            case self::TYPE_WHISPER:
+			case self::TYPE_ANNOUNCEMENT:
 				$this->source = $this->getString();
 			case self::TYPE_RAW:
 			case self::TYPE_TIP:
 			case self::TYPE_SYSTEM:
 				$this->message = $this->getString();
 				break;
-
-//			case self::TYPE_TRANSLATION:
-//				$this->message = $this->getString();
-//				$count = $this->getByte();
-//				for($i = 0; $i < $count; ++$i){
-//					$this->parameters[] = $this->getString();
-//				}
+			case self::TYPE_TRANSLATION:
+			case self::TYPE_POPUP:
+                $this->message = $this->getString();
+                $paramCount = $this->getVarInt();
+                for ($i = 0; $i < $paramCount; $i++) {
+                    $this->parameters[] = $this->getString();
+                }
+                break;
 		}
 	}
 
@@ -65,9 +68,9 @@ class TextPacket extends DataPacket{
 		$this->reset();
 		$this->putByte($this->type);
 		switch($this->type){
-			case self::TYPE_POPUP:
 			case self::TYPE_CHAT:
             case self::TYPE_WHISPER:
+            case self::TYPE_ANNOUNCEMENT:
 				$this->putString($this->source);
 			case self::TYPE_RAW:
 			case self::TYPE_TIP:
@@ -75,13 +78,13 @@ class TextPacket extends DataPacket{
             case self::TYPE_WHISPER:
 				$this->putString($this->message);
 				break;
-
-//			case self::TYPE_TRANSLATION:
-//				$this->putString($this->message);
-//				$this->putByte(count($this->parameters));
-//				foreach($this->parameters as $p){
-//					$this->putString($p);
-//				}
+			case self::TYPE_POPUP:
+			case self::TYPE_TRANSLATION:
+				$this->putString($this->message);
+				$this->putVarInt(count($this->parameters));
+				foreach($this->parameters as $p){
+					$this->putString($p);
+				}
 		}
 	}
 
