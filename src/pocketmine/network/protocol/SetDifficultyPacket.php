@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class SetDifficultyPacket extends DataPacket{
+class SetDifficultyPacket extends PEPacket{
 	const NETWORK_ID = Info::SET_DIFFICULTY_PACKET;
 	const PACKET_NAME = "SET_DIFFICULTY_PACKET";
 

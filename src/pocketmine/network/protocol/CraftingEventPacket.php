@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class CraftingEventPacket extends DataPacket{
+class CraftingEventPacket extends PEPacket{
 	const NETWORK_ID = Info::CRAFTING_EVENT_PACKET;
 	const PACKET_NAME = "CRAFTING_EVENT_PACKET";
 

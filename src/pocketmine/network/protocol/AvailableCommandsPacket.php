@@ -21,7 +21,7 @@
 
 namespace pocketmine\network\protocol;
 
-class AvailableCommandsPacket extends DataPacket{
+class AvailableCommandsPacket extends PEPacket{
 	const NETWORK_ID = Info::AVAILABLE_COMMANDS_PACKET;
 	const PACKET_NAME = "AVAILABLE_COMMANDS_PACKET";
 	

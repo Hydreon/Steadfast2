@@ -21,7 +21,7 @@
 
 namespace pocketmine\network\protocol;
 
-class CommandStepPacket extends DataPacket {
+class CommandStepPacket extends PEPacket {
 
 	const NETWORK_ID = Info::COMMAND_STEP_PACKET;
 	const PACKET_NAME = "COMMAND_STEP_PACKET";

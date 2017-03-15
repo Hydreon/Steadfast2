@@ -40,21 +40,12 @@ abstract class DataPacket extends BinaryStream{
 	public $isEncoded = false;
 	private $channel = 0;
 	
-	private static $packetsIds = [];
+	protected static $packetsIds = [];
 
 	public function pid(){
 		return $this::NETWORK_ID;
 	}
-
-//	abstract public function encode($playerProtocol);
-//
-//	abstract public function decode($playerProtocol);
-
-	public function reset($playerProtocol = 0){		
-		$this->buffer = chr(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);
-		$this->offset = 0;
-	}
-
+	
 	/**
 	 * @deprecated This adds extra overhead on the network, so its usage is now discouraged. It was a test for the viability of this.
 	 */

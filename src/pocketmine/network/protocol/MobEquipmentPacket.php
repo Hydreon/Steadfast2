@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class MobEquipmentPacket extends DataPacket{
+class MobEquipmentPacket extends PEPacket{
 	const NETWORK_ID = Info::MOB_EQUIPMENT_PACKET;
 	const PACKET_NAME = "MOB_EQUIPMENT_PACKET";
 

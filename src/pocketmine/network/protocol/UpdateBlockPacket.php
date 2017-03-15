@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class UpdateBlockPacket extends DataPacket{
+class UpdateBlockPacket extends PEPacket{
 	const NETWORK_ID = Info::UPDATE_BLOCK_PACKET;
 	const PACKET_NAME = "UPDATE_BLOCK_PACKET";
 

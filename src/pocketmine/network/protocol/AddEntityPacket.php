@@ -28,7 +28,7 @@ use pocketmine\utils\Binary;
 
 #endif
 
-class AddEntityPacket extends DataPacket{
+class AddEntityPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_ENTITY_PACKET;
 	const PACKET_NAME = "ADD_ENTITY_PACKET";
 

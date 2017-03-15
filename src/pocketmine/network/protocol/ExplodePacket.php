@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class ExplodePacket extends DataPacket{
+class ExplodePacket extends PEPacket{
 	const NETWORK_ID = Info::EXPLODE_PACKET;
 	const PACKET_NAME = "EXPLODE_PACKET";
 	

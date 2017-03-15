@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class AddPaintingPacket extends DataPacket{
+class AddPaintingPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_PAINTING_PACKET;
 	const PACKET_NAME = "ADD_PAINTING_PACKET";
 

@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class ContainerClosePacket extends DataPacket{
+class ContainerClosePacket extends PEPacket{
 	const NETWORK_ID = Info::CONTAINER_CLOSE_PACKET;
 	const PACKET_NAME = "CONTAINER_CLOSE_PACKET";
 

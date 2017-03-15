@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class TileEntityDataPacket extends DataPacket{
+class TileEntityDataPacket extends PEPacket{
 	const NETWORK_ID = Info::TILE_ENTITY_DATA_PACKET;
 	const PACKET_NAME = "TILE_ENTITY_DATA_PACKET";
 

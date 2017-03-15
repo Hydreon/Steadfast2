@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class AnimatePacket extends DataPacket{
+class AnimatePacket extends PEPacket{
 	const NETWORK_ID = Info::ANIMATE_PACKET;
 	const PACKET_NAME = "ANIMATE_PACKET";
 

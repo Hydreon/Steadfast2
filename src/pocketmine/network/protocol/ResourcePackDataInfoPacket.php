@@ -2,7 +2,7 @@
 
 namespace pocketmine\network\protocol;
 
-class ResourcePackDataInfoPacket extends DataPacket {
+class ResourcePackDataInfoPacket extends PEPacket {
 
 	const NETWORK_ID = Info::RESOURCE_PACK_DATA_INFO_PACKET;
 	const PACKET_NAME = "RESOURCE_PACK_DATA_INFO_PACKET";

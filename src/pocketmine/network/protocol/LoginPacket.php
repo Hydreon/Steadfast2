@@ -28,7 +28,7 @@ use pocketmine\utils\UUID;
 use pocketmine\utils\Binary;
 use pocketmine\network\protocol\Info;
 
-class LoginPacket extends DataPacket {
+class LoginPacket extends PEPacket {
 
 	const NETWORK_ID = Info::LOGIN_PACKET;
 	const PACKET_NAME = "LOGIN_PACKET";

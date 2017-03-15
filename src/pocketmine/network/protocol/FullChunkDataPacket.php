@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class FullChunkDataPacket extends DataPacket{
+class FullChunkDataPacket extends PEPacket{
 	const NETWORK_ID = Info::FULL_CHUNK_DATA_PACKET;
 	const PACKET_NAME = "FULL_CHUNK_DATA_PACKET";
 	

@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class ContainerSetContentPacket extends DataPacket{
+class ContainerSetContentPacket extends PEPacket{
 	const NETWORK_ID = Info::CONTAINER_SET_CONTENT_PACKET;
 	const PACKET_NAME = "CONTAINER_SET_CONTENT_PACKET";
 

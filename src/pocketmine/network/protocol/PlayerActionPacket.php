@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class PlayerActionPacket extends DataPacket{
+class PlayerActionPacket extends PEPacket{
 	const NETWORK_ID = Info::PLAYER_ACTION_PACKET;
 	const PACKET_NAME = "PLAYER_ACTION_PACKET";
 

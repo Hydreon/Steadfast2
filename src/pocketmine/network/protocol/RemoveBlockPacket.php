@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class RemoveBlockPacket extends DataPacket{
+class RemoveBlockPacket extends PEPacket{
 	const NETWORK_ID = Info::REMOVE_BLOCK_PACKET;
 	const PACKET_NAME = "REMOVE_BLOCK_PACKET";
 

@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class PlayStatusPacket extends DataPacket{
+class PlayStatusPacket extends PEPacket{
 	const NETWORK_ID = Info::PLAY_STATUS_PACKET;
 	const PACKET_NAME = "PLAY_STATUS_PACKET";
 	

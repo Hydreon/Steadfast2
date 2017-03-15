@@ -25,7 +25,7 @@ namespace pocketmine\network\protocol;
 use pocketmine\utils\TextFormat;
 
 
-class PlayerListPacket extends DataPacket{
+class PlayerListPacket extends PEPacket{
 	const NETWORK_ID = Info::PLAYER_LIST_PACKET;
 	const PACKET_NAME = "PLAYER_LIST_PACKET";
 

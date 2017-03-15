@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class SetEntityMotionPacket extends DataPacket{
+class SetEntityMotionPacket extends PEPacket{
 	const NETWORK_ID = Info::SET_ENTITY_MOTION_PACKET;
 	const PACKET_NAME = "SET_ENTITY_MOTION_PACKET";
 

@@ -28,7 +28,7 @@ use pocketmine\utils\Binary;
 
 #endif
 
-class AddPlayerPacket extends DataPacket{
+class AddPlayerPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_PLAYER_PACKET;
 	const PACKET_NAME = "ADD_PLAYER_PACKET";
 

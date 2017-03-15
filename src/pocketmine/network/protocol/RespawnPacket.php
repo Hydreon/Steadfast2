@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class RespawnPacket extends DataPacket{
+class RespawnPacket extends PEPacket{
 	const NETWORK_ID = Info::RESPAWN_PACKET;
 	const PACKET_NAME = "RESPAWN_PACKET";
 

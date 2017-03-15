@@ -24,7 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class UseItemPacket extends DataPacket{
+class UseItemPacket extends PEPacket{
 	const NETWORK_ID = Info::USE_ITEM_PACKET;
 	const PACKET_NAME = "USE_ITEM_PACKET";
 
