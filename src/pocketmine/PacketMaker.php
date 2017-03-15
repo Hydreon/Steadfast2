@@ -115,8 +115,8 @@ class PacketMaker extends Worker {
 			}
 		} elseif($data['isBatch']) {
 			$packetsStr = [];
-			foreach($data['packets'] as $packetData){		
-				foreach ($packetData as $protocol => $p) {
+			foreach($data['packets'] as $protocol => $packetData){		
+				foreach ($packetData as $p) {
 					if (!isset($packetsStr[$protocol])) {
 						$packetsStr[$protocol] = "";
 					}

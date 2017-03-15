@@ -103,7 +103,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 				$type = ord($buffer{0});
 				$buffer = substr($buffer, 1);
 				if ($type == self::STANDART_PACKET_ID) {
-					$pk = $this->getPacket($buffer);
+					$pk = $this->getPacket($buffer, $player->getPlayerProtocol());
 					if ($pk === false) {
 						return;
 					}
@@ -223,7 +223,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 		}
 	}
 
-	private function getPacket($buffer) {
+	private function getPacket($buffer, $playerProtocol) {
 		if (ord($buffer{0}) == 0xfe) {
 			$buffer = substr($buffer, 1);
 			if (empty($buffer)) {
@@ -234,7 +234,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 			return false;
 		}
 
-		if (($data = $this->server->getNetwork()->getPacket($pid)) === null) {
+		if (($data = $this->server->getNetwork()->getPacket($pid, $playerProtocol)) === null) {
 			return null;
 		}
 
