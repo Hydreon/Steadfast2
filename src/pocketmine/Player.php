@@ -164,6 +164,19 @@ use pocketmine\item\Elytra;
  */
 class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
+    const OS_ANDROID = 1;
+    const OS_IOS = 2;
+    const OS_OSX = 3;
+    const OS_FIREOS = 4;
+    const OS_GEARVR = 5;
+    const OS_HOLOLENS = 6;
+    const OS_WIN10 = 7;
+    const OS_WIN32 = 8;
+    const OS_DEDICATED = 9;
+    
+    const INVENTORY_CLASSIC = 0;
+    const INVENTORY_POCKET = 1;
+    
 	const SURVIVAL = 0;
 	const CREATIVE = 1;
 	const ADVENTURE = 2;
@@ -305,6 +318,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	private $expLevel = 0;
 
 	private $elytraIsActivated = false;
+    
+    /** @IMPORTANT don't change the scope */
+    private $inventoryType = self::INVENTORY_CLASSIC;
+    
+    /** @IMPORTANT don't change the scope */
+    private $deviceType = self::OS_DEDICATED;
 	
 	public function getLeaveMessage(){
 		return "";
@@ -1788,6 +1807,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->clientSecret = $packet->clientSecret;
 				$this->protocol = $packet->protocol1;
 				$this->setSkin($packet->skin, $packet->skinName);
+                if ($packet->osType > 0) {
+                    $this->deviceType = $packet->osType;
+                }
+                if ($packet->inventoryType >= 0) {
+                    $this->inventoryType = $packet->inventoryType;
+                }
 					
 				$this->processLogin();
 				//Timings::$timerLoginPacket->stopTiming();
@@ -3985,4 +4010,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function isElytraActivated() {
 		return $this->elytraIsActivated;
 	}
+    
+    public function getDeviceOS() {
+        return $this->deviceType;
+    }
+    
+    public function getInventoryType() {
+        return $this->inventoryType;
+    }
 }
