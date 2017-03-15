@@ -259,7 +259,7 @@ class Network {
 					}
 
 					$pk->setBuffer($buf, 1);
-					$pk->decode();
+					$pk->decode($p->getPlayerProtocol());
 					$p->handleDataPacket($pk);
 					if ($pk->getOffset() <= 0) {
 						return;

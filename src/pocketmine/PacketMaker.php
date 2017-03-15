@@ -88,13 +88,13 @@ class PacketMaker extends Worker {
 				foreach ($moveData['data'] as $singleMoveData) {
 					$pk = new MoveEntityPacket();
 					$pk->entities = [$singleMoveData];
-					$pk->encode();
+					$pk->encode($moveData['playerProtocol']);
 					$moveStr .= Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;					
 				}
 				$buffer = zlib_encode($moveStr, ZLIB_ENCODING_DEFLATE, 7);
 				$pkBatch = new BatchPacket();
 				$pkBatch->payload = $buffer;
-				$pkBatch->encode();
+				$pkBatch->encode($moveData['playerProtocol']);
 				$pkBatch->isEncoded = true;
 				$this->externalQueue[] = $this->makeBuffer($identifier, $pkBatch, false, false);
 			}	
@@ -103,36 +103,41 @@ class PacketMaker extends Worker {
 				foreach ($motionData['data'] as $singleMotionData) {
 					$pk = new SetEntityMotionPacket();
 					$pk->entities = [$singleMotionData];
-					$pk->encode();
+					$pk->encode($motionData['playerProtocol']);
 					$motionStr .= Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;		
 				}
 				$buffer = zlib_encode($motionStr, ZLIB_ENCODING_DEFLATE, 7);
 				$pkBatch = new BatchPacket();
 				$pkBatch->payload = $buffer;
-				$pkBatch->encode();
+				$pkBatch->encode($motionData['playerProtocol']);
 				$pkBatch->isEncoded = true;
 				$this->externalQueue[] = $this->makeBuffer($identifier, $pkBatch, false, false);
 			}
 		} elseif($data['isBatch']) {
-			$str = "";
-			foreach($data['packets'] as $p){
-				if($p instanceof DataPacket){
-					if(!$p->isEncoded){					
-						$p->encode();
+			$packetsStr = [];
+			foreach($data['packets'] as $packetData){		
+				foreach ($packetData as $protocol => $p) {
+					if (!isset($packetsStr[$protocol])) {
+						$packetsStr[$protocol] = "";
 					}
-					$str .= Binary::writeVarInt(strlen($p->buffer)) . $p->buffer;					
-				}else{					
-					$str .= Binary::writeVarInt(strlen($p)) . $p;
+					$packetsStr[$protocol] .= Binary::writeVarInt(strlen($p)) . $p;
 				}
 			}
-			$buffer = zlib_encode($str, ZLIB_ENCODING_DEFLATE, $data['networkCompressionLevel']);
-			$pk = new BatchPacket();
-			$pk->payload = $buffer;
-			$pk->encode();
-			$pk->isEncoded = true;
+			
+			$packs = [];
+			foreach ($packetsStr as $protocol => $str) {
+				$buffer = zlib_encode($str, ZLIB_ENCODING_DEFLATE, $data['networkCompressionLevel']);
+				$pk = new BatchPacket();
+				$pk->payload = $buffer;
+				$pk->encode($protocol);
+				$pk->isEncoded = true;
+				$packs[$protocol] = $pk;
+			}
 			
 			foreach($data['targets'] as $target){
-				$this->externalQueue[] = $this->makeBuffer($target[0], $pk, false, false);
+				if (isset($packs[$target[1]])) {
+					$this->externalQueue[] = $this->makeBuffer($target[0], $packs[$target[1]], false, false);
+				}
 			}
 		}
 		
@@ -140,10 +145,6 @@ class PacketMaker extends Worker {
 
 
 	protected function makeBuffer($identifier, $fullPacket, $needACK, $identifierACK) {		
-		if (!$fullPacket->isEncoded) {
-			$fullPacket->encode();
-		}
-
 		$data = array(
 			'identifier' => $identifier,
 			'buffer' => $fullPacket->buffer

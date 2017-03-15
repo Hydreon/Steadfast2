@@ -13,6 +13,8 @@ class ChunkMaker extends Worker {
 	
 	protected $externalQueue;
 	protected $internalQueue;
+	
+	const SUPPORTED_PROTOCOL = [100, 105];
 
 	public function __construct(\ClassLoader $loader = null) {
 		$this->externalQueue = new \Threaded;
@@ -87,36 +89,33 @@ class ChunkMaker extends Worker {
 		$offset += 16384;
 		$heightMapArray = substr($data['chunk'], $offset, 256);
 		$offset += 256;
-		$biomeColorArray = array_values(unpack("N*", substr($data['chunk'], $offset, 1024)));
-
-		$languages = ['English', 'German', 'Spanish'];
-		
+		$biomeColorArray = array_values(unpack("N*", substr($data['chunk'], $offset, 1024)));	
 		
 		$countBlocksInChunk = 8;
-		$chunkDataWithoutSigns = chr($countBlocksInChunk);		
+		$chunkData = chr($countBlocksInChunk);		
 		
 		for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
-			$chunkDataWithoutSigns .= chr($blockIndex);
+			$chunkData .= chr($blockIndex);
 			for ($i = 0; $i < 256; $i++) {
-				$chunkDataWithoutSigns .= substr($blockIdArray, $blockIndex * 16 + $i * 128, 16);
+				$chunkData .= substr($blockIdArray, $blockIndex * 16 + $i * 128, 16);
 			}
 			
 			for ($i = 0; $i < 256; $i++) {
-				$chunkDataWithoutSigns .= substr($blockDataArray, $blockIndex * 8 + $i * 64, 8);
+				$chunkData .= substr($blockDataArray, $blockIndex * 8 + $i * 64, 8);
 			}
 			
 			for ($i = 0; $i < 256; $i++) {
-				$chunkDataWithoutSigns .= substr($skyLightArray, $blockIndex * 8 + $i * 64, 8);
+				$chunkData .= substr($skyLightArray, $blockIndex * 8 + $i * 64, 8);
 			}
 			
 			for ($i = 0; $i < 256; $i++) {
-				$chunkDataWithoutSigns .= substr($blockLightArray, $blockIndex * 8 + $i * 64, 8);
+				$chunkData .= substr($blockLightArray, $blockIndex * 8 + $i * 64, 8);
 			}
 			
 		}
 		
 		
-		$chunkDataWithoutSigns .= $heightMapArray .
+		$chunkData .= $heightMapArray .
 				pack("n*", ...$biomeColorArray) .
 				Binary::writeLInt(0) .
 				$data['tiles'];		
@@ -125,21 +124,17 @@ class ChunkMaker extends Worker {
 		$result = array();
 		$result['chunkX'] = $data['chunkX'];
 		$result['chunkZ'] = $data['chunkZ'];
-		foreach ($languages as $lang) {
-			if(!isset($data['signTiles'][$lang])) {
-				continue;
-			}
-			$chunkData = $chunkDataWithoutSigns . $data['signTiles'][$lang];
+		foreach (self::SUPPORTED_PROTOCOL as $protocol) {
 			$pk = new FullChunkDataPacket();
 			$pk->chunkX = $data['chunkX'];
 			$pk->chunkZ = $data['chunkZ'];
 			$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
 			$pk->data = $chunkData;
-			$pk->encode();
+			$pk->encode($protocol);
 			if(!empty($pk->buffer)) {				
 				$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
 				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
-				$result[$lang] = $ordered;
+				$result[$protocol] = $ordered;
 			}
 		}
 		$this->externalQueue[] = serialize($result);

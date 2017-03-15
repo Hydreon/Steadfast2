@@ -2574,7 +2574,8 @@ class Level implements ChunkManager, Metadatable{
 		foreach ($viewers as $p) {
 			if(!isset($this->motionToSend[$p->getIdentifier()])){
 				$this->motionToSend[$p->getIdentifier()] = array(
-					'data' => array()
+					'data' => array(),
+					'playerProtocol' => $p->getPlayerProtocol()
 				);
 			}
 			$this->motionToSend[$p->getIdentifier()]['data'][] = $motion;
@@ -2586,7 +2587,8 @@ class Level implements ChunkManager, Metadatable{
 		foreach ($viewers as $p) {
 			if(!isset($this->moveToSend[$p->getIdentifier()])){
 				$this->moveToSend[$p->getIdentifier()] = array(
-					'data' => array()
+					'data' => array(),
+					'playerProtocol' => $p->getPlayerProtocol()
 				);
 			}
 			$this->moveToSend[$p->getIdentifier()]['data'][] = $move;

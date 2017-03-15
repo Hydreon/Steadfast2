@@ -326,8 +326,8 @@ class PlayerInventory extends BaseInventory{
 		$pk = new MobArmorEquipmentPacket();
 		$pk->eid = $this->getHolder()->getId();
 		$pk->slots = $armor;
-		$pk->encode();
-		$pk->isEncoded = true;
+//		$pk->encode();
+//		$pk->isEncoded = true;
 
 		foreach($target as $player){
 			if($player === $this->getHolder()){
@@ -373,8 +373,8 @@ class PlayerInventory extends BaseInventory{
 		$pk = new MobArmorEquipmentPacket();
 		$pk->eid = $this->getHolder()->getId();
 		$pk->slots = $armor;
-		$pk->encode();
-		$pk->isEncoded = true;
+//		$pk->encode();
+//		$pk->isEncoded = true;
 
 		foreach($target as $player){
 			if($player === $this->getHolder()){
