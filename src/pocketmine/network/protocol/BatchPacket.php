@@ -26,15 +26,16 @@ namespace pocketmine\network\protocol;
 
 class BatchPacket extends DataPacket{
 	const NETWORK_ID = Info::BATCH_PACKET;
+	const PACKET_NAME = "BATCH_PACKET";
 
 	public $payload;
 
-	public function decode(){
+	public function decode($playerProtocol){
 		$this->payload = $this->getString();
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putString($this->payload);
 	}
 

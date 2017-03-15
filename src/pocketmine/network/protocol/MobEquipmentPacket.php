@@ -26,21 +26,22 @@ namespace pocketmine\network\protocol;
 
 class MobEquipmentPacket extends DataPacket{
 	const NETWORK_ID = Info::MOB_EQUIPMENT_PACKET;
+	const PACKET_NAME = "MOB_EQUIPMENT_PACKET";
 
 	public $eid;
 	public $item;
 	public $slot;
 	public $selectedSlot;
 
-	public function decode(){		
+	public function decode($playerProtocol){		
 		$this->eid = $this->getVarInt();
 		$this->item = $this->getSlot();
 		$this->slot = $this->getByte();
 		$this->selectedSlot = $this->getByte();
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putVarInt($this->eid);
 		$this->putSlot($this->item);
 		$this->putByte($this->slot);

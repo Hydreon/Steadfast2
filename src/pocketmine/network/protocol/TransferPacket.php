@@ -26,17 +26,18 @@ namespace pocketmine\network\protocol;
 class TransferPacket extends DataPacket
 {
     const NETWORK_ID = Info::TRANSFER_PACKET;
+	const PACKET_NAME = "TRANSFER_PACKET";
     
     public $ip;
     public $port = 19132;
 
-    public function decode()
+    public function decode($playerProtocol)
     {
     }
 
-    public function encode()
+    public function encode($playerProtocol)
     {
-        $this->reset();
+        $this->reset($playerProtocol);
         $this->putString($this->ip);
         $this->putLShort($this->port);
     }

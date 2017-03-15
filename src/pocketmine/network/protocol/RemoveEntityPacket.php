@@ -26,15 +26,16 @@ namespace pocketmine\network\protocol;
 
 class RemoveEntityPacket extends DataPacket{
 	const NETWORK_ID = Info::REMOVE_ENTITY_PACKET;
+	const PACKET_NAME = "REMOVE_ENTITY_PACKET";
 
 	public $eid;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putVarInt($this->eid);
 	}
 

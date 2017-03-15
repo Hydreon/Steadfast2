@@ -26,6 +26,7 @@ namespace pocketmine\network\protocol;
 
 class UseItemPacket extends DataPacket{
 	const NETWORK_ID = Info::USE_ITEM_PACKET;
+	const PACKET_NAME = "USE_ITEM_PACKET";
 
 	public $x;
 	public $y;
@@ -41,7 +42,7 @@ class UseItemPacket extends DataPacket{
 	public $hotbarSlot;
 	public $interactBlockId;
 
-	public function decode(){
+	public function decode($playerProtocol){
 		$this->x = $this->getSignedVarInt();
 		$this->y = $this->getVarInt();
 		$this->z = $this->getSignedVarInt();
@@ -57,7 +58,7 @@ class UseItemPacket extends DataPacket{
 		$this->item = $this->getSlot();
 	}
 
-	public function encode(){
+	public function encode($playerProtocol){
 
 	}
 }

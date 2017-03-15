@@ -26,6 +26,7 @@ namespace pocketmine\network\protocol;
 
 class ContainerSetContentPacket extends DataPacket{
 	const NETWORK_ID = Info::CONTAINER_SET_CONTENT_PACKET;
+	const PACKET_NAME = "CONTAINER_SET_CONTENT_PACKET";
 
 	const SPECIAL_INVENTORY = 0;
 	const SPECIAL_ARMOR = 0x78;
@@ -41,7 +42,7 @@ class ContainerSetContentPacket extends DataPacket{
 		return parent::clean();
 	}
 
-	public function decode(){
+	public function decode($playerProtocol){
 		$this->windowid = $this->getByte();
 		$count = $this->getVarInt();
 		for($s = 0; $s < $count and !$this->feof(); ++$s){
@@ -55,8 +56,8 @@ class ContainerSetContentPacket extends DataPacket{
 		}
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putByte($this->windowid);
 		$this->putVarInt(count($this->slots));
 		foreach($this->slots as $slot){

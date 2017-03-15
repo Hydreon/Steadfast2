@@ -26,6 +26,7 @@ namespace pocketmine\network\protocol;
 
 class SetEntityMotionPacket extends DataPacket{
 	const NETWORK_ID = Info::SET_ENTITY_MOTION_PACKET;
+	const PACKET_NAME = "SET_ENTITY_MOTION_PACKET";
 
 
 	// eid, motX, motY, motZ
@@ -41,12 +42,12 @@ class SetEntityMotionPacket extends DataPacket{
 		return parent::clean();
 	}
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		foreach($this->entities as $d){
 			$this->putVarInt($d[0]); //eid
 			$this->putLFloat($d[1]); //motX

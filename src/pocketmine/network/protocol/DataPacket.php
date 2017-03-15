@@ -35,20 +35,23 @@ use pocketmine\utils\Utils;
 abstract class DataPacket extends BinaryStream{
 
 	const NETWORK_ID = 0;
+	const PACKET_NAME = "";
 
 	public $isEncoded = false;
 	private $channel = 0;
+	
+	private static $packetsIds = [];
 
 	public function pid(){
 		return $this::NETWORK_ID;
 	}
 
-	abstract public function encode();
+	abstract public function encode($playerProtocol);
 
-	abstract public function decode();
+	abstract public function decode($playerProtocol);
 
-	public function reset(){
-		$this->buffer = chr($this::NETWORK_ID);
+	public function reset($playerProtocol = 0){		
+		$this->buffer = chr(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);
 		$this->offset = 0;
 	}
 
@@ -84,6 +87,13 @@ abstract class DataPacket extends BinaryStream{
 		}
 
 		return $data;
+	}
+	
+	public static function initPackets() {
+		$oClass = new \ReflectionClass ('pocketmine\network\protocol\Info');
+		self::$packetsIds[100] = $oClass->getConstants();
+		$oClass = new \ReflectionClass ('pocketmine\network\protocol\Info105');
+		self::$packetsIds[105] = $oClass->getConstants();
 	}
 	
 }

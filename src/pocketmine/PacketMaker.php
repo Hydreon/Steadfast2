@@ -49,6 +49,7 @@ class PacketMaker extends Worker {
 
 		set_error_handler([$this, "errorHandler"], E_ALL);
 		register_shutdown_function([$this, "shutdownHandler"]);
+		DataPacket::initPackets();
 		$this->tickProcessor();
 	}
 

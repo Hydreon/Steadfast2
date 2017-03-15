@@ -30,16 +30,17 @@ use pocketmine\utils\Binary;
 
 class SetEntityDataPacket extends DataPacket{
 	const NETWORK_ID = Info::SET_ENTITY_DATA_PACKET;
+	const PACKET_NAME = "SET_ENTITY_DATA_PACKET";
 
 	public $eid;
 	public $metadata;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putVarInt($this->eid);
 		$meta = Binary::writeMetadata($this->metadata);
 		$this->put($meta);

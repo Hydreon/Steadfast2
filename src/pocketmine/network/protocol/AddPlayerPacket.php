@@ -30,6 +30,7 @@ use pocketmine\utils\Binary;
 
 class AddPlayerPacket extends DataPacket{
 	const NETWORK_ID = Info::ADD_PLAYER_PACKET;
+	const PACKET_NAME = "ADD_PLAYER_PACKET";
 
 	public $uuid;
 	public $username;
@@ -45,12 +46,12 @@ class AddPlayerPacket extends DataPacket{
 	public $item;
 	public $metadata;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putUUID($this->uuid);
 		$this->putString($this->username);
 		$this->putVarInt($this->eid);

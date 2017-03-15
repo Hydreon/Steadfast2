@@ -26,14 +26,15 @@ namespace pocketmine\network\protocol;
 
 class RequestChunkRadiusPacket extends DataPacket{
 	const NETWORK_ID = Info::REQUEST_CHUNK_RADIUS_PACKET;
+	const PACKET_NAME = "REQUEST_CHUNK_RADIUS_PACKET";
 
 	public $radius;
 
-	public function decode(){		
+	public function decode($playerProtocol){		
 		$this->radius = $this->getSignedVarInt();
 	}
 
-	public function encode(){
+	public function encode($playerProtocol){
 	}
 
 }

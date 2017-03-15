@@ -4,6 +4,7 @@ namespace pocketmine;
 
 use pocketmine\utils\Binary;
 use pocketmine\network\protocol\FullChunkDataPacket;
+use pocketmine\network\protocol\DataPacket;
 
 class ChunkMaker extends Worker {
 
@@ -44,6 +45,7 @@ class ChunkMaker extends Worker {
 		ini_set("display_startup_errors", 1);
 
 		set_error_handler([$this, "errorHandler"], E_ALL);
+		DataPacket::initPackets();
 		$this->tickProcessor();
 	}
 
