@@ -1448,7 +1448,6 @@ abstract class Entity extends Location implements Metadatable{
 					$bb->maxY = $bb->minY + 0.5;
 					$bb->minY -= 1;
 					if(count($this->level->getCollisionBlocks($bb, true)) > 0){
-						echo "2";
 						$this->onGround = true;
 					}else{
 						$this->onGround = false;
