@@ -3716,6 +3716,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->ip = $packet->ip;
 			$this->port = $packet->port;
 			$this->isFirstConnect = $packet->isFirst;
+            $this->deviceType = $packet->deviceOSType;
+            $this->inventoryType = $packet->inventoryType;
 			$this->processLogin();
 		} elseif ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
 			$this->removeAllEffects();
