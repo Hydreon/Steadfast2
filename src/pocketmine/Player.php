@@ -322,6 +322,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     /** @IMPORTANT don't change the scope */
     private $deviceType = self::OS_DEDICATED;
 	
+	private $messageQueue = [];
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1616,6 +1618,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 			$this->checkChunks();
 		}
+		
+		if (count($this->messageQueue) > 0) {
+			$message = array_shift($this->messageQueue);
+			$pk = new TextPacket();
+			$pk->type = TextPacket::TYPE_RAW;
+			$pk->message = $message;
+			$this->dataPacket($pk);
+		}
 
 		$this->timings->stopTiming();
 
@@ -2891,10 +2901,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$mes = explode("\n", $message);
 		foreach($mes as $m){
 			if($m !== ""){
-				$pk = new TextPacket();
-				$pk->type = TextPacket::TYPE_RAW;
-				$pk->message = $m;
-				$this->dataPacket($pk);
+				$this->messageQueue[] = $m;
+//				$pk = new TextPacket();
+//				$pk->type = TextPacket::TYPE_RAW;
+//				$pk->message = $m;
+//				$this->dataPacket($pk);
 			}
 		}
 	}
