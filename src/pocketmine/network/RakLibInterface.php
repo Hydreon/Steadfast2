@@ -174,12 +174,13 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 
 	public function handleEncapsulated($identifier, EncapsulatedPacket $packet, $flags){
 		if(isset($this->players[$identifier])){
+			$player = $this->players[$identifier];
 			try{
 				if($packet->buffer !== ""){
-					$pk = $this->getPacket($packet->buffer);				
+					$pk = $this->getPacket($packet->buffer, $player->getPlayerProtocol());				
 					if (!is_null($pk)) {
-						$pk->decode();
-						$this->players[$identifier]->handleDataPacket($pk);
+						$pk->decode($player->getPlayerProtocol());
+						$player->handleDataPacket($pk);
 					}
 				}
 			}catch(\Exception $e){
@@ -191,10 +192,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 						$logger->logException($e);
 					}
 				}
-
-				if(isset($this->players[$identifier])){
-					$this->interface->blockAddress($this->players[$identifier]->getAddress(), 5);
-				}
+				$this->interface->blockAddress($player->getAddress(), 5);
 			}
 		}
 	}
@@ -242,7 +240,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$identifier = $this->identifiers[$player];
 			$pk = null;
 			if(!$packet->isEncoded){
-				$packet->encode();
+				$packet->encode($player->getPlayerProtocol());
 			}elseif(!$needACK){
 				if (isset($packet->__encapsulatedPacket)) {
 					unset($packet->__encapsulatedPacket);
@@ -277,14 +275,14 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		return null;
 	}
 	
-	private function getPacket($buffer){
+	private function getPacket($buffer, $playerProtocol){
 		if(ord($buffer{0}) == 0xfe){
 			$buffer = substr($buffer, 1);	
 			$pid = ord($buffer{0});			
 		} else {
 			return;
 		}
-		if(($data = $this->network->getPacket($pid)) === null){
+		if(($data = $this->network->getPacket($pid, $playerProtocol)) === null){
 			return null;
 		}
 		$data->setBuffer($buffer, 1);

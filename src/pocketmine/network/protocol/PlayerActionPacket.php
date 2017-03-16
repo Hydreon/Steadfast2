@@ -24,8 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class PlayerActionPacket extends DataPacket{
+class PlayerActionPacket extends PEPacket{
 	const NETWORK_ID = Info::PLAYER_ACTION_PACKET;
+	const PACKET_NAME = "PLAYER_ACTION_PACKET";
 
 	const ACTION_START_BREAK = 0;
 	const ACTION_ABORT_BREAK = 1;
@@ -52,7 +53,7 @@ class PlayerActionPacket extends DataPacket{
 	public $z;
 	public $face;
 
-	public function decode(){
+	public function decode($playerProtocol){
 		$this->eid = $this->getVarInt();
 		$this->action = $this->getSignedVarInt();
 		$this->x = $this->getSignedVarInt();
@@ -61,8 +62,8 @@ class PlayerActionPacket extends DataPacket{
 		$this->face = $this->getVarInt();
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putVarInt($this->eid);
 		$this->putSignedVarInt($this->action);
 		$this->putSignedVarInt($this->x);

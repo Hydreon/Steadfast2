@@ -247,7 +247,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $iusername = '';
 	protected $displayName = '';
 	protected $startAction = -1;
-	public $protocol;
+	public $protocol = 0;
 	/** @var Vector3 */
 	protected $sleeping = null;
 	protected $clientID = null;
@@ -291,9 +291,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastMessageReceivedFrom = "";
 	
 	protected $identifier;
-	
-	/**@var string*/
-	public $language = 'English';
 	
 	public $proxyId = '';
 	public $proxySessionId = '';
@@ -709,19 +706,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 		
-		if(isset($payload[$this->language])) {
-			$data = $payload[$this->language];
-		} else {
-			$data = $payload['English'];
-		}
+		$data = $payload[$this->getPlayerProtocol()];
 
 		$this->usedChunks[Level::chunkHash($x, $z)] = true;
 		$this->chunkLoadCount++;
 
 		$pk = new BatchPacket();
 		$pk->payload = $data;
-		$pk->encode();
-		$pk->isEncoded = true;
+//		$pk->encode();
+//		$pk->isEncoded = true;
 		$this->dataPacket($pk);
 
 		$this->getServer()->getDefaultLevel()->useChunk($x, $z, $this);
@@ -883,31 +876,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		return true;
 	}
-
-	/**
-	 * Batch a Data packet
-	 *
-	 * @param DataPacket $packet
-	 *
-	 * @return bool
-	 */
-//	public function batchDataPacket(DataPacket $packet){
-//		$str = "";
-//		if($packet instanceof DataPacket){
-//			if(!$packet->isEncoded){
-//				$packet->encode();
-//			}
-//			$str .= Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer;
-//		}else{
-//			$str .= Binary::writeVarInt(strlen($packet)) . $packet;
-//		}
-//
-//		$pk = new BatchPacket();
-//		$pk->payload = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
-//		$pk->encode();
-//		$pk->isEncoded = true;
-//		$this->dataPacket($pk);
-//	}
 
 	/**
 	 * Sends an ordered DataPacket to the send buffer
@@ -4012,7 +3980,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function isElytraActivated() {
 		return $this->elytraIsActivated;
 	}
-    
+	
+	public function getPlayerProtocol() {
+		if ($this->protocol == 105) {
+			return 105;
+		} else {
+			return 100;
+		}
+	}
+	
     public function getDeviceOS() {
         return $this->deviceType;
     }

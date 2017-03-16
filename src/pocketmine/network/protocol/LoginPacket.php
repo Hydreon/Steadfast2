@@ -28,9 +28,10 @@ use pocketmine\utils\UUID;
 use pocketmine\utils\Binary;
 use pocketmine\network\protocol\Info;
 
-class LoginPacket extends DataPacket {
+class LoginPacket extends PEPacket {
 
 	const NETWORK_ID = Info::LOGIN_PACKET;
+	const PACKET_NAME = "LOGIN_PACKET";
 
 	public $username;
 	public $protocol1;
@@ -55,7 +56,7 @@ class LoginPacket extends DataPacket {
 		return $res;
 	}
 
-	public function decode() {
+	public function decode($playerProtocol) {
 		$acceptedProtocols = Info::ACCEPTED_PROTOCOLS;
 		$this->protocol1 = $this->getInt();
 		if (!in_array($this->protocol1, $acceptedProtocols)) {
@@ -99,7 +100,7 @@ class LoginPacket extends DataPacket {
         }
 	}
 
-	public function encode() {
+	public function encode($playerProtocol) {
 		
 	}
 

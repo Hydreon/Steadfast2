@@ -24,8 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class InteractPacket extends DataPacket{
+class InteractPacket extends PEPacket{
 	const NETWORK_ID = Info::INTERACT_PACKET;
+	const PACKET_NAME = "INTERACT_PACKET";
 	
 	const ACTION_DAMAGE = 2;
 	const ACTION_SEE = 4;
@@ -34,13 +35,13 @@ class InteractPacket extends DataPacket{
 	public $eid;
 	public $target;
 
-	public function decode(){
+	public function decode($playerProtocol){
 		$this->action = $this->getByte();
 		$this->target = $this->getVarInt();
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putByte($this->action);
 		$this->putVarInt($this->target);
 	}

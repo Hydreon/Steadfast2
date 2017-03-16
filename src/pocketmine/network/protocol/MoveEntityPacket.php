@@ -24,8 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class MoveEntityPacket extends DataPacket{
+class MoveEntityPacket extends PEPacket{
 	const NETWORK_ID = Info::MOVE_ENTITY_PACKET;
+	const PACKET_NAME = "MOVE_ENTITY_PACKET";
 
 
 	// eid, x, y, z, yaw, pitch
@@ -41,12 +42,12 @@ class MoveEntityPacket extends DataPacket{
 		return parent::clean();
 	}
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		foreach($this->entities as $d){
 			$this->putVarInt($d[0]); //eid
 			$this->putLFloat($d[1]); //x

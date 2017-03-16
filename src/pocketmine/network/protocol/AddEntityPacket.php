@@ -28,8 +28,9 @@ use pocketmine\utils\Binary;
 
 #endif
 
-class AddEntityPacket extends DataPacket{
+class AddEntityPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_ENTITY_PACKET;
+	const PACKET_NAME = "ADD_ENTITY_PACKET";
 
 	public $eid;
 	public $type;
@@ -45,12 +46,12 @@ class AddEntityPacket extends DataPacket{
 	public $links = [];
 	public $attributes = [];
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();		
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);		
 		$this->putVarInt($this->eid);
 		$this->putVarInt($this->eid);
 		$this->putVarInt($this->type);

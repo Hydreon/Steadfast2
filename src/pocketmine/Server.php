@@ -283,8 +283,6 @@ class Server{
 
 	public $packetMaker = null;
 	
-	private $signTranslation = [];
-	
 	private $globalCompasPosition = array(
 		'x' => 15000,
 		'y' => 10,
@@ -1866,18 +1864,22 @@ class Server{
 	 */
 	public function batchPackets(array $players, array $packets, $forceSync = true){
 		$targets = [];
+		$neededProtocol = [];
 		foreach($players as $p){
-			$targets[] = array($p->getIdentifier());
+			$targets[] = array($p->getIdentifier(), $p->getPlayerProtocol());
+			$neededProtocol[$p->getPlayerProtocol()] = $p->getPlayerProtocol();
 		}
 		$newPackets = array();
 		foreach($packets as $p){
-			if($p instanceof DataPacket){
-				if(!$p->isEncoded){					
-					$p->encode();
+			foreach ($neededProtocol as $protocol) {
+				if($p instanceof DataPacket){
+					if(!$p->isEncoded || count($neededProtocol) > 1){					
+						$p->encode($protocol);
+					}
+					$newPackets[$protocol][] = $p->buffer;
+				}elseif (count($neededProtocol) == 1) {
+					$newPackets[$protocol][] = $p;
 				}
-				$newPackets[] = $p->buffer;
-			}else{
-				$newPackets[] = $p;
 			}
 		}
 		$data = array();
@@ -1887,20 +1889,6 @@ class Server{
 		$data['isBatch'] = true;
 		$this->packetMaker->pushMainToThreadPacket(serialize($data));
 	}
-	
-//	public function broadcastPacketsCallback($data, array $identifiers){
-//		$pk = new BatchPacket();
-//		$pk->payload = $data;
-//		$pk->encode();
-//		$pk->isEncoded = true;
-//
-//		foreach($identifiers as $i){
-//			if(isset($this->players[$i])){
-//				$this->players[$i]->dataPacket($pk);
-//			}
-//		}
-//	}
-
 
 	/**
 	 * @param int $type
@@ -2086,8 +2074,8 @@ class Server{
 	/**
 	 * Starts the PocketMine-MP server and starts processing ticks and packets
 	 */
-	public function start(){
-		$this->loadSignTranslation();		
+	public function start(){	
+		DataPacket::initPackets();
 		$jsonCommands = @json_decode(@file_get_contents(__DIR__ . "/command/commands.json"), true);
 		if ($jsonCommands) {
 			$this->jsonCommands = $jsonCommands;
@@ -2333,10 +2321,10 @@ class Server{
 		$p->dataPacket($pk);
 	}
 
-	private $craftList;
+	private $craftList = [];
 	
 	public function sendRecipeList(Player $p){
-		if(!isset($this->craftList)) {
+		if(!isset($this->craftList[$p->getPlayerProtocol()])) {
 			$pk = new CraftingDataPacket();
 			$pk->cleanRecipes = true;
 
@@ -2351,12 +2339,12 @@ class Server{
 			foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
 				$pk->addFurnaceRecipe($recipe);
 			}
-			$pk->encode();
+			$pk->encode($p->getPlayerProtocol());
 			$pk->isEncoded = true;
-			$this->craftList = $pk;
+			$this->craftList[$p->getPlayerProtocol()] = $pk;
 		}
 		
-		$this->batchPackets([$p], [$this->craftList]);
+		$this->batchPackets([$p], [$this->craftList[$p->getPlayerProtocol()]]);
 	}
 
 	public function addPlayer($identifier, Player $player){
@@ -2624,40 +2612,6 @@ class Server{
 
 		$this->players = $random;
 	}
-	
-	private function loadSignTranslation() {
-		$languages = ['en' => 'English', 'de' => 'German', 'es' => 'Spanish'];
-		$signTranslation = [];
-		foreach ($languages as $langKey => $language) {
-			$path = 'worlds/world/signData/' . $langKey . '.json';
-			if (!file_exists($path)) {
-					continue;
-				}
-			$data = json_decode(file_get_contents($path), true);
-			if ($data) {
-				$signTranslation[$language] = $data;
-			}
-		}
-		$translation = [];
-		foreach ($signTranslation as $lang => $data) {
-			$translation[$lang] = [];
-			foreach ($data as $key => $val) {
-				$translation[$lang]['key'][] = '$' . $key . '$';
-				$translation[$lang]['val'][] = $val;
-			}
-		}
-		if(!isset($translation['English'])) {
-			$translation['English'] = [
-				'key' => [],
-				'val' => []
-			];
-		}
-		$this->signTranslation = $translation;
-	}
-	
-	public function getSignTranslation() {
-		return $this->signTranslation;
-	}	
 		
 	public function setGlobalCompassPosition($x, $z) {
 		$this->globalCompasPosition['x'] = $x;

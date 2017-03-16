@@ -25,8 +25,9 @@ namespace pocketmine\network\protocol;
 use pocketmine\utils\TextFormat;
 
 
-class PlayerListPacket extends DataPacket{
+class PlayerListPacket extends PEPacket{
 	const NETWORK_ID = Info::PLAYER_LIST_PACKET;
+	const PACKET_NAME = "PLAYER_LIST_PACKET";
 
 	const TYPE_ADD = 0;
 	const TYPE_REMOVE = 1;
@@ -41,12 +42,12 @@ class PlayerListPacket extends DataPacket{
 		return parent::clean();
 	}
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putByte($this->type);
 		$this->putVarInt(count($this->entries));
 		foreach($this->entries as $d){

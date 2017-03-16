@@ -24,9 +24,10 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class ExplodePacket extends DataPacket{
+class ExplodePacket extends PEPacket{
 	const NETWORK_ID = Info::EXPLODE_PACKET;
-
+	const PACKET_NAME = "EXPLODE_PACKET";
+	
 	public $x;
 	public $y;
 	public $z;
@@ -38,12 +39,12 @@ class ExplodePacket extends DataPacket{
 		return parent::clean();
 	}
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);

@@ -21,17 +21,18 @@
 
 namespace pocketmine\network\protocol;
 
-class SetCommandsEnabledPacket extends DataPacket{
+class SetCommandsEnabledPacket extends PEPacket{
 	const NETWORK_ID = Info::SET_COMMANDS_ENABLED_PACKET;
+	const PACKET_NAME = "SET_COMMANDS_ENABLED_PACKET";
 	
 	public $enabled;
 	
-	public function decode(){
+	public function decode($playerProtocol){
 	
 	}
 	
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putByte($this->enabled);
 	}
 }
