@@ -293,6 +293,10 @@ class Server{
 	private $spawnedEntity = [];
 	
 	private $unloadLevelQueue = [];
+	
+	private $serverPublicKey = '';
+	private $serverPrivateKey = '';
+	private $serverToken = 'hksdYI3has';
 
 	public function addSpawnedEntity($entity) {
 		if ($entity instanceof Player) {
@@ -2076,6 +2080,7 @@ class Server{
 	 */
 	public function start(){	
 		DataPacket::initPackets();
+		mcpeencyptGenerateKeyPair($this->serverPrivateKey, $this->serverPublicKey);
 		$jsonCommands = @json_decode(@file_get_contents(__DIR__ . "/command/commands.json"), true);
 		if ($jsonCommands) {
 			$this->jsonCommands = $jsonCommands;
@@ -2629,23 +2634,17 @@ class Server{
 	public function isUseEncrypt() {
 		return true;
 	}
-	
+		
 	public function getServerPublicKey() {
-		return 'MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEVDUmq9/Ec5Sj8mRbDUhlGp86TUbYdAvjIpFRB/BQJQxzDKQLN+HcheCCtLsYG4hHvW0Poni65escBUdMmk4r7sKMlwvknBlJ8J6Wl5onelFIMOMqW53h7GirmfSS3TAK';
+		return $this->serverPublicKey;
 	}
 	
-	public function getServerPrivateKey() {
-		return 'MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDAamStb0Xep3y3sWw2uSSAdUPkgQ9Rvhlnx8XEVOYy2teh69T0on77ja02m03n8t8WhZANiAARUNSar38RzlKPyZFsNSGUanzpNRth0C+MikVEH8FAlDHMMpAs34dyF4IK0uxgbiEe9bQ+ieLrl6xwFR0yaTivuwoyXC+ScGUnwnpaXmid6UUgw4ypbneHsaKuZ9JLdMAo=';
+	public function getServerToken() {	
+		return $this->serverToken;
 	}
-	public function getServerToken() {
-		$token = 'hksdYI3has';		
-		return $token;
-	}
+	
 	public function generateSecret($clientPublicKey) {
-		$serverPrivateKey = $this->getServerPrivateKey();
-		$path = $this->dataPath . "keyGen";
-		exec($path . "/createSharedSecret.sh '{$clientPublicKey}' '{$serverPrivateKey}' '{$path}'");
-		return file_get_contents($path . "/result.dat");
+		return mcpeencyptCreateSharedSecret($this->serverPrivateKey, $clientPublicKey);
 	}
 
 }
