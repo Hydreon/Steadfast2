@@ -436,6 +436,7 @@ class Block extends Position implements Metadatable{
 			self::$list[self::CAKE_BLOCK] = Cake::class;
 
 			self::$list[self::TRAPDOOR] = Trapdoor::class;
+			self::$list[self::IRON_TRAPDOOR] = IronTrapdoor::class;
 
 			self::$list[self::STONE_BRICKS] = StoneBricks::class;
 
