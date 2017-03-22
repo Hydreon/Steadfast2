@@ -24,19 +24,20 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class SetSpawnPositionPacket extends DataPacket{
+class SetSpawnPositionPacket extends PEPacket{
 	const NETWORK_ID = Info::SET_SPAWN_POSITION_PACKET;
+	const PACKET_NAME = "SET_SPAWN_POSITION_PACKET";
 
 	public $x;
 	public $y;
 	public $z;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putSignedVarInt($this->x);
 		$this->putByte($this->y);
 		$this->putSignedVarInt($this->z);

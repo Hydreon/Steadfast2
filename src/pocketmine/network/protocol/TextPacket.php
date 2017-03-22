@@ -24,8 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class TextPacket extends DataPacket{
+class TextPacket extends PEPacket{
 	const NETWORK_ID = Info::TEXT_PACKET;
+	const PACKET_NAME = "TEXT_PACKET";
 
 	const TYPE_RAW = 0;
 	const TYPE_CHAT = 1;
@@ -40,7 +41,7 @@ class TextPacket extends DataPacket{
 	public $message;
 	public $parameters = [];
 
-	public function decode(){
+	public function decode($playerProtocol){
 		$this->type = $this->getByte();
 		switch($this->type){
 			case self::TYPE_POPUP:
@@ -61,8 +62,8 @@ class TextPacket extends DataPacket{
 		}
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putByte($this->type);
 		switch($this->type){
 			case self::TYPE_POPUP:

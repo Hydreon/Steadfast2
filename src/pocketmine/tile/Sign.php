@@ -25,10 +25,6 @@ use pocketmine\level\format\FullChunk;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\Server;
-use pocketmine\Player;
-use pocketmine\nbt\NBT;
-use pocketmine\network\protocol\TileEntityDataPacket;
 
 class Sign extends Spawnable{
 
@@ -86,45 +82,6 @@ class Sign extends Spawnable{
 			new IntTag("y", (int) $this->y),
 			new IntTag("z", (int) $this->z)
 		]);
-	}
-	
-	private function getSignTranslateCompound($lang){
-		return new Compound("", [
-			new StringTag("id", Tile::SIGN),
-			new StringTag("Text1", $this->updateSignText($this->namedtag['Text1'], $lang)),
-			new StringTag("Text2", $this->updateSignText($this->namedtag['Text2'], $lang)),
-			new StringTag("Text3", $this->updateSignText($this->namedtag['Text3'], $lang)),
-			new StringTag("Text4", $this->updateSignText($this->namedtag['Text4'], $lang)),
-			new IntTag("x", (int) $this->x),
-			new IntTag("y", (int) $this->y),
-			new IntTag("z", (int) $this->z)
-		]);
-	}
-	
-	public function spawnTo(Player $player){
-		if($this->closed){
-			return false;
-		}
-		$translation = Server::getInstance()->getSignTranslation();	
-		$data = isset($translation[$player->language]) ? $translation[$player->language] : $translation['English'];
-		$nbt = new NBT(NBT::LITTLE_ENDIAN);
-		$nbt->setData($this->getSignTranslateCompound($data));
-		$pk = new TileEntityDataPacket();
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->namedtag = $nbt->write();
-		$player->dataPacket($pk);
-
-		return true;
-	}
-	
-	private function updateSignText($text, $lang) {		
-		if(empty($text)) {
-			return '';
-		}
-		return str_replace($lang['key'], $lang['val'], $text);
-		
 	}
 
 }

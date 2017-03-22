@@ -31,8 +31,9 @@ use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\EnchantmentList;
 use pocketmine\utils\BinaryStream;
 
-class CraftingDataPacket extends DataPacket{
+class CraftingDataPacket extends PEPacket{
 	const NETWORK_ID = Info::CRAFTING_DATA_PACKET;
+	const PACKET_NAME = "CRAFTING_DATA_PACKET";
 
 	const ENTRY_SHAPELESS = 0;
 	const ENTRY_SHAPED = 1;
@@ -140,12 +141,12 @@ class CraftingDataPacket extends DataPacket{
 		return parent::clean();
 	}
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putVarInt(count($this->entries));
 
 		$writer = new BinaryStream();

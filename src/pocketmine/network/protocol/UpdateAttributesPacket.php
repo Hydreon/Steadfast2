@@ -26,8 +26,9 @@ namespace pocketmine\network\protocol;
 
 use pocketmine\entity\Attribute;
 
-class UpdateAttributesPacket extends DataPacket{
+class UpdateAttributesPacket extends PEPacket{
 	const NETWORK_ID = Info::UPDATE_ATTRIBUTES_PACKET;
+	const PACKET_NAME = "UPDATE_ATTRIBUTES_PACKET";
 
     const HEALTH = "minecraft:health";
     const HUNGER = "minecraft:player.hunger";
@@ -43,12 +44,12 @@ class UpdateAttributesPacket extends DataPacket{
     public $name;
 	public $defaultValue;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putVarInt($this->entityId);
 		$this->putVarInt(1);
         $this->putLFloat($this->minValue);

@@ -99,17 +99,18 @@ class ProxyInterface implements AdvancedSourceInterface {
 				}
 			}
 			if (isset($this->session[$identifier])) {
+				$player = $this->session[$identifier];
 				$type = ord($buffer{0});
 				$buffer = substr($buffer, 1);
 				if ($type == self::STANDART_PACKET_ID) {
-					$pk = $this->getPacket($buffer);
+					$pk = $this->getPacket($buffer, $player->getPlayerProtocol());
 					if ($pk === false) {
 						return;
 					}
 					if (!is_null($pk)) {
 						try {
-							$pk->decode();
-							$this->session[$identifier]->handleDataPacket($pk);
+							$pk->decode($player->getPlayerProtocol());
+							$player->handleDataPacket($pk);
 						} catch (\Exception $e) {
 							echo "DECODE ERROR: " . $e->getMessage() . ", PACKET ID: " . $pk->pid();
 						}
@@ -121,8 +122,8 @@ class ProxyInterface implements AdvancedSourceInterface {
 					}
 					if (!is_null($pk)) {
 						try {
-							$pk->decode();
-							$this->session[$identifier]->handleProxyDataPacket($pk);
+							$pk->decode($player->getPlayerProtocol());
+							$player->handleProxyDataPacket($pk);
 						} catch (\Exception $e) {
 							echo "DECODE ERROR: " . $e->getMessage() . ", PROXY PACKET ID: " . $pk->pid();
 						}
@@ -195,7 +196,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false) {
 		if (isset($this->session[$player->getIdentifier()])) {
 			if (!$packet->isEncoded) {
-				$packet->encode();
+				$packet->encode($player->getPlayerProtocol());
 			}
 			if ($packet instanceof ProxyPacket) {
 				$type = chr(self::PROXY_PACKET_ID);
@@ -222,7 +223,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 		}
 	}
 
-	private function getPacket($buffer) {
+	private function getPacket($buffer, $playerProtocol) {
 		if (ord($buffer{0}) == 0xfe) {
 			$buffer = substr($buffer, 1);
 			if (empty($buffer)) {
@@ -233,7 +234,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 			return false;
 		}
 
-		if (($data = $this->server->getNetwork()->getPacket($pid)) === null) {
+		if (($data = $this->server->getNetwork()->getPacket($pid, $playerProtocol)) === null) {
 			return null;
 		}
 

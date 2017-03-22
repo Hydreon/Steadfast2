@@ -24,17 +24,18 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class BatchPacket extends DataPacket{
+class BatchPacket extends PEPacket{
 	const NETWORK_ID = Info::BATCH_PACKET;
+	const PACKET_NAME = "BATCH_PACKET";
 
 	public $payload;
 
-	public function decode(){
+	public function decode($playerProtocol){
 		$this->payload = $this->getString();
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putString($this->payload);
 	}
 

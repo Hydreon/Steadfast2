@@ -623,7 +623,7 @@ abstract class Entity extends Location implements Metadatable{
 	public function sendPotionEffects(Player $player){
 		foreach($this->effects as $effect){
 			$pk = new MobEffectPacket();
-			$pk->eid = 0;
+			$pk->eid = $player->getId();
 			$pk->effectId = $effect->getId();
 			$pk->amplifier = $effect->getAmplifier();
 			$pk->particles = $effect->isVisible();
@@ -1195,10 +1195,10 @@ abstract class Entity extends Location implements Metadatable{
 	
 	public function isCollideWithTransparent() {
 		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
-		if(!($block instanceof \pocketmine\block\Ladder) && !($block instanceof \pocketmine\block\Fire) && !($block instanceof \pocketmine\block\Vine)) {
+		if(!($block instanceof \pocketmine\block\Ladder) && !($block instanceof \pocketmine\block\Fire) && !($block instanceof \pocketmine\block\Vine) && !($block instanceof \pocketmine\block\Cobweb)) {
 			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
 		}
-		if($block instanceof \pocketmine\block\Ladder || $block instanceof \pocketmine\block\Fire || $block instanceof \pocketmine\block\Vine) {		
+		if($block instanceof \pocketmine\block\Ladder || $block instanceof \pocketmine\block\Fire || $block instanceof \pocketmine\block\Vine || $block instanceof \pocketmine\block\Cobweb) {		
 			return $block;
 		}
 		return false;
@@ -1444,24 +1444,22 @@ abstract class Entity extends Location implements Metadatable{
 			}else{
 
 				if($this instanceof Player){
-					if(!$this->onGround or $movY != 0){
-						$bb = clone $this->boundingBox;
-						$bb->maxY = $bb->minY + 0.5;
-						$bb->minY -= 1;
-						if(count($this->level->getCollisionBlocks($bb, true)) > 0){
-							$this->onGround = true;
-						}else{
-							$this->onGround = false;
-						}					
+					$bb = clone $this->boundingBox;
+					$bb->maxY = $bb->minY + 0.5;
+					$bb->minY -= 1;
+					if(count($this->level->getCollisionBlocks($bb, true)) > 0){
+						$this->onGround = true;
+					}else{
+						$this->onGround = false;
+					}					
 //						
-//						$bb = clone $this->boundingBox;
-//						$bb->minY -= 1;
-//						if(count($this->level->getCollisionBlocks($bb)) > 0){
-//							$this->onGround = true;
-//						}else{
-//							$this->onGround = false;
-//						}
-					}
+//					$bb = clone $this->boundingBox;
+//					$bb->minY -= 1;
+//					if(count($this->level->getCollisionBlocks($bb)) > 0){
+//						$this->onGround = true;
+//					}else{
+//						$this->onGround = false;
+//					}
 					$this->isCollided = $this->onGround;
 				}else{
 					$this->isCollidedVertically = $movY != $dy;

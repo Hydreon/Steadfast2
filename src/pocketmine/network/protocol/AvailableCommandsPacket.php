@@ -21,16 +21,17 @@
 
 namespace pocketmine\network\protocol;
 
-class AvailableCommandsPacket extends DataPacket{
+class AvailableCommandsPacket extends PEPacket{
 	const NETWORK_ID = Info::AVAILABLE_COMMANDS_PACKET;
+	const PACKET_NAME = "AVAILABLE_COMMANDS_PACKET";
 	
 	public $commands;
 	
-	public function decode(){
+	public function decode($playerProtocol){
 	}
 	
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putString($this->commands);
 	}
 }

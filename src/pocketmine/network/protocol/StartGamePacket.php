@@ -24,8 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class StartGamePacket extends DataPacket{
+class StartGamePacket extends PEPacket{
 	const NETWORK_ID = Info::START_GAME_PACKET;
+	const PACKET_NAME = "START_GAME_PACKET";
 
 	public $seed;
 	public $dimension;
@@ -39,13 +40,13 @@ class StartGamePacket extends DataPacket{
 	public $y;
 	public $z;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putVarInt(0); //EntityUniqueID
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
+		$this->putVarInt($this->eid); //EntityUniqueID
 		$this->putVarInt($this->eid); //EntityUniqueID
 		
 		$this->putLFloat($this->x); // default position (4)

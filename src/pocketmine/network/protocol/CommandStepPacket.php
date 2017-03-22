@@ -21,15 +21,16 @@
 
 namespace pocketmine\network\protocol;
 
-class CommandStepPacket extends DataPacket {
+class CommandStepPacket extends PEPacket {
 
 	const NETWORK_ID = Info::COMMAND_STEP_PACKET;
+	const PACKET_NAME = "COMMAND_STEP_PACKET";
 
 	public $name;
 	public $overload;
 	public $outputFormat;
 
-	public function decode() {
+	public function decode($playerProtocol) {
 		$this->name = $this->getString();
 		$this->overload = $this->getString();
 
@@ -41,7 +42,7 @@ class CommandStepPacket extends DataPacket {
 		$this->outputFormat = $this->getString();
 	}
 
-	public function encode() {
+	public function encode($playerProtocol) {
 		
 	}
 

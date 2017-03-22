@@ -587,6 +587,8 @@ class Item{
 		71 => "Iron Door",
 		73 => "Redstone Ore",
 		74 => "Glowing Redstone Ore",
+		75 => "Redstone Torch",
+		76 => "Glowing Redstone Torch",
 		78 => "Snow",
 		79 => "Ice",
 		80 => "Snow Block",

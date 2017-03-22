@@ -33,7 +33,7 @@ interface Info{
 	const CURRENT_PROTOCOL = 101;
 //	const NEWEST_PROTOCOL = 82;
 //	const OLDEST_PROTOCOL = 81;
-	const ACCEPTED_PROTOCOLS = [92, 100, 101, 102];
+	const ACCEPTED_PROTOCOLS = [92, 100, 101, 102, 105];
 
 	/**
 	 * Minecraft: PE packets
@@ -119,7 +119,7 @@ interface Info{
 	const RESOURCE_PACK_DATA_INFO_PACKET = 0x4f;
 //	const RESOURCE_PACK_CHUNK_DATA_PACKET = 0x50;
 //	const RESOURCE_PACK_CHUNK_REQUEST_PACKET = 0x51;
-	const TRANSFER_PACKET = 0x52;
+	const TRANSFER_PACKET = 0x53;
 	
 }
 

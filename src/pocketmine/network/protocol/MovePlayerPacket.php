@@ -24,8 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class MovePlayerPacket extends DataPacket{
+class MovePlayerPacket extends PEPacket{
 	const NETWORK_ID = Info::MOVE_PLAYER_PACKET;
+	const PACKET_NAME = "MOVE_PLAYER_PACKET";
 
 	const MODE_NORMAL = 0;
 	const MODE_RESET = 1;
@@ -46,7 +47,7 @@ class MovePlayerPacket extends DataPacket{
 		return parent::clean();
 	}
 
-	public function decode(){
+	public function decode($playerProtocol){
 		$this->eid = $this->getVarInt();
 		
 		$this->x = $this->getLFloat();
@@ -61,8 +62,8 @@ class MovePlayerPacket extends DataPacket{
 		$this->onGround = $this->getByte() > 0;
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putVarInt($this->eid);
 		
 		$this->putLFloat($this->x);
