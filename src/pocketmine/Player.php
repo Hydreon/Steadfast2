@@ -126,6 +126,7 @@ use pocketmine\network\protocol\SetDifficultyPacket;
 use pocketmine\network\protocol\SetEntityMotionPacket;
 use pocketmine\network\protocol\SetSpawnPositionPacket;
 use pocketmine\network\protocol\SetTimePacket;
+use pocketmine\network\protocol\SetTitlePacket;
 use pocketmine\network\protocol\StartGamePacket;
 use pocketmine\network\protocol\TakeItemEntityPacket;
 use pocketmine\network\protocol\TransferPacket;
@@ -2903,6 +2904,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->dataPacket($pk);
 			}
 		}
+	}
+	
+	public function sendTitle($message){
+		$pk = new TextPacket();
+		$pk->type = TextPacket::TYPE_ANNOUNCEMENT;
+		$pk->message = $message;
+		$this->dataPacket($pk);
 	}
 
 	public function sendTranslation($message, array $parameters = []){
