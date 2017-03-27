@@ -2078,9 +2078,9 @@ class Server{
 	/**
 	 * Starts the PocketMine-MP server and starts processing ticks and packets
 	 */
-	public function start(){	
+	public function start(){			
 		DataPacket::initPackets();
-		mcpeencyptGenerateKeyPair($this->serverPrivateKey, $this->serverPublicKey);
+		\McpeEncrypter::generateKeyPair($this->serverPrivateKey, $this->serverPublicKey);
 		$jsonCommands = @json_decode(@file_get_contents(__DIR__ . "/command/commands.json"), true);
 		if ($jsonCommands) {
 			$this->jsonCommands = $jsonCommands;
@@ -2639,12 +2639,11 @@ class Server{
 		return $this->serverPublicKey;
 	}
 	
+	public function getServerPrivateKey() {
+		return $this->serverPrivateKey;
+	}
+	
 	public function getServerToken() {	
 		return $this->serverToken;
 	}
-	
-	public function generateSecret($clientPublicKey) {
-		return mcpeencyptCreateSharedSecret($this->serverPrivateKey, $clientPublicKey);
-	}
-
 }

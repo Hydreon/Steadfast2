@@ -316,11 +316,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	private $elytraIsActivated = false;
 	
+	private $encrypter = null;
 	private $encryptEnabled = false;
-	private $sendPacketCounter = 0;
-	private $finalSecretKey = "";
-	private $encryptChiper;
-	private $decryptChiper;
     
     /** @IMPORTANT don't change the scope */
     private $inventoryType = self::INVENTORY_CLASSIC;
@@ -3575,12 +3572,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->dataPacket($pk);		
 		
 		if (!empty($identityPublicKey) && $this->server->isUseEncrypt()) {		
-			$token =  $this->server->getServerToken();
+			$token = $this->server->getServerToken();
 			$pk = new ServerToClientHandshakePacket();
 			$pk->publicKey = $this->server->getServerPublicKey();
 			$pk->serverToken = $token;
 			$this->dataPacket($pk);
-			$this->enableEncrypt($token,  $this->server->generateSecret($identityPublicKey));
+			$this->enableEncrypt($token, $this->server->getServerPrivateKey(), $identityPublicKey);
 		}
 
 		$this->achievements = [];
@@ -4014,26 +4011,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function getEncrypt($sStr) {
-		return mcrypt_generic($this->encryptChiper, $sStr . $this->getCheckSum($sStr));
-	}
+		return $this->encrypter->encrypt($sStr);
+	}	
 
 	public function getDecrypt($sStr) {
-		return mdecrypt_generic($this->decryptChiper, $sStr);
+		return $this->encrypter->decrypt($sStr);
 	}
 
-	private function enableEncrypt($token, $secret) {
-		$this->finalSecretKey = hex2bin(hash("sha256", $token . $secret));
-		$finalIV = substr($this->finalSecretKey, 0, 16);
+	private function enableEncrypt($token, $privateKey, $publicKey) {
+		$this->encrypter = new \McpeEncrypter($token, $privateKey, $publicKey);
 		$this->encryptEnabled = true;
-		$this->encryptChiper = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CFB, '');
-		mcrypt_generic_init($this->encryptChiper, $this->finalSecretKey, $finalIV);
-		$this->decryptChiper = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CFB, '');
-		mcrypt_generic_init($this->decryptChiper, $this->finalSecretKey, $finalIV);
-	}
-
-	private function getCheckSum($packetPlaintext) {
-		$pkNumber = pack("P", $this->sendPacketCounter++);
-		return hex2bin(substr(hash("sha256", $pkNumber . $packetPlaintext . $this->finalSecretKey), 0, 16));
 	}
 
 	public function getPlayerProtocol() {
