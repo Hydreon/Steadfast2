@@ -49,6 +49,7 @@ class LoginPacket extends PEPacket {
 	public $isValidProtocol = true;
     public $inventoryType = -1;
     public $osType = -1;
+    public $xuid = '';
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -87,7 +88,10 @@ class LoginPacket extends PEPacket {
 		$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
 		$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
 		$this->identityPublicKey = $this->chains['data'][$dataIndex]['identityPublicKey'];
-
+        if (isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
+            $this->xuid = $this->chains['data'][$dataIndex]['extraData']['XUID'];
+        }
+        
 		$this->serverAddress = $this->playerData['ServerAddress'];
 		$this->skinName = $this->playerData['SkinId'];
 		$this->skin = base64_decode($this->playerData['SkinData']);

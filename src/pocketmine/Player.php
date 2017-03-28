@@ -323,6 +323,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     private $deviceType = self::OS_DEDICATED;
 	
 	private $messageQueue = [];
+    
+    private $xuid = '';
 	
 	public function getLeaveMessage(){
 		return "";
@@ -1791,6 +1793,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 if ($packet->inventoryType >= 0) {
                     $this->inventoryType = $packet->inventoryType;
                 }
+                $this->xuid = $packet->xuid;
 					
 				$this->processLogin();
 				//Timings::$timerLoginPacket->stopTiming();
