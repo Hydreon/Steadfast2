@@ -4029,4 +4029,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function getPing() {
 		return $this->ping;
 	}
+    
+    public function getXUID() {
+        return $this->xuid;
+    }
 }
