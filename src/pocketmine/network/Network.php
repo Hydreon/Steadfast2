@@ -90,6 +90,7 @@ use pocketmine\network\protocol\AvailableCommandsPacket;
 use pocketmine\network\protocol\CommandStepPacket;
 use pocketmine\network\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
+use pocketmine\network\proxy\PingPacket;
 
 class Network {
 
@@ -476,6 +477,6 @@ class Network {
 		$this->proxyPacketPool = new \SplFixedArray(256);
 		$this->registerProxyPacket(ProtocolProxyInfo::CONNECT_PACKET, ConnectPacket::class);
 		$this->registerProxyPacket(ProtocolProxyInfo::DISCONNECT_PACKET, ProxyDisconnectPacket::class);
-		
+		$this->registerProxyPacket(ProtocolProxyInfo::PING_PACKET, PingPacket::class);		
 	}
 }

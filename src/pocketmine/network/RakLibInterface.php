@@ -196,6 +196,13 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			}
 		}
 	}
+	
+	public function handlePing($identifier, $ping){
+		if(isset($this->players[$identifier])){
+			$player = $this->players[$identifier];
+			$player->setPing($ping);
+		}
+	}
 
 	public function blockAddress($address, $timeout = 300){
 		$this->interface->blockAddress($address, $timeout);

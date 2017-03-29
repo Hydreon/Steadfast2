@@ -97,6 +97,13 @@ class ServerHandler{
                 $flags = ord($packet{$offset++});
                 $buffer = substr($packet, $offset);
                 $this->instance->handleEncapsulated($identifier, EncapsulatedPacket::fromBinary($buffer, true), $flags);
+			} elseif ($id === RakLib::PACKET_PING) {
+				$len = ord($packet{$offset++});
+				$identifier = substr($packet, $offset, $len);
+				$offset += $len;
+				$len = ord($packet{$offset++});
+				$ping = substr($packet, $offset, $len);
+				$this->instance->handlePing($identifier, $ping);
             }elseif($id === RakLib::PACKET_RAW){
                 $len = ord($packet{$offset++});
                 $address = substr($packet, $offset, $len);
@@ -139,7 +146,7 @@ class ServerHandler{
                 $offset += $len;
                 $identifierACK = Binary::readInt(substr($packet, $offset, 4));
                 $this->instance->notifyACK($identifier, $identifierACK);
-            }
+            } 
 
             return true;
         }

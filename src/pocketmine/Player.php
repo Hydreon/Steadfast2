@@ -326,6 +326,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     
     private $xuid = '';
 	
+	private $ping = 0;
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1510,7 +1512,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->lastUpdate = $currentTick;
 
-		
+
 
 		$this->timings->startTiming();
 		
@@ -3706,6 +3708,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->server->clearPlayerList($this);
 			$this->closeFromProxy = true;
 			$this->close('', $packet->reason);
+		} elseif ($packet->pid() === ProtocolProxyInfo::PING_PACKET) {
+			$this->setPing($packet->ping);
 		}
 	}
 
@@ -4010,4 +4014,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     public function getInventoryType() {
         return $this->inventoryType;
     }
+	
+	public function setPing($ping) {
+		$this->ping = $ping;
+	}
+	
+	public function getPing() {
+		return $this->ping;
+	}
 }

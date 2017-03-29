@@ -60,6 +60,7 @@ use pocketmine\command\defaults\WhitelistCommand;
 use pocketmine\Server;
 use pocketmine\utils\MainLogger;
 use pocketmine\command\defaults\TransferCommand;
+use pocketmine\command\defaults\PingCommand;
 
 class SimpleCommandMap implements CommandMap{
 
@@ -113,6 +114,7 @@ class SimpleCommandMap implements CommandMap{
 		$this->register("pocketmine", new ReloadCommand("reload"));
 		
 		$this->register("pocketmine", new TransferCommand("transfer"));
+		$this->register("pocketmine", new PingCommand("ping"));
 
 		if($this->server->getProperty("debug.commands", false) === true){
 			$this->register("pocketmine", new StatusCommand("status"));

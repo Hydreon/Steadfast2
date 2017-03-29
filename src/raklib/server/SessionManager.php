@@ -116,6 +116,9 @@ class SessionManager{
 		$time = microtime(true);
 		foreach($this->sessions as $session){
 			$session->update($time);
+			if(($this->ticks % 40) === 0){
+				$this->streamPing($session);
+			}
 		}
 
 		foreach($this->ipSec as $address => $count){
@@ -205,6 +208,13 @@ class SessionManager{
     public function streamEncapsulated(Session $session, EncapsulatedPacket $packet, $flags = RakLib::PRIORITY_NORMAL){
         $id = $session->getAddress() . ":" . $session->getPort();
         $buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . chr($flags) . $packet->toBinary(true);
+        $this->server->pushThreadToMainPacket($buffer);
+    }
+	
+	public function streamPing(Session $session){
+        $id = $session->getAddress() . ":" . $session->getPort();
+		$ping = $session->getPing();
+        $buffer = chr(RakLib::PACKET_PING) . chr(strlen($id)) . $id .  chr(strlen($ping)) . $ping;
         $this->server->pushThreadToMainPacket($buffer);
     }
 

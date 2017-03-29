@@ -93,5 +93,24 @@
                 }
             }
         ]
+    },
+    "ping": {
+        "versions": [
+            {
+                "description": "Return player ping",
+                "permission": "any",
+                "aliases": [],
+                "overloads": {
+                    "byPass": {
+                        "input": {
+                            "parameters": []
+                        },
+                        "output": {
+                            "parameters": []
+                        }
+                    }
+                }
+            }
+        ]
     }
 }
