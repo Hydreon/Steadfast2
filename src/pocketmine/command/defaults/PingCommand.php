@@ -45,16 +45,8 @@ class PingCommand extends VanillaCommand{
 		if(!($sender instanceof Player)){
 			$sender->sendMessage(TextFormat::RED . "Only for players");
 			return true;
-		}
-		
-		$ping = $sender->getPing();
-		if ($ping <= 150) {
-			$sender->sendMessage(TextFormat::GREEN . "Connection: Good ({$ping}ms)");
-		} elseif ($ping <= 250) {
-			$sender->sendMessage(TextFormat::YELLOW . "Connection: Okay ({$ping}ms)");
-		} else {
-			$sender->sendMessage(TextFormat::RED . "Connection: Bad ({$ping}ms)");
-		}
+		}		
+		$sender->sendPing();
 		return true;
 	}
 }
