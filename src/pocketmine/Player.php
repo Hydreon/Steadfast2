@@ -327,6 +327,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     private $xuid = '';
 	
 	private $ping = 0;
+    
+    protected $xblName = '';
 	
 	public function getLeaveMessage(){
 		return "";
@@ -1774,6 +1776,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				
 				$this->username = TextFormat::clean($packet->username);
+                $this->xblName = $this->username;
 				$this->displayName = $this->username;
 				$this->setNameTag($this->username);
 				$this->iusername = strtolower($this->username);
@@ -3051,6 +3054,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function getName(){
 		return $this->username;
 	}
+    
+    public function getXBLName() {
+        return $this->xblName;
+    }
 	
 	public function freeChunks(){
 		foreach ($this->usedChunks as $index => $chunk) {
@@ -4022,4 +4029,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function getPing() {
 		return $this->ping;
 	}
+    
+    public function getXUID() {
+        return $this->xuid;
+    }
 }
