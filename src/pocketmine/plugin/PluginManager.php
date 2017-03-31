@@ -592,6 +592,9 @@ class PluginManager{
 					if(isset($options['versions'][0]['aliases']) && is_array($options['versions'][0]['aliases'])){
 						$newCmd->setAliases($options['versions'][0]['aliases']);
 					}
+					if(isset($options['versions'][0]['show-in-help'])){
+						$newCmd->setAvailableForHelp($options['versions'][0]['show-in-help']);
+					}
 					$pluginCmds[] = $newCmd;
 				}
 			}

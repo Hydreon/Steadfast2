@@ -29,6 +29,9 @@ use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 abstract class Command{
+	
+	private $availableForHelp = true;
+	
 	/** @var string */
 	private $name;
 
@@ -307,6 +310,14 @@ abstract class Command{
 				}
 			}
 		}
+	}
+	
+	public function setAvailableForHelp($val) {
+		$this->availableForHelp = $val;
+	}
+	
+	public function isAvailableForHelp() {
+		return $this->availableForHelp;
 	}
 
 	/**
