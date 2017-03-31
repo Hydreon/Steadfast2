@@ -158,6 +158,7 @@ use pocketmine\network\proxy\ProxyPacket;
 
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Elytra;
+use pocketmine\network\protocol\SetTitlePacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -4043,4 +4044,38 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     public function getXUID() {
         return $this->xuid;
     }
+	
+	public function setTitle($text, $subtext = '', $time = 36000) {
+		if ($this->protocol >= 105) {		
+			$pk = new SetTitlePacket();
+			$pk->type = SetTitlePacket::TITLE_TYPE_TIMES;
+			$pk->text = "";
+			$pk->fadeInTime = 5;
+			$pk->fadeOutTime = 5;
+			$pk->stayTime = 20 * $time;
+			$this->dataPacket($pk);
+			
+			if (!empty($subtext)) {
+				$pk = new SetTitlePacket();
+				$pk->type = SetTitlePacket::TITLE_TYPE_SUBTITLE;
+				$pk->text = $subtext;
+				$this->dataPacket($pk);
+			}
+			
+			$pk = new SetTitlePacket();
+			$pk->type = SetTitlePacket::TITLE_TYPE_TITLE;
+			$pk->text = $text;
+			$this->dataPacket($pk);	
+		}
+	}
+
+	public function clearTitle() {
+		if ($this->protocol >= 105) {
+			$pk = new SetTitlePacket();
+			$pk->type = SetTitlePacket::TITLE_TYPE_CLEAR;
+			$pk->text = "";
+			$this->dataPacket($pk);
+		}
+	}
+
 }
