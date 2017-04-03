@@ -49,6 +49,7 @@ use pocketmine\network\protocol\ExplodePacket;
 use pocketmine\network\protocol\HurtArmorPacket;
 use pocketmine\network\protocol\Info as ProtocolInfo;
 use pocketmine\network\protocol\Info105 as ProtocolInfo105;
+use pocketmine\network\protocol\Info110 as ProtocolInfo110;
 use pocketmine\network\protocol\InteractPacket;
 use pocketmine\network\protocol\LevelEventPacket;
 use pocketmine\network\protocol\DisconnectPacket;
@@ -103,6 +104,9 @@ class Network {
 	private $packetPool105;
 	
 	/** @var \SplFixedArray */
+	private $packetPool110;
+	
+	/** @var \SplFixedArray */
 	private $proxyPacketPool;
 
 	/** @var Server */
@@ -123,6 +127,7 @@ class Network {
 
 		$this->registerPackets();
 		$this->registerPackets105();
+		$this->registerPackets110();
 		$this->registerProxyPackets();
 
 		$this->server = $server;
@@ -238,6 +243,14 @@ class Network {
 	 * @param int        $id 0-255
 	 * @param DataPacket $class
 	 */
+	public function registerPacket110($id, $class){
+		$this->packetPool110[$id] = new $class;
+	}
+	
+	/**
+	 * @param int        $id 0-255
+	 * @param DataPacket $class
+	 */
 	public function registerProxyPacket($id, $class){
 		$this->proxyPacketPool[$id] = new $class;
 	}
@@ -303,6 +316,9 @@ class Network {
 	public function getPacket($id, $playerProtocol){
 		/** @var DataPacket $class */
 		switch ($playerProtocol) {
+			case 110:
+				$class = $this->packetPool110[$id];
+				break;
 			case 105:
 				$class = $this->packetPool105[$id];
 				break;
@@ -471,6 +487,65 @@ class Network {
 		$this->registerPacket105(ProtocolInfo105::RESOURCE_PACKS_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		
 		
+	}
+	
+	
+	private function registerPackets110(){
+		$this->packetPool110 = new \SplFixedArray(256);
+		$this->registerPacket110(ProtocolInfo110::LOGIN_PACKET, LoginPacket::class);
+		$this->registerPacket110(ProtocolInfo110::PLAY_STATUS_PACKET, PlayStatusPacket::class);
+		$this->registerPacket110(ProtocolInfo110::DISCONNECT_PACKET, DisconnectPacket::class);
+		$this->registerPacket110(ProtocolInfo110::TEXT_PACKET, TextPacket::class);
+		$this->registerPacket110(ProtocolInfo110::SET_TIME_PACKET, SetTimePacket::class);
+		$this->registerPacket110(ProtocolInfo110::START_GAME_PACKET, StartGamePacket::class);
+		$this->registerPacket110(ProtocolInfo110::ADD_PLAYER_PACKET, AddPlayerPacket::class);
+		$this->registerPacket110(ProtocolInfo110::ADD_ENTITY_PACKET, AddEntityPacket::class);
+		$this->registerPacket110(ProtocolInfo110::REMOVE_ENTITY_PACKET, RemoveEntityPacket::class);
+		$this->registerPacket110(ProtocolInfo110::ADD_ITEM_ENTITY_PACKET, AddItemEntityPacket::class);
+		$this->registerPacket110(ProtocolInfo110::TAKE_ITEM_ENTITY_PACKET, TakeItemEntityPacket::class);
+		$this->registerPacket110(ProtocolInfo110::MOVE_ENTITY_PACKET, MoveEntityPacket::class);
+		$this->registerPacket110(ProtocolInfo110::MOVE_PLAYER_PACKET, MovePlayerPacket::class);
+		$this->registerPacket110(ProtocolInfo110::REMOVE_BLOCK_PACKET, RemoveBlockPacket::class);
+		$this->registerPacket110(ProtocolInfo110::UPDATE_BLOCK_PACKET, UpdateBlockPacket::class);
+		$this->registerPacket110(ProtocolInfo110::ADD_PAINTING_PACKET, AddPaintingPacket::class);
+		$this->registerPacket110(ProtocolInfo110::EXPLODE_PACKET, ExplodePacket::class);
+		$this->registerPacket110(ProtocolInfo110::LEVEL_EVENT_PACKET, LevelEventPacket::class);
+		$this->registerPacket110(ProtocolInfo110::TILE_EVENT_PACKET, TileEventPacket::class);
+		$this->registerPacket110(ProtocolInfo110::ENTITY_EVENT_PACKET, EntityEventPacket::class);
+		$this->registerPacket110(ProtocolInfo110::MOB_EQUIPMENT_PACKET, MobEquipmentPacket::class);
+		$this->registerPacket110(ProtocolInfo110::MOB_ARMOR_EQUIPMENT_PACKET, MobArmorEquipmentPacket::class);
+		$this->registerPacket110(ProtocolInfo110::INTERACT_PACKET, InteractPacket::class);
+		$this->registerPacket110(ProtocolInfo110::USE_ITEM_PACKET, UseItemPacket::class);
+		$this->registerPacket110(ProtocolInfo110::PLAYER_ACTION_PACKET, PlayerActionPacket::class);
+		$this->registerPacket110(ProtocolInfo110::HURT_ARMOR_PACKET, HurtArmorPacket::class);
+		$this->registerPacket110(ProtocolInfo110::SET_ENTITY_DATA_PACKET, SetEntityDataPacket::class);
+		$this->registerPacket110(ProtocolInfo110::SET_ENTITY_MOTION_PACKET, SetEntityMotionPacket::class);
+		$this->registerPacket110(ProtocolInfo110::SET_ENTITY_LINK_PACKET, SetEntityLinkPacket::class);
+		$this->registerPacket110(ProtocolInfo110::SET_SPAWN_POSITION_PACKET, SetSpawnPositionPacket::class);
+		$this->registerPacket110(ProtocolInfo110::ANIMATE_PACKET, AnimatePacket::class);
+		$this->registerPacket110(ProtocolInfo110::RESPAWN_PACKET, RespawnPacket::class);
+		$this->registerPacket110(ProtocolInfo110::DROP_ITEM_PACKET, DropItemPacket::class);
+		$this->registerPacket110(ProtocolInfo110::CONTAINER_OPEN_PACKET, ContainerOpenPacket::class);
+		$this->registerPacket110(ProtocolInfo110::CONTAINER_CLOSE_PACKET, ContainerClosePacket::class);
+		$this->registerPacket110(ProtocolInfo110::CONTAINER_SET_SLOT_PACKET, ContainerSetSlotPacket::class);
+		$this->registerPacket110(ProtocolInfo110::CONTAINER_SET_DATA_PACKET, ContainerSetDataPacket::class);
+		$this->registerPacket110(ProtocolInfo110::CONTAINER_SET_CONTENT_PACKET, ContainerSetContentPacket::class);
+		$this->registerPacket110(ProtocolInfo110::CRAFTING_DATA_PACKET, CraftingDataPacket::class);
+		$this->registerPacket110(ProtocolInfo110::CRAFTING_EVENT_PACKET, CraftingEventPacket::class);
+		$this->registerPacket110(ProtocolInfo110::ADVENTURE_SETTINGS_PACKET, AdventureSettingsPacket::class);
+		$this->registerPacket110(ProtocolInfo110::TILE_ENTITY_DATA_PACKET, TileEntityDataPacket::class);
+		$this->registerPacket110(ProtocolInfo110::FULL_CHUNK_DATA_PACKET, FullChunkDataPacket::class);
+		$this->registerPacket110(ProtocolInfo110::SET_COMMANDS_ENABLED_PACKET, SetCommandsEnabledPacket::class);
+		$this->registerPacket110(ProtocolInfo110::SET_DIFFICULTY_PACKET, SetDifficultyPacket::class);
+		$this->registerPacket110(ProtocolInfo110::PLAYER_LIST_PACKET, PlayerListPacket::class);
+		$this->registerPacket110(ProtocolInfo110::REQUEST_CHUNK_RADIUS_PACKET, RequestChunkRadiusPacket::class);
+		$this->registerPacket110(ProtocolInfo110::CHUNK_RADIUS_UPDATE_PACKET, ChunkRadiusUpdatePacket::class);
+		$this->registerPacket110(ProtocolInfo110::AVAILABLE_COMMANDS_PACKET, AvailableCommandsPacket::class);
+		$this->registerPacket110(ProtocolInfo110::COMMAND_STEP_PACKET, CommandStepPacket::class);
+		$this->registerPacket110(ProtocolInfo110::TRANSFER_PACKET, TransferPacket::class);
+		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
+		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACKS_INFO_PACKET, ResourcePackDataInfoPacket::class);
+	
 	}
 	
 	private function registerProxyPackets(){

@@ -36,6 +36,8 @@ use raklib\RakLib;
 use raklib\server\RakLibServer;
 use raklib\server\ServerHandler;
 use raklib\server\ServerInstance;
+use pocketmine\network\protocol\BatchPacket;
+use pocketmine\utils\Binary;
 
 class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	
@@ -244,22 +246,23 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	 */
 	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
 		if(isset($this->identifiers[$player])){			
+			$protocol = $player->getPlayerProtocol();
 			$identifier = $this->identifiers[$player];
 			$pk = null;
 			if(!$packet->isEncoded){
-				$packet->encode($player->getPlayerProtocol());
-			}elseif(!$needACK){
+				$packet->encode($protocol);
+			} elseif(!$needACK){
 				if (isset($packet->__encapsulatedPacket)) {
 					unset($packet->__encapsulatedPacket);
 				}
 				$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
 				$packet->__encapsulatedPacket->identifierACK = null;
-				$packet->__encapsulatedPacket->buffer = chr(0xfe) . $packet->buffer;
+				$packet->__encapsulatedPacket->buffer = chr(0xfe) . $this->getPacketBuffer($packet, $protocol);
 				$packet->__encapsulatedPacket->reliability = 3;
 				$pk = $packet->__encapsulatedPacket;
 			}
 
-			if(!$immediate and !$needACK and $packet->pid() !== ProtocolInfo::BATCH_PACKET
+			if(!$immediate and !$needACK and !($packet instanceof BatchPacket)
 				and Network::$BATCH_THRESHOLD >= 0
 				and strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
 				$this->server->batchPackets([$player], [$packet], true);
@@ -267,8 +270,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			}
 
 			if($pk === null){
-				$pk = new EncapsulatedPacket();
-				$pk->buffer = chr(0xfe) . $packet->buffer;
+				$pk = new EncapsulatedPacket();				
+				$pk->buffer = chr(0xfe) . $this->getPacketBuffer($packet, $protocol);
 				$pk->reliability = 3;
 
 				if($needACK === true){
@@ -282,29 +285,53 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		return null;
 	}
 	
-	private function getPacket($buffer, $playerProtocol){
-		if(ord($buffer{0}) == 0xfe){
-			$buffer = substr($buffer, 1);	
-			$pid = ord($buffer{0});			
+	private function getPacket($buffer, $playerProtocol) {
+		if (ord($buffer{0}) == 0xfe) {
+			$buffer = substr($buffer, 1);
 		} else {
-			return;
-		}
-		if(($data = $this->network->getPacket($pid, $playerProtocol)) === null){
 			return null;
 		}
-		$data->setBuffer($buffer, 1);
-
-		return $data;
+		
+		if ($playerProtocol == 0) {
+			$playerProtocol = $this->isZlib($buffer) ? 110 : 100;
+		}
+		switch ($playerProtocol) {
+			case 110:
+				$pk = new BatchPacket($buffer);
+				$pk->is110 = true;
+				return $pk;
+			default:
+				$pid = ord($buffer{0});
+				if (($data = $this->network->getPacket($pid, $playerProtocol)) === null) {
+					return null;
+				}
+				$data->setBuffer($buffer, 1);
+				return $data;
+		}
 	}
 	
 	public function putReadyPacket($player, $buffer) {
-		if (isset($this->identifiers[$player])) {			
+		if (isset($this->identifiers[$player])) {	
 			$pk = new EncapsulatedPacket();
 			$pk->buffer = chr(0xfe) . $buffer;
-			$pk->reliability = 2;		
+			$pk->reliability = 3;		
 			$this->interface->sendEncapsulated($player->getIdentifier(), $pk, RakLib::PRIORITY_NORMAL);			
 		}
 	}
 	
+	private function getPacketBuffer($packet, $protocol) {
+		if ($protocol < 110 || ($packet instanceof BatchPacket)) {
+			return $packet->buffer;
+		}
+		
+		return zlib_encode(Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer, ZLIB_ENCODING_DEFLATE, 7);
+	}
 	
+	private function isZlib($buffer) {
+		if (ord($buffer{0}) == 120) {
+			return true;
+		}
+		return false;
+	}
+
 }

@@ -4009,10 +4009,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function getPlayerProtocol() {
-		if ($this->protocol == 105) {
+		if ($this->protocol == 110) {
+			return 110;
+		} else if ($this->protocol == 105) {
 			return 105;
-		} else {
+		} else if ($this->protocol > 0){
 			return 100;
+		} else {
+			return 0;
 		}
 	}
 	
