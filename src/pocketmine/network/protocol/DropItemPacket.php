@@ -33,7 +33,7 @@ class DropItemPacket extends PEPacket{
 
 	public function decode($playerProtocol){
 		$this->type = $this->getByte();
-		$this->item = $this->getSlot();
+		$this->item = $this->getSlot($playerProtocol);
 	}
 
 	public function encode($playerProtocol){

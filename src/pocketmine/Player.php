@@ -1084,10 +1084,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($this->gamemode === Player::SPECTATOR){
 			$pk = new ContainerSetContentPacket();
 			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
+			$pk->eid = $this->getId();
 			$this->dataPacket($pk);
 		}elseif($this->gamemode === Player::CREATIVE) {
 			$pk = new ContainerSetContentPacket();
 			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
+			$pk->eid = $this->getId();
 			foreach(Item::getCreativeItems() as $item){
 				$pk->slots[] = clone $item;
 			}
@@ -3664,10 +3666,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if ($this->gamemode === Player::SPECTATOR) {
 			$pk = new ContainerSetContentPacket();
 			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
+			$pk->eid = $this->getId();
 			$this->dataPacket($pk);
 		} elseif ($this->gamemode === Player::CREATIVE) {
 			$pk = new ContainerSetContentPacket();
 			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
+			$pk->eid = $this->getId();
 			foreach (Item::getCreativeItems() as $item) {
 				$pk->slots[] = clone $item;
 			}

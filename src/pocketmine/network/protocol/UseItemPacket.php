@@ -55,7 +55,7 @@ class UseItemPacket extends PEPacket{
 		$this->posY = $this->getLFloat();
 		$this->posZ = $this->getLFloat();
 		$this->hotbarSlot = $this->getSignedVarInt();
-		$this->item = $this->getSlot();
+		$this->item = $this->getSlot($playerProtocol);
 	}
 
 	public function encode($playerProtocol){

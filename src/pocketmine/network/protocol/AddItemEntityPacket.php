@@ -45,7 +45,7 @@ class AddItemEntityPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->eid);
 		$this->putVarInt($this->eid);
-		$this->putSlot($this->item);
+		$this->putSlot($this->item, $playerProtocol);
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);

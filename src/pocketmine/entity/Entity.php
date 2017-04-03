@@ -154,7 +154,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_CHESTED_MOUNT = 31;
 	const DATA_FLAG_STACKABLE = 32; //???
 	
-	public static $entityCount = 1;
+	public static $entityCount = 2;
 	/** @var Entity[] */
 	private static $knownEntities = [];
 	private static $shortNames = [];

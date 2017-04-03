@@ -44,7 +44,9 @@ class ContainerOpenPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putByte($this->windowid);
 		$this->putByte($this->type);
-		$this->putSignedVarInt($this->slots);
+		if ($playerProtocol < 110) {
+			$this->putSignedVarInt($this->slots);
+		}
 		$this->putSignedVarInt($this->x);
 		$this->putByte($this->y);
 		$this->putSignedVarInt($this->z);

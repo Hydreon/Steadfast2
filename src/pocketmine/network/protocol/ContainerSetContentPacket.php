@@ -35,6 +35,7 @@ class ContainerSetContentPacket extends PEPacket{
 	public $windowid;
 	public $slots = [];
 	public $hotbar = [];
+	public $eid = 0;
 
 	public function clean(){
 		$this->slots = [];
@@ -46,7 +47,7 @@ class ContainerSetContentPacket extends PEPacket{
 		$this->windowid = $this->getByte();
 		$count = $this->getVarInt();
 		for($s = 0; $s < $count and !$this->feof(); ++$s){
-			$this->slots[$s] = $this->getSlot();
+			$this->slots[$s] = $this->getSlot($playerProtocol);
 		}
 		if($this->windowid === self::SPECIAL_INVENTORY){
 			$count = $this->getVarInt();
@@ -59,15 +60,18 @@ class ContainerSetContentPacket extends PEPacket{
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putByte($this->windowid);
+		if ($playerProtocol >= 110) {
+			$this->putVarInt($this->eid);
+		}
 		$this->putVarInt(count($this->slots));
 		foreach($this->slots as $slot){
-			$this->putSlot($slot);
+			$this->putSlot($slot, $playerProtocol);	
 		}
 		if($this->windowid === self::SPECIAL_INVENTORY and count($this->hotbar) > 0){
 			$this->putVarInt(count($this->hotbar));
 			foreach($this->hotbar as $slot){
 				$this->putSignedVarInt($slot);
-			}
+			}	
 		}else{
 			$this->putVarInt(0);
 		}
