@@ -8,6 +8,9 @@ class MetadataConvertor {
 
 	private static $initialMeta = [];
 	private static $diffEntityFlags110 = [
+		'DATA_FLAG_RESTING_BAT' => 22,
+		'DATA_FLAG_ANIMAL_SIT' => 23,
+		'DATA_FLAG_ANGRY_WOLF' => 24,
 		'DATA_FLAG_INTERESTED' => 25,
 		'DATA_FLAG_ANGRY_BLAZE' => 26,
 		'DATA_FLAG_TAME_WOLF' => 27,
@@ -22,7 +25,8 @@ class MetadataConvertor {
 	];
 	private static $entityFlags110 = [];
 	private static $diffEntityMetaIds110 = [
-		'DATA_EXPLODE_TIMER' => 57
+		'DATA_EXPLODE_TIMER' => 57,
+		'DATA_SEAT_RIDER_OFFSET' => 58,
 	];
 	private static $entityMetaIds110 = [];
 
