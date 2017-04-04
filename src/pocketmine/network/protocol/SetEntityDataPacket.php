@@ -42,7 +42,7 @@ class SetEntityDataPacket extends PEPacket{
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->eid);
-		$meta = Binary::writeMetadata($this->metadata);
+		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
 	}
 

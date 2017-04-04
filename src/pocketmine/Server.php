@@ -141,6 +141,7 @@ use pocketmine\entity\monster\walking\Zombie;
 use pocketmine\entity\monster\walking\ZombieVillager;
 use pocketmine\entity\projectile\FireBall;
 use pocketmine\network\ProxyInterface;
+use pocketmine\utils\MetadataConvertor;
 
 /**
  * The class that manages everything
@@ -1645,6 +1646,7 @@ class Server{
 		Item::init();
 		Biome::init();
 		TextWrapper::init();
+		MetadataConvertor::init();
 		$this->craftingManager = new CraftingManager();
 
 		$this->pluginManager = new PluginManager($this, $this->commandMap);

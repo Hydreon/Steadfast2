@@ -68,7 +68,7 @@ class AddPlayerPacket extends PEPacket{
 		$this->putSignedVarInt(0);
 //		$this->putSlot($this->item, $playerProtocol);
 
-		$meta = Binary::writeMetadata($this->metadata);
+		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
 	}
 

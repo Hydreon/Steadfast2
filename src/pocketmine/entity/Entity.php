@@ -154,6 +154,13 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_CHESTED_MOUNT = 31;
 	const DATA_FLAG_STACKABLE = 32; //???
 	
+	
+	const DATA_PLAYER_FLAG_SLEEP = 1;
+	const DATA_PLAYER_FLAG_DEAD = 2;
+
+	const DATA_PLAYER_FLAGS = 27;
+	const DATA_PLAYER_BED_POSITION = 29;
+	
 	public static $entityCount = 2;
 	/** @var Entity[] */
 	private static $knownEntities = [];
