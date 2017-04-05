@@ -1084,10 +1084,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($this->gamemode === Player::SPECTATOR){
 			$pk = new ContainerSetContentPacket();
 			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
+			$pk->eid = $this->getId();
 			$this->dataPacket($pk);
 		}elseif($this->gamemode === Player::CREATIVE) {
 			$pk = new ContainerSetContentPacket();
 			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
+			$pk->eid = $this->getId();
 			foreach(Item::getCreativeItems() as $item){
 				$pk->slots[] = clone $item;
 			}
@@ -2568,6 +2570,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 //				$this->craftingType = self::CRAFTING_DEFAULT;
 				if($packet->type === TextPacket::TYPE_CHAT){
+					if ($this->getPlayerProtocol() == ProtocolInfo::PROTOCOL_110 && $packet->message{0} == '#') { //hack for beta version
+						$commandLine = substr($packet->message, 1);
+						$ev = new PlayerCommandPreprocessEvent($this, $commandLine);
+						$this->server->getPluginManager()->callEvent($ev);
+						if ($ev->isCancelled()) {
+							break;
+						}
+						$this->server->dispatchCommand($this, $commandLine);
+						$ev = new PlayerCommandPostprocessEvent($this, $commandLine);
+						$this->server->getPluginManager()->callEvent($ev);
+						break;
+					}
+					
 					$packet->message = TextFormat::clean($packet->message, $this->removeFormat);
 					foreach(explode("\n", $packet->message) as $message){
 						if(trim($message) != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){							
@@ -3664,10 +3679,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if ($this->gamemode === Player::SPECTATOR) {
 			$pk = new ContainerSetContentPacket();
 			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
+			$pk->eid = $this->getId();
 			$this->dataPacket($pk);
 		} elseif ($this->gamemode === Player::CREATIVE) {
 			$pk = new ContainerSetContentPacket();
 			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
+			$pk->eid = $this->getId();
 			foreach (Item::getCreativeItems() as $item) {
 				$pk->slots[] = clone $item;
 			}
@@ -4009,14 +4026,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function getPlayerProtocol() {
-		if ($this->protocol == 105) {
-			return 105;
-		} else {
-			return 100;
+		switch ($this->protocol) {
+			case ProtocolInfo::PROTOCOL_110:
+			case ProtocolInfo::PROTOCOL_105:
+				return $this->protocol;
+			default:
+				return ProtocolInfo::BASE_PROTOCOL;
 		}
 	}
-	
-    public function getDeviceOS() {
+
+	public function getDeviceOS() {
         return $this->deviceType;
     }
     
@@ -4047,7 +4066,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     }
 	
 	public function setTitle($text, $subtext = '', $time = 36000) {
-		if ($this->protocol >= 105) {		
+		if ($this->protocol >= Info::PROTOCOL_105) {		
 			$pk = new SetTitlePacket();
 			$pk->type = SetTitlePacket::TITLE_TYPE_TIMES;
 			$pk->text = "";
@@ -4055,6 +4074,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->fadeOutTime = 5;
 			$pk->stayTime = 20 * $time;
 			$this->dataPacket($pk);
+			
+			if ($this->getPlayerProtocol() == ProtocolInfo::PROTOCOL_110) { //hack for beta version
+				$subtext =  TextFormat::RED ."Beta players: use # for commands as #login";
+			}
 			
 			if (!empty($subtext)) {
 				$pk = new SetTitlePacket();
@@ -4071,7 +4094,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function clearTitle() {
-		if ($this->protocol >= 105) {
+		if ($this->protocol >= Info::PROTOCOL_105) {
 			$pk = new SetTitlePacket();
 			$pk->type = SetTitlePacket::TITLE_TYPE_CLEAR;
 			$pk->text = "";

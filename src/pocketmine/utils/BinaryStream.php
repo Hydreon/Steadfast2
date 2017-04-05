@@ -28,6 +28,7 @@ namespace pocketmine\utils;
 #endif
 
 use pocketmine\item\Item;
+use pocketmine\network\protocol\Info;
 
 
 class BinaryStream extends \stdClass{
@@ -187,7 +188,7 @@ class BinaryStream extends \stdClass{
 		$this->put($uuid->toBinary());
 	}
 
-	public function getSlot(){		
+	public function getSlot($playerProtocol){		
 		$id = $this->getSignedVarInt();		
 		if($id <= 0){
 			return Item::get(0, 0, 0);
@@ -196,11 +197,15 @@ class BinaryStream extends \stdClass{
 		$aux = $this->getSignedVarInt();
 		$meta = $aux >> 8;
 		$count = $aux & 0xff;
-				
+
 		$nbtLen = $this->getLShort();		
 		$nbt = "";		
 		if($nbtLen > 0){
 			$nbt = $this->get($nbtLen);
+		}
+		
+		if ($playerProtocol >= Info::PROTOCOL_110) {
+			$this->offset += 2;
 		}
 		
 		return Item::get(
@@ -211,16 +216,20 @@ class BinaryStream extends \stdClass{
 		);
 	}
 
-	public function putSlot(Item $item){
+	public function putSlot(Item $item, $playerProtocol){
 		if($item->getId() === 0){
 			$this->putSignedVarInt(0);
 			return;
 		}
 		$this->putSignedVarInt($item->getId());
 		$this->putSignedVarInt(($item->getDamage() === null ? 0  : ($item->getDamage() << 8)) + $item->getCount());	
-		$nbt = $item->getCompound();		
+		$nbt = $item->getCompound();	
 		$this->putLShort(strlen($nbt));
-		$this->put($nbt);		
+		$this->put($nbt);
+		if ($playerProtocol >= Info::PROTOCOL_110) {
+			$this->putByte(0);
+			$this->putByte(0);
+		}
 	}
 
 	public function feof(){

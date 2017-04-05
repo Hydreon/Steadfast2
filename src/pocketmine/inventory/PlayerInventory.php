@@ -332,6 +332,7 @@ class PlayerInventory extends BaseInventory{
 		foreach($target as $player){
 			if($player === $this->getHolder()){
 				$pk2 = new ContainerSetContentPacket();
+				$pk2->eid = $this->getHolder()->getId();
 				$pk2->windowid = ContainerSetContentPacket::SPECIAL_ARMOR;
 				$pk2->slots = $armor;
 				$player->dataPacket($pk2);
@@ -400,6 +401,7 @@ class PlayerInventory extends BaseInventory{
 
 		$pk = new ContainerSetContentPacket();
 		$pk->slots = [];
+		$pk->eid = $this->getHolder()->getId();
 		for($i = 0; $i < $this->getSize(); ++$i){ //Do not send armor by error here
 			$pk->slots[$i] = $this->getItem($i);
 		}

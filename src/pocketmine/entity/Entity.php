@@ -138,7 +138,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_NOT_MOVE = 16;
 	const DATA_FLAG_NO_AI = 16;
 	const DATA_FLAG_SILENT = 17;
-	const DATA_FLAG_WALLCLIMBING = 18;
+	const DATA_FLAG_IS_CLIMBING = 18;
 	const DATA_FLAG_RESTING_BAT = 19;
 	const DATA_FLAG_ANIMAL_SIT = 20;
 	const DATA_FLAG_ANGRY_WOLF = 21;
@@ -154,7 +154,22 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_CHESTED_MOUNT = 31;
 	const DATA_FLAG_STACKABLE = 32; //???
 	
-	public static $entityCount = 1;
+	/* 1.1.0 new flags
+	const DATA_FLAG_CAN_CLIMBING = 19; 
+	const DATA_FLAG_IS_SWIMMER = 20; 
+	const DATA_FLAG_CAN_FLY = 21; 
+	const DATA_FLAG_IS_STAING = 37; 
+	const DATA_FLAG_IS_WASD_CONTROLLED = 43; 
+	const DATA_FLAG_CAN_POWER_JUMP = 44;
+	 */
+	
+	const DATA_PLAYER_FLAG_SLEEP = 1;
+	const DATA_PLAYER_FLAG_DEAD = 2;
+
+	const DATA_PLAYER_FLAGS = 27;
+	const DATA_PLAYER_BED_POSITION = 29;
+	
+	public static $entityCount = 2;
 	/** @var Entity[] */
 	private static $knownEntities = [];
 	private static $shortNames = [];

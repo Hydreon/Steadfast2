@@ -40,12 +40,6 @@ use pocketmine\level\Level;
 
 class Human extends Creature implements ProjectileSource, InventoryHolder{
 
-	const DATA_PLAYER_FLAG_SLEEP = 1;
-	const DATA_PLAYER_FLAG_DEAD = 2;
-
-	const DATA_PLAYER_FLAGS = 27;
-	const DATA_PLAYER_BED_POSITION = 29;
-
 	protected $nameTag = "TESTIFICATE";
 	/** @var PlayerInventory */
 	protected $inventory;
