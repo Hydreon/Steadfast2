@@ -2570,6 +2570,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 //				$this->craftingType = self::CRAFTING_DEFAULT;
 				if($packet->type === TextPacket::TYPE_CHAT){
+					if ($this->getPlayerProtocol() == ProtocolInfo::PROTOCOL_110 && $packet->message{0} == '#') { //hack for beta version
+						$commandLine = substr($packet->message, 1);
+						$ev = new PlayerCommandPreprocessEvent($this, $commandLine);
+						$this->server->getPluginManager()->callEvent($ev);
+						if ($ev->isCancelled()) {
+							break;
+						}
+						$this->server->dispatchCommand($this, $commandLine);
+						$ev = new PlayerCommandPostprocessEvent($this, $commandLine);
+						$this->server->getPluginManager()->callEvent($ev);
+						break;
+					}
+					
 					$packet->message = TextFormat::clean($packet->message, $this->removeFormat);
 					foreach(explode("\n", $packet->message) as $message){
 						if(trim($message) != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){							
@@ -4061,6 +4074,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->fadeOutTime = 5;
 			$pk->stayTime = 20 * $time;
 			$this->dataPacket($pk);
+			
+			if ($this->getPlayerProtocol() == ProtocolInfo::PROTOCOL_110) { //hack for beta version
+				$subtext =  TextFormat::RED ."Beta players: use # for commands as #login";
+			}
 			
 			if (!empty($subtext)) {
 				$pk = new SetTitlePacket();
