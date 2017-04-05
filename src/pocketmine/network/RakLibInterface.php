@@ -179,7 +179,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$player = $this->players[$identifier];
 			try{
 				if($packet->buffer !== ""){
-					$pk = $this->getPacket($packet->buffer, $player->getPlayerProtocol());				
+					$pk = $this->getPacket($packet->buffer, $player->getPlayerProtocol(), $player->isOnline());				
 					if (!is_null($pk)) {
 						$pk->decode($player->getPlayerProtocol());
 						$player->handleDataPacket($pk);
@@ -285,18 +285,18 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		return null;
 	}
 	
-	private function getPacket($buffer, $playerProtocol) {
+	private function getPacket($buffer, $playerProtocol, $isOnline) {
 		if (ord($buffer{0}) == 0xfe) {
 			$buffer = substr($buffer, 1);
 		} else {
 			return null;
 		}
 		
-		if ($playerProtocol == 0) {
-			$playerProtocol = $this->isZlib($buffer) ? 110 : 100;
+		if (!$isOnline) {
+			$playerProtocol = $this->isZlib($buffer) ? Info::PROTOCOL_110 : Info::BASE_PROTOCOL;
 		}
 		switch ($playerProtocol) {
-			case 110:
+			case Info::PROTOCOL_110:
 				$pk = new BatchPacket($buffer);
 				$pk->is110 = true;
 				return $pk;
@@ -320,7 +320,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	}
 	
 	private function getPacketBuffer($packet, $protocol) {
-		if ($protocol < 110 || ($packet instanceof BatchPacket)) {
+		if ($protocol < Info::PROTOCOL_110 || ($packet instanceof BatchPacket)) {
 			return $packet->buffer;
 		}
 		

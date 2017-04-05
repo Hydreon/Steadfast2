@@ -60,7 +60,7 @@ class ContainerSetContentPacket extends PEPacket{
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putByte($this->windowid);
-		if ($playerProtocol >= 110) {
+		if ($playerProtocol >= Info::PROTOCOL_110) {
 			$this->putVarInt($this->eid);
 		}
 		$this->putVarInt(count($this->slots));

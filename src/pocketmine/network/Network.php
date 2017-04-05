@@ -316,10 +316,10 @@ class Network {
 	public function getPacket($id, $playerProtocol){
 		/** @var DataPacket $class */
 		switch ($playerProtocol) {
-			case 110:
+			case Info::PROTOCOL_110:
 				$class = $this->packetPool110[$id];
 				break;
-			case 105:
+			case Info::PROTOCOL_105:
 				$class = $this->packetPool105[$id];
 				break;
 			default:

@@ -28,6 +28,7 @@ namespace pocketmine\utils;
 #endif
 
 use pocketmine\item\Item;
+use pocketmine\network\protocol\Info;
 
 
 class BinaryStream extends \stdClass{
@@ -203,7 +204,7 @@ class BinaryStream extends \stdClass{
 			$nbt = $this->get($nbtLen);
 		}
 		
-		if ($playerProtocol >= 110) {
+		if ($playerProtocol >= Info::PROTOCOL_110) {
 			$this->offset += 2;
 		}
 		
@@ -225,7 +226,7 @@ class BinaryStream extends \stdClass{
 		$nbt = $item->getCompound();	
 		$this->putLShort(strlen($nbt));
 		$this->put($nbt);
-		if ($playerProtocol >= 110) {
+		if ($playerProtocol >= Info::PROTOCOL_110) {
 			$this->putByte(0);
 			$this->putByte(0);
 		}

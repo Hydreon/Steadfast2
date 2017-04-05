@@ -4013,18 +4013,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function getPlayerProtocol() {
-		if ($this->protocol == 110) {
-			return 110;
-		} else if ($this->protocol == 105) {
-			return 105;
-		} else if ($this->protocol > 0){
-			return 100;
-		} else {
-			return 0;
+		switch ($this->protocol) {
+			case ProtocolInfo::PROTOCOL_110:
+			case ProtocolInfo::PROTOCOL_105:
+				return $this->protocol;
+			default:
+				return ProtocolInfo::BASE_PROTOCOL;
 		}
 	}
-	
-    public function getDeviceOS() {
+
+	public function getDeviceOS() {
         return $this->deviceType;
     }
     
@@ -4055,7 +4053,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     }
 	
 	public function setTitle($text, $subtext = '', $time = 36000) {
-		if ($this->protocol >= 105) {		
+		if ($this->protocol >= Info::PROTOCOL_105) {		
 			$pk = new SetTitlePacket();
 			$pk->type = SetTitlePacket::TITLE_TYPE_TIMES;
 			$pk->text = "";
@@ -4079,7 +4077,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function clearTitle() {
-		if ($this->protocol >= 105) {
+		if ($this->protocol >= Info::PROTOCOL_105) {
 			$pk = new SetTitlePacket();
 			$pk->type = SetTitlePacket::TITLE_TYPE_CLEAR;
 			$pk->text = "";

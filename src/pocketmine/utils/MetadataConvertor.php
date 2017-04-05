@@ -3,6 +3,7 @@
 namespace pocketmine\utils;
 
 use pocketmine\entity\Entity;
+use pocketmine\network\protocol\Info;
 
 class MetadataConvertor {
 
@@ -55,7 +56,7 @@ class MetadataConvertor {
 
 	private static function updateMetaIds($meta, $protocol) {
 		switch ($protocol) {
-			case 110:
+			case Info::PROTOCOL_110:
 				$newMeta = [];
 				foreach ($meta as $key => $value) {
 					if (isset(self::$entityMetaIds110[$key])) {
@@ -72,7 +73,7 @@ class MetadataConvertor {
 
 	private static function updateEntityFlags($meta, $protocol) {
 		switch ($protocol) {
-			case 110:
+			case Info::PROTOCOL_110:
 				if (isset($meta[Entity::DATA_FLAGS])) {
 					$newflags = 0;
 					$flags = strrev(decbin($meta[Entity::DATA_FLAGS][1]));
