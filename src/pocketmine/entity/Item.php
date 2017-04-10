@@ -71,10 +71,12 @@ class Item extends Entity{
 		if(isset($this->namedtag->Thrower)){
 			$this->thrower = $this->namedtag["Thrower"];
 		}
-		$this->item = NBT::getItemHelper($this->namedtag->Item);
-
-
-		$this->server->getPluginManager()->callEvent(new ItemSpawnEvent($this));
+		if (isset($this->namedtag->Item)) {
+			$this->item = NBT::getItemHelper($this->namedtag->Item);
+			$this->server->getPluginManager()->callEvent(new ItemSpawnEvent($this));
+		} else {
+			$this->close();
+		}	
 	}
 
 
