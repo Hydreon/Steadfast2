@@ -153,6 +153,10 @@ abstract class PluginBase implements Plugin{
 		return $this->jsonCommands;
 	}
 
+	public function setJsonCommands($commands) {
+        $this->jsonCommands = $commands;
+    }
+
 	/**
 	 * @return PluginLogger
 	 */
