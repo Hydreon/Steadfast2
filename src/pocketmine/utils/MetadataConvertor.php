@@ -75,7 +75,7 @@ class MetadataConvertor {
 		switch ($protocol) {
 			case Info::PROTOCOL_110:
 				if (isset($meta[Entity::DATA_FLAGS])) {
-					$newflags = 0;
+					$newflags = 1 << 19; //DATA_FLAG_CAN_CLIMBING
 					$flags = strrev(decbin($meta[Entity::DATA_FLAGS][1]));
 					for ($i = 0; $i < strlen($flags); $i++) {
 						if ($flags{$i} === '1') {
