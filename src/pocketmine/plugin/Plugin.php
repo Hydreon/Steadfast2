@@ -116,4 +116,5 @@ interface Plugin extends CommandExecutor{
 	 */
 	public function getJsonCommands();
 
+    public function setJsonCommands($commands);
 }
