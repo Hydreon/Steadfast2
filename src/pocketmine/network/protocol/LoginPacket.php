@@ -50,6 +50,7 @@ class LoginPacket extends PEPacket {
     public $inventoryType = -1;
     public $osType = -1;
     public $xuid = '';
+	public $languageCode = false;
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -101,6 +102,9 @@ class LoginPacket extends PEPacket {
         }
         if (isset($this->playerData['UIProfile'])) {
             $this->inventoryType = $this->playerData['UIProfile'];
+        }
+		 if (isset($this->playerData['LanguageCode'])) {
+            $this->languageCode = $this->playerData['LanguageCode'];
         }
 	}
 

@@ -319,6 +319,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     
     /** @IMPORTANT don't change the scope */
     private $inventoryType = self::INVENTORY_CLASSIC;
+	private $languageCode = false;
     
     /** @IMPORTANT don't change the scope */
     private $deviceType = self::OS_DEDICATED;
@@ -1802,6 +1803,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                     $this->inventoryType = $packet->inventoryType;
                 }
                 $this->xuid = $packet->xuid;
+				$this->languageCode = $packet->languageCode;
 					
 				$this->processLogin();
 				//Timings::$timerLoginPacket->stopTiming();
@@ -3636,6 +3638,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->generator = 1; //0 old, 1 infinite, 2 flat
 		$pk->gamemode = $this->gamemode & 0x01;
 		$pk->eid = $this->id;
+		$pk->playerHaveLanguageCode = ($this->languageCode !== false);
 		$this->dataPacket($pk);
 
 		$pk = new SetTimePacket();

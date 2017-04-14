@@ -98,7 +98,7 @@ class ChunkMaker extends Worker {
 		$chunkData = chr($countBlocksInChunk);		
 		
 		for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
-			$chunkData .= chr($blockIndex);
+			$chunkData .= chr(0);
 			for ($i = 0; $i < 256; $i++) {
 				$chunkData .= substr($blockIdArray, $blockIndex * 16 + $i * 128, 16);
 			}
