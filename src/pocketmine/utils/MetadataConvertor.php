@@ -79,6 +79,10 @@ class MetadataConvertor {
 					$flags = strrev(decbin($meta[Entity::DATA_FLAGS][1]));
 					for ($i = 0; $i < strlen($flags); $i++) {
 						if ($flags{$i} === '1') {
+							if ($i == Entity::DATA_FLAG_INVISIBLE) { //hack for 1.1.0.3 floating text
+								$meta[Entity::DATA_SCALE] = [Entity::DATA_TYPE_FLOAT, 0] ;
+								continue;
+							}
 							$newflags |= 1 << (isset(self::$entityFlags110[$i]) ? self::$entityFlags110[$i] : $i);
 						}
 					}
