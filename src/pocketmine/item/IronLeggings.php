@@ -28,5 +28,7 @@ class IronLeggings extends Armor{
 	
 	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::IRON_LEGGINGS, $meta, $count, "Iron Leggings");
+        $this->type = Armor::TYPE_LEGGINS;
+        $this->tier = Armor::TIER_IRON;
 	}
 }

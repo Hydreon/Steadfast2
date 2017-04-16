@@ -25,6 +25,8 @@ namespace pocketmine\item;
 class DiamondShovel extends Tool{
 	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::DIAMOND_SHOVEL, $meta, $count, "Diamond Shovel");
+        $this->type = Tool::TYPE_SHOVEL;
+        $this->tier = Tool::TIER_DIAMOND;
 	}
 
 	public function isShovel(){

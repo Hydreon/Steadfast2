@@ -1487,7 +1487,7 @@ class Item{
 			$this->setNamedTag($tags);
 		}else{
 			$this->tags = $tags;
-			$this->cachedNBT = null;
+            $this->cachedNBT = empty($tags) ? null : Item::parseCompound($tags);
 		}
 
 		return $this;

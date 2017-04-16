@@ -155,7 +155,7 @@ use pocketmine\network\proxy\DisconnectPacket as ProxyDisconnectPacket;
 use pocketmine\network\ProxyInterface;
 use pocketmine\network\proxy\RedirectPacket;
 use pocketmine\network\proxy\ProxyPacket;
-
+use pocketmine\inventory\AnvilInventory;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Elytra;
 use pocketmine\network\protocol\SetTitlePacket;
@@ -2787,13 +2787,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerConteinerSetSlotPacket->stopTiming();
 					break;
 				}
-				
-				if ($this->craftingType === self::CRAFTING_ENCHANT) {
-					if ($this->currentWindow instanceof EnchantInventory) {
-						$this->enchantTransaction($transaction);
-					}
-				} else {
-					$this->addTransaction($transaction);
+                
+				switch ($this->craftingType) {
+                    case self::CRAFTING_ENCHANT:
+                        if ($this->currentWindow instanceof EnchantInventory) {
+                            $this->enchantTransaction($transaction);
+                        }
+                        break;
+                    case self::CRAFTING_ANVIL:
+                        if ($this->currentWindow instanceof AnvilInventory) {
+                            $this->anvilTransaction($transaction);
+                        }
+                        break;
+                    default:
+                        $this->addTransaction($transaction);
+                        break;
 				}
 				//Timings::$timerConteinerSetSlotPacket->stopTiming();
 				break;
@@ -3699,7 +3707,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->sendSelfData();				
 		$this->updateSpeed(self::DEFAULT_SPEED);
-//		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
+		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
 	}
 	
 	public function handleProxyDataPacket($packet) {
@@ -3886,6 +3894,34 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$enchantInv->setItem(0, $oldItem);
 		}
 	}
+    
+    protected function anvilTransaction(BaseTransaction $transaction) {
+        $inventory = $transaction->getInventory();
+        $oldItem = $transaction->getSourceItem();
+        $newItem = $transaction->getTargetItem();
+        
+        if ($inventory instanceof PlayerInventory) {
+            if ($newItem->getId() === Item::AIR || $newItem->getId() === $oldItem->getId()) {
+                $this->inventory->setItem($transaction->getSlot(), $newItem);
+                if ($newItem->getId() !== Item::AIR) {
+                    $oldItem->setCount($oldItem->getCount() - $newItem->getCount());
+                }
+                $this->currentWindow->putItem($oldItem);
+            } else {
+                if ($this->currentWindow->takeAwayItem($newItem)) {
+                    $this->inventory->addItem($newItem);
+                } else {
+                    if ($this->currentWindow->checkResult($newItem)) {
+                        $this->inventory->addItem($newItem);
+                        $this->currentWindow->clearItems();
+                    } else {
+                        $this->currentWindow->clearItems(true);
+                    }
+                }
+            }
+            $this->inventory->sendContents($this);
+        }
+    }
 	
 	protected function updateAttribute($name, $value, $minValue, $maxValue, $defaultValue) {
 		$pk = new UpdateAttributesPacket();
