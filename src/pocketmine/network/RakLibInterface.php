@@ -278,9 +278,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 					$pk->identifierACK = $this->identifiersACK[$identifier]++;
 				}
 			}
-			if ($immediate) {
-				$pk->reliability = 0;
-			}
+
 			$this->interface->sendEncapsulated($identifier, $pk, ($needACK === true ? RakLib::FLAG_NEED_ACK : 0) | ($immediate === true ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL));
 		}
 
