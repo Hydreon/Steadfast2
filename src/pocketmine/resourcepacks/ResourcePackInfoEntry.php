@@ -19,21 +19,29 @@
  *
 */
 
-namespace pocketmine\network\protocol;
+namespace pocketmine\resourcepacks;
 
-#include <rules/DataPacket.h>
+class ResourcePackInfoEntry{
+	protected $packId; //UUID
+	protected $version;
+	protected $packSize;
 
-class RequestChunkRadiusPacket extends PEPacket{
-	const NETWORK_ID = Info::REQUEST_CHUNK_RADIUS_PACKET;
-	const PACKET_NAME = "REQUEST_CHUNK_RADIUS_PACKET";
-
-	public $radius;
-
-	public function decode($playerProtocol){
-		$this->radius = $this->getVarInt();
+	public function __construct(string $packId, string $version, $packSize){
+		$this->packId = $packId;
+		$this->version = $version;
+		$this->packSize = $packSize;
 	}
 
-	public function encode($playerProtocol){
-
+	public function getPackId() : string{
+		return $this->packId;
 	}
+
+	public function getVersion() : string{
+		return $this->version;
+	}
+
+	public function getPackSize(){
+		return $this->packSize;
+	}
+
 }

@@ -19,35 +19,36 @@
  *
 */
 
-
 namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-class ResourcePackDataInfoPacket extends PEPacket{
-	const NETWORK_ID = Info::RESOURCE_PACK_DATA_INFO_PACKET;
-	const PACKET_NAME = "RESOURCE_PACK_DATA_INFO_PACKET";
+class ResourcePackClientResponsePacket extends PEPacket{
+	const NETWORK_ID = Info::RESOURCE_PACK_CLIENT_RESPONSE_PACKET;
+	const PACKET_NAME = "RESOURCE_PACK_CLIENT_RESPONSE_PACKET";
 
-	public $packId;
-	public $maxChunkSize;
-	public $chunkCount;
-	public $compressedPackSize;
-	public $sha256;
+	const STATUS_REFUSED = 1;
+	const STATUS_SEND_PACKS = 2;
+	const STATUS_HAVE_ALL_PACKS = 3;
+	const STATUS_COMPLETED = 4;
+
+	public $status;
+	public $packIds = [];
 
 	public function decode($playerProtocol){
-		$this->packId = $this->getString();
-		$this->maxChunkSize = $this->getLInt();
-		$this->chunkCount = $this->getLInt();
-		$this->compressedPackSize = $this->getLLong();
-		$this->sha256 = $this->getString();
+		$this->status = $this->getByte();
+		$entryCount = $this->getLShort();
+		while($entryCount-- > 0){
+			$this->packIds[] = $this->getString();
+		}
 	}
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		$this->putString($this->packId);
-		$this->putLInt($this->maxChunkSize);
-		$this->putLInt($this->chunkCount);
-		$this->putLLong($this->compressedPackSize);
-		$this->putString($this->sha256);
+		$this->putByte($this->status);
+		$this->putLShort(count($this->packIds));
+		foreach($this->packIds as $id){
+			$this->putString($id);
+		}
 	}
 }
