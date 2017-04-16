@@ -2908,7 +2908,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
-	/**
+
+    public function setImmobile($value = true){
+        $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NO_AI, $value);
+    }
+
+
+    /**
 	 * Kicks a player from the server
 	 *
 	 * @param string $reason
@@ -3401,6 +3407,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 
 		$oldPos = $this->getPosition();
+		//$this->freeChunks();
 		if(parent::teleport($pos, $yaw, $pitch)){
 			if (!is_null($this->currentWindow)) {
 				$this->removeWindow($this->currentWindow);
@@ -3707,7 +3714,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->sendSelfData();				
 		$this->updateSpeed(self::DEFAULT_SPEED);
-		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
+
 	}
 	
 	public function handleProxyDataPacket($packet) {
@@ -3756,17 +3763,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function transfer($address, $port = false) {
-		if ($this->isAvailableTansferPacket()) {
+
 			$pk = new TransferPacket();
 			$pk->ip = $address;
 			$pk->port = ($port === false ? 19132 : $port);
-			$this->dataPacket($pk);
-		} else {
-			$pk = new RedirectPacket();
-			$pk->ip = $address;
-			$pk->port = ($port === false ? 10305 : $port);
-			$this->dataPacket($pk);
-		}
+			$this->directDataPacket($pk);
+
 	}
 
 	public function isAvailableTansferPacket() {
@@ -4087,7 +4089,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setPing($ping) {
 		$this->ping = $ping;
 	}
-	
+
 	public function getPing() {
 		return $this->ping;
 	}
@@ -4113,13 +4115,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->text = "";
 			$pk->fadeInTime = 5;
 			$pk->fadeOutTime = 5;
-			$pk->stayTime = 20 * $time;
+			$pk->stayTime =  $time;
 			$this->dataPacket($pk);
-			
+			/*
 			if ($this->getPlayerProtocol() == ProtocolInfo::PROTOCOL_110) { //hack for beta version
 				$subtext =  TextFormat::RED ."Use # for commands as #login";
 			}
-			
+			*/
 			if (!empty($subtext)) {
 				$pk = new SetTitlePacket();
 				$pk->type = SetTitlePacket::TITLE_TYPE_SUBTITLE;
