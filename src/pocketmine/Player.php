@@ -3574,12 +3574,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 
-		if (count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers()) {
-			$this->close("", "Server is Full", false);
-			return;
-		}
+        if(count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers() and $this->kick("disconnectionScreen.serverFull")){
+            return;
+        }
 
-		$this->server->getPluginManager()->callEvent($ev = new PlayerPreLoginEvent($this, "Plugin reason"));
+
+        $this->server->getPluginManager()->callEvent($ev = new PlayerPreLoginEvent($this, "Plugin reason"));
 		if ($ev->isCancelled()) {
 			$this->close("", $ev->getKickMessage());
 			return;
