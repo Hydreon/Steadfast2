@@ -4115,7 +4115,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case ProtocolInfo::PROTOCOL_105:
 				return $this->protocol;
 			case ProtocolInfo::PROTOCOL_106:
+<<<<<<< HEAD
  				return ProtocolInfo::PROTOCOL_105;
+=======
+				return ProtocolInfo::PROTOCOL_105;
+>>>>>>> refs/remotes/Hydreon/master
 			default:
 				return ProtocolInfo::BASE_PROTOCOL;
 		}
@@ -4162,7 +4166,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->dataPacket($pk);
 			
 			if ($this->getPlayerProtocol() == ProtocolInfo::PROTOCOL_110) { //hack for beta version
-				$subtext =  TextFormat::RED ."Beta players: use # for commands as #login";
+				$subtext =  TextFormat::RED ."Use # for commands as #login";
 			}
 			
 			if (!empty($subtext)) {

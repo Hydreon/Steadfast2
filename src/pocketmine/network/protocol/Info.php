@@ -37,6 +37,7 @@ interface Info{
 	
 	const BASE_PROTOCOL = 100;
 	const PROTOCOL_105 = 105;
+	const PROTOCOL_106 = 106;
 	const PROTOCOL_110 = 110;
 
 	/**
