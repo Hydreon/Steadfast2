@@ -276,7 +276,7 @@ class Network {
 					throw new \InvalidStateException("Empty or invalid BatchPacket received");
 				}
 
-//				if (ord($buf{0}) !== 0x14) {
+//				if (ord($buf{0}) !== 0x13) {
 //					echo 'Recive: 0x'. bin2hex($buf{0}).PHP_EOL;
 //				}
 				
