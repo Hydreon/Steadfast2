@@ -243,6 +243,7 @@ class Item{
 	const BIRCH_WOODEN_STAIRS = 135;
 	const JUNGLE_WOOD_STAIRS = 136;
 	const JUNGLE_WOODEN_STAIRS = 136;
+	const BEACON = 138;
 	const COBBLE_WALL = 139;
 	const STONE_WALL = 139;
 	const COBBLESTONE_WALL = 139;
@@ -640,6 +641,7 @@ class Item{
 		134 => "Spruce Wood Stairs",
 		135 => "Birch Wood Stairs",
 		136 => "Jungle Wood Stairs",
+		138 => "Beacon",
 		139 => "Cobblestone Wall",
 		140 => "Flower Pot",
 		141 => "Carrot Block",

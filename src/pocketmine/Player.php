@@ -4080,10 +4080,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->stayTime = 20 * $time;
 			$this->dataPacket($pk);
 			
-			if ($this->getPlayerProtocol() == ProtocolInfo::PROTOCOL_110) { //hack for beta version
-				$subtext =  TextFormat::RED ."Use # for commands as #login";
-			}
-			
 			if (!empty($subtext)) {
 				$pk = new SetTitlePacket();
 				$pk->type = SetTitlePacket::TITLE_TYPE_SUBTITLE;
