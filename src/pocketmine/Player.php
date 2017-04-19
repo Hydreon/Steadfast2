@@ -4102,5 +4102,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->dataPacket($pk);
 		}
 	}
+	
+	protected function insideWaterCheck(&$hasUpdate) {
+		var_dump(__CLASS__.'::'.__METHOD__);
+		parent::insideWaterCheck($hasUpdate);
+		if (!$this->hasEffect(Effect::WATER_BREATHING) && $this->isInsideOfWater()) {
+			$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, false, self::DATA_TYPE_LONG, false);
+			$this->sendSelfData();
+		} else {
+			$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
+			$this->sendSelfData();
+		}
+	}
 
 }
