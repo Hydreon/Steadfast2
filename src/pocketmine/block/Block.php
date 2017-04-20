@@ -98,6 +98,7 @@ class Block extends Position implements Metadatable{
 	const DOUBLE_SLABS = 43;
 	const SLAB = 44;
 	const SLABS = 44;
+	const STONE_SLAB = 44;
 	const BRICKS = 45;
 	const BRICKS_BLOCK = 45;
 	const TNT = 46;
@@ -169,6 +170,7 @@ class Block extends Position implements Metadatable{
 	const MONSTER_EGG = 97;
 	const STONE_BRICKS = 98;
 	const STONE_BRICK = 98;
+	const STONEBRICK = 98;
 	const BROWN_MUSHROOM_BLOCK = 99;
 	const RED_MUSHROOM_BLOCK = 100;
 	const IRON_BAR = 101;
