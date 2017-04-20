@@ -147,8 +147,12 @@ use pocketmine\network\protocol\SetPlayerGameTypePacket;
 use pocketmine\block\Liquid;
 use pocketmine\network\protocol\SetCommandsEnabledPacket;
 use pocketmine\network\protocol\AvailableCommandsPacket;
+use pocketmine\network\protocol\ResourcePackChunkDataPacket;
+use pocketmine\network\protocol\ResourcePackChunkRequestPacket;
+use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
+use pocketmine\network\protocol\ResourcePackStackPacket;
 use raklib\Binary;
 use pocketmine\network\proxy\Info as ProtocolProxyInfo;
 use pocketmine\network\proxy\DisconnectPacket as ProxyDisconnectPacket;
@@ -159,6 +163,7 @@ use pocketmine\network\proxy\ProxyPacket;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Elytra;
 use pocketmine\network\protocol\SetTitlePacket;
+use pocketmine\resourcepacks\ResourcePack;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -266,9 +271,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/** @var Vector3 */
 	public $newPosition;
 
-	protected $viewDistance;
+	protected $viewDistance = -1;
 	protected $chunksPerTick;
-	protected $spawnThreshold;
+	protected $spawnThreshold = ((4 ** 2) * M_PI);
 	/** @var null|Position */
 	private $spawnPosition = null;
 
@@ -577,6 +582,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->perm->getEffectivePermissions();
 	}
 
+	public function getViewDistance() : int{
+ 		return $this->viewDistance;
+ 	}
+ 
+ 	public function setViewDistance(int $distance){
+ 		$this->viewDistance = $this->server->getAllowedViewDistance($distance);
+ 		$pk = new ChunkRadiusUpdatePacket();
+ 		$pk->radius = $this->viewDistance;
+ 		$this->dataPacket($pk);
+ 	}
+
 
 	/**
 	 * @param SourceInterface $interface
@@ -597,7 +613,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->spawnPosition = null;
 		$this->gamemode = $this->server->getGamemode();
 		$this->setLevel($this->server->getDefaultLevel(), true);
-		$this->viewDistance = $this->server->getViewDistance();
+		//$this->viewDistance = $this->server->getViewDistance();
 		$this->newPosition = new Vector3(0, 0, 0);
 		$this->checkMovement = (bool) $this->server->getAdvancedProperty("main.check-movement", true);
 		$this->boundingBox = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
@@ -833,58 +849,83 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 		}
 
+	public function sendPlayStatus(int $status, bool $immediate = false){
+		$pk = new PlayStatusPacket();
+		$pk->status = $status;
+		if($immediate){
+			$this->directDataPacket($pk);
+		}else{
+			$this->dataPacket($pk);
+		}
+	}
+
 	protected function orderChunks(){
-		if($this->connected === false){
+		if($this->connected === false or $this->viewDistance === -1){
 			return false;
 		}
+
 		$this->nextChunkOrderRun = 200;
-		$radiusSquared = $this->viewDistance;
-		$radius = ceil(sqrt($radiusSquared));
-		$side = ceil($radius / 2);
+		$radius = $this->server->getAllowedViewDistance($this->viewDistance);
+		$radiusSquared = $radius ** 2;
 		$newOrder = [];
-		$lastChunk = $this->usedChunks;
-		$currentQueue = [];
+		$unloadChunks = $this->usedChunks;
 		$centerX = $this->x >> 4;
 		$centerZ = $this->z >> 4;
-		for($X = -$side; $X <= $side; ++$X){
-			for($Z = -$side; $Z <= $side; ++$Z){
-				$chunkX = $X + $centerX;
-				$chunkZ = $Z + $centerZ;
-				if(!isset($this->usedChunks[$index = Level::chunkHash($chunkX, $chunkZ)])){
-					$newOrder[$index] = abs($X) + abs($Z);
-				}else{
-					$currentQueue[$index] = abs($X) + abs($Z);
+		for($x = 0; $x < $radius; ++$x){
+			for($z = 0; $z <= $x; ++$z){
+				if(($x ** 2 + $z ** 2) > $radiusSquared){
+					break; //skip to next band
+				}
+				//If the chunk is in the radius, others at the same offsets in different quadrants are also guaranteed to be.
+				/* Top right quadrant */
+				if(!isset($this->usedChunks[$index = Level::chunkHash($centerX + $x, $centerZ + $z)]) or $this->usedChunks[$index] === false){
+					$newOrder[$index] = true;
+				}
+				unset($unloadChunks[$index]);
+				/* Top left quadrant */
+				if(!isset($this->usedChunks[$index = Level::chunkHash($centerX - $x - 1, $centerZ + $z)]) or $this->usedChunks[$index] === false){
+					$newOrder[$index] = true;
+				}
+				unset($unloadChunks[$index]);
+				/* Bottom right quadrant */
+				if(!isset($this->usedChunks[$index = Level::chunkHash($centerX + $x, $centerZ - $z - 1)]) or $this->usedChunks[$index] === false){
+					$newOrder[$index] = true;
+				}
+				unset($unloadChunks[$index]);
+				/* Bottom left quadrant */
+				if(!isset($this->usedChunks[$index = Level::chunkHash($centerX - $x - 1, $centerZ - $z - 1)]) or $this->usedChunks[$index] === false){
+					$newOrder[$index] = true;
+				}
+				unset($unloadChunks[$index]);
+				if($x !== $z){
+					/* Top right quadrant mirror */
+					if(!isset($this->usedChunks[$index = Level::chunkHash($centerX + $z, $centerZ + $x)]) or $this->usedChunks[$index] === false){
+						$newOrder[$index] = true;
+					}
+					unset($unloadChunks[$index]);
+					/* Top left quadrant mirror */
+					if(!isset($this->usedChunks[$index = Level::chunkHash($centerX - $z - 1, $centerZ + $x)]) or $this->usedChunks[$index] === false){
+						$newOrder[$index] = true;
+					}
+					unset($unloadChunks[$index]);
+					/* Bottom right quadrant mirror */
+					if(!isset($this->usedChunks[$index = Level::chunkHash($centerX + $z, $centerZ - $x - 1)]) or $this->usedChunks[$index] === false){
+						$newOrder[$index] = true;
+					}
+					unset($unloadChunks[$index]);
+					/* Bottom left quadrant mirror */
+					if(!isset($this->usedChunks[$index = Level::chunkHash($centerX - $z - 1, $centerZ - $x - 1)]) or $this->usedChunks[$index] === false){
+						$newOrder[$index] = true;
+					}
+					unset($unloadChunks[$index]);
 				}
 			}
 		}
-		asort($newOrder);
-		asort($currentQueue);
-		$limit = $this->viewDistance;
-		foreach($currentQueue as $index => $distance){
-			if($limit-- <= 0){
-				break;
-			}
-			unset($lastChunk[$index]);
-		}
-		foreach($lastChunk as $index => $Yndex){
-			$X = null;
-			$Z = null;
+		foreach($unloadChunks as $index => $bool){
 			Level::getXZ($index, $X, $Z);
 			$this->unloadChunk($X, $Z);
 		}
-		$loadedChunks = count($this->usedChunks);
-		if((count($newOrder) + $loadedChunks) > $this->viewDistance){
-			$count = $loadedChunks;
-			$this->loadQueue = [];
-			foreach($newOrder as $k => $distance){
-				if(++$count > $this->viewDistance){
-					break;
-				}
-				$this->loadQueue[$k] = $distance;
-			}
-		}else{
-			$this->loadQueue = $newOrder;
-		}
+		$this->loadQueue = $newOrder;
 		return true;
 	}
 
@@ -1809,6 +1850,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->processLogin();
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
+			case ProtocolInfo::RESOURCE_PACK_CLIENT_RESPONSE_PACKET:
+				$this->handleResourcePackClientResponse($packet);
+				break;	
 			case ProtocolInfo::MOVE_PLAYER_PACKET:
 				//Timings::$timerMovePacket->startTiming();
 				$newPos = new Vector3($packet->x, $packet->y - $this->getEyeHeight(), $packet->z);
@@ -2591,7 +2635,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						if(trim($message) != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){							
 							$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $message));
 							if(!$ev->isCancelled()){
-								$this->server->broadcastMessage($ev->getPlayer()->getDisplayName() . ": " . $ev->getMessage(), $ev->getRecipients());
+								$this->server->broadcastMessage($ev->getFormat(), $ev->getRecipients());
 							}
 						}
 					}
@@ -2841,16 +2885,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET:
 				//Timings::$timerChunkRudiusPacket->startTiming();
-				if ($packet->radius > 20) {
-					$packet->radius = 20;
-				} elseif ($packet->radius < 4) {
-					$packet->radius = 4;
-				}
-				$this->viewDistance = $packet->radius ** 2;
-				$pk = new ChunkRadiusUpdatePacket();
-				$pk->radius = $packet->radius;
-				$this->dataPacket($pk);
-				//Timings::$timerChunkRudiusPacket->stopTiming();
+				$this->setViewDistance($packet->radius);
 				break;
 			case ProtocolInfo::COMMAND_STEP_PACKET:
 				$commandName = $packet->name;
@@ -3324,13 +3359,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->bodyYaw = $yaw;
 		$pk->pitch = $pitch;
 		$pk->yaw = $yaw;
-		$pk->mode = MovePlayerPacket::MODE_RESET;
+		$pk->mode = $mode;
 
 		if($targets !== null) {
 			Server::broadcastPacket($targets, $pk);
 		} else {
 			$this->dataPacket($pk);
 		}
+
+		$this->newPosition = null;
 	}
 
 	protected function checkChunks(){
@@ -3595,7 +3632,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		$pk = new ResourcePacksInfoPacket();
-		$this->dataPacket($pk);		
+		$manager = $this->server->getResourceManager();
+		$pk->resourcePackEntries = $manager->getResourceStack();
+		$pk->mustAccept = $manager->resourcePacksRequired();
+		$this->dataPacket($pk);
 
 		$this->achievements = [];
 
@@ -3701,6 +3741,50 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->sendSelfData();				
 		$this->updateSpeed(self::DEFAULT_SPEED);
 //		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
+	}
+
+	protected function completeLoginSequence(){
+	}
+
+	public function handleResourcePackClientResponse(ResourcePackClientResponsePacket $packet) : bool{
+		switch($packet->status){
+			case ResourcePackClientResponsePacket::STATUS_REFUSED:
+				//TODO: add lang strings for this
+				$this->close("", "You must accept resource packs to join this server.", true);
+				break;
+			case ResourcePackClientResponsePacket::STATUS_SEND_PACKS:
+				$manager = $this->server->getResourceManager();
+				foreach($packet->packIds as $uuid){
+					$pack = $manager->getPackById($uuid);
+					if(!($pack instanceof ResourcePack)){
+						//Client requested a resource pack but we don't have it available on the server
+						$this->close("", "disconnectionScreen.resourcePack", true);
+						$this->server->getLogger()->debug("Got a resource pack request for unknown pack with UUID " . $uuid . ", available packs: " . implode(", ", $manager->getPackIdList()));
+						break;
+					}
+					$pk = new ResourcePackDataInfoPacket();
+					$pk->packId = $pack->getPackId();
+					$pk->maxChunkSize = 1048576; //1MB
+					$pk->chunkCount = $pack->getPackSize() / $pk->maxChunkSize;
+					$pk->compressedPackSize = $pack->getPackSize();
+					$pk->sha256 = $pack->getSha256();
+					$this->dataPacket($pk);
+				}
+				break;
+			case ResourcePackClientResponsePacket::STATUS_HAVE_ALL_PACKS:
+				$pk = new ResourcePackStackPacket();
+				$manager = $this->server->getResourceManager();
+				$pk->resourcePackStack = $manager->getResourceStack();
+				$pk->mustAccept = $manager->resourcePacksRequired();
+				$this->dataPacket($pk);
+				break;
+			case ResourcePackClientResponsePacket::STATUS_COMPLETED:
+				$this->completeLoginSequence();
+				break;
+			default:
+				return false;
+		}
+		return true;
 	}
 	
 	public function handleProxyDataPacket($packet) {
@@ -4035,7 +4119,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case ProtocolInfo::PROTOCOL_105:
 				return $this->protocol;
 			case ProtocolInfo::PROTOCOL_106:
+<<<<<<< HEAD
+ 				return ProtocolInfo::PROTOCOL_105;
+=======
 				return ProtocolInfo::PROTOCOL_105;
+>>>>>>> refs/remotes/Hydreon/master
 			default:
 				return ProtocolInfo::BASE_PROTOCOL;
 		}
