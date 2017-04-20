@@ -1391,29 +1391,32 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->lastYaw = $to->yaw;
 			$this->lastPitch = $to->pitch;
 
-			if(!$isFirst){
+			if (!$isFirst) {
 				$needEvent = true;
-				if(!$this->isSpectator()) {					
-					$block = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()), floor($to->getZ())));
-					$blockUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 1, floor($to->getZ())));
-					$roundBlock = $from->level->getBlock(new Vector3(floor($to->getX()), round($to->getY()), floor($to->getZ())));
-					if($from->getY() - $to->getY() > 0.1){
+				if (!$this->isSpectator()) {
+					$toX = floor($to->x);
+					$toZ = floor($to->z);
+					$toY = ceil($to->y);
+					$block = $from->level->getBlock(new Vector3($toX, $toY, $toZ));
+					$blockUp = $from->level->getBlock(new Vector3($toX, $toY + 1, $toZ));
+					$roundBlock = $from->level->getBlock(new Vector3($toX, round($to->y), $toZ));
+					if($from->y - $to->y > 0.1){
 						if(!$roundBlock->isTransparent()){
 							$needEvent = false;
 						}
 					}else{
 						if(!$block->isTransparent() || !$blockUp->isTransparent()){
-							$blockUpUp = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) + 2, floor($to->getZ())));
+							$blockUpUp = $from->level->getBlock(new Vector3($toX, $toY + 2, $toZ));
 							if(!$blockUp->isTransparent()){
-								$blockLow = $from->level->getBlock(new Vector3(floor($to->getX()), ceil($to->getY()) - 1, floor($to->getZ())));
-								if($from->getY() == $to->getY() && !$blockLow->isTransparent()){
+								$blockLow = $from->level->getBlock(new Vector3($toX, $toY - 1, $toZ));
+								if($from->y == $to->y && !$blockLow->isTransparent()){
 									$needEvent = false;
 								}
 							}else{
 								if(!$blockUpUp->isTransparent()){
 									$needEvent = false;
 								}
-								$blockFrom = $from->level->getBlock(new Vector3($from->getX(), $from->getY(), $from->getZ()));
+								$blockFrom = $from->level->getBlock(new Vector3($from->x, $from->y, $from->z));
 								if($blockFrom instanceof Liquid){
 									$needEvent = false;
 								}
@@ -1421,13 +1424,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}
 					}
 				}
-				if($needEvent){
+				if ($needEvent) {
 					$ev = new PlayerMoveEvent($this, $from, $to);
 					$this->setMoving(true);
 
 					$this->server->getPluginManager()->callEvent($ev);
 
-					if(!($revert = $ev->isCancelled())){ //Yes, this is intended
+					if (!($revert = $ev->isCancelled())) { //Yes, this is intended
 						if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
 							$this->teleport($ev->getTo());						
 						}else{
@@ -1450,7 +1453,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 
 		if($revert){
-
 			$this->lastX = $from->x;
 			$this->lastY = $from->y;
 			$this->lastZ = $from->z;
@@ -1680,8 +1682,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		];
 
 		$slot = $this->inventory->getItemInHand();
-		if(isset($items[$slot->getId()])) {
-			if($this->getFood() < 20 and isset($items[$slot->getId()])){
+		$slotId = $slot->getId();
+		if (isset($items[$slotId])) {
+			if ($this->getFood() < 20) {
 				$this->server->getPluginManager()->callEvent($ev = new PlayerItemConsumeEvent($this, $slot));
 				if($ev->isCancelled()){
 					$this->inventory->sendContents($this);
@@ -1694,7 +1697,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->dataPacket($pk);
 				Server::broadcastPacket($this->getViewers(), $pk);
 
-				$amount = $items[$slot->getId()];
+				$amount = $items[$slotId];
 				if(is_array($amount)){
 					$amount = isset($amount[$slot->getDamage()]) ? $amount[$slot->getDamage()] : 0;
 				}
@@ -1702,21 +1705,29 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				--$slot->count;
 				$this->inventory->setItemInHand($slot);
-				if($slot->getId() === Item::MUSHROOM_STEW or $slot->getId() === Item::BEETROOT_SOUP){
-					$this->inventory->addItem(Item::get(Item::BOWL, 0, 1));
-				}elseif($slot->getId() === Item::RAW_FISH and $slot->getDamage() === 3){ //Pufferfish
-					$this->addEffect(Effect::getEffect(Effect::HUNGER)->setAmplifier(2)->setDuration(15 * 20));
-					//$this->addEffect(Effect::getEffect(Effect::NAUSEA)->setAmplifier(1)->setDuration(15 * 20));
-					$this->addEffect(Effect::getEffect(Effect::POISON)->setAmplifier(3)->setDuration(60 * 20));
-				} elseif ($slot->getId() === Item::GOLDEN_APPLE) {
-                    $this->addEffect(Effect::getEffect(Effect::REGENERATION)->setAmplifier(1)->setDuration(5 * 20));
-//                    $this->addEffect(Effect::getEffect(Effect::ABSORPTION)->setAmplifier(0)->setDuration(120 * 20));
-                } elseif ($slot->getId() === Item::ENCHANTED_GOLDEN_APPLE) {
-                    $this->addEffect(Effect::getEffect(Effect::REGENERATION)->setAmplifier(4)->setDuration(30 * 20));
-//                    $this->addEffect(Effect::getEffect(Effect::ABSORPTION)->setAmplifier(0)->setDuration(120 * 20));
-                    $this->addEffect(Effect::getEffect(Effect::DAMAGE_RESISTANCE)->setAmplifier(0)->setDuration(300 * 20));
-                    $this->addEffect(Effect::getEffect(Effect::FIRE_RESISTANCE)->setAmplifier(0)->setDuration(300 * 20));
-                }
+				switch ($slotId) {
+					case Item::MUSHROOM_STEW:
+					case Item::BEETROOT_SOUP:
+						$this->inventory->addItem(Item::get(Item::BOWL, 0, 1));
+						break;
+					case Item::RAW_FISH:
+						if ($slot->getDamage() === 3) { //Pufferfish
+							$this->addEffect(Effect::getEffect(Effect::HUNGER)->setAmplifier(2)->setDuration(15 * 20));
+							//$this->addEffect(Effect::getEffect(Effect::NAUSEA)->setAmplifier(1)->setDuration(15 * 20));
+							$this->addEffect(Effect::getEffect(Effect::POISON)->setAmplifier(3)->setDuration(60 * 20));
+						}
+						break;
+					case Item::GOLDEN_APPLE:
+						$this->addEffect(Effect::getEffect(Effect::REGENERATION)->setAmplifier(1)->setDuration(5 * 20));
+//						$this->addEffect(Effect::getEffect(Effect::ABSORPTION)->setAmplifier(0)->setDuration(120 * 20));
+						break;
+					case Item::ENCHANTED_GOLDEN_APPLE:
+						$this->addEffect(Effect::getEffect(Effect::REGENERATION)->setAmplifier(4)->setDuration(30 * 20));
+//						$this->addEffect(Effect::getEffect(Effect::ABSORPTION)->setAmplifier(0)->setDuration(120 * 20));
+						$this->addEffect(Effect::getEffect(Effect::DAMAGE_RESISTANCE)->setAmplifier(0)->setDuration(300 * 20));
+						$this->addEffect(Effect::getEffect(Effect::FIRE_RESISTANCE)->setAmplifier(0)->setDuration(300 * 20));
+						break;
+				}
 			}
 		}
 	}
@@ -1743,10 +1754,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 
-		$this->server->getPluginManager()->callEvent($ev = new DataPacketReceiveEvent($this, $packet));
-		if($ev->isCancelled()){
-			return;
-		}
+//		$this->server->getPluginManager()->callEvent($ev = new DataPacketReceiveEvent($this, $packet));
+//		if($ev->isCancelled()){
+//			return;
+//		}
 
 		$beforeLoginAvailablePackets = [ProtocolInfo::LOGIN_PACKET, ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET];
 		if (!$this->isOnline() && !in_array($packet->pid(), $beforeLoginAvailablePackets)) {
