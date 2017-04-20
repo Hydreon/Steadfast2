@@ -913,44 +913,43 @@ abstract class Entity extends Location implements Metadatable{
 		}
 
 		$hasUpdate = false;
-		if($block = $this->isCollideWithLiquid()){
+		$block = $this->isCollideWithLiquid();
+		if ($block !== false) {
 			$block->onEntityCollide($this);
-		} 
-		if($block = $this->isCollideWithTransparent()){
+		}
+		$block = $this->isCollideWithTransparent();
+		if ($block !== false) {
 			$block->onEntityCollide($this);
 		}
 		
-		if($this->y < 0 && $this->dead !== true){
+		if ($this->y < 0 && $this->dead !== true) {
 			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_VOID, 20);
 			$this->attack($ev->getFinalDamage(), $ev);
 			$hasUpdate = true;
 		}
 
-		if($this->fireTicks > 0){
-			if($this->fireProof){
+		if ($this->fireTicks > 0) {
+			if ($this->fireProof) {
 				$this->fireTicks -= 4 * $tickDiff;
-				if($this->fireTicks < 0){
-					$this->fireTicks = 0;
-				}
-			}else{
-				if(!$this->hasEffect(Effect::FIRE_RESISTANCE) and ($this->fireTicks % 20) === 0 or $tickDiff > 20){
+			} else {
+				if (!$this->hasEffect(Effect::FIRE_RESISTANCE) && ($this->fireTicks % 20) === 0 || $tickDiff > 20) {
 					$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_FIRE_TICK, $this->fireDamage);
 					$this->attack($ev->getFinalDamage(), $ev);
 				}
 				$this->fireTicks -= $tickDiff;
 			}
 
-			if($this->fireTicks <= 0){
+			if ($this->fireTicks <= 0) {
 				$this->extinguish();
-			}else{
+			} else {
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ONFIRE, true);
 				$hasUpdate = true;
 			}
 		}
 
-		if($this->noDamageTicks > 0){
+		if ($this->noDamageTicks > 0) {
 			$this->noDamageTicks -= $tickDiff;
-			if($this->noDamageTicks < 0){
+			if ($this->noDamageTicks < 0) {
 				$this->noDamageTicks = 0;
 			}
 		}
@@ -1181,23 +1180,39 @@ abstract class Entity extends Location implements Metadatable{
 	}
 	
 	public function isCollideWithLiquid() {
-		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
-		if(!($block instanceof Liquid)) {
-			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
+		$x = floor($this->x);
+		$y = floor($this->y);
+		$z = floor($this->z);
+		
+		$block = $this->level->getBlock(new Vector3($x, $y, $z));
+		$isLiquid = $block instanceof Liquid;
+		
+		if (!$isLiquid) {
+			$y = floor($this->y + $this->eyeHeight);
+			$block = $this->level->getBlock(new Vector3($x, $y, $z));
+			$isLiquid = $block instanceof Liquid;
+			
+			if (!$isLiquid) {
+				$block = $this->level->getBlock(new Vector3(floor($this->x + $this->width), $y, $z));
+				$isLiquid = $block instanceof Liquid;
+				
+				if (!$isLiquid) {
+					$block = $this->level->getBlock(new Vector3(floor($this->x - $this->width), $y, $z));
+					$isLiquid = $block instanceof Liquid;
+					
+					if (!$isLiquid) {
+						$block = $this->level->getBlock(new Vector3($x, $y, floor($this->z + $this->width)));
+						$isLiquid = $block instanceof Liquid;
+						
+						if (!$isLiquid) {
+							$block = $this->level->getBlock(new Vector3($x, $y, floor($this->z - $this->width)));
+							$isLiquid = $block instanceof Liquid;
+						}
+					}
+				}
+			}
 		}
-				if(!($block instanceof Liquid)) {
-			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x + $this->width), Math::floorFloat($y), Math::floorFloat($this->z)));
-		}
-				if(!($block instanceof Liquid)) {
-			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x - $this->width), Math::floorFloat($y), Math::floorFloat($this->z)));
-		}
-				if(!($block instanceof Liquid)) {
-			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y), Math::floorFloat($this->z + $this->width)));
-		}
-				if(!($block instanceof Liquid)) {
-			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y), Math::floorFloat($this->z - $this->width)));
-		}
-		if($block instanceof Liquid) {
+		if ($isLiquid) {
 			$f = ($block->y + 1) - ($block->getFluidHeightPercent() - 0.1111111);
 			return $y < $f ? $block : false;
 		}

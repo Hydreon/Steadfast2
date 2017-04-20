@@ -4103,9 +4103,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 	
-	protected function insideWaterCheck(&$hasUpdate) {
-		var_dump(__CLASS__.'::'.__METHOD__);
-		parent::insideWaterCheck($hasUpdate);
+	protected function insideWaterCheck(&$hasUpdate, $tickDiff) {
+		parent::insideWaterCheck($hasUpdate, $tickDiff);
 		if (!$this->hasEffect(Effect::WATER_BREATHING) && $this->isInsideOfWater()) {
 			$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, false, self::DATA_TYPE_LONG, false);
 			$this->sendSelfData();
