@@ -64,6 +64,7 @@ abstract class Particle extends Vector3{
 	const TYPE_NOTE = 36;
 	const TYPE_WITCH_MAGIC = 37;
 	
+	const TYPE_ICE_CRYSTAL = 40;
 	/**
 	 * @return DataPacket|DataPacket[]
 	 */
