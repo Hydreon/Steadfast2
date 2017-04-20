@@ -615,6 +615,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				self::$availableCommands = array_merge(self::$availableCommands, $pluginCommands);
 			}
 		}
+		$this->inventory = new PlayerInventory($this);
 	}
 
 	/**
