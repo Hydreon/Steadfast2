@@ -69,6 +69,11 @@ use pocketmine\Server;
 use pocketmine\utils\ChunkException;
 use pocketmine\block\Liquid;
 
+use pocketmine\block\Cobweb;
+use pocketmine\block\Fire;
+use pocketmine\block\Ladder;
+use pocketmine\block\Vine;
+
 abstract class Entity extends Location implements Metadatable{
 
 
@@ -1220,11 +1225,18 @@ abstract class Entity extends Location implements Metadatable{
 	}
 	
 	public function isCollideWithTransparent() {
-		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = $this->y), Math::floorFloat($this->z)));
-		if(!($block instanceof \pocketmine\block\Ladder) && !($block instanceof \pocketmine\block\Fire) && !($block instanceof \pocketmine\block\Vine) && !($block instanceof \pocketmine\block\Cobweb)) {
-			$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
+		$x = floor($this->x);
+		$z = floor($this->z);
+	
+		$block = $this->level->getBlock(new Vector3($x, floor($this->y), $z));
+		$isTransparent = $block instanceof Ladder || $block instanceof Fire || $block instanceof Vine || $block instanceof Cobweb;
+		
+		if(!$isTransparent) {
+			$block = $this->level->getBlock(new Vector3($x, floor($this->y + $this->getEyeHeight()), $z));
+			$isTransparent = $block instanceof Ladder || $block instanceof Fire || $block instanceof Vine || $block instanceof Cobweb;
 		}
-		if($block instanceof \pocketmine\block\Ladder || $block instanceof \pocketmine\block\Fire || $block instanceof \pocketmine\block\Vine || $block instanceof \pocketmine\block\Cobweb) {		
+		
+		if($isTransparent) {
 			return $block;
 		}
 		return false;
