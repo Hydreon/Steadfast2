@@ -4035,6 +4035,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case ProtocolInfo::PROTOCOL_105:
 				return $this->protocol;
 			case ProtocolInfo::PROTOCOL_106:
+			case ProtocolInfo::PROTOCOL_107:
 				return ProtocolInfo::PROTOCOL_105;
 			default:
 				return ProtocolInfo::BASE_PROTOCOL;
