@@ -184,15 +184,15 @@ class Vector3{
 	}
 
 	public function distanceSquared(Vector3 $pos){
-		return pow($this->x - $pos->x, 2) + pow($this->y - $pos->y, 2) + pow($this->z - $pos->z, 2);
+		return ($this->x - $pos->x) ** 2 + ($this->y - $pos->y) ** 2 + ($this->z - $pos->z) ** 2;
 	}
 
 	public function maxPlainDistance($x = 0, $z = 0){
-		if($x instanceof Vector3){
-			return $this->maxPlainDistance($x->x, $x->z);
-		}elseif($x instanceof Vector2){
+		if ($x instanceof Vector3) {
+			return max(abs($this->x - $x->x), abs($this->z - $z->z));
+		} else if ($x instanceof Vector2) {
 			return $this->maxPlainDistance($x->x, $x->y);
-		}else{
+		} else {
 			return max(abs($this->x - $x), abs($this->z - $z));
 		}
 	}
@@ -209,12 +209,13 @@ class Vector3{
 	 * @return Vector3
 	 */
 	public function normalize(){
-		$len = $this->length();
-		if($len != 0){
-			return $this->divide($len);
+		$len = $this->x ** 2 + $this->y ** 2 + $this->z ** 2;
+		if ($len == 0) {
+			return new Vector3(0, 0, 0);
+		} else if ($len == 1) {
+			return new Vector3($this->x, $this->y, $this->z);
 		}
-
-		return new Vector3(0, 0, 0);
+		return $this->divide($len);
 	}
 
 	public function dot(Vector3 $v){
@@ -244,19 +245,16 @@ class Vector3{
 	 */
 	public function getIntermediateWithXValue(Vector3 $v, $x){
 		$xDiff = $v->x - $this->x;
-		$yDiff = $v->y - $this->y;
-		$zDiff = $v->z - $this->z;
-
 		if(($xDiff ** 2) < 1){
 			return null;
 		}
-
 		$f = ($x - $this->x) / $xDiff;
-
-		if($f < 0 or $f > 1){
+		if ($f < 0 or $f > 1) {
 			return null;
-		}else{
-			return new Vector3($this->x + $xDiff * $f, $this->y + $yDiff * $f, $this->z + $zDiff * $f);
+		} else {
+			$yDiff = $v->y - $this->y;
+			$zDiff = $v->z - $this->z;
+			return new Vector3($x, $this->y + $yDiff * $f, $this->z + $zDiff * $f);
 		}
 	}
 
@@ -270,20 +268,17 @@ class Vector3{
 	 * @return Vector3
 	 */
 	public function getIntermediateWithYValue(Vector3 $v, $y){
-		$xDiff = $v->x - $this->x;
 		$yDiff = $v->y - $this->y;
-		$zDiff = $v->z - $this->z;
-
-		if(($yDiff ** 2) < 1){
+		if (($yDiff ** 2) < 1) {
 			return null;
 		}
-
 		$f = ($y - $this->y) / $yDiff;
-
-		if($f < 0 or $f > 1){
+		if ($f < 0 or $f > 1) {
 			return null;
-		}else{
-			return new Vector3($this->x + $xDiff * $f, $this->y + $yDiff * $f, $this->z + $zDiff * $f);
+		} else {
+			$xDiff = $v->x - $this->x;
+			$zDiff = $v->z - $this->z;
+			return new Vector3($this->x + $xDiff * $f, $y, $this->z + $zDiff * $f);
 		}
 	}
 
@@ -297,20 +292,17 @@ class Vector3{
 	 * @return Vector3
 	 */
 	public function getIntermediateWithZValue(Vector3 $v, $z){
-		$xDiff = $v->x - $this->x;
-		$yDiff = $v->y - $this->y;
 		$zDiff = $v->z - $this->z;
-
-		if(($zDiff ** 2) < 1){
+		if (($zDiff ** 2) < 1) {
 			return null;
 		}
-
 		$f = ($z - $this->z) / $zDiff;
-
-		if($f < 0 or $f > 1){
+		if ($f < 0 or $f > 1) {
 			return null;
-		}else{
-			return new Vector3($this->x + $xDiff * $f, $this->y + $yDiff * $f, $this->z + $zDiff * $f);
+		} else {
+			$xDiff = $v->x - $this->x;
+			$yDiff = $v->y - $this->y;
+			return new Vector3($this->x + $xDiff * $f, $this->y + $yDiff * $f, $z);
 		}
 	}
 
