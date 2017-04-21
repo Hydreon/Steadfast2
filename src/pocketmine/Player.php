@@ -2535,7 +2535,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				switch($packet->event){
 					case EntityEventPacket::USE_ITEM: //Eating
 						$slot = $this->inventory->getItemInHand();
-						if($slot instanceof Potion && $slot->canBeConsumed()){
+						if($slot instanceof Item && $slot->getId() == Item::POTION){//if($slot instanceof Potion && $slot->canBeConsumed()){
 							$ev = new PlayerItemConsumeEvent($this, $slot);
 							$this->server->getPluginManager()->callEvent($ev);
 							if(!$ev->isCancelled()){

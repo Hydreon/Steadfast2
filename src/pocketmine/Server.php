@@ -430,7 +430,7 @@ class Server{
  	}
 
  	public function getAllowedViewDistance(int $distance) : int{
- 		return max(2, min($distance, $this->getViewDistance()));
+ 		return 4;//max(2, min($distance, $this->getViewDistance())); TODO : revert
   	}
 
 	/**
