@@ -2073,10 +2073,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 
 //				$this->craftingType = self::CRAFTING_DEFAULT;
-				$pos = new Vector3($packet->x, $packet->y, $packet->z);
 				
-				switch($packet->action){
+				switch ($packet->action) {
 //					case PlayerActionPacket::ACTION_START_BREAK:
+//						$pos = new Vector3($packet->x, $packet->y, $packet->z);
 //						if($this->lastBreak !== PHP_INT_MAX or $pos->distanceSquared($this) > 10000){
 //							break;
 //						}
@@ -2096,15 +2096,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //						$this->lastBreak = PHP_INT_MAX;
 //						break;
 					case PlayerActionPacket::ACTION_RELEASE_ITEM:
-						if($this->startAction > -1 and $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION)){
-							if($this->inventory->getItemInHand()->getId() === Item::BOW) {
+						if ($this->startAction > -1 and $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION)) {
+							if ($this->inventory->getItemInHand()->getId() === Item::BOW) {
 								$bow = $this->inventory->getItemInHand();
 								if ($this->isSurvival() and !$this->inventory->contains(Item::get(Item::ARROW, 0, 1))) {
 									$this->inventory->sendContents($this);
 									break;
 								}
 
-
+								$yawRad = $this->yaw / 180 * M_PI;
+								$pitchRad = $this->pitch / 180 * M_PI;
 								$nbt = new Compound("", [
 									"Pos" => new Enum("Pos", [
 										new DoubleTag("", $this->x),
@@ -2112,9 +2113,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 										new DoubleTag("", $this->z)
 									]),
 									"Motion" => new Enum("Motion", [
-										new DoubleTag("", -sin($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI)),
-										new DoubleTag("", -sin($this->pitch / 180 * M_PI)),
-										new DoubleTag("", cos($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI))
+										new DoubleTag("", -sin($yawRad) * cos($pitchRad)),
+										new DoubleTag("", -sin($pitchRad)),
+										new DoubleTag("", cos($yawRad) * cos($pitchRad))
 									]),
 									"Rotation" => new Enum("Rotation", [
 										new FloatTag("", $this->yaw),
@@ -2134,12 +2135,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 								$this->server->getPluginManager()->callEvent($ev);
 
-								if ($ev->isCancelled()) {
-									$ev->getProjectile()->kill();
+								$projectile = $ev->isCancelled();
+								if ($projectile) {
+									$projectile->kill();
 									$this->inventory->sendContents($this);
 								} else {
-									$ev->getProjectile()->setMotion($ev->getProjectile()->getMotion()->multiply($ev->getForce()));
-									if($this->isSurvival()){
+									$projectile->setMotion($projectile->getMotion()->multiply($ev->getForce()));
+									if ($this->isSurvival()) {
 										$this->inventory->removeItem(Item::get(Item::ARROW, 0, 1));
 										$bow->setDamage($bow->getDamage() + 1);
 										if ($bow->getDamage() >= 385) {
@@ -2148,20 +2150,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 											$this->inventory->setItemInHand($bow);
 										}
 									}
-									if ($ev->getProjectile() instanceof Projectile) {
-										$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($ev->getProjectile()));
+									if ($projectile instanceof Projectile) {
+										$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($projectile));
 										if ($projectileEv->isCancelled()) {
-											$ev->getProjectile()->kill();
+											$projectile->kill();
 										} else {
-											$ev->getProjectile()->spawnToAll();
+											$projectile->spawnToAll();
 											$this->level->addSound(new LaunchSound($this), $this->getViewers());
 										}
 									} else {
-										$ev->getProjectile()->spawnToAll();
+										$projectile->spawnToAll();
 									}
 								}
 							}
-						}elseif($this->inventory->getItemInHand()->getId() === Item::BUCKET and $this->inventory->getItemInHand()->getDamage() === 1){ //Milk!
+						} else if($this->inventory->getItemInHand()->getId() === Item::BUCKET and $this->inventory->getItemInHand()->getDamage() === 1) { //Milk!
 							$this->server->getPluginManager()->callEvent($ev = new PlayerItemConsumeEvent($this, $this->inventory->getItemInHand()));
 							if($ev->isCancelled()){
 								$this->inventory->sendContents($this);
@@ -2182,7 +2184,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							}
 
 							$this->removeAllEffects();
-						}else{
+						} else {
 							$this->inventory->sendContents($this);
 						}
 						break;
@@ -2297,13 +2299,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				$this->craftingType = self::CRAFTING_DEFAULT;
 
 				$vector = new Vector3($packet->x, $packet->y, $packet->z);
+				$item = $this->inventory->getItemInHand();
 
-
-				if($this->isCreative()){
-					$item = $this->inventory->getItemInHand();
-				}else{
-					$item = $this->inventory->getItemInHand();
-				}
+//				if($this->isCreative()){
+//					$item = $this->inventory->getItemInHand();
+//				}else{
+//					$item = $this->inventory->getItemInHand();
+//				}
 
 				$oldItem = clone $item;
 
@@ -2354,7 +2356,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				
 				if ($packet->action === InteractPacket::ACTION_DAMAGE && 
 					$target instanceof Entity && !$this->isSpectator() && 
-					$this->dead !== true and $target->dead !== true) {
+					$this->dead !== true && $target->dead !== true) {
 					
 					if($target instanceof DroppedItem or $target instanceof Arrow){
 						$this->kick("Attempting to attack an invalid entity");
