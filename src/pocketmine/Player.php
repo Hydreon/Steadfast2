@@ -1994,8 +1994,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					}
 
-					$vectorLength = sqrt($packet->x ** 2 + $packet->y ** 2 + $packet->z ** 2); 
-					if ($vectorLength != 0) {
+					if ($packet->x == 0 && $packet->y == 0 && $packet->z == 0) {
+						$vectorLength = sqrt($packet->x ** 2 + $packet->y ** 2 + $packet->z ** 2);
 						$aimPos = new Vector3($packet->x / $vectorLength, $packet->y / $vectorLength, $packet->z / $vectorLength);
 					} else {
 						$aimPos = new Vector3(0, 0, 0);
