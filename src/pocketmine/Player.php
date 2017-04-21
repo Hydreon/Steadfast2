@@ -1822,31 +1822,30 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case ProtocolInfo::MOVE_PLAYER_PACKET:
 				//Timings::$timerMovePacket->startTiming();
-				$newPos = new Vector3($packet->x, $packet->y - $this->getEyeHeight(), $packet->z);
-
 				$revert = false;
 				if ($this->dead === true || $this->spawned !== true) {
 					$revert = true;
 					$this->forceMovement = new Vector3($this->x, $this->y, $this->z);
 				}
-
-
 				if ($revert) {
 					$this->sendPosition($this->forceMovement, $packet->yaw, $packet->pitch);
-				} elseif (!($this->forceMovement instanceof Vector3) || $newPos->distanceSquared($this->forceMovement) <= 0.1) {
-					$packet->yaw %= 360;
-					$packet->pitch %= 360;
+				} else {
+					$newPos = new Vector3($packet->x, $packet->y - $this->getEyeHeight(), $packet->z);
+					if (!($this->forceMovement instanceof Vector3) || $newPos->distanceSquared($this->forceMovement) <= 0.1) {
+						$packet->yaw %= 360;
+						$packet->pitch %= 360;
 
-					if ($packet->yaw < 0) {
-						$packet->yaw += 360;
+						if ($packet->yaw < 0) {
+							$packet->yaw += 360;
+						}
+						$this->setRotation($packet->yaw, $packet->pitch);
+						$this->newPosition = $newPos;	
+						$this->forceMovement = null;
+					} else if (microtime(true) - $this->lastTeleportTime > 2) {
+						$this->forceMovement = new Vector3($this->x, $this->y, $this->z);
+						$this->sendPosition($this->forceMovement, $packet->yaw, $packet->pitch);
+						$this->lastTeleportTime = microtime(true);
 					}
-					$this->setRotation($packet->yaw, $packet->pitch);
-					$this->newPosition = $newPos;	
-					$this->forceMovement = null;
-				} elseif (microtime(true) - $this->lastTeleportTime > 2) {
-					$this->forceMovement = new Vector3($this->x, $this->y, $this->z);
-					$this->sendPosition($this->forceMovement, $packet->yaw, $packet->pitch);
-					$this->lastTeleportTime = microtime(true);
 				}
 				//Timings::$timerMovePacket->stopTiming();
 				break;
@@ -1938,31 +1937,26 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerUseItemPacket->stopTiming();
 					break;
 				}
-				
-				$blockVector = new Vector3($packet->x, $packet->y, $packet->z);
-
-//				$this->craftingType = self::CRAFTING_DEFAULT;
-
-				if($packet->face >= 0 and $packet->face <= 5){ //Use Block, place
-
+				if ($packet->face >= 0 and $packet->face <= 5) { //Use Block, place
+					$blockVector = new Vector3($packet->x, $packet->y, $packet->z);
 					$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 
-					if($blockVector->distance($this) > 10 or ($this->isCreative() and $this->isAdventure())){
+					if ($blockVector->distance($this) > 10 || ($this->isCreative() && $this->isAdventure())) {
 						
-					}elseif($this->isCreative() && !$this->isSpectator()){
+					} else if ($this->isCreative() && !$this->isSpectator()) {
 						$item = $this->inventory->getItemInHand();
-						if($this->level->useItemOn($blockVector, $item, $packet->face, $packet->fx, $packet->fy, $packet->fz, $this) === true){
+						if ($this->level->useItemOn($blockVector, $item, $packet->face, $packet->fx, $packet->fy, $packet->fz, $this) === true) {
 							//Timings::$timerUseItemPacket->stopTiming();
 							break;
 						}
-					}elseif(!$this->inventory->getItemInHand()->deepEquals($packet->item)){
-						$this->inventory->sendHeldItem($this);
-					}else{
+					} else if (!$this->inventory->getItemInHand()->deepEquals($packet->item)) {
+//						$this->inventory->sendHeldItem($this);
+					} else {
 						$item = $this->inventory->getItemInHand();
 						$oldItem = clone $item;
 						//TODO: Implement adventure mode checks
-						if($this->level->useItemOn($blockVector, $item, $packet->face, $packet->fx, $packet->fy, $packet->fz, $this)){
-							if(!$item->deepEquals($oldItem) or $item->getCount() !== $oldItem->getCount()){
+						if ($this->level->useItemOn($blockVector, $item, $packet->face, $packet->fx, $packet->fy, $packet->fz, $this)) {
+							if (!$item->deepEquals($oldItem) or $item->getCount() !== $oldItem->getCount()) {
 								$this->inventory->setItemInHand($item, $this);
 								$this->inventory->sendHeldItem($this->hasSpawned);
 							}
@@ -1983,26 +1977,33 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->level->sendBlocks([$this], [$target, $block], UpdateBlockPacket::FLAG_ALL_PRIORITY);
 					//Timings::$timerUseItemPacket->stopTiming();
 					break;
-				}elseif($packet->face === 0xff || $packet->face === -1){  // -1 for 0.16
-					$aimPos = (new Vector3($packet->x / 32768, $packet->y / 32768, $packet->z / 32768))->normalize();
-
-					if($this->isCreative() && !$this->isSpectator()){
-						$item = $this->inventory->getItemInHand();
-					}elseif(!$this->inventory->getItemInHand()->deepEquals($packet->item)){
+				} else if ($packet->face === 0xff || $packet->face === -1) {  // -1 for 0.16
+					if ($this->isSpectator()) {
+						$this->inventory->sendHeldItem($this);
+						if ($this->inventory->getHeldItemSlot() !== -1) {
+							$this->inventory->sendContents($this);
+						}
+						//Timings::$timerUseItemPacket->stopTiming();
+						break;
+					}
+					
+					$item = $this->inventory->getItemInHand();
+					if (!$item->deepEquals($packet->item)) {
 						$this->inventory->sendHeldItem($this);
 						//Timings::$timerUseItemPacket->stopTiming();
 						break;
-					}else{
-						$item = $this->inventory->getItemInHand();
+					}
+
+					$vectorLength = sqrt($packet->x ** 2 + $packet->y ** 2 + $packet->z ** 2); 
+					if ($vectorLength != 0) {
+						$aimPos = new Vector3($packet->x / $vectorLength, $packet->y / $vectorLength, $packet->z / $vectorLength);
+					} else {
+						$aimPos = new Vector3(0, 0, 0);
 					}
 
 					$ev = new PlayerInteractEvent($this, $item, $aimPos, $packet->face, PlayerInteractEvent::RIGHT_CLICK_AIR);
-					
 					$this->server->getPluginManager()->callEvent($ev);
-					if($this->isSpectator()){
-						$ev->setCancelled(true);
-					}
-					if($ev->isCancelled()){
+					if ($ev->isCancelled()) {
 						$this->inventory->sendHeldItem($this);
 						if ($this->inventory->getHeldItemSlot() !== -1) {
 							$this->inventory->sendContents($this);
@@ -2013,6 +2014,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 //					if($item->getId() === Item::SNOWBALL || $item->getId() === Item::EGG){
 					if($item->getId() === Item::SNOWBALL){
+						$yawRad = $this->yaw / 180 * M_PI;
+						$pitchRad = $this->pitch / 180 * M_PI;
 						$nbt = new Compound("", [
 							"Pos" => new Enum("Pos", [
 								new DoubleTag("", $this->x),
@@ -2020,9 +2023,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								new DoubleTag("", $this->z)
 							]),
 							"Motion" => new Enum("Motion", [
-								new DoubleTag("", -sin($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI)),
-								new DoubleTag("", -sin($this->pitch / 180 * M_PI)),
-								new DoubleTag("", cos($this->yaw / 180 * M_PI) * cos($this->pitch / 180 * M_PI))
+								new DoubleTag("", -sin($yawRad) * cos($pitchRad)),
+								new DoubleTag("", -sin($pitchRad)),
+								new DoubleTag("", cos($yawRad) * cos($pitchRad))
 							]),
 							"Rotation" => new Enum("Rotation", [
 								new FloatTag("", $this->yaw),
@@ -2040,19 +2043,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								break;
 						}
 						$projectile->setMotion($projectile->getMotion()->multiply($f));
-						if($this->isSurvival()){
+						if ($this->isSurvival()) {
 							$item->setCount($item->getCount() - 1);
 							$this->inventory->setItemInHand($item->getCount() > 0 ? $item : Item::get(Item::AIR));
 						}
-						if($projectile instanceof Projectile){
+						if ($projectile instanceof Projectile) {
 							$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($projectile));
-							if($projectileEv->isCancelled()){
+							if ($projectileEv->isCancelled()) {
 								$projectile->kill();
-							}else{
+							} else {
 								$projectile->spawnToAll();
 								$this->level->addSound(new LaunchSound($this), $this->getViewers());
 							}
-						}else{
+						} else {
 							$projectile->spawnToAll();
 						}
 					}
