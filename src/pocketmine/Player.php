@@ -1994,7 +1994,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					}
 
-					if ($packet->x == 0 && $packet->y == 0 && $packet->z == 0) {
+					if ($packet->x != 0 || $packet->y != 0 || $packet->z != 0) {
 						$vectorLength = sqrt($packet->x ** 2 + $packet->y ** 2 + $packet->z ** 2);
 						$aimPos = new Vector3($packet->x / $vectorLength, $packet->y / $vectorLength, $packet->z / $vectorLength);
 					} else {
@@ -2135,8 +2135,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 								$this->server->getPluginManager()->callEvent($ev);
 
-								$projectile = $ev->isCancelled();
-								if ($projectile) {
+								$projectile = $ev->getProjectile();
+								if ($ev->isCancelled()) {
 									$projectile->kill();
 									$this->inventory->sendContents($this);
 								} else {
