@@ -889,10 +889,14 @@ abstract class Entity extends Location implements Metadatable{
 		//TODO: check vehicles
 
 		$this->justCreated = false;
+		$isPlayer = $this instanceof Player;
 		
 		if($this->dead === true){
 			$this->removeAllEffects();
 			$this->despawnFromAll();
+			if (!$isPlayer) {
+				$this->close(); 
+			}
 			//Timings::$tickEntityTimer->stopTiming();
 			return false;
 		}
