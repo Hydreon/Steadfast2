@@ -92,11 +92,10 @@ class Vector3{
 	 * @return Vector3
 	 */
 	public function add($x, $y = 0, $z = 0){
-		if($x instanceof Vector3){
+		if ($x instanceof Vector3) {
 			return new Vector3($this->x + $x->x, $this->y + $x->y, $this->z + $x->z);
-		}else{
-			return new Vector3($this->x + $x, $this->y + $y, $this->z + $z);
 		}
+		return new Vector3($this->x + $x, $this->y + $y, $this->z + $z);
 	}
 
 	/**
@@ -107,11 +106,10 @@ class Vector3{
 	 * @return Vector3
 	 */
 	public function subtract($x = 0, $y = 0, $z = 0){
-		if($x instanceof Vector3){
+		if ($x instanceof Vector3) {
 			return $this->add(-$x->x, -$x->y, -$x->z);
-		}else{
-			return $this->add(-$x, -$y, -$z);
 		}
+		return $this->add(-$x, -$y, -$z);
 	}
 
 	public function multiply($number){
@@ -191,7 +189,7 @@ class Vector3{
 		if ($x instanceof Vector3) {
 			return max(abs($this->x - $x->x), abs($this->z - $z->z));
 		} else if ($x instanceof Vector2) {
-			return $this->maxPlainDistance($x->x, $x->y);
+			return max(abs($this->x - $x->x), abs($this->z - $x->y));
 		} else {
 			return max(abs($this->x - $x), abs($this->z - $z));
 		}
@@ -215,7 +213,7 @@ class Vector3{
 		} else if ($len == 1) {
 			return new Vector3($this->x, $this->y, $this->z);
 		}
-		return $this->divide($len);
+		return $this->divide(sqrt($len));
 	}
 
 	public function dot(Vector3 $v){

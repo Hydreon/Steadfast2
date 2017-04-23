@@ -53,32 +53,14 @@ class AxisAlignedBB{
 	}
 
 	public function addCoord($x, $y, $z){
-		$minX = $this->minX;
-		$minY = $this->minY;
-		$minZ = $this->minZ;
-		$maxX = $this->maxX;
-		$maxY = $this->maxY;
-		$maxZ = $this->maxZ;
-
-		if($x < 0){
-			$minX += $x;
-		}elseif($x > 0){
-			$maxX += $x;
-		}
-
-		if($y < 0){
-			$minY += $y;
-		}elseif($y > 0){
-			$maxY += $y;
-		}
-
-		if($z < 0){
-			$minZ += $z;
-		}elseif($z > 0){
-			$maxZ += $z;
-		}
-
-		return new AxisAlignedBB($minX, $minY, $minZ, $maxX, $maxY, $maxZ);
+		return new AxisAlignedBB(
+			$x < 0 ? $this->minX + $x : $this->minX, 
+			$y < 0 ? $this->minY + $y : $this->minY, 
+			$z < 0 ? $this->minZ + $z : $this->minZ, 
+			$x > 0 ? $this->maxX + $x : $this->maxX, 
+			$y > 0 ? $this->maxY + $y : $this->maxY, 
+			$z > 0 ? $this->maxZ + $z : $this->maxZ
+		);
 	}
 
 	public function grow($x, $y, $z){

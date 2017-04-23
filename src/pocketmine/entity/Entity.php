@@ -812,47 +812,34 @@ abstract class Entity extends Location implements Metadatable{
 		$j = floor($y);
 		$k = floor($z);
 
-		$diffX = $x - $i;
-		$diffY = $y - $j;
-		$diffZ = $z - $k;
-
 		if (Block::$solid[$this->level->getBlockIdAt($i, $j, $k)]) {
-			$flag = !Block::$solid[$this->level->getBlockIdAt($i - 1, $j, $k)];
-			$flag1 = !Block::$solid[$this->level->getBlockIdAt($i + 1, $j, $k)];
-			$flag2 = !Block::$solid[$this->level->getBlockIdAt($i, $j - 1, $k)];
-			$flag3 = !Block::$solid[$this->level->getBlockIdAt($i, $j + 1, $k)];
-			$flag4 = !Block::$solid[$this->level->getBlockIdAt($i, $j, $k - 1)];
-			$flag5 = !Block::$solid[$this->level->getBlockIdAt($i, $j, $k + 1)];
-
 			$direction = -1;
 			$limit = 9999;
+			$diffX = $x - $i;
+			$diffY = $y - $j;
+			$diffZ = $z - $k;
 
-			if ($flag) {
+			if (!Block::$solid[$this->level->getBlockIdAt($i - 1, $j, $k)]) {
 				$limit = $diffX;
 				$direction = 0;
 			}
-
-			if ($flag1 && 1 - $diffX < $limit) {
+			if (1 - $diffX < $limit && !Block::$solid[$this->level->getBlockIdAt($i + 1, $j, $k)]) {
 				$limit = 1 - $diffX;
 				$direction = 1;
 			}
-
-			if ($flag2 && $diffY < $limit) {
+			if ($diffY < $limit && !Block::$solid[$this->level->getBlockIdAt($i, $j - 1, $k)]) {
 				$limit = $diffY;
 				$direction = 2;
 			}
-
-			if ($flag3 && 1 - $diffY < $limit) {
+			if (1 - $diffY < $limit && !Block::$solid[$this->level->getBlockIdAt($i, $j + 1, $k)]) {
 				$limit = 1 - $diffY;
 				$direction = 3;
 			}
-
-			if ($flag4 && $diffZ < $limit) {
+			if ($diffZ < $limit && !Block::$solid[$this->level->getBlockIdAt($i, $j, $k - 1)]) {
 				$limit = $diffZ;
 				$direction = 4;
 			}
-
-			if ($flag5 && 1 - $diffZ < $limit) {
+			if (1 - $diffZ < $limit && !Block::$solid[$this->level->getBlockIdAt($i, $j, $k + 1)]) {
 				$direction = 5;
 			}
 
