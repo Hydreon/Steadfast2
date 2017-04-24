@@ -2193,7 +2193,8 @@ class Level implements ChunkManager, Metadatable{
 	 * @return bool
 	 */
 	public function isChunkInUse($x, $z){
-		return isset($this->usedChunks[PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z)]) and count($this->usedChunks[PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z)]) > 0;
+		$someIndex = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (($z) & 0xFFFFFFFF) : $x . ":" . $z;		
+		return isset($this->usedChunks[$someIndex]) && count($this->usedChunks[$someIndex]) > 0;
 	}
 
 	/**
