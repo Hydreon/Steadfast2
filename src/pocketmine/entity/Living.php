@@ -133,9 +133,9 @@ abstract class Living extends Entity implements Damageable{
 
 		$motion = new Vector3($this->motionX, $this->motionY, $this->motionZ);
 
-		$motion->x /= 2;
-		$motion->y /= 2;
-		$motion->z /= 2;
+		$motion->x = $motion->x >> 1;
+		$motion->y = $motion->y >> 1;
+		$motion->z = $motion->z >> 1;
 		$motion->x += ($f != 0) ? ($x / $f) * $base : 0;
 		$motion->y += $base;
 		$motion->z += ($f != 0) ? ($z / $f) * $base : 0;
@@ -245,37 +245,34 @@ abstract class Living extends Entity implements Damageable{
 	 * @return Block[]
 	 */
 	public function getLineOfSight($maxDistance, $maxLength = 0, array $transparent = []){
-		if($maxDistance > 120){
+		if ($maxDistance > 120) {
 			$maxDistance = 120;
 		}
-
-		if(count($transparent) === 0){
+		if (count($transparent) === 0) {
 			$transparent = null;
 		}
-
 		$blocks = [];
 		$nextIndex = 0;
-
+		
 		$itr = new BlockIterator($this->level, $this->getPosition(), $this->getDirectionVector(), $this->getEyeHeight(), $maxDistance);
-
-		while($itr->valid()){
+		while ($itr->valid()) {
 			$itr->next();
 			$block = $itr->current();
 			$blocks[$nextIndex++] = $block;
 
-			if($maxLength !== 0 and count($blocks) > $maxLength){
+			if ($maxLength !== 0 && count($blocks) > $maxLength) {
 				array_shift($blocks);
 				--$nextIndex;
 			}
 
 			$id = $block->getId();
 
-			if($transparent === null){
-				if($id !== 0){
+			if ($transparent === null) {
+				if ($id !== 0) {
 					break;
 				}
-			}else{
-				if(!isset($transparent[$id])){
+			} else {
+				if (!isset($transparent[$id])) {
 					break;
 				}
 			}
@@ -292,9 +289,9 @@ abstract class Living extends Entity implements Damageable{
 	 */
 	public function getTargetBlock($maxDistance, array $transparent = []){
 		try{
-			$block = $this->getLineOfSight($maxDistance, 1, $transparent)[0];
-			if($block instanceof Block){
-				return $block;
+			$blocks = $this->getLineOfSight($maxDistance, 1, $transparent);
+			if (isset($blocks[0]) && $blocks[0] instanceof Block) {
+				return $blocks[0];
 			}
 		}catch (\ArrayOutOfBoundsException $e){
 
