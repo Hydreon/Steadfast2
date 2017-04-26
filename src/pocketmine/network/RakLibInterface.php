@@ -64,7 +64,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 
 	public $count = 0;
 	public $maxcount = 31360;
-	public $name = "Lifeboat Network";
+	public $name = "Minecraft server";
 
 	public function setCount($count, $maxcount) {
 		$this->count = $count;

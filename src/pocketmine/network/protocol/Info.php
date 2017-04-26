@@ -73,6 +73,7 @@ interface Info{
 //	const LEVEL_SOUND_EVENT_PACKET = 0x1a;
 	const LEVEL_EVENT_PACKET = 0x1b;	
 	const TILE_EVENT_PACKET = 0x1c;
+	const BLOCK_EVENT_PACKET = 0x1c;
 	const ENTITY_EVENT_PACKET = 0x1d;
 	const MOB_EFFECT_PACKET = 0x1e;
 	const UPDATE_ATTRIBUTES_PACKET = 0x1f;	

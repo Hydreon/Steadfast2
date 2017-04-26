@@ -220,11 +220,11 @@ class PluginManager{
 								$apiVersion = array_map("intval", explode(".", $this->server->getApiVersion()));
 								//Completely different API version
 								if($version[0] !== $apiVersion[0]){
-									continue;
+								//	continue;
 								}
 								//If the plugin requires new API features, being backwards compatible
 								if($version[1] > $apiVersion[1]){
-									continue;
+									//continue;
 								}
 
 								$compatible = true;
@@ -233,7 +233,7 @@ class PluginManager{
 
 							if($compatible === false){
 								$this->server->getLogger()->error("Could not load plugin '" . $name . "': API version not compatible");
-								continue;
+								//continue;
 							}
 
 							$plugins[$name] = $file;
