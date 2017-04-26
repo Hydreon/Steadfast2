@@ -53,32 +53,14 @@ class AxisAlignedBB{
 	}
 
 	public function addCoord($x, $y, $z){
-		$minX = $this->minX;
-		$minY = $this->minY;
-		$minZ = $this->minZ;
-		$maxX = $this->maxX;
-		$maxY = $this->maxY;
-		$maxZ = $this->maxZ;
-
-		if($x < 0){
-			$minX += $x;
-		}elseif($x > 0){
-			$maxX += $x;
-		}
-
-		if($y < 0){
-			$minY += $y;
-		}elseif($y > 0){
-			$maxY += $y;
-		}
-
-		if($z < 0){
-			$minZ += $z;
-		}elseif($z > 0){
-			$maxZ += $z;
-		}
-
-		return new AxisAlignedBB($minX, $minY, $minZ, $maxX, $maxY, $maxZ);
+		return new AxisAlignedBB(
+			$x < 0 ? $this->minX + $x : $this->minX, 
+			$y < 0 ? $this->minY + $y : $this->minY, 
+			$z < 0 ? $this->minZ + $z : $this->minZ, 
+			$x > 0 ? $this->maxX + $x : $this->maxX, 
+			$y > 0 ? $this->maxY + $y : $this->maxY, 
+			$z > 0 ? $this->maxZ + $z : $this->maxZ
+		);
 	}
 
 	public function grow($x, $y, $z){
@@ -250,77 +232,41 @@ class AxisAlignedBB{
 		$v5 = $pos1->getIntermediateWithZValue($pos2, $this->minZ);
 		$v6 = $pos1->getIntermediateWithZValue($pos2, $this->maxZ);
 
-		if($v1 !== null and !$this->isVectorInYZ($v1)){
-			$v1 = null;
-		}
-
-		if($v2 !== null and !$this->isVectorInYZ($v2)){
-			$v2 = null;
-		}
-
-		if($v3 !== null and !$this->isVectorInXZ($v3)){
-			$v3 = null;
-		}
-
-		if($v4 !== null and !$this->isVectorInXZ($v4)){
-			$v4 = null;
-		}
-
-		if($v5 !== null and !$this->isVectorInXY($v5)){
-			$v5 = null;
-		}
-
-		if($v6 !== null and !$this->isVectorInXY($v6)){
-			$v6 = null;
-		}
-
-		$vector = null;
-
-
-		if($v1 !== null and ($vector === null or $pos1->distanceSquared($v1) < $pos1->distanceSquared($vector))){
-			$vector = $v1;
-		}
-
-		if($v2 !== null and ($vector === null or $pos1->distanceSquared($v2) < $pos1->distanceSquared($vector))){
-			$vector = $v2;
-		}
-
-		if($v3 !== null and ($vector === null or $pos1->distanceSquared($v3) < $pos1->distanceSquared($vector))){
-			$vector = $v3;
-		}
-
-		if($v4 !== null and ($vector === null or $pos1->distanceSquared($v4) < $pos1->distanceSquared($vector))){
-			$vector = $v4;
-		}
-
-		if($v5 !== null and ($vector === null or $pos1->distanceSquared($v5) < $pos1->distanceSquared($vector))){
-			$vector = $v5;
-		}
-
-		if($v6 !== null and ($vector === null or $pos1->distanceSquared($v6) < $pos1->distanceSquared($vector))){
-			$vector = $v6;
-		}
-
-		if($vector === null){
-			return null;
-		}
-
 		$f = -1;
-
-		if($vector === $v1){
+		$vector = null;
+		if ($v1 !== null && $this->isVectorInYZ($v1)) {
+			$vector = $v1;
 			$f = 4;
-		}elseif($vector === $v2){
+		}
+
+		if ($v2 !== null && $this->isVectorInYZ($v2) && ($vector === null || $pos1->distanceSquared($v2) < $pos1->distanceSquared($vector))) {
+			$vector = $v2;
 			$f = 5;
-		}elseif($vector === $v3){
+		}
+
+		if ($v3 !== null && $this->isVectorInXZ($v3) && ($vector === null || $pos1->distanceSquared($v3) < $pos1->distanceSquared($vector))) {
+			$vector = $v3;
 			$f = 0;
-		}elseif($vector === $v4){
+		}
+
+		if ($v4 !== null && $this->isVectorInXZ($v4) && ($vector === null || $pos1->distanceSquared($v4) < $pos1->distanceSquared($vector))) {
+			$vector = $v4;
 			$f = 1;
-		}elseif($vector === $v5){
+		}
+
+		if ($v5 !== null && $this->isVectorInXY($v5) && ($vector === null || $pos1->distanceSquared($v5) < $pos1->distanceSquared($vector))) {
+			$vector = $v5;
 			$f = 2;
-		}elseif($vector === $v6){
+		}
+
+		if ($v6 !== null && $this->isVectorInXY($v6) && ($vector === null || $pos1->distanceSquared($v6) < $pos1->distanceSquared($vector))) {
+			$vector = $v6;
 			$f = 3;
 		}
 
+		if ($vector === null) {
+			return null;
+		}
 		return MovingObjectPosition::fromBlock(0, 0, 0, $f, $vector);
 	}
 

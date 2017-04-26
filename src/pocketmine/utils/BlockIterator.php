@@ -252,16 +252,12 @@ class BlockIterator implements \Iterator{
 	}
 
 	private function scan(){
-		if($this->currentBlock >= 0){
+		if ($this->currentBlock >= 0 || $this->end) {
 			return;
 		}
 
 		if($this->maxDistance !== 0 and $this->currentDistance > $this->maxDistanceInt){
 			$this->end = true;
-			return;
-		}
-
-		if($this->end){
 			return;
 		}
 
