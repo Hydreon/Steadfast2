@@ -808,9 +808,9 @@ abstract class Entity extends Location implements Metadatable{
 	}
 
 	protected function checkObstruction($x, $y, $z) {
-		$i = floor($x);
-		$j = floor($y);
-		$k = floor($z);
+		$i = Math::floorFloat($x);
+		$j = Math::floorFloat($y);
+		$k = Math::floorFloat($z);
 
 		if (Block::$solid[$this->level->getBlockIdAt($i, $j, $k)]) {
 			$direction = -1;
@@ -1161,12 +1161,12 @@ abstract class Entity extends Location implements Metadatable{
 	}
 
 	public function isCollideWithWater() {
-		$x = floor($this->x);
-		$z = floor($this->z);
+		$x = Math::floorFloat($this->x);
+		$z = Math::floorFloat($this->z);
 		// checking block under feet
-		$block = $this->level->getBlock(new Vector3($x, floor($y = $this->y), $z));
+		$block = $this->level->getBlock(new Vector3($x, Math::floorFloat($y = $this->y), $z));
 		if(!($block instanceof Water)) {
-			$block = $this->level->getBlock(new Vector3($x, floor($y = ($this->y + $this->eyeHeight)), $z));
+			$block = $this->level->getBlock(new Vector3($x, Math::floorFloat($y = ($this->y + $this->eyeHeight)), $z));
 		}
 		if($block instanceof Water) {
 			$f = ($block->y + 1) - ($block->getFluidHeightPercent() - 0.1111111);
@@ -1176,32 +1176,32 @@ abstract class Entity extends Location implements Metadatable{
 	}
 	
 	public function isCollideWithLiquid() {
-		$x = floor($this->x);
-		$y = floor($this->y);
-		$z = floor($this->z);
+		$x = Math::floorFloat($this->x);
+		$y = Math::floorFloat($this->y);
+		$z = Math::floorFloat($this->z);
 		
 		$block = $this->level->getBlock(new Vector3($x, $y, $z));
 		$isLiquid = $block instanceof Liquid;
 		
 		if (!$isLiquid) {
-			$y = floor($this->y + $this->eyeHeight);
+			$y = Math::floorFloat($this->y + $this->eyeHeight);
 			$block = $this->level->getBlock(new Vector3($x, $y, $z));
 			$isLiquid = $block instanceof Liquid;
 			
 			if (!$isLiquid) {
-				$block = $this->level->getBlock(new Vector3(floor($this->x + $this->width), $y, $z));
+				$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x + $this->width), $y, $z));
 				$isLiquid = $block instanceof Liquid;
 				
 				if (!$isLiquid) {
-					$block = $this->level->getBlock(new Vector3(floor($this->x - $this->width), $y, $z));
+					$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x - $this->width), $y, $z));
 					$isLiquid = $block instanceof Liquid;
 					
 					if (!$isLiquid) {
-						$block = $this->level->getBlock(new Vector3($x, $y, floor($this->z + $this->width)));
+						$block = $this->level->getBlock(new Vector3($x, $y, Math::floorFloat($this->z + $this->width)));
 						$isLiquid = $block instanceof Liquid;
 						
 						if (!$isLiquid) {
-							$block = $this->level->getBlock(new Vector3($x, $y, floor($this->z - $this->width)));
+							$block = $this->level->getBlock(new Vector3($x, $y, Math::floorFloat($this->z - $this->width)));
 							$isLiquid = $block instanceof Liquid;
 						}
 					}
@@ -1216,14 +1216,14 @@ abstract class Entity extends Location implements Metadatable{
 	}
 	
 	public function isCollideWithTransparent() {
-		$x = floor($this->x);
-		$z = floor($this->z);
+		$x = Math::floorFloat($this->x);
+		$z = Math::floorFloat($this->z);
 	
-		$block = $this->level->getBlock(new Vector3($x, floor($this->y), $z));
+		$block = $this->level->getBlock(new Vector3($x, Math::floorFloat($this->y), $z));
 		$isTransparent = $block instanceof Ladder || $block instanceof Fire || $block instanceof Vine || $block instanceof Cobweb;
 		
 		if(!$isTransparent) {
-			$block = $this->level->getBlock(new Vector3($x, floor($this->y + $this->getEyeHeight()), $z));
+			$block = $this->level->getBlock(new Vector3($x, Math::floorFloat($this->y + $this->getEyeHeight()), $z));
 			$isTransparent = $block instanceof Ladder || $block instanceof Fire || $block instanceof Vine || $block instanceof Cobweb;
 		}
 		
