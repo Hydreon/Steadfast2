@@ -53,15 +53,15 @@ class Vector3{
 	}
 
 	public function getFloorX(){
-		return floor($this->x);
+		return (int) floor($this->x);
 	}
 
 	public function getFloorY(){
-		return floor($this->y);
+		return (int) floor($this->y);
 	}
 
 	public function getFloorZ(){
-		return floor($this->z);
+		return (int) floor($this->z);
 	}
 
 	public function getRight(){
