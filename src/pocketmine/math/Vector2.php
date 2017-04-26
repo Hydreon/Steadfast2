@@ -50,19 +50,19 @@ class Vector2{
 		return (int) $this->y;
 	}
 
-	public function add($x, $y = 0) {
-		if ($x instanceof Vector2) {
-			return new Vector2($this->x + $x->x, $this->y + $y->y);
-		} else {
+	public function add($x, $y = 0){
+		if($x instanceof Vector2){
+			return $this->add($x->x, $x->y);
+		}else{
 			return new Vector2($this->x + $x, $this->y + $y);
 		}
 	}
 
-	public function subtract($x, $y = 0) {
-		if ($x instanceof Vector2) {
-			return new Vector2($this->x - $x->x, $this->y - $y->y);
-		} else {
-			return new Vector2($this->x - $x, $this->y - $y);
+	public function subtract($x, $y = 0){
+		if($x instanceof Vector2){
+			return $this->add(-$x->x, -$x->y);
+		}else{
+			return $this->add(-$x, -$y);
 		}
 	}
 
@@ -92,22 +92,22 @@ class Vector2{
 
 	public function distance($x, $y = 0){
 		if($x instanceof Vector2){
-			return sqrt(($this->x - $x->x) ** 2 + ($this->y - $x->y) ** 2);
+			return sqrt($this->distanceSquared($x->x, $x->y));
 		}else{
-			return sqrt(($this->x - $x) ** 2 + ($this->y - $y) ** 2);
+			return sqrt($this->distanceSquared($x, $y));
 		}
 	}
 
-	public function distanceSquared($x, $y = 0) {
-		if ($x instanceof Vector2) {
-			return ($this->x - $x->x) ** 2 + ($this->y - $x->y) ** 2;
-		} else {
-			return ($this->x - $x) ** 2 + ($this->y - $y) ** 2;
+	public function distanceSquared($x, $y = 0){
+		if($x instanceof Vector2){
+			return $this->distanceSquared($x->x, $x->y);
+		}else{
+			return pow($this->x - $x, 2) + pow($this->y - $y, 2);
 		}
 	}
 
 	public function length(){
-		return sqrt($this->x * $this->x + $this->y * $this->y);
+		return sqrt($this->lengthSquared());
 	}
 
 	public function lengthSquared(){
@@ -115,9 +115,9 @@ class Vector2{
 	}
 
 	public function normalize(){
-		if ($this->x != 0 || $this->y != 0) {
-			$len = sqrt($this->x * $this->x + $this->y * $this->y);
-			return new Vector2($this->x / $len, $this->y / $len);
+		$len = $this->length();
+		if($len != 0){
+			return $this->divide($len);
 		}
 
 		return new Vector2(0, 0);

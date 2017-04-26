@@ -96,19 +96,16 @@ class Item extends Entity{
 			return false;
 		}
 
-		$tickDiff = $currentTick - $this->lastUpdate;
-		if ($tickDiff < 1) {
-			$tickDiff = 1;
-		}
+		$tickDiff = max(1, $currentTick - $this->lastUpdate);
 		$this->lastUpdate = $currentTick;
 
 		$this->timings->startTiming();
 
 		$hasUpdate = $this->entityBaseTick($tickDiff);
 
-		if (!$this->dead) {
+		if(!$this->dead){
 
-			if ($this->pickupDelay > 0 && $this->pickupDelay < 32767) { //Infinite delay
+			if($this->pickupDelay > 0 and $this->pickupDelay < 32767){ //Infinite delay
 				$this->pickupDelay -= $tickDiff;
 			}
 
@@ -119,8 +116,8 @@ class Item extends Entity{
 
 			$friction = 1 - $this->drag;
 
-			if ($this->onGround && ($this->motionX != 0 || $this->motionZ != 0)) {
-				$friction = $this->level->getBlock(new Vector3($this->getFloorX(), $this->getFloorY() - 1, $this->getFloorZ()))->getFrictionFactor() * $friction;
+			if($this->onGround and ($this->motionX != 0 or $this->motionZ != 0)){
+				$friction = $this->getLevel()->getBlock(new Vector3($this->getFloorX(), $this->getFloorY() - 1, $this->getFloorZ()))->getFrictionFactor() * $friction;
 			}
 
 			$this->motionX *= $friction;
@@ -151,7 +148,7 @@ class Item extends Entity{
 
 		$this->timings->stopTiming();
 		
-		return $hasUpdate || !$this->onGround || $this->motionX != 0 || $this->motionY != 0 || $this->motionZ != 0;
+		return $hasUpdate or !$this->onGround or $this->motionX != 0 or $this->motionY != 0 or $this->motionZ != 0;
 	}
 
 	public function saveNBT(){
