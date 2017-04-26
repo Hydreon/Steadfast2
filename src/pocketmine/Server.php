@@ -829,10 +829,10 @@ class Server{
 				return $nbt->getData();
 			}catch(\Exception $e){ //zlib decode error / corrupt data
 				rename($path . "$name.dat", $path . "$name.dat.bak");
-				$this->logger->warning("Corrupted data found for \"" . $name . "\", creating new profile");
+			//	$this->logger->warning("Corrupted data found for \"" . $name . "\", creating new profile");
 			}
 		}else{
-			$this->logger->notice("Player data not found for \"" . $name . "\", creating new profile");
+		//	$this->logger->notice("Player data not found for \"" . $name . "\", creating new profile");
 		}
 		$spawn = $this->getDefaultLevel()->getSafeSpawn();
 		$nbt = new Compound("", [
@@ -884,7 +884,7 @@ class Server{
 	 * @param Compound $nbtTag
 	 */
 	public function saveOfflinePlayerData($name, Compound $nbtTag, $async = false){
-			$nbt = new NBT(NBT::BIG_ENDIAN);
+	/*	$nbt = new NBT(NBT::BIG_ENDIAN);
 		try{
 			$nbt->setData($nbtTag);
 			if($async){
@@ -897,7 +897,7 @@ class Server{
 			if(\pocketmine\DEBUG > 1 and $this->logger instanceof MainLogger){
 				$this->logger->logException($e);
 			}
-		}
+		}*/
 	}
 
 	/**
