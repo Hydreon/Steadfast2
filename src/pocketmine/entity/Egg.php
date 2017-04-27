@@ -47,7 +47,7 @@ class Egg extends Projectile {
 			return false;
 		}
 
-		$this->timings->startTiming();
+		//$this->timings->startTiming();
 
 		$hasUpdate = parent::onUpdate($currentTick);
 
@@ -56,7 +56,7 @@ class Egg extends Projectile {
 			$hasUpdate = true;
 		}
 
-		$this->timings->stopTiming();
+		//$this->timings->stopTiming();
 
 		return $hasUpdate;
 	}

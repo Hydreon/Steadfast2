@@ -1523,7 +1523,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 
 
-		$this->timings->startTiming();
+		//$this->timings->startTiming();
 		
 		
 		$this->checkTeleportPosition();
@@ -1541,7 +1541,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if($this->deadTicks >= 10){
 				$this->despawnFromAll();
 			}
-			$this->timings->stopTiming();
+			//$this->timings->stopTiming();
 			return $this->deadTicks < 10;
 //			return true;
 		}
@@ -1570,7 +1570,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							if($this->inAirTicks < 301){
 //								$this->setMotion(new Vector3(0, $expectedVelocity, 0));
 							}elseif($this->kick("Flying is not enabled on this server")){
-								$this->timings->stopTiming();
+								//$this->timings->stopTiming();
 								return false;
 							}
 						}
@@ -1640,7 +1640,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->dataPacket($pk);
 		}
 
-		$this->timings->stopTiming();
+		//$this->timings->stopTiming();
 
 		return true;
 	}

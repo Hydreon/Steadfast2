@@ -64,7 +64,7 @@ class FireBall extends Projectile{
 			return false;
 		}
 
-		$this->timings->startTiming();
+		//$this->timings->startTiming();
 
 		$hasUpdate = parent::onUpdate($currentTick);
 
@@ -92,7 +92,7 @@ class FireBall extends Projectile{
 			$hasUpdate = true;
 		}
 
-		$this->timings->stopTiming();
+		//$this->timings->stopTiming();
 		return $hasUpdate;
 	}
 
