@@ -920,14 +920,15 @@ class Server{
 		$found = null;
 		$name = strtolower($name);
 		$delta = PHP_INT_MAX;
-		foreach($this->getOnlinePlayers() as $player){
-			if(stripos($player->getName(), $name) === 0){
-				$curDelta = strlen($player->getName()) - strlen($name);
-				if($curDelta < $delta){
+		foreach ($this->getOnlinePlayers() as $player) {
+			$playerName = strtolower($player->getName());
+			if (strpos($playerName, $name) === 0) {
+				$curDelta = strlen($playerName) - strlen($name);
+				if ($curDelta < $delta) {
 					$found = $player;
 					$delta = $curDelta;
 				}
-				if($curDelta === 0){
+				if ($curDelta == 0) {
 					break;
 				}
 			}
@@ -961,10 +962,11 @@ class Server{
 		$partialName = strtolower($partialName);
 		$matchedPlayers = [];
 		foreach($this->getOnlinePlayers() as $player){
-			if(strtolower($player->getName()) === $partialName){
+			$playerName = strtolower($player->getName());
+			if ($playerName === $partialName) {
 				$matchedPlayers = [$player];
 				break;
-			}elseif(stripos($player->getName(), $partialName) !== false){
+			} else if (strpos($playerName, $partialName) !== false) {
 				$matchedPlayers[] = $player;
 			}
 		}
@@ -2547,9 +2549,10 @@ class Server{
 
 		$now = microtime(true);
 		array_shift($this->tickAverage);
-		$this->tickAverage[] = min(20, 1 / max(0.001, $now - $tickTime));
+		$tickDiff = $now - $tickTime;
+		$this->tickAverage[] = ($tickDiff <= 0.05) ? 20 : 1 / $tickDiff;
 		array_shift($this->useAverage);
-		$this->useAverage[] = min(1, ($now - $tickTime) / 0.05);
+		$this->useAverage[] = min(1, $tickDiff * 20);
 
 		if(($this->nextTick - $tickTime) < -1){
 			$this->nextTick = $tickTime;
