@@ -208,7 +208,7 @@ class Furnace extends Tile implements InventoryHolder, Container, Nameable{
 			return false;
 		}
 
-		$this->timings->startTiming();
+		//$this->timings->startTiming();
 
 		$ret = false;
 
@@ -282,7 +282,7 @@ class Furnace extends Tile implements InventoryHolder, Container, Nameable{
 
 		$this->lastUpdate = microtime(true);
 
-		$this->timings->stopTiming();
+		//$this->timings->stopTiming();
 
 		return $ret;
 	}

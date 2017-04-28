@@ -41,7 +41,7 @@ class Arrow extends Projectile{
 		if($this->closed){
 			return false;
 		}
-		$this->timings->startTiming();
+		//$this->timings->startTiming();
 		$hasUpdate = parent::onUpdate($currentTick);
 		if(!$this->hadCollision and $this->isCritical){
 			$this->level->addParticle(new CriticalParticle($this->add(
@@ -58,7 +58,7 @@ class Arrow extends Projectile{
 			$this->kill();
 			$hasUpdate = true;
 		}
-		$this->timings->stopTiming();
+		//$this->timings->stopTiming();
 		return $hasUpdate;
 	}
 	public function spawnTo(Player $player){

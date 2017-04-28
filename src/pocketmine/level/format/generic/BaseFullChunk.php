@@ -113,7 +113,7 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function initChunk(){
 		if($this->getProvider() instanceof LevelProvider and $this->NBTentities !== null){
-			$this->getProvider()->getLevel()->timings->syncChunkLoadEntitiesTimer->startTiming();
+			//$this->getProvider()->getLevel()->timings->syncChunkLoadEntitiesTimer->startTiming();
 			foreach($this->NBTentities as $nbt){
 				if($nbt instanceof Compound){
 					if(!isset($nbt->id)){
@@ -134,9 +134,9 @@ abstract class BaseFullChunk implements FullChunk{
 					}
 				}
 			}
-			$this->getProvider()->getLevel()->timings->syncChunkLoadEntitiesTimer->stopTiming();
+			//$this->getProvider()->getLevel()->timings->syncChunkLoadEntitiesTimer->stopTiming();
 
-			$this->getProvider()->getLevel()->timings->syncChunkLoadTileEntitiesTimer->startTiming();
+			//$this->getProvider()->getLevel()->timings->syncChunkLoadTileEntitiesTimer->startTiming();
 			foreach($this->NBTtiles as $nbt){
 				if($nbt instanceof Compound){
 					if(!isset($nbt->id)){
@@ -156,7 +156,7 @@ abstract class BaseFullChunk implements FullChunk{
 				}
 			}
 
-			$this->getProvider()->getLevel()->timings->syncChunkLoadTileEntitiesTimer->stopTiming();
+			//$this->getProvider()->getLevel()->timings->syncChunkLoadTileEntitiesTimer->stopTiming();
 
 			$this->NBTentities = null;
 			$this->NBTtiles = null;

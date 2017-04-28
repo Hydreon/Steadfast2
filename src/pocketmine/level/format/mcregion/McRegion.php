@@ -174,12 +174,12 @@ class McRegion extends BaseLevelProvider{
 		$regionX = $regionZ = null;
 		self::getRegionIndex($chunkX, $chunkZ, $regionX, $regionZ);
 		$this->loadRegion($regionX, $regionZ);
-		$this->level->timings->syncChunkLoadDataTimer->startTiming();
+		//$this->level->timings->syncChunkLoadDataTimer->startTiming();
 		$chunk = $this->getRegion($regionX, $regionZ)->readChunk($chunkX - $regionX * 32, $chunkZ - $regionZ * 32);
 		if($chunk === null and $create){
 			$chunk = $this->getEmptyChunk($chunkX, $chunkZ);
 		}
-		$this->level->timings->syncChunkLoadDataTimer->stopTiming();
+		//$this->level->timings->syncChunkLoadDataTimer->stopTiming();
 
 		if($chunk !== null){
 			$this->chunks[$index] = $chunk;

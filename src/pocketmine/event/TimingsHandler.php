@@ -118,29 +118,29 @@ class TimingsHandler{
 	}
 
 	public function startTiming(){
-		if(PluginManager::$useTimings and ++$this->timingDepth === 1){
-			$this->start = microtime(true);
-			if($this->parent instanceof TimingsHandler and ++$this->parent->timingDepth === 1){
-				$this->parent->start = $this->start;
-			}
-		}
+//		if(PluginManager::$useTimings and ++$this->timingDepth === 1){
+//			$this->start = microtime(true);
+//			if($this->parent instanceof TimingsHandler and ++$this->parent->timingDepth === 1){
+//				$this->parent->start = $this->start;
+//			}
+//		}
 	}
 
 	public function stopTiming(){
-		if(PluginManager::$useTimings){
-			if(--$this->timingDepth !== 0 or $this->start === 0){
-				return;
-			}
-
-			$diff = microtime(true) - $this->start;
-			$this->totalTime += $diff;
-			$this->curTickTotal += $diff;
-			$this->count++;
-			$this->start = 0;
-			if($this->parent instanceof TimingsHandler){
-				$this->parent->stopTiming();
-			}
-		}
+//		if(PluginManager::$useTimings){
+//			if(--$this->timingDepth !== 0 or $this->start === 0){
+//				return;
+//			}
+//
+//			$diff = microtime(true) - $this->start;
+//			$this->totalTime += $diff;
+//			$this->curTickTotal += $diff;
+//			$this->count++;
+//			$this->start = 0;
+//			if($this->parent instanceof TimingsHandler){
+//				$this->parent->stopTiming();
+//			}
+//		}
 	}
 
 	public function reset(){

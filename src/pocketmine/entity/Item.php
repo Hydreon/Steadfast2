@@ -102,7 +102,7 @@ class Item extends Entity{
 		}
 		$this->lastUpdate = $currentTick;
 
-		$this->timings->startTiming();
+		//$this->timings->startTiming();
 
 		$hasUpdate = $this->entityBaseTick($tickDiff);
 
@@ -149,7 +149,7 @@ class Item extends Entity{
 			}
 		}
 
-		$this->timings->stopTiming();
+		//$this->timings->stopTiming();
 		
 		return $hasUpdate || !$this->onGround || $this->motionX != 0 || $this->motionY != 0 || $this->motionZ != 0;
 	}
