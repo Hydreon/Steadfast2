@@ -233,14 +233,14 @@ class ServerScheduler{
 				unset($this->tasks[$task->getTaskId()]);
 				continue;
 			}else{
-				$task->timings->startTiming();
+				//$task->timings->startTiming();
 				try{
 					$task->run($this->currentTick);
 				}catch(\Throwable $e){
 					Server::getInstance()->getLogger()->critical("Could not execute task " . $task->getTaskName() . ": " . $e->getMessage());
 					Server::getInstance()->getLogger()->logException($e);
 				}
-				$task->timings->stopTiming();
+				//$task->timings->stopTiming();
 			}
 			if($task->isRepeating()){
 				$task->setNextRun($this->currentTick + $task->getPeriod());

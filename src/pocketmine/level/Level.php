@@ -568,7 +568,7 @@ class Level implements ChunkManager, Metadatable{
 	 */
 	public function doTick($currentTick){
 
-		$this->timings->doTick->startTiming();
+		//$this->timings->doTick->startTiming();
 
 		$this->checkTime();
 
@@ -582,15 +582,15 @@ class Level implements ChunkManager, Metadatable{
 		$Z = null;
 
 		//Do block updates
-		$this->timings->doTickPending->startTiming();
+		//$this->timings->doTickPending->startTiming();
 		while($this->updateQueue->count() > 0 and $this->updateQueue->current()["priority"] <= $currentTick){
 			$block = $this->getBlock($this->updateQueue->extract()["data"]);
 			unset($this->updateQueueIndex[PHP_INT_SIZE === 8 ? ((($block->x) & 0xFFFFFFF) << 35) | ((( $block->y) & 0x7f) << 28) | (( $block->z) & 0xFFFFFFF) : ($block->x) . ":" . ( $block->y) .":". ( $block->z)]);
 			$block->onUpdate(self::BLOCK_UPDATE_SCHEDULED);
 		}
-		$this->timings->doTickPending->stopTiming();
+		//$this->timings->doTickPending->stopTiming();
 
-		$this->timings->entityTick->startTiming();
+		//$this->timings->entityTick->startTiming();
 		//Update entities that need update
 		//Timings::$tickEntityTimer->startTiming();
 		foreach($this->updateEntities as $id => $entity){
@@ -599,9 +599,9 @@ class Level implements ChunkManager, Metadatable{
 			}
 		}
 		//Timings::$tickEntityTimer->stopTiming();
-		$this->timings->entityTick->stopTiming();
+		//$this->timings->entityTick->stopTiming();
 
-		$this->timings->tileEntityTick->startTiming();
+		//$this->timings->tileEntityTick->startTiming();
 		//Update tiles that need update
 		if(count($this->updateTiles) > 0){
 			//Timings::$tickTileEntityTimer->startTiming();
@@ -612,11 +612,11 @@ class Level implements ChunkManager, Metadatable{
 			}
 			//Timings::$tickTileEntityTimer->stopTiming();
 		}
-		$this->timings->tileEntityTick->stopTiming();
+		//$this->timings->tileEntityTick->stopTiming();
 
-		$this->timings->doTickTiles->startTiming();
+		//$this->timings->doTickTiles->startTiming();
 		$this->tickChunks();
-		$this->timings->doTickTiles->stopTiming();
+		//$this->timings->doTickTiles->stopTiming();
 
 		if(count($this->changedCount) > 0){
 			if(count($this->players) > 0){
@@ -688,7 +688,7 @@ class Level implements ChunkManager, Metadatable{
 		while(($data = unserialize($this->chunkMaker->readThreadToMainPacket()))){
 			$this->chunkRequestCallback($data['chunkX'], $data['chunkZ'], $data);
 		}
-		$this->timings->doTick->stopTiming();
+		//$this->timings->doTick->stopTiming();
 	}
 
 	/**
@@ -2071,7 +2071,7 @@ class Level implements ChunkManager, Metadatable{
 
 	protected function processChunkRequest(){
 		if(count($this->chunkSendQueue) > 0){
-			$this->timings->syncChunkSendTimer->startTiming();
+			//$this->timings->syncChunkSendTimer->startTiming();
 
 			$x = null;
 			$z = null;
@@ -2090,16 +2090,16 @@ class Level implements ChunkManager, Metadatable{
 					unset($this->chunkSendQueue[$index]);
 				}else{
 					$this->chunkSendTasks[$index] = true;
-					$this->timings->syncChunkSendPrepareTimer->startTiming();
+					//$this->timings->syncChunkSendPrepareTimer->startTiming();
 					$task = $this->provider->requestChunkTask($x, $z);
 					if($task instanceof AsyncTask){
 						$this->server->getScheduler()->scheduleAsyncTask($task);
 					}
-					$this->timings->syncChunkSendPrepareTimer->stopTiming();
+					//$this->timings->syncChunkSendPrepareTimer->stopTiming();
 				}
 			}
 
-			$this->timings->syncChunkSendTimer->stopTiming();
+			//$this->timings->syncChunkSendTimer->stopTiming();
 		}
 	}
 
@@ -2219,9 +2219,9 @@ class Level implements ChunkManager, Metadatable{
 			$this->chunks[$index] = $chunk;
 			$chunk->initChunk();
 		}else{
-			$this->timings->syncChunkLoadTimer->startTiming();
+			//$this->timings->syncChunkLoadTimer->startTiming();
 			$this->provider->loadChunk($x, $z, $generate);
-			$this->timings->syncChunkLoadTimer->stopTiming();
+			//$this->timings->syncChunkLoadTimer->stopTiming();
 
 			if(($chunk = $this->provider->getChunk($x, $z)) !== null){
 				$this->chunks[$index] = $chunk;
@@ -2260,7 +2260,7 @@ class Level implements ChunkManager, Metadatable{
 			return false;
 		}
 
-		$this->timings->doChunkUnload->startTiming();
+		//$this->timings->doChunkUnload->startTiming();
 
 		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
 		if (isset($this->chunks[$index])) {
@@ -2270,20 +2270,20 @@ class Level implements ChunkManager, Metadatable{
 			unset($this->usedChunks[$index]);
 			unset($this->chunkTickList[$index]);
 			Cache::remove("world:" . $this->getId() . ":$index");
-			$this->timings->doChunkUnload->stopTiming();
+			//$this->timings->doChunkUnload->stopTiming();
 			return true;
 		}
 		
 		if($chunk !== null){
 			/* @var BaseFullChunk $chunk */
 			if(!$chunk->allowUnload) {
-				$this->timings->doChunkUnload->stopTiming();
+				//$this->timings->doChunkUnload->stopTiming();
 				return false;
 			}
 			
 			$this->server->getPluginManager()->callEvent($ev = new ChunkUnloadEvent($chunk));
 			if($ev->isCancelled()){
-				$this->timings->doChunkUnload->stopTiming();
+				//$this->timings->doChunkUnload->stopTiming();
 				return false;
 			}
 		}
@@ -2316,7 +2316,7 @@ class Level implements ChunkManager, Metadatable{
 		unset($this->chunkTickList[$index]);
 		Cache::remove("world:" . $this->getId() . ":$index");
 
-		$this->timings->doChunkUnload->stopTiming();
+		//$this->timings->doChunkUnload->stopTiming();
 
 		return true;
 	}
@@ -2506,7 +2506,7 @@ class Level implements ChunkManager, Metadatable{
 
 	public function doChunkGarbageCollection(){
 		if(!$this->isFrozen) {
-			$this->timings->doChunkGC->startTiming();
+			//$this->timings->doChunkGC->startTiming();
 
 			$X = null;
 			$Z = null;
@@ -2528,7 +2528,7 @@ class Level implements ChunkManager, Metadatable{
 
 			$this->provider->doGarbageCollection();
 
-			$this->timings->doChunkGC->stopTiming();
+			//$this->timings->doChunkGC->stopTiming();
 		}
 	}
 

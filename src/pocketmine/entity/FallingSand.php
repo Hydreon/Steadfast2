@@ -87,7 +87,7 @@ class FallingSand extends Entity{
 			return false;
 		}
 
-		$this->timings->startTiming();
+		//$this->timings->startTiming();
 
 		$tickDiff = max(1, $currentTick - $this->lastUpdate);
 		$this->lastUpdate = $currentTick;
