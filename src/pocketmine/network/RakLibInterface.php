@@ -174,12 +174,12 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->server->addPlayer($identifier, $player);
 	}
 
-	public function handleEncapsulated($identifier, EncapsulatedPacket $packet, $flags){
+	public function handleEncapsulated($identifier, $buffer){
 		if(isset($this->players[$identifier])){
 			$player = $this->players[$identifier];
 			try{
-				if($packet->buffer !== ""){
-					$pk = $this->getPacket($packet->buffer, $player->getPlayerProtocol(), $player->isOnline());				
+				if($buffer !== ""){
+					$pk = $this->getPacket($buffer, $player->getPlayerProtocol(), $player->isOnline());				
 					if (!is_null($pk)) {
 						$pk->decode($player->getPlayerProtocol());
 						$player->handleDataPacket($pk);
@@ -187,13 +187,6 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				}
 			}catch(\Exception $e){
 				var_dump($e->getMessage());
-				if(\pocketmine\DEBUG > 1 and isset($pk)){
-					$logger = $this->server->getLogger();
-					if($logger instanceof MainLogger){
-						$logger->debug("Packet " . get_class($pk) . " 0x" . bin2hex($packet->buffer));
-						$logger->logException($e);
-					}
-				}
 				$this->interface->blockAddress($player->getAddress(), 5);
 			}
 		}
@@ -288,30 +281,14 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	}
 	
 	private function getPacket($buffer, $playerProtocol, $isOnline) {
-		if (ord($buffer{0}) == 0xfe) {
-			$buffer = substr($buffer, 1);
-		} else {
+		$pid = ord($buffer{0});
+		if (($data = $this->network->getPacket($pid, $playerProtocol)) === null) {
 			return null;
 		}
-		
-		if (!$isOnline) {
-			$playerProtocol = $this->isZlib($buffer) ? Info::PROTOCOL_110 : Info::BASE_PROTOCOL;
-		}
-		switch ($playerProtocol) {
-			case Info::PROTOCOL_110:
-				$pk = new BatchPacket($buffer);
-				$pk->is110 = true;
-				return $pk;
-			default:
-				$pid = ord($buffer{0});
-				if (($data = $this->network->getPacket($pid, $playerProtocol)) === null) {
-					return null;
-				}
-				$data->setBuffer($buffer, 1);
-				return $data;
-		}
+		$data->setBuffer($buffer, 1);
+		return $data;
 	}
-	
+
 	public function putReadyPacket($player, $buffer) {
 		if (isset($this->identifiers[$player])) {	
 			$pk = new EncapsulatedPacket();

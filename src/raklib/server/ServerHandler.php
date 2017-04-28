@@ -94,9 +94,8 @@ class ServerHandler{
                 $len = ord($packet{$offset++});
                 $identifier = substr($packet, $offset, $len);
                 $offset += $len;
-                $flags = ord($packet{$offset++});
                 $buffer = substr($packet, $offset);
-                $this->instance->handleEncapsulated($identifier, EncapsulatedPacket::fromBinary($buffer, true), $flags);
+                $this->instance->handleEncapsulated($identifier, $buffer);
 			} elseif ($id === RakLib::PACKET_PING) {
 				$len = ord($packet{$offset++});
 				$identifier = substr($packet, $offset, $len);
