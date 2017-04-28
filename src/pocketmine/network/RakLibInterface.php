@@ -239,37 +239,20 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	 */
 	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
 		if(isset($this->identifiers[$player])){			
-			$protocol = $player->getPlayerProtocol();
-			$identifier = $this->identifiers[$player];
-			$pk = null;
-			if(!$packet->isEncoded){
-				$packet->encode($protocol);
-			} elseif(!$needACK){
-				if (isset($packet->__encapsulatedPacket)) {
-					unset($packet->__encapsulatedPacket);
-				}
-				$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
-				$packet->__encapsulatedPacket->identifierACK = null;
-				$packet->__encapsulatedPacket->buffer = chr(0xfe) . $this->getPacketBuffer($packet, $protocol);
-				$packet->__encapsulatedPacket->reliability = 3;
-				$pk = $packet->__encapsulatedPacket;
-			}
-
-			if(!$immediate and !$needACK and !($packet instanceof BatchPacket)
-				and Network::$BATCH_THRESHOLD >= 0
-				and strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
+			$protocol = $player->getPlayerProtocol();							
+			$packet->encode($protocol);
+			if(!($packet instanceof BatchPacket) && strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
 				$this->server->batchPackets([$player], [$packet], true);
 				return null;
 			}
+			$identifier = $this->identifiers[$player];	
 
-			if($pk === null){
-				$pk = new EncapsulatedPacket();				
-				$pk->buffer = chr(0xfe) . $this->getPacketBuffer($packet, $protocol);
-				$pk->reliability = 3;
+			$pk = new EncapsulatedPacket();				
+			$pk->buffer = chr(0xfe) . $this->getPacketBuffer($packet, $protocol);
+			$pk->reliability = 3;
 
-				if($needACK === true){
-					$pk->identifierACK = $this->identifiersACK[$identifier]++;
-				}
+			if($needACK === true){
+				$pk->identifierACK = $this->identifiersACK[$identifier]++;
 			}
 			if ($immediate) {
 				$pk->reliability = 0;
