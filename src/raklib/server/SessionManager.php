@@ -225,6 +225,9 @@ class SessionManager{
 					$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buf;
 					$this->server->pushThreadToMainPacket($buffer);
 				}
+			} else {
+				$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buff;
+				$this->server->pushThreadToMainPacket($buffer);
 			}
 		}
     }
