@@ -500,7 +500,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return Player[]
 	 */
 	public function getUsingChunk($X, $Z){
-		return isset($this->usedChunks[$index = PHP_INT_SIZE === 8 ? ((($X) & 0xFFFFFFFF) << 32) | (( $Z) & 0xFFFFFFFF) : ($X) . ":" . ( $Z)]) ? $this->usedChunks[$index] : [];
+		return isset($this->usedChunks[$index = self::chunkHash($X, $Z)]) ? $this->usedChunks[$index] : [];
 	}
 
 	/**
@@ -512,9 +512,8 @@ class Level implements ChunkManager, Metadatable{
 	 * @param Player $player
 	 */
 	public function useChunk($X, $Z, Player $player){
-		$index = PHP_INT_SIZE === 8 ? ((($X) & 0xFFFFFFFF) << 32) | (( $Z) & 0xFFFFFFFF) : ($X) . ":" . ( $Z);
 		$this->loadChunk($X, $Z);
-		$this->usedChunks[$index][$player->getId()] = $player;
+		$this->usedChunks[self::chunkHash($X, $Z)][$player->getId()] = $player;
 	}
 
 	/**
@@ -526,8 +525,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @param Player $player
 	 */
 	public function freeChunk($X, $Z, Player $player){
-		unset($this->usedChunks[$index = PHP_INT_SIZE === 8 ? ((($X) & 0xFFFFFFFF) << 32) | (( $Z) & 0xFFFFFFFF) : ($X) . ":" . ( $Z)][$player->getId()]);
-
+		unset($this->usedChunks[self::chunkHash($X, $Z)][$player->getId()]);
 		$this->unloadChunkRequest($X, $Z, true);
 	}
 
@@ -582,7 +580,7 @@ class Level implements ChunkManager, Metadatable{
 		//$this->timings->doTickPending->startTiming();
 		while($this->updateQueue->count() > 0 and $this->updateQueue->current()["priority"] <= $currentTick){
 			$block = $this->getBlock($this->updateQueue->extract()["data"]);
-			unset($this->updateQueueIndex[PHP_INT_SIZE === 8 ? ((($block->x) & 0xFFFFFFF) << 35) | ((( $block->y) & 0x7f) << 28) | (( $block->z) & 0xFFFFFFF) : ($block->x) . ":" . ( $block->y) .":". ( $block->z)]);
+			unset($this->updateQueueIndex[self::blockHash($block->x, $block->y, $block->z)]);
 			$block->onUpdate(self::BLOCK_UPDATE_SCHEDULED);
 		}
 		//$this->timings->doTickPending->stopTiming();
@@ -625,9 +623,7 @@ class Level implements ChunkManager, Metadatable{
 						if(count($this->changedBlocks[$index][$Y]) < 256){
 							continue;
 						}else{
-							$X = null;
-							$Z = null;
-							if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32; $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X, $Z) = explode(":", $index); $X = (int) $X; $Z = (int) $Z;};
+							self::getXZ($index, $X, $Z);						
 							foreach($this->getUsingChunk($X, $Z) as $p){
 								$p->unloadChunk($X, $Z);
 							}
@@ -730,13 +726,13 @@ class Level implements ChunkManager, Metadatable{
 			$x = $player->x >> 4;
 			$z = $player->z >> 4;
 
-			$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
+			$index = self::chunkHash($x, $z);
 			$existingPlayers = max(0, isset($this->chunkTickList[$index]) ? $this->chunkTickList[$index] : 0);
 			$this->chunkTickList[$index] = $existingPlayers + 1;
 			for($chunk = 0; $chunk < $chunksPerPlayer; ++$chunk){
 				$dx = mt_rand(-$randRange, $randRange);
 				$dz = mt_rand(-$randRange, $randRange);
-				$hash = PHP_INT_SIZE === 8 ? ((($dx + $x) & 0xFFFFFFFF) << 32) | (( $dz + $z) & 0xFFFFFFFF) : ($dx + $x) . ":" . ( $dz + $z);
+				$hash = self::chunkHash($dx + $x, $dz + $z);
 				if(!isset($this->chunkTickList[$hash]) and isset($this->chunks[$hash])){
 					$this->chunkTickList[$hash] = -1;
 				}
@@ -745,11 +741,9 @@ class Level implements ChunkManager, Metadatable{
 
 		$blockTest = 0;
 
+		$chunkX = $chunkZ = null;
 		foreach($this->chunkTickList as $index => $players){
-			if(PHP_INT_SIZE === 8){ $chunkX = ($index >> 32) << 32 >> 32; $chunkZ = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $chunkX, $chunkZ) = explode(":", $index); $chunkX = (int) $chunkX; $chunkZ = (int) $chunkZ;};
-
-
-
+			self::getXZ($index, $chunkX, $chunkZ);
 			if(!isset($this->chunks[$index]) or ($chunk = $this->getChunk($chunkX, $chunkZ, false)) === null){
 				unset($this->chunkTickList[$index]);
 				continue;
@@ -895,7 +889,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @param int     $delay
 	 */
 	public function scheduleUpdate(Vector3 $pos, $delay){
-		if(isset($this->updateQueueIndex[$index = PHP_INT_SIZE === 8 ? ((($pos->x) & 0xFFFFFFF) << 35) | ((( $pos->y) & 0x7f) << 28) | (( $pos->z) & 0xFFFFFFF) : ($pos->x) . ":" . ( $pos->y) .":". ( $pos->z)]) and $this->updateQueueIndex[$index] <= $delay){
+		if(isset($this->updateQueueIndex[$index = self::blockHash($pos->x, $pos->y, $pos->z)]) and $this->updateQueueIndex[$index] <= $delay){
 			return;
 		}
 		$this->updateQueueIndex[$index] = $delay;
@@ -1092,10 +1086,10 @@ class Level implements ChunkManager, Metadatable{
 	 * @return Block
 	 */
 	public function getBlock(Vector3 $pos, $cached = true){
-		$index = PHP_INT_SIZE === 8 ? ((($pos->x) & 0xFFFFFFF) << 35) | ((( $pos->y) & 0x7f) << 28) | (( $pos->z) & 0xFFFFFFF) : ($pos->x) . ":" . ( $pos->y) .":". ( $pos->z);
+		$index = self::blockHash($pos->x, $pos->y, $pos->z);
 		if($cached === true and isset($this->blockCache[$index])){
 			return $this->blockCache[$index];
-		}elseif($pos->y >= 0 and $pos->y < 128 and isset($this->chunks[$chunkIndex = PHP_INT_SIZE === 8 ? ((($pos->x >> 4) & 0xFFFFFFFF) << 32) | (( $pos->z >> 4) & 0xFFFFFFFF) : ($pos->x >> 4) . ":" . ( $pos->z >> 4)])){
+		}elseif($pos->y >= 0 and $pos->y < 128 and isset($this->chunks[$chunkIndex = self::chunkHash ($pos->x >> 4, $pos->z >> 4)])){
 			$fullState = $this->chunks[$chunkIndex]->getFullBlock($pos->x & 0x0f, $pos->y & 0x7f, $pos->z & 0x0f);
 		}else{
 			$fullState = 0;
@@ -1158,10 +1152,10 @@ class Level implements ChunkManager, Metadatable{
 			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f,  $newLevel & 0x0f);
 
 			if($newLevel < $oldLevel){
-				$removalVisited[PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFF) << 35) | ((( $y) & 0x7f) << 28) | (( $z) & 0xFFFFFFF) : ($x) . ":" . ( $y) .":". ( $z)] = true;
+				$removalVisited[self::blockHash($x, $y, $z)] = true;
 				$lightRemovalQueue->enqueue([new Vector3($x, $y, $z), $oldLevel]);
 			}else{
-				$visited[PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFF) << 35) | ((( $y) & 0x7f) << 28) | (( $z) & 0xFFFFFFF) : ($x) . ":" . ( $y) .":". ( $z)] = true;
+				$visited[self::blockHash($x, $y, $z)] = true;
 				$lightPropagationQueue->enqueue(new Vector3($x, $y, $z));
 			}
 		}
@@ -1203,14 +1197,14 @@ class Level implements ChunkManager, Metadatable{
 		if($current !== 0 and $current < $currentLight){
 			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f,  0 & 0x0f);
 
-			if(!isset($visited[$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFF) << 35) | ((( $y) & 0x7f) << 28) | (( $z) & 0xFFFFFFF) : ($x) . ":" . ( $y) .":". ( $z)])){
+			if(!isset($visited[$index = self::blockHash($x, $y, $z)])){
 				$visited[$index] = true;
 				if($current > 1){
 					$queue->enqueue([new Vector3($x, $y, $z), $current]);
 				}
 			}
 		}elseif($current >= $currentLight){
-			if(!isset($spreadVisited[$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFF) << 35) | ((( $y) & 0x7f) << 28) | (( $z) & 0xFFFFFFF) : ($x) . ":" . ( $y) .":". ( $z)])){
+			if(!isset($spreadVisited[$index = self::blockHash($x, $y, $z)])){
 				$spreadVisited[$index] = true;
 				$spreadQueue->enqueue(new Vector3($x, $y, $z));
 			}
@@ -1223,7 +1217,7 @@ class Level implements ChunkManager, Metadatable{
 		if($current < $currentLight){
 			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f,  $currentLight & 0x0f);
 
-			if(!isset($visited[$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFF) << 35) | ((( $y) & 0x7f) << 28) | (( $z) & 0xFFFFFFF) : ($x) . ":" . ( $y) .":". ( $z)])){
+			if(!isset($visited[$index = self::blockHash($x, $y, $z)])){
 				$visited[$index] = true;
 				if($currentLight > 1){
 					$queue->enqueue(new Vector3($x, $y, $z));
@@ -1233,9 +1227,8 @@ class Level implements ChunkManager, Metadatable{
 	}
 	
 	public function chunkCacheClear($x, $z){
-		$index = PHP_INT_SIZE === 8 ? (($x & 0xFFFFFFFF) << 32) | ($z & 0xFFFFFFFF) : $x . ":" . $z;
 		if(ADVANCED_CACHE == true){
-			Cache::remove("world:" . $this->getId() . ":" . $index);
+			Cache::remove("world:" . $this->getId() . ":" . self::chunkHash($x, $z));
 		}
 	}
 
@@ -1261,15 +1254,15 @@ class Level implements ChunkManager, Metadatable{
 		if($pos->y < 0 or $pos->y >= 128){
 			return false;
 		}
-
-		unset($this->blockCache[$index = PHP_INT_SIZE === 8 ? ((($pos->x) & 0xFFFFFFF) << 35) | ((( $pos->y) & 0x7f) << 28) | (( $pos->z) & 0xFFFFFFF) : ($pos->x) . ":" . ( $pos->y) .":". ( $pos->z)]);
+		$x = $y = $z = null;
+		unset($this->blockCache[$index = self::blockHash($x, $y, $z)]);
 
 		if($this->getChunk($pos->x >> 4, $pos->z >> 4, true)->setBlock($pos->x & 0x0f, $pos->y & 0x7f, $pos->z & 0x0f, $block->getId(), $block->getDamage())){
 			if(!($pos instanceof Position)){
 				$pos = $this->temporalPosition->setComponents($pos->x, $pos->y, $pos->z);
 			}
 			$block->position($pos);
-			$index = PHP_INT_SIZE === 8 ? ((($pos->x >> 4) & 0xFFFFFFFF) << 32) | (( $pos->z >> 4) & 0xFFFFFFFF) : ($pos->x >> 4) . ":" . ( $pos->z >> 4);
+			$index = self::chunkHash($pos->x >> 4, $pos->z >> 4);
 			if(ADVANCED_CACHE == true){
 				Cache::remove("world:" . $this->getId() . ":" . $index);
 			}
@@ -1768,7 +1761,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @param int $id 0-255
 	 */
 	public function setBlockIdAt($x, $y, $z, $id){
-		unset($this->blockCache[PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFF) << 35) | ((( $y) & 0x7f) << 28) | (( $z) & 0xFFFFFFF) : ($x) . ":" . ( $y) .":". ( $z)]);
+		unset($this->blockCache[self::blockHash($x, $y, $z)]);
 		$this->getChunk($x >> 4, $z >> 4, true)->setBlockId($x & 0x0f, $y & 0x7f, $z & 0x0f, $id & 0xff);
 	}
 
@@ -1794,7 +1787,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @param int $data 0-15
 	 */
 	public function setBlockDataAt($x, $y, $z, $data){
-		unset($this->blockCache[PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFF) << 35) | ((( $y) & 0x7f) << 28) | (( $z) & 0xFFFFFFF) : ($x) . ":" . ( $y) .":". ( $z)]);
+		unset($this->blockCache[self::blockHash($x, $y, $z)]);
 		$this->getChunk($x >> 4, $z >> 4, true)->setBlockData($x & 0x0f, $y & 0x7f, $z & 0x0f, $data & 0x0f);
 	}
 
@@ -1924,7 +1917,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return FullChunk|Chunk
 	 */
 	public function getChunk($x, $z, $create = false){
-		if(isset($this->chunks[$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z)])){
+		if(isset($this->chunks[$index = self::chunkHash($x, $z)])){
 			return $this->chunks[$index];
 		}elseif($this->loadChunk($x, $z, $create) and $this->chunks[$index] !== null){
 			return $this->chunks[$index];
@@ -1976,7 +1969,7 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public function setChunk($x, $z, FullChunk $chunk, $unload = true){
-		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
+		$index = self::chunkHash($x, $z);
 		if($unload){
 			foreach($this->getUsingChunk($x, $z) as $player){
 				$player->unloadChunk($x, $z);
@@ -1988,7 +1981,7 @@ class Level implements ChunkManager, Metadatable{
 			$this->chunks[$index] = $chunk;
 		}
 		if(ADVANCED_CACHE == true){
-			Cache::remove("world:" . $this->getId() . ":" . PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z));
+			Cache::remove("world:" . $this->getId() . ":" . self::chunkHash($x, $z));
 		}
 		$chunk->setChanged();
 	}
@@ -2012,7 +2005,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return bool
 	 */
 	public function isChunkLoaded($x, $z){
-		return isset($this->chunks[PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z)]) or $this->provider->isChunkLoaded($x, $z);
+		return isset($this->chunks[self::chunkHash($x, $z)]) or $this->provider->isChunkLoaded($x, $z);
 	}
 
 	/**
@@ -2058,7 +2051,7 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public function requestChunk($x, $z, Player $player, $order = LevelProvider::ORDER_ZXY){
-		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
+		$index = self::chunkHash($x, $z);
 		if(!isset($this->chunkSendQueue[$index])){
 			$this->chunkSendQueue[$index] = [];
 		}
@@ -2076,7 +2069,7 @@ class Level implements ChunkManager, Metadatable{
 				if(isset($this->chunkSendTasks[$index])){
 					continue;
 				}
-				if(PHP_INT_SIZE === 8){ $x = ($index >> 32) << 32 >> 32; $z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $x, $z) = explode(":", $index); $x = (int) $x; $z = (int) $z;};
+				self::getXZ($index, $x, $z);			
 				if(ADVANCED_CACHE == true and ($cache = Cache::get("world:" . $this->getId() . ":" . $index)) !== false){
 					/** @var Player[] $players */
 					foreach($players as $player){
@@ -2104,7 +2097,7 @@ class Level implements ChunkManager, Metadatable{
 		if ($this->closed) {
 			return;
 		} 
-		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
+		$index = self::chunkHash($x, $z);
 		if(isset($this->chunkSendTasks[$index])){
 
 			if(ADVANCED_CACHE == true){
@@ -2193,7 +2186,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return bool
 	 */
 	public function isChunkInUse($x, $z){
-		$someIndex = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (($z) & 0xFFFFFFFF) : $x . ":" . $z;		
+		$someIndex = self::chunkHash($x, $z);		
 		return isset($this->usedChunks[$someIndex]) && count($this->usedChunks[$someIndex]) > 0;
 	}
 
@@ -2205,7 +2198,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return bool
 	 */
 	public function loadChunk($x, $z, $generate = true){
-		if(isset($this->chunks[$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z)])){
+		if(isset($this->chunks[$index = self::chunkHash($x, $z)])){
 			return true;
 		}
 
@@ -2234,7 +2227,7 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	protected function queueUnloadChunk($x, $z){
-		$this->unloadQueue[$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z)] = microtime(true);
+		$this->unloadQueue[$index = self::chunkHash($x, $z)] = microtime(true);
 		unset($this->chunkTickList[$index]);
 	}
 
@@ -2249,7 +2242,7 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public function cancelUnloadChunkRequest($x, $z){
-		unset($this->unloadQueue[PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z)]);
+		unset($this->unloadQueue[self::chunkHash($x, $z)]);
 	}
 
 	public function unloadChunk($x, $z, $safe = true){
@@ -2259,7 +2252,7 @@ class Level implements ChunkManager, Metadatable{
 
 		//$this->timings->doChunkUnload->startTiming();
 
-		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
+		$index = self::chunkHash($x, $z);
 		if (isset($this->chunks[$index])) {
 			$chunk = $this->chunks[$index];
 		} else {
@@ -2509,8 +2502,8 @@ class Level implements ChunkManager, Metadatable{
 			$Z = null;
 
 			foreach($this->chunks as $index => $chunk){
-				if(!isset($this->unloadQueue[$index]) and (!isset($this->usedChunks[$index]) or count($this->usedChunks[$index]) === 0)){
-					if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32; $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X, $Z) = explode(":", $index); $X = (int) $X; $Z = (int) $Z;};
+				if(!isset($this->unloadQueue[$index]) and (!isset($this->usedChunks[$index]) or count($this->usedChunks[$index]) === 0)){					
+					self::getXZ($index, $X, $Z);
 					if(!$this->isSpawnChunk($X, $Z)){
 						$this->unloadChunkRequest($X, $Z, true);
 					}
@@ -2518,8 +2511,8 @@ class Level implements ChunkManager, Metadatable{
 			}
 
 			foreach($this->provider->getLoadedChunks() as $chunk){
-				if(!isset($this->chunks[PHP_INT_SIZE === 8 ? ((($chunk->getX()) & 0xFFFFFFFF) << 32) | (( $chunk->getZ()) & 0xFFFFFFFF) : ($chunk->getX()) . ":" . ( $chunk->getZ())])){
-								$this->provider->unloadChunk($chunk->getX(), $chunk->getZ(), false);
+				if(!isset($this->chunks[self::chunkHash($chunk->getX(), $chunk->getZ())])){
+					$this->provider->unloadChunk($chunk->getX(), $chunk->getZ(), false);
 				}
 			}
 
@@ -2534,8 +2527,7 @@ class Level implements ChunkManager, Metadatable{
 			$X = null;
 			$Z = null;
 			foreach($this->unloadQueue as $index => $time){
-				if(PHP_INT_SIZE === 8){ $X = ($index >> 32) << 32 >> 32; $Z = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $X, $Z) = explode(":", $index); $X = (int) $X; $Z = (int) $Z;};
-
+				self::getXZ($index, $X, $Z);
 				//If the chunk can't be unloaded, it stays on the queue
 				if($this->unloadChunk($X, $Z, true)){
 					unset($this->unloadQueue[$index]);
@@ -2654,7 +2646,7 @@ class Level implements ChunkManager, Metadatable{
 	}
 	
 	public function updateChunk($x, $z) {
-		$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z);
+		$index = self::chunkHash($x, $z);
 		$this->chunkSendTasks[$index] = true;		
 		$this->provider->requestChunkTask($x, $z);
 		$this->chunkSendQueue[$index] = [];

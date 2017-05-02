@@ -809,6 +809,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->noDamageTicks = 60;
 			
+			$chunkX = $chunkZ = null;
 			foreach($this->usedChunks as $index => $c){
 				Level::getXZ($index, $chunkX, $chunkZ);
 				foreach($this->level->getChunkEntities($chunkX, $chunkZ) as $entity){
@@ -3021,7 +3022,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$chunkX = $chunkZ = null;
 			foreach($this->usedChunks as $index => $d){
-				if(PHP_INT_SIZE === 8){ $chunkX = ($index >> 32) << 32 >> 32; $chunkZ = ($index & 0xFFFFFFFF) << 32 >> 32;}else{list( $chunkX, $chunkZ) = explode(":", $index); $chunkX = (int) $chunkX; $chunkZ = (int) $chunkZ;};
+				Level::getXZ($index, $chunkX, $chunkZ);
 				$this->level->freeChunk($chunkX, $chunkZ, $this);
 				unset($this->usedChunks[$index]);
 			}
@@ -3095,6 +3096,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     }
 	
 	public function freeChunks(){
+		$x = $z = null;
 		foreach ($this->usedChunks as $index => $chunk) {
 			Level::getXZ($index, $x, $z);
 			$this->level->freeChunk($x, $z, $this);

@@ -630,7 +630,7 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param Player $player
 	 */
 	public function spawnTo(Player $player) {
-		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[PHP_INT_SIZE === 8 ? ((($this->chunk->getX()) & 0xFFFFFFFF) << 32) | (( $this->chunk->getZ()) & 0xFFFFFFFF) : ($this->chunk->getX()) . ":" . ( $this->chunk->getZ())])) {
+		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
 			$this->hasSpawned[$player->getId()] = $player;
 		}
 	}
@@ -1115,15 +1115,9 @@ abstract class Entity extends Location implements Metadatable{
 			}
 			$this->despawnFromAll();
 			if ($this instanceof Player) {
+				$X = $Z = null;
 				foreach ($this->usedChunks as $index => $d) {
-					if (PHP_INT_SIZE === 8) {
-						$X = ($index >> 32) << 32 >> 32;
-						$Z = ($index & 0xFFFFFFFF) << 32 >> 32;
-					} else {
-						list($X, $Z) = explode(":", $index);
-						$X = (int) $X;
-						$Z = (int) $Z;
-					}
+					Level::getXZ($index, $X, $Z);
 					$this->unloadChunk($X, $Z);
 				}
 			}

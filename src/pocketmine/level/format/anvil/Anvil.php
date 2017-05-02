@@ -76,7 +76,7 @@ class Anvil extends McRegion{
 	 * @return RegionLoader
 	 */
 	protected function getRegion($x, $z){
-		return isset($this->regions[$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z)]) ? $this->regions[$index] : null;
+		return isset($this->regions[$index = Level::chunkHash($x, $z)]) ? $this->regions[$index] : null;
 	}
 
 	/**
@@ -102,7 +102,7 @@ class Anvil extends McRegion{
 
 		$chunk->setX($chunkX);
 		$chunk->setZ($chunkZ);
-		$this->chunks[PHP_INT_SIZE === 8 ? ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF) : ($chunkX) . ":" . ( $chunkZ)] = $chunk;
+		$this->chunks[Level::chunkHash($chunkX, $chunkZ)] = $chunk;
 	}
 
 	public static function createChunkSection($Y){
@@ -124,7 +124,7 @@ class Anvil extends McRegion{
 	}
 
 	protected function loadRegion($x, $z){
-		if(isset($this->regions[$index = PHP_INT_SIZE === 8 ? ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF) : ($x) . ":" . ( $z)])){
+		if(isset($this->regions[$index = Level::chunkHash($x, $z)])){
 			return true;
 		}
 
