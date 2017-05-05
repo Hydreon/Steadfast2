@@ -2522,12 +2522,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					case EntityEventPacket::ENCHANT:
 						if ($this->currentWindow instanceof EnchantInventory) {
-							$enchantLevel = abs($packet->theThing);
-							$items = $this->inventory->getContents();
-							foreach ($items as $slot => $item) {
-								if ($item->getId() === Item::DYE && $item->getDamage() === 4 && $item->getCount() >= $enchantLevel) {
-									$this->currentWindow->setEnchantingLevel($enchantLevel);
-									break 2;
+							if ($this->expLevel > 0) {
+								$enchantLevel = abs($packet->theThing);
+								$items = $this->inventory->getContents();
+								foreach ($items as $slot => $item) {
+									if ($item->getId() === Item::DYE && $item->getDamage() === 4 && $item->getCount() >= $enchantLevel) {
+										$this->currentWindow->setEnchantingLevel($enchantLevel);
+										break 2;
+									}
 								}
 							}
 							$this->currentWindow->setItem(0, Item::get(Item::AIR));
