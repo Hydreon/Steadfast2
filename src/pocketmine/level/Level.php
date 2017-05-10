@@ -1254,8 +1254,7 @@ class Level implements ChunkManager, Metadatable{
 		if($pos->y < 0 or $pos->y >= 128){
 			return false;
 		}
-		$x = $y = $z = null;
-		unset($this->blockCache[$index = self::blockHash($x, $y, $z)]);
+		unset($this->blockCache[$index = self::blockHash($pos->x, $pos->y, $pos->z)]);
 
 		if($this->getChunk($pos->x >> 4, $pos->z >> 4, true)->setBlock($pos->x & 0x0f, $pos->y & 0x7f, $pos->z & 0x0f, $block->getId(), $block->getDamage())){
 			if(!($pos instanceof Position)){
