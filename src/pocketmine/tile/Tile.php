@@ -45,6 +45,7 @@ abstract class Tile extends Position{
 	const BREWING_STAND = "Cauldron";
 	const ENCHANT_TABLE = "EnchantTable";
 	const ENDER_CHEST = "EnderChest";
+	const BED = "Bed";
 
 	public static $tileCount = 1;
 

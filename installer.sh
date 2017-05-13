@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CHANNEL="stable"
-BRANCH="php7"
+BRANCH="master"
 NAME="PocketMine-MP"
 BUILD_URL=""
 
@@ -195,10 +195,10 @@ fi
 if [ "$CHANNEL" == "soft" ]; then
 	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-Soft/${BRANCH}/resources/start.sh" > start.sh
 else
-	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/${BRANCH}/start.sh" > start.sh
+	download_file "https://raw.githubusercontent.com/pmmp/PocketMine-MP/${BRANCH}/start.sh" > start.sh
 fi
 
-download_file "https://raw.githubusercontent.com/PocketMine/php-build-scripts/${BRANCH}/compile.sh" > compile.sh
+download_file "https://raw.githubusercontent.com/pmmp/php-build-scripts/${BRANCH}/compile.sh" > compile.sh
 
 
 chmod +x compile.sh

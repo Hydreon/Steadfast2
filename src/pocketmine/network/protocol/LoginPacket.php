@@ -92,6 +92,10 @@ class LoginPacket extends PEPacket {
 			$this->chains['data'][$index] = $data;
 			$index++;
 		}
+		if (!isset($dataIndex)) {
+			$this->isValidProtocol = false;
+			return;
+		}
 		
 		$this->playerData = self::load($this->playerData);
 		$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];

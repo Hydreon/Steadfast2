@@ -95,6 +95,7 @@ use pocketmine\scheduler\CallbackTask;
 use pocketmine\scheduler\GarbageCollectionTask;
 use pocketmine\scheduler\SendUsageTask;
 use pocketmine\scheduler\ServerScheduler;
+use pocketmine\tile\Bed;
 use pocketmine\tile\Chest;
 use pocketmine\tile\EnchantTable;
 use pocketmine\tile\EnderChest;
@@ -1145,7 +1146,7 @@ class Server{
 			return false;
 		}
 
-		$seed = $seed === null ? (PHP_INT_SIZE === 8 ? unpack("N", @Utils::getRandomBytes(4, false))[1] << 32 >> 32 : unpack("N", @Utils::getRandomBytes(4, false))[1]) : (int) $seed;
+		$seed = $seed === null ? Binary::readInt(@Utils::getRandomBytes(4, false)) : (int) $seed;
 
 		if(($provider = LevelProviderManager::getProviderByName($providerName = $this->getProperty("level-settings.default-format", "mcregion"))) === null){
 			$provider = LevelProviderManager::getProviderByName($providerName = "mcregion");
@@ -2614,6 +2615,7 @@ class Server{
 		Tile::registerTile(Skull::class);
 		Tile::registerTile(FlowerPot::class);
         Tile::registerTile(EnderChest::class);
+		Tile::registerTile(Bed::class);
 	}
 
 	public function shufflePlayers(){

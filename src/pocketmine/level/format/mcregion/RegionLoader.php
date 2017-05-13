@@ -107,7 +107,7 @@ class RegionLoader{
 			}
 			$this->generateChunk($x, $z);
 			fseek($this->filePointer, $this->locationTable[$index][0] << 12);
-			$length = (PHP_INT_SIZE === 8 ? unpack("N", fread($this->filePointer, 4))[1] << 32 >> 32 : unpack("N", fread($this->filePointer, 4))[1]);
+			$length = Binary::readInt(fread($this->filePointer, 4));
 			$compression = ord(fgetc($this->filePointer));
 		}
 

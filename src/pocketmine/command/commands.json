@@ -57,11 +57,11 @@
                 "permission": "any",
 				"aliases": [],
                 "overloads": {
-                    "total": {
+                    "byPage": {
                         "input": {
 							"parameters": [
 								{
-									"name": "pageNumber",
+									"name": "page",
 									"type": "int",
 									"optional": true
 								}
@@ -75,12 +75,12 @@
                         "input": {
 							"parameters": [
 								{
-									"name": "topic",
+									"name": "command",
 									"type": "rawtext",
 									"optional": true
 								},
 								{
-									"name": "pageNumber",
+									"name": "page",
 									"type": "int",
 									"optional": true
 								}
