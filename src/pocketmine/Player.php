@@ -3518,6 +3518,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->eyeHeight;
 	}
 	
+	public function kickOnFullServer() {
+		return true;
+	}
+	
 	public function processLogin() {
 		$valid = true;
 		$len = strlen($this->username);
@@ -3543,7 +3547,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 
-		if (count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers()) {
+		if (count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers() && $this->kickOnFullServer()) {
 			$this->close("", "Server is Full", false);
 			return;
 		}
