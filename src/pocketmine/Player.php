@@ -149,6 +149,7 @@ use pocketmine\network\protocol\SetCommandsEnabledPacket;
 use pocketmine\network\protocol\AvailableCommandsPacket;
 use pocketmine\network\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
+use pocketmine\network\protocol\ResourcePackStackPacket;
 use raklib\Binary;
 use pocketmine\network\proxy\Info as ProtocolProxyInfo;
 use pocketmine\network\proxy\DisconnectPacket as ProxyDisconnectPacket;
@@ -3620,6 +3621,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		
 		$pk = new ResourcePacksInfoPacket();
 		$this->dataPacket($pk);		
+		
+		$pk = new ResourcePackStackPacket();
+		$this->dataPacket($pk);
 
 		$this->achievements = [];
 
