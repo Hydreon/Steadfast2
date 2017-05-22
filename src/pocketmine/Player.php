@@ -2216,6 +2216,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
 //						$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
 						$this->deadTicks = 0;
+						$this->despawnFromAll();
 						$this->dead = false;
 						$this->noDamageTicks = 60;
 
