@@ -5,6 +5,7 @@ namespace pocketmine;
 use pocketmine\utils\Binary;
 use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\DataPacket;
+use pocketmine\network\protocol\Info;
 
 class ChunkMaker extends Worker {
 
@@ -15,7 +16,7 @@ class ChunkMaker extends Worker {
 	protected $externalQueue;
 	protected $internalQueue;
 	
-	const SUPPORTED_PROTOCOL = [100, 105];
+	const SUPPORTED_PROTOCOL = [Info::BASE_PROTOCOL, Info::PROTOCOL_105, Info::PROTOCOL_110];
 
 	public function __construct(\ClassLoader $loader = null) {
 		$this->externalQueue = new \Threaded;
@@ -97,7 +98,7 @@ class ChunkMaker extends Worker {
 		$chunkData = chr($countBlocksInChunk);		
 		
 		for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
-			$chunkData .= chr($blockIndex);
+			$chunkData .= chr(0);
 			for ($i = 0; $i < 256; $i++) {
 				$chunkData .= substr($blockIdArray, $blockIndex * 16 + $i * 128, 16);
 			}

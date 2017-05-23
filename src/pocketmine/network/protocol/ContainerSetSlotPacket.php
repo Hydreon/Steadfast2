@@ -39,7 +39,7 @@ class ContainerSetSlotPacket extends PEPacket{
 		$this->windowid = $this->getByte();
 		$this->slot = $this->getSignedVarInt();
 		$this->hotbarSlot = $this->getSignedVarInt();
-		$this->item = $this->getSlot();
+		$this->item = $this->getSlot($playerProtocol);
 	}
 
 	public function encode($playerProtocol){
@@ -47,6 +47,6 @@ class ContainerSetSlotPacket extends PEPacket{
 		$this->putByte($this->windowid);
 		$this->putSignedVarInt($this->slot);
 		$this->putSignedVarInt($this->hotbarSlot);
-		$this->putSlot($this->item);
+		$this->putSlot($this->item, $playerProtocol);
 	}
 }

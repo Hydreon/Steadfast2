@@ -121,7 +121,8 @@ abstract class DefaultPermissions{
 		self::registerPermission(new Permission(self::ROOT . ".command.spawnpoint", "Allows the user to change player's spawnpoint", Permission::DEFAULT_OP), $commands);
 		self::registerPermission(new Permission(self::ROOT . ".command.setworldspawn", "Allows the user to change the world spawn", Permission::DEFAULT_OP), $commands);
 
-		self::registerPermission(new Permission(self::ROOT . ".command.transfer", "Allows the user transfer", Permission::DEFAULT_TRUE), $commands);
+		self::registerPermission(new Permission(self::ROOT . ".command.transfer", "Allows the user transfer", Permission::DEFAULT_OP), $commands);
+		self::registerPermission(new Permission(self::ROOT . ".command.ping", "Allows get player ping", Permission::DEFAULT_TRUE), $commands);
 		
 		$commands->recalculatePermissibles();
 

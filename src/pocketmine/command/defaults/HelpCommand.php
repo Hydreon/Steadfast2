@@ -61,14 +61,14 @@ class HelpCommand extends VanillaCommand{
 		if($sender instanceof ConsoleCommandSender){
 			$pageHeight = PHP_INT_MAX;
 		}else{
-			$pageHeight = 5;
+			$pageHeight = 10;
 		}
 
 		if($command === ""){
 			/** @var Command[][] $commands */
 			$commands = [];
 			foreach($sender->getServer()->getCommandMap()->getCommands() as $command){
-				if($command->testPermissionSilent($sender)){
+				if($command->testPermissionSilent($sender) && $command->isAvailableForHelp()){
 					$commands[$command->getName()] = $command;
 				}
 			}
@@ -92,7 +92,7 @@ class HelpCommand extends VanillaCommand{
 			return true;
 		}else{
 			if(($cmd = $sender->getServer()->getCommandMap()->getCommand(strtolower($command))) instanceof Command){
-				if($cmd->testPermissionSilent($sender)){
+				if($cmd->testPermissionSilent($sender) && $cmd->isAvailableForHelp()){
 					$message = TextFormat::YELLOW . "--------- " . TextFormat::WHITE . " Help: /" . $cmd->getName() . TextFormat::YELLOW . " ---------\n";
 					$message .= TextFormat::GOLD . "Description: " . TextFormat::WHITE . $cmd->getDescription() . "\n";
 					$message .= TextFormat::GOLD . "Usage: " . TextFormat::WHITE . implode("\n" . TextFormat::WHITE, explode("\n", $cmd->getUsage())) . "\n";

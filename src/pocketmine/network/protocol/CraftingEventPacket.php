@@ -47,12 +47,12 @@ class CraftingEventPacket extends PEPacket{
 
 		$size = $this->getVarInt();
 		for($i = 0; $i < $size and $i < 128; ++$i){
-			$this->input[] = $this->getSlot();
+			$this->input[] = $this->getSlot($playerProtocol);
 		}
 
 		$size = $this->getVarInt();
 		for($i = 0; $i < $size and $i < 128; ++$i){
-			$this->output[] = $this->getSlot();
+			$this->output[] = $this->getSlot($playerProtocol);
 		}
 	}
 

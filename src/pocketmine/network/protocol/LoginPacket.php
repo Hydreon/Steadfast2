@@ -49,6 +49,8 @@ class LoginPacket extends PEPacket {
 	public $isValidProtocol = true;
     public $inventoryType = -1;
     public $osType = -1;
+    public $xuid = '';
+	public $languageCode = false;
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -64,7 +66,16 @@ class LoginPacket extends PEPacket {
 			return;
 		}
 		$this->getByte();	
-		$body = \zlib_decode($this->getString());
+		$data = $this->getString();
+		if ($this->protocol1 >= Info::PROTOCOL_110) {			
+			if (ord($data{0}) != 120 || (($decodedData = @zlib_decode($data)) === false)) {
+				$body = $data;
+			} else {
+				$body = $decodedData;
+			}
+		} else {
+			$body = \zlib_decode($data);
+		}
 		$this->chainsDataLength = Binary::readLInt($this->getFromString($body, 4));
 		$this->chains = json_decode($this->getFromString($body, $this->chainsDataLength), true);
 
@@ -81,13 +92,20 @@ class LoginPacket extends PEPacket {
 			$this->chains['data'][$index] = $data;
 			$index++;
 		}
+		if (!isset($dataIndex)) {
+			$this->isValidProtocol = false;
+			return;
+		}
 		
 		$this->playerData = self::load($this->playerData);
 		$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
 		$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
 		$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
 		$this->identityPublicKey = $this->chains['data'][$dataIndex]['identityPublicKey'];
-
+        if (isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
+            $this->xuid = $this->chains['data'][$dataIndex]['extraData']['XUID'];
+        }
+        
 		$this->serverAddress = $this->playerData['ServerAddress'];
 		$this->skinName = $this->playerData['SkinId'];
 		$this->skin = base64_decode($this->playerData['SkinData']);
@@ -97,6 +115,9 @@ class LoginPacket extends PEPacket {
         }
         if (isset($this->playerData['UIProfile'])) {
             $this->inventoryType = $this->playerData['UIProfile'];
+        }
+		 if (isset($this->playerData['LanguageCode'])) {
+            $this->languageCode = $this->playerData['LanguageCode'];
         }
 	}
 

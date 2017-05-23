@@ -60,6 +60,7 @@ use pocketmine\command\defaults\WhitelistCommand;
 use pocketmine\Server;
 use pocketmine\utils\MainLogger;
 use pocketmine\command\defaults\TransferCommand;
+use pocketmine\command\defaults\PingCommand;
 
 class SimpleCommandMap implements CommandMap{
 
@@ -113,6 +114,7 @@ class SimpleCommandMap implements CommandMap{
 		$this->register("pocketmine", new ReloadCommand("reload"));
 		
 		$this->register("pocketmine", new TransferCommand("transfer"));
+		$this->register("pocketmine", new PingCommand("ping"));
 
 		if($this->server->getProperty("debug.commands", false) === true){
 			$this->register("pocketmine", new StatusCommand("status"));
@@ -170,21 +172,61 @@ class SimpleCommandMap implements CommandMap{
 
 		return true;
 	}
+	
+	private function parseArgs($commandLine) {
+		$lines = (explode(' ', $commandLine));
+		$newArgs = [];
+		$i = 0;
+		$state = 0;
+		foreach ($lines as $arg) {
+			if ($arg == '') {
+				continue;
+			}
+			$needNewArg = false;
+
+			if ($state == 0) {
+				if ($arg{0} == '"') {
+					$state = 1;
+					$arg = substr($arg, 1);
+				} elseif ($arg{0} == '\'') {
+					$state = 2;
+					$arg = substr($arg, 1);
+				} else {
+					$needNewArg = true;
+				}
+			}
+			if ($state == 1) {
+				if ($arg{strlen($arg) - 1} == '"') {
+					$state = 0;
+					$arg = substr($arg, 0, -1);
+					$needNewArg = true;
+				}
+			}
+			if ($state == 2) {
+				if ($arg{strlen($arg) - 1} == '\'') {
+					$needNewArg = true;
+					$state = 0;
+					$arg = substr($arg, 0, -1);
+				}
+			}
+
+			if (!isset($newArgs[$i])) {
+				$newArgs[$i] = $arg;
+			} else {
+				$newArgs[$i] .= ' ' . $arg;
+			}
+			if ($needNewArg) {
+				$i++;
+			}
+		}
+		return $newArgs;
+	}
 
 	public function dispatch(CommandSender $sender, $commandLine){
-		$args = preg_split("/\s(?=[^\']*(\'[^\']*\'[^\']*)*$)(?=[^\"]*(\"[^\"]*\"[^\"]*)*$)/", $commandLine);
-		if ($args === false) {
-			return false;
-		}
-
+		$args = $this->parseArgs($commandLine);
 		if (count($args) === 0) {
 			return false;
 		}
-
-		foreach ($args as $key => $arg) {
-			$args[$key] = trim($arg, " '\"");
-		}
-
 		$sentCommandLabel = strtolower(array_shift($args));
 		$target = $this->getCommand($sentCommandLabel);
 
@@ -192,7 +234,7 @@ class SimpleCommandMap implements CommandMap{
 			return false;
 		}
 
-		$target->timings->startTiming();
+		//$target->timings->startTiming();
 		try{
 			$target->execute($sender, $sentCommandLabel, $args);
 		}catch(\Exception $e){
@@ -202,7 +244,7 @@ class SimpleCommandMap implements CommandMap{
 				$logger->logException($e);
 			}
 		}
-		$target->timings->stopTiming();
+		//$target->timings->stopTiming();
 
 		return true;
 	}

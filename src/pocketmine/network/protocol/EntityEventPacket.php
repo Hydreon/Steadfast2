@@ -41,8 +41,8 @@ class EntityEventPacket extends PEPacket{
 	const FISH_HOOK_HOOK = 13;
 	const FISH_HOOK_TEASE = 14;
 	const SQUID_INK_CLOUD = 15;
-	const AMBIENT_SOUND = 16;
-	const RESPAWN = 17;
+	const AMBIENT_SOUND = 17;
+	const RESPAWN = 18;
 	const ENCHANT = 34;
 
 	//TODO add new events

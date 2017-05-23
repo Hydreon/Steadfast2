@@ -139,6 +139,8 @@ abstract class RakLib{
      * int (timeout)
      */
     const PACKET_BLOCK_ADDRESS = 0x09;
+	
+	const PACKET_PING = 0x0a;
 
     /*
      * No payload

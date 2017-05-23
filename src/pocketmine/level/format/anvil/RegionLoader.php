@@ -76,7 +76,7 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		}
 
 		fseek($this->filePointer, $this->locationTable[$index][0] << 12);
-		$length = (PHP_INT_SIZE === 8 ? unpack("N", fread($this->filePointer, 4))[1] << 32 >> 32 : unpack("N", fread($this->filePointer, 4))[1]);
+		$length = Binary::readInt(fread($this->filePointer, 4));
 		$compression = ord(fgetc($this->filePointer));
 
 		if($length <= 0 or $length >= self::MAX_SECTOR_LENGTH){ //Not yet generated / corrupted
@@ -87,7 +87,7 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 			}
 			$this->generateChunk($x, $z);
 			fseek($this->filePointer, $this->locationTable[$index][0] << 12);
-			$length = (PHP_INT_SIZE === 8 ? unpack("N", fread($this->filePointer, 4))[1] << 32 >> 32 : unpack("N", fread($this->filePointer, 4))[1]);
+			$length = Binary::readInt(fread($this->filePointer, 4));
 			$compression = ord(fgetc($this->filePointer));
 		}
 
@@ -124,7 +124,7 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		$nbt->V = new ByteTag("V", self::VERSION);
 		$nbt->InhabitedTime = new LongTag("InhabitedTime", 0);
 		$nbt->Biomes = new ByteArray("Biomes", str_repeat(chr(-1), 256));
-		$nbt->BiomeColors = new IntArray("BiomeColors", array_fill(0, 156, (PHP_INT_SIZE === 8 ? unpack("N", "\x00\x85\xb2\x4a")[1] << 32 >> 32 : unpack("N", "\x00\x85\xb2\x4a")[1])));
+		$nbt->BiomeColors = new IntArray("BiomeColors", array_fill(0, 156, Binary::readInt("\x00\x85\xb2\x4a")));
 		$nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, 127));
 		$nbt->Sections = new Enum("Sections", []);
 		$nbt->Sections->setTagType(NBT::TAG_Compound);

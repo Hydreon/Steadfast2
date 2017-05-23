@@ -80,7 +80,7 @@ class PrimedTNT extends Entity implements Explosive{
 			return false;
 		}
 
-		$this->timings->startTiming();
+		//$this->timings->startTiming();
 
 		$tickDiff = max(1, $currentTick - $this->lastUpdate);
 		$this->lastUpdate = $currentTick;

@@ -22,10 +22,14 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\level\Level;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
+use pocketmine\tile\Tile;
+use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\ByteTag;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\StringTag;
 
 class Bed extends Transparent{
 	
@@ -119,6 +123,26 @@ class Bed extends Transparent{
 				$meta = (($d + 3) % 4) & 0x03;
 				$this->getLevel()->setBlock($block, Block::get($this->id, $meta), true, true);
 				$this->getLevel()->setBlock($next, Block::get($this->id, $meta | 0x08), true, true);
+				
+				$nbt = new Compound("", [
+					new StringTag("id", Tile::BED),
+					new IntTag("x", (int) $this->x),
+					new IntTag("y", (int) $this->y),
+					new IntTag("z", (int) $this->z),
+					new ByteTag("color", (int) 14),
+					new ByteTag("isMovable", (int) 1)
+				]);
+				Tile::createTile("Bed", $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
+				
+				$nbtNext = new Compound("", [
+					new StringTag("id", Tile::BED),
+					new IntTag("x", (int) $next->x),
+					new IntTag("y", (int) $next->y),
+					new IntTag("z", (int) $next->z),
+					new ByteTag("color", (int) 14),
+					new ByteTag("isMovable", (int) 1)
+				]);
+				Tile::createTile("Bed", $this->getLevel()->getChunk($next->x >> 4, $next->z >> 4), $nbtNext);
 
 				return true;
 			}

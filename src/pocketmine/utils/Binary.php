@@ -24,6 +24,7 @@
  */
 namespace pocketmine\utils;
 use pocketmine\entity\Entity;
+use pocketmine\utils\MetadataConvertor;
 
 class Binary{
 	const BIG_ENDIAN = 0x00;
@@ -86,18 +87,8 @@ class Binary{
 	 *
 	 * @return string
 	 */
-	public static function writeMetadata(array $data){
-//		unset($data[17]);
-//		unset($data[15]);
-//		if (isset($data[Entity::DATA_AIR])) {
-//			$air = $data[Entity::DATA_AIR][1];
-//			if ($air > 0) {
-//				$air = (int) (3086 * 30 / ($air));
-//			} else {
-//				$air = 0;
-//			}
-//			$data[Entity::DATA_AIR][1] = $air;
-//		}
+	public static function writeMetadata(array $data, $playerProtocol){
+		$data = MetadataConvertor::updateMeta($data, $playerProtocol);
 		$m = "";
 		$m .= self::writeVarInt(count($data));
 		foreach($data as $bottom => $d){
