@@ -161,6 +161,8 @@ use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Elytra;
 use pocketmine\network\protocol\SetTitlePacket;
 
+use pocketmine\inventory\win10\Win10InvLogic;
+
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
  */
@@ -2336,10 +2338,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				//Timings::$timerRemoveBlockPacket->stopTiming();
 				break;
-
 			case ProtocolInfo::MOB_ARMOR_EQUIPMENT_PACKET:
 				break;
-
 			case ProtocolInfo::INTERACT_PACKET:
 				//Timings::$timerInteractPacket->startTiming();
 				if($this->spawned === false or $this->dead === true or $this->blocked){
@@ -2549,13 +2549,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerDropItemPacket->stopTiming();
 					break;
 				}
+				
+				if ($this->inventoryType == self::INVENTORY_CLASSIC) {
+					Win10InvLogic::packetHandler($packet, $this);
+				}
 
 				if(!$this->inventory->contains($packet->item)) {
 					$this->inventory->sendContents($this);
 					//Timings::$timerDropItemPacket->stopTiming();
 					break;
 				}
-
 				$slot = $this->inventory->first($packet->item);
 				if($slot == -1){
 					//Timings::$timerDropItemPacket->stopTiming();
@@ -2771,6 +2774,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$isPlayerNotNormal = $this->spawned === false || $this->blocked === true || !$this->isAlive();
 				if ($isPlayerNotNormal || $packet->slot < 0) {
 					//Timings::$timerConteinerSetSlotPacket->stopTiming();
+					break;
+				}
+				
+				if ($this->inventoryType == self::INVENTORY_CLASSIC) {
+					Win10InvLogic::packetHandler($packet, $this);
 					break;
 				}
 				
@@ -3446,6 +3454,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return 0;
 		}
 		return -1;
+	}
+	
+	/**
+	 * 
+	 * @return Inventory
+	 */
+	public function getCurrentWindow() {
+		return $this->currentWindow;
 	}
 
 	/**
