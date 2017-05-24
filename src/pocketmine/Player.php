@@ -160,6 +160,7 @@ use pocketmine\network\proxy\ProxyPacket;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Elytra;
 use pocketmine\network\protocol\SetTitlePacket;
+use pocketmine\network\protocol\LevelSoundEventPacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -326,6 +327,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     private $deviceType = self::OS_DEDICATED;
 	
 	private $messageQueue = [];
+	
+	private $noteSoundQueue = [];
     
     private $xuid = '';
 	
@@ -1640,6 +1643,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->type = TextPacket::TYPE_RAW;
 			$pk->message = $message;
 			$this->dataPacket($pk);
+		}
+		
+		if (count($this->noteSoundQueue) > 0) {
+			$noteId = array_shift($this->noteSoundQueue);
+			$this->sendNoteSound($noteId);
 		}
 
 		//$this->timings->stopTiming();
@@ -3621,11 +3629,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		$pk = new ResourcePacksInfoPacket();
-		$this->dataPacket($pk);		
+		$this->dataPacket($pk);	
 		
 		$pk = new ResourcePackStackPacket();
 		$this->dataPacket($pk);
-
+		
 		$this->achievements = [];
 
 		/** @var Byte $achievement */
@@ -4134,6 +4142,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->text = "";
 			$this->dataPacket($pk);
 		}
+	}
+		
+	public function sendNoteSound($noteId, $queue = false) {
+		if ($queue) {
+			$this->noteSoundQueue[] = $noteId;
+			return;
+		}
+		$pk = new LevelSoundEventPacket();
+		$pk->eventId = LevelSoundEventPacket::SOUND_NOTE;
+		$pk->x = $this->x;
+		$pk->y = $this->y;
+		$pk->z = $this->z;
+		$pk->entityType = $noteId;
+		$this->directDataPacket($pk);
 	}
 
 }
