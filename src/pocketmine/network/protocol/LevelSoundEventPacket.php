@@ -23,6 +23,9 @@ class LevelSoundEventPacket extends PEPacket {
 	}
 
 	public function encode($playerProtocol) {
+		if ($playerProtocol < Info::PROTOCOL_110 && $this->eventId == self::SOUND_NOTE) {
+			$this->eventId = 70;
+		}
 		$this->reset($playerProtocol);
 		$this->putByte($this->eventId);
 		$this->putLFloat($this->x);
