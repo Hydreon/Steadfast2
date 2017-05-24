@@ -1465,7 +1465,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->lastYaw = $from->yaw;
 			$this->lastPitch = $from->pitch;
 
-			$this->sendPosition($from, $from->yaw, $from->pitch, 1);
+			$this->sendPosition($from, $from->yaw, $from->pitch, MovePlayerPacket::MODE_RESET);
 			$this->forceMovement = new Vector3($from->x, $from->y, $from->z);
 		}else{
 			$this->forceMovement = null;
@@ -1838,7 +1838,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->forceMovement = new Vector3($this->x, $this->y, $this->z);
 				}
 				if ($revert) {
-					$this->sendPosition($this->forceMovement, $packet->yaw, $packet->pitch);
+					$this->sendPosition($this->forceMovement, $packet->yaw, $packet->pitch, MovePlayerPacket::MODE_RESET);
 				} else {
 					$newPos = new Vector3($packet->x, $packet->y - $this->getEyeHeight(), $packet->z);
 					if (!($this->forceMovement instanceof Vector3) || $newPos->distanceSquared($this->forceMovement) <= 0.1) {
@@ -1853,7 +1853,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->forceMovement = null;
 					} else if (microtime(true) - $this->lastTeleportTime > 2) {
 						$this->forceMovement = new Vector3($this->x, $this->y, $this->z);
-						$this->sendPosition($this->forceMovement, $packet->yaw, $packet->pitch);
+						$this->sendPosition($this->forceMovement, $packet->yaw, $packet->pitch, MovePlayerPacket::MODE_RESET);
 						$this->lastTeleportTime = microtime(true);
 					}
 				}
@@ -3342,7 +3342,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
-	public function sendPosition(Vector3 $pos, $yaw = null, $pitch = null, $mode = 0, array $targets = null) {
+	public function sendPosition(Vector3 $pos, $yaw = null, $pitch = null, $mode = MovePlayerPacket::MODE_RESET, array $targets = null) {
 		$yaw = $yaw === null ? $this->yaw : $yaw;
 		$pitch = $pitch === null ? $this->pitch : $pitch;
 
@@ -3354,7 +3354,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->bodyYaw = $yaw;
 		$pk->pitch = $pitch;
 		$pk->yaw = $yaw;
-		$pk->mode = MovePlayerPacket::MODE_TELEPORT;
+		$pk->mode = $mode;
 
 		if($targets !== null) {
 			Server::broadcastPacket($targets, $pk);
@@ -3408,7 +3408,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				}
 //			}
 
-			$this->sendPosition($this, $this->pitch, $this->yaw, 1);
+			$this->sendPosition($this, $this->pitch, $this->yaw, MovePlayerPacket::MODE_RESET);
 			$this->forceMovement = $this->teleportPosition;
 			$this->teleportPosition = null;
 
