@@ -264,6 +264,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	/** @var Player[] */
 	protected $hiddenPlayers = [];
+	protected $hiddenEntity = [];
 
 	/** @var Vector3 */
 	public $newPosition;
@@ -736,7 +737,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		if($this->spawned){
 			foreach($this->level->getChunkEntities($x, $z) as $entity){
-				if($entity !== $this and !$entity->closed and !$entity->dead){
+				if($entity !== $this and !$entity->closed and !$entity->dead and $this->canSeeEntity($entity)){
 					$entity->spawnTo($this);
 				}
 			}
@@ -817,7 +818,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			foreach($this->usedChunks as $index => $c){
 				Level::getXZ($index, $chunkX, $chunkZ);
 				foreach($this->level->getChunkEntities($chunkX, $chunkZ) as $entity){
-					if($entity !== $this && !$entity->closed && !$entity->dead){
+					if($entity !== $this && !$entity->closed && !$entity->dead && $this->canSeeEntity($entity)){
 						$entity->spawnTo($this);
 					}
 				}
@@ -3025,6 +3026,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$player->despawnFrom($this);
 			}
 			$this->hiddenPlayers = [];
+			$this->hiddenEntity = [];
 			
 			if (!is_null($this->currentWindow)) {
 				$this->removeWindow($this->currentWindow);
@@ -4156,6 +4158,28 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->z = $this->z;
 		$pk->entityType = $noteId;
 		$this->directDataPacket($pk);
+	}
+		
+	public function canSeeEntity(Entity $entity){
+		return !isset($this->hiddenEntity[$entity->getId()]);
+	}
+
+	public function hideEntity(Entity $entity){
+		if($entity instanceof Player){
+			return;
+		}
+		$this->hiddenEntity[$entity->getId()] = $entity;
+		$entity->despawnFrom($this);
+	}
+
+	public function showEntity(Entity $entity){
+		if($entity instanceof Player){
+			return;
+		}
+		unset($this->hiddenEntity[$entity->getId()]);
+		if($entity !== $this && !$entity->closed && !$entity->dead){
+			$entity->spawnTo($this);
+		}
 	}
 
 }
