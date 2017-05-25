@@ -37,13 +37,9 @@ interface Info105{
     const DISCONNECT_PACKET = 0x05;
     const BATCH_PACKET = 0x06;
     const RESOURCE_PACKS_INFO_PACKET = 0x07;
-<<<<<<< HEAD
 	const RESOURCE_PACK_STACK_PACKET = 0x08; //ResourcePacksStackPacket
 	const RESOURCE_PACK_CLIENT_RESPONSE_PACKET = 0x09;
-=======
 	const RESOURCE_PACKS_STACK_PACKET = 0x08;
-//	const RESOURCE_PACKS_CLIENT_RESPONSE_PACKET = 0x09;
->>>>>>> d4de7d2b2e545ae599b2209df083d3edf27e03b2
     const TEXT_PACKET = 0x0a;
     const SET_TIME_PACKET = 0x0b;
     const START_GAME_PACKET = 0x0c;

@@ -119,7 +119,6 @@ use pocketmine\network\protocol\PlayerActionPacket;
 use pocketmine\network\protocol\PlayStatusPacket;
 use pocketmine\network\protocol\RespawnPacket;
 use pocketmine\network\protocol\SetEntityDataPacket;
-use pocketmine\network\protocol\StrangePacket;
 use pocketmine\network\protocol\TextPacket;
 use pocketmine\network\protocol\MovePlayerPacket;
 use pocketmine\network\protocol\SetDifficultyPacket;
@@ -163,11 +162,11 @@ use pocketmine\inventory\AnvilInventory;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Elytra;
 use pocketmine\network\protocol\SetTitlePacket;
-<<<<<<< HEAD
+
 use pocketmine\resourcepacks\ResourcePack;
-=======
+
 use pocketmine\network\protocol\LevelSoundEventPacket;
->>>>>>> d4de7d2b2e545ae599b2209df083d3edf27e03b2
+
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -3613,17 +3612,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 
-<<<<<<< HEAD
         if(count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers() and $this->kick("disconnectionScreen.serverFull")){
             return;
         }
-
-=======
-		if (count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers() && $this->kickOnFullServer()) {
-			$this->close("", "Server is Full", false);
-			return;
-		}
->>>>>>> d4de7d2b2e545ae599b2209df083d3edf27e03b2
 
         $this->server->getPluginManager()->callEvent($ev = new PlayerPreLoginEvent($this, "Plugin reason"));
 		if ($ev->isCancelled()) {
@@ -3692,25 +3683,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		$pk = new ResourcePacksInfoPacket();
-<<<<<<< HEAD
+
 		$manager = $this->server->getResourceManager();
 		$pk->resourcePackEntries = $manager->getResourceStack();
 		$pk->mustAccept = $manager->resourcePacksRequired();
 		$this->dataPacket($pk);
 
-=======
-		$this->dataPacket($pk);	
-		
-		$pk = new ResourcePackStackPacket();
-		$this->dataPacket($pk);
-		
->>>>>>> d4de7d2b2e545ae599b2209df083d3edf27e03b2
 		$this->achievements = [];
 
-		/** @var Byte $achievement */
-		foreach ($nbt->Achievements as $achievement) {
-			$this->achievements[$achievement->getName()] = $achievement->getValue() > 0 ? true : false;
-		}
 
 		$nbt->lastPlayed = new LongTag("lastPlayed", floor(microtime(true) * 1000));
 		parent::__construct($this->level->getChunk($nbt["Pos"][0] >> 4, $nbt["Pos"][2] >> 4, true), $nbt);

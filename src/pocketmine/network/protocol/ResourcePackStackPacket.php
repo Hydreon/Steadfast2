@@ -1,6 +1,6 @@
 <?php
 
-<<<<<<< HEAD
+
 /*
  *
  *  ____            _        _   __  __ _                  __  __ ____
@@ -27,33 +27,20 @@ namespace pocketmine\network\protocol;
 
 use pocketmine\resourcepacks\ResourcePack;
 use pocketmine\resourcepacks\ResourcePackInfoEntry;
-
+/*
 class ResourcePackStackPacket extends PEPacket{
 	const NETWORK_ID = Info::RESOURCE_PACK_STACK_PACKET;
 	const PACKET_NAME = "RESOURCE_PACK_STACK_PACKET";
 
 	public $mustAccept = false;
 
-	/** @var ResourcePack[] */
+
 	public $behaviorPackStack = [];
-	/** @var ResourcePack[] */
+
 	public $resourcePackStack = [];
 
 	public function decode($playerProtocol){
-		/*$this->mustAccept = $this->getBool();
-		$behaviorPackCount = $this->getLShort();
-		while($behaviorPackCount-- > 0){
-			$packId = $this->getString();
-			$version = $this->getString();
-			$this->behaviorPackStack[] = new ResourcePackInfoEntry($packId, $version);
-		}
 
-		$resourcePackCount = $this->getLShort();
-		while($resourcePackCount-- > 0){
-			$packId = $this->getString();
-			$version = $this->getString();
-			$this->resourcePackStack[] = new ResourcePackInfoEntry($packId, $version);
-		}*/
 	}
 
 	public function encode($playerProtocol){
@@ -73,12 +60,12 @@ class ResourcePackStackPacket extends PEPacket{
 		}
 	}
 }
-=======
+*/
 namespace pocketmine\network\protocol;
 
 class ResourcePackStackPacket extends PEPacket {
 
-	const NETWORK_ID = Info::RESOURCE_PACKS_STACK_PACKET;
+	const NETWORK_ID = Info::RESOURCE_PACK_STACK_PACKET;
 	const PACKET_NAME = "RESOURCE_PACKS_STACK_PACKET";
 
 	public function decode($playerProtocol) {
@@ -93,4 +80,4 @@ class ResourcePackStackPacket extends PEPacket {
 	}
 
 }
->>>>>>> d4de7d2b2e545ae599b2209df083d3edf27e03b2
+

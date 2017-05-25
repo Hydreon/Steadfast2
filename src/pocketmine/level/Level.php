@@ -502,12 +502,10 @@ class Level implements ChunkManager, Metadatable{
 	 * @return Player[]
 	 */
 	public function getUsingChunk($X, $Z){
-<<<<<<< HEAD
+
 
 	    return isset($this->usedChunks[$index = PHP_INT_SIZE === 8 ? ((($X) & 0xFFFFFFFF) << 32) | (( $Z) & 0xFFFFFFFF) : ($X) . ":" . ( $Z)]) ? $this->usedChunks[$index] : [];
-=======
-		return isset($this->usedChunks[$index = self::chunkHash($X, $Z)]) ? $this->usedChunks[$index] : [];
->>>>>>> 3d7a8a501fb4517c54e361fcc96e258c6ee6131a
+
 	}
 
 	/**
