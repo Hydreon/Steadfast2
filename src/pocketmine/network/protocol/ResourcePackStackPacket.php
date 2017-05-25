@@ -1,5 +1,6 @@
 <?php
 
+<<<<<<< HEAD
 /*
  *
  *  ____            _        _   __  __ _                  __  __ ____
@@ -72,3 +73,24 @@ class ResourcePackStackPacket extends PEPacket{
 		}
 	}
 }
+=======
+namespace pocketmine\network\protocol;
+
+class ResourcePackStackPacket extends PEPacket {
+
+	const NETWORK_ID = Info::RESOURCE_PACKS_STACK_PACKET;
+	const PACKET_NAME = "RESOURCE_PACKS_STACK_PACKET";
+
+	public function decode($playerProtocol) {
+		
+	}
+	
+	public function encode($playerProtocol) {
+		$this->reset($playerProtocol);
+		$this->putByte(0);
+		$this->putVarInt(0);
+		$this->putVarInt(0);
+	}
+
+}
+>>>>>>> d4de7d2b2e545ae599b2209df083d3edf27e03b2
