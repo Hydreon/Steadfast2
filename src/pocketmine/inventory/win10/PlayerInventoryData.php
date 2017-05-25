@@ -2,29 +2,36 @@
 
 namespace pocketmine\inventory\win10;
 
-use pocketmine\Player;
+use pocketmine\inventory\BaseTransaction;
 use pocketmine\inventory\PlayerInventory;
+use pocketmine\inventory\SimpleTransactionGroup;
+use pocketmine\inventory\win10\TransactionData;
 use pocketmine\item\Item;
-use pocketmine\item\Armor;
+use pocketmine\Player;
+
 
 class PlayerInventoryData {
-	
+		
 	protected $cursor = null;
 	/** @var PlayerInventory */
 	protected $inventory;
-	protected $tmpItemsList = [];
+	/** @var TransactionData[] */
+	protected $transactionDataList = [];
 	
 	public function __construct(Player $player) {
 		$this->inventory = $player->getInventory();
 	}
 	
+	protected function resetData() {
+		$this->cursor = null;
+		$this->transactionDataList = [];
+	}
+	
 	public function dropItemPreprocessing() {
-		var_dump('drop item');
 		if ($this->cursor == null) {
 			return;
 		}
-		$this->inventory->addItem($this->cursor);
-		$this->cursor = null;
+		$this->resetData();
 	}
 	
 	public function selfInventoryLogic($slot, $newItem) {
@@ -32,35 +39,7 @@ class PlayerInventoryData {
 	}
 	
 	public function armorInventoryLogic($slot, $newItem) {
-		if ($newItem->getId() == Item::AIR) {
-			// get item from slot
-			var_dump('Armor: get item from slot');
-			$this->cursor = $this->inventory->getArmorItem($slot);
-			$this->inventory->setArmorItem($slot, $newItem);
-		} else {
-			// put item to slot
-			var_dump('Armor: put item to slot');
-			if ($this->cursor == null || !$newItem->equals($this->cursor)) {
-				// item is bad
-				var_dump('Armor: item is bad');
-				$this->inventory->sendArmorContents($this->inventory->getHolder());
-				return;
-			} else {
-				$currentItem = $this->inventory->getArmorItem($slot);
-				if ($currentItem->getId() == Item::AIR) {
-					// put item in empty slot
-					var_dump('Armor: put item in empty slot');
-					$this->inventory->setArmorItem($slot, $this->cursor);
-					$this->cursor = null;
-				} else {
-					// switch item
-					var_dump('Armor: switch item');
-					$this->inventory->setArmorItem($slot, $this->cursor);
-					$this->cursor = $currentItem;
-				}
-				$this->inventory->sendArmorContents($this->inventory->getHolder());
-			}
-		}
+		$this->basicInventoryLogic($slot + $this->inventory->getSize(), $newItem);
 	}
 	
 	public function otherInventoryLogic($slot, $newItem) {
@@ -77,40 +56,117 @@ class PlayerInventoryData {
 			$inventory = $this->inventory;
 		}
 		if ($newItem->getId() == Item::AIR) {
-			$this->cursor = $inventory->getItem($slot);
+			$this->cursor = $this->getSlotItemBasedOnTransactions($inventory, $slot);
 			if ($this->cursor->getId() == Item::AIR) {
-				$this->cursor = null;
+				$this->resetData();
 				$inventory->sendContents($this->inventory->getHolder());
 				return;
 			}
-			// get item from slot
-			$inventory->setItem($slot, $newItem);
+//			var_dump('get item from slot');
+			$this->transactionDataList[] = new TransactionData($inventory, $slot, $this->cursor, $newItem);
 		} else {
-			// put item to slot
+			$currentItem = $this->getSlotItemBasedOnTransactions($inventory, $slot);
 			if ($this->cursor == null || !$newItem->equals($this->cursor)) {
-				$currentItem = $inventory->getItem($slot);
 				if ($newItem->equals($currentItem) && $newItem->count == $currentItem->count) {
 					return;
 				}
-				// item is bad
+				// fix for items pick up
+				$inventory->sendContents($this->inventory->getHolder());
+//				var_dump('item is bad');
 			} else {
-				$currentItem = $inventory->getItem($slot);
+//				var_dump('put item to slot');
 				if ($currentItem->getId() == Item::AIR) {
-					// put item in empty slot
-					$inventory->setItem($slot, $this->cursor);
+//					var_dump('put item in empty slot');
+//					if (empty($this->transactionDataList)) {
+//						var_dump('HERE');
+//						$inventory->sendContents($this->inventory->getHolder());
+//						return;
+//					}
+					$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $this->cursor);
 					$this->cursor = null;
 				} else if ($currentItem->equals($this->cursor)) {
-					// add item to existings item
-					$currentItem->count += $this->cursor->count;
-					$inventory->setItem($slot, $currentItem);
+//					var_dump('add item to existings item');
+					$this->cursor->count += $currentItem->count;
+					$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $this->cursor);
 					$this->cursor = null;
 				} else {
-					// switch item
-					$inventory->setItem($slot, $this->cursor);
+//					var_dump('switch item');
+					$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $this->cursor);
 					$this->cursor = $currentItem;
 				}
 			}
-			$inventory->sendContents($this->inventory->getHolder());
+			$this->tryExecuteTransactions();
+		}
+	}
+	
+	/** @todo testing */
+	protected function getSlotItemBasedOnTransactions($inventory, $slot) {
+		$transactionData = end($this->transactionDataList);
+		while ($transactionData !== false) {
+			$trInventory = $transactionData->getInventory();
+			$trSlot = $transactionData->getSlot();
+			if ($trInventory === $inventory && $trSlot == $slot) {	/** @todo testing */
+				return $transactionData->getNewItem();
+			}
+			$transactionData = prev($this->transactionDataList);
+		}
+		return $inventory->getItem($slot);
+	}
+	
+	protected function isMayExecuteTransactions() {
+		$air = Item::get(Item::AIR);
+		$oldItem = null;
+		$newItem = null;
+		foreach ($this->transactionDataList as $transactionData) {
+			if ($oldItem == null && $newItem == null) {
+				$oldItem = $transactionData->getOldItem();
+				$newItem = $transactionData->getNewItem();
+			} else {
+				$trNewItem = $transactionData->getNewItem();
+				if (!$trNewItem->equals($oldItem) || $trNewItem->getCount() != $oldItem->getCount()) {
+					throw new \Exception('Aaaaaa!!!! Rollback!');
+				}
+				$oldItem = $transactionData->getOldItem();
+			}
+		}
+		return $oldItem != null && $newItem != null && $oldItem->getId() == Item::AIR && $newItem->getId() == Item::AIR;
+	}
+	
+	protected function tryExecuteTransactions() {
+		try {
+			if ($this->isMayExecuteTransactions()) {
+//				var_dump('transactions is good');
+				// prepare SimpleTransactionGroup
+				$trGroup = new SimpleTransactionGroup($this->inventory->getHolder());
+				foreach ($this->transactionDataList as $transactionData) {
+					$trGroup->addTransaction(new BaseTransaction(
+						$transactionData->getInventory(),
+						$transactionData->getSlot(),
+						$transactionData->getOldItem(),
+						$transactionData->getNewItem()
+					));
+				}
+				// trying execute
+//				var_dump('starting transaction execituions');
+				$isExecute = $trGroup->execute();
+				if (!$isExecute) {
+					var_dump('transaction execituions fail');
+					$trGroup->sendInventories();
+				}
+				$this->resetData();
+			}
+		} catch (\Exception $e) {
+//			var_dump('transactions rollback');
+			// resend inventories
+			$player = $this->inventory->getHolder();
+			foreach ($this->transactionDataList as $transactionData) {
+				$inventory = $transactionData->getInventory();
+				if ($inventory instanceof PlayerInventory) {
+					$inventory->sendArmorContents($player);
+				}
+				$inventory->sendContents($player);
+			}
+			$this->resetData();
 		}
 	}
 		

@@ -25,6 +25,7 @@ class Win10InvLogic {
 		$packetID = $packet::NETWORK_ID;
 		switch ($packetID) {
 			case Info::CONTAINER_SET_SLOT_PACKET:
+//				var_dump($packet);
 				$invData = self::$playersInventoryData[$playerName];
 				switch ($packet->windowid) {
 					case self::WINDOW_ID_PLAYER_INVENTORY:
