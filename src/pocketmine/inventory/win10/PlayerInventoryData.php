@@ -28,7 +28,6 @@ class PlayerInventoryData {
 	}
 	
 	public function selfInventoryLogic($slot, $newItem) {
-		$this->inventory->printAll();
 		$this->basicInventoryLogic($slot, $newItem);
 	}
 	
@@ -78,37 +77,40 @@ class PlayerInventoryData {
 			$inventory = $this->inventory;
 		}
 		if ($newItem->getId() == Item::AIR) {
-			var_dump('get item from slot');
 			$this->cursor = $inventory->getItem($slot);
 			if ($this->cursor->getId() == Item::AIR) {
 				$this->cursor = null;
-				return;
-			}
-			$inventory->setItem($slot, $newItem);
-		} else {
-			var_dump('put item to slot');
-			if ($this->cursor == null || !$newItem->equals($this->cursor)) {
-				var_dump('item is bad');
 				$inventory->sendContents($this->inventory->getHolder());
 				return;
+			}
+			// get item from slot
+			$inventory->setItem($slot, $newItem);
+		} else {
+			// put item to slot
+			if ($this->cursor == null || !$newItem->equals($this->cursor)) {
+				$currentItem = $inventory->getItem($slot);
+				if ($newItem->equals($currentItem) && $newItem->count == $currentItem->count) {
+					return;
+				}
+				// item is bad
 			} else {
 				$currentItem = $inventory->getItem($slot);
 				if ($currentItem->getId() == Item::AIR) {
-					var_dump('put item in empty slot');
+					// put item in empty slot
 					$inventory->setItem($slot, $this->cursor);
 					$this->cursor = null;
 				} else if ($currentItem->equals($this->cursor)) {
-					var_dump('add item to existings item');
+					// add item to existings item
 					$currentItem->count += $this->cursor->count;
 					$inventory->setItem($slot, $currentItem);
 					$this->cursor = null;
 				} else {
-					var_dump('switch item');
+					// switch item
 					$inventory->setItem($slot, $this->cursor);
 					$this->cursor = $currentItem;
 				}
-				$inventory->sendContents($this->inventory->getHolder());
 			}
+			$inventory->sendContents($this->inventory->getHolder());
 		}
 	}
 		
