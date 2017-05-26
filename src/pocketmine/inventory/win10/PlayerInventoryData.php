@@ -55,17 +55,25 @@ class PlayerInventoryData {
 		if ($inventory == null) {
 			$inventory = $this->inventory;
 		}
-		if ($newItem->getId() == Item::AIR) {
-			$this->cursor = $this->getSlotItemBasedOnTransactions($inventory, $slot);
-			if ($this->cursor->getId() == Item::AIR) {
-				$this->resetData();
-				$inventory->sendContents($this->inventory->getHolder());
-				return;
+		$currentItem = clone $this->getSlotItemBasedOnTransactions($inventory, $slot);
+		$isDecreasingTransaction = $newItem->getId() == Item::AIR || ($newItem->equals($currentItem) && $newItem->count < $currentItem->count);
+		if ($isDecreasingTransaction) {
+			if ($newItem->getId() == Item::AIR) {
+				$this->cursor = $currentItem;
+				if ($this->cursor->getId() == Item::AIR) {
+					$this->resetData();
+					$inventory->sendContents($this->inventory->getHolder());
+					return;
+				}
+//				var_dump('get item from slot');
+				$this->transactionDataList[] = new TransactionData($inventory, $slot, $this->cursor, $newItem);
+			} else {
+//				var_dump('get part of item stack');
+				$this->cursor = clone $currentItem;
+				$this->cursor->count -= $newItem->count;
+				$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $newItem);
 			}
-//			var_dump('get item from slot');
-			$this->transactionDataList[] = new TransactionData($inventory, $slot, $this->cursor, $newItem);
 		} else {
-			$currentItem = $this->getSlotItemBasedOnTransactions($inventory, $slot);
 			if ($this->cursor == null || !$newItem->equals($this->cursor)) {
 				if ($newItem->equals($currentItem) && $newItem->count == $currentItem->count) {
 					return;
@@ -77,22 +85,18 @@ class PlayerInventoryData {
 //				var_dump('put item to slot');
 				if ($currentItem->getId() == Item::AIR) {
 //					var_dump('put item in empty slot');
-//					if (empty($this->transactionDataList)) {
-//						var_dump('HERE');
-//						$inventory->sendContents($this->inventory->getHolder());
-//						return;
-//					}
 					$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $this->cursor);
 					$this->cursor = null;
 				} else if ($currentItem->equals($this->cursor)) {
 //					var_dump('add item to existings item');
-					$this->cursor->count += $currentItem->count;
-					$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $this->cursor);
+					$newItem = clone $this->cursor;
 					$this->cursor = null;
+					$newItem->count += $currentItem->count;
+					$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $newItem);
 				} else {
 //					var_dump('switch item');
 					$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $this->cursor);
-					$this->cursor = $currentItem;
+					$this->cursor = clone $currentItem;
 				}
 			}
 			$this->tryExecuteTransactions();
@@ -114,22 +118,41 @@ class PlayerInventoryData {
 	}
 	
 	protected function isMayExecuteTransactions() {
-		$air = Item::get(Item::AIR);
-		$oldItem = null;
-		$newItem = null;
+		$newItems = [];
+		$oldItems = [];
+		
 		foreach ($this->transactionDataList as $transactionData) {
-			if ($oldItem == null && $newItem == null) {
-				$oldItem = $transactionData->getOldItem();
-				$newItem = $transactionData->getNewItem();
-			} else {
-				$trNewItem = $transactionData->getNewItem();
-				if (!$trNewItem->equals($oldItem) || $trNewItem->getCount() != $oldItem->getCount()) {
-					throw new \Exception('Aaaaaa!!!! Rollback!');
+//			echo $transactionData . PHP_EOL;
+			$newItem = $transactionData->getNewItem();
+			$itemId = $newItem->getId();
+			if ($itemId !== Item::AIR) {
+				if (!isset($newItems[$itemId])) {
+					$newItems[$itemId] = 0;
 				}
-				$oldItem = $transactionData->getOldItem();
+				$newItems[$itemId] += $newItem->getCount();
+//				var_dump('Set new item: ' . $itemId . ' Count: ' . $newItems[$itemId]);
+			}
+			$oldItem = $transactionData->getOldItem();
+			$itemId = $oldItem->getId();
+			if ($itemId !== Item::AIR) {
+				if (!isset($oldItems[$itemId])) {
+					$oldItems[$itemId] = 0;
+				}
+				$oldItems[$itemId] += $oldItem->getCount();
+//				var_dump('Set old item: ' . $itemId . ' Count: ' . $oldItems[$itemId]);
 			}
 		}
-		return $oldItem != null && $newItem != null && $oldItem->getId() == Item::AIR && $newItem->getId() == Item::AIR;
+		
+		foreach ($newItems as $itemId => $itemCount) {
+			if (isset($oldItems[$itemId]) && $oldItems[$itemId] == $itemCount) {
+//				var_dump('Unset old item:' . $itemId);
+				unset($oldItems[$itemId]);
+//				var_dump('Unset new item:' . $itemId);
+				unset($newItems[$itemId]);
+			}
+		}
+		
+		return empty($oldItems) && empty($newItems);
 	}
 	
 	protected function tryExecuteTransactions() {
@@ -148,9 +171,6 @@ class PlayerInventoryData {
 				}
 				// trying execute
 //				var_dump('starting transaction execituions');
-				foreach ($this->transactionDataList as $transactionData) {
-					echo $transactionData . PHP_EOL;
-				}
 				$isExecute = $trGroup->execute();
 				if (!$isExecute) {
 //					var_dump('transaction execituions fail');

@@ -80,6 +80,16 @@ class PlayerInventory extends BaseInventory{
 	public function getHeldItemIndex(){
 		return $this->itemInHandIndex;
 	}
+	
+	/**
+	 * @impportant For win10 inventory only
+	 * @param int $index
+	 */
+	public function justSetHeldItemIndex($index) {
+		if($index >= 0 and $index < $this->getHotbarSize()){
+			$this->itemInHandIndex = $index;
+		}
+	}
 
 	public function setHeldItemIndex($index, $isNeedSendToHolder = true){
 		if($index >= 0 and $index < $this->getHotbarSize()){

@@ -45,6 +45,8 @@ class Win10InvLogic {
 				break;
 			case Info::MOB_EQUIPMENT_PACKET:
 				$inventory = $player->getInventory();
+				$inventory->justSetHeldItemIndex($packet->slot);
+				
 				$pk = new MobEquipmentPacket();
 				$pk->eid = $player->getId();
 				$pk->item = $packet->item;
