@@ -4,8 +4,8 @@ namespace pocketmine\inventory\win10;
 
 use pocketmine\inventory\BaseTransaction;
 use pocketmine\inventory\PlayerInventory;
-use pocketmine\inventory\SimpleTransactionGroup;
 use pocketmine\inventory\win10\TransactionData;
+use pocketmine\inventory\win10\Win10SimpleTransactionGroup;
 use pocketmine\item\Item;
 use pocketmine\Player;
 
@@ -137,7 +137,7 @@ class PlayerInventoryData {
 			if ($this->isMayExecuteTransactions()) {
 //				var_dump('transactions is good');
 				// prepare SimpleTransactionGroup
-				$trGroup = new SimpleTransactionGroup($this->inventory->getHolder());
+				$trGroup = new Win10SimpleTransactionGroup($this->inventory->getHolder());
 				foreach ($this->transactionDataList as $transactionData) {
 					$trGroup->addTransaction(new BaseTransaction(
 						$transactionData->getInventory(),
@@ -148,9 +148,12 @@ class PlayerInventoryData {
 				}
 				// trying execute
 //				var_dump('starting transaction execituions');
+				foreach ($this->transactionDataList as $transactionData) {
+					echo $transactionData . PHP_EOL;
+				}
 				$isExecute = $trGroup->execute();
 				if (!$isExecute) {
-					var_dump('transaction execituions fail');
+//					var_dump('transaction execituions fail');
 					$trGroup->sendInventories();
 				}
 				$this->resetData();

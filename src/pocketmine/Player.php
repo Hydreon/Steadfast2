@@ -1854,7 +1854,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerMovePacket->stopTiming();
 				break;
 			case ProtocolInfo::MOB_EQUIPMENT_PACKET:
-				break;
 				//Timings::$timerMobEqipmentPacket->startTiming();
 				if($this->spawned === false or $this->dead === true){
 					//Timings::$timerMobEqipmentPacket->stopTiming();
@@ -1865,6 +1864,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$packet->slot = -1; //Air
 				}else{
 					$packet->slot -= 9; //Get real block slot
+				}
+				
+				// not so good solution
+				if ($this->inventoryType == self::INVENTORY_CLASSIC) {
+					Win10InvLogic::packetHandler($packet, $this);
+					break;
 				}
 
 				/** @var Item $item */
@@ -3640,8 +3645,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk = new ResourcePacksInfoPacket();
 		$this->dataPacket($pk);		
 		
-		$pk = new ResourcePackStackPacket();
-		$this->dataPacket($pk);
+//		$pk = new ResourcePackStackPacket();
+//		$this->dataPacket($pk);
 
 		$this->achievements = [];
 

@@ -3,7 +3,7 @@
 namespace pocketmine\inventory\win10;
 
 use pocketmine\network\protocol\Info;
-
+use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\Player;
 
 class Win10InvLogic {
@@ -42,6 +42,22 @@ class Win10InvLogic {
 			case Info::DROP_ITEM_PACKET:
 				$invData = self::$playersInventoryData[$playerName];
 				$invData->dropItemPreprocessing();
+				break;
+			case Info::MOB_EQUIPMENT_PACKET:
+				$inventory = $player->getInventory();
+				$pk = new MobEquipmentPacket();
+				$pk->eid = $player->getId();
+				$pk->item = $packet->item;
+				$pk->slot = $inventory->getHeldItemSlot();
+				$pk->selectedSlot = $inventory->getHeldItemIndex();
+
+				$level = $player->getLevel();
+				$viewers = $player->getViewers();
+				foreach($viewers as $viewer){
+					if($level->mayAddPlayerHandItem($player, $viewer)) {
+						$viewer->dataPacket($pk);
+					}
+				}
 				break;
 			default:
 				var_dump('Unknovn packet: ' . dechex($packetID));
