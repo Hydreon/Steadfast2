@@ -1549,7 +1549,9 @@ abstract class Entity extends Location implements Metadatable{
 					}
 				}
 				foreach($newChunk as $player){
-					$this->spawnTo($player);
+					if ($player->canSeeEntity($this)) {
+						$this->spawnTo($player);
+					}
 				}
 			}
 
@@ -1670,7 +1672,9 @@ abstract class Entity extends Location implements Metadatable{
 	public function respawnToAll(){
 		foreach($this->hasSpawned as $key => $player){
 			unset($this->hasSpawned[$key]);
-			$this->spawnTo($player);
+			if ($player->canSeeEntity($this)) {
+				$this->spawnTo($player);
+			}
 		}
 	}
 
@@ -1679,7 +1683,7 @@ abstract class Entity extends Location implements Metadatable{
 			return false;
 		}
 		foreach($this->level->getUsingChunk($this->chunk->getX(), $this->chunk->getZ()) as $player){
-			if($player->loggedIn === true){
+			if($player->loggedIn === true && $player->canSeeEntity($this)){
 				$this->spawnTo($player);
 			}
 		}
