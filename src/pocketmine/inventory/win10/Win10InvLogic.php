@@ -67,4 +67,12 @@ class Win10InvLogic {
 		}
 	}
 	
+	public static function playerPickUpItem($player, $item) {
+		$playerName = $player->getName();
+		if (!isset(self::$playersInventoryData[$playerName])) {
+			return;
+		}
+		self::$playersInventoryData[$playerName]->setPickUpItem($item);
+	}
+	
 }

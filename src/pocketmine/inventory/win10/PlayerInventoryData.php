@@ -11,20 +11,29 @@ use pocketmine\Player;
 
 
 class PlayerInventoryData {
-		
+	
 	protected $cursor = null;
 	/** @var PlayerInventory */
 	protected $inventory;
 	/** @var TransactionData[] */
 	protected $transactionDataList = [];
+	/** @var TransactionData[] */
+	protected $tmpTransactionList = [];
+	/** @var Item */
+	protected $pickUpItem = null;
 	
 	public function __construct(Player $player) {
 		$this->inventory = $player->getInventory();
 	}
 	
+	public function setPickUpItem($item) {
+		$this->pickUpItem = $item;
+	}
+	
 	protected function resetData() {
 		$this->cursor = null;
 		$this->transactionDataList = [];
+		$this->tmpTransactionList = [];
 	}
 	
 	public function dropItemPreprocessing() {
@@ -67,6 +76,10 @@ class PlayerInventoryData {
 				}
 //				var_dump('get item from slot');
 				$this->transactionDataList[] = new TransactionData($inventory, $slot, $this->cursor, $newItem);
+				if (!empty($this->tmpTransactionList)) {
+					$this->addTransactionFromTmp();
+					$this->tryExecuteTransactions();
+				}
 			} else {
 //				var_dump('get part of item stack');
 				$this->cursor = clone $currentItem;
@@ -78,8 +91,21 @@ class PlayerInventoryData {
 				if ($newItem->equals($currentItem) && $newItem->count == $currentItem->count) {
 					return;
 				}
-				// fix for items pick up
-				$inventory->sendContents($this->inventory->getHolder());
+				$countDiff = $newItem->count - $currentItem->count;
+				if ($this->pickUpItem->equals($newItem) && $countDiff <= $this->pickUpItem->count) {
+					// fix for items pick up
+					$inventory->sendContents($this->inventory->getHolder());
+					$this->pickUpItem->count -= $countDiff;
+					if ($this->pickUpItem->count == 0) {
+						$this->pickUpItem = null;
+					}
+				} else if ($currentItem->getId() == Item::AIR || $newItem->equals($currentItem)) {
+					if ($this->isTransactionTmp($newItem, $currentItem, $inventory)) {
+						$this->tmpTransactionList[] = new TransactionData($inventory, $slot, $currentItem, $newItem);
+						return;
+					}
+				}
+				
 //				var_dump('item is bad');
 			} else {
 //				var_dump('put item to slot');
@@ -117,6 +143,20 @@ class PlayerInventoryData {
 		return $inventory->getItem($slot);
 	}
 	
+	protected function addTransactionFromTmp() {
+		$lastTransaction = end($this->transactionDataList);
+		$oldItem = $lastTransaction->getOldItem();
+		foreach ($this->tmpTransactionList as $index => $trData) {
+			if ($oldItem->equals($trData->getNewItem())) {
+				// move transaction from tmp to ordinary
+				unset($this->tmpTransactionList[$index]);
+				$this->transactionDataList[] = $trData;
+				break;
+			}
+		}
+	}
+
+
 	protected function isMayExecuteTransactions() {
 		$newItems = [];
 		$oldItems = [];
@@ -191,6 +231,26 @@ class PlayerInventoryData {
 			}
 			$this->resetData();
 		}
+	}
+	
+	protected function isTransactionTmp($newItem, $currentItem, $inventory) {
+		var_dump('checking for tmp transaction');
+		// small bad code for transaction bad order issue
+		$countDiff = $newItem->count - $currentItem->count;
+		$searchItem = Item::get($newItem->getId(), $newItem->getDamage(), $countDiff);
+		var_dump('Search item: ' . $searchItem->getId() . ' ' . $newItem->getDamage() . ' ' . $searchItem->count);
+		$player = $this->inventory->getHolder();
+		$window = $player->getCurrentWindow();
+		$targetInventory = ($inventory instanceof PlayerInventory && $window != null) ? $window : $this->inventory;
+		var_dump(get_class($targetInventory));
+		$items = $targetInventory->all($searchItem);
+		foreach ($items as $item) {
+			if ($item->count == $searchItem->count) {
+				var_dump('add tmp transaction');
+				return true;
+			}
+		}
+		return false;
 	}
 		
 }

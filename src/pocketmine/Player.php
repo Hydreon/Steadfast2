@@ -1292,7 +1292,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						if($ev->isCancelled()){
 							continue;
 						}
-
+						
 						$pk = new TakeItemEntityPacket();
 						$pk->eid = $this->getId();
 						$pk->target = $entity->getId();
@@ -1305,6 +1305,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 						$this->inventory->addItem(clone $item);
 						$entity->kill();
+						
+						if ($this->inventoryType == self::INVENTORY_CLASSIC) {
+							Win10InvLogic::playerPickUpItem($this, $item);
+						}
 					}
 				}
 			}
