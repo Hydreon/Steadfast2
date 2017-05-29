@@ -160,6 +160,7 @@ use pocketmine\network\proxy\ProxyPacket;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Elytra;
 use pocketmine\network\protocol\SetTitlePacket;
+use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
 
 /**
@@ -1764,13 +1765,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			//Timings::$timerBatchPacket->stopTiming();
 			return;
 		}
-
+	
 //		$this->server->getPluginManager()->callEvent($ev = new DataPacketReceiveEvent($this, $packet));
 //		if($ev->isCancelled()){
 //			return;
 //		}
 
-		$beforeLoginAvailablePackets = [ProtocolInfo::LOGIN_PACKET, ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET];
+		$beforeLoginAvailablePackets = [ProtocolInfo::LOGIN_PACKET, ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET, ProtocolInfo::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET];
 		if (!$this->isOnline() && !in_array($packet->pid(), $beforeLoginAvailablePackets)) {
 			return;
 		}
@@ -2880,6 +2881,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk = new ChunkRadiusUpdatePacket();
 				$pk->radius = $packet->radius;
 				$this->dataPacket($pk);
+				$this->loggedIn = true;
+				$this->scheduleUpdate();
 				//Timings::$timerChunkRudiusPacket->stopTiming();
 				break;
 			case ProtocolInfo::COMMAND_STEP_PACKET:
@@ -2925,6 +2928,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				
 				$ev = new PlayerCommandPostprocessEvent($this, $commandLine);
 				$this->server->getPluginManager()->callEvent($ev);
+				break;
+			case ProtocolInfo::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET:
+				switch ($packet->status) {
+					case ResourcePackClientResponsePacket::STATUS_REFUSED:
+					case ResourcePackClientResponsePacket::STATUS_SEND_PACKS:
+					case ResourcePackClientResponsePacket::STATUS_HAVE_ALL_PACKS:
+						$pk = new ResourcePackStackPacket();
+						$this->dataPacket($pk);
+						break;
+					case ResourcePackClientResponsePacket::STATUS_COMPLETED:
+						$this->completeLogin();
+						break;
+					default:
+						return false;
+				}
 				break;
 			default:
 				break;
@@ -3534,7 +3552,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return true;
 	}
 	
-	public function processLogin() {
+	public function processLogin() {			
+		if (!($this->interface instanceof ProxyInterface)) {
+			$pk = new PlayStatusPacket();
+			$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
+			$this->dataPacket($pk);			
+		}
+		
+		$pk = new ResourcePacksInfoPacket();
+		$this->dataPacket($pk);			
+	}
+	
+	public function completeLogin() {
 		$valid = true;
 		$len = strlen($this->username);
 		if ($len > 16 or $len < 3) {
@@ -3624,18 +3653,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 		
-		if (!($this->interface instanceof ProxyInterface)) {
-			$pk = new PlayStatusPacket();
-			$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
-			$this->dataPacket($pk);			
-		}
-		
-		$pk = new ResourcePacksInfoPacket();
-		$this->dataPacket($pk);	
-		
-		$pk = new ResourcePackStackPacket();
-		$this->dataPacket($pk);
-		
 		$this->achievements = [];
 
 		/** @var Byte $achievement */
@@ -3645,7 +3662,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$nbt->lastPlayed = new LongTag("lastPlayed", floor(microtime(true) * 1000));
 		parent::__construct($this->level->getChunk($nbt["Pos"][0] >> 4, $nbt["Pos"][2] >> 4, true), $nbt);
-		$this->loggedIn = true;
+//		$this->loggedIn = true;
 		$this->server->addOnlinePlayer($this);		
 
 		if ($this->isCreative()) {
@@ -3772,6 +3789,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             $this->inventoryType = $packet->inventoryType;
 			$this->xuid = $packet->XUID;
 			$this->processLogin();
+			$this->completeLogin();
 		} elseif ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
 			$this->removeAllEffects();
 			$this->server->clearPlayerList($this);
