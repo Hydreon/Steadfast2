@@ -2019,8 +2019,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					}
 
-//					if($item->getId() === Item::SNOWBALL || $item->getId() === Item::EGG){
-					if($item->getId() === Item::SNOWBALL){
+					if($item->getId() === Item::SNOWBALL || $item->getId() === Item::EGG){
 						$yawRad = $this->yaw / 180 * M_PI;
 						$pitchRad = $this->pitch / 180 * M_PI;
 						$nbt = new Compound("", [
