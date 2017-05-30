@@ -5,12 +5,14 @@ namespace pocketmine\inventory\win10;
 use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\Player;
+use pocketmine\inventory\PlayerInventory;
 
 class Win10InvLogic {
 	
 	const HOTBAR_OFFSET = 10;
 	
 	const WINDOW_ID_PLAYER_INVENTORY = 0x00;
+	const WINDOW_ID_PLAYER_OFFHAND = 0x77;				// 119
 	const WINDOW_ID_PLAYER_ARMOR = 0x78;				// 120
 	const WINDOW_ID_HOTBAR = 0x7a;					// 122
 	
@@ -44,6 +46,11 @@ class Win10InvLogic {
 				$invData->dropItemPreprocessing();
 				break;
 			case Info::MOB_EQUIPMENT_PACKET:
+				if ($packet->windowId == self::WINDOW_ID_PLAYER_OFFHAND) {
+					$invData = self::$playersInventoryData[$playerName];
+					$invData->armorInventoryLogic(PlayerInventory::OFFHAND_ARMOR_SLOT_ID, $packet->item);
+					break;
+				}
 				$inventory = $player->getInventory();
 				$inventory->justSetHeldItemIndex($packet->slot);
 				

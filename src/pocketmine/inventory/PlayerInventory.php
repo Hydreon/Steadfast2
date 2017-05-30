@@ -35,6 +35,8 @@ use pocketmine\Player;
 use pocketmine\Server;
 
 class PlayerInventory extends BaseInventory{
+	
+	const OFFHAND_ARMOR_SLOT_ID = 4;
 
 	protected $itemInHandIndex = 0;
 	/** @var int[] */
@@ -49,11 +51,11 @@ class PlayerInventory extends BaseInventory{
 	}
 
 	public function getSize(){
-		return parent::getSize() - 4; //Remove armor slots
+		return parent::getSize() - 5; //Remove armor slots
 	}
 
 	public function setSize($size){
-		parent::setSize($size + 4);
+		parent::setSize($size + 5);
 		$this->sendContents($this->getViewers());
 	}
 	
@@ -317,7 +319,7 @@ class PlayerInventory extends BaseInventory{
 	}
 
 	public function clearAll(){
-		$limit = $this->getSize() + 4;
+		$limit = $this->getSize() + 5;
 		for($index = 0; $index < $limit; ++$index){
 			$this->clear($index);
 		}
@@ -345,11 +347,25 @@ class PlayerInventory extends BaseInventory{
 				$pk2->eid = $this->getHolder()->getId();
 				$pk2->windowid = ContainerSetContentPacket::SPECIAL_ARMOR;
 				$pk2->slots = $armor;
-				$player->dataPacket($pk2);
+				$player->dataPacket($pk2);				
 			}else{
 				$player->dataPacket($pk);
 			}
 		}
+		$this->sendOffHandContents($target);
+	}
+	
+	private function sendOffHandContents($target) {
+		$pk = new MobEquipmentPacket();
+		$pk->eid = $this->getHolder()->getId();
+		$pk->item = $this->getItem($this->getSize() + self::OFFHAND_ARMOR_SLOT_ID);
+		$pk->slot = $this->getHeldItemSlot();
+		$pk->selectedSlot = $this->getHeldItemIndex();
+		$pk->windowId = MobEquipmentPacket::WINDOW_ID_PLAYER_OFFHAND;
+		foreach($target as $player){			
+			$player->dataPacket($pk);
+		}
+		
 	}
 
 	/**
@@ -378,7 +394,12 @@ class PlayerInventory extends BaseInventory{
 		if($target instanceof Player){
 			$target = [$target];
 		}
-
+		
+		if ($index - $this->getSize() == self::OFFHAND_ARMOR_SLOT_ID) {
+			$this->sendOffHandContents($target);
+			return;
+		}
+		
 		$armor = $this->getArmorContents();
 
 		$pk = new MobArmorEquipmentPacket();
@@ -472,4 +493,43 @@ class PlayerInventory extends BaseInventory{
 		return parent::getHolder();
 	}
 	
+	public function removeArrow(...$slots) {
+		/** @var Item[] $itemSlots */
+		/** @var Item[] $slots */
+		$itemSlots = [];
+		foreach ($slots as $slot) {
+			if (!($slot instanceof Item)) {
+				throw new \InvalidArgumentException("Expected Item[], got " . gettype($slot));
+			}
+			if ($slot->getId() !== 0 and $slot->getCount() > 0) {
+				$itemSlots[] = clone $slot;
+			}
+		}
+
+		for ($i = $this->getSize() + 4; $i >= 0; $i--) {
+			$item = $this->getItem($i);
+			if ($item->getId() === Item::AIR or $item->getCount() <= 0) {
+				continue;
+			}
+
+			foreach ($itemSlots as $index => $slot) {
+				if ($slot->equals($item, $slot->getDamage() === null ? false : true, $slot->getCompound() === null ? false : true)) {
+					$amount = min($item->getCount(), $slot->getCount());
+					$slot->setCount($slot->getCount() - $amount);
+					$item->setCount($item->getCount() - $amount);
+					$this->setItem($i, $item);
+					if ($slot->getCount() <= 0) {
+						unset($itemSlots[$index]);
+					}
+				}
+			}
+
+			if (count($itemSlots) === 0) {
+				break;
+			}
+		}
+
+		return $itemSlots;
+	}
+
 }
