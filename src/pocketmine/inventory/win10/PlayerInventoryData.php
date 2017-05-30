@@ -92,7 +92,7 @@ class PlayerInventoryData {
 					return;
 				}
 				$countDiff = $newItem->count - $currentItem->count;
-				if ($this->pickUpItem->equals($newItem) && $countDiff <= $this->pickUpItem->count) {
+				if ($this->pickUpItem !== null && $this->pickUpItem->equals($newItem) && $countDiff <= $this->pickUpItem->count) {
 					// fix for items pick up
 					$inventory->sendContents($this->inventory->getHolder());
 					$this->pickUpItem->count -= $countDiff;
