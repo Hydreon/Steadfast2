@@ -705,6 +705,11 @@ abstract class Entity extends Location implements Metadatable{
 			$source->setCancelled();
 		}
 		
+		$this->server->getPluginManager()->callEvent($source);
+		if($source->isCancelled()){
+			return;
+		}
+		
 		if ($source instanceof EntityDamageByEntityEvent) {
 			$damager = $source->getDamager();
 			if ($damager instanceof Player) {
@@ -717,11 +722,6 @@ abstract class Entity extends Location implements Metadatable{
 					}
 				}
 			}
-		}
-
-		$this->server->getPluginManager()->callEvent($source);
-		if($source->isCancelled()){
-			return;
 		}
 
 		$this->setLastDamageCause($source);
