@@ -30,7 +30,8 @@ class MovePlayerPacket extends PEPacket{
 
 	const MODE_NORMAL = 0;
 	const MODE_RESET = 1;
-	const MODE_ROTATION = 2;
+	const MODE_TELEPORT= 2;
+	const MODE_ROTATION = 3;
 
 	public $eid;
 	public $x;

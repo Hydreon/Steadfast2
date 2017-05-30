@@ -902,6 +902,7 @@ class Item{
 			self::$list[self::DIAMOND] = Diamond::class;
 			self::$list[self::STICK] = Stick::class;
 			self::$list[self::SNOWBALL] = Snowball::class;
+			self::$list[self::EGG] = Egg::class;
 			self::$list[self::BOWL] = Bowl::class;
 			self::$list[self::FEATHER] = Feather::class;
 			self::$list[self::BRICK] = Brick::class;
@@ -1357,7 +1358,6 @@ class Item{
 		self::$food[] = Item::BREAD;
 		self::$food[] = Item::APPLE;
 		self::$food[] = Item::GOLDEN_APPLE;
-		self::$food[] = Item::EGG;
 		self::$food[] = Item::RAW_FISH;
 		self::$food[] = Item::COOKED_FISH;
 		self::$food[] = Item::RAW_PORKCHOP;
