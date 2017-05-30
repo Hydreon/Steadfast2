@@ -40,6 +40,10 @@ interface Info105{
 	const RESOURCE_PACK_STACK_PACKET = 0x08; //ResourcePacksStackPacket
 	const RESOURCE_PACK_CLIENT_RESPONSE_PACKET = 0x09;
 	const RESOURCE_PACKS_STACK_PACKET = 0x08;
+<<<<<<< HEAD
+=======
+	const RESOURCE_PACKS_CLIENT_RESPONSE_PACKET = 0x09;
+>>>>>>> cf92cd37ac4a2d830d8600b5bfa99038693063d2
     const TEXT_PACKET = 0x0a;
     const SET_TIME_PACKET = 0x0b;
     const START_GAME_PACKET = 0x0c;

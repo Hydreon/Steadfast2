@@ -1,5 +1,6 @@
 <?php
 
+<<<<<<< HEAD
 /*
  *
  *  ____            _        _   __  __ _                  __  __ ____
@@ -27,6 +28,14 @@ class ResourcePackClientResponsePacket extends PEPacket{
 	const NETWORK_ID = Info::RESOURCE_PACK_CLIENT_RESPONSE_PACKET;
 	const PACKET_NAME = "RESOURCE_PACK_CLIENT_RESPONSE_PACKET";
 
+=======
+namespace pocketmine\network\protocol;
+
+class ResourcePackClientResponsePacket extends PEPacket {
+
+	const NETWORK_ID = Info::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET;
+	const PACKET_NAME = "RESOURCE_PACKS_CLIENT_RESPONSE_PACKET";
+>>>>>>> cf92cd37ac4a2d830d8600b5bfa99038693063d2
 	const STATUS_REFUSED = 1;
 	const STATUS_SEND_PACKS = 2;
 	const STATUS_HAVE_ALL_PACKS = 3;
@@ -35,14 +44,22 @@ class ResourcePackClientResponsePacket extends PEPacket{
 	public $status;
 	public $packIds = [];
 
+<<<<<<< HEAD
 	public function decode($playerProtocol){
 		$this->status = $this->getByte();
 		$entryCount = $this->getLShort();
 		while($entryCount-- > 0){
+=======
+	public function decode($playerProtocol) {
+		$this->status = $this->getByte();
+		$entryCount = $this->getLShort();
+		while ($entryCount-- > 0) {
+>>>>>>> cf92cd37ac4a2d830d8600b5bfa99038693063d2
 			$this->packIds[] = $this->getString();
 		}
 	}
 
+<<<<<<< HEAD
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putByte($this->status);
@@ -51,4 +68,10 @@ class ResourcePackClientResponsePacket extends PEPacket{
 			$this->putString($id);
 		}
 	}
+=======
+	public function encode($playerProtocol) {
+		
+	}
+
+>>>>>>> cf92cd37ac4a2d830d8600b5bfa99038693063d2
 }

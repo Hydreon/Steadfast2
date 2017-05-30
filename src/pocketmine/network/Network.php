@@ -95,6 +95,7 @@ use pocketmine\network\protocol\ResourcePackChunkRequestPacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
+use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\proxy\PingPacket;
 
 class Network {
@@ -433,6 +434,11 @@ class Network {
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACK_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACKS_INFO_PACKET, ResourcePacksInfoPacket::class);
+<<<<<<< HEAD
+=======
+		$this->registerPacket(ProtocolInfo::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
+
+>>>>>>> cf92cd37ac4a2d830d8600b5bfa99038693063d2
 	}
 	
 	private function registerPackets105(){
@@ -495,6 +501,12 @@ class Network {
 		$this->registerPacket105(ProtocolInfo105::RESOURCE_PACK_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
 		$this->registerPacket105(ProtocolInfo105::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket105(ProtocolInfo105::RESOURCE_PACKS_INFO_PACKET, ResourcePacksInfoPacket::class);
+<<<<<<< HEAD
+=======
+		$this->registerPacket105(ProtocolInfo105::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
+		
+		
+>>>>>>> cf92cd37ac4a2d830d8600b5bfa99038693063d2
 	}
 	
 	
@@ -557,6 +569,11 @@ class Network {
 		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACK_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
 		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACKS_INFO_PACKET, ResourcePacksInfoPacket::class);
+<<<<<<< HEAD
+=======
+		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
+	
+>>>>>>> cf92cd37ac4a2d830d8600b5bfa99038693063d2
 	}
 	
 	private function registerProxyPackets(){
