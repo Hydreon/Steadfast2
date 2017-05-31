@@ -493,43 +493,19 @@ class PlayerInventory extends BaseInventory{
 		return parent::getHolder();
 	}
 	
-	public function removeArrow(...$slots) {
-		/** @var Item[] $itemSlots */
-		/** @var Item[] $slots */
-		$itemSlots = [];
-		foreach ($slots as $slot) {
-			if (!($slot instanceof Item)) {
-				throw new \InvalidArgumentException("Expected Item[], got " . gettype($slot));
-			}
-			if ($slot->getId() !== 0 and $slot->getCount() > 0) {
-				$itemSlots[] = clone $slot;
-			}
-		}
-
-		for ($i = $this->getSize() + 4; $i >= 0; $i--) {
-			$item = $this->getItem($i);
-			if ($item->getId() === Item::AIR or $item->getCount() <= 0) {
-				continue;
-			}
-
-			foreach ($itemSlots as $index => $slot) {
-				if ($slot->equals($item, $slot->getDamage() === null ? false : true, $slot->getCompound() === null ? false : true)) {
-					$amount = min($item->getCount(), $slot->getCount());
-					$slot->setCount($slot->getCount() - $amount);
-					$item->setCount($item->getCount() - $amount);
-					$this->setItem($i, $item);
-					if ($slot->getCount() <= 0) {
-						unset($itemSlots[$index]);
-					}
-				}
-			}
-
-			if (count($itemSlots) === 0) {
-				break;
+	public function removeItemWithCheckOffHand($searchItem) {
+		$offhandSlotId = $this->getSize() + self::OFFHAND_ARMOR_SLOT_ID;
+		$item = $this->getItem($offhandSlotId);
+		if ($item->getId() !== Item::AIR && $item->getCount() > 0) {
+			if ($searchItem->equals($item, $searchItem->getDamage() === null ? false : true, $searchItem->getCompound() === null ? false : true)) {
+				$amount = min($item->getCount(), $searchItem->getCount());
+				$searchItem->setCount($searchItem->getCount() - $amount);
+				$item->setCount($item->getCount() - $amount);
+				$this->setItem($offhandSlotId, $item);
+				return;
 			}
 		}
-
-		return $itemSlots;
+		parent::removeItem($searchItem);
 	}
-
+	
 }
