@@ -33,6 +33,7 @@ use pocketmine\network\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\Player;
 use pocketmine\Server;
+use pocketmine\network\protocol\Info;
 
 class PlayerInventory extends BaseInventory{
 	
@@ -362,8 +363,10 @@ class PlayerInventory extends BaseInventory{
 		$pk->slot = $this->getHeldItemSlot();
 		$pk->selectedSlot = $this->getHeldItemIndex();
 		$pk->windowId = MobEquipmentPacket::WINDOW_ID_PLAYER_OFFHAND;
-		foreach($target as $player){			
-			$player->dataPacket($pk);
+		foreach($target as $player){	
+			if ($player->getPlayerProtocol() >= Info::PROTOCOL_110) {
+				$player->dataPacket($pk);
+			}
 		}
 		
 	}
