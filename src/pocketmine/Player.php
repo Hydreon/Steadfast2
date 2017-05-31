@@ -1868,6 +1868,25 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerMobEqipmentPacket->stopTiming();
 					break;
 				}
+				
+				if ($packet->windowId == Win10InvLogic::WINDOW_ID_PLAYER_OFFHAND) {
+					if ($this->inventoryType == self::INVENTORY_CLASSIC) {
+						Win10InvLogic::packetHandler($packet, $this);
+						break;
+					} else {
+						$slot = PlayerInventory::OFFHAND_ARMOR_SLOT_ID;
+						$currentArmor = $this->inventory->getArmorItem($slot);
+						$slot += $this->inventory->getSize();
+						$transaction = new BaseTransaction($this->inventory, $slot, $currentArmor, $packet->item);
+						$oldItem = $transaction->getSourceItem();
+						$newItem = $transaction->getTargetItem();
+						if ($oldItem->deepEquals($newItem) && $oldItem->getCount() === $newItem->getCount()) {
+							break;
+						}
+						$this->addTransaction($transaction);	
+						break;
+					}
+				}
 
 				if($packet->slot === 0x28 or $packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
 					$packet->slot = -1; //Air
@@ -2160,7 +2179,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								} else {
 									$projectile->setMotion($projectile->getMotion()->multiply($ev->getForce()));
 									if ($this->isSurvival()) {
-										$this->inventory->removeItem(Item::get(Item::ARROW, 0, 1));
+										$this->inventory->removeItemWithCheckOffHand(Item::get(Item::ARROW, 0, 1));
 										$bow->setDamage($bow->getDamage() + 1);
 										if ($bow->getDamage() >= 385) {
 											$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 0));
@@ -2640,7 +2659,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case ProtocolInfo::CONTAINER_CLOSE_PACKET:
 				//Timings::$timerContainerClosePacket->startTiming();
-				if($this->spawned === false or $packet->windowid === 0){
+				if($this->spawned === false or $packet->windowid === 0){					
 					break;
 				}
 				$this->craftingType = self::CRAFTING_DEFAULT;
@@ -2722,7 +2741,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 				
-				$used = array_fill(0, $this->inventory->getSize() + 4, 0);
+				$used = array_fill(0, $this->inventory->getSize() + 5, 0);
 
 				$playerInventoryItems = $this->inventory->getContents();
 				foreach ($ingredients as $ingredient) {
@@ -2792,7 +2811,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				
 				if ($this->inventoryType == self::INVENTORY_CLASSIC) {
-					Win10InvLogic::packetHandler($packet, $this);
+					Win10InvLogic::packetHandler($packet, $this);				
 					break;
 				}
 				

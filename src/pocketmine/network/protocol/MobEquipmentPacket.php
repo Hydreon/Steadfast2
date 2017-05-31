@@ -32,12 +32,16 @@ class MobEquipmentPacket extends PEPacket{
 	public $item;
 	public $slot;
 	public $selectedSlot;
+	public $windowId = 0;
+	
+	const WINDOW_ID_PLAYER_OFFHAND = 0x77;
 
 	public function decode($playerProtocol){		
 		$this->eid = $this->getVarInt();
 		$this->item = $this->getSlot($playerProtocol);
 		$this->slot = $this->getByte();
 		$this->selectedSlot = $this->getByte();
+		$this->windowId = $this->getByte();
 	}
 
 	public function encode($playerProtocol){
@@ -46,6 +50,6 @@ class MobEquipmentPacket extends PEPacket{
 		$this->putSlot($this->item, $playerProtocol);
 		$this->putByte($this->slot);
 		$this->putByte($this->selectedSlot);
-		$this->putByte(0); // mystery
+		$this->putByte($this->windowId);
 	}
 }

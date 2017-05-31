@@ -59,7 +59,7 @@ class PlayerInventoryData {
 			$this->basicInventoryLogic($slot, $newItem, $currentInventory);
 		}
 	}
-	
+
 	protected function basicInventoryLogic($slot, $newItem, $inventory = null) {
 		if ($inventory == null) {
 			$inventory = $this->inventory;
@@ -111,18 +111,34 @@ class PlayerInventoryData {
 //				var_dump('put item to slot');
 				if ($currentItem->getId() == Item::AIR) {
 //					var_dump('put item in empty slot');
-					$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $this->cursor);
-					$this->cursor = null;
+					$diff = $newItem->count;
+					if ($diff > 0) {
+						if ($this->cursor->count == $diff) {
+							$this->cursor = null;
+							$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $newItem);
+						} else if ($this->cursor->count > $diff) {
+							$this->cursor->count -= $diff;
+							$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $newItem);
+						}
+					}
 				} else if ($currentItem->equals($this->cursor)) {
 //					var_dump('add item to existings item');
-					$newItem = clone $this->cursor;
-					$this->cursor = null;
-					$newItem->count += $currentItem->count;
-					$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $newItem);
+					if ($currentItem->equals($newItem)) {
+						$diff = $newItem->count - $currentItem->count;
+						if ($diff > 0) {
+							if ($this->cursor->count == $diff) {
+								$this->cursor = null;
+								$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $newItem);
+							} else if ($this->cursor->count > $diff) {
+								$this->cursor->count -= $diff;
+								$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $newItem);
+							}
+						}
+					} 
 				} else {
 //					var_dump('switch item');
 					$this->transactionDataList[] = new TransactionData($inventory, $slot, $currentItem, $this->cursor);
-					$this->cursor = clone $currentItem;
+					$this->cursor = clone $currentItem;					
 				}
 			}
 			$this->tryExecuteTransactions();
@@ -234,19 +250,19 @@ class PlayerInventoryData {
 	}
 	
 	protected function isTransactionTmp($newItem, $currentItem, $inventory) {
-		var_dump('checking for tmp transaction');
+//		var_dump('checking for tmp transaction');
 		// small bad code for transaction bad order issue
 		$countDiff = $newItem->count - $currentItem->count;
 		$searchItem = Item::get($newItem->getId(), $newItem->getDamage(), $countDiff);
-		var_dump('Search item: ' . $searchItem->getId() . ' ' . $newItem->getDamage() . ' ' . $searchItem->count);
+//		var_dump('Search item: ' . $searchItem->getId() . ' ' . $newItem->getDamage() . ' ' . $searchItem->count);
 		$player = $this->inventory->getHolder();
 		$window = $player->getCurrentWindow();
 		$targetInventory = ($inventory instanceof PlayerInventory && $window != null) ? $window : $this->inventory;
-		var_dump(get_class($targetInventory));
+//		var_dump(get_class($targetInventory));
 		$items = $targetInventory->all($searchItem);
 		foreach ($items as $item) {
 			if ($item->count == $searchItem->count) {
-				var_dump('add tmp transaction');
+//				var_dump('add tmp transaction');
 				return true;
 			}
 		}

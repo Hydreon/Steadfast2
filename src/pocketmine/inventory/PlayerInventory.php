@@ -33,8 +33,11 @@ use pocketmine\network\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\Player;
 use pocketmine\Server;
+use pocketmine\network\protocol\Info;
 
 class PlayerInventory extends BaseInventory{
+	
+	const OFFHAND_ARMOR_SLOT_ID = 4;
 
 	protected $itemInHandIndex = 0;
 	/** @var int[] */
@@ -49,11 +52,11 @@ class PlayerInventory extends BaseInventory{
 	}
 
 	public function getSize(){
-		return parent::getSize() - 4; //Remove armor slots
+		return parent::getSize() - 5; //Remove armor slots
 	}
 
 	public function setSize($size){
-		parent::setSize($size + 4);
+		parent::setSize($size + 5);
 		$this->sendContents($this->getViewers());
 	}
 	
@@ -317,7 +320,7 @@ class PlayerInventory extends BaseInventory{
 	}
 
 	public function clearAll(){
-		$limit = $this->getSize() + 4;
+		$limit = $this->getSize() + 5;
 		for($index = 0; $index < $limit; ++$index){
 			$this->clear($index);
 		}
@@ -345,11 +348,27 @@ class PlayerInventory extends BaseInventory{
 				$pk2->eid = $this->getHolder()->getId();
 				$pk2->windowid = ContainerSetContentPacket::SPECIAL_ARMOR;
 				$pk2->slots = $armor;
-				$player->dataPacket($pk2);
+				$player->dataPacket($pk2);				
 			}else{
 				$player->dataPacket($pk);
 			}
 		}
+		$this->sendOffHandContents($target);
+	}
+	
+	private function sendOffHandContents($target) {
+		$pk = new MobEquipmentPacket();
+		$pk->eid = $this->getHolder()->getId();
+		$pk->item = $this->getItem($this->getSize() + self::OFFHAND_ARMOR_SLOT_ID);
+		$pk->slot = $this->getHeldItemSlot();
+		$pk->selectedSlot = $this->getHeldItemIndex();
+		$pk->windowId = MobEquipmentPacket::WINDOW_ID_PLAYER_OFFHAND;
+		foreach($target as $player){	
+			if ($player->getPlayerProtocol() >= Info::PROTOCOL_110) {
+				$player->dataPacket($pk);
+			}
+		}
+		
 	}
 
 	/**
@@ -378,7 +397,12 @@ class PlayerInventory extends BaseInventory{
 		if($target instanceof Player){
 			$target = [$target];
 		}
-
+		
+		if ($index - $this->getSize() == self::OFFHAND_ARMOR_SLOT_ID) {
+			$this->sendOffHandContents($target);
+			return;
+		}
+		
 		$armor = $this->getArmorContents();
 
 		$pk = new MobArmorEquipmentPacket();
@@ -470,6 +494,21 @@ class PlayerInventory extends BaseInventory{
 	 */
 	public function getHolder(){
 		return parent::getHolder();
+	}
+	
+	public function removeItemWithCheckOffHand($searchItem) {
+		$offhandSlotId = $this->getSize() + self::OFFHAND_ARMOR_SLOT_ID;
+		$item = $this->getItem($offhandSlotId);
+		if ($item->getId() !== Item::AIR && $item->getCount() > 0) {
+			if ($searchItem->equals($item, $searchItem->getDamage() === null ? false : true, $searchItem->getCompound() === null ? false : true)) {
+				$amount = min($item->getCount(), $searchItem->getCount());
+				$searchItem->setCount($searchItem->getCount() - $amount);
+				$item->setCount($item->getCount() - $amount);
+				$this->setItem($offhandSlotId, $item);
+				return;
+			}
+		}
+		parent::removeItem($searchItem);
 	}
 	
 }
