@@ -2249,7 +2249,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 						$this->extinguish();
 						$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
-//						$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, 300);
+						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
 						$this->deadTicks = 0;
 						$this->despawnFromAll();
 						$this->dead = false;
@@ -2264,7 +2264,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->foodUsageTime = 0;
 
 						$this->removeAllEffects();
-						$this->sendData($this);
+						$this->sendSelfData();
 
 						$this->sendSettings();
 						$this->inventory->sendContents($this);
@@ -4238,6 +4238,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($entity !== $this && !$entity->closed && !$entity->dead){
 			$entity->spawnTo($this);
 		}
+	}
+	
+	public function setOnFire($seconds, $damage = 1){
+		if($this->isSpectator()) {
+			return;
+		}
+		parent::setOnFire($seconds, $damage);
 	}
 
 }
