@@ -162,6 +162,7 @@ use pocketmine\item\Elytra;
 use pocketmine\network\protocol\SetTitlePacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
+use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -2343,140 +2344,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 
 			case 'INTERACT_PACKET':
-				//Timings::$timerInteractPacket->startTiming();
-				if($this->spawned === false or $this->dead === true or $this->blocked){
-					//Timings::$timerInteractPacket->stopTiming();
-					break;
+				if ($packet->action === InteractPacket::ACTION_DAMAGE) {
+					$this->attackByTargetId($packet->target);
 				}
-
-//				$this->craftingType = self::CRAFTING_DEFAULT;
-
-				$target = $this->level->getEntity($packet->target);
-
-				$cancelled = false;
-
-				if($target instanceof Player && $this->server->getConfigBoolean("pvp", true) === false){
-					$cancelled = true;
-				}
-				
-				if ($packet->action === InteractPacket::ACTION_DAMAGE && 
-					$target instanceof Entity && !$this->isSpectator() && 
-					$this->dead !== true && $target->dead !== true) {
-					
-					if($target instanceof DroppedItem or $target instanceof Arrow){
-						$this->kick("Attempting to attack an invalid entity");
-						$this->server->getLogger()->warning("Player " . $this->getName() . " tried to attack an invalid entity");
-						//Timings::$timerInteractPacket->stopTiming();
-						return;
-					}
-
-					$item = $this->inventory->getItemInHand();
-					$damageTable = [
-						Item::WOODEN_SWORD => 4,
-						Item::GOLD_SWORD => 4,
-						Item::STONE_SWORD => 5,
-						Item::IRON_SWORD => 6,
-						Item::DIAMOND_SWORD => 7,
-
-						Item::WOODEN_AXE => 3,
-						Item::GOLD_AXE => 3,
-						Item::STONE_AXE => 3,
-						Item::IRON_AXE => 5,
-						Item::DIAMOND_AXE => 6,
-
-						Item::WOODEN_PICKAXE => 2,
-						Item::GOLD_PICKAXE => 2,
-						Item::STONE_PICKAXE => 3,
-						Item::IRON_PICKAXE => 4,
-						Item::DIAMOND_PICKAXE => 5,
-
-						Item::WOODEN_SHOVEL => 1,
-						Item::GOLD_SHOVEL => 1,
-						Item::STONE_SHOVEL => 2,
-						Item::IRON_SHOVEL => 3,
-						Item::DIAMOND_SHOVEL => 4,
-					];
-
-					$damage = [
-						EntityDamageEvent::MODIFIER_BASE => isset($damageTable[$item->getId()]) ? $damageTable[$item->getId()] : 1,
-					];
-
-					if($this->distance($target) > 8){
-						$cancelled = true;
-					}elseif($target instanceof Player){
-						if(($target->getGamemode() & 0x01) > 0){
-							//Timings::$timerInteractPacket->stopTiming();
-							break;
-						}elseif($this->server->getConfigBoolean("pvp") !== true or $this->server->getDifficulty() === 0){
-							$cancelled = true;
-						}
-
-						$armorValues = [
-							Item::LEATHER_CAP => 1,
-							Item::LEATHER_TUNIC => 3,
-							Item::LEATHER_PANTS => 2,
-							Item::LEATHER_BOOTS => 1,
-							Item::CHAIN_HELMET => 1,
-							Item::CHAIN_CHESTPLATE => 5,
-							Item::CHAIN_LEGGINGS => 4,
-							Item::CHAIN_BOOTS => 1,
-							Item::GOLD_HELMET => 1,
-							Item::GOLD_CHESTPLATE => 5,
-							Item::GOLD_LEGGINGS => 3,
-							Item::GOLD_BOOTS => 1,
-							Item::IRON_HELMET => 2,
-							Item::IRON_CHESTPLATE => 6,
-							Item::IRON_LEGGINGS => 5,
-							Item::IRON_BOOTS => 2,
-							Item::DIAMOND_HELMET => 3,
-							Item::DIAMOND_CHESTPLATE => 8,
-							Item::DIAMOND_LEGGINGS => 6,
-							Item::DIAMOND_BOOTS => 3,
-						];
-						$points = 0;
-						foreach($target->getInventory()->getArmorContents() as $index => $i){
-							if(isset($armorValues[$i->getId()])){
-								$points += $armorValues[$i->getId()];
-							}
-						}
-
-						$damage[EntityDamageEvent::MODIFIER_ARMOR] = -floor($damage[EntityDamageEvent::MODIFIER_BASE] * $points * 0.04);
-					}
-					
-					$timeDiff = microtime(true) - $this->lastDamegeTime;					
-					$this->lastDamegeTime = microtime(true);
-					
-					foreach (self::$damegeTimeList as $time => $koef) {
-						if ($timeDiff <= $time) {							
-							$damage[EntityDamageEvent::MODIFIER_BASE] *= $koef;
-							break;
-						}
-					}
-					$ev = new EntityDamageByEntityEvent($this, $target, EntityDamageEvent::CAUSE_ENTITY_ATTACK, $damage);
-					if($cancelled){
-						$ev->setCancelled();
-					}
-
-					$target->attack($ev->getFinalDamage(), $ev);
-
-					if($ev->isCancelled()){
-						if($item->isTool() and $this->isSurvival()){
-							$this->inventory->sendContents($this);
-						}
-						//Timings::$timerInteractPacket->stopTiming();
-						break;
-					}
-
-					if($item->isTool() and $this->isSurvival()){
-						if($item->useOn($target) and $item->getDamage() >= $item->getMaxDurability()){
-							$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 1), $this);
-						} elseif ($this->inventory->getItemInHand()->getId() == $item->getId()) {
-							$this->inventory->setItemInHand($item, $this);
-						}
-					}
-				}
-
-				//Timings::$timerInteractPacket->stopTiming();
 				break;
 			case 'ANIMATE_PACKET':
 				//Timings::$timerAnimatePacket->startTiming();
@@ -2935,6 +2805,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					default:
 						return false;
+				}
+				break;
+			case 'INVENTORY_TRANSACTION_PACKET':
+				//TODO 120
+				switch($packet->transactionType) {
+					case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_USE_ON_ENTITY:
+						if ($packet->actionType == InventoryTransactionPacket::ITEM_USE_ON_ENTITY_ACTION_ATTACK) {
+							$this->attackByTargetId($packet->entityId);
+						}
+						break;
 				}
 				break;
 			default:
@@ -4203,4 +4083,115 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
  		parent::setOnFire($seconds, $damage);
  	}
 	
+	 public function attackByTargetId($targetId) {
+		if ($this->spawned === false || $this->dead === true || $this->blocked) {
+			return;
+		}
+
+		$target = $this->level->getEntity($targetId);
+		if ($target instanceof Player && ($this->server->getConfigBoolean("pvp", true) === false || ($target->getGamemode() & 0x01) > 0)) {
+			return;
+		}
+
+		if (!($target instanceof Entity) || $this->isSpectator() || $target->dead === true) {
+			return;
+		}
+
+		if ($target instanceof DroppedItem || $target instanceof Arrow) {
+			$this->kick("Attempting to attack an invalid entity");
+			$this->server->getLogger()->warning("Player " . $this->getName() . " tried to attack an invalid entity");
+			return;
+		}
+
+		$item = $this->inventory->getItemInHand();
+		$damageTable = [
+			Item::WOODEN_SWORD => 4,
+			Item::GOLD_SWORD => 4,
+			Item::STONE_SWORD => 5,
+			Item::IRON_SWORD => 6,
+			Item::DIAMOND_SWORD => 7,
+			Item::WOODEN_AXE => 3,
+			Item::GOLD_AXE => 3,
+			Item::STONE_AXE => 3,
+			Item::IRON_AXE => 5,
+			Item::DIAMOND_AXE => 6,
+			Item::WOODEN_PICKAXE => 2,
+			Item::GOLD_PICKAXE => 2,
+			Item::STONE_PICKAXE => 3,
+			Item::IRON_PICKAXE => 4,
+			Item::DIAMOND_PICKAXE => 5,
+			Item::WOODEN_SHOVEL => 1,
+			Item::GOLD_SHOVEL => 1,
+			Item::STONE_SHOVEL => 2,
+			Item::IRON_SHOVEL => 3,
+			Item::DIAMOND_SHOVEL => 4,
+		];
+
+		$damage = [
+			EntityDamageEvent::MODIFIER_BASE => isset($damageTable[$item->getId()]) ? $damageTable[$item->getId()] : 1,
+		];
+
+		if ($this->distance($target) > 8) {
+			return;
+		} elseif ($target instanceof Player) {
+			$armorValues = [
+				Item::LEATHER_CAP => 1,
+				Item::LEATHER_TUNIC => 3,
+				Item::LEATHER_PANTS => 2,
+				Item::LEATHER_BOOTS => 1,
+				Item::CHAIN_HELMET => 1,
+				Item::CHAIN_CHESTPLATE => 5,
+				Item::CHAIN_LEGGINGS => 4,
+				Item::CHAIN_BOOTS => 1,
+				Item::GOLD_HELMET => 1,
+				Item::GOLD_CHESTPLATE => 5,
+				Item::GOLD_LEGGINGS => 3,
+				Item::GOLD_BOOTS => 1,
+				Item::IRON_HELMET => 2,
+				Item::IRON_CHESTPLATE => 6,
+				Item::IRON_LEGGINGS => 5,
+				Item::IRON_BOOTS => 2,
+				Item::DIAMOND_HELMET => 3,
+				Item::DIAMOND_CHESTPLATE => 8,
+				Item::DIAMOND_LEGGINGS => 6,
+				Item::DIAMOND_BOOTS => 3,
+			];
+			$points = 0;
+			foreach ($target->getInventory()->getArmorContents() as $index => $i) {
+				if (isset($armorValues[$i->getId()])) {
+					$points += $armorValues[$i->getId()];
+				}
+			}
+
+			$damage[EntityDamageEvent::MODIFIER_ARMOR] = -floor($damage[EntityDamageEvent::MODIFIER_BASE] * $points * 0.04);
+		}
+
+		$timeDiff = microtime(true) - $this->lastDamegeTime;
+		$this->lastDamegeTime = microtime(true);
+
+		foreach (self::$damegeTimeList as $time => $koef) {
+			if ($timeDiff <= $time) {
+				$damage[EntityDamageEvent::MODIFIER_BASE] *= $koef;
+				break;
+			}
+		}
+		$ev = new EntityDamageByEntityEvent($this, $target, EntityDamageEvent::CAUSE_ENTITY_ATTACK, $damage);
+		$target->attack($ev->getFinalDamage(), $ev);
+
+		if ($ev->isCancelled()) {
+			if ($item->isTool() && $this->isSurvival()) {
+				$this->inventory->sendContents($this);
+			}
+			return;
+		}
+
+		if ($item->isTool() && $this->isSurvival()) {
+			if ($item->useOn($target) && $item->getDamage() >= $item->getMaxDurability()) {
+				$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 1), $this);
+			} elseif ($this->inventory->getItemInHand()->getId() == $item->getId()) {
+				$this->inventory->setItemInHand($item, $this);
+			}
+		}
+	}
+
 }
