@@ -4242,10 +4242,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function setOnFire($seconds, $damage = 1){
-		if($this->isSpectator()) {
-			return;
-		}
-		parent::setOnFire($seconds, $damage);
-	}
+ 		if($this->isSpectator()) {
+ 			return;
+ 		}
+ 		parent::setOnFire($seconds, $damage);
+ 	}
 
 }
