@@ -26,8 +26,7 @@ class MetadataConvertor {
 	];
 	private static $entityFlags110 = [];
 	private static $diffEntityMetaIds110 = [
-//		'DATA_EXPLODE_TIMER' => 57,
-//		'DATA_SEAT_RIDER_OFFSET' => 58,
+		'DATA_MAX_AIR' => 43,
 	];
 	private static $entityMetaIds110 = [];
 

@@ -46,6 +46,10 @@ abstract class DataPacket extends BinaryStream{
 		return $this::NETWORK_ID;
 	}
 	
+	public function pname(){
+		return $this::PACKET_NAME;
+	}
+	
 	/**
 	 * @deprecated This adds extra overhead on the network, so its usage is now discouraged. It was a test for the viability of this.
 	 */
