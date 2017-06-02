@@ -621,7 +621,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				self::$availableCommands = array_merge(self::$availableCommands, $pluginCommands);
 			}
 		}
-		$this->inventory = new PlayerInventory($this);
 		$this->setViewRadius(2);
 	}
 	
@@ -795,7 +794,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->sendSettings();
 			$this->sendPotionEffects($this);
-			$this->sendData($this);			
+			$this->sendData($this);
 			$this->inventory->sendContents($this);
 			$this->inventory->sendArmorContents($this);
 
@@ -918,7 +917,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			'pocketmine\network\protocol\RemoveBlockPacket',
 			'pocketmine\network\protocol\UseItemPacket',
 		];
-		if (in_array(get_class($packet), $disallowedPackets)) {			
+		if (in_array(get_class($packet), $disallowedPackets)) {
 			return;
 		}
 		
@@ -3546,7 +3545,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return true;
 	}
 	
-	public function processLogin() {			
+	public function processLogin() {
 		if (!($this->interface instanceof ProxyInterface)) {
 			$pk = new PlayStatusPacket();
 			$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
@@ -4203,5 +4202,5 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
  		}
  		parent::setOnFire($seconds, $damage);
  	}
-
+	
 }

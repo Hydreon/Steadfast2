@@ -15,6 +15,7 @@ class PlayerHotbarPacket extends PEPacket {
 	
 	public function decode($playerProtocol) {
 		var_dump(__CLASS__);
+		var_dump(bin2hex($this->buffer));
 	}
 
 	public function encode($playerProtocol) {
