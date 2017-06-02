@@ -1779,11 +1779,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " UPDATE_ATTRIBUTES_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
                 break;
             case ProtocolInfo::ADVENTURE_SETTINGS_PACKET:
-                $isHacker = ($this->allowFlight === false && ($packet->flags >> 9) & 0x01 === 1) || 
-                    (!$this->isSpectator() && ($packet->flags >> 7) & 0x01 === 1);
-                if ($isHacker) {
-                    file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " ADVENTURE_SETTINGS_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
-                    $this->kick("Sorry, hack mods are not permitted on Steadfast... at all.");
+		switch ($packet->flags) { 
+                    case 614: 
+                        if(!$this->isCreative() and !$this->isSpectator() and !$this->isOp() and !$this->getAllowFlight()){
+                            $this->kick("HACK Fly");
+                        }
+                        break;
+                    case 102: 
+                        if(!$this->isCreative() and !$this->isSpectator() and !$this->isOp() and !$this->getAllowFlight()){
+                            $this->kick("HACK Fly");
+                        }
+                        break;
+                    default:
+                        break;
                 }
                 break;
 			case ProtocolInfo::LOGIN_PACKET:
