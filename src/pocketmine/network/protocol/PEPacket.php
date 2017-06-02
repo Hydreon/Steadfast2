@@ -13,6 +13,10 @@ abstract class PEPacket extends DataPacket {
 	public function reset($playerProtocol = 0) {
 		$this->buffer = chr(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);
 		$this->offset = 0;
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->buffer .= "\x00\x00";
+			$this->offset = 2;
+		}
 	}
 
 }

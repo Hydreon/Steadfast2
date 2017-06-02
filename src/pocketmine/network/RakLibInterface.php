@@ -268,7 +268,11 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		if (($data = $this->network->getPacket($pid, $playerProtocol)) === null) {
 			return null;
 		}
-		$data->setBuffer($buffer, 1);
+		$offset = 1;
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$offset = 3;
+		}
+		$data->setBuffer($buffer, $offset);
 		return $data;
 	}
 

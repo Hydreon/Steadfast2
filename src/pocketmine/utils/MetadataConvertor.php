@@ -56,6 +56,7 @@ class MetadataConvertor {
 
 	private static function updateMetaIds($meta, $protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_120:
 			case Info::PROTOCOL_110:
 				$newMeta = [];
 				foreach ($meta as $key => $value) {
@@ -73,6 +74,7 @@ class MetadataConvertor {
 
 	private static function updateEntityFlags($meta, $protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_120:
 			case Info::PROTOCOL_110:
 				if (isset($meta[Entity::DATA_FLAGS])) {
 					$newflags = 1 << 19; //DATA_FLAG_CAN_CLIMBING

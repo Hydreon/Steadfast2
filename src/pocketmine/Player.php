@@ -907,21 +907,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 		
-//		$allowedPackets = [
-//			'pocketmine\network\protocol\BatchPacket',
-//			'pocketmine\network\protocol\PlayStatusPacket',
-//			'pocketmine\network\protocol\StartGamePacket',
-////			'pocketmine\network\protocol\MovePlayerPacket',
-////			'pocketmine\network\protocol\SetEntityMotionPacket',
-////			'pocketmine\network\protocol\PlayerActionPacket',
-////			'pocketmine\network\protocol\AnimatePacket',
-////			'pocketmine\network\protocol\SetSpawnPositionPacket',
-////			'pocketmine\network\protocol\ChunkRadiusUpdatePacket',
-//		];
-//		if (!in_array(get_class($packet), $allowedPackets)) {
-////			var_dump(get_class($packet));
-//			return;
-//		}
+//		TODO 120
+		$disallowedPackets = [
+			'pocketmine\network\protocol\AddItemPacket',
+			'pocketmine\network\protocol\ContainerSetContentPacket',
+			'pocketmine\network\protocol\ContainerSetSlotpacket',
+			'pocketmine\network\protocol\DropItemPacket',
+			'pocketmine\network\protocol\InventoryActionPacket',
+			'pocketmine\network\protocol\ReplaceSelectedItemPacket',
+			'pocketmine\network\protocol\RemoveBlockPacket',
+			'pocketmine\network\protocol\UseItemPacket',
+			
+			'pocketmine\network\protocol\SetEntityDataPacket',
+			'pocketmine\network\protocol\AvailableCommandsPacket'
+		];
+		if (in_array(get_class($packet), $disallowedPackets)) {			
+			return;
+		}
 		
 		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
 		if($ev->isCancelled()){
@@ -4083,6 +4085,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public function getPlayerProtocol() {
 		switch ($this->protocol) {
+			case ProtocolInfo::PROTOCOL_120:
+				return ProtocolInfo::PROTOCOL_120;
 			case ProtocolInfo::PROTOCOL_110:
 			case ProtocolInfo::PROTOCOL_111:
 			case ProtocolInfo::PROTOCOL_112:

@@ -2348,8 +2348,8 @@ class Server{
 			$pk->isEncoded = true;
 			$this->craftList[$p->getPlayerProtocol()] = $pk;
 		}
-		
-		$this->batchPackets([$p], [$this->craftList[$p->getPlayerProtocol()]]);
+//		TODO 120
+//		$this->batchPackets([$p], [$this->craftList[$p->getPlayerProtocol()]]);
 	}
 
 	public function addPlayer($identifier, Player $player){
