@@ -917,9 +917,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			'pocketmine\network\protocol\ReplaceSelectedItemPacket',
 			'pocketmine\network\protocol\RemoveBlockPacket',
 			'pocketmine\network\protocol\UseItemPacket',
-			
-			'pocketmine\network\protocol\SetEntityDataPacket',
-			'pocketmine\network\protocol\AvailableCommandsPacket'
 		];
 		if (in_array(get_class($packet), $disallowedPackets)) {			
 			return;
