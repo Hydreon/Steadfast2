@@ -2675,7 +2675,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 
 //				foreach($packet->input as $i => $item){
-//					if($item->getDamage() === -1 or $item->getDamage() === 0xffff){
+//					if($item->getDamage() === -1 or $item->getDamage() === 32767){
 //						$item->setDamage(null);
 //					}
 //
@@ -2713,7 +2713,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				foreach ($ingredients as $ingredient) {
 					$slot = -1;
 					foreach ($playerInventoryItems as $index => $i) {
-						if ($ingredient->getId() !== Item::AIR && $ingredient->deepEquals($i, (!is_null($ingredient->getDamage()) && $ingredient->getDamage() != 0xffff), false) && ($i->getCount() - $used[$index]) >= 1) {
+						if ($ingredient->getId() !== Item::AIR && $ingredient->deepEquals($i, (!is_null($ingredient->getDamage()) && $ingredient->getDamage() != 32767), false) && ($i->getCount() - $used[$index]) >= 1) {
 							$slot = $index;
 							$used[$index]++;
 							break;
