@@ -1752,7 +1752,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 
-		if($packet->pid() === ProtocolInfo::BATCH_PACKET){
+		if($packet->pname() === 'BATCH_PACKET'){
 			/** @var BatchPacket $packet */
 			//Timings::$timerBatchPacket->startTiming();
 			$this->server->getNetwork()->processBatch($packet, $this);
@@ -1765,19 +1765,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //			return;
 //		}
 
-		$beforeLoginAvailablePackets = [ProtocolInfo::LOGIN_PACKET, ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET, ProtocolInfo::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET];
-		if (!$this->isOnline() && !in_array($packet->pid(), $beforeLoginAvailablePackets)) {
+		$beforeLoginAvailablePackets = ['LOGIN_PACKET', 'REQUEST_CHUNK_RADIUS_PACKET', 'RESOURCE_PACKS_CLIENT_RESPONSE_PACKET'];
+		if (!$this->isOnline() && !in_array($packet->pname(), $beforeLoginAvailablePackets)) {
 			return;
 		}
 		
-		switch($packet->pid()){
-            case ProtocolInfo::SET_PLAYER_GAMETYPE_PACKET:
+		switch($packet->pname()){
+            case 'SET_PLAYER_GAMETYPE_PACKET':
                 file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " SET_PLAYER_GAMETYPE_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
                 break;
-            case ProtocolInfo::UPDATE_ATTRIBUTES_PACKET:
+            case 'UPDATE_ATTRIBUTES_PACKET':
                 file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " UPDATE_ATTRIBUTES_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
                 break;
-            case ProtocolInfo::ADVENTURE_SETTINGS_PACKET:
+            case 'ADVENTURE_SETTINGS_PACKET':
                 $isHacker = ($this->allowFlight === false && ($packet->flags >> 9) & 0x01 === 1) || 
                     (!$this->isSpectator() && ($packet->flags >> 7) & 0x01 === 1);
                 if ($isHacker) {
@@ -1785,7 +1785,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                     $this->kick("Sorry, hack mods are not permitted on Steadfast... at all.");
                 }
                 break;
-			case ProtocolInfo::LOGIN_PACKET:
+			case 'LOGIN_PACKET':
 				//Timings::$timerLoginPacket->startTiming();
 				if($this->loggedIn === true){
 					//Timings::$timerLoginPacket->stopTiming();
@@ -1826,7 +1826,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->processLogin();
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
-			case ProtocolInfo::MOVE_PLAYER_PACKET:
+			case 'MOVE_PLAYER_PACKET':
 				//Timings::$timerMovePacket->startTiming();
 				$revert = false;
 				if ($this->dead === true || $this->spawned !== true) {
@@ -1855,7 +1855,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				//Timings::$timerMovePacket->stopTiming();
 				break;
-			case ProtocolInfo::MOB_EQUIPMENT_PACKET:
+			case 'MOB_EQUIPMENT_PACKET':
 				//Timings::$timerMobEqipmentPacket->startTiming();
 				if($this->spawned === false or $this->dead === true){
 					//Timings::$timerMobEqipmentPacket->stopTiming();
@@ -1937,7 +1937,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 				//Timings::$timerMobEqipmentPacket->stopTiming();
 				break;
-			case ProtocolInfo::USE_ITEM_PACKET:
+			case 'USE_ITEM_PACKET':
 				//Timings::$timerUseItemPacket->startTiming();
 				if($this->spawned === false or $this->dead === true or $this->blocked){
 					//Timings::$timerUseItemPacket->stopTiming();
@@ -2070,7 +2070,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				//Timings::$timerUseItemPacket->stopTiming();
 				break;
-			case ProtocolInfo::PLAYER_ACTION_PACKET:
+			case 'PLAYER_ACTION_PACKET':
 				//Timings::$timerActionPacket->startTiming();
 				if($this->spawned === false or $this->blocked === true or ($this->dead === true and $packet->action !== 7)){
 					//Timings::$timerActionPacket->stopTiming();
@@ -2296,7 +2296,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 				//Timings::$timerActionPacket->stopTiming();
 				break;
-			case ProtocolInfo::REMOVE_BLOCK_PACKET:
+			case 'REMOVE_BLOCK_PACKET':
 				//Timings::$timerRemoveBlockPacket->startTiming();
 				if($this->spawned === false or $this->blocked === true or $this->dead === true){
 					//Timings::$timerRemoveBlockPacket->stopTiming();
@@ -2340,10 +2340,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerRemoveBlockPacket->stopTiming();
 				break;
 
-			case ProtocolInfo::MOB_ARMOR_EQUIPMENT_PACKET:
+			case 'MOB_ARMOR_EQUIPMENT_PACKET':
 				break;
 
-			case ProtocolInfo::INTERACT_PACKET:
+			case 'INTERACT_PACKET':
 				//Timings::$timerInteractPacket->startTiming();
 				if($this->spawned === false or $this->dead === true or $this->blocked){
 					//Timings::$timerInteractPacket->stopTiming();
@@ -2479,7 +2479,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				//Timings::$timerInteractPacket->stopTiming();
 				break;
-			case ProtocolInfo::ANIMATE_PACKET:
+			case 'ANIMATE_PACKET':
 				//Timings::$timerAnimatePacket->startTiming();
 				if($this->spawned === false or $this->dead === true){
 					//Timings::$timerAnimatePacket->stopTiming();
@@ -2498,9 +2498,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				Server::broadcastPacket($this->getViewers(), $pk);
 				//Timings::$timerAnimatePacket->stopTiming();
 				break;
-			case ProtocolInfo::SET_HEALTH_PACKET: //Not used
+			case 'SET_HEALTH_PACKET': //Not used
 				break;
-			case ProtocolInfo::ENTITY_EVENT_PACKET:
+			case 'ENTITY_EVENT_PACKET':
 				//Timings::$timerEntityEventPacket->startTiming();
 				if($this->spawned === false or $this->blocked === true or $this->dead === true){
 					//Timings::$timerEntityEventPacket->stopTiming();
@@ -2546,7 +2546,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				//Timings::$timerEntityEventPacket->stopTiming();
 				break;
-			case ProtocolInfo::DROP_ITEM_PACKET:
+			case 'DROP_ITEM_PACKET':
 				//Timings::$timerDropItemPacket->startTiming();
 				if($this->spawned === false or $this->blocked === true or $this->dead === true){
 					//Timings::$timerDropItemPacket->stopTiming();
@@ -2589,7 +2589,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->inventory->sendContents($this);
 				//Timings::$timerDropItemPacket->stopTiming();
 				break;
-			case ProtocolInfo::TEXT_PACKET:
+			case 'TEXT_PACKET':
 				//Timings::$timerTextPacket->startTiming();
 				if($this->spawned === false or $this->dead === true){
 					//Timings::$timerTextPacket->stopTiming();
@@ -2624,7 +2624,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				//Timings::$timerTextPacket->stopTiming();
 				break;
-			case ProtocolInfo::CONTAINER_CLOSE_PACKET:
+			case 'CONTAINER_CLOSE_PACKET':
 				//Timings::$timerContainerClosePacket->startTiming();
 				if($this->spawned === false or $packet->windowid === 0){
 					break;
@@ -2638,7 +2638,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				//Timings::$timerContainerClosePacket->stopTiming();
 				break;
-			case ProtocolInfo::CRAFTING_EVENT_PACKET:
+			case 'CRAFTING_EVENT_PACKET':
 				//Timings::$timerCraftingEventPacket->startTiming();
 				if ($this->spawned === false or $this->dead) {
 					//Timings::$timerCraftingEventPacket->stopTiming();
@@ -2769,7 +2769,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerCraftingEventPacket->stopTiming();
 				break;
 
-			case ProtocolInfo::CONTAINER_SET_SLOT_PACKET:
+			case 'CONTAINER_SET_SLOT_PACKET':
 				//Timings::$timerConteinerSetSlotPacket->startTiming();
 				$isPlayerNotNormal = $this->spawned === false || $this->blocked === true || !$this->isAlive();
 				if ($isPlayerNotNormal || $packet->slot < 0) {
@@ -2822,7 +2822,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				//Timings::$timerConteinerSetSlotPacket->stopTiming();
 				break;
-			case ProtocolInfo::TILE_ENTITY_DATA_PACKET:
+			case 'TILE_ENTITY_DATA_PACKET':
 				//Timings::$timerTileEntityPacket->startTiming();
 				if($this->spawned === false or $this->blocked === true or $this->dead === true){
 					//Timings::$timerTileEntityPacket->stopTiming();
@@ -2863,7 +2863,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				//Timings::$timerTileEntityPacket->stopTiming();
 				break;
-			case ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET:
+			case 'REQUEST_CHUNK_RADIUS_PACKET':
 				//Timings::$timerChunkRudiusPacket->startTiming();
 				if ($packet->radius > 20) {
 					$packet->radius = 20;
@@ -2879,7 +2879,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->scheduleUpdate();
 				//Timings::$timerChunkRudiusPacket->stopTiming();
 				break;
-			case ProtocolInfo::COMMAND_STEP_PACKET:
+			case 'COMMAND_STEP_PACKET':
 				$commandName = $packet->name;
 				$commandOverload = $packet->overload;
 				$commandParams = json_decode($packet->outputFormat, true);
@@ -2923,7 +2923,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$ev = new PlayerCommandPostprocessEvent($this, $commandLine);
 				$this->server->getPluginManager()->callEvent($ev);
 				break;
-			case ProtocolInfo::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET:
+			case 'RESOURCE_PACKS_CLIENT_RESPONSE_PACKET':
 				switch ($packet->status) {
 					case ResourcePackClientResponsePacket::STATUS_REFUSED:
 					case ResourcePackClientResponsePacket::STATUS_SEND_PACKS:
