@@ -25,8 +25,6 @@ namespace pocketmine\item;
 class StoneSword extends Tool{
 	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::STONE_SWORD, $meta, $count, "Stone Sword");
-        $this->type = Tool::TYPE_SWORD;
-        $this->tier = Tool::TIER_STONE;
 	}
 
 	public function isSword(){

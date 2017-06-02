@@ -25,8 +25,6 @@ namespace pocketmine\item;
 class DiamondPickaxe extends Tool{
 	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::DIAMOND_PICKAXE, $meta, $count, "Diamond Pickaxe");
-        $this->type = Tool::TYPE_PICKAXE;
-        $this->tier = Tool::TIER_DIAMOND;
 	}
 
 	public function isPickaxe(){

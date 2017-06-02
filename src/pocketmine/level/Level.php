@@ -404,10 +404,9 @@ class Level implements ChunkManager, Metadatable{
 	public function addSound(Sound $sound, array $players = null){
 		$pk = $sound->encode();
 
-        if($players === null){
-            //	$players = $this->getUsingChunk($particle->x >> 4, $particle->z >> 4);
-            $players = [];
-        }
+		if($players === null){
+			$players = $this->getUsingChunk($sound->x >> 4, $sound->z >> 4);
+		}
 
 		if($pk !== null){
 			if(!is_array($pk)){
@@ -424,8 +423,7 @@ class Level implements ChunkManager, Metadatable{
 		$pk = $particle->encode();
 
 		if($players === null){
-		//	$players = $this->getUsingChunk($particle->x >> 4, $particle->z >> 4);
-            $players = $this->players;
+			$players = $this->getUsingChunk($particle->x >> 4, $particle->z >> 4);
 		}
 
 		if($pk !== null){
@@ -502,10 +500,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return Player[]
 	 */
 	public function getUsingChunk($X, $Z){
-
-
-	    return isset($this->usedChunks[$index = PHP_INT_SIZE === 8 ? ((($X) & 0xFFFFFFFF) << 32) | (( $Z) & 0xFFFFFFFF) : ($X) . ":" . ( $Z)]) ? $this->usedChunks[$index] : [];
-
+		return isset($this->usedChunks[$index = self::chunkHash($X, $Z)]) ? $this->usedChunks[$index] : [];
 	}
 
 	/**
@@ -1154,7 +1149,7 @@ class Level implements ChunkManager, Metadatable{
 		$newLevel = (int) Block::$light[$this->getChunk($x >> 4,  $z >> 4, true)->getBlockId($x & 0x0f,  $y & 0x7f,  $z & 0x0f)];
 
 		if($oldLevel !== $newLevel){
-			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f,  15);
+			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f,  $newLevel & 0x0f);
 
 			if($newLevel < $oldLevel){
 				$removalVisited[self::blockHash($x, $y, $z)] = true;
@@ -1220,7 +1215,7 @@ class Level implements ChunkManager, Metadatable{
 		$current = $this->getChunk($x >> 4,  $z >> 4, true)->getBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f);
 
 		if($current < $currentLight){
-			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f,  15);
+			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f,  $currentLight & 0x0f);
 
 			if(!isset($visited[$index = self::blockHash($x, $y, $z)])){
 				$visited[$index] = true;
@@ -1385,9 +1380,9 @@ class Level implements ChunkManager, Metadatable{
 			}
 			
 			$breakTime = $player->isCreative() ? 0.15 : $target->getBreakTime($item);
-			$delta = 0.5;
+			$delta = 0.1;
 
-			if (!$ev->getInstaBreak() && ($player->lastBreak + $breakTime) >= (microtime(true) - $delta)) {
+			if (!$ev->getInstaBreak() && ($player->lastBreak + $breakTime) >= microtime(true) - $delta) {
 				return false;
 			}
 			
@@ -1842,7 +1837,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @param int $level 0-15
 	 */
 	public function setBlockLightAt($x, $y, $z, $level){
-		$this->getChunk($x >> 4, $z >> 4, true)->setBlockLight($x & 0x0f, $y & 0x7f, $z & 0x0f, 15);
+		$this->getChunk($x >> 4, $z >> 4, true)->setBlockLight($x & 0x0f, $y & 0x7f, $z & 0x0f, $level & 0x0f);
 	}
 
 	/**

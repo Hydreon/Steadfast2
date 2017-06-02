@@ -28,7 +28,5 @@ class GoldHelmet extends Armor{
 	
 	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::GOLD_HELMET, $meta, $count, "Gold Helmet");
-        $this->type = Armor::TYPE_HELMET;
-        $this->tier = Armor::TIER_GOLD;
 	}
 }

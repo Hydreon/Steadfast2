@@ -25,8 +25,6 @@ namespace pocketmine\item;
 class DiamondHoe extends Tool{
 	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::DIAMOND_HOE, $meta, $count, "Diamond Hoe");
-        $this->type = Tool::TYPE_HOE;
-        $this->tier = Tool::TIER_DIAMOND;
 	}
 
 	public function isHoe(){

@@ -26,7 +26,6 @@ use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 
 abstract class Tool extends Item{
-    const TIER_NONE = 0;
 	const TIER_WOODEN = 1;
 	const TIER_GOLD = 2;
 	const TIER_STONE = 3;
@@ -39,22 +38,10 @@ abstract class Tool extends Item{
 	const TYPE_PICKAXE = 3;
 	const TYPE_AXE = 4;
 	const TYPE_SHEARS = 5;
-    const TYPE_HOE = 6;
-    
-    protected $type = Tool::TYPE_NONE;
-    protected $tier = Tool::TIER_NONE;
 
 	public function __construct($id, $meta = 0, $count = 1, $name = "Unknown"){
 		parent::__construct($id, $meta, $count, $name);
 	}
-    
-    public function getType () {
-        return $this->type;
-    }
-    
-    public function getTier () {
-        return $this->tier;
-    }
 
 	public function getMaxStackSize(){
 		return 1;

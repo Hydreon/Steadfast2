@@ -30,8 +30,6 @@ use pocketmine\Player;
 class FlintSteel extends Tool{
 	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::FLINT_STEEL, $meta, $count, "Flint and Steel");
-        $this->type = Tool::TYPE_NONE;
-        $this->tier = Tool::TIER_NONE;
 	}
 
 	public function canBeActivated(){

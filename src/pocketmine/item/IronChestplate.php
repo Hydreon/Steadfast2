@@ -28,7 +28,5 @@ class IronChestplate extends Armor{
 	
 	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::IRON_CHESTPLATE, $meta, $count, "Iron Chestplate");
-        $this->type = Armor::TYPE_CHESTPLATE;
-        $this->tier = Armor::TIER_IRON;
 	}
 }

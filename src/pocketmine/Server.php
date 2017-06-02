@@ -143,7 +143,6 @@ use pocketmine\entity\monster\walking\ZombieVillager;
 use pocketmine\entity\projectile\FireBall;
 use pocketmine\network\ProxyInterface;
 use pocketmine\utils\MetadataConvertor;
-use pocketmine\resourcepacks\ResourcePackManager;
 
 /**
  * The class that manages everything
@@ -157,8 +156,6 @@ class Server{
 
 	/** @var BanList */
 	private $banByName = null;
-
-	private $resourceManager;
 
 	/** @var BanList */
 	private $banByIP = null;
@@ -426,13 +423,9 @@ class Server{
 	/**
 	 * @return int
 	 */
-	public function getViewDistance() : int{
- 		return max(2, 8);
- 	}
-
- 	public function getAllowedViewDistance(int $distance) : int{
- 		return 4;//max(2, min($distance, $this->getViewDistance())); TODO : revert
-  	}
+	public function getViewDistance(){
+		return 96;
+	}
 
 	/**
 	 * @return string
@@ -704,10 +697,6 @@ class Server{
 	public function getCraftingManager(){
 		return $this->craftingManager;
 	}
-
- 	public function getResourceManager() : ResourcePackManager{
- 		return $this->resourceManager;
- 	}
 
 	/**
 	 * @return ServerScheduler
@@ -1662,8 +1651,6 @@ class Server{
 		TextWrapper::init();
 		MetadataConvertor::init();
 		$this->craftingManager = new CraftingManager();
-
-		$this->resourceManager = new ResourcePackManager($this, \pocketmine\PATH . "resource_packs" . DIRECTORY_SEPARATOR);
 
 		$this->pluginManager = new PluginManager($this, $this->commandMap);
 		$this->pluginManager->subscribeToPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, $this->consoleSender);
