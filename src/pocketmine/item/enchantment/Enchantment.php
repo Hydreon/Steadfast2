@@ -180,7 +180,7 @@ class Enchantment{
 	}
 
 	public function setLevel($level){
-		$this->level = (int) $level;
+		$this->level = (int) min(5, $level);
 
 		return $this;
 	}
