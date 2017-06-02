@@ -2,7 +2,7 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\inventory\transactions\SimpleTransaction;
+use pocketmine\inventory\transactions\SimpleTransactionData;
 use pocketmine\network\protocol\ContainerSetContentPacket;
 use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
@@ -24,11 +24,11 @@ class InventoryTransactionPacket extends PEPacket {
 	const INV_SOURCE_TYPE_CREATIVE = 3;
 	
 	public $transactionType;
+	/** @var SimpleTransactionData */
 	public $transactions;
 	public $b;
 	
 	public function decode($playerProtocol) {
-		var_dump(__CLASS__);
 		$this->transactionType = $this->getVarInt();
 		$this->transactions = $this->getTransactions($playerProtocol);
 		// complex inventory transaction
@@ -44,7 +44,7 @@ class InventoryTransactionPacket extends PEPacket {
 		$transactions = [];
 		$actionsCount = $this->getVarInt();
 		for ($i = 0; $i < $actionsCount; $i++) {
-			$tr = new SimpleTransaction();
+			$tr = new SimpleTransactionData();
 			$sourceType = $this->getVarInt();
 			switch ($sourceType) {
 				case self::INV_SOURCE_TYPE_CONTAINER;
