@@ -1943,131 +1943,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerUseItemPacket->stopTiming();
 					break;
 				}
-				if ($packet->face >= 0 and $packet->face <= 5) { //Use Block, place
-					$blockVector = new Vector3($packet->x, $packet->y, $packet->z);
-					$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
-
-					if ($blockVector->distance($this) > 10 || ($this->isCreative() && $this->isAdventure())) {
-						
-					} else if ($this->isCreative() && !$this->isSpectator()) {
-						$item = $this->inventory->getItemInHand();
-						if ($this->level->useItemOn($blockVector, $item, $packet->face, $packet->fx, $packet->fy, $packet->fz, $this) === true) {
-							//Timings::$timerUseItemPacket->stopTiming();
-							break;
-						}
-					} else if (!$this->inventory->getItemInHand()->deepEquals($packet->item)) {
-//						$this->inventory->sendHeldItem($this);
-					} else {
-						$item = $this->inventory->getItemInHand();
-						$oldItem = clone $item;
-						//TODO: Implement adventure mode checks
-						if ($this->level->useItemOn($blockVector, $item, $packet->face, $packet->fx, $packet->fy, $packet->fz, $this)) {
-							if (!$item->deepEquals($oldItem) or $item->getCount() !== $oldItem->getCount()) {
-								$this->inventory->setItemInHand($item, $this);
-								$this->inventory->sendHeldItem($this->hasSpawned);
-							}
-							//Timings::$timerUseItemPacket->stopTiming();
-							break;
-						}
-					}
-					
-					$this->inventory->sendHeldItem($this);
-
-					if($blockVector->distanceSquared($this) > 10000){
-						//Timings::$timerUseItemPacket->stopTiming();
-						break;
-					}
-					$target = $this->level->getBlock($blockVector);
-					$block = $target->getSide($packet->face);
-
-					$this->level->sendBlocks([$this], [$target, $block], UpdateBlockPacket::FLAG_ALL_PRIORITY);
-					//Timings::$timerUseItemPacket->stopTiming();
-					break;
-				} else if ($packet->face === 0xff || $packet->face === -1) {  // -1 for 0.16
-					if ($this->isSpectator()) {
-						$this->inventory->sendHeldItem($this);
-						if ($this->inventory->getHeldItemSlot() !== -1) {
-							$this->inventory->sendContents($this);
-						}
-						//Timings::$timerUseItemPacket->stopTiming();
-						break;
-					}
-					
-					$item = $this->inventory->getItemInHand();
-					if (!$item->deepEquals($packet->item)) {
-						$this->inventory->sendHeldItem($this);
-						//Timings::$timerUseItemPacket->stopTiming();
-						break;
-					}
-
-					if ($packet->x != 0 || $packet->y != 0 || $packet->z != 0) {
-						$vectorLength = sqrt($packet->x ** 2 + $packet->y ** 2 + $packet->z ** 2);
-						$aimPos = new Vector3($packet->x / $vectorLength, $packet->y / $vectorLength, $packet->z / $vectorLength);
-					} else {
-						$aimPos = new Vector3(0, 0, 0);
-					}
-
-					$ev = new PlayerInteractEvent($this, $item, $aimPos, $packet->face, PlayerInteractEvent::RIGHT_CLICK_AIR);
-					$this->server->getPluginManager()->callEvent($ev);
-					if ($ev->isCancelled()) {
-						$this->inventory->sendHeldItem($this);
-						if ($this->inventory->getHeldItemSlot() !== -1) {
-							$this->inventory->sendContents($this);
-						}
-						//Timings::$timerUseItemPacket->stopTiming();
-						break;
-					}
-
-					if($item->getId() === Item::SNOWBALL || $item->getId() === Item::EGG){
-						$yawRad = $this->yaw / 180 * M_PI;
-						$pitchRad = $this->pitch / 180 * M_PI;
-						$nbt = new Compound("", [
-							"Pos" => new Enum("Pos", [
-								new DoubleTag("", $this->x),
-								new DoubleTag("", $this->y + $this->getEyeHeight()),
-								new DoubleTag("", $this->z)
-							]),
-							"Motion" => new Enum("Motion", [
-								new DoubleTag("", -sin($yawRad) * cos($pitchRad)),
-								new DoubleTag("", -sin($pitchRad)),
-								new DoubleTag("", cos($yawRad) * cos($pitchRad))
-							]),
-							"Rotation" => new Enum("Rotation", [
-								new FloatTag("", $this->yaw),
-								new FloatTag("", $this->pitch)
-							]),
-						]);
-
-						$f = 1.5;
-						switch ($item->getId()) {
-							case Item::SNOWBALL:
-								$projectile = Entity::createEntity("Snowball", $this->chunk, $nbt, $this);
-								break;
-							case Item::EGG:
-								$projectile = Entity::createEntity("Egg", $this->chunk, $nbt, $this);
-								break;
-						}
-						$projectile->setMotion($projectile->getMotion()->multiply($f));
-						if ($this->isSurvival()) {
-							$item->setCount($item->getCount() - 1);
-							$this->inventory->setItemInHand($item->getCount() > 0 ? $item : Item::get(Item::AIR));
-						}
-						if ($projectile instanceof Projectile) {
-							$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($projectile));
-							if ($projectileEv->isCancelled()) {
-								$projectile->kill();
-							} else {
-								$projectile->spawnToAll();
-								$this->level->addSound(new LaunchSound($this), $this->getViewers());
-							}
-						} else {
-							$projectile->spawnToAll();
-						}
-					}
-
-					$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, true);
-					$this->startAction = $this->server->getTick();
-				}
+				$blockPosition = [ 'x' => $packet->x, 'y' => $packet->y, 'z' => $packet->z ];
+				$clickPosition = [ 'x' => $packet->fx, 'y' => $packet->fy, 'z' => $packet->fz ];
+				$this->useItem($packet->item, $packet->hotbarSlot, $packet->face, $blockPosition, $clickPosition);
 				//Timings::$timerUseItemPacket->stopTiming();
 				break;
 			case 'PLAYER_ACTION_PACKET':
@@ -2835,6 +2713,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						if ($packet->actionType == InventoryTransactionPacket::ITEM_USE_ON_ENTITY_ACTION_ATTACK) {
 							$this->attackByTargetId($packet->entityId);
 						}
+						break;
+					case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_USE:
+						$this->useItem($packet->item, $packet->slot, $packet->face, $packet->position, $packet->clickPosition);
 						break;
 				}
 				break;
@@ -4104,7 +3985,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
  		parent::setOnFire($seconds, $damage);
  	}
 	
-	 public function attackByTargetId($targetId) {
+	public function attackByTargetId($targetId) {
 		if ($this->spawned === false || $this->dead === true || $this->blocked) {
 			return;
 		}
@@ -4212,6 +4093,143 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			} elseif ($this->inventory->getItemInHand()->getId() == $item->getId()) {
 				$this->inventory->setItemInHand($item, $this);
 			}
+		}
+	}
+	
+	protected function useItem($item, $slot, $face, $blockPosition, $clickPosition) {
+		switch ($face) {
+			//Use Block, place
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+				$blockVector = new Vector3($blockPosition['x'], $blockPosition['y'], $blockPosition['z']);
+				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
+
+				$itemInHand = $this->inventory->getItemInHand();
+				if ($blockVector->distance($this) > 10 || ($this->isCreative() && $this->isAdventure())) {
+
+				} else if ($this->isCreative() && !$this->isSpectator()) {
+					if ($this->level->useItemOn($blockVector, $itemInHand, $face, $clickPosition['x'], $clickPosition['y'], $clickPosition['z'], $this) === true) {
+						//Timings::$timerUseItemPacket->stopTiming();
+						return;
+					}
+				} else if (!$itemInHand->deepEquals($item)) {
+	//						$this->inventory->sendHeldItem($this);
+				} else {
+					$oldItem = clone $itemInHand;
+					//TODO: Implement adventure mode checks
+					if ($this->level->useItemOn($blockVector, $itemInHand, $face, $clickPosition['x'], $clickPosition['y'], $clickPosition['z'], $this)) {
+						if (!$itemInHand->deepEquals($oldItem) || $itemInHand->getCount() !== $oldItem->getCount()) {
+							$this->inventory->setItemInHand($itemInHand, $this);
+							$this->inventory->sendHeldItem($this->hasSpawned);
+						}
+						//Timings::$timerUseItemPacket->stopTiming();
+						return;
+					}
+				}
+
+				$this->inventory->sendHeldItem($this);
+
+				if($blockVector->distanceSquared($this) > 10000){
+					//Timings::$timerUseItemPacket->stopTiming();
+					return;
+				}
+				$target = $this->level->getBlock($blockVector);
+				$block = $target->getSide($face);
+
+				$this->level->sendBlocks([$this], [$target, $block], UpdateBlockPacket::FLAG_ALL_PRIORITY);
+				//Timings::$timerUseItemPacket->stopTiming();
+				return;
+			
+			case 0xff:
+			case -1:  // -1 for 0.16
+				if ($this->isSpectator()) {
+					$this->inventory->sendHeldItem($this);
+					if ($this->inventory->getHeldItemSlot() !== -1) {
+						$this->inventory->sendContents($this);
+					}
+					//Timings::$timerUseItemPacket->stopTiming();
+					return;
+				}
+
+				$itemInHand = $this->inventory->getItemInHand();
+				if (!$itemInHand->deepEquals($item)) {
+					$this->inventory->sendHeldItem($this);
+					//Timings::$timerUseItemPacket->stopTiming();
+					return;
+				}
+
+				if ($blockPosition['x'] != 0 || $blockPosition['y'] != 0 || $blockPosition['z'] != 0) {
+					$vectorLength = sqrt($blockPosition['x'] ** 2 + $blockPosition['y'] ** 2 + $blockPosition['z'] ** 2);
+					$aimPos = new Vector3($blockPosition['x'] / $vectorLength, $blockPosition['y'] / $vectorLength, $blockPosition['z'] / $vectorLength);
+				} else {
+					$aimPos = new Vector3(0, 0, 0);
+				}
+
+				$ev = new PlayerInteractEvent($this, $itemInHand, $aimPos, $face, PlayerInteractEvent::RIGHT_CLICK_AIR);
+				$this->server->getPluginManager()->callEvent($ev);
+				if ($ev->isCancelled()) {
+					$this->inventory->sendHeldItem($this);
+					if ($this->inventory->getHeldItemSlot() !== -1) {
+						$this->inventory->sendContents($this);
+					}
+					//Timings::$timerUseItemPacket->stopTiming();
+					return;
+				}
+
+				if($itemInHand->getId() === Item::SNOWBALL || $itemInHand->getId() === Item::EGG){
+					$yawRad = $this->yaw / 180 * M_PI;
+					$pitchRad = $this->pitch / 180 * M_PI;
+					$nbt = new Compound("", [
+						"Pos" => new Enum("Pos", [
+							new DoubleTag("", $this->x),
+							new DoubleTag("", $this->y + $this->getEyeHeight()),
+							new DoubleTag("", $this->z)
+						]),
+						"Motion" => new Enum("Motion", [
+							new DoubleTag("", -sin($yawRad) * cos($pitchRad)),
+							new DoubleTag("", -sin($pitchRad)),
+							new DoubleTag("", cos($yawRad) * cos($pitchRad))
+						]),
+						"Rotation" => new Enum("Rotation", [
+							new FloatTag("", $this->yaw),
+							new FloatTag("", $this->pitch)
+						]),
+					]);
+
+					$f = 1.5;
+					switch ($itemInHand->getId()) {
+						case Item::SNOWBALL:
+							$projectile = Entity::createEntity("Snowball", $this->chunk, $nbt, $this);
+							break;
+						case Item::EGG:
+							$projectile = Entity::createEntity("Egg", $this->chunk, $nbt, $this);
+							break;
+					}
+					$projectile->setMotion($projectile->getMotion()->multiply($f));
+					if ($this->isSurvival()) {
+						$itemInHand->setCount($itemInHand->getCount() - 1);
+						$this->inventory->setItemInHand($itemInHand->getCount() > 0 ? $itemInHand : Item::get(Item::AIR));
+					}
+					if ($projectile instanceof Projectile) {
+						$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($projectile));
+						if ($projectileEv->isCancelled()) {
+							$projectile->kill();
+						} else {
+							$projectile->spawnToAll();
+							$this->level->addSound(new LaunchSound($this), $this->getViewers());
+						}
+					} else {
+						$projectile->spawnToAll();
+					}
+				}
+
+				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, true);
+				$this->startAction = $this->server->getTick();
+				return;
 		}
 	}
 
