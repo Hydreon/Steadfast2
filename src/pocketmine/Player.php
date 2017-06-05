@@ -163,6 +163,7 @@ use pocketmine\network\protocol\SetTitlePacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
+use pocketmine\network\protocol\v120\Protocol120;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -907,17 +908,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 		
-//		TODO 120
-		$disallowedPackets = [
-			'pocketmine\network\protocol\AddItemPacket',
-			'pocketmine\network\protocol\ContainerSetContentPacket',
-			'pocketmine\network\protocol\ContainerSetSlotpacket',
-			'pocketmine\network\protocol\DropItemPacket',
-			'pocketmine\network\protocol\InventoryActionPacket',
-			'pocketmine\network\protocol\ReplaceSelectedItemPacket',
-			'pocketmine\network\protocol\RemoveBlockPacket',
-			'pocketmine\network\protocol\UseItemPacket',
-		];
+		$disallowedPackets = [];
+		$protocol = $this->getPlayerProtocol();
+		if ($protocol >= ProtocolInfo::PROTOCOL_120) {
+			$disallowedPackets = Protocol120::getDisallowedPackets();
+		}
 		if (in_array(get_class($packet), $disallowedPackets)) {
 			return;
 		}
@@ -3862,21 +3857,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function getPlayerProtocol() {
-		switch ($this->protocol) {
-			case ProtocolInfo::PROTOCOL_120:
-				return ProtocolInfo::PROTOCOL_120;
-			case ProtocolInfo::PROTOCOL_110:
-			case ProtocolInfo::PROTOCOL_111:
-			case ProtocolInfo::PROTOCOL_112:
-			case ProtocolInfo::PROTOCOL_113:
-				return ProtocolInfo::PROTOCOL_110;
-			case ProtocolInfo::PROTOCOL_105:
-			case ProtocolInfo::PROTOCOL_106:
-			case ProtocolInfo::PROTOCOL_107:
-				return ProtocolInfo::PROTOCOL_105;
-			default:
-				return ProtocolInfo::BASE_PROTOCOL;
-		}
+		return $this->protocol;
 	}
 
 	public function getDeviceOS() {

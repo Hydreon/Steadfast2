@@ -125,6 +125,7 @@ class LoginPacket extends PEPacket {
 		 if (isset($this->playerData['LanguageCode'])) {
             $this->languageCode = $this->playerData['LanguageCode'];
         }
+		$this->protocol1 = self::convertProtocol($this->protocol1);
 	}
 
 	public function encode($playerProtocol) {
