@@ -162,6 +162,7 @@ use pocketmine\item\Elytra;
 use pocketmine\network\protocol\SetTitlePacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
+use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -2935,6 +2936,32 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					default:
 						return false;
+				}
+				break;
+			/** @minProtocol 120 */
+			case 'INVENTORY_TRANSACTION_PACKET':
+				var_dump('здесь могла быть ваша транзакция');
+				switch ($packet->transactionType) {
+					case InventoryTransactionPacket::TRANSACTION_TYPE_NORMAL:
+						$trGroup = new SimpleTransactionGroup($this);
+						foreach ($packet->transactions as $trData) {
+							echo $trData;
+							$transaction = $trData->convertToTransaction($this);
+							$trGroup->addTransaction($transaction);
+						}
+						try {
+							$isExecute = $trGroup->execute();
+							if (!$isExecute) {
+								echo '[INFO] Transaction execute fail 1.'.PHP_EOL;
+								$trGroup->sendInventories();
+							} else {
+								echo '[INFO] Transaction successfully executed.'.PHP_EOL;
+							}
+						} catch (\Exception $ex) {
+							echo '[INFO] Transaction execute fail 2.'.PHP_EOL;
+							$trGroup->sendInventories();
+						}
+						break;
 				}
 				break;
 			default:

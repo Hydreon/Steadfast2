@@ -22,6 +22,7 @@ class InventoryTransactionPacket extends PEPacket {
 	const INV_SOURCE_TYPE_GLOBAL = 1;
 	const INV_SOURCE_TYPE_WORLD_INTERACTION = 2;
 	const INV_SOURCE_TYPE_CREATIVE = 3;
+	const INV_SOURCE_TYPE_CRAFT = 99999;
 	
 	const ITEM_RELEASE_ACTION_RELEASE = 0;
 	const ITEM_RELEASE_ACTION_USE = 1;
@@ -56,13 +57,16 @@ class InventoryTransactionPacket extends PEPacket {
 		$this->reset($playerProtocol);
 		/** @todo Доделать */
 	}
-
+	
 	private function getTransactions($playerProtocol) {
 		$transactions = [];
 		$actionsCount = $this->getVarInt();
 		for ($i = 0; $i < $actionsCount; $i++) {
 			$tr = new SimpleTransactionData();
 			$sourceType = $this->getVarInt();
+			if ($sourceType > 3) {
+				var_dump(bin2hex($this->buffer));
+			}
 			switch ($sourceType) {
 				case self::INV_SOURCE_TYPE_CONTAINER;
 					$tr->inventoryId = $this->getSignedVarInt();
@@ -75,6 +79,8 @@ class InventoryTransactionPacket extends PEPacket {
 				case self::INV_SOURCE_TYPE_CREATIVE:
 					$tr->inventoryId = ContainerSetContentPacket::SPECIAL_CREATIVE;
 					break;
+				case self::INV_SOURCE_TYPE_CRAFT:
+					$this->getVarInt(); // craft grid size? always 3 for small and big
 				default:
 					continue;
 			}
