@@ -52,7 +52,11 @@ class SimpleTransactionData {
 				$slot = $inventory->getSize() + $this->slot;
 				break;
 			default:
-				$inventory = $player->getInventory();
+				$currentWindowId = $player->getCurrentWindowId();
+				if ($currentWindowId != $this->inventoryId) {
+					return null;
+				}
+				$inventory = $player->getCurrentWindow();
 				$slot = $this->slot;
 				break;
 			

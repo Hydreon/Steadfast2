@@ -2687,13 +2687,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					case InventoryTransactionPacket::TRANSACTION_TYPE_NORMAL:
 						$trGroup = new SimpleTransactionGroup($this);
 						foreach ($packet->transactions as $trData) {
-							echo $trData;
+//							echo $trData;
 							$transaction = $trData->convertToTransaction($this);
+							if ($transaction == null) {
+								// roolback
+								$trGroup->sendInventories();
+								return;
+							}
 							$trGroup->addTransaction($transaction);
 						}
 						try {
-							$isExecute = $trGroup->execute();
-							if (!$isExecute) {
+							if (!$trGroup->execute()) {
 								echo '[INFO] Transaction execute fail 1.'.PHP_EOL;
 								$trGroup->sendInventories();
 							} else {
@@ -3244,6 +3248,22 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return 0;
 		}
 		return -1;
+	}
+	
+	/**
+	 * 
+	 * @return integer
+	 */
+	public function getCurrentWindowId() {
+		return $this->currentWindowId;
+	}
+	
+	/**
+	 * 
+	 * @return BaseInventory
+	 */
+	public function getCurrentWindow() {
+		return $this->currentWindow;
 	}
 
 	/**

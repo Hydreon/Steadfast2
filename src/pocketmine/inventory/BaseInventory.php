@@ -25,6 +25,7 @@ use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityInventoryChangeEvent;
 use pocketmine\event\inventory\InventoryOpenEvent;
 use pocketmine\item\Item;
+use pocketmine\network\Multiversion;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\ContainerSetContentPacket;
 use pocketmine\network\protocol\ContainerSetSlotPacket;
@@ -439,11 +440,7 @@ abstract class BaseInventory implements Inventory{
 				$this->close($player);
 				continue;
 			}
-			$pk = new ContainerSetContentPacket();			
-			$pk->windowid = $id;
-			$pk->slots = $slots;
-			$pk->eid = $player->getId();
-			$player->dataPacket($pk);
+			Multiversion::sendContainer($player, $id, $slots);
 		}
 	}
 
@@ -456,17 +453,13 @@ abstract class BaseInventory implements Inventory{
 			$target = [$target];
 		}
 
-		$pk = new ContainerSetSlotPacket();
-		$pk->slot = $index;
-		$pk->item = clone $this->getItem($index);
-
+		$item = clone $this->getItem($index);
 		foreach($target as $player){
 			if(($id = $player->getWindowId($this)) === -1){
 				$this->close($player);
 				continue;
 			}
-			$pk->windowid = $id;
-			$player->dataPacket($pk);
+			Multiversion::sendContainerSlot($player, $id, $item, $index);
 		}
 	}
 

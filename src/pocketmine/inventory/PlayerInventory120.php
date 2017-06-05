@@ -26,7 +26,7 @@ class PlayerInventory120 extends PlayerInventory {
 	public function setItem($index, Item $item, $sendPacket = true) {
 		if ($index == self::CURSOR_INDEX) {
 			$this->cursor = clone $item;
-			/** @todo отправка пакета */
+			$this->sendCursor();
 		} else {
 			parent::setItem($index, $item, $sendPacket);
 		}
