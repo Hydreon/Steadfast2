@@ -14,6 +14,7 @@ use pocketmine\Player;
 class PlayerInventory120 extends PlayerInventory {
 
 	const CURSOR_INDEX = -1;
+	const CREATIVE_INDEX = -2;
 	
 	/** @var Item */
 	protected $cursor;

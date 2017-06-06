@@ -51,6 +51,13 @@ class SimpleTransactionData {
 				$inventory = $player->getInventory();
 				$slot = $inventory->getSize() + $this->slot;
 				break;
+			case Protocol120::CONTAINER_ID_CREATIVE:
+				if (!$player->isCreative() || $player->isSpectator()) {
+					return null;
+				}
+				$inventory = $player->getInventory();
+				$slot = PlayerInventory120::CREATIVE_INDEX;
+				break;
 			default:
 				$currentWindowId = $player->getCurrentWindowId();
 				if ($currentWindowId != $this->inventoryId) {

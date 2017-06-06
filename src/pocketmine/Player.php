@@ -164,6 +164,7 @@ use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\Protocol120;
+use pocketmine\network\Multiversion;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -1080,18 +1081,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->sendSettings();
 
 		if($this->gamemode === Player::SPECTATOR){
-			$pk = new ContainerSetContentPacket();
-			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
-			$pk->eid = $this->getId();
-			$this->dataPacket($pk);
+			Multiversion::sendContainer($this, Protocol120::CONTAINER_ID_CREATIVE, []);
 		}elseif($this->gamemode === Player::CREATIVE) {
-			$pk = new ContainerSetContentPacket();
-			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
-			$pk->eid = $this->getId();
+			$slots = [];
 			foreach(Item::getCreativeItems() as $item){
-				$pk->slots[] = clone $item;
+				$slots[] = clone $item;
 			}
-			$this->dataPacket($pk);
+			Multiversion::sendContainer($this, Protocol120::CONTAINER_ID_CREATIVE, $slots);
 		}
 
 		$this->inventory->sendContents($this);
@@ -3527,18 +3523,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . TextFormat::AQUA . $this->ip . " connected");
 		
 		if ($this->gamemode === Player::SPECTATOR) {
-			$pk = new ContainerSetContentPacket();
-			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
-			$pk->eid = $this->getId();
-			$this->dataPacket($pk);
+			Multiversion::sendContainer($this, Protocol120::CONTAINER_ID_CREATIVE, []);
 		} elseif ($this->gamemode === Player::CREATIVE) {
-			$pk = new ContainerSetContentPacket();
-			$pk->windowid = ContainerSetContentPacket::SPECIAL_CREATIVE;
-			$pk->eid = $this->getId();
-			foreach (Item::getCreativeItems() as $item) {
-				$pk->slots[] = clone $item;
+			$slots = [];
+			foreach(Item::getCreativeItems() as $item){
+				$slots[] = clone $item;
 			}
-			$this->dataPacket($pk);
+			Multiversion::sendContainer($this, Protocol120::CONTAINER_ID_CREATIVE, $slots);
 		}
 
 //		$this->server->sendFullPlayerListData($this);
