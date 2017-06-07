@@ -98,10 +98,16 @@ class SimpleTransactionGroup implements TransactionGroup {
 			if ($ts->getTargetItem()->getId() !== Item::AIR) {
 				$needItems[] = $ts->getTargetItem();
 			}
-			$checkSourceItem = $ts->getInventory()->getItem($ts->getSlot());
 			$sourceItem = $ts->getSourceItem();
-			if (!$checkSourceItem->deepEquals($sourceItem) or $sourceItem->getCount() !== $checkSourceItem->getCount()) {
-				return false;
+			if ($ts->getSlot() == PlayerInventory120::CREATIVE_INDEX ) {
+				if ($sourceItem->getId() !== Item::AIR && Item::getCreativeItemIndex($sourceItem) === -1) {					
+					return false;
+				}
+			} else {
+				$checkSourceItem = $ts->getInventory()->getItem($ts->getSlot());
+				if (!$checkSourceItem->deepEquals($sourceItem) or $sourceItem->getCount() !== $checkSourceItem->getCount()) {
+					return false;
+				}
 			}
 			if ($sourceItem->getId() !== Item::AIR) {
 				$haveItems[] = $sourceItem;
@@ -132,7 +138,7 @@ class SimpleTransactionGroup implements TransactionGroup {
 		$haveItems = [];
 		$needItems = [];
 
-		$matchResult = $this->matchItems($haveItems, $needItems);		
+		$matchResult = $this->matchItems($haveItems, $needItems);	
 		return $matchResult && empty($haveItems) && empty($needItems) && !empty($this->transactions);
 	}
 

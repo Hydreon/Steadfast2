@@ -14,6 +14,7 @@ use pocketmine\Player;
 class PlayerInventory120 extends PlayerInventory {
 
 	const CURSOR_INDEX = -1;
+	const CREATIVE_INDEX = -2;
 	const CRAFT_INDEX_0 = -3;
 	const CRAFT_INDEX_1 = -4;
 	const CRAFT_INDEX_2 = -5;
