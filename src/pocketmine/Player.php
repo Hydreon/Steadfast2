@@ -164,6 +164,7 @@ use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\Protocol120;
+use pocketmine\inventory\PlayerInventory120;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -2385,7 +2386,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if ($this->spawned === false or $this->dead) {
 					//Timings::$timerCraftingEventPacket->stopTiming();
 					break;
-				} else if ($packet->windowId > 0 && $packet->windowId !== $this->currentWindowId) {
+				}
+				if ($packet->windowId > 0 && $packet->windowId !== $this->currentWindowId) {
 					$this->inventory->sendContents($this);
 					$pk = new ContainerClosePacket();
 					$pk->windowid = $packet->windowId;
@@ -2408,6 +2410,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					if (!is_null($newRecipe)) {
 						$recipe = $newRecipe;
 					}
+				}
+				
+				if ($this->protocol >= ProtocolInfo::PROTOCOL_120) {
+					$craftSlots = $this->inventory->getCraftContents();
+					try {
+						self::tryApplyCraft($craftSlots, $recipe);
+						$this->inventory->setItem(PlayerInventory120::CURSOR_INDEX, $recipe->getResult());
+						foreach ($craftSlots as $slot => $item) {
+							if ($item == null) {
+								continue;
+							}
+							$this->inventory->setitem(PlayerInventory120::CRAFT_INDEX_0 - $slot, $item);
+						}
+					} catch (\Exception $e) {
+						var_dump($e->getMessage());
+					}
+					return;
 				}
 
 				// переделать эту проверку
@@ -2685,28 +2704,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				var_dump('здесь могла быть ваша транзакция');
 				switch ($packet->transactionType) {
 					case InventoryTransactionPacket::TRANSACTION_TYPE_NORMAL:
-						$trGroup = new SimpleTransactionGroup($this);
-						foreach ($packet->transactions as $trData) {
-//							echo $trData;
-							$transaction = $trData->convertToTransaction($this);
-							if ($transaction == null) {
-								// roolback
-								$trGroup->sendInventories();
-								return;
-							}
-							$trGroup->addTransaction($transaction);
-						}
-						try {
-							if (!$trGroup->execute()) {
-								echo '[INFO] Transaction execute fail 1.'.PHP_EOL;
-								$trGroup->sendInventories();
-							} else {
-								echo '[INFO] Transaction successfully executed.'.PHP_EOL;
-							}
-						} catch (\Exception $ex) {
-							echo '[INFO] Transaction execute fail 2.'.PHP_EOL;
-							$trGroup->sendInventories();
-						}
+						$this->normalTransactionLogic($packet);
 						break;
 					case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_USE_ON_ENTITY:
 						if ($packet->actionType == InventoryTransactionPacket::ITEM_USE_ON_ENTITY_ACTION_ATTACK) {
@@ -4231,6 +4229,83 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, true);
 				$this->startAction = $this->server->getTick();
 				return;
+		}
+	}
+	
+	/**
+	 * @minProtocolSupport 120
+	 * @param InventoryTransactionPacket $packet
+	 */
+	private function normalTransactionLogic($packet) {
+		$trGroup = new SimpleTransactionGroup($this);
+		foreach ($packet->transactions as $trData) {
+//			echo $trData;
+			$transaction = $trData->convertToTransaction($this);
+			if ($transaction == null) {
+				// roolback
+				$trGroup->sendInventories();
+				return;
+			}
+			$trGroup->addTransaction($transaction);
+		}
+		try {
+			if (!$trGroup->execute()) {
+				echo '[INFO] Transaction execute fail 1.'.PHP_EOL;
+				$trGroup->sendInventories();
+			} else {
+				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
+			}
+		} catch (\Exception $ex) {
+			echo '[INFO] Transaction execute fail 2.'.PHP_EOL;
+			$trGroup->sendInventories();
+		}
+	}
+	
+	/**
+	 * 
+	 * @param Item[] $craftSlots
+	 * @param Recipe $recipe
+	 * @throws \Exception
+	 */
+	private static function tryApplyCraft(&$craftSlots, $recipe) {
+		if ($recipe instanceof ShapedRecipe) {
+			$ingredients = [];
+			$itemGrid = $recipe->getIngredientMap();;
+			// convert map into list
+			foreach ($itemGrid as $line) {
+				foreach ($line as $item) {
+					echo $item . PHP_EOL;
+					$ingredients[] = $item;
+				}
+			}
+		} else if ($recipe instanceof ShapelessRecipe) {
+			$ingredients = $recipe->getIngredientList();
+		}
+		$ingredientsCount = count($ingredients);
+		$firstIndex = 0;
+		foreach ($craftSlots as &$item) {
+			if ($item == null || $item->getId() == Item::AIR) {
+				continue;
+			}
+			for ($i = $firstIndex; $i < $ingredientsCount; $i++) {
+				$ingredient = $ingredients[$i];
+				if ($ingredient->getId() == Item::AIR) {
+					continue;
+				}
+				$isItemsNotEquals = $item->getId() != $ingredient->getId() || 
+						($item->getDamage() != $ingredient->getDamage() && $ingredient->getDamage() != 32767) || 
+						$item->count < $ingredient->count;
+				if ($isItemsNotEquals) {
+					throw new \Exception('Пришёл кривой рецепт');
+				}
+				$firstIndex = $i + 1;
+				$item->count -= $ingredient->count;
+				if ($item->count == 0) {
+					/** @important count = 0 is important */
+					$item = Item::get(Item::AIR, 0, 0);
+				}
+				break;
+			}
 		}
 	}
 

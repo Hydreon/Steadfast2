@@ -14,9 +14,23 @@ use pocketmine\Player;
 class PlayerInventory120 extends PlayerInventory {
 
 	const CURSOR_INDEX = -1;
+	const CRAFT_INDEX_0 = -3;
+	const CRAFT_INDEX_1 = -4;
+	const CRAFT_INDEX_2 = -5;
+	const CRAFT_INDEX_3 = -6;
+	const CRAFT_INDEX_4 = -7;
+	const CRAFT_INDEX_5 = -8;
+	const CRAFT_INDEX_6 = -9;
+	const CRAFT_INDEX_7 = -10;
+	const CRAFT_INDEX_8 = -11;
+	const CRAFT_RESULT_INDEX = -12;
 	
 	/** @var Item */
 	protected $cursor;
+	/** @var Item[] */
+	protected $craftSlots = [ 0 => null, 1 => null, 2 => null, 3 => null, 4 => null, 5 => null, 6 => null, 7 => null, 8 => null ];
+	/** @var Item */
+	protected $craftResult = null;
 	
 	public function __construct(Human $player) {
 		parent::__construct($player);
@@ -24,17 +38,66 @@ class PlayerInventory120 extends PlayerInventory {
 	}
 	
 	public function setItem($index, Item $item, $sendPacket = true) {
-		if ($index == self::CURSOR_INDEX) {
-			$this->cursor = clone $item;
-			$this->sendCursor();
-		} else {
+		if ($index >= 0) {
 			parent::setItem($index, $item, $sendPacket);
+			return;
+		}
+		// protocol 120 logic
+		switch ($index) {
+			case self::CURSOR_INDEX:
+				$this->cursor = clone $item;
+				if ($sendPacket) {
+					$this->sendCursor();
+				}
+				break;
+			case self::CRAFT_INDEX_0:
+			case self::CRAFT_INDEX_1:
+			case self::CRAFT_INDEX_2:
+			case self::CRAFT_INDEX_3:
+			case self::CRAFT_INDEX_4:
+			case self::CRAFT_INDEX_5:
+			case self::CRAFT_INDEX_6:
+			case self::CRAFT_INDEX_7:
+			case self::CRAFT_INDEX_8:
+				$slot = self::CRAFT_INDEX_0 - $index;
+				$this->craftSlots[$slot] = $item;
+				if ($sendPacket) {
+					/** @todo add packet sending */
+					$pk = new InventorySlotPacket();
+					$pk->containerId = Protocol120::CONTAINER_ID_NONE;
+					$pk->slot = 0;
+					$pk->item = Item::get(Item::WOOL, 10);
+					$this->holder->dataPacket($pk);
+				}
+				break;
+			case self::CRAFT_RESULT_INDEX:
+				$this->craftResult = $item;
+				if ($sendPacket) {
+					/** @todo add packet sending */
+				}
+				break;
 		}
 	}
 	
 	public function getItem($index) {
-		if ($index == self::CURSOR_INDEX) {
-			return $this->cursor == null ? clone $this->air : clone $this->cursor;
+		if ($index < 0) {
+			switch ($index) {
+				case self::CURSOR_INDEX:
+					return $this->cursor == null ? clone $this->air : clone $this->cursor;
+				case self::CRAFT_INDEX_0:
+				case self::CRAFT_INDEX_1:
+				case self::CRAFT_INDEX_2:
+				case self::CRAFT_INDEX_3:
+				case self::CRAFT_INDEX_4:
+				case self::CRAFT_INDEX_5:
+				case self::CRAFT_INDEX_6:
+				case self::CRAFT_INDEX_7:
+				case self::CRAFT_INDEX_8:
+					$slot = self::CRAFT_INDEX_0 - $index;
+					return $this->craftSlots[$slot] == null ? clone $this->air : clone $this->craftSlots[$slot];
+				case self::CRAFT_RESULT_INDEX:
+					return $this->craftResult == null ? clone $this->air : clone $this->craftResult;
+			}
 		} else {
 			return parent::getItem($index);
 		}
@@ -94,6 +157,10 @@ class PlayerInventory120 extends PlayerInventory {
 				$player->dataPacket($pk);
 			}
 		}
+	}
+	
+	public function getCraftContents() {
+		return $this->craftSlots;
 	}
 
 }

@@ -10,8 +10,11 @@ class InventorySlotPacket extends PEPacket {
 	const NETWORK_ID = Info120::INVENTORY_SLOT_PACKET;
 	const PACKET_NAME = "INVENTORY_SLOT_PACKET";
 	
+	/** @var integer */
 	public $containerId;
+	/** @var integer */
 	public $slot;
+	/** @var Item */
 	public $item;
 	
 	public function decode($playerProtocol) {

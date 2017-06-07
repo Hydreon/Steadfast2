@@ -58,16 +58,42 @@ class InventoryTransactionPacket extends PEPacket {
 		/** @todo Доделать */
 	}
 	
+	
+	// put from cursor to craft 0
+	// 1e 0000 00 02
+	// 9f8d06 03 00 00 220200000000
+	// 00 f801 00 220200000000 00
+	
+	// put to cursor from craft 0
+	// 1e 0000 00 02
+	// 9f8d06 05 00 220200000000 00
+	// 00 f801 00 00 220200000000
+	
+	// put from cursor to craft 1
+	// 1e 0000 00 02
+	// 9f8d06 03 01 00 220200000000
+	// 00 f801 00 220200000000 00
+	
+	// use for craft (???)
+	// 1e 0000 00 02
+	// 9f8d06 09 01 00 220200000000
+	// 9f8d06 05 01 220200000000 00
+	
+	// get craft result (???)
+	// 1e 0000 00 02
+	// 9f8d06 07 00 0a0800000000 00
+	// 00 f801 00 00 0a0800000000
+	
 	private function getTransactions($playerProtocol) {
 		$transactions = [];
 		$actionsCount = $this->getVarInt();
 		for ($i = 0; $i < $actionsCount; $i++) {
 			$tr = new SimpleTransactionData();
-			$sourceType = $this->getVarInt();
-			if ($sourceType > 3) {
+			$tr->sourceType = $this->getVarInt();
+			if ($tr->sourceType > 3) {
 				var_dump(bin2hex($this->buffer));
 			}
-			switch ($sourceType) {
+			switch ($tr->sourceType) {
 				case self::INV_SOURCE_TYPE_CONTAINER;
 					$tr->inventoryId = $this->getSignedVarInt();
 					break;
@@ -80,13 +106,13 @@ class InventoryTransactionPacket extends PEPacket {
 					$tr->inventoryId = ContainerSetContentPacket::SPECIAL_CREATIVE;
 					break;
 				case self::INV_SOURCE_TYPE_CRAFT:
-					$this->getVarInt(); // craft grid size? always 3 for small and big
+					$tr->craftAction = $this->getVarInt();
 				default:
 					continue;
 			}
 			$tr->slot = $this->getVarInt();
 			$tr->oldItem = $this->getSlot($playerProtocol);
-			$tr->newItem = $this->getSlot($playerProtocol);
+			$tr->newItem = $this->getSlot($playerProtocol);			
 			$transactions[] = $tr;
 		}
 		return $transactions;
