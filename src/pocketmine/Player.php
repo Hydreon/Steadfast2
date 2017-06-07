@@ -2168,45 +2168,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case 'REMOVE_BLOCK_PACKET':
 				//Timings::$timerRemoveBlockPacket->startTiming();
-				if($this->spawned === false or $this->blocked === true or $this->dead === true){
-					//Timings::$timerRemoveBlockPacket->stopTiming();
-					break;
-				}
-//				$this->craftingType = self::CRAFTING_DEFAULT;
-
-				$vector = new Vector3($packet->x, $packet->y, $packet->z);
-				$item = $this->inventory->getItemInHand();
-
-//				if($this->isCreative()){
-//					$item = $this->inventory->getItemInHand();
-//				}else{
-//					$item = $this->inventory->getItemInHand();
-//				}
-
-				$oldItem = clone $item;
-
-				if($this->level->useBreakOn($vector, $item, $this) === true){
-					if($this->isSurvival()){
-						if(!$item->equals($oldItem, true) or $item->getCount() !== $oldItem->getCount()){
-							$this->inventory->setItemInHand($item, $this);
-							$this->inventory->sendHeldItem($this->hasSpawned);
-						}
-					}
-					//Timings::$timerRemoveBlockPacket->stopTiming();
-					break;
-				}
-
-				$this->inventory->sendContents($this);
-				$target = $this->level->getBlock($vector);
-				$tile = $this->level->getTile($vector);
-
-				$this->level->sendBlocks([$this], [$target], UpdateBlockPacket::FLAG_ALL_PRIORITY);
-
-				$this->inventory->sendHeldItem($this);
-
-				if($tile instanceof Spawnable){
-					$tile->spawnTo($this);
-				}
+				$this->breakBlock([ 'x' => $packet->x, 'y' => $packet->y, 'z' => $packet->z ]);
 				//Timings::$timerRemoveBlockPacket->stopTiming();
 				break;
 
@@ -2708,7 +2670,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}
 						break;
 					case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_USE:
-						$this->useItem($packet->item, $packet->slot, $packet->face, $packet->position, $packet->clickPosition);
+						switch ($packet->actionType) {
+							case InventoryTransactionPacket::ITEM_USE_ACTION_PLACE:
+							case InventoryTransactionPacket::ITEM_USE_ACTION_USE:
+								$this->useItem($packet->item, $packet->slot, $packet->face, $packet->position, $packet->clickPosition);
+								break;
+							case InventoryTransactionPacket::ITEM_USE_ACTION_DESTROY:
+								$this->breakBlock($packet->position);
+								break;
+							default:
+								print_r($packet);
+								break;
+						}
+						break;
+					default:
+						print_r($packet);
 						break;
 				}
 				break;
@@ -4220,6 +4196,45 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, true);
 				$this->startAction = $this->server->getTick();
 				return;
+		}
+	}
+	
+	/**
+	 * 
+	 * @param integer[] $blockPosition
+	 */
+	private function breakBlock($blockPosition) {
+		if($this->spawned === false or $this->blocked === true or $this->dead === true){
+			//Timings::$timerRemoveBlockPacket->stopTiming();
+			return;
+		}
+
+		$vector = new Vector3($blockPosition['x'], $blockPosition['y'], $blockPosition['z']);
+		$item = $this->inventory->getItemInHand();
+
+		$oldItem = clone $item;
+
+		if($this->level->useBreakOn($vector, $item, $this) === true){
+			if($this->isSurvival()){
+				if(!$item->equals($oldItem, true) or $item->getCount() !== $oldItem->getCount()){
+					$this->inventory->setItemInHand($item, $this);
+					$this->inventory->sendHeldItem($this->hasSpawned);
+				}
+			}
+			//Timings::$timerRemoveBlockPacket->stopTiming();
+			return;
+		}
+
+		$this->inventory->sendContents($this);
+		$target = $this->level->getBlock($vector);
+		$tile = $this->level->getTile($vector);
+
+		$this->level->sendBlocks([$this], [$target], UpdateBlockPacket::FLAG_ALL_PRIORITY);
+
+		$this->inventory->sendHeldItem($this);
+
+		if($tile instanceof Spawnable){
+			$tile->spawnTo($this);
 		}
 	}
 	

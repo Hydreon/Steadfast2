@@ -17,6 +17,7 @@ class SimpleTransactionData {
 	const CRAFT_ACTION_GET_SLOT = 5;
 	const CRAFT_ACTION_GET_RESULT = 7;
 	const CRAFT_ACTION_USE = 9;
+	const CRAFT_ACTION_DROP = 199;
 	
 	/** @var integer */
 	/** @important for InventoryTransactionPacket */
@@ -38,7 +39,8 @@ class SimpleTransactionData {
 	}
 	
 	public function __toString() {
-		return 'Inv.ID: ' . $this->inventoryId . PHP_EOL .
+		return 'Source type: ' . $this->sourceType . PHP_EOL .
+				'Inv.ID: ' . $this->inventoryId . PHP_EOL .
 				'Craft action: ' . $this->craftAction . PHP_EOL .
 				'Slot: ' . $this->slot . PHP_EOL .
 				'Old item: ' . $this->oldItem . PHP_EOL .

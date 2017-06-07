@@ -58,7 +58,6 @@ class InventoryTransactionPacket extends PEPacket {
 		/** @todo Доделать */
 	}
 	
-	
 	// put from cursor to craft 0
 	// 1e 0000 00 02
 	// 9f8d06 03 00 00 220200000000
@@ -84,6 +83,11 @@ class InventoryTransactionPacket extends PEPacket {
 	// 9f8d06 07 00 0a0800000000 00
 	// 00 f801 00 00 0a0800000000
 	
+	// drop item from craft (???)
+	// 1e 0000 00 02
+	// 00 00 00 00 220200000000
+	// 9f8d06 c701 00 220200000000 00
+	
 	private function getTransactions($playerProtocol) {
 		$transactions = [];
 		$actionsCount = $this->getVarInt();
@@ -100,7 +104,7 @@ class InventoryTransactionPacket extends PEPacket {
 				case self::INV_SOURCE_TYPE_GLOBAL: // ???
 					break;
 				case self::INV_SOURCE_TYPE_WORLD_INTERACTION:
-					$this->getVarInt(); // flags NoFlag = 0 WorldInteraction_Random = 1
+					var_dump('flags: ' . $this->getVarInt()); // flags NoFlag = 0 WorldInteraction_Random = 1
 					break;
 				case self::INV_SOURCE_TYPE_CREATIVE:
 					$tr->inventoryId = ContainerSetContentPacket::SPECIAL_CREATIVE;
