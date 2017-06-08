@@ -104,7 +104,7 @@ class InventoryTransactionPacket extends PEPacket {
 				case self::INV_SOURCE_TYPE_GLOBAL: // ???
 					break;
 				case self::INV_SOURCE_TYPE_WORLD_INTERACTION:
-					var_dump('flags: ' . $this->getVarInt()); // flags NoFlag = 0 WorldInteraction_Random = 1
+					$tr->flags = $this->getVarInt(); // flags NoFlag = 0 WorldInteraction_Random = 1
 					break;
 				case self::INV_SOURCE_TYPE_CREATIVE:
 					$tr->inventoryId = ContainerSetContentPacket::SPECIAL_CREATIVE;

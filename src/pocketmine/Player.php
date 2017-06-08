@@ -4246,6 +4246,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$trGroup = new SimpleTransactionGroup($this);
 		foreach ($packet->transactions as $trData) {
 //			echo $trData;
+			if ($trData->isDropItemTransaction()) {
+				$this->tryDropItem($packet->transactions);
+				return;
+			}
 			$transaction = $trData->convertToTransaction($this);
 			if ($transaction == null) {
 				// roolback
@@ -4268,7 +4272,54 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	/**
-	 * 
+	 * @minprotocol 120
+	 * @param SimpleTransactionData[] $transactionsData
+	 */
+	private function tryDropItem($transactionsData) {
+		$dropItem = null;
+		$transaction = null;
+		foreach ($transactionsData as $trData) {
+			if ($trData->isDropItemTransaction()) {
+				$dropItem = $trData->newItem;
+			} else {
+				$transaction = $trData->convertToTransaction($this);
+			}
+		}
+		if ($dropItem == null || $transaction == null) {
+			$this->inventory->sendContents($this);
+			if ($this->currentWindow != null) {
+				$this->currentWindow->sendContents($this);
+			}
+			return;
+		}
+		//  check transaction and real data
+		$inventory = $transaction->getInventory();
+		$item = $inventory->getItem($transaction->getSlot());
+		if (!$item->equals($dropItem) || $item->count < $dropItem->count) {
+			$inventory->sendContents($this);
+			return;
+		}
+		// generate event
+		$ev = new PlayerDropItemEvent($this, $dropItem);
+		$this->server->getPluginManager()->callEvent($ev);
+		if($ev->isCancelled()) {
+			$inventory->sendContents($this);
+			return;
+		}
+		// finalizing drop item process
+		if ($item->count == $dropItem->count) {
+			$item = Item::get(Item::AIR, 0, 0);
+		} else {
+			$item->count -= $dropItem->count;
+		}
+		$inventory->setItem($transaction->getSlot(), $item);
+		$motion = $this->getDirectionVector()->multiply(0.4);
+		$this->level->dropItem($this->add(0, 1.3, 0), $dropItem, $motion, 40);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
+	}
+	
+	/**
+	 * @minprotocol 120
 	 * @param Item[] $craftSlots
 	 * @param Recipe $recipe
 	 * @throws \Exception

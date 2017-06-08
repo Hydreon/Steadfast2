@@ -5,6 +5,7 @@ namespace pocketmine\inventory\transactions;
 use pocketmine\inventory\BaseTransaction;
 use pocketmine\inventory\PlayerInventory120;
 use pocketmine\item\Item;
+use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\Protocol120;
 use pocketmine\Player;
 
@@ -32,6 +33,8 @@ class SimpleTransactionData {
 	public $newItem;
 	/** @var integer */
 	public $craftAction = -1;
+	/** @var integer */
+	public $flags = 0;
 	
 	public function __construct() {
 		$this->oldItem = Item::get(Item::AIR);
@@ -42,11 +45,18 @@ class SimpleTransactionData {
 		return 'Source type: ' . $this->sourceType . PHP_EOL .
 				'Inv.ID: ' . $this->inventoryId . PHP_EOL .
 				'Craft action: ' . $this->craftAction . PHP_EOL .
+				'Flags: ' . $this->flags . PHP_EOL .
 				'Slot: ' . $this->slot . PHP_EOL .
 				'Old item: ' . $this->oldItem . PHP_EOL .
 				'New item: ' . $this->newItem . PHP_EOL;
 	}
 	
+	public function isDropItemTransaction() {
+		return $this->sourceType == InventoryTransactionPacket::INV_SOURCE_TYPE_WORLD_INTERACTION && 
+				$this->inventoryId == Protocol120::CONTAINER_ID_NONE;
+	}
+
+
 	/**
 	 * source - old
 	 * target - new
