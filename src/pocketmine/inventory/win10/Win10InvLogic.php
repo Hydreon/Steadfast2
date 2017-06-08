@@ -81,5 +81,18 @@ class Win10InvLogic {
 		}
 		self::$playersInventoryData[$playerName]->setPickUpItem($item);
 	}
+    
+    /**
+     * 
+     * @param Player $player
+     */
+    public static function removeData($player) {
+        $playerName = $player->getName();
+        if (isset(self::$playersInventoryData[$playerName]) && 
+            self::$playersInventoryData[$playerName]->check($player->getInventory())) {
+            
+			unset(self::$playersInventoryData[$playerName]);
+		}
+    }
 	
 }

@@ -25,6 +25,10 @@ class PlayerInventoryData {
 	public function __construct(Player $player) {
 		$this->inventory = $player->getInventory();
 	}
+    
+    public function check($inventory) {
+        return $this->inventory === $inventory;
+    }
 	
 	public function setPickUpItem($item) {
 		$this->pickUpItem = $item;

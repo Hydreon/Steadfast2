@@ -3043,7 +3043,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param string $reason  Reason showed in console
 	 */
 	public function close($message = "", $reason = "generic reason"){
-        
+        Win10InvLogic::removeData($this);
         foreach($this->tasks as $task){
 			$task->cancel();
 		}
