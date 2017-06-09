@@ -567,7 +567,7 @@ class Level implements ChunkManager, Metadatable{
 
 		$this->checkTime();
 
-		if(($currentTick % 200) === 0){
+		if(($currentTick % 200) === 0 && $this->server->getConfigBoolean("time-update", true)){
 			$this->sendTime();
 		}
 

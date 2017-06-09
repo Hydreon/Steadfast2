@@ -3093,7 +3093,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			parent::close();
 
-			if($this->loggedIn) $this->server->removeOnlinePlayer($this);
+			$this->server->removeOnlinePlayer($this);
 
 			$this->loggedIn = false;
 
