@@ -2230,10 +2230,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						if ($this->currentWindow instanceof EnchantInventory) {
 							if ($this->expLevel > 0) {
 								$enchantLevel = abs($packet->theThing);
+								if ($this->protocol >= ProtocolInfo::PROTOCOL_120) {
+									$this->currentWindow->setEnchantingLevel($enchantLevel);
+									return;
+								}
 								$items = $this->inventory->getContents();
 								foreach ($items as $slot => $item) {
 									if ($item->getId() === Item::DYE && $item->getDamage() === 4 && $item->getCount() >= $enchantLevel) {
-										$this->currentWindow->setEnchantingLevel($enchantLevel);
+										
 										break 2;
 									}
 								}
@@ -2679,11 +2683,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								$this->breakBlock($packet->position);
 								break;
 							default:
+								var_dump('Wrong actionType');
 								print_r($packet);
 								break;
 						}
 						break;
 					default:
+						var_dump('Wrong transactionType');
 						print_r($packet);
 						break;
 				}
@@ -3511,6 +3517,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->sendSelfData();				
 		$this->updateSpeed(self::DEFAULT_SPEED);
+		$this->addExperience(10, 100);
 //		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
 	}
 	
@@ -4250,6 +4257,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->tryDropItem($packet->transactions);
 				return;
 			}
+			if ($trData->isCompleteEnchantTransaction()) {
+				$this->tryEnchant($packet->transactions);
+				return;
+			}
 			$transaction = $trData->convertToTransaction($this);
 			if ($transaction == null) {
 				// roolback
@@ -4363,6 +4374,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				break;
 			}
+		}
+	}
+	
+	/**
+	 * @minprotocol 120
+	 * @param SimpleTransactionData[] $transactionsData
+	 */
+	private function tryEnchant($transactionsData) {
+		foreach ($transactionsData as $trData) {
+			if (!$trData->isUpdateEnchantSlotTransaction() || $trData->oldItem->getId() != Item::AIR) {
+				continue;
+			}
+			$transaction = $trData->convertToTransaction($this);
+			$inventory = $transaction->getInventory();
+			$inventory->setItem($transaction->getSlot(), $transaction->getTargetItem());
 		}
 	}
 

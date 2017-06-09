@@ -12,13 +12,18 @@ use pocketmine\Player;
 class SimpleTransactionData {
 	
 	/**
-	 * @INPORTANT don't use CRAFT_ACTION outside this class, it will change with new spec 
+	 * @INPORTANT don't use constants ACTION_ outside this class, it will change with new spec 
 	 */
-	const CRAFT_ACTION_PUT_SLOT = 3;
-	const CRAFT_ACTION_GET_SLOT = 5;
-	const CRAFT_ACTION_GET_RESULT = 7;
-	const CRAFT_ACTION_USE = 9;
-	const CRAFT_ACTION_DROP = 199;
+	const ACTION_CRAFT_PUT_SLOT = 3;
+	const ACTION_CRAFT_GET_SLOT = 5;
+	const ACTION_CRAFT_GET_RESULT = 7;
+	const ACTION_CRAFT_USE = 9;
+	
+	const ACTION_ENCH_ITEM = 29;
+	const ACTION_ENCH_LAPIS = 31;
+	const ACTION_ENCH_RESULT = 33;
+	
+	const ACTION_DROP = 199;
 	
 	/** @var integer */
 	/** @important for InventoryTransactionPacket */
@@ -32,7 +37,7 @@ class SimpleTransactionData {
 	/** @var Item */
 	public $newItem;
 	/** @var integer */
-	public $craftAction = -1;
+	public $action = -1;
 	/** @var integer */
 	public $flags = 0;
 	
@@ -44,7 +49,7 @@ class SimpleTransactionData {
 	public function __toString() {
 		return 'Source type: ' . $this->sourceType . PHP_EOL .
 				'Inv.ID: ' . $this->inventoryId . PHP_EOL .
-				'Craft action: ' . $this->craftAction . PHP_EOL .
+				'Action: ' . $this->action . PHP_EOL .
 				'Flags: ' . $this->flags . PHP_EOL .
 				'Slot: ' . $this->slot . PHP_EOL .
 				'Old item: ' . $this->oldItem . PHP_EOL .
@@ -55,8 +60,15 @@ class SimpleTransactionData {
 		return $this->sourceType == InventoryTransactionPacket::INV_SOURCE_TYPE_WORLD_INTERACTION && 
 				$this->inventoryId == Protocol120::CONTAINER_ID_NONE;
 	}
+	
+	public function isCompleteEnchantTransaction() {
+		return $this->action == self::ACTION_ENCH_RESULT;
+	}
 
-
+	public function isUpdateEnchantSlotTransaction() {
+		return $this->action == self::ACTION_ENCH_ITEM || $this->action == self::ACTION_ENCH_LAPIS;
+	}
+	
 	/**
 	 * source - old
 	 * target - new
@@ -80,12 +92,23 @@ class SimpleTransactionData {
 			case Protocol120::CONTAINER_ID_NONE:
 				$currentWindowId = $player->getCurrentWindowId();
 				if ($currentWindowId != $this->inventoryId) {
-					var_dump('it maybe big craft packet check it please');
-					return null;
+					// enchanting almost 100%
+					$inventory = $player->getCurrentWindow();
+					switch ($this->action) {
+						case self::ACTION_ENCH_ITEM:
+							$slot = 0;
+							break;
+						case self::ACTION_ENCH_LAPIS:
+							$slot = 1;
+							break;
+						default:
+							return null;
+					}
+					break;
 				}
 				$inventory = $player->getInventory();
-				switch ($this->craftAction) {
-					case self::CRAFT_ACTION_GET_RESULT:
+				switch ($this->action) {
+					case self::ACTION_CRAFT_GET_RESULT:
 						$slot = PlayerInventory120::CRAFT_RESULT_INDEX;
 						break;
 					default:
