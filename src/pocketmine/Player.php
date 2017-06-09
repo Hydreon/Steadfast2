@@ -3809,7 +3809,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk = new TransferPacket();
 			$pk->ip = $address;
 			$pk->port = ($port === false ? 19132 : $port);
-			$this->dataPacket($pk);
+			$this->directDataPacket($pk);
 		} else {
 			$pk = new RedirectPacket();
 			$pk->ip = $address;
