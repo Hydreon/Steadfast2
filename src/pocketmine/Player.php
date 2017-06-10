@@ -4247,5 +4247,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
  		}
  		parent::setOnFire($seconds, $damage);
  	}
+	
+	/**
+	 * 
+	 * @param integer $soundId
+	 * @param float[] $position
+	 */
+	public function sendSound($soundId, $position) {
+		$pk = new LevelSoundEventPacket();
+		$pk->eventId = $soundId;
+		$pk->x = $position['x'];
+		$pk->y = $position['y'];
+		$pk->z = $position['z'];
+		$pk->blockId = -1;
+		$pk->entityType = 1;
+		$this->dataPacket($pk);
+	}
 
 }
