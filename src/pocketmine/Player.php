@@ -165,7 +165,9 @@ use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\Protocol120;
 use pocketmine\inventory\PlayerInventory120;
-use pocketmine\network\Multiversion;
+
+use pocketmine\network\multiversion\Multiversion;
+use pocketmine\network\multiversion\MultiversionEnums;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -1942,35 +1944,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case 'PLAYER_ACTION_PACKET':
 				//Timings::$timerActionPacket->startTiming();
-				if($this->spawned === false or $this->blocked === true or ($this->dead === true and $packet->action !== 7)){
+//				if($this->spawned === false or $this->blocked === true or ($this->dead === true and $packet->action !== 7)){
+				if($this->spawned === false || $this->blocked === true){
 					//Timings::$timerActionPacket->stopTiming();
 					break;
 				}
 
 //				$this->craftingType = self::CRAFTING_DEFAULT;
-				
-				switch ($packet->action) {
-//					case PlayerActionPacket::ACTION_START_BREAK:
-//						$pos = new Vector3($packet->x, $packet->y, $packet->z);
-//						if($this->lastBreak !== PHP_INT_MAX or $pos->distanceSquared($this) > 10000){
-//							break;
-//						}
-//						$target = $this->level->getBlock($pos);
-//						$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $target, $packet->face, $target->getId() === 0 ? PlayerInteractEvent::LEFT_CLICK_AIR : PlayerInteractEvent::LEFT_CLICK_BLOCK);
-//						$this->getServer()->getPluginManager()->callEvent($ev);
-//						if($this->isSpectator()){
-//							$ev->setCancelled(true);
-//						}
-//						if($ev->isCancelled()){
-//							$this->inventory->sendHeldItem($this);
-//							break;
-//						}
-//						$this->lastBreak = microtime(true);
-//						break;
-//					case PlayerActionPacket::ACTION_ABORT_BREAK:
-//						$this->lastBreak = PHP_INT_MAX;
-//						break;
-					case PlayerActionPacket::ACTION_RELEASE_ITEM:
+				$action = MultiversionEnums::getPlayerAction($this->protocol, $packet->action);
+				switch ($action) {
+					case 'RELEASE_USE_ITEM':
 						if ($this->startAction > -1 and $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION)) {
 							if ($this->inventory->getItemInHand()->getId() === Item::BOW) {
 								$bow = $this->inventory->getItemInHand();
@@ -2063,10 +2046,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->inventory->sendContents($this);
 						}
 						break;
-					case PlayerActionPacket::ACTION_STOP_SLEEPING:
+					case 'STOP_SLEEPENG':
 						$this->stopSleep();
 						break;
-					case PlayerActionPacket::ACTION_RESPAWN:
+					case 'RESPAWN':
+						var_dump('respawn');
 						if($this->spawned === false or $this->isAlive() or !$this->isOnline()){
 							break;
 						}
@@ -2114,7 +2098,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						
 						$this->server->getPluginManager()->callEvent(new PlayerRespawnAfterEvent($this));
 						break;
-					case PlayerActionPacket::ACTION_START_SPRINT:
+					case 'START_SPRINTING':
 						$ev = new PlayerToggleSprintEvent($this, true);
 						$this->server->getPluginManager()->callEvent($ev);
 						if($ev->isCancelled()){
@@ -2123,7 +2107,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->setSprinting(true);
 						}
 						break;
-					case PlayerActionPacket::ACTION_STOP_SPRINT:
+					case 'STOP_STRINTING':
 						$ev = new PlayerToggleSprintEvent($this, false);
 						$this->server->getPluginManager()->callEvent($ev);
 						if($ev->isCancelled()){
@@ -2132,7 +2116,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->setSprinting(false);
 						}
 						break;
-					case PlayerActionPacket::ACTION_START_SNEAK:
+					case 'START_SNEAKING':
 						$ev = new PlayerToggleSneakEvent($this, true);
 						$this->server->getPluginManager()->callEvent($ev);
 						if($ev->isCancelled()){
@@ -2141,7 +2125,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->setSneaking(true);
 						}
 						break;
-					case PlayerActionPacket::ACTION_STOP_SNEAK:
+					case 'STOP_SNEAKING':
 						$ev = new PlayerToggleSneakEvent($this, false);
 						$this->server->getPluginManager()->callEvent($ev);
 						if($ev->isCancelled()){
@@ -2150,13 +2134,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->setSneaking(false);
 						}
 						break;
-					case PlayerActionPacket::ACTION_START_ELYTRA:
+					case 'START_GLIDING':
 						if ($this->isHaveElytra()) {
 							$this->setFlyingFlag(true);
 							$this->elytraIsActivated = true;
 						}
 						break;
-					case PlayerActionPacket::ACTION_STOP_ELYTRA:
+					case 'STOP_GLIDING':
 						$this->setFlyingFlag(false);
 						$this->elytraIsActivated = false;
 						break;

@@ -1,6 +1,6 @@
 <?php
 
-namespace pocketmine\network;
+namespace pocketmine\network\multiversion;
 
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\PlayerInventory120;
