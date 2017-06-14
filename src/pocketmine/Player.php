@@ -2144,6 +2144,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->setFlyingFlag(false);
 						$this->elytraIsActivated = false;
 						break;
+					case 'CRACK_BLOCK':
+//						
+//						// 190000bc1f0000c03f000060400000f040848008
+//						
+//						$pk = clone $packet;
+//						$this->dataPacket($pk);
+//						foreach ($this->getViewers() as $viewer) {
+//							$viewer->dataPacket($pk);
+//						}
+						break;
 				}
 
 				$this->startAction = -1;

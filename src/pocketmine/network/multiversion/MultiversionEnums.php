@@ -61,4 +61,16 @@ abstract class MultiversionEnums {
 		return self::$playerActionType[$playerProtocol][$actionId];
 	}
 	
+	public static function getPlayerActionId($playerProtocol, $actionName) {
+		if (!isset(self::$playerActionType[$playerProtocol])) {
+			$playerProtocol = -1;
+		}
+		foreach (self::$playerActionType[$playerProtocol] as $key => $value) {
+			if ($value == $actionName) {
+				return $key;
+			}
+		}
+		return -1;
+	}
+	
 }
