@@ -1436,7 +1436,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
 							$this->teleport($ev->getTo());						
 						}else{
-							$this->level->addEntityMovement($this->getViewers(), $this->getId(), $this->x, $this->y + $this->getVisibleEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+							$this->level->addEntityMovement($this->getViewers(), $this->getId(), $this->x, $this->y + $this->getVisibleEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw, true);
 						}
 					}
 				}else{
@@ -2543,6 +2543,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->currentWindow->sendContents($this);
 							$this->inventory->sendContents($this);
 						}
+						break;
+					case EntityEventPacket::FEED:
+						$position = [ 'x' => $this->x, 'y' => $this->y, 'z' => $this->z ];
+						$this->sendSound(LevelSoundEventPacket::SOUND_EAT, $position, 63);
 						break;
 				}
 				//Timings::$timerEntityEventPacket->stopTiming();
@@ -4202,5 +4206,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
  		}
  		parent::setOnFire($seconds, $damage);
  	}
+	
+	 /**
+	 * 
+	 * @param integer $soundId
+	 * @param float[] $position
+	 */
+	public function sendSound($soundId, $position, $entityType = 1) {
+		$pk = new LevelSoundEventPacket();
+		$pk->eventId = $soundId;
+		$pk->x = $position['x'];
+		$pk->y = $position['y'];
+		$pk->z = $position['z'];
+		$pk->blockId = -1;
+		$pk->entityType = $entityType;
+		$this->dataPacket($pk);
+	}
 
 }

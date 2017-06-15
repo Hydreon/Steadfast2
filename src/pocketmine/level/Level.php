@@ -2574,8 +2574,8 @@ class Level implements ChunkManager, Metadatable{
 		}
 	}
 
-	public function addEntityMovement($viewers, $entityId, $x, $y, $z, $yaw, $pitch, $headYaw = null){
-		$move = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch];
+	public function addEntityMovement($viewers, $entityId, $x, $y, $z, $yaw, $pitch, $headYaw = null, $isPlayer = false){
+		$move = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch, $isPlayer];
 		foreach ($viewers as $p) {
 			if(!isset($this->moveToSend[$p->getIdentifier()])){
 				$this->moveToSend[$p->getIdentifier()] = array(

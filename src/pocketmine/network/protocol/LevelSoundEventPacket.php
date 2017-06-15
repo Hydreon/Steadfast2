@@ -7,6 +7,10 @@ class LevelSoundEventPacket extends PEPacket {
 	const NETWORK_ID = Info::LEVEL_SOUND_EVENT_PACKET;
 	const PACKET_NAME = "LEVEL_SOUND_EVENT_PACKET";
 	
+	const SOUND_EAT = 30;
+ 	const SOUND_EXPLODE = 45;
+ 	const SOUND_CHEST_OPEN = 60;
+ 	const SOUND_CHEST_CLOSED = 61;
 	const SOUND_NOTE = 72;
 
 	public $eventId;
