@@ -759,6 +759,7 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param int $amount
 	 */
 	public function setHealth($amount) {
+		$amount = (int) round($amount);
 		if ($amount === $this->health) {
 			return;
 		}
