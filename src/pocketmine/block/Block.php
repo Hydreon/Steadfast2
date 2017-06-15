@@ -855,47 +855,72 @@ class Block extends Position implements Metadatable{
 	/**
 	 * Returns the seconds that this block takes to be broken using an specific Item
 	 *
+	 * Not implemented:
+	 *  - enchantment effects (Efficiency)
+	 *  - status effect on player (haste, mining fatigue)
+	 *  - player not on ground, player in water
+	 * 
 	 * @param Item $item
 	 *
 	 * @return float
 	 */
-	public function getBreakTime(Item $item){
-		$base = $this->getHardness() * 1.5;
-		if($this->canBeBrokenWith($item)){
-			if($this->getToolType() === Tool::TYPE_SHEARS and $item->isShears()){
-				$base /= 15;
-			}elseif(
-				($this->getToolType() === Tool::TYPE_PICKAXE and ($tier = $item->isPickaxe()) !== false) or
-				($this->getToolType() === Tool::TYPE_AXE and ($tier = $item->isAxe()) !== false) or
-				($this->getToolType() === Tool::TYPE_SHOVEL and ($tier = $item->isShovel()) !== false)
-			){
-				switch($tier){
-					case Tool::TIER_WOODEN:
-						$base /= 2;
-						break;
-					case Tool::TIER_STONE:
-						$base /= 4;
-						break;
-					case Tool::TIER_IRON:
-						$base /= 6;
-						break;
-					case Tool::TIER_DIAMOND:
-						$base /= 8;
-						break;
-					case Tool::TIER_GOLD:
-						$base /= 12;
-						break;
+	public function getBreakTime(Item $item) {
+		static $tierMultipliers = [
+			Tool::TIER_WOODEN => 2,
+			Tool::TIER_STONE => 4,
+			Tool::TIER_IRON => 6,
+			Tool::TIER_DIAMOND => 8,
+			Tool::TIER_GOLD => 12,
+		];
+		
+		/** @docs http://minecraft.gamepedia.com/Breaking */
+		if (!$this->canBeBrokenWith($item)) {
+			return -1;
+		}
+		$secondsForBreak = $this->getHardness();
+		$toolType = $this->getToolType();
+		switch ($toolType) {
+			case Tool::TYPE_SWORD:
+				if ($item->isSword()) {
+					if ($this->id == self::COBWEB) {
+						// line below is simplification of $baseTime = $baseTime * 1.5 / 15
+						$secondsForBreak = $secondsForBreak * 0.1;
+					}
+					return $secondsForBreak;
 				}
-			}
-		}else{
-			$base *= 3.33;
+				break;
+			case Tool::TYPE_SHEARS:
+				if ($item->isShears()) {
+					if ($this->id == self::WOOL) {
+						// line below is simplification of $baseTime = $baseTime * 1.5 / 5
+						$secondsForBreak = $secondsForBreak * 0.3;
+					} else {
+						$secondsForBreak = $secondsForBreak * 0.1;
+					}
+					return $secondsForBreak;
+				}
+				break;
+			case Tool::TYPE_SHOVEL:
+				$tier = $item->isShovel();
+				if ($tier !== false && isset($tierMultipliers[$tier])) {
+					return $secondsForBreak * 1.5 / $tierMultipliers[$tier];
+				}
+				break;
+			case Tool::TYPE_PICKAXE:
+				$tier = $item->isPickaxe();
+				if ($tier !== false && isset($tierMultipliers[$tier])) {
+					return $secondsForBreak * 1.5 / $tierMultipliers[$tier];
+				}
+				break;
+			case Tool::TYPE_AXE:
+				$tier = $item->isAxe();
+				if ($tier !== false && isset($tierMultipliers[$tier])) {
+					return $secondsForBreak * 1.5 / $tierMultipliers[$tier];
+				}
+				break;
 		}
-
-		if($item->isSword()){
-			$base *= 0.5;
-		}
-
-		return $base;
+		
+		return $secondsForBreak * 5;
 	}
 
 	public function canBeBrokenWith(Item $item){

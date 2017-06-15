@@ -169,6 +169,8 @@ use pocketmine\inventory\PlayerInventory120;
 use pocketmine\network\multiversion\Multiversion;
 use pocketmine\network\multiversion\MultiversionEnums;
 
+use pocketmine\network\protocol\LevelEventPacket;
+
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
  */
@@ -1953,6 +1955,37 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				$this->craftingType = self::CRAFTING_DEFAULT;
 				$action = MultiversionEnums::getPlayerAction($this->protocol, $packet->action);
 				switch ($action) {
+					case 'START_DESTROY_BLOCK':
+						if (!$this->isCreative()) {
+							$block = $this->level->getBlock(new Vector3($packet->x, $packet->y, $packet->z));
+							$breakTime = ceil($block->getBreakTime($this->inventory->getItemInHand()) * 20);
+							if ($breakTime > 0) {
+								$pk = new LevelEventPacket();
+								$pk->evid = LevelEventPacket::EVENT_START_BLOCK_CRACKING;
+								$pk->x = $packet->x;
+								$pk->y = $packet->y;
+								$pk->z = $packet->z;
+								$pk->data = (int) (65535 / $breakTime); // ????
+								$this->dataPacket($pk);
+								$viewers = $this->getViewers();
+								foreach ($viewers as $viewer) {
+									$viewer->dataPacket($pk);
+								}
+							}
+						}
+						break;
+					case 'ABORT_DESTROY_BLOCK':
+						$pk = new LevelEventPacket();
+						$pk->evid = LevelEventPacket::EVENT_STOP_BLOCK_CRACKING;
+						$pk->x = $packet->x;
+						$pk->y = $packet->y;
+						$pk->z = $packet->z;
+						$this->dataPacket($pk);
+						$viewers = $this->getViewers();
+						foreach ($viewers as $viewer) {
+							$viewer->dataPacket($pk);
+						}
+						break;
 					case 'RELEASE_USE_ITEM':
 						if ($this->startAction > -1 and $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION)) {
 							if ($this->inventory->getItemInHand()->getId() === Item::BOW) {
@@ -2050,16 +2083,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->stopSleep();
 						break;
 					case 'RESPAWN':
-						var_dump('respawn');
-						if($this->spawned === false or $this->isAlive() or !$this->isOnline()){
+						if ($this->spawned === false or $this->isAlive() or !$this->isOnline()) {
 							break;
 						}
-
-						if($this->server->isHardcore()){
+						if ($this->server->isHardcore()) {
 							$this->setBanned(true);
 							break;
 						}
-
 						$this->craftingType = self::CRAFTING_DEFAULT;
 
 						$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
@@ -2143,16 +2173,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					case 'STOP_GLIDING':
 						$this->setFlyingFlag(false);
 						$this->elytraIsActivated = false;
-						break;
-					case 'CRACK_BLOCK':
-//						
-//						// 190000bc1f0000c03f000060400000f040848008
-//						
-//						$pk = clone $packet;
-//						$this->dataPacket($pk);
-//						foreach ($this->getViewers() as $viewer) {
-//							$viewer->dataPacket($pk);
-//						}
 						break;
 				}
 
@@ -2657,7 +2677,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			/** @minProtocol 120 */
 			case 'INVENTORY_TRANSACTION_PACKET':
-				var_dump('здесь могла быть ваша транзакция');
 				switch ($packet->transactionType) {
 					case InventoryTransactionPacket::TRANSACTION_TYPE_NORMAL:
 						$this->normalTransactionLogic($packet);
@@ -2677,14 +2696,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								$this->breakBlock($packet->position);
 								break;
 							default:
-								var_dump('Wrong actionType');
-								print_r($packet);
+								error_log('Wrong actionType ' . $packet->actionType);
 								break;
 						}
 						break;
 					default:
-						var_dump('Wrong transactionType');
-						print_r($packet);
+						error_log('Wrong transactionType ' . $packet->transactionType);
 						break;
 				}
 				break;
@@ -4358,7 +4375,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						($item->getDamage() != $ingredient->getDamage() && $ingredient->getDamage() != 32767) || 
 						$item->count < $ingredient->count;
 				if ($isItemsNotEquals) {
-					throw new \Exception('Пришёл кривой рецепт');
+					throw new \Exception('Recive bad recipe');
 				}
 				$firstIndex = $i + 1;
 				$item->count -= $ingredient->count;

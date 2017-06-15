@@ -55,23 +55,23 @@ class LevelEventPacket extends PEPacket{
 	const EVENT_PARTICLE_SPLASH = 2002;
 	const EVENT_PARTICLE_EYE_DESPAWN = 2003;
 	const EVENT_PARTICLE_SPAWN = 2004;
-
+	// couldron 3501 - 3508
 	const EVENT_START_RAIN = 3001;
 	const EVENT_START_THUNDER = 3002;
 	const EVENT_STOP_RAIN = 3003;
 	const EVENT_STOP_THUNDER = 3004;
-
+	
+	const EVENT_START_BLOCK_CRACKING = 3600;
+	const EVENT_STOP_BLOCK_CRACKING = 3601;
 	const EVENT_SET_DATA = 4000;
-
 	const EVENT_PLAYERS_SLEEPING = 9800;
-
 	const EVENT_ADD_PARTICLE_MASK = 0x4000;
 
 	public $evid;
 	public $x;
 	public $y;
 	public $z;
-	public $data;
+	public $data = 0;
 
 	public function decode($playerProtocol){
 
