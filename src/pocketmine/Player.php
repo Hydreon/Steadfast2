@@ -3528,7 +3528,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->sendSelfData();				
 		$this->updateSpeed(self::DEFAULT_SPEED);
-		$this->addExperience(10, 100);
 //		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
 	}
 	
