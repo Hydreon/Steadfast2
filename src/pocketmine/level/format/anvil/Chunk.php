@@ -40,6 +40,8 @@ class Chunk extends BaseChunk {
 
 	/** @var Compound */
 	protected $nbt;
+	
+	const SECTION_COUNT = 16;
 
 	public function __construct($level, Compound $nbt = null) {
 		if ($nbt === null) {
@@ -82,12 +84,12 @@ class Chunk extends BaseChunk {
 		foreach ($this->nbt->Sections as $section) {
 			if ($section instanceof Compound) {
 				$y = (int) $section["Y"];
-				if ($y < 8) {
+				if ($y < static::SECTION_COUNT) {
 					$sections[$y] = new ChunkSection($section);
 				}
 			}
 		}
-		for ($y = 0; $y < 8; ++$y) {
+		for ($y = 0; $y < static::SECTION_COUNT; ++$y) {
 			if (!isset($sections[$y])) {
 				$sections[$y] = new EmptyChunkSection($y);
 			}
@@ -336,7 +338,7 @@ class Chunk extends BaseChunk {
 			$chunk->x = $chunkX;
 			$chunk->z = $chunkZ;
 
-			for ($y = 0; $y < 8; ++$y) {
+			for ($y = 0; $y < static::SECTION_COUNT; ++$y) {
 				$chunk->sections[$y] = new EmptyChunkSection($y);
 			}
 

@@ -45,7 +45,7 @@ class SimpleChunkManager implements ChunkManager{
 	 */
 	public function getBlockIdAt($x, $y, $z){
 		if($chunk = $this->getChunk($x >> 4, $z >> 4)){
-			return $chunk->getBlockId($x & 0xf, $y & 0x7f, $z & 0xf);
+			return $chunk->getBlockId($x & 0xf, $y & Level::Y_MASK, $z & 0xf);
 		}
 		return 0;
 	}
@@ -60,7 +60,7 @@ class SimpleChunkManager implements ChunkManager{
 	 */
 	public function setBlockIdAt($x, $y, $z, $id){
 		if($chunk = $this->getChunk($x >> 4, $z >> 4)){
-			$chunk->setBlockId($x & 0xf, $y & 0x7f, $z & 0xf, $id);
+			$chunk->setBlockId($x & 0xf, $y & Level::Y_MASK, $z & 0xf, $id);
 		}
 	}
 
@@ -75,7 +75,7 @@ class SimpleChunkManager implements ChunkManager{
 	 */
 	public function getBlockDataAt($x, $y, $z) {
 		if($chunk = $this->getChunk($x >> 4, $z >> 4)){
-			return $chunk->getBlockData($x & 0xf, $y & 0x7f, $z & 0xf);
+			return $chunk->getBlockData($x & 0xf, $y & Level::Y_MASK, $z & 0xf);
 		}
 		return 0;
 	}
@@ -90,7 +90,7 @@ class SimpleChunkManager implements ChunkManager{
 	 */
 	public function setBlockDataAt($x, $y, $z, $data){
 		if($chunk = $this->getChunk($x >> 4, $z >> 4)){
-			$chunk->setBlockData($x & 0xf, $y & 0x7f, $z & 0xf, $data);
+			$chunk->setBlockData($x & 0xf, $y & Level::Y_MASK, $z & 0xf, $data);
 		}
 	}
 

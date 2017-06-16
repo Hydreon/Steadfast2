@@ -26,6 +26,7 @@ use pocketmine\block\Sapling;
 use pocketmine\level\ChunkManager;
 use pocketmine\level\generator\object\Tree as ObjectTree;
 use pocketmine\utils\Random;
+use pocketmine\level\Level;
 
 class Tree extends Populator{
 	/** @var ChunkManager */
@@ -62,7 +63,7 @@ class Tree extends Populator{
 	}
 
 	private function getHighestWorkableBlock($x, $z){
-		for($y = 127; $y > 0; --$y){
+		for($y = Level::MAX_Y - 1; $y > 0; --$y){
 			$b = $this->level->getBlockIdAt($x, $y, $z);
 			if($b === Block::DIRT or $b === Block::GRASS){
 				break;

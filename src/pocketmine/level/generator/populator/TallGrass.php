@@ -24,6 +24,7 @@ namespace pocketmine\level\generator\populator;
 use pocketmine\block\Block;
 use pocketmine\level\ChunkManager;
 use pocketmine\utils\Random;
+use pocketmine\level\Level;
 
 class TallGrass extends Populator{
 	/** @var ChunkManager */
@@ -60,7 +61,7 @@ class TallGrass extends Populator{
 	}
 
 	private function getHighestWorkableBlock($x, $z){
-		for($y = 127; $y >= 0; --$y){
+		for($y = Level::MAX_Y - 1; $y >= 0; --$y){
 			$b = $this->level->getBlockIdAt($x, $y, $z);
 			if($b !== Block::AIR and $b !== Block::LEAVES and $b !== Block::LEAVES2 and $b !== Block::SNOW_LAYER){
 				break;

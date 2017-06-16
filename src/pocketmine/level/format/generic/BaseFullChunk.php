@@ -29,6 +29,7 @@ use pocketmine\Player;
 use pocketmine\tile\Tile;
 use pocketmine\utils\Binary;
 use pocketmine\block\Block;
+use pocketmine\level\Level;
 
 abstract class BaseFullChunk implements FullChunk{
 
@@ -104,7 +105,7 @@ abstract class BaseFullChunk implements FullChunk{
 		if(count($heightMap) === 256){
 			$this->heightMap = $heightMap;
 		}else{
-			$this->heightMap = array_fill(0, 256, 127);
+			$this->heightMap = array_fill(0, 256, Level::MAX_Y - 1);
 		}
 
 		$this->NBTtiles = $tiles;
@@ -230,7 +231,7 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function getHighestBlockAt($x, $z){
 		$column = $this->getBlockIdColumn($x, $z);
-		for($y = 127; $y >= 0; --$y){
+		for($y = Level::MAX_Y - 1; $y >= 0; --$y){
 			if($column{$y} !== "\x00"){
 				return $y;
 			}
@@ -381,7 +382,7 @@ abstract class BaseFullChunk implements FullChunk{
 		for($z = 0; $z < 16; ++$z){
 			for($x = 0; $x < 16; ++$x){
 				$top = $this->getHeightMap($x, $z);
-				for($y = 127; $y > $top; --$y){
+				for($y = Level::MAX_Y - 1; $y > $top; --$y){
 					$this->setBlockSkyLight($x, $y, $z, 15);
 				}
 

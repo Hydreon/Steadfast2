@@ -30,6 +30,7 @@ use pocketmine\nbt\tag\Compound;
 use pocketmine\utils\ChunkException;
 use pocketmine\utils\Binary;
 use pocketmine\nbt\NBT;
+use pocketmine\tile\Spawnable;
 
 class Anvil extends McRegion {
 
@@ -105,6 +106,10 @@ class Anvil extends McRegion {
 		$skyLight = "";
 
 		foreach($chunk->getSections() as $section){
+			//TODO ANVIL
+			if ($section->getY() > 7) {
+				break;
+			}
 			$ids .= $section->getIdArray();
 			$meta .= $section->getDataArray();
 			$blockLight .= $section->getLightArray();
@@ -134,6 +139,7 @@ class Anvil extends McRegion {
 	}
 	
 	private function getColumn($data, $x, $z){
+		//TODO ANVIL
 		$column = "";
 		$i = ($z << 4) + $x;
 		for($y = 0; $y < 128; ++$y){
@@ -143,6 +149,7 @@ class Anvil extends McRegion {
 	}
 	
 	private function getHalfColumn($data, $x, $z){
+		//TODO ANVIL
 		$column = "";
 		$i = ($z << 3) + ($x >> 1);
 		if(($x & 1) === 0){
