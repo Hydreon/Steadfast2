@@ -45,6 +45,8 @@ class PlayerActionPacket extends PEPacket{
 
 	const ACTION_START_ELYTRA = 15;
 	const ACTION_STOP_ELYTRA = 16;
+	
+	const ACTION_CRACK_BLOCK = 18;
 
 	public $eid;
 	public $action;
