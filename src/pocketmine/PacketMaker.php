@@ -10,6 +10,7 @@ use pocketmine\utils\Binary;
 use pocketmine\network\protocol\BatchPacket;
 use pocketmine\network\protocol\MoveEntityPacket;
 use pocketmine\network\protocol\SetEntityMotionPacket;
+use pocketmine\network\protocol\MovePlayerPacket;
 
 class PacketMaker extends Worker {
 
@@ -87,8 +88,19 @@ class PacketMaker extends Worker {
 			foreach ($data['moveData'] as $identifier => $moveData) {
 				$moveStr = "";
 				foreach ($moveData['data'] as $singleMoveData) {
-					$pk = new MoveEntityPacket();
-					$pk->entities = [$singleMoveData];
+					if ($singleMoveData[7]) {
+						$pk = new MovePlayerPacket();
+						$pk->eid = $singleMoveData[0];
+						$pk->x = $singleMoveData[1];
+						$pk->y = $singleMoveData[2];
+						$pk->z = $singleMoveData[3];
+						$pk->pitch = $singleMoveData[6];
+						$pk->yaw = $singleMoveData[5];
+						$pk->bodyYaw = $singleMoveData[4];
+					} else {
+						$pk = new MoveEntityPacket();
+						$pk->entities = [$singleMoveData];
+					}
 					$pk->encode($moveData['playerProtocol']);
 					$moveStr .= Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;					
 				}

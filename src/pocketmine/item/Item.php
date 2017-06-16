@@ -1451,7 +1451,7 @@ class Item{
 			if(!isset($b[1])){
 				$meta = 0;
 			}else{
-				$meta = $b[1] & 32767;
+				$meta = $b[1] & 0x7FFF;
 			}
 
 			if(defined(Item::class . "::" . strtoupper($b[0]))){
@@ -1469,7 +1469,7 @@ class Item{
 
 	public function __construct($id, $meta = 0, $count = 1, $name = "Unknown", $obtainTime = null){
 		$this->id = $id & 0xffff;
-		$this->meta = $meta !== null ? $meta & 32767 : null;
+		$this->meta = $meta !== null ? $meta & 0x7fff : null;
 		$this->count = (int) $count;
 		$this->name = $name;
 		if($obtainTime == null){
@@ -1821,7 +1821,7 @@ class Item{
 	}
 
 	public function setDamage($meta){
-		$this->meta = $meta !== null ? $meta & 32767 : null;
+		$this->meta = $meta !== null ? $meta & 0x7FFF : null;
 	}
 
 	public function getMaxStackSize(){
