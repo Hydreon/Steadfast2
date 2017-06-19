@@ -41,8 +41,7 @@ class Chunk extends BaseChunk {
 	/** @var Compound */
 	protected $nbt;
 	
-	//TODO ANVIL
-	const SECTION_COUNT = 8;
+	const SECTION_COUNT = 16;
 
 	public function __construct($level, Compound $nbt = null) {
 		if ($nbt === null) {
@@ -213,7 +212,7 @@ class Chunk extends BaseChunk {
 			return null;
 		}
 	}
-
+	
 	public function toFastBinary() {
 		$nbt = clone $this->getNBT();
 

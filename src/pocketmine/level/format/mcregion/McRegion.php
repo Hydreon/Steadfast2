@@ -311,6 +311,6 @@ class McRegion extends BaseLevelProvider{
 	}
 	
 	public static function getYMask() {
-		return 0x7F;
+		return 0x7f;
 	}
 }

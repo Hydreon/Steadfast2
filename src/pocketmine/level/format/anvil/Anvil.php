@@ -87,83 +87,35 @@ class Anvil extends McRegion {
 		$data['chunkX'] = $x;
 		$data['chunkZ'] = $z;
 		$data['tiles'] = $tiles;
+		$data['isAnvil'] = true;
 		$data['chunk'] = $this->getChunkData($chunk);
 		
 		$this->getLevel()->chunkMaker->pushMainToThreadPacket(serialize($data));
 		return null;
 	}
-		
-		
+	
 	private function getChunkData($chunk) {
-		$orderedIds = "";
-		$orderedData = "";
-		$orderedSkyLight = "";
-		$orderedLight = "";
-
-		$ids = "";
-		$meta = "";
-		$blockLight = "";
-		$skyLight = "";
-
-		foreach($chunk->getSections() as $section){
-			//TODO ANVIL
-			if ($section->getY() > 7) {
-				break;
+		$data = [
+			'sections' => [],
+			'heightMap' => pack("C*", ...$chunk->getHeightMapArray()),
+			'biomeColor' => pack("n*", ...$chunk->getBiomeColorArray())	
+		];
+		foreach ($chunk->getSections() as $section) {
+			if ($section instanceof EmptyChunkSection) {
+				$data['sections'][$section->getY()]['empty'] = true;
+				continue;
 			}
-			$ids .= $section->getIdArray();
-			$meta .= $section->getDataArray();
-			$blockLight .= $section->getLightArray();
-			$skyLight .= $section->getSkyLightArray();
+			$chunkData = [];
+			$chunkData['empty'] = false;
+			$chunkData['blocks'] = $section->getIdArray();
+			$chunkData['data'] = $section->getDataArray();
+			$chunkData['blockLight'] = $section->getLightArray();
+			$chunkData['skyLight'] = $section->getSkyLightArray();
+			$data['sections'][$section->getY()] = $chunkData;
 		}
-
-		for($x = 0; $x < 16; ++$x){
-			for($z = 0; $z < 16; ++$z){
-				$orderedIds .= $this->getColumn($ids, $x, $z);
-				$orderedData .= $this->getHalfColumn($meta, $x, $z);
-				$orderedSkyLight .= $this->getHalfColumn($skyLight, $x, $z);
-				$orderedLight .= $this->getHalfColumn($blockLight, $x, $z);
-			}
-		}
-		$heightmap = pack("C*", ...$chunk->getHeightMapArray());
-		$biomeColors = pack("N*", ...$chunk->getBiomeColorArray());
-		return
-			Binary::writeInt($chunk->getX()) . 
-			Binary::writeInt($chunk->getZ()) .
-			$orderedIds .
-			$orderedData .
-			$orderedSkyLight .
-			$orderedLight .
-			$heightmap .
-			$biomeColors .
-			chr(($chunk->isPopulated() ? 1 << 1 : 0) + ($chunk->isGenerated() ? 1 : 0));
+		return $data;
 	}
-	
-	private function getColumn($data, $x, $z){
-		//TODO ANVIL
-		$column = "";
-		$i = ($z << 4) + $x;
-		for($y = 0; $y < 128; ++$y){
-			$column .= $data{($y << 8) + $i};
-		}
-		return $column;
-	}
-	
-	private function getHalfColumn($data, $x, $z){
-		//TODO ANVIL
-		$column = "";
-		$i = ($z << 3) + ($x >> 1);
-		if(($x & 1) === 0){
-			for($y = 0; $y < 128; $y += 2){
-				$column .= ($data{($y << 7) + $i} & "\x0f") | chr((ord($data{(($y + 1) << 7) + $i}) & 0x0f) << 4);
-			}
-		}else{
-			for($y = 0; $y < 128; $y += 2){
-				$column .= chr((ord($data{($y << 7) + $i}) & 0xf0) >> 4) | ($data{(($y + 1) << 7) + $i} & "\xf0");
-			}
-		}
-		return $column;
-	}
-
+		
 	/**
 	 * @param $x
 	 * @param $z
@@ -233,11 +185,10 @@ class Anvil extends McRegion {
 	}
 	
 	public static function getMaxY() {
-		//TODO ANVIL
-		return 128;
+		return 256;
 	}
 	
 	public static function getYMask() {
-		return 0x7F;
+		return 0xff;
 	}
 }
