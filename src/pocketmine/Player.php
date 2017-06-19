@@ -162,6 +162,7 @@ use pocketmine\item\Elytra;
 use pocketmine\network\protocol\SetTitlePacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
+use pocketmine\network\protocol\LevelEventPacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -338,6 +339,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     protected $xblName = '';
 	
 	protected $viewRadius;
+	
+	private $actionsNum = [];
 	
 	public function getLeaveMessage(){
 		return "";
@@ -2081,26 +2084,40 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				$this->craftingType = self::CRAFTING_DEFAULT;
 				
 				switch ($packet->action) {
-//					case PlayerActionPacket::ACTION_START_BREAK:
-//						$pos = new Vector3($packet->x, $packet->y, $packet->z);
-//						if($this->lastBreak !== PHP_INT_MAX or $pos->distanceSquared($this) > 10000){
-//							break;
-//						}
-//						$target = $this->level->getBlock($pos);
-//						$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $target, $packet->face, $target->getId() === 0 ? PlayerInteractEvent::LEFT_CLICK_AIR : PlayerInteractEvent::LEFT_CLICK_BLOCK);
-//						$this->getServer()->getPluginManager()->callEvent($ev);
-//						if($this->isSpectator()){
-//							$ev->setCancelled(true);
-//						}
-//						if($ev->isCancelled()){
-//							$this->inventory->sendHeldItem($this);
-//							break;
-//						}
-//						$this->lastBreak = microtime(true);
-//						break;
-//					case PlayerActionPacket::ACTION_ABORT_BREAK:
-//						$this->lastBreak = PHP_INT_MAX;
-//						break;
+					case PlayerActionPacket::ACTION_START_BREAK:
+						$this->actionsNum['CRACK_BLOCK'] = 0;
+						if (!$this->isCreative()) {
+							$block = $this->level->getBlock(new Vector3($packet->x, $packet->y, $packet->z));
+							$breakTime = ceil($block->getBreakTime($this->inventory->getItemInHand()) * 20);
+							if ($breakTime > 0) {
+								$pk = new LevelEventPacket();
+								$pk->evid = LevelEventPacket::EVENT_START_BLOCK_CRACKING;
+								$pk->x = $packet->x;
+								$pk->y = $packet->y;
+								$pk->z = $packet->z;
+								$pk->data = (int) (65535 / $breakTime); // ????
+								$this->dataPacket($pk);
+								$viewers = $this->getViewers();
+								foreach ($viewers as $viewer) {
+									$viewer->dataPacket($pk);
+								}
+							}
+						}
+						break;
+					case PlayerActionPacket::ACTION_ABORT_BREAK:
+					case PlayerActionPacket::ACTION_STOP_BREAK:
+						$this->actionsNum['CRACK_BLOCK'] = 0;
+						$pk = new LevelEventPacket();
+						$pk->evid = LevelEventPacket::EVENT_STOP_BLOCK_CRACKING;
+						$pk->x = $packet->x;
+						$pk->y = $packet->y;
+						$pk->z = $packet->z;
+						$this->dataPacket($pk);
+						$viewers = $this->getViewers();
+						foreach ($viewers as $viewer) {
+							$viewer->dataPacket($pk);
+						}
+						break;
 					case PlayerActionPacket::ACTION_RELEASE_ITEM:
 						if ($this->startAction > -1 and $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION)) {
 							if ($this->inventory->getItemInHand()->getId() === Item::BOW) {
@@ -2290,6 +2307,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					case PlayerActionPacket::ACTION_STOP_ELYTRA:
 						$this->setFlyingFlag(false);
 						$this->elytraIsActivated = false;
+						break;
+					case PlayerActionPacket::ACTION_CRACK_BLOCK:
+						$this->crackBlock($packet);
 						break;
 				}
 
@@ -3995,12 +4015,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		];
 		$armor = $this->getInventory()->getArmorContents();
 		foreach ($armor as $item) {
-			if ($item->getId() !== Item::AIR) {
-				$enchantments = $item->getEnchantments();
-				foreach ($result as $id => $enchantment) {
-					if (isset($enchantments[$id]) && (is_null($enchantment) || $enchantments[$id]->getLevel() > $enchantment->getLevel())) {
-						$result[$id] = $enchantments[$id];
-					}
+			if ($item->getId() === Item::AIR) {
+				continue;
+			}
+			$enchantments = $item->getEnchantments();
+			foreach ($result as $id => $enchantment) {
+				if (isset($enchantments[$id]) && (is_null($enchantment) || $enchantments[$id]->getLevel() > $enchantment->getLevel())) {
+					$result[$id] = $enchantments[$id];
 				}
 			}
 		}
@@ -4207,18 +4228,53 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
  		parent::setOnFire($seconds, $damage);
  	}
 	
+	/**
+	 * 
+	 * @param PlayerActionPacket $packet
+	 */
+	private function crackBlock($packet) {
+		if (!isset($this->actionsNum['CRACK_BLOCK'])) {
+			$this->actionsNum['CRACK_BLOCK'] = 0;
+		}
+		$recipients = $this->getViewers();
+		$recipients[] = $this;
+		$blockId = $this->level->getBlockIdAt($packet->x, $packet->y, $packet->z);
+		$blockPos = [
+			'x' => $packet->x,
+			'y' => $packet->y,
+			'z' => $packet->z,
+		];
+		
+		$isNeedSendSound = $this->actionsNum['CRACK_BLOCK'] % 4 == 0;
+		$this->actionsNum['CRACK_BLOCK']++;
+
+		$pk = new LevelEventPacket();
+		$pk->evid = LevelEventPacket::EVENT_PARTICLE_CRACK_BLOCK;
+		$pk->x = $packet->x;
+		$pk->y = $packet->y + 1;
+		$pk->z = $packet->z;
+		$pk->data = $blockId;
+		
+		foreach ($recipients as $recipient) {
+			$recipient->dataPacket($pk);
+			if ($isNeedSendSound) {
+				$recipient->sendSound(LevelSoundEventPacket::SOUND_HIT, $blockPos, 1, $blockId);
+			}
+		}
+	}
+	
 	 /**
 	 * 
 	 * @param integer $soundId
 	 * @param float[] $position
 	 */
-	public function sendSound($soundId, $position, $entityType = 1) {
+	public function sendSound($soundId, $position, $entityType = 1, $blockId = -1) {
 		$pk = new LevelSoundEventPacket();
 		$pk->eventId = $soundId;
 		$pk->x = $position['x'];
 		$pk->y = $position['y'];
 		$pk->z = $position['z'];
-		$pk->blockId = -1;
+		$pk->blockId = $blockId;
 		$pk->entityType = $entityType;
 		$this->dataPacket($pk);
 	}
