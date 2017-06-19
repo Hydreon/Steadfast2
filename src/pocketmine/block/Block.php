@@ -877,14 +877,18 @@ class Block extends Position implements Metadatable{
 		if (!$this->canBeBrokenWith($item)) {
 			return -1;
 		}
-		$secondsForBreak = $this->getHardness();
 		$toolType = $this->getToolType();
+		$isSuitableForHarvest = !empty($this->getDrops($item)) || $toolType == Tool::TYPE_NONE;
+		$secondsForBreak = $this->getHardness() * ($isSuitableForHarvest ? 1.5 : 5);
+		if ($secondsForBreak == 0) {
+			$secondsForBreak = 0.05;
+		}
+		
 		switch ($toolType) {
 			case Tool::TYPE_SWORD:
 				if ($item->isSword()) {
 					if ($this->id == self::COBWEB) {
-						// line below is simplification of $baseTime = $baseTime * 1.5 / 15
-						$secondsForBreak = $secondsForBreak * 0.1;
+						$secondsForBreak = $secondsForBreak / 15;
 					}
 					return $secondsForBreak;
 				}
@@ -893,9 +897,9 @@ class Block extends Position implements Metadatable{
 				if ($item->isShears()) {
 					if ($this->id == self::WOOL) {
 						// line below is simplification of $baseTime = $baseTime * 1.5 / 5
-						$secondsForBreak = $secondsForBreak * 0.3;
+						$secondsForBreak = $secondsForBreak / 5;
 					} else {
-						$secondsForBreak = $secondsForBreak * 0.1;
+						$secondsForBreak = $secondsForBreak / 15;
 					}
 					return $secondsForBreak;
 				}
@@ -903,24 +907,24 @@ class Block extends Position implements Metadatable{
 			case Tool::TYPE_SHOVEL:
 				$tier = $item->isShovel();
 				if ($tier !== false && isset($tierMultipliers[$tier])) {
-					return $secondsForBreak * 1.5 / $tierMultipliers[$tier];
+					return $secondsForBreak / $tierMultipliers[$tier];
 				}
 				break;
 			case Tool::TYPE_PICKAXE:
 				$tier = $item->isPickaxe();
 				if ($tier !== false && isset($tierMultipliers[$tier])) {
-					return $secondsForBreak * 1.5 / $tierMultipliers[$tier];
+					return $secondsForBreak / $tierMultipliers[$tier];
 				}
 				break;
 			case Tool::TYPE_AXE:
 				$tier = $item->isAxe();
 				if ($tier !== false && isset($tierMultipliers[$tier])) {
-					return $secondsForBreak * 1.5 / $tierMultipliers[$tier];
+					return $secondsForBreak / $tierMultipliers[$tier];
 				}
 				break;
 		}
 		
-		return $secondsForBreak * 5;
+		return $secondsForBreak;
 	}
 
 	public function canBeBrokenWith(Item $item){
