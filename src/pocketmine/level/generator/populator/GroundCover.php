@@ -25,7 +25,6 @@ use pocketmine\block\Block;
 use pocketmine\level\ChunkManager;
 use pocketmine\level\generator\biome\Biome;
 use pocketmine\utils\Random;
-use pocketmine\level\Level;
 
 class GroundCover extends Populator{
 
@@ -42,12 +41,12 @@ class GroundCover extends Populator{
 					}
 
 					$column = $chunk->getBlockIdColumn($x, $z);
-					for($y = Level::MAX_Y - 1; $y > 0; --$y){
+					for($y = $level->getMaxY() - 1; $y > 0; --$y){
 						if($column{$y} !== "\x00" and !Block::get(ord($column{$y}))->isTransparent()){
 							break;
 						}
 					}
-					$startY = min(Level::MAX_Y - 1, $y + $diffY);
+					$startY = min($level->getMaxY() - 1, $y + $diffY);
 					$endY = $startY - count($cover);
 					for($y = $startY; $y > $endY and $y >= 0; --$y){
 						$b = $cover[$startY - $y];

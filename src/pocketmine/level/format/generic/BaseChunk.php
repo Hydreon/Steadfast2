@@ -27,7 +27,6 @@ use pocketmine\level\format\LevelProvider;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\utils\Binary;
 use pocketmine\utils\ChunkException;
-use pocketmine\level\Level;
 
 abstract class BaseChunk extends BaseFullChunk implements Chunk{
 
@@ -72,7 +71,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 		if(count($heightMap) === 256){
 			$this->heightMap = $heightMap;
 		}else{
-			$this->heightMap = array_fill(0, 256, Level::MAX_Y - 1);
+			$this->heightMap = array_fill(0, 256, $provider::getMaxY() - 1);
 		}
 
 		$this->NBTtiles = $tiles;

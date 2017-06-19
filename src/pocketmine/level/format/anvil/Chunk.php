@@ -41,7 +41,8 @@ class Chunk extends BaseChunk {
 	/** @var Compound */
 	protected $nbt;
 	
-	const SECTION_COUNT = 16;
+	//TODO ANVIL
+	const SECTION_COUNT = 8;
 
 	public function __construct($level, Compound $nbt = null) {
 		if ($nbt === null) {

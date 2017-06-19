@@ -105,7 +105,7 @@ class Explosion{
 							$vBlock->x = $pointerX >= $x ? $x : $x - 1;
 							$vBlock->y = $pointerY >= $y ? $y : $y - 1;
 							$vBlock->z = $pointerZ >= $z ? $z : $z - 1;
-							if($vBlock->y < 0 or $vBlock->y >= Level::MAX_Y){
+							if($vBlock->y < 0 or $vBlock->y >= $this->level->getMaxY()){
 								break;
 							}
 							$block = $this->level->getBlock($vBlock);

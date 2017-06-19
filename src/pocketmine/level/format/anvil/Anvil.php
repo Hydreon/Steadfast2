@@ -231,4 +231,13 @@ class Anvil extends McRegion {
 
 		return true;
 	}
+	
+	public static function getMaxY() {
+		//TODO ANVIL
+		return 128;
+	}
+	
+	public static function getYMask() {
+		return 0x7F;
+	}
 }

@@ -32,7 +32,6 @@ use pocketmine\nbt\tag\IntArray;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\utils\Binary;
 use pocketmine\utils\MainLogger;
-use pocketmine\level\Level;
 
 class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 
@@ -102,6 +101,7 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 	}
 
 	public function generateChunk($x, $z){
+		$levelProvider = $this->levelProvider;
 		$nbt = new Compound("Level", []);
 		$nbt->xPos = new IntTag("xPos", ($this->getX() * 32) + $x);
 		$nbt->zPos = new IntTag("zPos", ($this->getZ() * 32) + $z);
@@ -112,7 +112,7 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		$nbt->InhabitedTime = new LongTag("InhabitedTime", 0);
 		$nbt->Biomes = new ByteArray("Biomes", str_repeat(chr(-1), 256));
 		$nbt->BiomeColors = new IntArray("BiomeColors", array_fill(0, 156, Binary::readInt("\x00\x85\xb2\x4a")));
-		$nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, Level::MAX_Y - 1));
+		$nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, $levelProvider::getMaxY() - 1));
 		$nbt->Sections = new Enum("Sections", []);
 		$nbt->Sections->setTagType(NBT::TAG_Compound);
 		$nbt->Entities = new Enum("Entities", []);
