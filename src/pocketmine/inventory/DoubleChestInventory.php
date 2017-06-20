@@ -40,7 +40,7 @@ class DoubleChestInventory extends ChestInventory implements InventoryHolder{
 		$this->left = $left->getRealInventory();
 		$this->right = $right->getRealInventory();
 		$items = array_merge($this->left->getContents(), $this->right->getContents());
-		BaseInventory::__construct($this, InventoryType::get(InventoryType::DOUBLE_CHEST), $items);
+		BaseInventory::__construct($left, InventoryType::get(InventoryType::DOUBLE_CHEST), $items);
 	}
 
 	public function getInventory(){
