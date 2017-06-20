@@ -81,49 +81,68 @@ class ChunkMaker extends Worker {
 	}
 
 	protected function doChunk($data) {
-		$offset = 8;
-		$blockIdArray = substr($data['chunk'], $offset, 32768);
-		$offset += 32768;
-		$blockDataArray = substr($data['chunk'], $offset, 16384);
-		$offset += 16384;
-		$skyLightArray = substr($data['chunk'], $offset, 16384);
-		$offset += 16384;
-		$blockLightArray = substr($data['chunk'], $offset, 16384);
-		$offset += 16384;
-		$heightMapArray = substr($data['chunk'], $offset, 256);
-		$offset += 256;
-		$biomeColorArray = array_values(unpack("N*", substr($data['chunk'], $offset, 1024)));	
-		
-		$countBlocksInChunk = 8;
-		$chunkData = chr($countBlocksInChunk);		
-		
-		for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
-			$chunkData .= chr(0);
-			for ($i = 0; $i < 256; $i++) {
-				$chunkData .= substr($blockIdArray, $blockIndex * 16 + $i * 128, 16);
+		if (isset($data['isAnvil']) && $data['isAnvil'] == true) {
+			$chunkData = chr(count($data['chunk']['sections']));
+			foreach ($data['chunk']['sections'] as $y => $sections) {
+				$chunkData .= chr(0);
+				if ($sections['empty'] == true) {
+					$chunkData .= str_repeat("\x00", 10240);
+				} else {
+					$chunkData .= $this->sortData($sections['blocks']) . 
+							$this->sortHalfData($sections['data']) . 
+							$this->sortHalfData($sections['skyLight']) . 
+							$this->sortHalfData($sections['blockLight']);
+				}
 			}
-			
-			for ($i = 0; $i < 256; $i++) {
-				$chunkData .= substr($blockDataArray, $blockIndex * 8 + $i * 64, 8);
-			}
-			
-			for ($i = 0; $i < 256; $i++) {
-				$chunkData .= substr($skyLightArray, $blockIndex * 8 + $i * 64, 8);
-			}
-			
-			for ($i = 0; $i < 256; $i++) {
-				$chunkData .= substr($blockLightArray, $blockIndex * 8 + $i * 64, 8);
-			}
-			
-		}
-		
-		
-		$chunkData .= $heightMapArray .
-				pack("n*", ...$biomeColorArray) .
-				Binary::writeLInt(0) .
-				$data['tiles'];		
-		
+			$chunkData .= $data['chunk']['heightMap'] .
+					$data['chunk']['biomeColor'] .
+					Binary::writeLInt(0) .
+					$data['tiles'];		
+		} else {
+			$offset = 8;
+			$blockIdArray = substr($data['chunk'], $offset, 32768);
+			$offset += 32768;
+			$blockDataArray = substr($data['chunk'], $offset, 16384);
+			$offset += 16384;
+			$skyLightArray = substr($data['chunk'], $offset, 16384);
+			$offset += 16384;
+			$blockLightArray = substr($data['chunk'], $offset, 16384);
+			$offset += 16384;
+			$heightMapArray = substr($data['chunk'], $offset, 256);
+			$offset += 256;
+			$biomeColorArray = array_values(unpack("N*", substr($data['chunk'], $offset, 1024)));	
 
+			$countBlocksInChunk = 8;
+			$chunkData = chr($countBlocksInChunk);		
+
+			for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
+				$chunkData .= chr(0);
+				for ($i = 0; $i < 256; $i++) {
+					$chunkData .= substr($blockIdArray, $blockIndex * 16 + $i * 128, 16);
+				}
+
+				for ($i = 0; $i < 256; $i++) {
+					$chunkData .= substr($blockDataArray, $blockIndex * 8 + $i * 64, 8);
+				}
+
+				for ($i = 0; $i < 256; $i++) {
+					$chunkData .= substr($skyLightArray, $blockIndex * 8 + $i * 64, 8);
+				}
+
+				for ($i = 0; $i < 256; $i++) {
+					$chunkData .= substr($blockLightArray, $blockIndex * 8 + $i * 64, 8);
+				}
+
+			}
+
+
+			$chunkData .= $heightMapArray .
+					pack("n*", ...$biomeColorArray) .
+					Binary::writeLInt(0) .
+					$data['tiles'];		
+		}
+
+	
 		$result = array();
 		$result['chunkX'] = $data['chunkX'];
 		$result['chunkZ'] = $data['chunkZ'];
@@ -209,6 +228,41 @@ class ChunkMaker extends Worker {
 		}
 
 		return $messages;
+	}
+	
+	private function sortData($data){
+		$newData = '';
+		for ($x = 0; $x < 16; $x++) {
+			for ($z = 0; $z < 16; $z++) {
+				for ($y = 0; $y < 16; $y++) {
+					$newData .= $data{($y << 8) + ($z << 4) + $x};
+				}
+			}
+		}
+		return $newData;
+	}
+	
+	private function sortHalfData($data){
+		$newData = str_repeat("\x00", 2048);
+		for ($x = 0; $x < 16; $x++) {
+			for ($z = 0; $z < 16; $z++) {
+				for ($y = 0; $y < 16; $y++) {
+					$i = ($x << 7) | ($z << 3) | ($y >> 1);
+					$l = ord($data{($y << 7) + ($z << 3) + ($x >> 1)});
+					if (($x & 1) === 0) {
+						$l = $l & 0x0f;
+					} else {
+						$l = $l >> 4;
+					}
+					if (($y & 1) === 0) {
+						$newData{$i} = chr((ord($newData{$i}) & 0xf0) | ($l & 0x0f));
+					} else {
+						$newData{$i} = chr((($l & 0x0f) << 4) | (ord($newData{$i}) & 0x0f));
+					}
+				}
+			}
+		}
+		return $newData;
 	}
 
 }

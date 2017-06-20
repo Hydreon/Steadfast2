@@ -120,7 +120,7 @@ class Flat extends Generator{
 			for($X = 0; $X < 16; ++$X){
 				$this->chunk->setBiomeId($X, $Z, $biome);
 				$this->chunk->setBiomeColor($X, $Z, $R, $G, $B);
-				for($y = 0; $y < 128; ++$y){
+				for($y = 0; $y < $this->level->getMaxY(); ++$y){
 					$this->chunk->setBlock($X, $y, $Z, ...$this->structure[$y]);
 				}
 			}

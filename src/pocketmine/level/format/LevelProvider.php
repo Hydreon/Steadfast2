@@ -213,5 +213,9 @@ interface LevelProvider{
 	public function getLevel();
 
 	public function close();
+	
+	public static function getMaxY();
+	
+	public static function getYMask();
 
 }

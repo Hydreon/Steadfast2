@@ -57,7 +57,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 				throw new ChunkException("Received invalid ChunkSection instance");
 			}
 
-			if($Y >= self::SECTION_COUNT){
+			if($Y >= static::SECTION_COUNT){
 				throw new ChunkException("Invalid amount of chunks");
 			}
 		}
@@ -71,7 +71,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 		if(count($heightMap) === 256){
 			$this->heightMap = $heightMap;
 		}else{
-			$this->heightMap = array_fill(0, 256, 127);
+			$this->heightMap = array_fill(0, 256, $provider::getMaxY() - 1);
 		}
 
 		$this->NBTtiles = $tiles;
@@ -161,7 +161,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 
 	public function getBlockIdColumn($x, $z){
 		$column = "";
-		for($y = 0; $y < Chunk::SECTION_COUNT; ++$y){
+		for($y = 0; $y < static::SECTION_COUNT; ++$y){
 			$column .= $this->sections[$y]->getBlockIdColumn($x, $z);
 		}
 
@@ -170,7 +170,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 
 	public function getBlockDataColumn($x, $z){
 		$column = "";
-		for($y = 0; $y < Chunk::SECTION_COUNT; ++$y){
+		for($y = 0; $y < static::SECTION_COUNT; ++$y){
 			$column .= $this->sections[$y]->getBlockDataColumn($x, $z);
 		}
 
@@ -179,7 +179,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 
 	public function getBlockSkyLightColumn($x, $z){
 		$column = "";
-		for($y = 0; $y < Chunk::SECTION_COUNT; ++$y){
+		for($y = 0; $y < static::SECTION_COUNT; ++$y){
 			$column .= $this->sections[$y]->getBlockSkyLightColumn($x, $z);
 		}
 
@@ -188,7 +188,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 
 	public function getBlockLightColumn($x, $z){
 		$column = "";
-		for($y = 0; $y < Chunk::SECTION_COUNT; ++$y){
+		for($y = 0; $y < static::SECTION_COUNT; ++$y){
 			$column .= $this->sections[$y]->getBlockLightColumn($x, $z);
 		}
 
@@ -223,7 +223,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 
 	public function getBlockIdArray(){
 		$blocks = "";
-		for($y = 0; $y < Chunk::SECTION_COUNT; ++$y){
+		for($y = 0; $y < static::SECTION_COUNT; ++$y){
 			$blocks .= $this->sections[$y]->getIdArray();
 		}
 
@@ -232,7 +232,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 
 	public function getBlockDataArray(){
 		$data = "";
-		for($y = 0; $y < Chunk::SECTION_COUNT; ++$y){
+		for($y = 0; $y < static::SECTION_COUNT; ++$y){
 			$data .= $this->sections[$y]->getDataArray();
 		}
 
@@ -241,7 +241,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 
 	public function getBlockSkyLightArray(){
 		$skyLight = "";
-		for($y = 0; $y < Chunk::SECTION_COUNT; ++$y){
+		for($y = 0; $y < static::SECTION_COUNT; ++$y){
 			$skyLight .= $this->sections[$y]->getSkyLightArray();
 		}
 
@@ -250,7 +250,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 
 	public function getBlockLightArray(){
 		$blockLight = "";
-		for($y = 0; $y < Chunk::SECTION_COUNT; ++$y){
+		for($y = 0; $y < static::SECTION_COUNT; ++$y){
 			$blockLight .= $this->sections[$y]->getLightArray();
 		}
 

@@ -256,6 +256,9 @@ class Level implements ChunkManager, Metadatable{
 	public $chunkMaker = null;
 	
 	private $closed = false;
+	
+	protected $yMask;
+	protected $maxY;
 
 		/**
 	 * Returns the chunk unique hash/key
@@ -270,14 +273,14 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public static function blockHash($x, $y, $z){
-		return PHP_INT_SIZE === 8 ? (($x & 0xFFFFFFF) << 35) | (($y & 0x7f) << 28) | ($z & 0xFFFFFFF) : $x . ":" . $y .":". $z;
+		return PHP_INT_SIZE === 8 ? (($x & 0x7FFFFFF) << 36) | (($y & 0xff) << 28) | ($z & 0x7FFFFFF) : $x . ":" . $y .":". $z;
 	}
 
 	public static function getBlockXYZ($hash, &$x, &$y, &$z){
 		if(PHP_INT_SIZE === 8){
-			$x = ($hash >> 35) << 36 >> 36;
-			$y = (($hash >> 28) & 0x7f);// << 57 >> 57; //it's always positive
-			$z = ($hash & 0xFFFFFFF) << 36 >> 36;
+			$x = ($hash >> 36) & 0x7FFFFFF;
+			$y = (($hash >> 28) & 0xff);// << 57 >> 57; //it's always positive
+			$z = ($hash & 0x7FFFFFF);
 		}else{
 			$hash = explode(":", $hash);
 			$x = (int) $hash[0];
@@ -318,6 +321,8 @@ class Level implements ChunkManager, Metadatable{
 
 		if(is_subclass_of($provider, LevelProvider::class, true)){
 			$this->provider = new $provider($this, $path);
+			$this->yMask = $provider::getYMask();
+			$this->maxY = $provider::getMaxY();
 		}else{
 			throw new LevelException("Provider is not a subclass of LevelProvider");
 		}
@@ -1056,10 +1061,10 @@ class Level implements ChunkManager, Metadatable{
 		$chunk = $this->getChunk($pos->x >> 4, $pos->z >> 4, false);
 		$level = 0;
 		if($chunk instanceof FullChunk){
-			$level = $chunk->getBlockSkyLight($pos->x & 0x0f, $pos->y & 0x7f, $pos->z & 0x0f);
+			$level = $chunk->getBlockSkyLight($pos->x & 0x0f, $pos->y & $this->getYMask(), $pos->z & 0x0f);
 			//TODO: decrease light level by time of day
 			if($level < 15){
-				$level = max($chunk->getBlockLight($pos->x & 0x0f, $pos->y & 0x7f, $pos->z & 0x0f));
+				$level = max($chunk->getBlockLight($pos->x & 0x0f, $pos->y & $this->getYMask(), $pos->z & 0x0f));
 			}
 		}
 
@@ -1074,7 +1079,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return int bitmap, (id << 4) | data
 	 */
 	public function getFullBlock($x, $y, $z){
-		return $this->getChunk($x >> 4, $z >> 4, false)->getFullBlock($x & 0x0f, $y & 0x7f, $z & 0x0f);
+		return $this->getChunk($x >> 4, $z >> 4, false)->getFullBlock($x & 0x0f, $y & $this->getYMask(), $z & 0x0f);
 	}
 
 	/**
@@ -1089,8 +1094,8 @@ class Level implements ChunkManager, Metadatable{
 		$index = self::blockHash($pos->x, $pos->y, $pos->z);
 		if($cached === true and isset($this->blockCache[$index])){
 			return $this->blockCache[$index];
-		}elseif($pos->y >= 0 and $pos->y < 128 and isset($this->chunks[$chunkIndex = self::chunkHash ($pos->x >> 4, $pos->z >> 4)])){
-			$fullState = $this->chunks[$chunkIndex]->getFullBlock($pos->x & 0x0f, $pos->y & 0x7f, $pos->z & 0x0f);
+		}elseif($pos->y >= 0 and $pos->y < $this->getMaxY() and isset($this->chunks[$chunkIndex = self::chunkHash ($pos->x >> 4, $pos->z >> 4)])){
+			$fullState = $this->chunks[$chunkIndex]->getFullBlock($pos->x & 0x0f, $pos->y & $this->getYMask(), $pos->z & 0x0f);
 		}else{
 			$fullState = 0;
 		}
@@ -1145,11 +1150,11 @@ class Level implements ChunkManager, Metadatable{
 		$visited = [];
 		$removalVisited = [];
 
-		$oldLevel = $this->getChunk($x >> 4,  $z >> 4, true)->getBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f);
-		$newLevel = (int) Block::$light[$this->getChunk($x >> 4,  $z >> 4, true)->getBlockId($x & 0x0f,  $y & 0x7f,  $z & 0x0f)];
+		$oldLevel = $this->getChunk($x >> 4,  $z >> 4, true)->getBlockLight($x & 0x0f,  $y & $this->getYMask(),  $z & 0x0f);
+		$newLevel = (int) Block::$light[$this->getChunk($x >> 4,  $z >> 4, true)->getBlockId($x & 0x0f,  $y & $this->getYMask(),  $z & 0x0f)];
 
 		if($oldLevel !== $newLevel){
-			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f,  $newLevel & 0x0f);
+			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & $this->getYMask(),  $z & 0x0f,  $newLevel & 0x0f);
 
 			if($newLevel < $oldLevel){
 				$removalVisited[self::blockHash($x, $y, $z)] = true;
@@ -1178,7 +1183,7 @@ class Level implements ChunkManager, Metadatable{
 			/** @var Vector3 $node */
 			$node = $lightPropagationQueue->dequeue();
 
-			$lightLevel = $this->getChunk($node->x >> 4,  $node->z >> 4, true)->getBlockLight($node->x & 0x0f,  $node->y & 0x7f,  $node->z & 0x0f) - (int) Block::$lightFilter[$this->getChunk($node->x >> 4,  $node->z >> 4, true)->getBlockId($node->x & 0x0f,  $node->y & 0x7f,  $node->z & 0x0f)];
+			$lightLevel = $this->getChunk($node->x >> 4,  $node->z >> 4, true)->getBlockLight($node->x & 0x0f,  $node->y & $this->getYMask(),  $node->z & 0x0f) - (int) Block::$lightFilter[$this->getChunk($node->x >> 4,  $node->z >> 4, true)->getBlockId($node->x & 0x0f,  $node->y & $this->getYMask(),  $node->z & 0x0f)];
 
 			if($lightLevel >= 1){
 				$this->computeSpreadBlockLight($node->x - 1, $node->y, $node->z, $lightLevel, $lightPropagationQueue, $visited);
@@ -1192,10 +1197,10 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	private function computeRemoveBlockLight($x, $y, $z, $currentLight, \SplQueue $queue, \SplQueue $spreadQueue, array &$visited, array &$spreadVisited){
-		$current = $this->getChunk($x >> 4,  $z >> 4, true)->getBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f);
+		$current = $this->getChunk($x >> 4,  $z >> 4, true)->getBlockLight($x & 0x0f,  $y & $this->getYMask(),  $z & 0x0f);
 
 		if($current !== 0 and $current < $currentLight){
-			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f,  0 & 0x0f);
+			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & $this->getYMask(),  $z & 0x0f,  0 & 0x0f);
 
 			if(!isset($visited[$index = self::blockHash($x, $y, $z)])){
 				$visited[$index] = true;
@@ -1212,10 +1217,10 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	private function computeSpreadBlockLight($x, $y, $z, $currentLight, \SplQueue $queue, array &$visited){
-		$current = $this->getChunk($x >> 4,  $z >> 4, true)->getBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f);
+		$current = $this->getChunk($x >> 4,  $z >> 4, true)->getBlockLight($x & 0x0f,  $y & $this->getYMask(),  $z & 0x0f);
 
 		if($current < $currentLight){
-			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & 0x7f,  $z & 0x0f,  $currentLight & 0x0f);
+			$this->getChunk($x >> 4,  $z >> 4, true)->setBlockLight($x & 0x0f,  $y & $this->getYMask(),  $z & 0x0f,  $currentLight & 0x0f);
 
 			if(!isset($visited[$index = self::blockHash($x, $y, $z)])){
 				$visited[$index] = true;
@@ -1251,12 +1256,12 @@ class Level implements ChunkManager, Metadatable{
 	 * @return bool Whether the block has been updated or not
 	 */
 	public function setBlock(Vector3 $pos, Block $block, $direct = false, $update = true){
-		if($pos->y < 0 or $pos->y >= 128){
+		if($pos->y < 0 or $pos->y >= $this->getMaxY()){
 			return false;
 		}
 		unset($this->blockCache[$index = self::blockHash($pos->x, $pos->y, $pos->z)]);
 
-		if($this->getChunk($pos->x >> 4, $pos->z >> 4, true)->setBlock($pos->x & 0x0f, $pos->y & 0x7f, $pos->z & 0x0f, $block->getId(), $block->getDamage())){
+		if($this->getChunk($pos->x >> 4, $pos->z >> 4, true)->setBlock($pos->x & 0x0f, $pos->y & $this->getYMask(), $pos->z & 0x0f, $block->getId(), $block->getDamage())){
 			if(!($pos instanceof Position)){
 				$pos = $this->temporalPosition->setComponents($pos->x, $pos->y, $pos->z);
 			}
@@ -1458,7 +1463,7 @@ class Level implements ChunkManager, Metadatable{
 		$target = $this->getBlock($vector);
 		$block = $target->getSide($face);
 
-		if($block->y > 127 or $block->y < 0){
+		if($block->y >= $this->getMaxY() or $block->y < 0){
 			return false;
 		}
 
@@ -1748,7 +1753,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return int 0-255
 	 */
 	public function getBlockIdAt($x, $y, $z){
-		return $this->getChunk($x >> 4, $z >> 4, true)->getBlockId($x & 0x0f, $y & 0x7f, $z & 0x0f);
+		return $this->getChunk($x >> 4, $z >> 4, true)->getBlockId($x & 0x0f, $y & $this->getYMask(), $z & 0x0f);
 	}
 
 	/**
@@ -1761,7 +1766,7 @@ class Level implements ChunkManager, Metadatable{
 	 */
 	public function setBlockIdAt($x, $y, $z, $id){
 		unset($this->blockCache[self::blockHash($x, $y, $z)]);
-		$this->getChunk($x >> 4, $z >> 4, true)->setBlockId($x & 0x0f, $y & 0x7f, $z & 0x0f, $id & 0xff);
+		$this->getChunk($x >> 4, $z >> 4, true)->setBlockId($x & 0x0f, $y & $this->getYMask(), $z & 0x0f, $id & 0xff);
 	}
 
 	/**
@@ -1774,7 +1779,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return int 0-15
 	 */
 	public function getBlockDataAt($x, $y, $z){
-		return $this->getChunk($x >> 4, $z >> 4, true)->getBlockData($x & 0x0f, $y & 0x7f, $z & 0x0f);
+		return $this->getChunk($x >> 4, $z >> 4, true)->getBlockData($x & 0x0f, $y & $this->getYMask(), $z & 0x0f);
 	}
 
 	/**
@@ -1787,7 +1792,7 @@ class Level implements ChunkManager, Metadatable{
 	 */
 	public function setBlockDataAt($x, $y, $z, $data){
 		unset($this->blockCache[self::blockHash($x, $y, $z)]);
-		$this->getChunk($x >> 4, $z >> 4, true)->setBlockData($x & 0x0f, $y & 0x7f, $z & 0x0f, $data & 0x0f);
+		$this->getChunk($x >> 4, $z >> 4, true)->setBlockData($x & 0x0f, $y & $this->getYMask(), $z & 0x0f, $data & 0x0f);
 	}
 
 	/**
@@ -1800,7 +1805,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return int 0-15
 	 */
 	public function getBlockSkyLightAt($x, $y, $z){
-		return $this->getChunk($x >> 4, $z >> 4, true)->getBlockSkyLight($x & 0x0f, $y & 0x7f, $z & 0x0f);
+		return $this->getChunk($x >> 4, $z >> 4, true)->getBlockSkyLight($x & 0x0f, $y & $this->getYMask(), $z & 0x0f);
 	}
 
 	/**
@@ -1812,7 +1817,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @param int $level 0-15
 	 */
 	public function setBlockSkyLightAt($x, $y, $z, $level){
-		$this->getChunk($x >> 4, $z >> 4, true)->setBlockSkyLight($x & 0x0f, $y & 0x7f, $z & 0x0f, $level & 0x0f);
+		$this->getChunk($x >> 4, $z >> 4, true)->setBlockSkyLight($x & 0x0f, $y & $this->getYMask(), $z & 0x0f, $level & 0x0f);
 	}
 
 	/**
@@ -1825,7 +1830,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return int 0-15
 	 */
 	public function getBlockLightAt($x, $y, $z){
-		return $this->getChunk($x >> 4, $z >> 4, true)->getBlockLight($x & 0x0f, $y & 0x7f, $z & 0x0f);
+		return $this->getChunk($x >> 4, $z >> 4, true)->getBlockLight($x & 0x0f, $y & $this->getYMask(), $z & 0x0f);
 	}
 
 	/**
@@ -1837,7 +1842,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @param int $level 0-15
 	 */
 	public function setBlockLightAt($x, $y, $z, $level){
-		$this->getChunk($x >> 4, $z >> 4, true)->setBlockLight($x & 0x0f, $y & 0x7f, $z & 0x0f, $level & 0x0f);
+		$this->getChunk($x >> 4, $z >> 4, true)->setBlockLight($x & 0x0f, $y & $this->getYMask(), $z & 0x0f, $level & 0x0f);
 	}
 
 	/**
@@ -2351,12 +2356,12 @@ class Level implements ChunkManager, Metadatable{
 			$z = $v->z & 0x0f;
 			if($chunk !== null){
 				for(; $v->y > 0; --$v->y){
-					if($v->y < 127 and Block::$solid[$chunk->getBlockId($x, $v->y & 0x7f, $z)]){
+					if($v->y < ($this->getMaxY() - 1) and Block::$solid[$chunk->getBlockId($x, $v->y & $this->getYMask(), $z)]){
 						$v->y++;
 						break;
 					}
 				}
-				for(; $v->y < 128; ++$v->y){
+				for(; $v->y < $this->getMaxY(); ++$v->y){
 					if(!Block::$solid[$chunk->getBlockId($x, $v->y + 1, $z)]){
 						if(!Block::$solid[$chunk->getBlockId($x, $v->y, $z)]){
 							return new Position($spawn->x, $v->y === Math::floorFloat($spawn->y) ? $spawn->y : $v->y, $spawn->z, $this);
@@ -2652,5 +2657,13 @@ class Level implements ChunkManager, Metadatable{
 		foreach ($this->getUsingChunk($x, $z) as $player) {
 			$this->chunkSendQueue[$index][spl_object_hash($player)] = $player;
 		}
+	}
+	
+	public function getYMask() {
+		return $this->yMask;
+	}
+	
+	public function getMaxY() {
+		return $this->maxY;
 	}
 }

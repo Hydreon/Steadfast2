@@ -44,7 +44,7 @@ class AddPaintingPacket extends PEPacket{
 		$this->putVarInt($this->eid);
 		$this->putVarInt($this->eid);
 		$this->putSignedVarInt($this->x);
-		$this->putByte($this->y);
+		$this->putVarInt($this->y);
 		$this->putSignedVarInt($this->z);
 		$this->putSignedVarInt($this->direction);
 		$this->putString($this->title);
