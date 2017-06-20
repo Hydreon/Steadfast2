@@ -305,4 +305,12 @@ class McRegion extends BaseLevelProvider{
 		}
 		$this->level = null;
 	}
+	
+	public static function getMaxY() {
+		return 128;
+	}
+	
+	public static function getYMask() {
+		return 0x7f;
+	}
 }

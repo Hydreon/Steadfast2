@@ -59,7 +59,7 @@ class PlayerActionPacket extends PEPacket{
 		$this->eid = $this->getVarInt();
 		$this->action = $this->getSignedVarInt();
 		$this->x = $this->getSignedVarInt();
-		$this->y = $this->getByte();
+		$this->y = $this->getVarInt();
 		$this->z = $this->getSignedVarInt();
 		$this->face = $this->getVarInt();
 	}
@@ -69,7 +69,7 @@ class PlayerActionPacket extends PEPacket{
 		$this->putVarInt($this->eid);
 		$this->putSignedVarInt($this->action);
 		$this->putSignedVarInt($this->x);
-		$this->putByte($this->y);
+		$this->putVarInt($this->y);
 		$this->putSignedVarInt($this->z);
 		$this->putVarInt($this->face);
 	}

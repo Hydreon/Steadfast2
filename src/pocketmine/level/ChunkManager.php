@@ -63,4 +63,8 @@ interface ChunkManager{
 	 * @param int $data 0-15
 	 */
 	public function setBlockDataAt($x, $y, $z, $data);
+	
+	public function getYMask();
+	
+	public function getMaxY();
 }
