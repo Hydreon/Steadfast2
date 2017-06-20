@@ -1550,7 +1550,8 @@ class Server{
 			"auto-generate" => false,
 			"save-player-data" => false,
 			"use-proxy" => false,
-			"use-raklib" => true
+			"use-raklib" => true,
+			"time-update" => true
 		]);
 
 		ServerScheduler::$WORKERS = 4;

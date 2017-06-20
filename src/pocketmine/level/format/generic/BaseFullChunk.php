@@ -104,7 +104,7 @@ abstract class BaseFullChunk implements FullChunk{
 		if(count($heightMap) === 256){
 			$this->heightMap = $heightMap;
 		}else{
-			$this->heightMap = array_fill(0, 256, 127);
+			$this->heightMap = array_fill(0, 256, $provider::getMaxY() - 1);
 		}
 
 		$this->NBTtiles = $tiles;
@@ -230,7 +230,8 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function getHighestBlockAt($x, $z){
 		$column = $this->getBlockIdColumn($x, $z);
-		for($y = 127; $y >= 0; --$y){
+		$provider = $this->provider;
+		for($y = $provider::getMaxY() - 1; $y >= 0; --$y){
 			if($column{$y} !== "\x00"){
 				return $y;
 			}
@@ -381,7 +382,8 @@ abstract class BaseFullChunk implements FullChunk{
 		for($z = 0; $z < 16; ++$z){
 			for($x = 0; $x < 16; ++$x){
 				$top = $this->getHeightMap($x, $z);
-				for($y = 127; $y > $top; --$y){
+				$provider = $this->provider;
+				for($y = $provider::getMaxY() - 1; $y > $top; --$y){
 					$this->setBlockSkyLight($x, $y, $z, 15);
 				}
 

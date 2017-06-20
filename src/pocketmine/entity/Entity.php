@@ -705,6 +705,11 @@ abstract class Entity extends Location implements Metadatable{
 			$source->setCancelled();
 		}
 		
+		$this->server->getPluginManager()->callEvent($source);
+		if($source->isCancelled()){
+			return;
+		}
+		
 		if ($source instanceof EntityDamageByEntityEvent) {
 			$damager = $source->getDamager();
 			if ($damager instanceof Player) {
@@ -717,11 +722,6 @@ abstract class Entity extends Location implements Metadatable{
 					}
 				}
 			}
-		}
-
-		$this->server->getPluginManager()->callEvent($source);
-		if($source->isCancelled()){
-			return;
 		}
 
 		$this->setLastDamageCause($source);
@@ -759,6 +759,7 @@ abstract class Entity extends Location implements Metadatable{
 	 * @param int $amount
 	 */
 	public function setHealth($amount) {
+		$amount = (int) round($amount);
 		if ($amount === $this->health) {
 			return;
 		}
@@ -965,7 +966,7 @@ abstract class Entity extends Location implements Metadatable{
 			$this->lastYaw = $this->yaw;
 			$this->lastPitch = $this->pitch;
 
-			$this->level->addEntityMovement($this->getViewers(), $this->id, $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+			$this->level->addEntityMovement($this->getViewers(), $this->id, $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw, ($this instanceof Player));
 		}
 
 		if($diffMotion > 0.0025 or ($diffMotion > 0.0001 and $this->getMotion()->lengthSquared() <= 0.0001)){ //0.05 ** 2

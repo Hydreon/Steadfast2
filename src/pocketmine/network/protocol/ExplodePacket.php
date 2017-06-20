@@ -53,7 +53,7 @@ class ExplodePacket extends PEPacket{
 		if(count($this->records) > 0){
 			foreach($this->records as $record){
 				$this->putSignedVarInt($record->x);
-				$this->putByte($record->y);
+				$this->putVarInt($record->y);
 				$this->putSignedVarInt($record->z);
 			}
 		}
