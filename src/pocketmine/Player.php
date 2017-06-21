@@ -2496,6 +2496,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->inventory->setItemInHand($item, $this);
 						}
 					}
+				} else {
+					$this->customInteract($packet);
 				}
 
 				//Timings::$timerInteractPacket->stopTiming();
@@ -4277,6 +4279,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->blockId = $blockId;
 		$pk->entityType = $entityType;
 		$this->dataPacket($pk);
+	}
+	
+	public function customInteract($packet) {
+		
 	}
 
 }
