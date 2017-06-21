@@ -227,6 +227,7 @@ class Explosion{
 		$pk1->blockId = -1;
 		$pk1->entityType = 1;
 		Server::broadcastPacket($this->level->getUsingChunk($source->x >> 4, $source->z >> 4), $pk1);
+		
 		return true;
 	}
 }

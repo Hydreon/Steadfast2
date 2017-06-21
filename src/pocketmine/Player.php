@@ -1866,7 +1866,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 
-				if($packet->slot === 0x28 or $packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
+				if($packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
 					$packet->slot = -1; //Air
 				}else{
 					$packet->slot -= 9; //Get real block slot
@@ -2496,6 +2496,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->inventory->setItemInHand($item, $this);
 						}
 					}
+				} else {
+					$this->customInteract($packet);
 				}
 
 				//Timings::$timerInteractPacket->stopTiming();
@@ -2898,7 +2900,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$radius = (int) ($packet->radius / 2);
 				$this->setViewRadius($radius);
 				$pk = new ChunkRadiusUpdatePacket();
-				$pk->radius = $radius * 2;
+				$pk->radius = $radius;
 				$this->dataPacket($pk);
 				$this->loggedIn = true;
 				$this->scheduleUpdate();
@@ -4277,6 +4279,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->blockId = $blockId;
 		$pk->entityType = $entityType;
 		$this->dataPacket($pk);
+	}
+	
+	public function customInteract($packet) {
+		
 	}
 
 }
