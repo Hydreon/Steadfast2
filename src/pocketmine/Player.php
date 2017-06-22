@@ -162,6 +162,7 @@ use pocketmine\item\Elytra;
 use pocketmine\network\protocol\SetTitlePacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
+use pocketmine\network\protocol\LevelEventPacket;
 
 use pocketmine\inventory\win10\Win10InvLogic;
 
@@ -340,6 +341,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     protected $xblName = '';
 	
 	protected $viewRadius;
+	
+	private $actionsNum = [];
 	
 	public function getLeaveMessage(){
 		return "";
@@ -1442,7 +1445,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
 							$this->teleport($ev->getTo());						
 						}else{
-							$this->level->addEntityMovement($this->getViewers(), $this->getId(), $this->x, $this->y + $this->getVisibleEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+							$this->level->addEntityMovement($this->getViewers(), $this->getId(), $this->x, $this->y + $this->getVisibleEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw, true);
 						}
 					}
 				}else{
@@ -1888,7 +1891,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 				}
 
-				if($packet->slot === 0x28 or $packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
+				if($packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
 					$packet->slot = -1; //Air
 				}else{
 					$packet->slot -= 9; //Get real block slot
@@ -2112,26 +2115,40 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				$this->craftingType = self::CRAFTING_DEFAULT;
 				
 				switch ($packet->action) {
-//					case PlayerActionPacket::ACTION_START_BREAK:
-//						$pos = new Vector3($packet->x, $packet->y, $packet->z);
-//						if($this->lastBreak !== PHP_INT_MAX or $pos->distanceSquared($this) > 10000){
-//							break;
-//						}
-//						$target = $this->level->getBlock($pos);
-//						$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $target, $packet->face, $target->getId() === 0 ? PlayerInteractEvent::LEFT_CLICK_AIR : PlayerInteractEvent::LEFT_CLICK_BLOCK);
-//						$this->getServer()->getPluginManager()->callEvent($ev);
-//						if($this->isSpectator()){
-//							$ev->setCancelled(true);
-//						}
-//						if($ev->isCancelled()){
-//							$this->inventory->sendHeldItem($this);
-//							break;
-//						}
-//						$this->lastBreak = microtime(true);
-//						break;
-//					case PlayerActionPacket::ACTION_ABORT_BREAK:
-//						$this->lastBreak = PHP_INT_MAX;
-//						break;
+					case PlayerActionPacket::ACTION_START_BREAK:
+						$this->actionsNum['CRACK_BLOCK'] = 0;
+						if (!$this->isCreative()) {
+							$block = $this->level->getBlock(new Vector3($packet->x, $packet->y, $packet->z));
+							$breakTime = ceil($block->getBreakTime($this->inventory->getItemInHand()) * 20);
+							if ($breakTime > 0) {
+								$pk = new LevelEventPacket();
+								$pk->evid = LevelEventPacket::EVENT_START_BLOCK_CRACKING;
+								$pk->x = $packet->x;
+								$pk->y = $packet->y;
+								$pk->z = $packet->z;
+								$pk->data = (int) (65535 / $breakTime); // ????
+								$this->dataPacket($pk);
+								$viewers = $this->getViewers();
+								foreach ($viewers as $viewer) {
+									$viewer->dataPacket($pk);
+								}
+							}
+						}
+						break;
+					case PlayerActionPacket::ACTION_ABORT_BREAK:
+					case PlayerActionPacket::ACTION_STOP_BREAK:
+						$this->actionsNum['CRACK_BLOCK'] = 0;
+						$pk = new LevelEventPacket();
+						$pk->evid = LevelEventPacket::EVENT_STOP_BLOCK_CRACKING;
+						$pk->x = $packet->x;
+						$pk->y = $packet->y;
+						$pk->z = $packet->z;
+						$this->dataPacket($pk);
+						$viewers = $this->getViewers();
+						foreach ($viewers as $viewer) {
+							$viewer->dataPacket($pk);
+						}
+						break;
 					case PlayerActionPacket::ACTION_RELEASE_ITEM:
 						if ($this->startAction > -1 and $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION)) {
 							if ($this->inventory->getItemInHand()->getId() === Item::BOW) {
@@ -2322,6 +2339,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->setFlyingFlag(false);
 						$this->elytraIsActivated = false;
 						break;
+					case PlayerActionPacket::ACTION_CRACK_BLOCK:
+						$this->crackBlock($packet);
+						break;
 				}
 
 				$this->startAction = -1;
@@ -2432,7 +2452,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						EntityDamageEvent::MODIFIER_BASE => isset($damageTable[$item->getId()]) ? $damageTable[$item->getId()] : 1,
 					];
 
-					if($this->distance($target) > 8){
+					if($this->distance($target) > 2){
 						$cancelled = true;
 					}elseif($target instanceof Player){
 						if(($target->getGamemode() & 0x01) > 0){
@@ -2505,6 +2525,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->inventory->setItemInHand($item, $this);
 						}
 					}
+				} else {
+					$this->customInteract($packet);
 				}
 
 				//Timings::$timerInteractPacket->stopTiming();
@@ -2572,6 +2594,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->currentWindow->sendContents($this);
 							$this->inventory->sendContents($this);
 						}
+						break;
+					case EntityEventPacket::FEED:
+						$position = [ 'x' => $this->x, 'y' => $this->y, 'z' => $this->z ];
+						$this->sendSound(LevelSoundEventPacket::SOUND_EAT, $position, 63);
 						break;
 					case EntityEventPacket::FEED:
 						$position = [ 'x' => $this->x, 'y' => $this->y, 'z' => $this->z ];
@@ -2713,7 +2739,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 
 //				foreach($packet->input as $i => $item){
-//					if($item->getDamage() === -1 or $item->getDamage() === 0xffff){
+//					if($item->getDamage() === -1 or $item->getDamage() === 0x7fff){
 //						$item->setDamage(null);
 //					}
 //
@@ -2751,7 +2777,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				foreach ($ingredients as $ingredient) {
 					$slot = -1;
 					foreach ($playerInventoryItems as $index => $i) {
-						if ($ingredient->getId() !== Item::AIR && $ingredient->deepEquals($i, (!is_null($ingredient->getDamage()) && $ingredient->getDamage() != 0xffff), false) && ($i->getCount() - $used[$index]) >= 1) {
+						if ($ingredient->getId() !== Item::AIR && $ingredient->deepEquals($i, (!is_null($ingredient->getDamage()) && $ingredient->getDamage() != 0x7fff), false) && ($i->getCount() - $used[$index]) >= 1) {
 							$slot = $index;
 							$used[$index]++;
 							break;
@@ -2915,7 +2941,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$radius = (int) ($packet->radius / 2);
 				$this->setViewRadius($radius);
 				$pk = new ChunkRadiusUpdatePacket();
-				$pk->radius = $radius * 2;
+				$pk->radius = $radius;
 				$this->dataPacket($pk);
 				$this->loggedIn = true;
 				$this->scheduleUpdate();
@@ -4040,12 +4066,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		];
 		$armor = $this->getInventory()->getArmorContents();
 		foreach ($armor as $item) {
-			if ($item->getId() !== Item::AIR) {
-				$enchantments = $item->getEnchantments();
-				foreach ($result as $id => $enchantment) {
-					if (isset($enchantments[$id]) && (is_null($enchantment) || $enchantments[$id]->getLevel() > $enchantment->getLevel())) {
-						$result[$id] = $enchantments[$id];
-					}
+			if ($item->getId() === Item::AIR) {
+				continue;
+			}
+			$enchantments = $item->getEnchantments();
+			foreach ($result as $id => $enchantment) {
+				if (isset($enchantments[$id]) && (is_null($enchantment) || $enchantments[$id]->getLevel() > $enchantment->getLevel())) {
+					$result[$id] = $enchantments[$id];
 				}
 			}
 		}
@@ -4254,18 +4281,57 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	/**
 	 * 
+	 * @param PlayerActionPacket $packet
+	 */
+	private function crackBlock($packet) {
+		if (!isset($this->actionsNum['CRACK_BLOCK'])) {
+			$this->actionsNum['CRACK_BLOCK'] = 0;
+		}
+		$recipients = $this->getViewers();
+		$recipients[] = $this;
+		$blockId = $this->level->getBlockIdAt($packet->x, $packet->y, $packet->z);
+		$blockPos = [
+			'x' => $packet->x,
+			'y' => $packet->y,
+			'z' => $packet->z,
+		];
+		
+		$isNeedSendSound = $this->actionsNum['CRACK_BLOCK'] % 4 == 0;
+		$this->actionsNum['CRACK_BLOCK']++;
+
+		$pk = new LevelEventPacket();
+		$pk->evid = LevelEventPacket::EVENT_PARTICLE_CRACK_BLOCK;
+		$pk->x = $packet->x;
+		$pk->y = $packet->y + 1;
+		$pk->z = $packet->z;
+		$pk->data = $blockId;
+		
+		foreach ($recipients as $recipient) {
+			$recipient->dataPacket($pk);
+			if ($isNeedSendSound) {
+				$recipient->sendSound(LevelSoundEventPacket::SOUND_HIT, $blockPos, 1, $blockId);
+			}
+		}
+	}
+	
+	 /**
+	 * 
 	 * @param integer $soundId
 	 * @param float[] $position
 	 */
-	public function sendSound($soundId, $position, $entityType = 1) {
+	public function sendSound($soundId, $position, $entityType = 1, $blockId = -1) {
 		$pk = new LevelSoundEventPacket();
 		$pk->eventId = $soundId;
 		$pk->x = $position['x'];
 		$pk->y = $position['y'];
 		$pk->z = $position['z'];
-		$pk->blockId = -1;
+		$pk->blockId = $blockId;
 		$pk->entityType = $entityType;
 		$this->dataPacket($pk);
+	}
+	
+	public function customInteract($packet) {
+		
 	}
 
 }

@@ -53,8 +53,8 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 
 		$this->lastUsed = time();
 	}
-
-	public function readChunk($x, $z, $generate = true, $forward = false){
+	
+	public function readChunk($x, $z){
 		$index = self::getChunkOffset($x, $z);
 		if($index < 0 or $index >= 4096){
 			return null;
@@ -63,16 +63,7 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		$this->lastUsed = time();
 
 		if(!$this->isChunkGenerated($index)){
-			if($generate === true){
-				//Allocate space
-				$this->locationTable[$index][0] = ++$this->lastSector;
-				$this->locationTable[$index][1] = 1;
-				fseek($this->filePointer, $this->locationTable[$index][0] << 12);
-				fwrite($this->filePointer, str_pad(pack("N", -1) . chr(self::COMPRESSION_ZLIB), 4096, "\x00", STR_PAD_RIGHT));
-				$this->writeLocationIndex($index);
-			}else{
-				return null;
-			}
+			return null;
 		}
 
 		fseek($this->filePointer, $this->locationTable[$index][0] << 12);
@@ -104,17 +95,13 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		$chunk = Chunk::fromBinary(fread($this->filePointer, $length - 1), $this->levelProvider);
 		if($chunk instanceof Chunk){
 			return $chunk;
-		}elseif($forward === false){
-			MainLogger::getLogger()->error("Corrupted chunk detected");
-			$this->generateChunk($x, $z);
-
-			return $this->readChunk($x, $z, $generate, true);
 		}else{
 			return null;
 		}
 	}
 
 	public function generateChunk($x, $z){
+		$levelProvider = $this->levelProvider;
 		$nbt = new Compound("Level", []);
 		$nbt->xPos = new IntTag("xPos", ($this->getX() * 32) + $x);
 		$nbt->zPos = new IntTag("zPos", ($this->getZ() * 32) + $z);
@@ -125,7 +112,7 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		$nbt->InhabitedTime = new LongTag("InhabitedTime", 0);
 		$nbt->Biomes = new ByteArray("Biomes", str_repeat(chr(-1), 256));
 		$nbt->BiomeColors = new IntArray("BiomeColors", array_fill(0, 156, Binary::readInt("\x00\x85\xb2\x4a")));
-		$nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, 127));
+		$nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, $levelProvider::getMaxY() - 1));
 		$nbt->Sections = new Enum("Sections", []);
 		$nbt->Sections->setTagType(NBT::TAG_Compound);
 		$nbt->Entities = new Enum("Entities", []);

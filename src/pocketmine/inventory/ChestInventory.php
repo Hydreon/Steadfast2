@@ -55,6 +55,8 @@ class ChestInventory extends ContainerInventory {
 			if (($level = $this->getHolder()->getLevel()) instanceof Level) {
 				Server::broadcastPacket($level->getUsingChunk($this->getHolder()->getX() >> 4, $this->getHolder()->getZ() >> 4), $pk);
 			}
+			$position = [ 'x' => $this->holder->x, 'y' => $this->holder->y, 'z' => $this->holder->z ];
+			$who->sendSound(LevelSoundEventPacket::SOUND_CHEST_OPEN, $position);
 		}
 
 		$position = [ 'x' => $this->holder->x, 'y' => $this->holder->y, 'z' => $this->holder->z ];
@@ -74,9 +76,8 @@ class ChestInventory extends ContainerInventory {
 			}
 		}
 		parent::onClose($who);
-
 		$position = [ 'x' => $this->holder->x, 'y' => $this->holder->y, 'z' => $this->holder->z ];
-		$who->sendSound(LevelSoundEventPacket::SOUND_CHEST_CLOSED, $position);
+ 		$who->sendSound(LevelSoundEventPacket::SOUND_CHEST_CLOSED, $position);
 	}
 
 }
