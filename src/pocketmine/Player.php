@@ -2423,7 +2423,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						EntityDamageEvent::MODIFIER_BASE => isset($damageTable[$item->getId()]) ? $damageTable[$item->getId()] : 1,
 					];
 
-					if($this->distance($target) > 8){
+					if($this->distance($target) > 2){
 						$cancelled = true;
 					}elseif($target instanceof Player){
 						if(($target->getGamemode() & 0x01) > 0){
