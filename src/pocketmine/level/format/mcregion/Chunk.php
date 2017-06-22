@@ -313,7 +313,6 @@ class Chunk extends BaseFullChunk{
 			$offset = 0;
 
 			$chunk = new Chunk($provider instanceof LevelProvider ? $provider : McRegion::class, null);
-			$chunk->provider = $provider;
 			$chunk->x = Binary::readInt(substr($data, $offset, 4));
 			$offset += 4;
 			$chunk->z = Binary::readInt(substr($data, $offset, 4));

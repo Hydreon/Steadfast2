@@ -138,6 +138,7 @@ class RegionLoader{
 	}
 
 	public function generateChunk($x, $z){
+		$levelProvider = $this->levelProvider;
 		$nbt = new Compound("Level", []);
 		$nbt->xPos = new IntTag("xPos", ($this->getX() * 32) + $x);
 		$nbt->zPos = new IntTag("zPos", ($this->getZ() * 32) + $z);
@@ -148,7 +149,7 @@ class RegionLoader{
 		$nbt->InhabitedTime = new LongTag("InhabitedTime", 0);
 		$biomes = str_repeat(Binary::writeByte(-1), 256);
 		$nbt->Biomes = new ByteArray("Biomes", $biomes);
-		$nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, 127));
+		$nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, $levelProvider::getMaxY() - 1));
 		$nbt->BiomeColors = new IntArray("BiomeColors", array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a")));
 
 		$half = str_repeat("\x00", 16384);

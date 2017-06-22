@@ -35,7 +35,7 @@ class ChunkRadiusUpdatePacket extends PEPacket{
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		$this->putVarInt($this->radius);
+		$this->putSignedVarInt($this->radius);
 	}
 
 }

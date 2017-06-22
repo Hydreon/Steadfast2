@@ -42,6 +42,7 @@ use pocketmine\Server;
 use pocketmine\utils\Random;
 use pocketmine\block\Air;
 use pocketmine\level\particle\HugeExplodeParticle;
+use pocketmine\network\protocol\LevelSoundEventPacket;
 
 class Explosion{
 
@@ -105,7 +106,7 @@ class Explosion{
 							$vBlock->x = $pointerX >= $x ? $x : $x - 1;
 							$vBlock->y = $pointerY >= $y ? $y : $y - 1;
 							$vBlock->z = $pointerZ >= $z ? $z : $z - 1;
-							if($vBlock->y < 0 or $vBlock->y > 127){
+							if($vBlock->y < 0 or $vBlock->y >= $this->level->getMaxY()){
 								break;
 							}
 							$block = $this->level->getBlock($vBlock);
@@ -218,7 +219,15 @@ class Explosion{
 		$pk->records = $send;
 		Server::broadcastPacket($this->level->getUsingChunk($source->x >> 4, $source->z >> 4), $pk);		
 		$this->level->addParticle(new HugeExplodeParticle(new Vector3($this->source->x,  $this->source->y, $this->source->z)));	
-
+		$pk1 = new LevelSoundEventPacket();
+		$pk1->eventId = 45;
+		$pk1->x = $this->source->x;
+		$pk1->y = $this->source->y;
+		$pk1->z = $this->source->z;
+		$pk1->blockId = -1;
+		$pk1->entityType = 1;
+		Server::broadcastPacket($this->level->getUsingChunk($source->x >> 4, $source->z >> 4), $pk1);
+		
 		return true;
 	}
 }
