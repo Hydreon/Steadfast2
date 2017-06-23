@@ -48,12 +48,12 @@ class ExplodePacket extends PEPacket{
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
-		$this->putLFloat($this->radius);
+		$this->putVarInt((int) ($this->radius * 100));
 		$this->putVarInt(count($this->records));
 		if(count($this->records) > 0){
 			foreach($this->records as $record){
 				$this->putSignedVarInt($record->x);
-				$this->putVarInt($record->y);
+				$this->putSignedVarInt($record->y);
 				$this->putSignedVarInt($record->z);
 			}
 		}
