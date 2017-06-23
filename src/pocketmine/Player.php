@@ -3485,7 +3485,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->eid = $this->id;
 		$pk->playerHaveLanguageCode = ($this->languageCode !== false);
 		$this->dataPacket($pk);
-
+		
 		$pk = new SetTimePacket();
 		$pk->time = $this->level->getTime();
 		$pk->started = true;
