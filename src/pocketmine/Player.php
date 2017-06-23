@@ -348,6 +348,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	private $actionsNum = [];
 	
+	private $isMayMove = false;
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1841,6 +1843,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						if ($packet->yaw < 0) {
 							$packet->yaw += 360;
 						}
+						
+						if (!$this->isMayMove) {
+							if ($this->yaw != $packet->yaw || $this->pitch != $packet->pitch || abs($this->x - $packet->x) >= 0.05 || abs($this->z - $packet->z) >= 0.05) {
+								$this->setMayMove(true);
+								$spawn = $this->getSpawn();
+								$spawn->y += 0.1;
+								$this->teleport($spawn);
+							}
+						}
+						
 						$this->setRotation($packet->yaw, $packet->pitch);
 						$this->newPosition = $newPos;	
 						$this->forceMovement = null;
@@ -2621,7 +2633,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$radius = (int) ($packet->radius / 2);
 				$this->setViewRadius($radius);
 				$pk = new ChunkRadiusUpdatePacket();
-				$pk->radius = $radius * 2;
+				$pk->radius = $radius;
 				$this->dataPacket($pk);
 				$this->loggedIn = true;
 				$this->scheduleUpdate();
@@ -3036,6 +3048,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->y = $pos->y;
 			$pk->z = $pos->z;
 			$this->dataPacket($pk);
+			$this->setMayMove(false);
 		}
 	}
 
@@ -3539,10 +3552,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->sendSelfData();				
 		$this->updateSpeed(self::DEFAULT_SPEED);
-		/** @todo костыляка для 1.2.0, убрать */
-		if ($this->protocol >= 120) {
-			$this->setDataFlag(0, 46);
-		}
+		$this->setMayMove(false);
 //		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
 	}
 	
@@ -4467,6 +4477,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->blockId = $blockId;
 		$pk->entityType = $entityType;
 		$this->dataPacket($pk);
+	}
+	
+	private function setMayMove($state) {
+		if ($this->protocol >= ProtocolInfo::PROTOCOL_120) {
+			$this->setDataFlag(self::DATA_FLAGS, 46, $state);
+			$this->isMayMove = $state;
+		} else {
+			$this->isMayMove = true;
+		}
 	}
 
 }
