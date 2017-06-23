@@ -75,6 +75,9 @@ class PlayerInventory extends BaseInventory{
 	}
 
 	public function setHotbarSlotIndex($index, $slot){
+		if ($this->holder instanceof Player && $this->holder->getInventoryType() == Player::INVENTORY_CLASSIC) {
+			return;
+		}
 		if($index >= 0 and $index < $this->getHotbarSize() and $slot >= -1 and $slot < $this->getSize()){
 			$this->hotbar[$index] = $slot;
 		}
