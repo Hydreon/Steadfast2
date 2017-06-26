@@ -2,6 +2,8 @@
 
 namespace pocketmine\network\protocol;
 
+use pocketmine\network\protocol\Info;
+
 class MapItemDataPacket extends PEPacket {
 
 	const NETWORK_ID = Info::CLIENTBOUND_MAP_ITEM_DATA_PACKET;
@@ -36,7 +38,12 @@ class MapItemDataPacket extends PEPacket {
 				$this->putByte($this->scale);
 				$this->putVarInt(count($this->pointners));
 				foreach ($this->pointners as $pointner) {
-					$this->putSignedVarInt($pointner['type']);
+					if ($playerProtocol >= Info::PROTOCOL_120) {
+						$this->putByte($pointner['type']);
+						$this->putByte(0); // rotation
+					} else {
+						$this->putSignedVarInt($pointner['type']);
+					}
 					if ($pointner['x'] > 0x7f) {
 						$pointner['x'] = 0x7f;
 					}
