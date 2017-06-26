@@ -106,7 +106,7 @@ interface Info120 {
 	const BOSS_EVENT_PACKET = 0x4a;
 	const SHOW_CREDITS_PACKET = 0x4b;
 	const AVAILABLE_COMMANDS_PACKET = 0x4c;
-	const COMMAND_STEP_PACKET = 0x4d;
+	const COMMAND_REQUEST_PACKET = 0x4d;
 	const COMMAND_BLOCK_UPDATE_PACKET = 0x4e;
 	// 0x4f - теперь не используется. неуверен
 	const UPDATE_TRADE_PACKET = 0x50;

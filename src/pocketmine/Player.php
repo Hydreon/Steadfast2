@@ -2728,6 +2728,24 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 				}
 				break;
+			/** @minProtocol 120 */
+			case 'COMMAND_REQUEST_PACKET':
+				if ($packet->command[0] != '/') {
+					$this->sendMessage('Invalid command data.');
+					break;
+				}
+				$commandLine = substr($packet->command, 1);
+				$commandPreprocessEvent = new PlayerCommandPreprocessEvent($this, $commandLine);
+				$this->server->getPluginManager()->callEvent($commandPreprocessEvent);
+				if ($commandPreprocessEvent->isCancelled()) {
+					break;
+				}
+				
+				$this->server->dispatchCommand($this, $commandLine);
+				
+				$commandPostprocessEvent = new PlayerCommandPostprocessEvent($this, $commandLine);
+				$this->server->getPluginManager()->callEvent($commandPostprocessEvent);
+				break;
 			default:
 				break;
 		}

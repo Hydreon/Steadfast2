@@ -94,6 +94,7 @@ use pocketmine\network\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\proxy\PingPacket;
+use pocketmine\network\protocol\v120\CommandRequestPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\PlayerHotbarPacket;
@@ -624,15 +625,14 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::REQUEST_CHUNK_RADIUS_PACKET, RequestChunkRadiusPacket::class);
 		$this->registerPacket120(ProtocolInfo120::CHUNK_RADIUS_UPDATE_PACKET, ChunkRadiusUpdatePacket::class);
 		$this->registerPacket120(ProtocolInfo120::AVAILABLE_COMMANDS_PACKET, AvailableCommandsPacket::class);
-		$this->registerPacket120(ProtocolInfo120::COMMAND_STEP_PACKET, CommandStepPacket::class);
 		$this->registerPacket120(ProtocolInfo120::TRANSFER_PACKET, TransferPacket::class);
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACKS_INFO_PACKET, ResourcePackDataInfoPacket::class);
-//		$this->registerPacket120(ProtocolInfo120::CLIENT_TO_SERVER_HANDSHAKE_PACKET, ClientToServerHandshakePacket::class);
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
 		// new
 		$this->registerPacket120(ProtocolInfo120::INVENTORY_TRANSACTION_PACKET, InventoryTransactionPacket::class);
 		$this->registerPacket120(ProtocolInfo120::INVENTORY_CONTENT_PACKET, InventoryContentPacket::class);
 		$this->registerPacket120(ProtocolInfo120::PLAYER_HOTBAR_PACKET, PlayerHotbarPacket::class);
+		$this->registerPacket120(ProtocolInfo120::COMMAND_REQUEST_PACKET, CommandRequestPacket::class);
 	}
 }
