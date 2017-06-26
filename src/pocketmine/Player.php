@@ -2115,6 +2115,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				$this->craftingType = self::CRAFTING_DEFAULT;
 				
 				switch ($packet->action) {
+					case PlayerActionPacket::ACTION_JUMP:
+ 						$this->onJump();
+ 						break;
 					case PlayerActionPacket::ACTION_START_BREAK:
 						$this->actionsNum['CRACK_BLOCK'] = 0;
 						if (!$this->isCreative()) {
@@ -4348,5 +4351,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			parent::fall($fallDistance);
 		}
 	}
-
+	
+	protected function onJump() {
+ 		
+ 	}
 }
