@@ -1968,6 +1968,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				$this->craftingType = self::CRAFTING_DEFAULT;
 				$action = MultiversionEnums::getPlayerAction($this->protocol, $packet->action);
 				switch ($action) {
+					case 'START_JUMP':
+						$this->onJump();
+						break;
 					case 'START_DESTROY_BLOCK':
 						$this->actionsNum['CRACK_BLOCK'] = 0;
 						if (!$this->isCreative()) {
@@ -4504,6 +4507,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		} else {
 			$this->isMayMove = true;
 		}
+	}
+	
+	protected function onJump() {
+		
 	}
 
 }
