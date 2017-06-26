@@ -115,11 +115,7 @@ use pocketmine\level\generator\PopulationTask;
 use pocketmine\entity\monster\Monster;
 use pocketmine\entity\animal\Animal;
 use pocketmine\nbt\NBT;
-
-
-
-
-
+use pocketmine\network\protocol\LevelSoundEventPacket;
 
 class Level implements ChunkManager, Metadatable{
 
@@ -1398,6 +1394,14 @@ class Level implements ChunkManager, Metadatable{
 			
 			$drops = $ev->getDrops();
 			$player->lastBreak = microtime(true);
+			
+			$pos = [ 'x' => $target->x, 'y' => $target->y, 'z' => $target->z ];
+			$blockId = $target->getId();
+			$player->sendSound(LevelSoundEventPacket::SOUND_BREAK, $pos, 1, $blockId);
+			$viewers = $player->getViewers();
+			foreach ($viewers as $viewer) {
+				$viewer->sendSound(LevelSoundEventPacket::SOUND_BREAK, $pos, 1, $blockId);
+			}
 		}elseif($item instanceof Item and !$target->isBreakable($item)){
 			return false;
 		}

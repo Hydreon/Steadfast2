@@ -86,7 +86,7 @@ class CraftingManager{
 		$this->registerRecipe((new ShapedRecipe(Item::get(Item::STONECUTTER, 0, 1),
 			"XX",
 			"XX"
-		))->setIngredient("X", Item::get(Item::COBBLESTONE)));
+		))->setIngredient("X", Item::get(Item::STONE)));
 
 		$this->registerRecipe((new ShapedRecipe(Item::get(Item::WOODEN_PLANK, Planks::OAK, 4),
 			"X"
@@ -219,7 +219,7 @@ class CraftingManager{
 			"CCC",
 			"C C",
 			"CCC"
-		))->setIngredient("C", Item::get(Item::COBBLESTONE, 0)));
+		))->setIngredient("C", Item::get(Item::STONE, 0)));
 
 		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::GLASS_PANE, 0, 16),
 			"GGG",
@@ -396,7 +396,7 @@ class CraftingManager{
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::GOLD_INGOT, 0, 1), Item::get(Item::GOLD_ORE, 0, 1)));
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::GLASS, 0, 1), Item::get(Item::SAND, 0, 1)));
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::GLASS, 0, 1), Item::get(Item::SAND, 1, 1))); // red sand
-		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::STONE, 0, 1), Item::get(Item::COBBLESTONE, 0, 1)));
+//		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::STONE, 0, 1), Item::get(Item::COBBLESTONE, 0, 1)));
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::BRICK, 0, 1), Item::get(Item::CLAY, 0, 1)));
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::NETHER_BRICK, 0, 1), Item::get(Item::NETHERRACK, 0, 1)));
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::HARDENED_CLAY, 0, 1), Item::get(Item::CLAY_BLOCK, 0, 1)));
@@ -468,18 +468,18 @@ class CraftingManager{
 		$recipes = [
 			//RESULT_ITEM_ID            RESULT_META                 INGREDIENT_ITEMID           INGREDIENT_META     RECIPE_SHAPE        RESULT_AMOUNT
 			[Item::SLAB,                Slab::STONE,                Item::STONE,                Stone::NORMAL,      "slab",             6],
-			[Item::SLAB,                Slab::COBBLESTONE,          Item::COBBLESTONE,          0,                  "slab",             6],
+			[Item::SLAB,                Slab::COBBLESTONE,          Item::STONE,				0,                  "slab",             6],
 			[Item::SLAB,                Slab::SANDSTONE,            Item::SANDSTONE,            0,                  "slab",             6],
 			[Item::SLAB,                Slab::BRICK,                Item::BRICK,                0,                  "slab",             6],
 			[Item::SLAB,                Slab::STONE_BRICK,          Item::STONE_BRICK,          StoneBricks::NORMAL,"slab",             6],
 			[Item::SLAB,                Slab::NETHER_BRICK,         Item::NETHER_BRICK_BLOCK,   0,                  "slab",             6],
 			[Item::SLAB,                Slab::QUARTZ,               Item::QUARTZ_BLOCK,         0,                  "slab",             6],
-			[Item::COBBLESTONE_STAIRS,  0,                          Item::COBBLESTONE,          0,                  "stairs",           4],
+			[Item::COBBLESTONE_STAIRS,  0,                          Item::STONE,				0,                  "stairs",           4],
 			[Item::SANDSTONE_STAIRS,    0,                          Item::SANDSTONE,            0,                  "stairs",           4],
 			[Item::STONE_BRICK_STAIRS,  0,                          Item::STONE_BRICK,          StoneBricks::NORMAL,"stairs",           4],
 			[Item::BRICK_STAIRS,        0,                          Item::BRICKS_BLOCK,         0,                  "stairs",           4],
 			[Item::NETHER_BRICKS_STAIRS,0,                          Item::NETHER_BRICK_BLOCK,   0,                  "stairs",           4],
-			[Item::COBBLESTONE_WALL,    StoneWall::NONE_MOSSY_WALL, Item::COBBLESTONE,          0,                  "wall/fence",       6],
+			[Item::COBBLESTONE_WALL,    StoneWall::NONE_MOSSY_WALL, Item::STONE,					0,                  "wall/fence",       6],
 			[Item::COBBLESTONE_WALL,    StoneWall::MOSSY_WALL,      Item::MOSSY_STONE,          0,                  "wall/fence",       6],
 			[Item::NETHER_BRICK_FENCE,  0,                          Item::NETHER_BRICK_BLOCK,   0,                  "wall/fence",       6],
 			[Item::NETHER_BRICKS,       0,                          Item::NETHER_BRICK,         0,                  "blockrecipe1",     1],
@@ -507,10 +507,10 @@ class CraftingManager{
 		))->setIngredient("A", Item::get(Item::STONE, Stone::DIORITE, 1))->setIngredient("B", Item::get(Item::QUARTZ, Quartz::QUARTZ_NORMAL, 1)));
 		$buildRecipes[] = ((new ShapedRecipe(Item::get(Item::STONE, Stone::DIORITE, 2),
 			...$shapes["blockrecipe2X2"]
-		))->setIngredient("A", Item::get(Item::COBBLESTONE, 0, 2))->setIngredient("B", Item::get(Item::QUARTZ, 0, 2)));
+		))->setIngredient("A", Item::get(Item::STONE, 0, 2))->setIngredient("B", Item::get(Item::QUARTZ, 0, 2)));
 		$buildRecipes[] = ((new ShapedRecipe(Item::get(Item::STONE, Stone::ANDESITE, 2),
 			...$shapes["blockrecipe1X2"]
-		))->setIngredient("A", Item::get(Item::COBBLESTONE, 0, 1))->setIngredient("B", Item::get(Item::STONE, Stone::DIORITE, 1)));
+		))->setIngredient("A", Item::get(Item::STONE, 0, 1))->setIngredient("B", Item::get(Item::STONE, Stone::DIORITE, 1)));
 		$buildRecipes[] = ((new ShapedRecipe(Item::get(Item::STONE_BRICK, StoneBricks::MOSSY, 1),
 			...$shapes["blockrecipe1X2"]
 		))->setIngredient("A", Item::get(Item::STONE_BRICK, StoneBricks::NORMAL, 1))->setIngredient("B", Item::get(Item::VINES, 0, 1)));
@@ -616,7 +616,7 @@ class CraftingManager{
 
 	protected function registerWeapons(){
 		$types = [
-			[Item::WOODEN_PLANK, Item::COBBLESTONE, Item::IRON_INGOT, Item::DIAMOND, Item::GOLD_INGOT],
+			[Item::WOODEN_PLANK, Item::STONE, Item::IRON_INGOT, Item::DIAMOND, Item::GOLD_INGOT],
 			[Item::WOODEN_SWORD, Item::STONE_SWORD, Item::IRON_SWORD, Item::DIAMOND_SWORD, Item::GOLD_SWORD],
 		];
 
@@ -646,7 +646,7 @@ class CraftingManager{
 
 	protected function registerTools(){
 		$types = [
-			[Item::WOODEN_PLANK, Item::COBBLESTONE, Item::IRON_INGOT, Item::DIAMOND, Item::GOLD_INGOT],
+			[Item::WOODEN_PLANK, Item::STONE, Item::IRON_INGOT, Item::DIAMOND, Item::GOLD_INGOT],
 			[Item::WOODEN_PICKAXE, Item::STONE_PICKAXE, Item::IRON_PICKAXE, Item::DIAMOND_PICKAXE, Item::GOLD_PICKAXE],
 			[Item::WOODEN_SHOVEL, Item::STONE_SHOVEL, Item::IRON_SHOVEL, Item::DIAMOND_SHOVEL, Item::GOLD_SHOVEL],
 			[Item::WOODEN_AXE, Item::STONE_AXE, Item::IRON_AXE, Item::DIAMOND_AXE, Item::GOLD_AXE],

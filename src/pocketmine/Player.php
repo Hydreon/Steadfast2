@@ -1871,7 +1871,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 
-				if($packet->slot === 0x28 or $packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
+				if($packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
 					$packet->slot = -1; //Air
 				}else{
 					$packet->slot -= 9; //Get real block slot
@@ -2214,6 +2214,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case 'INTERACT_PACKET':
 				if ($packet->action === InteractPacket::ACTION_DAMAGE) {
 					$this->attackByTargetId($packet->target);
+				} else {
+					$this->customInteract($packet);
 				}
 				break;
 			case 'ANIMATE_PACKET':
@@ -4063,7 +4065,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			EntityDamageEvent::MODIFIER_BASE => isset($damageTable[$item->getId()]) ? $damageTable[$item->getId()] : 1,
 		];
 
-		if ($this->distance($target) > 8) {
+		if ($this->distance($target) > 2) {
 			return;
 		} elseif ($target instanceof Player) {
 			$armorValues = [
@@ -4508,9 +4510,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->isMayMove = true;
 		}
 	}
-	
-	protected function onJump() {
+
+	public function customInteract($packet) {
 		
 	}
+	
+	public function fall($fallDistance) {
+		if (!$this->allowFlight) {
+			parent::fall($fallDistance);
+		}
+	}
+	
+	protected function onJump() {
+ 		
+ 	}
 
 }
