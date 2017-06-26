@@ -4342,5 +4342,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function customInteract($packet) {
 		
 	}
+	
+	public function fall($fallDistance) {
+		if (!$this->allowFlight) {
+			parent::fall($fallDistance);
+		}
+	}
 
 }
