@@ -2210,7 +2210,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 											$projectile->kill();
 										} else {
 											$projectile->spawnToAll();
-											$this->level->addSound(new LaunchSound($this), $this->getViewers());
+											$recipients = $this->hasSpawned;
+											$recipients[$this->id] = $this;
+											$pk = new LevelSoundEventPacket();
+											$pk->eventId = 20;
+											$pk->x = $this->x;
+											$pk->y = $this->y;
+											$pk->z = $this->z;
+											$pk->blockId = -1;
+											$pk->entityType = 1;
+											Server::broadcastPacket($recipients, $pk);
 										}
 									} else {
 										$projectile->spawnToAll();
