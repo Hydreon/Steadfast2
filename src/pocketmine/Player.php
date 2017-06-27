@@ -2038,106 +2038,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}
 						break;
 					case 'RELEASE_USE_ITEM':
-						if ($this->startAction > -1 and $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION)) {
-							if ($this->inventory->getItemInHand()->getId() === Item::BOW) {
-								$bow = $this->inventory->getItemInHand();
-								if ($this->isSurvival() and !$this->inventory->contains(Item::get(Item::ARROW, 0, 1))) {
-									$this->inventory->sendContents($this);
-									break;
-								}
-
-								$yawRad = $this->yaw / 180 * M_PI;
-								$pitchRad = $this->pitch / 180 * M_PI;
-								$nbt = new Compound("", [
-									"Pos" => new Enum("Pos", [
-										new DoubleTag("", $this->x),
-										new DoubleTag("", $this->y + $this->getEyeHeight()),
-										new DoubleTag("", $this->z)
-									]),
-									"Motion" => new Enum("Motion", [
-										new DoubleTag("", -sin($yawRad) * cos($pitchRad)),
-										new DoubleTag("", -sin($pitchRad)),
-										new DoubleTag("", cos($yawRad) * cos($pitchRad))
-									]),
-									"Rotation" => new Enum("Rotation", [
-										new FloatTag("", $this->yaw),
-										new FloatTag("", $this->pitch)
-									]),
-									"Fire" => new ShortTag("Fire", $this->isOnFire() ? 45 * 60 : 0)
-								]);
-
-								$diff = ($this->server->getTick() - $this->startAction);
-								$p = $diff / 20;
-								$f = min((($p ** 2) + $p * 2) / 3, 1) * 2;
-								$ev = new EntityShootBowEvent($this, $bow, Entity::createEntity("Arrow", $this->chunk, $nbt, $this, $f == 2 ? true : false), $f);
-
-								if ($f < 0.1 or $diff < 5) {
-									$ev->setCancelled();
-								}
-
-								$this->server->getPluginManager()->callEvent($ev);
-
-								$projectile = $ev->getProjectile();
-								if ($ev->isCancelled()) {
-									$projectile->kill();
-									$this->inventory->sendContents($this);
-								} else {
-									$projectile->setMotion($projectile->getMotion()->multiply($ev->getForce()));
-									if ($this->isSurvival()) {
-										$this->inventory->removeItemWithCheckOffHand(Item::get(Item::ARROW, 0, 1));
-										$bow->setDamage($bow->getDamage() + 1);
-										if ($bow->getDamage() >= 385) {
-											$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 0));
-										} else {
-											$this->inventory->setItemInHand($bow);
-										}
-									}
-									if ($projectile instanceof Projectile) {
-										$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($projectile));
-										if ($projectileEv->isCancelled()) {
-											$projectile->kill();
-										} else {
-											$projectile->spawnToAll();
-											$recipients = $this->hasSpawned;
-											$recipients[$this->id] = $this;
-											$pk = new LevelSoundEventPacket();
-											$pk->eventId = 20;
-											$pk->x = $this->x;
-											$pk->y = $this->y;
-											$pk->z = $this->z;
-											$pk->blockId = -1;
-											$pk->entityType = 1;
-											Server::broadcastPacket($recipients, $pk);
-										}
-									} else {
-										$projectile->spawnToAll();
-									}
-								}
-							}
-						} else if($this->inventory->getItemInHand()->getId() === Item::BUCKET and $this->inventory->getItemInHand()->getDamage() === 1) { //Milk!
-							$this->server->getPluginManager()->callEvent($ev = new PlayerItemConsumeEvent($this, $this->inventory->getItemInHand()));
-							if($ev->isCancelled()){
-								$this->inventory->sendContents($this);
-								break;
-							}
-
-							$pk = new EntityEventPacket();
-							$pk->eid = $this->getId();
-							$pk->event = EntityEventPacket::USE_ITEM;
-							$this->dataPacket($pk);
-							Server::broadcastPacket($this->getViewers(), $pk);
-
-							if ($this->isSurvival()) {
-								$slot = $this->inventory->getItemInHand();
-								--$slot->count;
-								$this->inventory->setItemInHand($slot);
-								$this->inventory->addItem(Item::get(Item::BUCKET, 0, 1));
-							}
-
-							$this->removeAllEffects();
-						} else {
-							$this->inventory->sendContents($this);
-						}
+						$this->releaseUseItem();
 						break;
 					case 'STOP_SLEEPENG':
 						$this->stopSleep();
@@ -2775,6 +2676,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								break;
 						}
 						break;
+					case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_RELEASE:
+						switch ($packet->actionType) {
+							case InventoryTransactionPacket::ITEM_RELEASE_ACTION_RELEASE:
+								$this->releaseUseItem();
+								break;
+						}
 					default:
 						error_log('Wrong transactionType ' . $packet->transactionType);
 						break;
@@ -4562,5 +4469,108 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected function onJump() {
  		
  	}
+	
+	 protected function releaseUseItem() {
+		if ($this->startAction > -1 and $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION)) {
+			if ($this->inventory->getItemInHand()->getId() === Item::BOW) {
+				$bow = $this->inventory->getItemInHand();
+				if ($this->isSurvival() and ! $this->inventory->contains(Item::get(Item::ARROW, 0, 1))) {
+					$this->inventory->sendContents($this);
+					return;
+				}
+
+				$yawRad = $this->yaw / 180 * M_PI;
+				$pitchRad = $this->pitch / 180 * M_PI;
+				$nbt = new Compound("", [
+					"Pos" => new Enum("Pos", [
+						new DoubleTag("", $this->x),
+						new DoubleTag("", $this->y + $this->getEyeHeight()),
+						new DoubleTag("", $this->z)
+							]),
+					"Motion" => new Enum("Motion", [
+						new DoubleTag("", -sin($yawRad) * cos($pitchRad)),
+						new DoubleTag("", -sin($pitchRad)),
+						new DoubleTag("", cos($yawRad) * cos($pitchRad))
+							]),
+					"Rotation" => new Enum("Rotation", [
+						new FloatTag("", $this->yaw),
+						new FloatTag("", $this->pitch)
+							]),
+					"Fire" => new ShortTag("Fire", $this->isOnFire() ? 45 * 60 : 0)
+				]);
+
+				$diff = ($this->server->getTick() - $this->startAction);
+				$p = $diff / 20;
+				$f = min((($p ** 2) + $p * 2) / 3, 1) * 2;
+				$ev = new EntityShootBowEvent($this, $bow, Entity::createEntity("Arrow", $this->chunk, $nbt, $this, $f == 2 ? true : false), $f);
+
+				if ($f < 0.1 or $diff < 5) {
+					$ev->setCancelled();
+				}
+
+				$this->server->getPluginManager()->callEvent($ev);
+
+				$projectile = $ev->getProjectile();
+				if ($ev->isCancelled()) {
+					$projectile->kill();
+					$this->inventory->sendContents($this);
+				} else {
+					$projectile->setMotion($projectile->getMotion()->multiply($ev->getForce()));
+					if ($this->isSurvival()) {
+						$this->inventory->removeItemWithCheckOffHand(Item::get(Item::ARROW, 0, 1));
+						$bow->setDamage($bow->getDamage() + 1);
+						if ($bow->getDamage() >= 385) {
+							$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 0));
+						} else {
+							$this->inventory->setItemInHand($bow);
+						}
+					}
+					if ($projectile instanceof Projectile) {
+						$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($projectile));
+						if ($projectileEv->isCancelled()) {
+							$projectile->kill();
+						} else {
+							$projectile->spawnToAll();
+							$recipients = $this->hasSpawned;
+							$recipients[$this->id] = $this;
+							$pk = new LevelSoundEventPacket();
+							$pk->eventId = 20;
+							$pk->x = $this->x;
+							$pk->y = $this->y;
+							$pk->z = $this->z;
+							$pk->blockId = -1;
+							$pk->entityType = 1;
+							Server::broadcastPacket($recipients, $pk);
+						}
+					} else {
+						$projectile->spawnToAll();
+					}
+				}
+			}
+		} else if ($this->inventory->getItemInHand()->getId() === Item::BUCKET and $this->inventory->getItemInHand()->getDamage() === 1) { //Milk!
+			$this->server->getPluginManager()->callEvent($ev = new PlayerItemConsumeEvent($this, $this->inventory->getItemInHand()));
+			if ($ev->isCancelled()) {
+				$this->inventory->sendContents($this);
+				return;
+			}
+
+			$pk = new EntityEventPacket();
+			$pk->eid = $this->getId();
+			$pk->event = EntityEventPacket::USE_ITEM;
+			$this->dataPacket($pk);
+			Server::broadcastPacket($this->getViewers(), $pk);
+
+			if ($this->isSurvival()) {
+				$slot = $this->inventory->getItemInHand();
+				--$slot->count;
+				$this->inventory->setItemInHand($slot);
+				$this->inventory->addItem(Item::get(Item::BUCKET, 0, 1));
+			}
+
+			$this->removeAllEffects();
+		} else {
+			$this->inventory->sendContents($this);
+		}
+	}
 
 }
