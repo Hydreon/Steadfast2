@@ -20,15 +20,15 @@ class Win10InvLogic {
 	protected static $playersInventoryData = [];
 	
 	public static function packetHandler($packet, Player $player) {
-		$playerName = $player->getName();
-		if (!isset(self::$playersInventoryData[$playerName])) {
-			self::$playersInventoryData[$playerName] = new PlayerInventoryData($player);
+		$playerId = $player->getId();
+		if (!isset(self::$playersInventoryData[$playerId])) {
+			self::$playersInventoryData[$playerId] = new PlayerInventoryData($player);
 		}
 		$packetID = $packet::NETWORK_ID;
 		switch ($packetID) {
 			case Info::CONTAINER_SET_SLOT_PACKET:
 //				var_dump($packet);
-				$invData = self::$playersInventoryData[$playerName];
+				$invData = self::$playersInventoryData[$playerId];
 				switch ($packet->windowid) {
 					case self::WINDOW_ID_PLAYER_INVENTORY:
 						$invData->selfInventoryLogic($packet->slot, $packet->item);
@@ -42,12 +42,12 @@ class Win10InvLogic {
 				}
 				break;
 			case Info::DROP_ITEM_PACKET:
-				$invData = self::$playersInventoryData[$playerName];
+				$invData = self::$playersInventoryData[$playerId];
 				$invData->dropItemPreprocessing();
 				break;
 			case Info::MOB_EQUIPMENT_PACKET:
 				if ($packet->windowId == self::WINDOW_ID_PLAYER_OFFHAND) {
-					$invData = self::$playersInventoryData[$playerName];
+					$invData = self::$playersInventoryData[$playerId];
 					$invData->armorInventoryLogic(PlayerInventory::OFFHAND_ARMOR_SLOT_ID, $packet->item);
 					break;
 				}
@@ -75,11 +75,11 @@ class Win10InvLogic {
 	}
 	
 	public static function playerPickUpItem($player, $item) {
-		$playerName = $player->getName();
-		if (!isset(self::$playersInventoryData[$playerName])) {
+		$playerId = $player->getId();
+		if (!isset(self::$playersInventoryData[$playerId])) {
 			return;
 		}
-		self::$playersInventoryData[$playerName]->setPickUpItem($item);
+		self::$playersInventoryData[$playerId]->setPickUpItem($item);
 	}
     
     /**
@@ -87,11 +87,11 @@ class Win10InvLogic {
      * @param Player $player
      */
     public static function removeData($player) {
-        $playerName = $player->getName();
-        if (isset(self::$playersInventoryData[$playerName]) && 
-            self::$playersInventoryData[$playerName]->check($player->getInventory())) {
+        $playerId = $player->getId();
+        if (isset(self::$playersInventoryData[$playerId]) && 
+            self::$playersInventoryData[$playerId]->check($player->getInventory())) {
             
-			unset(self::$playersInventoryData[$playerName]);
+			unset(self::$playersInventoryData[$playerId]);
 		}
     }
 	
