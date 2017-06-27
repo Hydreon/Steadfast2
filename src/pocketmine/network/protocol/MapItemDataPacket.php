@@ -32,6 +32,9 @@ class MapItemDataPacket extends PEPacket {
 				$this->putSignedVarInt($this->height);
 				$this->putSignedVarInt(0);
 				$this->putSignedVarInt(0);
+				if ($playerProtocol >= Info::PROTOCOL_120) {
+					$this->putVarInt($this->width * $this->height);
+				}
 				$this->put($this->data);
 				break;
 			case 4:
@@ -40,9 +43,9 @@ class MapItemDataPacket extends PEPacket {
 				foreach ($this->pointners as $pointner) {
 					if ($playerProtocol >= Info::PROTOCOL_120) {
 						$this->putByte($pointner['type']);
-						$this->putByte(0); // rotation
-					} else {
-						$this->putSignedVarInt($pointner['type']);
+						$this->putByte($pointner['rotate']);
+					} else {						
+						$this->putSignedVarInt($pointner['type'] << 4 | $pointner['rotate']);
 					}
 					if ($pointner['x'] > 0x7f) {
 						$pointner['x'] = 0x7f;
@@ -59,7 +62,11 @@ class MapItemDataPacket extends PEPacket {
 					$this->putByte($pointner['x']);
 					$this->putByte($pointner['z']);
 					$this->putString('');
-					$this->put(hex2bin($pointner['color']));
+					if ($playerProtocol >= Info::PROTOCOL_120) {
+						$this->putVarInt(hexdec($pointner['color']));
+					} else {
+						$this->putLInt(hexdec($pointner['color']));
+					}
 				}
 				break;
 		}
