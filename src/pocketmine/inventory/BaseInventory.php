@@ -262,18 +262,21 @@ abstract class BaseInventory implements Inventory{
 
 		$emptySlots = [];
 
-		for($i = 0; $i < $this->getSize(); ++$i){
+		$invSize = $this->getSize();
+		for ($i = 0; $i < $invSize; ++$i) {
 			$item = $this->getItem($i);
-			if($item->getId() === Item::AIR or $item->getCount() <= 0){
+			if($item->getId() === Item::AIR || $item->getCount() <= 0){
 				$emptySlots[] = $i;
 			}
 
+			$itemCount = $item->getCount();
 			foreach($itemSlots as $index => $slot){
-				if($slot->equals($item) and $item->getCount() < $item->getMaxStackSize()){
-					$amount = min($item->getMaxStackSize() - $item->getCount(), $slot->getCount(), $this->getMaxStackSize());
+				if($slot->equals($item) && $itemCount < $item->getMaxStackSize()){
+					$slotCount = $slot->getCount();
+					$amount = min($item->getMaxStackSize() - $itemCount, $slotCount, $this->getMaxStackSize());
 					if($amount > 0){
-						$slot->setCount($slot->getCount() - $amount);
-						$item->setCount($item->getCount() + $amount);
+						$slot->setCount($slotCount - $amount);
+						$item->setCount($itemCount + $amount);
 						$this->setItem($i, $item);
 						if($slot->getCount() <= 0){
 							unset($itemSlots[$index]);

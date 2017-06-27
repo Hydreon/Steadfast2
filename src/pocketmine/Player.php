@@ -170,6 +170,8 @@ use pocketmine\network\multiversion\Multiversion;
 use pocketmine\network\multiversion\MultiversionEnums;
 use pocketmine\network\protocol\LevelEventPacket;
 
+use pocketmine\inventory\win10\Win10InvLogic;
+
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
  */
@@ -1285,7 +1287,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						if($ev->isCancelled()){
 							continue;
 						}
-
+						
 						$pk = new TakeItemEntityPacket();
 						$pk->eid = $this->getId();
 						$pk->target = $entity->getId();
@@ -1298,6 +1300,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 						$this->inventory->addItem(clone $item);
 						$entity->kill();
+						
+						if ($this->inventoryType == self::INVENTORY_CLASSIC && $this->protocol < ProtocolInfo::PROTOCOL_120) {
+							Win10InvLogic::playerPickUpItem($this, $item);
+						}
 					}
 				}
 			}
@@ -1871,11 +1877,36 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerMobEqipmentPacket->stopTiming();
 					break;
 				}
+				
+				if ($packet->windowId == Win10InvLogic::WINDOW_ID_PLAYER_OFFHAND) {
+					if ($this->inventoryType == self::INVENTORY_CLASSIC && $this->protocol < ProtocolInfo::PROTOCOL_120) {
+						Win10InvLogic::packetHandler($packet, $this);
+						break;
+					} else {
+						$slot = PlayerInventory::OFFHAND_ARMOR_SLOT_ID;
+						$currentArmor = $this->inventory->getArmorItem($slot);
+						$slot += $this->inventory->getSize();
+						$transaction = new BaseTransaction($this->inventory, $slot, $currentArmor, $packet->item);
+						$oldItem = $transaction->getSourceItem();
+						$newItem = $transaction->getTargetItem();
+						if ($oldItem->deepEquals($newItem) && $oldItem->getCount() === $newItem->getCount()) {
+							break;
+						}
+						$this->addTransaction($transaction);	
+						break;
+					}
+				}
 
 				if($packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
 					$packet->slot = -1; //Air
 				}else{
 					$packet->slot -= 9; //Get real block slot
+				}
+				
+				// not so good solution
+				if ($this->inventoryType == self::INVENTORY_CLASSIC && $this->protocol < ProtocolInfo::PROTOCOL_120) {
+					Win10InvLogic::packetHandler($packet, $this);
+					break;
 				}
 
 				/** @var Item $item */
@@ -2053,7 +2084,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								} else {
 									$projectile->setMotion($projectile->getMotion()->multiply($ev->getForce()));
 									if ($this->isSurvival()) {
-										$this->inventory->removeItem(Item::get(Item::ARROW, 0, 1));
+										$this->inventory->removeItemWithCheckOffHand(Item::get(Item::ARROW, 0, 1));
 										$bow->setDamage($bow->getDamage() + 1);
 										if ($bow->getDamage() >= 385) {
 											$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 0));
@@ -2067,7 +2098,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 											$projectile->kill();
 										} else {
 											$projectile->spawnToAll();
-											$this->level->addSound(new LaunchSound($this), $this->getViewers());
+											$recipients = $this->hasSpawned;
+											$recipients[$this->id] = $this;
+											$pk = new LevelSoundEventPacket();
+											$pk->eventId = 20;
+											$pk->x = $this->x;
+											$pk->y = $this->y;
+											$pk->z = $this->z;
+											$pk->blockId = -1;
+											$pk->entityType = 1;
+											Server::broadcastPacket($recipients, $pk);
 										}
 									} else {
 										$projectile->spawnToAll();
@@ -2208,10 +2248,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->breakBlock([ 'x' => $packet->x, 'y' => $packet->y, 'z' => $packet->z ]);
 				//Timings::$timerRemoveBlockPacket->stopTiming();
 				break;
-
 			case 'MOB_ARMOR_EQUIPMENT_PACKET':
 				break;
-
 			case 'INTERACT_PACKET':
 				if ($packet->action === InteractPacket::ACTION_DAMAGE) {
 					$this->attackByTargetId($packet->target);
@@ -2291,6 +2329,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$position = [ 'x' => $this->x, 'y' => $this->y, 'z' => $this->z ];
 						$this->sendSound(LevelSoundEventPacket::SOUND_EAT, $position, 63);
 						break;
+					case EntityEventPacket::FEED:
+						$position = [ 'x' => $this->x, 'y' => $this->y, 'z' => $this->z ];
+						$this->sendSound(LevelSoundEventPacket::SOUND_EAT, $position, 63);
+						break;
 				}
 				//Timings::$timerEntityEventPacket->stopTiming();
 				break;
@@ -2300,13 +2342,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerDropItemPacket->stopTiming();
 					break;
 				}
+				
+				if ($this->inventoryType == self::INVENTORY_CLASSIC && $this->protocol < ProtocolInfo::PROTOCOL_120) {
+					Win10InvLogic::packetHandler($packet, $this);
+				}
 
 				if(!$this->inventory->contains($packet->item)) {
 					$this->inventory->sendContents($this);
 					//Timings::$timerDropItemPacket->stopTiming();
 					break;
 				}
-
 				$slot = $this->inventory->first($packet->item);
 				if($slot == -1){
 					//Timings::$timerDropItemPacket->stopTiming();
@@ -2374,7 +2419,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case 'CONTAINER_CLOSE_PACKET':
 				//Timings::$timerContainerClosePacket->startTiming();
-				if($this->spawned === false or $packet->windowid === 0){
+				if($this->spawned === false or $packet->windowid === 0){					
 					break;
 				}
 				$this->craftingType = self::CRAFTING_DEFAULT;
@@ -2474,7 +2519,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 				
-				$used = array_fill(0, $this->inventory->getSize() + 4, 0);
+				$used = array_fill(0, $this->inventory->getSize() + 5, 0);
 
 				$playerInventoryItems = $this->inventory->getContents();
 				foreach ($ingredients as $ingredient) {
@@ -2540,6 +2585,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$isPlayerNotNormal = $this->spawned === false || $this->blocked === true || !$this->isAlive();
 				if ($isPlayerNotNormal || $packet->slot < 0) {
 					//Timings::$timerConteinerSetSlotPacket->stopTiming();
+					break;
+				}
+				
+				if ($this->inventoryType == self::INVENTORY_CLASSIC && $this->protocol < ProtocolInfo::PROTOCOL_120) {
+					Win10InvLogic::packetHandler($packet, $this);				
 					break;
 				}
 				
@@ -2819,7 +2869,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param string $reason  Reason showed in console
 	 */
 	public function close($message = "", $reason = "generic reason"){
-        
+        Win10InvLogic::removeData($this);
         foreach($this->tasks as $task){
 			$task->cancel();
 		}
@@ -3285,18 +3335,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return -1;
 	}
 	
-	/**
-	 * 
-	 * @return integer
-	 */
 	public function getCurrentWindowId() {
 		return $this->currentWindowId;
 	}
 	
-	/**
-	 * 
-	 * @return BaseInventory
-	 */
 	public function getCurrentWindow() {
 		return $this->currentWindow;
 	}
