@@ -79,11 +79,15 @@ class AvailableCommandsPacket extends PEPacket{
 				$aliasesEnumId = -1;
 			}
 			$commandsStream->putLInt($aliasesEnumId);
-			$commandsStream->putVarInt(1); // overloads
-			$commandsStream->putVarInt(1);
-			$commandsStream->putString('player');
-			$commandsStream->putLInt(0);
-			$commandsStream->putByte(0);
+			$commandsStream->putVarInt(count($commandData['versions'][0]['overloads'])); // overloads
+			foreach ($commandData['versions'][0]['overloads'] as $overloadData) {
+				$commandsStream->putVarInt(count($overloadData['input']['parameters']));
+				foreach ($overloadData['input']['parameters'] as $paramData) {
+					$commandsStream->putString($paramData['name']);
+					$commandsStream->putLInt(0);
+					$commandsStream->putByte(isset($paramData['optional']) && $paramData['optional']);
+				}
+			}
 		}
 		
 		$additionalDataStream = new BinaryStream();
