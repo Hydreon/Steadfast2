@@ -85,6 +85,10 @@ class SimpleTransactionData {
 				$inventory = $player->getInventory();
 				$slot = PlayerInventory120::CURSOR_INDEX;
 				break;
+			case Protocol120::CONTAINER_ID_OFFHAND:
+				$inventory = $player->getInventory();
+				$slot = $inventory->getSize() + 4;
+				break;
 			case Protocol120::CONTAINER_ID_ARMOR:
 				$inventory = $player->getInventory();
 				$slot = $inventory->getSize() + $this->slot;

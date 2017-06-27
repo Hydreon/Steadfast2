@@ -113,7 +113,7 @@ class SimpleTransactionGroup implements TransactionGroup {
 				$haveItems[] = $sourceItem;
 			}
 		}
-
+		
 		foreach ($needItems as $i => $needItem) {
 			foreach ($haveItems as $j => $haveItem) {
 				if ($needItem->deepEquals($haveItem)) {

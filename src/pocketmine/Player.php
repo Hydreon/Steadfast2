@@ -1879,7 +1879,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				
 				if ($packet->windowId == Win10InvLogic::WINDOW_ID_PLAYER_OFFHAND) {
-					if ($this->inventoryType == self::INVENTORY_CLASSIC && $this->protocol < ProtocolInfo::PROTOCOL_120) {
+					if ($this->protocol >= ProtocolInfo::PROTOCOL_120) {
+						break;
+					}
+					if ($this->inventoryType == self::INVENTORY_CLASSIC) {
 						Win10InvLogic::packetHandler($packet, $this);
 						break;
 					} else {
@@ -1919,7 +1922,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$item = $this->inventory->getItem($packet->slot);
 					$slot = $packet->slot;
 				}
-
+				
 				if($packet->slot === -1){ //Air
 					if($this->isCreative()){
 						$found = false;
@@ -1972,7 +1975,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					}
 				}
-
+				
 				$this->inventory->sendHeldItem($this->hasSpawned);
 
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
