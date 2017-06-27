@@ -2329,10 +2329,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$position = [ 'x' => $this->x, 'y' => $this->y, 'z' => $this->z ];
 						$this->sendSound(LevelSoundEventPacket::SOUND_EAT, $position, 63);
 						break;
-					case EntityEventPacket::FEED:
-						$position = [ 'x' => $this->x, 'y' => $this->y, 'z' => $this->z ];
-						$this->sendSound(LevelSoundEventPacket::SOUND_EAT, $position, 63);
-						break;
 				}
 				//Timings::$timerEntityEventPacket->stopTiming();
 				break;
