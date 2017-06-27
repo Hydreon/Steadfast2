@@ -635,6 +635,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 			AvailableCommandsPacket::prepareCommands(self::$availableCommands);
 		}
+		$this->inventory = new PlayerInventory($this); // hack for not null getInventory
 		$this->setViewRadius(2);
 	}
 	
