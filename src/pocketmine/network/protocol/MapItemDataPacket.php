@@ -36,7 +36,7 @@ class MapItemDataPacket extends PEPacket {
 				$this->putByte($this->scale);
 				$this->putVarInt(count($this->pointners));
 				foreach ($this->pointners as $pointner) {
-					$this->putSignedVarInt($pointner['type']);
+					$this->putSignedVarInt($pointner['type'] << 4 | $pointner['rotate']);
 					if ($pointner['x'] > 0x7f) {
 						$pointner['x'] = 0x7f;
 					}
@@ -52,7 +52,7 @@ class MapItemDataPacket extends PEPacket {
 					$this->putByte($pointner['x']);
 					$this->putByte($pointner['z']);
 					$this->putString('');
-					$this->put(hex2bin($pointner['color']));
+					$this->putLInt(hexdec($pointner['color']));
 				}
 				break;
 		}
