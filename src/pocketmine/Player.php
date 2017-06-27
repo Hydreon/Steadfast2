@@ -631,6 +631,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pluginCommands = $plugin->getJsonCommands();
 				self::$availableCommands = array_merge(self::$availableCommands, $pluginCommands);
 			}
+			AvailableCommandsPacket::prepareCommands(self::$availableCommands);
 		}
 		$this->setViewRadius(2);
 	}
@@ -3547,7 +3548,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				
 		if (!empty(self::$availableCommands)) {
 			$pk = new AvailableCommandsPacket();
-			$pk->commands = json_encode(self::$availableCommands);
 			$this->dataPacket($pk);
 		}			
 		if($this->getHealth() <= 0){
