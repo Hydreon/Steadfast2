@@ -25,6 +25,7 @@ use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityInventoryChangeEvent;
 use pocketmine\event\inventory\InventoryOpenEvent;
 use pocketmine\item\Item;
+use pocketmine\network\multiversion\Multiversion;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\ContainerSetContentPacket;
 use pocketmine\network\protocol\ContainerSetSlotPacket;
@@ -261,18 +262,21 @@ abstract class BaseInventory implements Inventory{
 
 		$emptySlots = [];
 
-		for($i = 0; $i < $this->getSize(); ++$i){
+		$invSize = $this->getSize();
+		for ($i = 0; $i < $invSize; ++$i) {
 			$item = $this->getItem($i);
-			if($item->getId() === Item::AIR or $item->getCount() <= 0){
+			if($item->getId() === Item::AIR || $item->getCount() <= 0){
 				$emptySlots[] = $i;
 			}
 
+			$itemCount = $item->getCount();
 			foreach($itemSlots as $index => $slot){
-				if($slot->equals($item) and $item->getCount() < $item->getMaxStackSize()){
-					$amount = min($item->getMaxStackSize() - $item->getCount(), $slot->getCount(), $this->getMaxStackSize());
+				if($slot->equals($item) && $itemCount < $item->getMaxStackSize()){
+					$slotCount = $slot->getCount();
+					$amount = min($item->getMaxStackSize() - $itemCount, $slotCount, $this->getMaxStackSize());
 					if($amount > 0){
-						$slot->setCount($slot->getCount() - $amount);
-						$item->setCount($item->getCount() + $amount);
+						$slot->setCount($slotCount - $amount);
+						$item->setCount($itemCount + $amount);
 						$this->setItem($i, $item);
 						if($slot->getCount() <= 0){
 							unset($itemSlots[$index]);
@@ -439,11 +443,7 @@ abstract class BaseInventory implements Inventory{
 				$this->close($player);
 				continue;
 			}
-			$pk = new ContainerSetContentPacket();			
-			$pk->windowid = $id;
-			$pk->slots = $slots;
-			$pk->eid = $player->getId();
-			$player->dataPacket($pk);
+			Multiversion::sendContainer($player, $id, $slots);
 		}
 	}
 
@@ -456,17 +456,13 @@ abstract class BaseInventory implements Inventory{
 			$target = [$target];
 		}
 
-		$pk = new ContainerSetSlotPacket();
-		$pk->slot = $index;
-		$pk->item = clone $this->getItem($index);
-
+		$item = clone $this->getItem($index);
 		foreach($target as $player){
 			if(($id = $player->getWindowId($this)) === -1){
 				$this->close($player);
 				continue;
 			}
-			$pk->windowid = $id;
-			$player->dataPacket($pk);
+			Multiversion::sendContainerSlot($player, $id, $item, $index);
 		}
 	}
 

@@ -38,6 +38,8 @@ use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\Player;
 use pocketmine\level\Level;
 
+use pocketmine\network\multiversion\Multiversion;
+
 class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	protected $nameTag = "TESTIFICATE";
@@ -98,12 +100,13 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 		$this->setDataFlag(self::DATA_PLAYER_FLAGS, self::DATA_PLAYER_FLAG_SLEEP, false);
 		$this->setDataProperty(self::DATA_PLAYER_BED_POSITION, self::DATA_TYPE_POS, [0, 0, 0]);
-
-		$this->inventory = new PlayerInventory($this);
-		if($this instanceof Player){
+		
+		if ($this instanceof Player){
+			$this->inventory = Multiversion::getPlayerInventory($this);
 			$this->addWindow($this->inventory, 0);
+		} else {
+			$this->inventory = new PlayerInventory($this);
 		}
-
 
 		if(!($this instanceof Player)){
 			if(isset($this->namedtag->NameTag)){

@@ -124,7 +124,8 @@ namespace pocketmine {
 	ini_set("display_errors", 1);
 	ini_set("display_startup_errors", 1);
 	ini_set("default_charset", "utf-8");
-
+	ini_set("error_log", "logs/" . date('Y.m.d') . "_php_error.log");
+	
 	ini_set("memory_limit", -1);
 	define("pocketmine\\START_TIME", microtime(true));
 

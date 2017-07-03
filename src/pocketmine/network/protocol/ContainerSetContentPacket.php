@@ -29,6 +29,7 @@ class ContainerSetContentPacket extends PEPacket{
 	const PACKET_NAME = "CONTAINER_SET_CONTENT_PACKET";
 
 	const SPECIAL_INVENTORY = 0;
+	const SPECIAL_OFFHAND = 0x77;
 	const SPECIAL_ARMOR = 0x78;
 	const SPECIAL_CREATIVE = 0x79;
 

@@ -105,7 +105,7 @@ class SimpleCommandMap implements CommandMap{
 		$this->register("pocketmine", new EffectCommand("effect"));
 		$this->register("pocketmine", new ParticleCommand("particle"));
 		$this->register("pocketmine", new GamemodeCommand("gamemode"));
-		$this->register("pocketmine", new KillCommand("kill"));
+//		$this->register("pocketmine", new KillCommand("kill"));
 		$this->register("pocketmine", new SpawnpointCommand("spawnpoint"));
 		$this->register("pocketmine", new SetWorldSpawnCommand("setworldspawn"));
 		$this->register("pocketmine", new TeleportCommand("tp"));
@@ -195,6 +195,11 @@ class SimpleCommandMap implements CommandMap{
 					$needNewArg = true;
 				}
 			}
+			
+			if ($arg == '') {
+				continue;
+			}
+			
 			if ($state == 1) {
 				if ($arg{strlen($arg) - 1} == '"') {
 					$state = 0;

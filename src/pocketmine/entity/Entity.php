@@ -91,7 +91,6 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_TYPE_STRING = 4;
 	const DATA_TYPE_SLOT = 5;
 	const DATA_TYPE_POS = 6;
-//	const DATA_TYPE_ROTATION = 7;
 	const DATA_TYPE_LONG = 7;
 	const DATA_TYPE_VECTOR3 = 8;
 
@@ -102,10 +101,13 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_AIR = 7; //air under water type: short
 	const DATA_POTION_COLOR = 8; // type: int data: rgb
 	const DATA_POTION_AMBIENT = 9; //is potion ambient or not
+	const DATA_JUMP_DURATION = 10; // type: long
 	const DATA_HORSE_FLAGS = 16; // type: int
 	const DATA_HORSE_TYPE = 19; // type: byte
 	const DATA_ENDERMAN_BLOCK_ID = 23; // type: short
 	const DATA_ENDERMAN_BLOCK_META = 24; // type:short
+	const DATA_PLAYER_FLAGS = 27;
+	const DATA_PLAYER_BED_POSITION = 29;
 	const DATA_LEAD_HOLDER = 38; // type: long
 	const DATA_SCALE = 39; // type: float
 	const DATA_BUTTON_TEXT = 40; // type: string !IMPORTANT! Send to player
@@ -174,9 +176,6 @@ abstract class Entity extends Location implements Metadatable{
 	
 	const DATA_PLAYER_FLAG_SLEEP = 1;
 	const DATA_PLAYER_FLAG_DEAD = 2;
-
-	const DATA_PLAYER_FLAGS = 27;
-	const DATA_PLAYER_BED_POSITION = 29;
 	
 	public static $entityCount = 2;
 	/** @var Entity[] */

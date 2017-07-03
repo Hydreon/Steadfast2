@@ -191,7 +191,7 @@ class BinaryStream extends \stdClass{
 	public function getSlot($playerProtocol){		
 		$id = $this->getSignedVarInt();		
 		if($id <= 0){
-			return Item::get(0, 0, 0);
+			return Item::get(Item::AIR, 0, 0);
 		}
 	
 		$aux = $this->getSignedVarInt();
