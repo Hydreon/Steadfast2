@@ -60,12 +60,18 @@ class LoginPacket extends PEPacket {
 
 	public function decode($playerProtocol) {
 		$acceptedProtocols = Info::ACCEPTED_PROTOCOLS;
+		$tmpData = Binary::readInt(substr($this->buffer, 1, 4));
+		if ($tmpData == 0) {
+			$this->getShort();
+		}
 		$this->protocol1 = $this->getInt();
 		if (!in_array($this->protocol1, $acceptedProtocols)) {
 			$this->isValidProtocol = false;
 			return;
 		}
-		$this->getByte();	
+		if ($this->protocol1 < Info::PROTOCOL_120) {
+			$this->getByte();
+		}	
 		$data = $this->getString();
 		if ($this->protocol1 >= Info::PROTOCOL_110) {			
 			if (ord($data{0}) != 120 || (($decodedData = @zlib_decode($data)) === false)) {
@@ -119,6 +125,7 @@ class LoginPacket extends PEPacket {
 		 if (isset($this->playerData['LanguageCode'])) {
             $this->languageCode = $this->playerData['LanguageCode'];
         }
+		$this->protocol1 = self::convertProtocol($this->protocol1);
 	}
 
 	public function encode($playerProtocol) {

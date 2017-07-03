@@ -16,7 +16,7 @@ class ChunkMaker extends Worker {
 	protected $externalQueue;
 	protected $internalQueue;
 	
-	const SUPPORTED_PROTOCOL = [Info::BASE_PROTOCOL, Info::PROTOCOL_105, Info::PROTOCOL_110];
+	const SUPPORTED_PROTOCOL = [Info::BASE_PROTOCOL, Info::PROTOCOL_105, Info::PROTOCOL_110, Info::PROTOCOL_120];
 
 	public function __construct(\ClassLoader $loader = null) {
 		$this->externalQueue = new \Threaded;
