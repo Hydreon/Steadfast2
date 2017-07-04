@@ -352,6 +352,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	private $isMayMove = false;
 	
+	protected $serverAddress = '';
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1830,6 +1832,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 }
                 $this->xuid = $packet->xuid;
 				$this->languageCode = $packet->languageCode;
+				$this->serverAddress = $packet->serverAddress;
 					
 				$this->processLogin();
 				//Timings::$timerLoginPacket->stopTiming();
@@ -4576,6 +4579,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		} else {
 			$this->inventory->sendContents($this);
 		}
+	}
+	
+	public function getServerAddress() {
+		return $this->serverAddress;
 	}
 
 }
