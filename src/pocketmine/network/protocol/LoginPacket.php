@@ -50,7 +50,9 @@ class LoginPacket extends PEPacket {
     public $inventoryType = -1;
     public $osType = -1;
     public $xuid = '';
-	public $languageCode = false;
+	public $languageCode = 'unknown';
+	public $clientVersion = 'unknown';
+	public $originalProtocol;
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -122,9 +124,13 @@ class LoginPacket extends PEPacket {
         if (isset($this->playerData['UIProfile'])) {
             $this->inventoryType = $this->playerData['UIProfile'];
         }
-		 if (isset($this->playerData['LanguageCode'])) {
+		if (isset($this->playerData['LanguageCode'])) {
             $this->languageCode = $this->playerData['LanguageCode'];
         }
+		if (isset($this->playerData['GameVersion'])) {
+            $this->clientVersion = $this->playerData['GameVersion'];
+        }
+		$this->originalProtocol = $this->protocol1;
 		$this->protocol1 = self::convertProtocol($this->protocol1);
 	}
 

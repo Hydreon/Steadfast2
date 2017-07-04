@@ -354,6 +354,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $serverAddress = '';
 	
+	protected $clientVersion = '';
+	
+	protected $originalProtocol;
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1833,6 +1837,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 $this->xuid = $packet->xuid;
 				$this->languageCode = $packet->languageCode;
 				$this->serverAddress = $packet->serverAddress;
+				$this->clientVersion = $packet->clientVersion;
+				$this->originalProtocol = $packet->originalProtocol;
 					
 				$this->processLogin();
 				//Timings::$timerLoginPacket->stopTiming();
@@ -3473,7 +3479,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->generator = 1; //0 old, 1 infinite, 2 flat
 		$pk->gamemode = $this->gamemode & 0x01;
 		$pk->eid = $this->id;
-		$pk->playerHaveLanguageCode = ($this->languageCode !== false);
+		$pk->playerHaveLanguageCode = ($this->languageCode !== 'unknown');
 		$this->dataPacket($pk);
 		
 		$pk = new SetTimePacket();
@@ -4583,6 +4589,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public function getServerAddress() {
 		return $this->serverAddress;
+	}
+	
+	public function getClientlanguageCode() {
+		return $this->languageCode;
+	}
+	
+	public function getClientVersion() {
+		return $this->clientVersion;
+	}
+	
+	public function getOriginalProtocol() {
+		return $this->originalProtocol;
 	}
 
 }
