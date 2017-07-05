@@ -31,6 +31,7 @@ use pocketmine\utils\ChunkException;
 use pocketmine\utils\Binary;
 use pocketmine\nbt\NBT;
 use pocketmine\tile\Spawnable;
+use pocketmine\level\format\generic\EmptyChunkSection;
 
 class Anvil extends McRegion {
 
@@ -100,9 +101,9 @@ class Anvil extends McRegion {
 			'heightMap' => pack("C*", ...$chunk->getHeightMapArray()),
 			'biomeColor' => pack("n*", ...$chunk->getBiomeColorArray())	
 		];
+		$sections = [];
 		foreach ($chunk->getSections() as $section) {
 			if ($section instanceof EmptyChunkSection) {
-				$data['sections'][$section->getY()]['empty'] = true;
 				continue;
 			}
 			$chunkData = [];
@@ -111,8 +112,21 @@ class Anvil extends McRegion {
 			$chunkData['data'] = $section->getDataArray();
 			$chunkData['blockLight'] = $section->getLightArray();
 			$chunkData['skyLight'] = $section->getSkyLightArray();
-			$data['sections'][$section->getY()] = $chunkData;
+			$sections[$section->getY()] = $chunkData;
 		}
+		$sortedSections = [];
+		for ($y = 0; $y < Chunk::SECTION_COUNT; ++$y) {
+			if (count($sections) == 0) {
+				break;
+			}
+			if (isset($sections[$y])) {
+				$sortedSections[$y] = $sections[$y];
+				unset($sections[$y]);				
+			} else {
+				$sortedSections[$y] = ['empty' => true];
+			}
+		}
+		$data['sections'] = $sortedSections;
 		return $data;
 	}
 		
