@@ -128,4 +128,9 @@ interface Info120 {
 	const SET_LAST_HURT_BY_PACKET = 0x60;					// NEW
 	const BOOK_EDIT_PACKET = 0x61;							// NEW
 	const NPC_REQUEST_PACKET = 0x62;						// NEW
+	const PHOTO_TRANSFER_PACKET = 0x63;						// NEW
+	const MODAL_FORM_REQUEST_PACKET = 0x64;					// NEW
+	const MODAL_FORM_REAPONSE_PACKET = 0x65;				// NEW
+	const SERVER_SETTINGS_REQUEST_PACKET = 0x66;			// NEW
+	const SERVER_SETTINGS_RESPONSE_PACKET = 0x67;			// NEW
 }
