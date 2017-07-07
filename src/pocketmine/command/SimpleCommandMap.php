@@ -196,6 +196,11 @@ class SimpleCommandMap implements CommandMap{
 					$needNewArg = true;
 				}
 			}
+			
+			if ($arg == '') {
+				continue;
+			}
+			
 			if ($state == 1) {
 				if ($arg{strlen($arg) - 1} == '"') {
 					$state = 0;

@@ -3,8 +3,8 @@
         "versions": [
             {
                 "description": "Transfer command",
-                "permission": "op",
-
+                "permission": "any",
+                "show-in-help": false,
                 "overloads": {
                     "default": {
                         "input": {

@@ -50,7 +50,9 @@ class LoginPacket extends PEPacket {
     public $inventoryType = -1;
     public $osType = -1;
     public $xuid = '';
-	public $languageCode = false;
+	public $languageCode = 'unknown';
+	public $clientVersion = 'unknown';
+	public $originalProtocol;
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -60,12 +62,18 @@ class LoginPacket extends PEPacket {
 
 	public function decode($playerProtocol) {
 		$acceptedProtocols = Info::ACCEPTED_PROTOCOLS;
+		$tmpData = Binary::readInt(substr($this->buffer, 1, 4));
+		if ($tmpData == 0) {
+			$this->getShort();
+		}
 		$this->protocol1 = $this->getInt();
 		if (!in_array($this->protocol1, $acceptedProtocols)) {
 			$this->isValidProtocol = false;
 			return;
 		}
-		$this->getByte();	
+		if ($this->protocol1 < Info::PROTOCOL_120) {
+			$this->getByte();
+		}	
 		$data = $this->getString();
 		if ($this->protocol1 >= Info::PROTOCOL_110) {			
 			if (ord($data{0}) != 120 || (($decodedData = @zlib_decode($data)) === false)) {
@@ -116,9 +124,14 @@ class LoginPacket extends PEPacket {
         if (isset($this->playerData['UIProfile'])) {
             $this->inventoryType = $this->playerData['UIProfile'];
         }
-		 if (isset($this->playerData['LanguageCode'])) {
+		if (isset($this->playerData['LanguageCode'])) {
             $this->languageCode = $this->playerData['LanguageCode'];
         }
+		if (isset($this->playerData['GameVersion'])) {
+            $this->clientVersion = $this->playerData['GameVersion'];
+        }
+		$this->originalProtocol = $this->protocol1;
+		$this->protocol1 = self::convertProtocol($this->protocol1);
 	}
 
 	public function encode($playerProtocol) {

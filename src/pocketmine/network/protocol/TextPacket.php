@@ -23,6 +23,7 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
+use pocketmine\network\protocol\Info;
 
 class TextPacket extends PEPacket{
 	const NETWORK_ID = Info::TEXT_PACKET;
@@ -40,9 +41,13 @@ class TextPacket extends PEPacket{
 	public $source;
 	public $message;
 	public $parameters = [];
+	public $isLocolize = false;
 
 	public function decode($playerProtocol){
 		$this->type = $this->getByte();
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->isLocolize = $this->getByte();
+		}
 		switch($this->type){
 			case self::TYPE_POPUP:
 			case self::TYPE_CHAT:
@@ -65,6 +70,9 @@ class TextPacket extends PEPacket{
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putByte($this->type);
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->putByte($this->isLocolize);
+		}
 		switch($this->type){
 			case self::TYPE_POPUP:
 			case self::TYPE_CHAT:

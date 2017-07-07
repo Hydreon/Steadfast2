@@ -24,9 +24,8 @@ class Win10InvLogic {
 		if (!isset(self::$playersInventoryData[$playerId])) {
 			self::$playersInventoryData[$playerId] = new PlayerInventoryData($player);
 		}
-		$packetID = $packet::NETWORK_ID;
-		switch ($packetID) {
-			case Info::CONTAINER_SET_SLOT_PACKET:
+		switch ($packet->pname()) {
+			case 'CONTAINER_SET_SLOT_PACKET':
 //				var_dump($packet);
 				$invData = self::$playersInventoryData[$playerId];
 				switch ($packet->windowid) {
@@ -41,11 +40,11 @@ class Win10InvLogic {
 						break;
 				}
 				break;
-			case Info::DROP_ITEM_PACKET:
+			case 'DROP_ITEM_PACKET':
 				$invData = self::$playersInventoryData[$playerId];
 				$invData->dropItemPreprocessing();
 				break;
-			case Info::MOB_EQUIPMENT_PACKET:
+			case 'MOB_EQUIPMENT_PACKET':
 				if ($packet->windowId == self::WINDOW_ID_PLAYER_OFFHAND) {
 					$invData = self::$playersInventoryData[$playerId];
 					$invData->armorInventoryLogic(PlayerInventory::OFFHAND_ARMOR_SLOT_ID, $packet->item);
@@ -69,7 +68,7 @@ class Win10InvLogic {
 				}
 				break;
 			default:
-				var_dump('Unknovn packet: ' . dechex($packetID));
+				var_dump('Unknovn packet: ' . $packet->pname());
 				break;
 		}
 	}

@@ -855,11 +855,16 @@ class Block extends Position implements Metadatable{
 	/**
 	 * Returns the seconds that this block takes to be broken using an specific Item
 	 *
+	 * Not implemented:
+	 *  - enchantment effects (Efficiency)
+	 *  - status effect on player (haste, mining fatigue)
+	 *  - player not on ground, player in water
+	 * 
 	 * @param Item $item
 	 *
 	 * @return float
 	 */
-	public function getBreakTime(Item $item){
+	public function getBreakTime(Item $item) {
 		static $tierMultipliers = [
 			Tool::TIER_WOODEN => 2,
 			Tool::TIER_STONE => 4,
