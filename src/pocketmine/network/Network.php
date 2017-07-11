@@ -98,6 +98,7 @@ use pocketmine\network\protocol\v120\CommandRequestPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\PlayerHotbarPacket;
+use pocketmine\network\protocol\v120\ModalFormResponsePacket;
 
 class Network {
 
@@ -634,5 +635,6 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::INVENTORY_CONTENT_PACKET, InventoryContentPacket::class);
 		$this->registerPacket120(ProtocolInfo120::PLAYER_HOTBAR_PACKET, PlayerHotbarPacket::class);
 		$this->registerPacket120(ProtocolInfo120::COMMAND_REQUEST_PACKET, CommandRequestPacket::class);
+		$this->registerPacket120(ProtocolInfo120::MODAL_FORM_REAPONSE_PACKET, ModalFormResponsePacket::class);
 	}
 }

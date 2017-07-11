@@ -171,6 +171,7 @@ use pocketmine\network\multiversion\MultiversionEnums;
 use pocketmine\network\protocol\LevelEventPacket;
 
 use pocketmine\inventory\win10\Win10InvLogic;
+use pocketmine\network\protocol\v120\ShowModalFormPacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -359,6 +360,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $clientVersion = '';
 	
 	protected $originalProtocol;
+	
+	protected $lastModalId = 1;
 	
 	public function getLeaveMessage(){
 		return "";
@@ -2721,6 +2724,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$commandPostprocessEvent = new PlayerCommandPostprocessEvent($this, $commandLine);
 				$this->server->getPluginManager()->callEvent($commandPostprocessEvent);
 				break;
+			case 'MODAL_FORM_REAPONSE_PACKET':
+				$this->checkModal($packet->formId, json_decode($packet->data, true));
+				break;
 			default:
 				break;
 		}
@@ -4603,6 +4609,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public function getOriginalProtocol() {
 		return $this->originalProtocol;
+	}
+	
+	public function showModal($data) {
+		if ($this->protocol >= Info::PROTOCOL_120) {
+			$pk = new ShowModalFormPacket();
+			$pk->formId = $this->lastModalId++;
+			$pk->data = $data;
+			$this->dataPacket($pk);
+			return $pk->formId;
+		}
+		return false;
+	}
+
+	public function checkModal($formId, $data) {
+		
 	}
 
 }
