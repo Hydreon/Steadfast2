@@ -7,8 +7,8 @@ use pocketmine\network\protocol\PEPacket;
 
 class ModalFormResponsePacket extends PEPacket {
 
-	const NETWORK_ID = Info120::MODAL_FORM_REAPONSE_PACKET;
-	const PACKET_NAME = "MODAL_FORM_REAPONSE_PACKET";
+	const NETWORK_ID = Info120::MODAL_FORM_RESPONSE_PACKET;
+	const PACKET_NAME = "MODAL_FORM_RESPONSE_PACKET";
 
 	public $formId;
 	public $data;

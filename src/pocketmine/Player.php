@@ -2724,7 +2724,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$commandPostprocessEvent = new PlayerCommandPostprocessEvent($this, $commandLine);
 				$this->server->getPluginManager()->callEvent($commandPostprocessEvent);
 				break;
-			case 'MODAL_FORM_REAPONSE_PACKET':
+			case 'MODAL_FORM_RESPONSE_PACKET':
 				$this->checkModal($packet->formId, json_decode($packet->data, true));
 				break;
 			default:
