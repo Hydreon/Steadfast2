@@ -3402,7 +3402,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		foreach ($this->server->getOnlinePlayers() as $p) {
 			if ($p !== $this and strtolower($p->getName()) === strtolower($this->getName())) {
-				if ($p->kick("You connected from somewhere else.") === false) {
+				if ($this->xuid !== '') {
+					$p->close(TextFormat::YELLOW . $p->getName() . " has left the game", "You connected from somewhere else.");
+				} else if ($p->kick("You connected from somewhere else.") === false) {
 					$this->close(TextFormat::YELLOW . $this->getName() . " has left the game", "You connected from somewhere else.");
 					return;
 				}
