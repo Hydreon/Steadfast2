@@ -317,7 +317,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $movementSpeed = self::DEFAULT_SPEED;
 	
-	private static $damegeTimeList = ['0.05' => 0, '0.1' => 0.2, '0.15' => 0.4, '0.2' => 0.6, '0.25' => 0.8];
+	private static $damegeTimeList = ['0.1' => 0, '0.15' => 0.4, '0.2' => 0.6, '0.25' => 0.8];
 	
 	protected $lastDamegeTime = 0;
 	
@@ -4034,7 +4034,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			EntityDamageEvent::MODIFIER_BASE => isset($damageTable[$item->getId()]) ? $damageTable[$item->getId()] : 1,
 		];
 
-		if ($this->distance($target) > 4) {
+		if ($this->distance($target) > 3) {
 			return;
 		} elseif ($target instanceof Player) {
 			$armorValues = [
@@ -4071,9 +4071,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$timeDiff = microtime(true) - $this->lastDamegeTime;
 		$this->lastDamegeTime = microtime(true);
-
 		foreach (self::$damegeTimeList as $time => $koef) {
 			if ($timeDiff <= $time) {
+				if ($koef == 0) {
+					return;
+				}
 				$damage[EntityDamageEvent::MODIFIER_BASE] *= $koef;
 				break;
 			}
