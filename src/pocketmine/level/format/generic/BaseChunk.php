@@ -72,6 +72,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 			$this->heightMap = $heightMap;
 		}else{
 			$this->heightMap = array_fill(0, 256, $provider::getMaxY() - 1);
+			$this->incorrectHeightMap = true;
 		}
 
 		$this->NBTtiles = $tiles;

@@ -78,6 +78,7 @@ class Chunk extends BaseChunk {
 
 		if (!isset($this->nbt->HeightMap) or ! ($this->nbt->HeightMap instanceof IntArray)) {
 			$this->nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, 0));
+			$this->incorrectHeightMap = true;
 		}
 
 		$sections = [];
