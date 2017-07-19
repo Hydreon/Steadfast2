@@ -231,38 +231,44 @@ class ChunkMaker extends Worker {
 	}
 	
 	private function sortData($data){
-		$newData = '';
-		for ($x = 0; $x < 16; $x++) {
-			for ($z = 0; $z < 16; $z++) {
-				for ($y = 0; $y < 16; $y++) {
-					$newData .= $data{($y << 8) + ($z << 4) + $x};
+		$result = str_repeat("\x00", 4096);
+		if($data !== $result){
+			$i = 0;
+			for($x = 0; $x < 16; ++$x){
+				$zM = $x + 256;
+				for($z = $x; $z < $zM; $z += 16){
+					$yM = $z + 4096;
+					for($y = $z; $y < $yM; $y += 256){
+						$result{$i} = $data{$y};
+						++$i;
+					}
 				}
 			}
 		}
-		return $newData;
+		return $result;
 	}
 	
-	private function sortHalfData($data){
-		$newData = str_repeat("\x00", 2048);
-		for ($x = 0; $x < 16; $x++) {
-			for ($z = 0; $z < 16; $z++) {
-				for ($y = 0; $y < 16; $y++) {
-					$i = ($x << 7) | ($z << 3) | ($y >> 1);
-					$l = ord($data{($y << 7) + ($z << 3) + ($x >> 1)});
-					if (($x & 1) === 0) {
-						$l = $l & 0x0f;
-					} else {
-						$l = $l >> 4;
-					}
-					if (($y & 1) === 0) {
-						$newData{$i} = chr((ord($newData{$i}) & 0xf0) | ($l & 0x0f));
-					} else {
-						$newData{$i} = chr((($l & 0x0f) << 4) | (ord($newData{$i}) & 0x0f));
+	private function sortHalfData($data) {
+		$result = str_repeat("\x00", 2048);
+		if ($data !== $result) {
+			$i = 0;
+			for ($x = 0; $x < 8; ++$x) {
+				for ($z = 0; $z < 16; ++$z) {
+					$zx = (($z << 3) | $x);
+					for ($y = 0; $y < 8; ++$y) {
+						$j = (($y << 8) | $zx);
+						$j80 = ($j | 0x80);
+						$i1 = ord($data{$j});
+						$i2 = ord($data{$j80});
+						$result{$i} = chr(($i2 << 4) | ($i1 & 0x0f));
+						$result{$i | 0x80} = chr(($i1 >> 4) | ($i2 & 0xf0));
+						$i++;
 					}
 				}
+				$i += 128;
 			}
 		}
-		return $newData;
+		return $result;
 	}
 
 }

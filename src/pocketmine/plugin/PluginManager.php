@@ -634,6 +634,7 @@ class PluginManager{
 					$pluginCmds[] = $newCmd;
 				}
 			}
+			$plugin->generateJsonCommands($pluginCmds);
 		}
 
 		return $pluginCmds;

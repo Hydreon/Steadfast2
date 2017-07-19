@@ -72,6 +72,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 			$this->heightMap = $heightMap;
 		}else{
 			$this->heightMap = array_fill(0, 256, $provider::getMaxY() - 1);
+			$this->incorrectHeightMap = true;
 		}
 
 		$this->NBTtiles = $tiles;
@@ -135,7 +136,7 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 
 	public function setBlockSkyLight($x, $y, $z, $data){
 		try{
-			$this->sections[$y >> 4]->getBlockSkyLight($x, $y & 0x0f, $z, $data);
+			$this->sections[$y >> 4]->setBlockSkyLight($x, $y & 0x0f, $z, $data);
 			$this->hasChanged = true;
 		}catch(ChunkException $e){
 			$level = $this->getProvider();
@@ -145,12 +146,12 @@ abstract class BaseChunk extends BaseFullChunk implements Chunk{
 	}
 
 	public function getBlockLight($x, $y, $z){
-		return $this->sections[$y >> 4]->getBlockSkyLight($x, $y & 0x0f, $z);
+		return $this->sections[$y >> 4]->getBlockLight($x, $y & 0x0f, $z);
 	}
 
 	public function setBlockLight($x, $y, $z, $data){
 		try{
-			$this->sections[$y >> 4]->getBlockSkyLight($x, $y & 0x0f, $z, $data);
+			$this->sections[$y >> 4]->setBlockLight($x, $y & 0x0f, $z, $data);
 			$this->hasChanged = true;
 		}catch(ChunkException $e){
 			$level = $this->getProvider();

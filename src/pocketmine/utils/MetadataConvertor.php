@@ -46,10 +46,7 @@ class MetadataConvertor {
 		'DATA_MAX_AIR' => 43,
 	];
 	private static $diffEntityMetaIds120 = [
-		'DATA_NAMETAG' => 9,
-		'DATA_AIR' => 12,
-		'DATA_SCALE' => 44,
-		'DATA_MAX_AIR' => 48,
+		'DATA_MAX_AIR' => 43,
 	];
 	private static $entityMetaIds110 = [];
 	private static $entityMetaIds120 = [];

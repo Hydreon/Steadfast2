@@ -56,6 +56,30 @@ abstract class PluginBase implements Plugin{
 	
 	/** @var array */
 	private $jsonCommands = [];
+	
+	private static $defaultCommand = [
+		"versions" => [
+			[
+				"description" => "description",
+				"permission" => "any",
+				"aliases" => [],
+				"overloads" => [
+					"default" => [
+						"input" => [
+							"parameters" => [
+								[
+									"name" => "args",
+									"type" => "rawtext",
+									"optional" => true
+								]
+							]
+						],
+						"output" => []
+					]
+				]
+			]
+		]
+	];
 
 	/**
 	 * Called when the plugin is loaded, before calling onEnable()
@@ -156,6 +180,16 @@ abstract class PluginBase implements Plugin{
 	public function setJsonCommands($commands) {
         $this->jsonCommands = $commands;
     }
+	
+	public function generateJsonCommands($pluginCmds) {
+		foreach ($pluginCmds as $cmd) {
+			$this->jsonCommands[$cmd->getName()] = self::$defaultCommand;
+			$this->jsonCommands[$cmd->getName()]["versions"][0]["description"] = $cmd->getDescription();
+			foreach ($cmd->getAliases() as $alias) {
+				$this->jsonCommands[$cmd->getName()]["versions"][0]["aliases"][] = $alias;
+			}
+		}
+	}
 
 	/**
 	 * @return PluginLogger

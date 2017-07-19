@@ -72,6 +72,8 @@ abstract class BaseFullChunk implements FullChunk{
 	protected $hasChanged = false;
 
 	public $allowUnload = true;
+	
+	public $incorrectHeightMap = false;
 	/**
 	 * @param LevelProvider $provider
 	 * @param int           $x
@@ -105,6 +107,7 @@ abstract class BaseFullChunk implements FullChunk{
 			$this->heightMap = $heightMap;
 		}else{
 			$this->heightMap = array_fill(0, 256, $provider::getMaxY() - 1);
+			$this->incorrectHeightMap = true;
 		}
 
 		$this->NBTtiles = $tiles;
@@ -353,7 +356,7 @@ abstract class BaseFullChunk implements FullChunk{
 	public function getHeightMapArray(){
 		return $this->heightMap;
 	}
-
+	
 	public function hasChanged(){
 		return $this->hasChanged;
 	}

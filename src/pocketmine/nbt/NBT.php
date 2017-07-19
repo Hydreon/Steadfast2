@@ -641,7 +641,7 @@ class NBT{
 	}
 	
 	public function getNewString(){
-		$len = $this->getByte();
+		$len = $this->getVarInt();
 		return $this->get($len);
 	}
 
@@ -651,19 +651,22 @@ class NBT{
 	}
 	
 	public function putString($v){
-		$this->putByte(strlen($v));
+		$this->putVarInt(strlen($v));
 		$this->buffer .= $v;
 	}
 	
-	public function getSignedVarInt() {
-		// get var int
+	public function getVarInt() {
 		$result = $shift = 0;
 		do {
 			$byte = $this->getByte();
 			$result |= ($byte & 0x7f) << $shift;
 			$shift += 7;
 		} while ($byte > 0x7f);
-		
+		return $result;
+	}
+	
+	public function getSignedVarInt() {
+		$result = $this->getVarInt();
 		if ($result % 2 == 0) {
 			$result = $result / 2;
 		} else {
@@ -673,19 +676,11 @@ class NBT{
 	}
 	
 	public function putSignedVarInt($v) {
-		$v = ($v >= 0) ? 2 * $v : 2 * abs($v) - 1;
-		if ($v < 0x80) {
-			$this->putByte($v);
-		} else {
-			$values = array();
-			while ($v > 0) {
-				$values[] = 0x80 | ($v & 0x7f);
-				$v = $v >> 7;
-			}
-			$values[count($values)-1] &= 0x7f;
-			$bytes = call_user_func_array('pack', array_merge(array('C*'), $values));
-			$this->buffer .= $bytes;
-		}
+		$this->buffer .= Binary::writeSignedVarInt($v);
+	}
+
+	public function putVarInt($v) {
+		$this->buffer .= Binary::writeVarInt($v);
 	}
 
 	public function getArray(){
