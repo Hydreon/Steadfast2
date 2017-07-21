@@ -81,7 +81,6 @@ class ChunkMaker extends Worker {
 	}
 
 	protected function doChunk($data) {
-		static $time = [];
 		$chunkData120 = '';
 		if (isset($data['isAnvil']) && $data['isAnvil'] == true) {
 			$chunkData = chr(count($data['chunk']['sections']));
@@ -109,8 +108,6 @@ class ChunkMaker extends Worker {
 					Binary::writeLInt(0) .
 					$data['tiles'];
 		} else {
-			$timeStart = microtime(true);
-		
 			$offset = 8;
 			$blockIdArray = substr($data['chunk'], $offset, 32768);
 			$offset += 32768;
@@ -155,10 +152,6 @@ class ChunkMaker extends Worker {
 					pack("n*", ...$biomeColorArray) .
 					Binary::writeLInt(0) .
 					$data['tiles'];
-			
-			$timeStop = microtime(true);
-			$time[] = $timeStop - $timeStart;
-			var_dump("Avg. " . array_sum($time) / count($time));
 		}
 
 	
