@@ -1251,10 +1251,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		*/
 	}
 
-	protected function checkBlockCollision(){
-
-	}
-
 	protected function checkNearEntities($tickDiff){
 		foreach($this->level->getNearbyEntities($this->boundingBox->grow(1, 0.5, 1), $this) as $entity){
 			$entity->scheduleUpdate();
@@ -2444,6 +2440,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->dataPacket($pk);
 				$this->loggedIn = true;
 				$this->scheduleUpdate();
+				$this->justCreated = false;	
 				//Timings::$timerChunkRudiusPacket->stopTiming();
 				break;
 			case 'COMMAND_STEP_PACKET':
@@ -3002,35 +2999,32 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
-	protected function checkChunks(){
-		if($this->chunk === null or ($this->chunk->getX() !== ($this->x >> 4) or $this->chunk->getZ() !== ($this->z >> 4))){
-			if($this->chunk !== null){
+	protected function checkChunks() {
+		$chunkX = $this->x >> 4;
+		$chunkZ = $this->z >> 4;
+		if ($this->chunk === null || $this->chunk->getX() !== $chunkX || $this->chunk->getZ() !== $chunkZ) {
+			if ($this->chunk !== null) {
 				$this->chunk->removeEntity($this);
 			}
-			$this->chunk = $this->level->getChunk($this->x >> 4, $this->z >> 4, true);	
-			if($this->chunk !== null){
+			$this->chunk = $this->level->getChunk($chunkX, $chunkZ);
+			if ($this->chunk !== null) {
 				$this->chunk->addEntity($this);
 			}
-		}	
+		}
 
-		if(!$this->justCreated){
-			$newChunk = $this->level->getUsingChunk($this->x >> 4, $this->z >> 4);
-			unset($newChunk[$this->getId()]);
+		$chunkViewers = $this->level->getUsingChunk($this->x >> 4, $this->z >> 4);
+		unset($chunkViewers[$this->getId()]);
 
-			/** @var Player[] $reload */
-			//$reload = [];
-			foreach($this->hasSpawned as $player){
-				if(!isset($newChunk[$player->getId()])){
-					$this->despawnFrom($player);
-				}else{
-					unset($newChunk[$player->getId()]);
-					//$reload[] = $player;
-				}
+		foreach ($this->hasSpawned as $player) {
+			if (!isset($chunkViewers[$player->getId()])) {
+				$this->despawnFrom($player);
+			} else {
+				unset($chunkViewers[$player->getId()]);
 			}
+		}
 
-			foreach($newChunk as $player){
-				$this->spawnTo($player);
-			}
+		foreach ($chunkViewers as $player) {
+			$this->spawnTo($player);
 		}
 	}
 
@@ -4467,23 +4461,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if ($dx == 0 && $dz == 0 && $dy == 0) {
 			return true;
 		}
-		$axisalignedbb = clone $this->boundingBox;
-		$this->boundingBox->offset($dx, $dy, $dz);
 		$pos = new Vector3($this->x + $dx, $this->y + $dy, $this->z + $dz);
 		if (!$this->setPosition($pos)) {
-			$this->boundingBox->setBB($axisalignedbb);
 			return false;
 		} else {
 			$bb = clone $this->boundingBox;
-			$bb->maxY = $bb->minY + 0.5;
-			$bb->minY -= 1;
+			$bb->maxY = $this->y + 0.1;
+			$bb->minY = $this->y - 0.1;
 			if (count($this->level->getCollisionBlocks($bb, true)) > 0) {
 				$this->onGround = true;
 			} else {
 				$this->onGround = false;
 			}
 			$this->isCollided = $this->onGround;
-			$notInAir = $this->onGround || $this->isCollideWithWater();
+			$notInAir = $this->onGround;
 			$this->updateFallState($dy, $notInAir);
 		}
 		return true;
@@ -4599,5 +4590,119 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}		
 		$this->newPosition = null;
 	}
+	
+	public function getBlocksAround(){
+		$x = floor($this->x);
+		$z = floor($this->z);	
+		$blocksAround = [];
+		$blocksAround[] = $this->level->getBlock(new Vector3($x, floor($this->y), $z));
+		$blocksAround[] = $this->level->getBlock(new Vector3($x, floor($this->y + $this->eyeHeight), $z));
+		return $blocksAround;
+	}
+	
+	protected function checkBlockCollision(){
+		foreach($this->getBlocksAround() as $block){
+			if($block->hasEntityCollision()) {
+				$block->onEntityCollide($this);
+			}
+		}
+	}
+	
+	public function entityBaseTick($tickDiff = 1) {
+		$this->width;
+		if ($this->dead === true) {
+			return false;
+		}
 
+		if ($this->attackTime > 0) {
+			$this->attackTime -= $tickDiff;
+		}
+
+		if ($this->noDamageTicks > 0) {
+			$this->noDamageTicks -= $tickDiff;
+		}
+
+		if ($this->y < 0) {
+			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_VOID, 20);
+			$this->attack($ev->getFinalDamage(), $ev);
+		}
+
+		foreach ($this->effects as $effect) {
+			if ($effect->canTick()) {
+				$effect->applyEffect($this);
+			}
+			$newDuration = $effect->getDuration() - $tickDiff;
+			if ($newDuration <= 0) {
+				$this->removeEffect($effect->getId());
+			} else {
+				$effect->setDuration($newDuration);
+			}
+		}
+		
+		$this->checkBlockCollision();
+		
+		if ($this->isInsideOfSolid()) {
+			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_SUFFOCATION, 1);
+			$this->attack($ev->getFinalDamage(), $ev);
+		}
+
+		if (!$this->hasEffect(Effect::WATER_BREATHING) && $this->isInsideOfWater()) {
+			$airTicks = $this->getDataProperty(self::DATA_AIR) - $tickDiff;
+			if ($airTicks <= -20) {
+				$airTicks = 0;
+				$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_DROWNING, 2);
+				$this->attack($ev->getFinalDamage(), $ev);
+			}
+			$this->setAirTick($airTicks);
+			if ($this instanceof Player) {
+				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, false, self::DATA_TYPE_LONG, false);
+				$this->sendSelfData();
+			}
+		} else {
+			if ($this->getDataProperty(self::DATA_AIR) != 300) {
+				$this->setAirTick(300);
+				if (($this instanceof Player)) {
+					$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
+					$this->sendSelfData();
+				}
+			}
+		}
+
+		if ($this->fireTicks > 0) {
+			if ($this->fireProof) {
+				$this->fireTicks -= 4 * $tickDiff;
+			} else {
+				if (!$this->hasEffect(Effect::FIRE_RESISTANCE) && ($this->fireTicks % 20) === 0 || $tickDiff > 20) {
+					$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_FIRE_TICK, $this->fireDamage);
+					$this->attack($ev->getFinalDamage(), $ev);
+				}
+				$this->fireTicks -= $tickDiff;
+			}
+
+			if ($this->fireTicks <= 0) {
+				$this->extinguish();
+			} else {
+				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ONFIRE, true);
+			}
+		}
+		return true;
+	}
+	
+	public function isInsideOfWater() {
+		$blockId = $this->level->getBlockIdAt(floor($this->x), floor($this->y + $this->eyeHeight), floor($this->z));
+		if ($blockId == Block::WATER || $blockId == Block::STILL_WATER) {			
+			return true;
+		}
+		return false;
+	}
+	
+	public function isInsideOfSolid(){
+		$block = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y + $this->eyeHeight), floor($this->z)));
+		if($block->isSolid() && !$block->isTransparent()){
+			return true;
+		}
+		return false;
+	}
+
+	
 }
