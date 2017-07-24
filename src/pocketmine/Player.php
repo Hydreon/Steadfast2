@@ -268,8 +268,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $sleeping = null;
 	protected $clientID = null;
 
-	protected $stepHeight = 0.6;
-
 	public $usedChunks = [];
 	protected $chunkLoadCount = 0;
 	protected $loadQueue = [];
@@ -932,19 +930,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 		
-		$disallowedPackets = [];
-		$protocol = $this->getPlayerProtocol();
-		if ($protocol >= ProtocolInfo::PROTOCOL_120) {
-			$disallowedPackets = Protocol120::getDisallowedPackets();
-		}
-		if (in_array(get_class($packet), $disallowedPackets)) {
-			return;
-		}
-		
-		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
-		if($ev->isCancelled()){
-			return false;
-		}
+		//TODO optimiation
+//		$disallowedPackets = [];
+//		$protocol = $this->getPlayerProtocol();
+//		if ($protocol >= ProtocolInfo::PROTOCOL_120) {
+//			$disallowedPackets = Protocol120::getDisallowedPackets();
+//		}
+//		if (in_array(get_class($packet), $disallowedPackets)) {
+//			return;
+//		}
+//		
+//		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
+//		if($ev->isCancelled()){
+//			return false;
+//		}
 		
 		$this->interface->putPacket($this, $packet, $needACK, false);	
 		return true;
@@ -960,10 +959,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($this->connected === false){
 			return false;
 		}
-		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
-		if($ev->isCancelled()){
-			return false;
-		}
+		//TODO optimiation
+//		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
+//		if($ev->isCancelled()){
+//			return false;
+//		}
 
 		$this->interface->putPacket($this, $packet, $needACK, true);
 
@@ -1398,7 +1398,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->entityBaseTick($tickDiff);			
 
 			if(!$this->isSpectator() and $this->speed !== null){
-				if($this->onGround || $this->isCollideWithLiquid()){
+				if($this->onGround){
 					if($this->inAirTicks !== 0){
 						$this->startAirTicks = 5;
 					}
@@ -4457,29 +4457,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		
 	}
 	
-	public function move($dx, $dy, $dz) {
-		if ($dx == 0 && $dz == 0 && $dy == 0) {
-			return true;
-		}
-		$pos = new Vector3($this->x + $dx, $this->y + $dy, $this->z + $dz);
-		if (!$this->setPosition($pos)) {
-			return false;
-		} else {
-			$bb = clone $this->boundingBox;
-			$bb->maxY = $this->y + 0.1;
-			$bb->minY = $this->y - 0.1;
-			if (count($this->level->getCollisionBlocks($bb, true)) > 0) {
-				$this->onGround = true;
-			} else {
-				$this->onGround = false;
-			}
-			$this->isCollided = $this->onGround;
-			$notInAir = $this->onGround;
-			$this->updateFallState($dy, $notInAir);
-		}
-		return true;
-	}
-
 	protected function revertMovement(Vector3 $pos, $yaw = 0, $pitch = 0) {
 		$this->sendPosition($pos, $yaw, $pitch, MovePlayerPacket::MODE_RESET);
 		$this->forceMovement = $pos;
@@ -4591,25 +4568,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->newPosition = null;
 	}
 	
-	public function getBlocksAround(){
-		$x = floor($this->x);
-		$z = floor($this->z);	
-		$blocksAround = [];
-		$blocksAround[] = $this->level->getBlock(new Vector3($x, floor($this->y), $z));
-		$blocksAround[] = $this->level->getBlock(new Vector3($x, floor($this->y + $this->eyeHeight), $z));
-		return $blocksAround;
-	}
-	
-	protected function checkBlockCollision(){
-		foreach($this->getBlocksAround() as $block){
-			if($block->hasEntityCollision()) {
-				$block->onEntityCollide($this);
-			}
-		}
-	}
-	
 	public function entityBaseTick($tickDiff = 1) {
-		$this->width;
 		if ($this->dead === true) {
 			return false;
 		}
@@ -4687,22 +4646,5 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		return true;
 	}
-	
-	public function isInsideOfWater() {
-		$blockId = $this->level->getBlockIdAt(floor($this->x), floor($this->y + $this->eyeHeight), floor($this->z));
-		if ($blockId == Block::WATER || $blockId == Block::STILL_WATER) {			
-			return true;
-		}
-		return false;
-	}
-	
-	public function isInsideOfSolid(){
-		$block = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y + $this->eyeHeight), floor($this->z)));
-		if($block->isSolid() && !$block->isTransparent()){
-			return true;
-		}
-		return false;
-	}
-
 	
 }
