@@ -280,7 +280,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/** @var Vector3 */
 	public $newPosition;
 
-	protected $chunksPerTick;
 	protected $spawnThreshold;
 	/** @var null|Position */
 	private $spawnPosition = null;
@@ -622,7 +621,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->ip = $ip;
 		$this->port = $port;
 		$this->clientID = $clientID;
-		$this->chunksPerTick = (int) $this->server->getProperty("chunk-sending.per-tick", 4);
 		$this->spawnPosition = null;
 		$this->gamemode = $this->server->getGamemode();
 		$this->setLevel($this->server->getDefaultLevel(), true);
@@ -781,10 +779,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$count = 0;
 		foreach($this->loadQueue as $index => $distance){
-			if($count >= $this->chunksPerTick){
-				break;
-			}
-			
 			$X = null;
 			$Z = null;
 			Level::getXZ($index, $X, $Z);

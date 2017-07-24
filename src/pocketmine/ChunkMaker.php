@@ -108,18 +108,10 @@ class ChunkMaker extends Worker {
 					Binary::writeLInt(0) .
 					$data['tiles'];
 		} else {
-			$offset = 8;
-			$blockIdArray = substr($data['chunk'], $offset, 32768);
-			$offset += 32768;
-			$blockDataArray = substr($data['chunk'], $offset, 16384);
-			$offset += 16384;
-			$skyLightArray = substr($data['chunk'], $offset, 16384);
-			$offset += 16384;
-			$blockLightArray = substr($data['chunk'], $offset, 16384);
-			$offset += 16384;
-			$heightMapArray = substr($data['chunk'], $offset, 256);
-			$offset += 256;
-			$biomeColorArray = array_values(unpack("N*", substr($data['chunk'], $offset, 1024)));	
+			$blockIdArray = $data['blocks'];	
+			$blockDataArray = $data['data'];
+			$skyLightArray = $data['skyLight'];	
+			$blockLightArray = $data['blockLight'];
 
 			$countBlocksInChunk = 8;
 			$chunkData = chr($countBlocksInChunk);		
@@ -144,17 +136,16 @@ class ChunkMaker extends Worker {
 			}
 
 
-			$chunkData .= $heightMapArray .
-					pack("n*", ...$biomeColorArray) .
+			$chunkData .= $data['heightMap'] .
+					$data['biomeColor'] .
 					Binary::writeLInt(0) .
 					$data['tiles'];		
-			$chunkData120 .= $heightMapArray .
-					pack("n*", ...$biomeColorArray) .
+			$chunkData120 .= $data['heightMap'] .
+					$data['biomeColor'] .
 					Binary::writeLInt(0) .
 					$data['tiles'];
 		}
-
-	
+		
 		$result = array();
 		$result['chunkX'] = $data['chunkX'];
 		$result['chunkZ'] = $data['chunkZ'];
