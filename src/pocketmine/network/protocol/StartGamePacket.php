@@ -39,7 +39,6 @@ class StartGamePacket extends PEPacket{
 	public $x;
 	public $y;
 	public $z;
-	public $playerHaveLanguageCode = false;
 
 	public function decode($playerProtocol){
 
@@ -50,7 +49,7 @@ class StartGamePacket extends PEPacket{
 		$this->putVarInt($this->eid); //EntityUniqueID
 		$this->putVarInt($this->eid); //EntityUniqueID
 		
-		if ($playerProtocol >= Info::PROTOCOL_110 && $this->playerHaveLanguageCode) {
+		if ($playerProtocol >= Info::PROTOCOL_110) {
  			$this->putSignedVarInt($this->gamemode);	// Entity gamemode
  		}
 		
