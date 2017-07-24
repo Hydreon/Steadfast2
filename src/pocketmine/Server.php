@@ -1166,27 +1166,29 @@ class Server{
 		$this->getPluginManager()->callEvent(new LevelInitEvent($level));
 
 		$this->getPluginManager()->callEvent(new LevelLoadEvent($level));
+		
+		if ($this->getAutoGenerate()) {
+			$centerX = $level->getSpawnLocation()->getX() >> 4;
+			$centerZ = $level->getSpawnLocation()->getZ() >> 4;
 
-		$centerX = $level->getSpawnLocation()->getX() >> 4;
-		$centerZ = $level->getSpawnLocation()->getZ() >> 4;
+			$order = [];
 
-		$order = [];
-
-		for($X = -3; $X <= 3; ++$X){
-			for($Z = -3; $Z <= 3; ++$Z){
-				$distance = $X ** 2 + $Z ** 2;
-				$chunkX = $X + $centerX;
-				$chunkZ = $Z + $centerZ;
-				$index = Level::chunkHash($chunkX, $chunkZ);
-				$order[$index] = $distance;
+			for($X = -3; $X <= 3; ++$X){
+				for($Z = -3; $Z <= 3; ++$Z){
+					$distance = $X ** 2 + $Z ** 2;
+					$chunkX = $X + $centerX;
+					$chunkZ = $Z + $centerZ;
+					$index = Level::chunkHash($chunkX, $chunkZ);
+					$order[$index] = $distance;
+				}
 			}
-		}
 
-		asort($order);
+			asort($order);
 
-		foreach($order as $index => $distance){
-			Level::getXZ($index, $chunkX, $chunkZ);
-			$level->generateChunk($chunkX, $chunkZ, true);
+			foreach($order as $index => $distance){
+				Level::getXZ($index, $chunkX, $chunkZ);
+				$level->generateChunk($chunkX, $chunkZ, true);
+			}
 		}
 
 		return true;
@@ -1695,7 +1697,7 @@ class Server{
 
 		LevelProviderManager::addProvider($this, Anvil::class);
 		LevelProviderManager::addProvider($this, McRegion::class);
-
+		
 		foreach((array) $this->getProperty("worlds", []) as $name => $worldSetting){
 			if($this->loadLevel($name) === false){
 				$seed = $this->getProperty("worlds.$name.seed", time());

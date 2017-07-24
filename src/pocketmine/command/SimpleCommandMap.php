@@ -113,7 +113,7 @@ class SimpleCommandMap implements CommandMap{
 		$this->register("pocketmine", new TimingsCommand("timings"));
 		$this->register("pocketmine", new ReloadCommand("reload"));
 		
-		$this->register("pocketmine", new TransferCommand("transfer"));
+//		$this->register("pocketmine", new TransferCommand("transfer"));
 		$this->register("pocketmine", new PingCommand("ping"));
 
 		if($this->server->getProperty("debug.commands", false) === true){
