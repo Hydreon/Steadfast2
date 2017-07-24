@@ -263,7 +263,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $iusername = '';
 	protected $displayName = '';
 	protected $startAction = -1;
-	public $protocol = 0;
+	public $protocol = ProtocolInfo::BASE_PROTOCOL;
 	/** @var Vector3 */
 	protected $sleeping = null;
 	protected $clientID = null;
@@ -1637,7 +1637,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}		
 				if($packet->isValidProtocol === false) {
-					$this->protocol = ProtocolInfo::BASE_PROTOCOL;
 					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
