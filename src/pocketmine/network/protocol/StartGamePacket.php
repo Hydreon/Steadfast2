@@ -39,7 +39,6 @@ class StartGamePacket extends PEPacket{
 	public $x;
 	public $y;
 	public $z;
-	public $playerHaveLanguageCode = false;
 
 	public function decode($playerProtocol){
 

@@ -133,7 +133,7 @@ abstract class WalkingMonster extends WalkingEntity implements Monster{
 				$this->moveTime = 0;
 			}
 		}
-		if($this->isCollideWithWater()){
+		if($this->isInsideOfWater()){
 			$this->waterTick++;
 		} else{
 			$this->waterTick = 0;
