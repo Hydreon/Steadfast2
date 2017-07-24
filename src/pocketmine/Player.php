@@ -930,20 +930,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 		
-		//TODO optimiation
-//		$disallowedPackets = [];
-//		$protocol = $this->getPlayerProtocol();
-//		if ($protocol >= ProtocolInfo::PROTOCOL_120) {
-//			$disallowedPackets = Protocol120::getDisallowedPackets();
-//		}
-//		if (in_array(get_class($packet), $disallowedPackets)) {
-//			return;
-//		}
-//		
-//		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
-//		if($ev->isCancelled()){
-//			return false;
-//		}
+		if ($this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
+			$disallowedPackets = Protocol120::getDisallowedPackets();
+			if (in_array(get_class($packet), $disallowedPackets)) {
+				return;
+			}
+		}
+		
+		
+		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
+		if($ev->isCancelled()){
+			return false;
+		}
 		
 		$this->interface->putPacket($this, $packet, $needACK, false);	
 		return true;
@@ -959,11 +957,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($this->connected === false){
 			return false;
 		}
-		//TODO optimiation
-//		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
-//		if($ev->isCancelled()){
-//			return false;
-//		}
+
+		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
+		if($ev->isCancelled()){
+			return false;
+		}
 
 		$this->interface->putPacket($this, $packet, $needACK, true);
 
