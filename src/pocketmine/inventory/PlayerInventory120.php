@@ -127,9 +127,6 @@ class PlayerInventory120 extends PlayerInventory {
 	}
 	
 	public function sendCursor() {
-		if ($this->cursor == null) {
-			return;
-		}
 		$pk = new InventorySlotPacket();
 		$pk->containerId = Protocol120::CONTAINER_ID_CURSOR_SELECTED;
 		$pk->slot = 0;

@@ -4283,7 +4283,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	private function normalTransactionLogic($packet) {
 		$trGroup = new SimpleTransactionGroup($this);
 		foreach ($packet->transactions as $trData) {
-//			echo $trData;
+//			echo $trData . PHP_EOL;
 			if ($trData->isDropItemTransaction()) {
 				$this->tryDropItem($packet->transactions);
 				return;
@@ -4302,14 +4302,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		try {
 			if (!$trGroup->execute()) {
-				echo '[INFO] Transaction execute fail 1.'.PHP_EOL;
+				echo '[INFO] Transaction execute fail.'.PHP_EOL;
 				$trGroup->sendInventories();
 			} else {
-				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
+//				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
 			}
 		} catch (\Exception $ex) {
-			echo '[INFO] Transaction execute fail 2.'.PHP_EOL;
-			$trGroup->sendInventories();
+			echo '[INFO] Transaction execute exception. ' . $ex->getMessage() .PHP_EOL;
 		}
 	}
 	
@@ -4494,7 +4493,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	protected function onJump() {
- 		
+
  	}
 	
 	 protected function releaseUseItem() {

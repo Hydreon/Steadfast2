@@ -15,7 +15,7 @@ class InventorySlotPacket extends PEPacket {
 	/** @var integer */
 	public $slot;
 	/** @var Item */
-	public $item;
+	public $item = null;
 	
 	public function decode($playerProtocol) {
 		var_dump('decode: ' . __CLASS__);
@@ -25,6 +25,10 @@ class InventorySlotPacket extends PEPacket {
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->containerId);
 		$this->putVarInt($this->slot);
-		$this->putSlot($this->item, $playerProtocol);
+		if ($this->item == null) {
+			$this->putSignedVarInt(0);
+		} else {
+			$this->putSlot($this->item, $playerProtocol);
+		}
 	}
 }
