@@ -81,7 +81,7 @@ class SimpleCommandMap implements CommandMap{
 	private function setDefaultCommands(){
 		$this->register("pocketmine", new VersionCommand("version"));
 		$this->register("pocketmine", new PluginsCommand("plugins"));
-		$this->register("pocketmine", new SeedCommand("seed"));
+//		$this->register("pocketmine", new SeedCommand("seed"));
 		$this->register("pocketmine", new HelpCommand("help"));
 		$this->register("pocketmine", new StopCommand("stop"));
 		$this->register("pocketmine", new TellCommand("tell"));
@@ -113,12 +113,9 @@ class SimpleCommandMap implements CommandMap{
 		$this->register("pocketmine", new TimeCommand("time"));
 		$this->register("pocketmine", new TimingsCommand("timings"));
 		$this->register("pocketmine", new ReloadCommand("reload"));
-		
-<<<<<<< HEAD
-		//$this->register("pocketmine", new TransferCommand("transfer"));
-=======
+
 //		$this->register("pocketmine", new TransferCommand("transfer"));
->>>>>>> 0ba766af7bdafcbcbbfdfd15c20ddd35cf78cfc1
+
 		$this->register("pocketmine", new PingCommand("ping"));
 
 		if($this->server->getProperty("debug.commands", false) === true){
