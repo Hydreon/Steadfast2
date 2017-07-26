@@ -513,7 +513,6 @@ class Level implements ChunkManager, Metadatable{
 	 * @param Player $player
 	 */
 	public function useChunk($X, $Z, Player $player){
-		$this->loadChunk($X, $Z);
 		$this->usedChunks[self::chunkHash($X, $Z)][$player->getId()] = $player;
 	}
 
@@ -1088,41 +1087,14 @@ class Level implements ChunkManager, Metadatable{
 	 */
 	public function getBlock(Vector3 $pos, $cached = true){
 		$index = self::blockHash($pos->x, $pos->y, $pos->z);
-		if($cached === true and isset($this->blockCache[$index])){
+		if($cached === true && isset($this->blockCache[$index])){
 			return $this->blockCache[$index];
-		}elseif($pos->y >= 0 and $pos->y < $this->getMaxY() and isset($this->chunks[$chunkIndex = self::chunkHash ($pos->x >> 4, $pos->z >> 4)])){
+		}elseif($pos->y >= 0 && $pos->y < $this->getMaxY() && isset($this->chunks[$chunkIndex = self::chunkHash ($pos->x >> 4, $pos->z >> 4)])){
 			$fullState = $this->chunks[$chunkIndex]->getFullBlock($pos->x & 0x0f, $pos->y & $this->getYMask(), $pos->z & 0x0f);
 		}else{
 			$fullState = 0;
 		}
-		
-//		$mem1 = round((memory_get_usage() / 1024) / 1024, 2);
-//		$mem2 = round((memory_get_usage(true) / 1024) / 1024, 2);
-
 		$block = clone $this->blockStates[$fullState & 0xfff];
-		
-//		$mem12 = round((memory_get_usage() / 1024) / 1024, 2);
-//		$mem22 = round((memory_get_usage(true) / 1024) / 1024, 2);
-		
-//		$memDiff = ($mem12 - $mem1) + ($mem22 - $mem2);
-//		if (!self::$isMemoryLeakHappend && $memDiff >= 10) {
-//		if ($memDiff >= 10) {
-//			self::$isMemoryLeakHappend = true;
-//			
-//			$filename = './logs/memoryleak.log';
-//			$message = 'TIME: '.date('H:i:s').PHP_EOL;
-//			$message .= 'MEM DIFF : '.$memDiff.PHP_EOL;
-//			$message .= 'CULPRIT : '.$block->getId().' : '.$block->getName().PHP_EOL;
-//			
-//			$backtrace = debug_backtrace(0, 8);
-//			foreach ($backtrace as $k => $v) {
-//				$message .= "[line ".$backtrace[$k]['line']."] ".$backtrace[$k]['class']." -> ".$backtrace[$k]['function'].PHP_EOL;
-//			}
-//			$message .= PHP_EOL;
-//			
-//			file_put_contents($filename, $message, FILE_APPEND | LOCK_EX);
-//		}
-//
 		$block->x = $pos->x;
 		$block->y = $pos->y;
 		$block->z = $pos->z;

@@ -249,8 +249,6 @@ abstract class Entity extends Location implements Metadatable{
 	private $health = 20;
 	private $maxHealth = 20;
 
-	protected $ySize = 0;
-	protected $stepHeight = 0;
 	public $keepMovement = false;
 
 	public $fallDistance = 0;
@@ -265,8 +263,6 @@ abstract class Entity extends Location implements Metadatable{
 	protected $isStatic = false;
 
 	public $isCollided = false;
-	public $isCollidedHorizontally = false;
-	public $isCollidedVertically = false;
 
 	public $noDamageTicks;
 	protected $justCreated;
@@ -356,9 +352,6 @@ abstract class Entity extends Location implements Metadatable{
 		$this->initEntity();
 		$this->lastUpdate = $this->server->getTick();
 		$this->server->getPluginManager()->callEvent(new EntitySpawnEvent($this));
-
-		$this->checkBlockCollisionTicks = (int) $this->server->getAdvancedProperty("main.check-block-collision", 1);
-
 		$this->scheduleUpdate();
 
 	}
@@ -870,25 +863,28 @@ abstract class Entity extends Location implements Metadatable{
 		return false;
 	}
 
-	public function entityBaseTick($tickDiff = 1){
-
-		//Timings::$tickEntityTimer->startTiming();
-		//TODO: check vehicles
-
+	public function entityBaseTick($tickDiff = 1) {
 		$this->justCreated = false;
-		$isPlayer = $this instanceof Player;
-		
-		if($this->dead === true){
+		if ($this->dead === true) {
 			$this->removeAllEffects();
 			$this->despawnFromAll();
-			if (!$isPlayer) {
-				$this->close(); 
-			}
-			//Timings::$tickEntityTimer->stopTiming();
+			$this->close();
 			return false;
 		}
-
 		
+		$this->age += $tickDiff;
+		$this->ticksLived += $tickDiff;
+		if ($this->noDamageTicks > 0) {
+			$this->noDamageTicks -= $tickDiff;
+		}
+		
+		$hasUpdate = false;
+		if ($this->y < 0 && $this->dead !== true) {
+			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_VOID, 20);
+			$this->attack($ev->getFinalDamage(), $ev);
+			$hasUpdate = true;
+		}
+
 		foreach ($this->effects as $effect) {
 			if ($effect->canTick()) {
 				$effect->applyEffect($this);
@@ -900,22 +896,8 @@ abstract class Entity extends Location implements Metadatable{
 				$effect->setDuration($newDuration);
 			}
 		}
-
-		$hasUpdate = false;
-		$block = $this->isCollideWithLiquid();
-		if ($block !== false) {
-			$block->onEntityCollide($this);
-		}
-		$block = $this->isCollideWithTransparent();
-		if ($block !== false) {
-			$block->onEntityCollide($this);
-		}
 		
-		if ($this->y < 0 && $this->dead !== true) {
-			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_VOID, 20);
-			$this->attack($ev->getFinalDamage(), $ev);
-			$hasUpdate = true;
-		}
+		$this->checkBlockCollision();
 
 		if ($this->fireTicks > 0) {
 			if ($this->fireProof) {
@@ -935,22 +917,9 @@ abstract class Entity extends Location implements Metadatable{
 				$hasUpdate = true;
 			}
 		}
-
-		if ($this->noDamageTicks > 0) {
-			$this->noDamageTicks -= $tickDiff;
-			if ($this->noDamageTicks < 0) {
-				$this->noDamageTicks = 0;
-			}
-		}
-
-		$this->age += $tickDiff;
-		$this->ticksLived += $tickDiff;
-
-		//Timings::$tickEntityTimer->stopTiming();
-
 		return $hasUpdate;
 	}
-	
+
 	protected function updateMovement(){
 		$diffPosition = ($this->x - $this->lastX) ** 2 + ($this->y - $this->lastY) ** 2 + ($this->z - $this->lastZ) ** 2;
 		$diffRotation = ($this->yaw - $this->lastYaw) ** 2 + ($this->pitch - $this->lastPitch) ** 2;
@@ -1060,10 +1029,6 @@ abstract class Entity extends Location implements Metadatable{
 	protected function updateFallState($distanceThisTick, $onGround) {
 		if ($onGround === true) {
 			if($this->fallDistance > 0) {
-				if ($this instanceof Living) {
-					//TODO
-				}
-
 				if (!$this->isCollideWithWater()) {
 					$this->fall($this->fallDistance);
 				}
@@ -1145,144 +1110,54 @@ abstract class Entity extends Location implements Metadatable{
 	}
 
 	public function isInsideOfWater() {
-		$y = $this->y + $this->eyeHeight;
-		$block = $this->level->getBlock(new Vector3(floor($this->x), floor($y), floor($this->z)));
-		if ($block instanceof Water) {
-			$f = ($block->y + 1) - ($block->getFluidHeightPercent() - 0.1111111);
-			return $y < $f;
+		$blockId = $this->level->getBlockIdAt(floor($this->x), floor($this->y + $this->eyeHeight), floor($this->z));
+		if ($blockId == Block::WATER || $blockId == Block::STILL_WATER) {			
+			return true;
 		}
 		return false;
 	}
 
 	public function isCollideWithWater() {
-		$x = Math::floorFloat($this->x);
-		$z = Math::floorFloat($this->z);
-		// checking block under feet
-		$block = $this->level->getBlock(new Vector3($x, Math::floorFloat($y = $this->y), $z));
-		if(!($block instanceof Water)) {
-			$block = $this->level->getBlock(new Vector3($x, Math::floorFloat($y = ($this->y + $this->eyeHeight)), $z));
+		$x = floor($this->x);
+		$z = floor($this->z);
+		$blockId = $this->level->getBlockIdAt($x, floor($this->y),$z);
+		if ($blockId == Block::WATER || $blockId == Block::STILL_WATER) {			
+			return true;
 		}
-		if($block instanceof Water) {
-			$f = ($block->y + 1) - ($block->getFluidHeightPercent() - 0.1111111);
-			return $y < $f;
-		}
-		return false;
-	}
-	
-	public function isCollideWithLiquid() {
-		$x = Math::floorFloat($this->x);
-		$y = Math::floorFloat($this->y);
-		$z = Math::floorFloat($this->z);
-		
-		$block = $this->level->getBlock(new Vector3($x, $y, $z));
-		$isLiquid = $block instanceof Liquid;
-		
-		if (!$isLiquid) {
-			$y = Math::floorFloat($this->y + $this->eyeHeight);
-			$block = $this->level->getBlock(new Vector3($x, $y, $z));
-			$isLiquid = $block instanceof Liquid;
-			
-			if (!$isLiquid) {
-				$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x + $this->width), $y, $z));
-				$isLiquid = $block instanceof Liquid;
-				
-				if (!$isLiquid) {
-					$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x - $this->width), $y, $z));
-					$isLiquid = $block instanceof Liquid;
-					
-					if (!$isLiquid) {
-						$block = $this->level->getBlock(new Vector3($x, $y, Math::floorFloat($this->z + $this->width)));
-						$isLiquid = $block instanceof Liquid;
-						
-						if (!$isLiquid) {
-							$block = $this->level->getBlock(new Vector3($x, $y, Math::floorFloat($this->z - $this->width)));
-							$isLiquid = $block instanceof Liquid;
-						}
-					}
-				}
-			}
-		}
-		if ($isLiquid) {
-			$f = ($block->y + 1) - ($block->getFluidHeightPercent() - 0.1111111);
-			return $y < $f ? $block : false;
-		}
-		return false;
-	}
-	
-	public function isCollideWithTransparent() {
-		$x = Math::floorFloat($this->x);
-		$z = Math::floorFloat($this->z);
-	
-		$block = $this->level->getBlock(new Vector3($x, Math::floorFloat($this->y), $z));
-		$isTransparent = $block instanceof Ladder || $block instanceof Fire || $block instanceof Vine || $block instanceof Cobweb;
-		
-		if(!$isTransparent) {
-			$block = $this->level->getBlock(new Vector3($x, Math::floorFloat($this->y + $this->getEyeHeight()), $z));
-			$isTransparent = $block instanceof Ladder || $block instanceof Fire || $block instanceof Vine || $block instanceof Cobweb;
-		}
-		
-		if($isTransparent) {
-			return $block;
-		}
-		return false;
-	}
-
-	public function isInsideOfSolid(){
-		$block = $this->level->getBlock(new Vector3(Math::floorFloat($this->x), Math::floorFloat($y = ($this->y + $this->getEyeHeight())), Math::floorFloat($this->z)));
-
-		$bb = $block->getBoundingBox();
-
-		if($bb !== null and $block->isSolid() and !$block->isTransparent() and $bb->intersectsWith($this->getBoundingBox())){
+		$topBlockId = $this->level->getBlockIdAt($x, floor($this->y + $this->eyeHeight),$z);
+		if ($topBlockId == Block::WATER || $topBlockId == Block::STILL_WATER) {			
 			return true;
 		}
 		return false;
 	}
-
-	public function fastMove($dx, $dy, $dz){
-		if($dx == 0 and $dz == 0 and $dy == 0){
-			return true;
-		}
-
-		//Timings::$entityMoveTimer->startTiming();
-
-		$newBB = $this->boundingBox->getOffsetBoundingBox($dx, $dy, $dz);
-
-		$list = $this->level->getCollisionCubes($this, $newBB, false);
-
-		if(count($list) === 0){
-			$this->boundingBox = $newBB;
-		}
-
-		$this->x = ($this->boundingBox->minX + $this->boundingBox->maxX) / 2;
-		$this->y = $this->boundingBox->minY - $this->ySize;
-		$this->z = ($this->boundingBox->minZ + $this->boundingBox->maxZ) / 2;
-
-		if (!($this instanceof Player)) {
-			$this->checkChunks();
-		}
-
-		if(!$this->onGround or $dy != 0){
-			$bb = clone $this->boundingBox;
-			$bb->minY -= 0.75;
-			$this->onGround = false;
-
-			if(count($this->level->getCollisionBlocks($bb)) > 0){
+	
+	protected function getBlocksAround(){
+		$x = floor($this->x);
+		$z = floor($this->z);	
+		$blocksAround = [];
+		$blocksAround[] = $this->level->getBlock(new Vector3($x, floor($this->y), $z));
+		$blocksAround[] = $this->level->getBlock(new Vector3($x, floor($this->y + $this->eyeHeight), $z));
+		return $blocksAround;
+	}
+	
+	protected function checkBlockCollision(){
+		foreach($this->getBlocksAround() as $block){
+			if($block->hasEntityCollision()) {
+				$block->onEntityCollide($this);
 				$this->onGround = true;
 			}
 		}
-		$this->isCollided = $this->onGround;
-
-		$notInAir = $this->onGround || $this->isCollideWithWater();
-		$this->updateFallState($dy, $notInAir);
-
-
-		//Timings::$entityMoveTimer->stopTiming();
-
-		return true;
 	}
 
-	public function move($dx, $dy, $dz){
-	
+	public function isInsideOfSolid(){
+		$block = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y + $this->eyeHeight), floor($this->z)));
+		if($block->isSolid() && !$block->isTransparent()){
+			return true;
+		}
+		return false;
+	}
+
+	public function move($dx, $dy, $dz){	
 		if($dx == 0 and $dz == 0 and $dy == 0){
 			return true;
 		}
@@ -1290,227 +1165,24 @@ abstract class Entity extends Location implements Metadatable{
 		if($this->keepMovement){
 			$this->boundingBox->offset($dx, $dy, $dz);
 			$this->setPosition(new Vector3(($this->boundingBox->minX + $this->boundingBox->maxX) / 2, $this->boundingBox->minY, ($this->boundingBox->minZ + $this->boundingBox->maxZ) / 2));
-			$this->onGround = $this instanceof Player ? true : false;
 			return true;
 		}else{
-
-			//Timings::$entityMoveTimer->startTiming();
-
-			$this->ySize *= 0.4;
-
-			/*
-			if($this->isColliding){ //With cobweb?
-				$this->isColliding = false;
-				$dx *= 0.25;
-				$dy *= 0.05;
-				$dz *= 0.25;
-				$this->motionX = 0;
-				$this->motionY = 0;
-				$this->motionZ = 0;
-			}
-			*/
-
-			$movX = $dx;
-			$movY = $dy;
-			$movZ = $dz;
-
-			$axisalignedbb = clone $this->boundingBox;
-
-			/*$sneakFlag = $this->onGround and $this instanceof Player;
-
-			if($sneakFlag){
-				for($mov = 0.05; $dx != 0.0 and count($this->level->getCollisionCubes($this, $this->boundingBox->getOffsetBoundingBox($dx, -1, 0))) === 0; $movX = $dx){
-					if($dx < $mov and $dx >= -$mov){
-						$dx = 0;
-					}elseif($dx > 0){
-						$dx -= $mov;
-					}else{
-						$dx += $mov;
-					}
-				}
-
-				for(; $dz != 0.0 and count($this->level->getCollisionCubes($this, $this->boundingBox->getOffsetBoundingBox(0, -1, $dz))) === 0; $movZ = $dz){
-					if($dz < $mov and $dz >= -$mov){
-						$dz = 0;
-					}elseif($dz > 0){
-						$dz -= $mov;
-					}else{
-						$dz += $mov;
-					}
-				}
-
-				//TODO: big messy loop
-			}*/
-
-			$list = $this->level->getCollisionCubes($this, $this->boundingBox->getOffsetBoundingBox($dx, $dy, $dz));
-
-
-			foreach($list as $bb){
-				$dy = $bb->calculateYOffset($this->boundingBox, $dy);
-			}
-
-			$this->boundingBox->offset(0, $dy, 0);
-
-			if($movY != $dy){
-				$dx = 0;
-				$dy = 0;
-				$dz = 0;
-			}
-
-			$fallingFlag = ($this->onGround or ($dy != $movY and $movY < 0));
-
-			foreach($list as $bb){
-				$dx = $bb->calculateXOffset($this->boundingBox, $dx);
-			}
-
-			$this->boundingBox->offset($dx, 0, 0);
-
-			if($movX != $dx){
-				$dx = 0;
-				$dy = 0;
-				$dz = 0;
-			}
-
-			foreach($list as $bb){
-				$dz = $bb->calculateZOffset($this->boundingBox, $dz);
-			}
-
-			$this->boundingBox->offset(0, 0, $dz);
-
-			if($movZ != $dz){
-				$dx = 0;
-				$dy = 0;
-				$dz = 0;
-			}
-
-
-			if($this->stepHeight > 0 and $fallingFlag and $this->ySize < 0.05 and ($movX != $dx or $movZ != $dz)){
-				$cx = $dx;
-				$cy = $dy;
-				$cz = $dz;
-				$dx = $movX;
-				$dy = $this->stepHeight;
-				$dz = $movZ;
-
-				$axisalignedbb1 = clone $this->boundingBox;
-
-				$this->boundingBox->setBB($axisalignedbb);
-
-				$list = $this->level->getCollisionCubes($this, $this->boundingBox->getOffsetBoundingBox($dx, $dy, $dz), false);
-
-				foreach($list as $bb){
-					$dy = $bb->calculateYOffset($this->boundingBox, $dy);
-				}
-
-				$this->boundingBox->offset(0, $dy, 0);
-
-				foreach($list as $bb){
-					$dx = $bb->calculateXOffset($this->boundingBox, $dx);
-				}
-
-				$this->boundingBox->offset($dx, 0, 0);
-				if($movX != $dx){
-					$dx = 0;
-					$dy = 0;
-					$dz = 0;
-				}
-
-				foreach($list as $bb){
-					$dz = $bb->calculateZOffset($this->boundingBox, $dz);
-				}
-
-				$this->boundingBox->offset(0, 0, $dz);
-				if($movZ != $dz){
-					$dx = 0;
-					$dy = 0;
-					$dz = 0;
-				}
-
-				if($dy == 0){
-					$dx = 0;
-					$dy = 0;
-					$dz = 0;
-				}else{
-					$dy = -$this->stepHeight;
-					foreach($list as $bb){
-						$dy = $bb->calculateYOffset($this->boundingBox, $dy);
-					}
-					$this->boundingBox->offset(0, $dy, 0);
-				}
-
-				if(($cx ** 2 + $cz ** 2) >= ($dx ** 2 + $dz ** 2)){
-					$dx = $cx;
-					$dy = $cy;
-					$dz = $cz;
-					$this->boundingBox->setBB($axisalignedbb1);
-				}else{
-					$diff = $this->boundingBox->minY - (int) $this->boundingBox->minY;
-
-					if($diff > 0){
-						$this->ySize += $diff + 0.01;
-					}
-				}
-
-			}
-
-			$pos = new Vector3(
-				($this->boundingBox->minX + $this->boundingBox->maxX) / 2,
-				$this->boundingBox->minY + $this->ySize,
-				($this->boundingBox->minZ + $this->boundingBox->maxZ) / 2
-			);
-
-			$result = true;
-
+			$pos = new Vector3($this->x + $dx, $this->y + $dy, $this->z + $dz);			
 			if(!$this->setPosition($pos)){
-				$this->boundingBox->setBB($axisalignedbb);
-				$result = false;
+				return false;
 			}else{
-
-				if($this instanceof Player){
-					$bb = clone $this->boundingBox;
-					$bb->maxY = $bb->minY + 0.5;
-					$bb->minY -= 1;
-					if(count($this->level->getCollisionBlocks($bb, true)) > 0){
-						$this->onGround = true;
-					}else{
-						$this->onGround = false;
-					}					
-//						
-//					$bb = clone $this->boundingBox;
-//					$bb->minY -= 1;
-//					if(count($this->level->getCollisionBlocks($bb)) > 0){
-//						$this->onGround = true;
-//					}else{
-//						$this->onGround = false;
-//					}
-					$this->isCollided = $this->onGround;
-				}else{
-					$this->isCollidedVertically = $movY != $dy;
-					$this->isCollidedHorizontally = ($movX != $dx or $movZ != $dz);
-					$this->isCollided = ($this->isCollidedHorizontally or $this->isCollidedVertically);
-					$this->onGround = ($movY != $dy and $movY < 0);
+				$bb = clone $this->boundingBox;
+				$bb->maxY = $bb->minY + 0.5;
+				$bb->minY -= 1;
+				if (count($this->level->getCollisionBlocks($bb)) > 0) {
+					$this->onGround = true;
+				} else {
+					$this->onGround = false;
 				}
-				$notInAir = $this->onGround || $this->isCollideWithWater();
-				$this->updateFallState($dy, $notInAir);
-
-				if($movX != $dx){
-					$this->motionX = 0;
-				}
-
-				if($movY != $dy){
-					$this->motionY = 0;
-				}
-
-				if($movZ != $dz){
-					$this->motionZ = 0;
-				}
+				$this->isCollided = $this->onGround;
+				$this->updateFallState($dy, $this->onGround);
 			}
-
-			//TODO: vehicle collision events (first we need to spawn them!)
-
-			//Timings::$entityMoveTimer->stopTiming();
-
-			return $result;
+			return true;
 		}
 	}
 
@@ -1642,7 +1314,6 @@ abstract class Entity extends Location implements Metadatable{
 		if($ev->isCancelled()){
 			return false;
 		}
-		$this->ySize = 0;
 		$pos = $ev->getTo();
 
 		$this->setMotion(new Vector3(0, 0, 0));

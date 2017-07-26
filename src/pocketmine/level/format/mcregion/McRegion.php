@@ -129,8 +129,12 @@ class McRegion extends BaseLevelProvider{
 		$data['chunkX'] = $x;
 		$data['chunkZ'] = $z;
 		$data['tiles'] = $tiles;
-		$data['chunk'] = $chunk->toFastBinary();
-		
+		$data['blocks'] = $chunk->getBlockIdArray();
+		$data['data'] = $chunk->getBlockDataArray();
+		$data['blockLight'] = $chunk->getBlockLightArray();
+		$data['skyLight'] = $chunk->getBlockSkyLightArray();
+		$data['heightMap'] = pack("C*", ...$chunk->getHeightMapArray());
+		$data['biomeColor'] = pack("n*", ...$chunk->getBiomeColorArray());
 		$this->getLevel()->chunkMaker->pushMainToThreadPacket(serialize($data));
 		return null;
 	}
