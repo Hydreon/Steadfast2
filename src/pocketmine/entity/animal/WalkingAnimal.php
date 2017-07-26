@@ -78,7 +78,7 @@ abstract class WalkingAnimal extends WalkingEntity implements Animal{
 		){
 			$this->moveTime = 0;
 		}
-		if($this->isCollideWithWater()){
+		if($this->isInsideOfWater()){
 			$this->waterTick++;
 		} else{
 			$this->waterTick = 0;
