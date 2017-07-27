@@ -3171,7 +3171,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function processLogin() {
-		if ($this->server->isUseEncrypt()) {
+		if ($this->server->isUseEncrypt() && $this->needEncrypt()) {
 			$privateKey = $this->server->getServerPrivateKey();
 			$token = $this->server->getServerToken();
 			$pk = new ServerToClientHandshakePacket();
@@ -4682,6 +4682,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 		}
 		return true;
+	}
+	
+	public function needEncrypt() {
+		return $this->protocol >= Info::PROTOCOL_120;
 	}
 	
 }
