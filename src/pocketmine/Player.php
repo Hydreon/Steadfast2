@@ -360,6 +360,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $lastModalId = 1;
 	
+	/** @var CustomUI[] */
+	protected $activeModalWindows = [];
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -2540,6 +2543,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$commandPostprocessEvent = new PlayerCommandPostprocessEvent($this, $commandLine);
 				$this->server->getPluginManager()->callEvent($commandPostprocessEvent);
 				break;
+			/** @minProtocol 120 */
 			case 'MODAL_FORM_RESPONSE_PACKET':
 				$this->checkModal($packet->formId, json_decode($packet->data, true));
 				break;
@@ -4304,7 +4308,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	protected function onJump() {
-
+		
  	}
 	
 	 protected function releaseUseItem() {
@@ -4424,19 +4428,28 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->originalProtocol;
 	}
 	
-	public function showModal($data) {
+	/**
+	 * 
+	 * @param CustomUI $modalWindow
+	 * @return boolean
+	 */
+	public function showModal($modalWindow) {
 		if ($this->protocol >= Info::PROTOCOL_120) {
 			$pk = new ShowModalFormPacket();
 			$pk->formId = $this->lastModalId++;
-			$pk->data = $data;
+			$pk->data = $modalWindow->toJSON();
 			$this->dataPacket($pk);
-			return $pk->formId;
+			$this->activeModalWindows[$pk->formId] = $modalWindow; 
+			return true;
 		}
 		return false;
 	}
 
 	public function checkModal($formId, $data) {
-		
+		if (isset($this->activeModalWindows[$formId])) {
+			$this->activeModalWindows[$formId]->handle($data, $this);
+			unset($this->activeModalWindows[$formId]);
+		}
 	}
 	
 	protected function revertMovement(Vector3 $pos, $yaw = 0, $pitch = 0) {
