@@ -280,7 +280,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/** @var Vector3 */
 	public $newPosition;
 
-	protected $chunksPerTick;
 	protected $spawnThreshold;
 	/** @var null|Position */
 	private $spawnPosition = null;
@@ -365,6 +364,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $originalProtocol;
 	
 	protected $lastModalId = 1;
+	
+	/** @var CustomUI[] */
+	protected $activeModalWindows = [];
 	
 	public function getLeaveMessage(){
 		return "";
@@ -627,7 +629,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->ip = $ip;
 		$this->port = $port;
 		$this->clientID = $clientID;
-		$this->chunksPerTick = (int) $this->server->getProperty("chunk-sending.per-tick", 4);
 		$this->spawnPosition = null;
 		$this->gamemode = $this->server->getGamemode();
 		$this->setLevel($this->server->getDefaultLevel(), true);
@@ -786,10 +787,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$count = 0;
 		foreach($this->loadQueue as $index => $distance){
-			if($count >= $this->chunksPerTick){
-				break;
-			}
-			
 			$X = null;
 			$Z = null;
 			Level::getXZ($index, $X, $Z);
@@ -2387,28 +2384,37 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 
 				$t = $this->level->getTile($pos);
-				if($t instanceof Sign){
+				if ($t instanceof Sign) {
+					// prepare NBT data
 					$nbt = new NBT(NBT::LITTLE_ENDIAN);
 					$nbt->read($packet->namedtag, false, true);
-					$nbt = $nbt->getData();
-					if($nbt["id"] !== Tile::SIGN){
+					$nbtData = $nbt->getData();
+					$isNotCreator = !isset($t->namedtag->Creator) || $t->namedtag->Creator !== $this->username;
+					// check tile id
+					if ($nbtData["id"] !== Tile::SIGN || $isNotCreator) {
 						$t->spawnTo($this);
-					}else{
-						$ev = new SignChangeEvent($t->getBlock(), $this, [
-							TextFormat::clean($nbt["Text1"], $this->removeFormat), TextFormat::clean($nbt["Text2"], $this->removeFormat), TextFormat::clean($nbt["Text3"], $this->removeFormat), TextFormat::clean($nbt["Text4"], $this->removeFormat)
-						]);
-
-						if(!isset($t->namedtag->Creator) or $t->namedtag["Creator"] !== $this->username){
-							$ev->setCancelled(true);
+						break;
+					}
+					// collect sign text lines
+					$signText = [];
+					if ($this->protocol >= Info::PROTOCOL_120) {
+						$signText = explode("\n", $nbtData['Text']);
+						for ($i = 0; $i < 4; $i++) {
+							$signText[$i] = isset($signText[$i]) ? TextFormat::clean($signText[$i], $this->removeFormat) : '';
 						}
-
-						$this->server->getPluginManager()->callEvent($ev);
-
-						if(!$ev->isCancelled()){
-							$t->setText($ev->getLine(0), $ev->getLine(1), $ev->getLine(2), $ev->getLine(3));
-						}else{
-							$t->spawnTo($this);
+						unset($nbtData['Text']);
+					} else {
+						for ($i = 0; $i < 4; $i++) {
+							$signText[$i] = TextFormat::clean($nbtData["Text" . ($i + 1)], $this->removeFormat);
 						}
+					}
+					// event part
+					$ev = new SignChangeEvent($t->getBlock(), $this, $signText);
+					$this->server->getPluginManager()->callEvent($ev);
+					if ($ev->isCancelled()) {
+						$t->spawnTo($this);
+					} else {
+						$t->setText($ev->getLine(0), $ev->getLine(1), $ev->getLine(2), $ev->getLine(3));
 					}
 				}
 				//Timings::$timerTileEntityPacket->stopTiming();
@@ -2543,6 +2549,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$commandPostprocessEvent = new PlayerCommandPostprocessEvent($this, $commandLine);
 				$this->server->getPluginManager()->callEvent($commandPostprocessEvent);
 				break;
+			/** @minProtocol 120 */
 			case 'MODAL_FORM_RESPONSE_PACKET':
 				$this->checkModal($packet->formId, json_decode($packet->data, true));
 				break;
@@ -4133,7 +4140,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	private function normalTransactionLogic($packet) {
 		$trGroup = new SimpleTransactionGroup($this);
 		foreach ($packet->transactions as $trData) {
-//			echo $trData;
+//			echo $trData . PHP_EOL;
 			if ($trData->isDropItemTransaction()) {
 				$this->tryDropItem($packet->transactions);
 				return;
@@ -4152,14 +4159,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		try {
 			if (!$trGroup->execute()) {
-				echo '[INFO] Transaction execute fail 1.'.PHP_EOL;
+				echo '[INFO] Transaction execute fail.'.PHP_EOL;
 				$trGroup->sendInventories();
 			} else {
-				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
+//				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
 			}
 		} catch (\Exception $ex) {
-			echo '[INFO] Transaction execute fail 2.'.PHP_EOL;
-			$trGroup->sendInventories();
+			echo '[INFO] Transaction execute exception. ' . $ex->getMessage() .PHP_EOL;
 		}
 	}
 	
@@ -4344,7 +4350,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	protected function onJump() {
- 		
+		
  	}
 	
 	 protected function releaseUseItem() {
@@ -4464,19 +4470,28 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->originalProtocol;
 	}
 	
-	public function showModal($data) {
+	/**
+	 * 
+	 * @param CustomUI $modalWindow
+	 * @return boolean
+	 */
+	public function showModal($modalWindow) {
 		if ($this->protocol >= Info::PROTOCOL_120) {
 			$pk = new ShowModalFormPacket();
 			$pk->formId = $this->lastModalId++;
-			$pk->data = $data;
+			$pk->data = $modalWindow->toJSON();
 			$this->dataPacket($pk);
-			return $pk->formId;
+			$this->activeModalWindows[$pk->formId] = $modalWindow; 
+			return true;
 		}
 		return false;
 	}
 
 	public function checkModal($formId, $data) {
-		
+		if (isset($this->activeModalWindows[$formId])) {
+			$this->activeModalWindows[$formId]->handle($data, $this);
+			unset($this->activeModalWindows[$formId]);
+		}
 	}
 	
 	protected function revertMovement(Vector3 $pos, $yaw = 0, $pitch = 0) {
