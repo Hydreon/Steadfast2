@@ -2379,28 +2379,37 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 
 				$t = $this->level->getTile($pos);
-				if($t instanceof Sign){
+				if ($t instanceof Sign) {
+					// prepare NBT data
 					$nbt = new NBT(NBT::LITTLE_ENDIAN);
 					$nbt->read($packet->namedtag, false, true);
-					$nbt = $nbt->getData();
-					if($nbt["id"] !== Tile::SIGN){
+					$nbtData = $nbt->getData();
+					$isNotCreator = !isset($t->namedtag->Creator) || $t->namedtag->Creator !== $this->username;
+					// check tile id
+					if ($nbtData["id"] !== Tile::SIGN || $isNotCreator) {
 						$t->spawnTo($this);
-					}else{
-						$ev = new SignChangeEvent($t->getBlock(), $this, [
-							TextFormat::clean($nbt["Text1"], $this->removeFormat), TextFormat::clean($nbt["Text2"], $this->removeFormat), TextFormat::clean($nbt["Text3"], $this->removeFormat), TextFormat::clean($nbt["Text4"], $this->removeFormat)
-						]);
-
-						if(!isset($t->namedtag->Creator) or $t->namedtag["Creator"] !== $this->username){
-							$ev->setCancelled(true);
+						break;
+					}
+					// collect sign text lines
+					$signText = [];
+					if ($this->protocol >= Info::PROTOCOL_120) {
+						$signText = explode("\n", $nbtData['Text']);
+						for ($i = 0; $i < 4; $i++) {
+							$signText[$i] = isset($signText[$i]) ? TextFormat::clean($signText[$i], $this->removeFormat) : '';
 						}
-
-						$this->server->getPluginManager()->callEvent($ev);
-
-						if(!$ev->isCancelled()){
-							$t->setText($ev->getLine(0), $ev->getLine(1), $ev->getLine(2), $ev->getLine(3));
-						}else{
-							$t->spawnTo($this);
+						unset($nbtData['Text']);
+					} else {
+						for ($i = 0; $i < 4; $i++) {
+							$signText[$i] = TextFormat::clean($nbtData["Text" . ($i + 1)], $this->removeFormat);
 						}
+					}
+					// event part
+					$ev = new SignChangeEvent($t->getBlock(), $this, $signText);
+					$this->server->getPluginManager()->callEvent($ev);
+					if ($ev->isCancelled()) {
+						$t->spawnTo($this);
+					} else {
+						$t->setText($ev->getLine(0), $ev->getLine(1), $ev->getLine(2), $ev->getLine(3));
 					}
 				}
 				//Timings::$timerTileEntityPacket->stopTiming();
