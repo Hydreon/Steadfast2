@@ -2,6 +2,8 @@
 
 namespace pocketmine\network\protocol;
 
+use pocketmine\utils\JWT;
+
 class ServerToClientHandshakePacket extends PEPacket {
 
 	const NETWORK_ID = Info::SERVER_TO_CLIENT_HANDSHAKE_PACKET;
@@ -9,6 +11,7 @@ class ServerToClientHandshakePacket extends PEPacket {
 
 	public $publicKey;
 	public $serverToken;
+	public $privateKey;
 
 	public function decode($playerProtocol) {
 		
@@ -16,8 +19,15 @@ class ServerToClientHandshakePacket extends PEPacket {
 
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
-		$this->putString($this->publicKey);
-		$this->putString($this->serverToken);
+		if ($playerProtocol < Info::PROTOCOL_120) {
+			$this->putString($this->publicKey);
+			$this->putString($this->serverToken);
+		} else {
+			$header = ['alg' => 'ES384', 'x5u' => $this->publicKey];
+			$payload = ['salt' => JWT::base64UrlEncode($this->serverToken)];
+			$jwt = JWT::createJwt($header, $payload, $this->privateKey);
+			$this->putString($jwt);
+		}
 	}
 
 }

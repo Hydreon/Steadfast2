@@ -2547,6 +2547,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->checkModal($packet->formId, json_decode($packet->data, true));
 				break;
 			case 'CLIENT_TO_SERVER_HANDSHAKE_PACKET':
+				$this->continueLoginProcess();
 				break;
 			default:
 				break;
@@ -3162,26 +3163,33 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return true;
 	}
 	
-	public function processLogin() {	
-		if (!empty($this->identityPublicKey) && $this->server->isUseEncrypt()) {		
+	public function processLogin() {
+		if ($this->server->isUseEncrypt()) {
+			$privateKey = $this->server->getServerPrivateKey();
 			$token = $this->server->getServerToken();
 			$pk = new ServerToClientHandshakePacket();
 			$pk->publicKey = $this->server->getServerPublicKey();
 			$pk->serverToken = $token;
+			$pk->privateKey = $privateKey;
 			$this->dataPacket($pk);
-			$this->enableEncrypt($token, $this->server->getServerPrivateKey(), $this->identityPublicKey);
+			$this->enableEncrypt($token, $privateKey, $this->identityPublicKey);
+		} else {
+			$this->continueLoginProcess();
 		}
 		
+	}
+	
+	public function continueLoginProcess() {
 		if (!($this->interface instanceof ProxyInterface)) {
 			$pk = new PlayStatusPacket();
 			$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
-			$this->dataPacket($pk);			
+			$this->dataPacket($pk);
 		}
-		
+
 		$pk = new ResourcePacksInfoPacket();
-		$this->dataPacket($pk);			
+		$this->dataPacket($pk);
 	}
-	
+
 	public function completeLogin() {
 		$valid = true;
 		$len = strlen($this->username);

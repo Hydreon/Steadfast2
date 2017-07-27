@@ -275,7 +275,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$playerProtocol = $player->getPlayerProtocol();
 		if ($player->isEncryptEnable()) {
 			$buffer = $player->getDecrypt($buffer);
-			if ($playerProtocol == Info::PROTOCOL_110 && $this->isZlib($buffer)) {
+			if ($playerProtocol >= Info::PROTOCOL_110 && $this->isZlib($buffer)) {
 				$pk = new BatchPacket($buffer);
 				return $pk;
 			}
