@@ -4,7 +4,7 @@ namespace pocketmine\customUI\elements\simpleForm;
 
 use pocketmine\customUI\elements\UIElement;
 
-class Button extends UIElement {
+abstract class Button extends UIElement {
 	
 	const IMAGE_TYPE_PATH = 'path';
 	const IMAGE_TYPE_URL = 'url';
@@ -53,5 +53,7 @@ class Button extends UIElement {
 		}
 		return $data;
 	}
+
+	abstract public function handle($player);
 
 }

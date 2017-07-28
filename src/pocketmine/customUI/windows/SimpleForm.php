@@ -5,7 +5,7 @@ namespace pocketmine\customUI\windows;
 use pocketmine\customUI\CustomUI;
 use pocketmine\customUI\elements\simpleForm\Button;
 
-abstract class SimpleForm implements CustomUI {
+class SimpleForm implements CustomUI {
 	
 	/** @var string */
 	protected $title = '';
@@ -56,5 +56,17 @@ abstract class SimpleForm implements CustomUI {
 		return $this->json = json_encode($data);
 	}
 	
-	abstract public function handle($response, $player);
+	/**
+	 * 
+	 * 
+	 * @param type $response Button index
+	 * @param type $player
+	 * @throws Exception
+	 */
+	final public function handle($response, $player) {
+		if (!isset($this->buttons[$response])) {
+			throw new Exception(__CLASS__ . '::' . __METHOD__ . " Button with index {$response} doesn't exists.");
+		}
+		$this->buttons[$response]->handle($player);
+	}
 }
