@@ -2261,11 +2261,9 @@ class Level implements ChunkManager, Metadatable{
 
 		try{
 			if ($chunk !== null) {
-				if ($this->server->isUseAnimal() || $this->server->isUseMonster()) {
-					foreach ($chunk->getEntities() as $entity) {
-						if ($entity instanceof Monster || $entity instanceof Animal) {
-							$entity->close();
-						}
+				foreach ($chunk->getEntities() as $entity) {
+					if (!$entity->isNeedSaveOnChunkUnload()) {
+						$entity->close();
 					}
 				}
 				if ($this->getAutoSave()) {

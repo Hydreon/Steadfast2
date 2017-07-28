@@ -1480,5 +1480,9 @@ abstract class Entity extends Location implements Metadatable{
 	public function setAirTick($val){
 		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $val, false);
 	}
+	
+	public function isNeedSaveOnChunkUnload() {
+		return true;
+	}
 
 }
