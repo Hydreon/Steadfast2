@@ -513,6 +513,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @param Player $player
 	 */
 	public function useChunk($X, $Z, Player $player){
+		$this->loadChunk($X, $Z);
 		$this->usedChunks[self::chunkHash($X, $Z)][$player->getId()] = $player;
 	}
 
