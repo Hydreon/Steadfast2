@@ -27,12 +27,13 @@ class SimpleForm implements CustomUI {
 	}
 	
 	/**
-	 * Add button to for
+	 * Add button to form
 	 * 
 	 * @param Button $button
 	 */
 	public function addButton(Button $button) {
 		$this->buttons[] = $button;
+		$this->json = '';
 	}
 
 	/**
@@ -64,9 +65,10 @@ class SimpleForm implements CustomUI {
 	 * @throws Exception
 	 */
 	final public function handle($response, $player) {
-		if (!isset($this->buttons[$response])) {
-			throw new Exception(__CLASS__ . '::' . __METHOD__ . " Button with index {$response} doesn't exists.");
+		if (isset($this->buttons[$response])) {
+			$this->buttons[$response]->handle(true, $player);
+		} else {
+			error_log(__CLASS__ . '::' . __METHOD__ . " Button with index {$response} doesn't exists.");
 		}
-		$this->buttons[$response]->handle($player);
 	}
 }
