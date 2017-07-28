@@ -104,6 +104,15 @@ class PlayerInventory120 extends PlayerInventory {
 		}
 	}
 	
+	public function setHotbarSlotIndex($index, $slot) {
+		if ($index == $slot || $slot < 0) {
+			return;
+		}
+		$tmp = $this->getItem($index);
+		$this->setItem($index, $this->getItem($slot));
+		$this->setItem($slot, $tmp);
+	}
+	
 	public function sendSlot($index, $target) {
 		$pk = new InventorySlotPacket();
 		$pk->containerId = Protocol120::CONTAINER_ID_INVENTORY;
