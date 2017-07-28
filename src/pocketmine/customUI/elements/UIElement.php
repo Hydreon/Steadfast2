@@ -16,6 +16,6 @@ abstract class UIElement {
 	/**
 	 * @param Player $player
 	 */
-	abstract public function handle($player);
+	abstract public function handle($value, $player);
 	
 }

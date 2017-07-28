@@ -43,7 +43,7 @@ abstract class Button extends UIElement {
 	 * 
 	 * @return array
 	 */
-	public function getDataToJson() {
+	final public function getDataToJson() {
 		$data = [ 'text' => $this->text ];
 		if ($this->imageType != '') {
 			$data['image'] = [
@@ -54,6 +54,10 @@ abstract class Button extends UIElement {
 		return $data;
 	}
 
-	abstract public function handle($player);
+	/**
+	 * @param boolean $value Always true
+	 * @param Player $player
+	 */
+	abstract public function handle($value, $player);
 
 }
