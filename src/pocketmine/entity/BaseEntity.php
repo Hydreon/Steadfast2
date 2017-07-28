@@ -267,6 +267,8 @@ abstract class BaseEntity extends Creature{
 		return Entity::createEntity($type, $chunk, $nbt, ...$args);
 	}
 	  
-  
+	public function isNeedSaveOnChunkUnload() {
+		return false;
+	}  
 
 }

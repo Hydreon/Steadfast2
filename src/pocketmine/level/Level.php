@@ -513,6 +513,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @param Player $player
 	 */
 	public function useChunk($X, $Z, Player $player){
+		$this->loadChunk($X, $Z);
 		$this->usedChunks[self::chunkHash($X, $Z)][$player->getId()] = $player;
 	}
 
@@ -2260,11 +2261,9 @@ class Level implements ChunkManager, Metadatable{
 
 		try{
 			if ($chunk !== null) {
-				if ($this->server->isUseAnimal() || $this->server->isUseMonster()) {
-					foreach ($chunk->getEntities() as $entity) {
-						if ($entity instanceof Monster || $entity instanceof Animal) {
-							$entity->close();
-						}
+				foreach ($chunk->getEntities() as $entity) {
+					if (!$entity->isNeedSaveOnChunkUnload()) {
+						$entity->close();
 					}
 				}
 				if ($this->getAutoSave()) {
