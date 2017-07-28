@@ -49,6 +49,10 @@ abstract class ModalWindow implements CustomUI {
 		]);
 	}
 	
+	/**
+	 * @param boolean $response
+	 * @param Player $player
+	 */
 	abstract public function handle($response, $player);
 
 }

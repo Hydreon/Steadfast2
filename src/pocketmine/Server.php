@@ -1483,7 +1483,7 @@ class Server{
 	 * @param string          $dataPath
 	 * @param string          $pluginPath
 	 */
-	public function __construct(\ClassLoader $autoloader, \ThreadedLogger $logger, $filePath, $dataPath, $pluginPath){
+	public function __construct(\ClassLoader $autoloader, \ThreadedLogger $logger, $filePath, $dataPath, $pluginPath){		
 		self::$instance = $this;
 
 		$this->autoloader = $autoloader;

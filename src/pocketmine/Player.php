@@ -4159,7 +4159,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		try {
 			if (!$trGroup->execute()) {
-				echo '[INFO] Transaction execute fail.'.PHP_EOL;
+//				echo '[INFO] Transaction execute fail.'.PHP_EOL;
 				$trGroup->sendInventories();
 			} else {
 //				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
@@ -4225,11 +4225,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	private static function tryApplyCraft(&$craftSlots, $recipe) {
 		if ($recipe instanceof ShapedRecipe) {
 			$ingredients = [];
-			$itemGrid = $recipe->getIngredientMap();;
+			$itemGrid = $recipe->getIngredientMap();
 			// convert map into list
 			foreach ($itemGrid as $line) {
 				foreach ($line as $item) {
-					echo $item . PHP_EOL;
+//					echo $item . PHP_EOL;
 					$ingredients[] = $item;
 				}
 			}
