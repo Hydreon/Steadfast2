@@ -2110,11 +2110,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerDropItemPacket->stopTiming();
 					break;
 				}
-				$this->inventory->setItem($slot, Item::get(Item::AIR, null, 0));
-
+				
 				$motion = $this->getDirectionVector()->multiply(0.4);
-
-				$this->level->dropItem($this->add(0, 1.3, 0), $item, $motion, 40);
+				
+				if($slot < $this->inventory->getHotbarSize()){
+					$item->setCount($item->getCount() - 1);
+					$this->inventory->setItem($slot, $item);
+					$this->level->dropItem($this->add(0, 1.3, 0), Item::get($item->getId(), $item->getDamage()), $motion, 40);
+				} else {
+					$this->inventory->setItem($slot, Item::get(Item::AIR, null, 0));
+					$this->level->dropItem($this->add(0, 1.3, 0), $item, $motion, 40);
+				}
 
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 				$this->inventory->sendContents($this);
