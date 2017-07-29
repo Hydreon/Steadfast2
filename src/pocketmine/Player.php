@@ -1271,11 +1271,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->target = $entity->getId();
 				Server::broadcastPacket($entity->getViewers(), $pk);
 
-				$pk = new TakeItemEntityPacket();
-				$pk->eid = $this->id;
-				$pk->target = $entity->getId();
-				$this->dataPacket($pk);
-
 				$this->inventory->addItem(clone $item);
 				$entity->kill();
 			}elseif($entity instanceof DroppedItem){
@@ -1296,11 +1291,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$pk->eid = $this->getId();
 						$pk->target = $entity->getId();
 						Server::broadcastPacket($entity->getViewers(), $pk);
-
-						$pk = new TakeItemEntityPacket();
-						$pk->eid = $this->id;
-						$pk->target = $entity->getId();
-						$this->dataPacket($pk);
 
 						$this->inventory->addItem(clone $item);
 						$entity->kill();
@@ -1818,6 +1808,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 				//Timings::$timerMobEqipmentPacket->stopTiming();
+				break;
+			case 'LEVEL_SOUND_EVENT_PACKET':
+				$viewers = $this->getViewers();
+				foreach ($viewers as $viewer) {
+					$viewer->dataPacket($packet);
+				}
+				$this->dataPacket($packet);
 				break;
 			case 'USE_ITEM_PACKET':
 				//Timings::$timerUseItemPacket->startTiming();
