@@ -23,10 +23,10 @@ abstract class Multiversion {
 	public static function getPlayerInventory($player) {
 		switch ($player->protocol) {
 			case ProtocolInfo::PROTOCOL_120:
-				var_dump('Create 120 inv');
+//				var_dump('Create 120 inv');
 				return new PlayerInventory120($player);
 			default:
-				var_dump('Create default inv');
+//				var_dump('Create default inv');
 				return new PlayerInventory($player);
 		}
 	}

@@ -2262,6 +2262,9 @@ class Level implements ChunkManager, Metadatable{
 		try{
 			if ($chunk !== null) {
 				foreach ($chunk->getEntities() as $entity) {
+					if ($entity instanceof Player) {
+						continue;
+					}
 					if (!$entity->isNeedSaveOnChunkUnload()) {
 						$entity->close();
 					}
