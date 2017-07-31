@@ -172,6 +172,7 @@ use pocketmine\network\protocol\LevelEventPacket;
 
 use pocketmine\inventory\win10\Win10InvLogic;
 use pocketmine\network\protocol\v120\ShowModalFormPacket;
+use pocketmine\network\protocol\v120\ServerSettingsResponsetPacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -2548,6 +2549,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case 'MODAL_FORM_RESPONSE_PACKET':
 				$this->checkModal($packet->formId, json_decode($packet->data, true));
 				break;
+			case 'SERVER_SETTINGS_REQUEST_PACKET':				
+				$this->sendServerSettings();
+				break;
 			default:
 				break;
 		}
@@ -4643,4 +4647,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return true;
 	}
 	
+	protected function sendServerSettingsModal($modalWindow) {
+		if ($this->protocol >= Info::PROTOCOL_120) {
+			$pk = new ServerSettingsResponsetPacket();
+			$pk->formId = $this->lastModalId++;
+			$pk->data = $modalWindow->toJSON();
+			$this->dataPacket($pk);
+			$this->activeModalWindows[$pk->formId] = $modalWindow;
+		}
+	}
+
+	protected function sendServerSettings() {
+		
+	}
+
 }
