@@ -533,6 +533,15 @@ abstract class Entity extends Location implements Metadatable{
 	 * @return string
 	 */
 	public function getSaveId(){
+		if (!isset(self::$shortNames[static::class])) {
+			$backtrace = debug_backtrace(0, 20);
+			$result = '';
+			foreach ($backtrace as $k => $v) {
+				$result .= "[line " . (isset($backtrace[$k]['line']) ? $backtrace[$k]['line'] : 'unknown line') . "] " . (isset($backtrace[$k]['class']) ? $backtrace[$k]['class'] : 'unknown class') . " -> " . (isset($backtrace[$k]['function']) ? $backtrace[$k]['function'] : 'unknown function') . PHP_EOL;
+			}
+			var_dump($result);
+			var_dump($this->closed);
+		}
 		return self::$shortNames[static::class];
 	}
 
