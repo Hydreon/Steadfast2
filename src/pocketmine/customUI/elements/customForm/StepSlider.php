@@ -4,7 +4,7 @@ namespace pocketmine\customUI\elements\customForm;
 
 use pocketmine\customUI\elements\UIElement;
 
-abstract class StepSlider extends UIElement {
+class StepSlider extends UIElement {
 	
 	/** @var string[] */
 	protected $steps = [];
@@ -68,5 +68,9 @@ abstract class StepSlider extends UIElement {
 			'default' => $this->defaultStepIndex
 		];
 	}
-	
+
+	public function handle($value, $player) {
+		
+	}
+
 }

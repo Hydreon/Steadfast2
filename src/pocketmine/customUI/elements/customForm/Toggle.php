@@ -4,7 +4,7 @@ namespace pocketmine\customUI\elements\customForm;
 
 use pocketmine\customUI\elements\UIElement;
 
-abstract class Toggle extends UIElement {
+class Toggle extends UIElement {
 	
 	/** @var boolean */
 	protected $defaultValue = false;
@@ -38,5 +38,9 @@ abstract class Toggle extends UIElement {
 			"default" => $this->defaultValue
 		];
 	}
-	
+
+	public function handle($value, $player) {
+		
+	}
+
 }

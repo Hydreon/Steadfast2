@@ -4,7 +4,7 @@ namespace pocketmine\customUI\elements\customForm;
 
 use pocketmine\customUI\elements\UIElement;
 
-abstract class Input extends UIElement {
+class Input extends UIElement {
 	
 	/** @var string Text displaying in input without text */
 	protected $placeholder = '';
@@ -34,6 +34,10 @@ abstract class Input extends UIElement {
 			"placeholder" => $this->placeholder,
 			"default" => $this->defaultText
 		];
+	}
+	
+	public function handle($value, $player) {
+		
 	}
 
 }
