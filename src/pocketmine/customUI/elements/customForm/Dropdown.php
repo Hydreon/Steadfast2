@@ -4,7 +4,7 @@ namespace pocketmine\customUI\elements\customForm;
 
 use pocketmine\customUI\elements\UIElement;
 
-abstract class Dropdown extends UIElement {
+class Dropdown extends UIElement {
 	
 	/** @var string[] */
 	protected $options = [];
@@ -67,6 +67,10 @@ abstract class Dropdown extends UIElement {
 			'options' => $this->options,
 			'default' => $this->defaultOptionIndex
 		];
+	}
+
+	public function handle($value, $player) {
+		
 	}
 
 }
