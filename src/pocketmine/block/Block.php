@@ -724,8 +724,7 @@ class Block extends Position implements Metadatable{
 	 * @return float
 	 */
 	public function getFrictionFactor(){
-//		return 0.6;
-		return 10;
+		return 0.6;
 	}
 
 	/**

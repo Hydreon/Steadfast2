@@ -172,6 +172,7 @@ use pocketmine\network\protocol\LevelEventPacket;
 
 use pocketmine\inventory\win10\Win10InvLogic;
 use pocketmine\network\protocol\v120\ShowModalFormPacket;
+use pocketmine\network\protocol\v120\ServerSettingsResponsetPacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -359,6 +360,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $originalProtocol;
 	
 	protected $lastModalId = 1;
+	
+	/** @var CustomUI[] */
+	protected $activeModalWindows = [];
 	
 	public function getLeaveMessage(){
 		return "";
@@ -1174,7 +1178,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		
 		$flags |= 0x02;
 		$flags |= 0x04;
-
+		
 		$pk = new AdventureSettingsPacket();
 		$pk->flags = $flags;
 		$pk->userId = $this->getId();
@@ -1268,11 +1272,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->target = $entity->getId();
 				Server::broadcastPacket($entity->getViewers(), $pk);
 
-				$pk = new TakeItemEntityPacket();
-				$pk->eid = $this->id;
-				$pk->target = $entity->getId();
-				$this->dataPacket($pk);
-
 				$this->inventory->addItem(clone $item);
 				$entity->kill();
 			}elseif($entity instanceof DroppedItem){
@@ -1293,11 +1292,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$pk->eid = $this->getId();
 						$pk->target = $entity->getId();
 						Server::broadcastPacket($entity->getViewers(), $pk);
-
-						$pk = new TakeItemEntityPacket();
-						$pk->eid = $this->id;
-						$pk->target = $entity->getId();
-						$this->dataPacket($pk);
 
 						$this->inventory->addItem(clone $item);
 						$entity->kill();
@@ -2086,23 +2080,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					Win10InvLogic::packetHandler($packet, $this);
 				}
 
-				if(!$this->inventory->contains($packet->item)) {
+				$slot = $this->inventory->first($packet->item);
+				if ($slot == -1) {
 					$this->inventory->sendContents($this);
 					//Timings::$timerDropItemPacket->stopTiming();
 					break;
 				}
-				$slot = $this->inventory->first($packet->item);
-				if($slot == -1){
-					//Timings::$timerDropItemPacket->stopTiming();
-					break;
-				}
-				$item = $this->inventory->getItem($slot);
-				if($this->isSpectator()){
+				if ($this->isSpectator()) {
 					$this->inventory->sendSlot($slot, $this);
 					//Timings::$timerDropItemPacket->stopTiming();
 					break;
 				}
-				$ev = new PlayerDropItemEvent($this, $item);
+				$item = $this->inventory->getItem($slot);
+				$ev = new PlayerDropItemEvent($this, $packet->item);
 				$this->server->getPluginManager()->callEvent($ev);
 				if($ev->isCancelled()){
 					$this->inventory->sendSlot($slot, $this);
@@ -2111,12 +2101,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerDropItemPacket->stopTiming();
 					break;
 				}
-				$this->inventory->setItem($slot, Item::get(Item::AIR, null, 0));
-
+				
+				$remainingCount = $item->getCount() - $packet->item->getCount();
+				if ($remainingCount > 0) {
+					$item->setCount($remainingCount);
+					$this->inventory->setItem($slot, $item);
+				} else {
+					$this->inventory->setItem($slot, Item::get(Item::AIR));
+				}
+				
 				$motion = $this->getDirectionVector()->multiply(0.4);
-
-				$this->level->dropItem($this->add(0, 1.3, 0), $item, $motion, 40);
-
+				$this->level->dropItem($this->add(0, 1.3, 0), $packet->item, $motion, 40);
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 				$this->inventory->sendContents($this);
 				//Timings::$timerDropItemPacket->stopTiming();
@@ -2544,8 +2539,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$commandPostprocessEvent = new PlayerCommandPostprocessEvent($this, $commandLine);
 				$this->server->getPluginManager()->callEvent($commandPostprocessEvent);
 				break;
+			/** @minProtocol 120 */
 			case 'MODAL_FORM_RESPONSE_PACKET':
 				$this->checkModal($packet->formId, json_decode($packet->data, true));
+				break;
+			case 'SERVER_SETTINGS_REQUEST_PACKET':				
+				$this->sendServerSettings();
 				break;
 			default:
 				break;
@@ -4117,7 +4116,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		try {
 			if (!$trGroup->execute()) {
-				echo '[INFO] Transaction execute fail.'.PHP_EOL;
+//				echo '[INFO] Transaction execute fail.'.PHP_EOL;
 				$trGroup->sendInventories();
 			} else {
 //				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
@@ -4183,11 +4182,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	private static function tryApplyCraft(&$craftSlots, $recipe) {
 		if ($recipe instanceof ShapedRecipe) {
 			$ingredients = [];
-			$itemGrid = $recipe->getIngredientMap();;
+			$itemGrid = $recipe->getIngredientMap();
 			// convert map into list
 			foreach ($itemGrid as $line) {
 				foreach ($line as $item) {
-					echo $item . PHP_EOL;
+//					echo $item . PHP_EOL;
 					$ingredients[] = $item;
 				}
 			}
@@ -4308,7 +4307,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	protected function onJump() {
-
+		
  	}
 	
 	 protected function releaseUseItem() {
@@ -4428,19 +4427,28 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->originalProtocol;
 	}
 	
-	public function showModal($data) {
+	/**
+	 * 
+	 * @param CustomUI $modalWindow
+	 * @return boolean
+	 */
+	public function showModal($modalWindow) {
 		if ($this->protocol >= Info::PROTOCOL_120) {
 			$pk = new ShowModalFormPacket();
 			$pk->formId = $this->lastModalId++;
-			$pk->data = $data;
+			$pk->data = $modalWindow->toJSON();
 			$this->dataPacket($pk);
-			return $pk->formId;
+			$this->activeModalWindows[$pk->formId] = $modalWindow; 
+			return true;
 		}
 		return false;
 	}
 
 	public function checkModal($formId, $data) {
-		
+		if (isset($this->activeModalWindows[$formId])) {
+			$this->activeModalWindows[$formId]->handle($data, $this);
+			unset($this->activeModalWindows[$formId]);
+		}
 	}
 	
 	protected function revertMovement(Vector3 $pos, $yaw = 0, $pitch = 0) {
@@ -4633,4 +4641,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return true;
 	}
 	
+	protected function sendServerSettingsModal($modalWindow) {
+		if ($this->protocol >= Info::PROTOCOL_120) {
+			$pk = new ServerSettingsResponsetPacket();
+			$pk->formId = $this->lastModalId++;
+			$pk->data = $modalWindow->toJSON();
+			$this->dataPacket($pk);
+			$this->activeModalWindows[$pk->formId] = $modalWindow;
+		}
+	}
+
+	protected function sendServerSettings() {
+		
+	}
+
 }

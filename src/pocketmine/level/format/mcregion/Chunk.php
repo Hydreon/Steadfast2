@@ -34,7 +34,6 @@ use pocketmine\nbt\tag\LongTag;
 use pocketmine\Player;
 use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryStream;
-use pocketmine\entity\Human;
 
 class Chunk extends BaseFullChunk{
 
@@ -378,7 +377,7 @@ class Chunk extends BaseFullChunk{
 		$entities = [];
 
 		foreach($this->getEntities() as $entity){
-			if(!($entity instanceof Human) && !$entity->closed){
+			if (!($entity instanceof Player) && !$entity->closed) {
 				$entity->saveNBT();
 				$entities[] = $entity->namedtag;
 			}

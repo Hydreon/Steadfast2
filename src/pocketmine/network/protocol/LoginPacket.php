@@ -113,9 +113,9 @@ class LoginPacket extends PEPacket {
         if (isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
             $this->xuid = $this->chains['data'][$dataIndex]['extraData']['XUID'];
         }
-        
+		
 		$this->serverAddress = $this->playerData['ServerAddress'];
-		$this->skinName = $this->playerData['SkinId'];
+		$this->skinName = 'Standard_Custom';//$this->playerData['SkinId'];
 		$this->skin = base64_decode($this->playerData['SkinData']);
 		$this->clientSecret = $this->playerData['ClientRandomId'];
         if (isset($this->playerData['DeviceOS'])) {
