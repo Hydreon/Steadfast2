@@ -1577,6 +1577,8 @@ class Item{
 
 		return false;
 	}
+
+
 	
 	/**
 	 * @param $id
@@ -1657,6 +1659,30 @@ class Item{
 		}
 
 		return $enchantments;
+	}
+
+	/**
+	 * @param int  $id
+	 * @param int  $level
+	 * @param bool $compareLevel
+	 *
+	 * @return bool
+	 */
+	public function hasEnchantment(int $id, int $level = 1, bool $compareLevel = false) : bool{
+		if($this->hasEnchantments()){
+			foreach($this->getEnchantments() as $enchantment){
+				if($enchantment->getId() == $id){
+					if($compareLevel){
+						if($enchantment->getLevel() == $level){
+							return true;
+						}
+					}else{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	public function hasCustomName(){
@@ -1922,6 +1948,38 @@ class Item{
 	
 	public function getObtainTime(){
 		return $this->obtainTime;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getLore() : array{
+		$tag = $this->getNamedTagEntry("display");
+		if($tag instanceof CompoundTag and isset($tag->Lore) and $tag->Lore instanceof ListTag){
+			$lines = [];
+			foreach($tag->Lore->getValue() as $line){
+				$lines[] = $line->getValue();
+			}
+			return $lines;
+		}
+		return [];
+	}
+
+	/**
+	 * @param array $lines
+	 */
+	public function setLore(array $lines){
+		$tag = $this->getNamedTag() ?? new CompoundTag("", []);
+		if(!isset($tag->display)){
+			$tag->display = new CompoundTag("display", []);
+		}
+		$tag->display->Lore = new ListTag("Lore");
+		$tag->display->Lore->setTagType(NBT::TAG_String);
+		$count = 0;
+		foreach($lines as $line){
+			$tag->display->Lore[$count++] = new StringTag("", $line);
+		}
+		$this->setNamedTag($tag);
 	}
 
 }
