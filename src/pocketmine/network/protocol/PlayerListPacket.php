@@ -54,9 +54,19 @@ class PlayerListPacket extends PEPacket{
 			if($this->type === self::TYPE_ADD){
 				$this->putUUID($d[0]);
 				$this->putVarInt($d[1]);
-				$this->putString($d[2]);				
-				$this->putString($d[3]);
-				$this->putString($d[4]);
+				$this->putString($d[2]);
+				if ($playerProtocol >= Info::PROTOCOL_120) {
+					$this->putString($d[3]);
+					$this->putString($d[4]);
+					if (isset($d[7])) {
+						$this->putString($d[5]);
+						$this->putString($d[6]);
+						$this->putString($d[7]);
+					}
+				} else {
+					$this->putString('Standard_Custom');
+					$this->putString($d[4]);
+				}
 			}else{
 				$this->putUUID($d[0]);
 			}
