@@ -680,13 +680,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param string $name
 	 */
 	public function setDisplayName($name){
-		if($this->displayName == $name){
-			return;
-		}
 		$this->displayName = $name;
-		if($this->spawned){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->getSkinName(), $this->getSkinData());
-		}
 	}
 
 	/**
@@ -696,10 +690,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->nameTag;
 	}
 
-	public function setSkin($str, $skinName){
-		parent::setSkin($str, $skinName);
+	public function setSkin($str, $skinName, $skinGeometryName = "", $skinGeometryData = ""){
+		parent::setSkin($str, $skinName, $skinGeometryName, $skinGeometryData);
 		if($this->spawned === true){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->skinName, $this->skin);
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->getXUID(), $this->getViewers());
 		}
 	}
 
@@ -1277,11 +1271,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->target = $entity->getId();
 				Server::broadcastPacket($entity->getViewers(), $pk);
 
-				$pk = new TakeItemEntityPacket();
-				$pk->eid = $this->id;
-				$pk->target = $entity->getId();
-				$this->dataPacket($pk);
-
 				$this->inventory->addItem(clone $item);
 				$entity->kill();
 			}elseif($entity instanceof DroppedItem){
@@ -1302,11 +1291,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$pk->eid = $this->getId();
 						$pk->target = $entity->getId();
 						Server::broadcastPacket($entity->getViewers(), $pk);
-
-						$pk = new TakeItemEntityPacket();
-						$pk->eid = $this->id;
-						$pk->target = $entity->getId();
-						$this->dataPacket($pk);
 
 						$this->inventory->addItem(clone $item);
 						$entity->kill();
@@ -2092,23 +2076,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					Win10InvLogic::packetHandler($packet, $this);
 				}
 
-				if(!$this->inventory->contains($packet->item)) {
+				$slot = $this->inventory->first($packet->item);
+				if ($slot == -1) {
 					$this->inventory->sendContents($this);
 					//Timings::$timerDropItemPacket->stopTiming();
 					break;
 				}
-				$slot = $this->inventory->first($packet->item);
-				if($slot == -1){
-					//Timings::$timerDropItemPacket->stopTiming();
-					break;
-				}
-				$item = $this->inventory->getItem($slot);
-				if($this->isSpectator()){
+				if ($this->isSpectator()) {
 					$this->inventory->sendSlot($slot, $this);
 					//Timings::$timerDropItemPacket->stopTiming();
 					break;
 				}
-				$ev = new PlayerDropItemEvent($this, $item);
+				$item = $this->inventory->getItem($slot);
+				$ev = new PlayerDropItemEvent($this, $packet->item);
 				$this->server->getPluginManager()->callEvent($ev);
 				if($ev->isCancelled()){
 					$this->inventory->sendSlot($slot, $this);
@@ -2117,12 +2097,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerDropItemPacket->stopTiming();
 					break;
 				}
-				$this->inventory->setItem($slot, Item::get(Item::AIR, null, 0));
-
+				
+				$remainingCount = $item->getCount() - $packet->item->getCount();
+				if ($remainingCount > 0) {
+					$item->setCount($remainingCount);
+					$this->inventory->setItem($slot, $item);
+				} else {
+					$this->inventory->setItem($slot, Item::get(Item::AIR));
+				}
+				
 				$motion = $this->getDirectionVector()->multiply(0.4);
-
-				$this->level->dropItem($this->add(0, 1.3, 0), $item, $motion, 40);
-
+				$this->level->dropItem($this->add(0, 1.3, 0), $packet->item, $motion, 40);
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 				$this->inventory->sendContents($this);
 				//Timings::$timerDropItemPacket->stopTiming();
@@ -3384,7 +3369,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			Multiversion::sendContainer($this, Protocol120::CONTAINER_ID_CREATIVE, $slots);
 		}
 
-//		$this->server->sendFullPlayerListData($this);
 		$this->server->sendRecipeList($this);
 
 		$this->sendSelfData();				
@@ -3414,7 +3398,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->rawUUID = $this->uuid->toBinary();
 			$this->clientSecret = $packet->clientSecret;
 			$this->protocol = $packet->protocol;
-			$this->setSkin($packet->skin, $packet->skinName);
+			$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $pakcet->skinGeometryData);
 			$this->setViewRadius((int) ($packet->viewDistance / 2));
 			$this->ip = $packet->ip;
 			$this->port = $packet->port;
@@ -3426,7 +3410,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->completeLogin();
 		} elseif ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
 			$this->removeAllEffects();
-			$this->server->clearPlayerList($this);
+//			$this->server->clearPlayerList($this);
 			$this->closeFromProxy = true;
 			$this->close('', $packet->reason);
 		} elseif ($packet->pid() === ProtocolProxyInfo::PING_PACKET) {

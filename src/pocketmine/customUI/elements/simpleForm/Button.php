@@ -54,10 +54,4 @@ abstract class Button extends UIElement {
 		return $data;
 	}
 
-	/**
-	 * @param boolean $value Always true
-	 * @param Player $player
-	 */
-	abstract public function handle($value, $player);
-
 }

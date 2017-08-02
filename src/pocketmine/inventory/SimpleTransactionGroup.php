@@ -75,12 +75,13 @@ class SimpleTransactionGroup implements TransactionGroup {
 			return;
 		}
 		foreach ($this->transactions as $hash => $tx) {
-			if ($tx->getInventory() === $transaction->getInventory() and $tx->getSlot() === $transaction->getSlot()) {
-				if ($transaction->getCreationTime() >= $tx->getCreationTime()) {
-					unset($this->transactions[$hash]);
-				} else {
+			if ($tx->getInventory() === $transaction->getInventory() && $tx->getSlot() === $transaction->getSlot()) {
+				$transaction = self::mergeTransaction($tx,  $transaction);
+				if ($transaction === null) {
 					return;
 				}
+				unset($this->transactions[$hash]);
+				unset($this->inventories[spl_object_hash($tx->getInventory())]);
 			}
 		}
 		$this->transactions[spl_object_hash($transaction)] = $transaction;
@@ -174,6 +175,37 @@ class SimpleTransactionGroup implements TransactionGroup {
 			}
 			$inventory->sendContents($this->getSource());
 		}
+	}
+	
+	/**
+	 * Merge two transaction in one.
+	 * It's duck tape for 1.2 enchantment
+	 * 
+	 * @param BaseTransaction $sourceTr
+	 * @param BaseTransaction $targetTr
+	 * @return BaseTransaction | null
+	 */
+	protected static function mergeTransaction($sourceTr, $targetTr) {
+		$oldSourceItem = $sourceTr->getSourceItem();
+		$newSourceItem = $targetTr->getSourceItem();
+		if ($oldSourceItem->equals($newSourceItem) || $oldSourceItem->getId() == Item::AIR || $newSourceItem->getId() == Item::AIR) {
+			$oldTargetItem = $sourceTr->getTargetItem();
+			$newTargetItem = $targetTr->getTargetItem();
+			if ($oldTargetItem->equals($newTargetItem) || $oldTargetItem->getId() == Item::AIR || $newTargetItem->getId() == Item::AIR) {
+				if ($oldSourceItem->getId() != Item::AIR) {
+					$oldSourceItem->count += $newSourceItem->count;
+				} else {
+					$oldSourceItem = $newSourceItem;
+				}
+				if ($oldTargetItem->getId() != Item::AIR) {
+					$oldTargetItem->count += $newTargetItem->count;
+				} else {
+					$oldTargetItem = $newSourceItem;
+				}
+				return new BaseTransaction($sourceTr->getInventory(), $sourceTr->getSlot(), $oldSourceItem, $oldTargetItem);
+			}
+		}
+		return null;
 	}
 
 }
