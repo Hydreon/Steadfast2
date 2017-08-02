@@ -62,7 +62,7 @@ To build the SteadyFast server phar file please follow the instructions below.
 
 1) Download the Steadfast2 master from GitHub, then unzip the master then move the src folder into your server directory, then deleted the old .phar file if you still have it in the server directory. 
 
-2) Download the [PocketMine DevTools Plugin](https://poggit.pmmp.io/r/7221/PocketMine-DevTools.phar) then move the plugin into your server directory plugins folder.
+2) Download the [PocketMine DevTools Plugin](https://poggit.pmmp.io/p/DevTools/1.12.1) then move the plugin into your server directory plugins folder.
 
 3) Start the server if you don't know how to start the server follow your Starting/Stopping Server instructions above.
 
