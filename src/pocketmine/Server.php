@@ -299,6 +299,7 @@ class Server{
 	private $serverPublicKey = '';
 	private $serverPrivateKey = '';
 	private $serverToken = 'hksdYI3has';
+	private $isUseEncrypt = false;
 
 	public function addSpawnedEntity($entity) {
 		if ($entity instanceof Player) {
@@ -1530,7 +1531,8 @@ class Server{
 			"auto-save" => true,
 			"auto-generate" => false,
 			"save-player-data" => false,
-			"time-update" => true
+			"time-update" => true,
+			"use-encrypt" => false
 		]);
 
 		ServerScheduler::$WORKERS = 4;
@@ -1566,6 +1568,7 @@ class Server{
 		$this->animalLimit = $this->getConfigInt("animals-limit", 0);
 		$this->useMonster = $this->getConfigBoolean("spawn-mobs", false);
 		$this->monsterLimit = $this->getConfigInt("mobs-limit", 0);
+		$this->isUseEncrypt = $this->getConfigBoolean("use-encrypt", false);
 
 		if(($memory = str_replace("B", "", strtoupper($this->getConfigString("memory-limit", "256M")))) !== false){
 			$value = ["M" => 1, "G" => 1024];
@@ -2054,7 +2057,9 @@ class Server{
 	 */
 	public function start(){			
 		DataPacket::initPackets();
-		\McpeEncrypter::generateKeyPair($this->serverPrivateKey, $this->serverPublicKey);
+		if ($this->isUseEncrypt) {
+			\McpeEncrypter::generateKeyPair($this->serverPrivateKey, $this->serverPublicKey);
+		}
 		$jsonCommands = @json_decode(@file_get_contents(__DIR__ . "/command/commands.json"), true);
 		if ($jsonCommands) {
 			$this->jsonCommands = $jsonCommands;
@@ -2580,7 +2585,7 @@ class Server{
 	}
 	
 	public function isUseEncrypt() {
-		return true;
+		return $this->isUseEncrypt;
 	}
 		
 	public function getServerPublicKey() {
