@@ -27,6 +27,7 @@ use pocketmine\command\CommandSender;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
+
 class TellCommand extends VanillaCommand{
 
 	public function __construct($name){
@@ -54,13 +55,36 @@ class TellCommand extends VanillaCommand{
 
 		$player = $sender->getServer()->getPlayer($name);
 
-		if($player instanceof Player){
-			$player->setLastMessageFrom($sender->getName());
-			$sender->sendMessage("[me -> " . $player->getName() . "] " . implode(" ", $args));
-			$player->sendMessage("[" . $sender->getName() . " -> me] " . implode(" ", $args));
-		}else{
-			$sender->sendMessage("There's no player by that name online.");
-		}
+		if(class_exists("Server\\cbPlayer")){
+            if($player instanceof Player & $sender instanceof Player) {
+                if ($sender->privateMessages) {
+                    if ($player->privateMessages) {
+                        $player->setLastMessageFrom($sender->getName());
+                        $sender->sendMessage("[me -> " . $player->getName() . "] " . implode(" ", $args));
+                        $player->sendMessage("[" . $sender->getName() . " -> me] " . implode(" ", $args));
+                    } else {
+                        $sender->sendMessage(TextFormat::RED . "This player has disabled private messages.");
+                    }
+                }else {
+                    $sender->sendMessage(TextFormat::RED . "Your private messages are disabled. Please enable them first.");
+                }
+            }else {
+                $sender->sendMessage("There's no player by that name online.");
+            }
+
+
+        }else{
+            if($player instanceof Player){
+                $player->setLastMessageFrom($sender->getName());
+                $sender->sendMessage("[me -> " . $player->getName() . "] " . implode(" ", $args));
+                $player->sendMessage("[" . $sender->getName() . " -> me] " . implode(" ", $args));
+            }else{
+                $sender->sendMessage("There's no player by that name online.");
+            }
+        }
+
+
+
 
 		return true;
 	}
