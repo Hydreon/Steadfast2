@@ -30,7 +30,7 @@ Steadfast2 is not the best suited for running on Windows and another fork of Poc
 
 To install Steadfast2 on Windows OS please follow the instructions below.
 
-1) To install Steadfast2 on windows OS, first you need to download the PocketMine PHP7 installer -> [from here](https://github.com/NotPocketMine/Windows-PocketMine-MP/raw/master/PocketMine-MP-x64.exe) "Always take caution when downloading binaries off the internet" :)
+1) To install Steadfast2 on windows OS, first you need to download the PocketMine PHP7 installer -> [from here](https://github.com/NotPocketMine/Windows-PocketMine-MP/) "Always take caution when downloading binaries off the internet" :)
 
 2) Next, you need to run the PocketMine installer then follow the instructions provide in the installer. 
 
