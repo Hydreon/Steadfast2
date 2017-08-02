@@ -675,13 +675,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param string $name
 	 */
 	public function setDisplayName($name){
-		if($this->displayName == $name){
-			return;
-		}
 		$this->displayName = $name;
-		if($this->spawned){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->getSkinName(), $this->getSkinData());
-		}
 	}
 
 	/**
@@ -691,10 +685,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->nameTag;
 	}
 
-	public function setSkin($str, $skinName){
-		parent::setSkin($str, $skinName);
+	public function setSkin($str, $skinName, $skinGeometryName = "", $skinGeometryData = ""){
+		parent::setSkin($str, $skinName, $skinGeometryName, $skinGeometryData);
 		if($this->spawned === true){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->skinName, $this->skin);
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->getXUID(), $this->getViewers());
 		}
 	}
 
@@ -3350,7 +3344,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			Multiversion::sendContainer($this, Protocol120::CONTAINER_ID_CREATIVE, $slots);
 		}
 
-//		$this->server->sendFullPlayerListData($this);
 		$this->server->sendRecipeList($this);
 
 		$this->sendSelfData();				
@@ -3380,7 +3373,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->rawUUID = $this->uuid->toBinary();
 			$this->clientSecret = $packet->clientSecret;
 			$this->protocol = $packet->protocol;
-			$this->setSkin($packet->skin, $packet->skinName);
+			$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $pakcet->skinGeometryData);
 			$this->setViewRadius((int) ($packet->viewDistance / 2));
 			$this->ip = $packet->ip;
 			$this->port = $packet->port;
@@ -3392,7 +3385,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->completeLogin();
 		} elseif ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
 			$this->removeAllEffects();
-			$this->server->clearPlayerList($this);
+//			$this->server->clearPlayerList($this);
 			$this->closeFromProxy = true;
 			$this->close('', $packet->reason);
 		} elseif ($packet->pid() === ProtocolProxyInfo::PING_PACKET) {

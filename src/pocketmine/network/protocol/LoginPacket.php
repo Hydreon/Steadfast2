@@ -53,6 +53,8 @@ class LoginPacket extends PEPacket {
 	public $languageCode = 'unknown';
 	public $clientVersion = 'unknown';
 	public $originalProtocol;
+	public $skinGeometryName = "";
+	public $skinGeometryData = "";
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -115,8 +117,14 @@ class LoginPacket extends PEPacket {
         }
 		
 		$this->serverAddress = $this->playerData['ServerAddress'];
-		$this->skinName = 'Standard_Custom';//$this->playerData['SkinId'];
+		$this->skinName = $this->playerData['SkinId'];
 		$this->skin = base64_decode($this->playerData['SkinData']);
+		if (isset($this->playerData['SkinGeometryName'])) {
+            $this->skinGeometryName = $this->playerData['SkinGeometryName'];    
+        }
+		if (isset($this->playerData['SkinGeometry'])) {
+            $this->skinGeometryName = $this->playerData['SkinGeometry'];    
+        }
 		$this->clientSecret = $this->playerData['ClientRandomId'];
         if (isset($this->playerData['DeviceOS'])) {
             $this->osType = $this->playerData['DeviceOS'];    

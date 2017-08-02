@@ -2274,60 +2274,32 @@ class Server{
 	}
 
 	public function addOnlinePlayer(Player $player){
-		$this->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getDisplayName(), $player->getSkinName(), $player->getSkinData());
+		$this->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getName(), $player->getSkinName(), $player->getSkinData(), $player->getSkinGeometryName(), $player->getSkinGeometryData(), $player->getXUID(), [$player]);		
 		$this->playerList[$player->getRawUniqueId()] = $player;		
 	}
 
-	public function removeOnlinePlayer(Player $player){
-		if(isset($this->playerList[$player->getRawUniqueId()])){
+	public function removeOnlinePlayer(Player $player) {
+		if (isset($this->playerList[$player->getRawUniqueId()])) {
 			unset($this->playerList[$player->getRawUniqueId()]);
-			
-			$pk = new PlayerListPacket();
-			$pk->type = PlayerListPacket::TYPE_REMOVE;
-			$pk->entries[] = [$player->getUniqueId()];
-			Server::broadcastPacket($this->playerList, $pk);
 		}
-	}
-	
-	public function clearPlayerList(Player $player) {
-		$pk = new PlayerListPacket();
-		$pk->type = PlayerListPacket::TYPE_REMOVE;
-		foreach ($this->playerList as $onlinePlayer) {
-			if($player !== $onlinePlayer) {
-				$pk->entries[] = [$onlinePlayer->getUniqueId()];
-			}
-		}
-		$player->dataPacket($pk);
 	}
 
-	public function updatePlayerListData(UUID $uuid, $entityId, $name, $skinName, $skinData, array $players = null){
+	public function updatePlayerListData(UUID $uuid, $entityId, $name, $skinName, $skinData, $skinGeometryName, $skinGeometryData, $xuid, $players){
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_ADD;
-		$pk->entries[] = [$uuid, $entityId, $name, $skinName, $skinData];
-		foreach ($players === null ? $this->playerList : $players as $p){		
+		$pk->entries[] = [$uuid, $entityId, $name, $skinName, $skinData, $skinGeometryName, $skinGeometryData, $xuid];
+		foreach ($players as $p){		
 			$p->dataPacket($pk);
 		}
 	}
 
-	public function removePlayerListData(UUID $uuid, array $players = null){
+	public function removePlayerListData(UUID $uuid, $players){
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_REMOVE;
 		$pk->entries[] = [$uuid];
-		foreach ($players === null ? $this->playerList : $players as $p){		
+		foreach ($players as $p){		
 			$p->dataPacket($pk);
 		}
-	}
-
-	public function sendFullPlayerListData(Player $p){
-		$pk = new PlayerListPacket();
-		$pk->type = PlayerListPacket::TYPE_ADD;
-		foreach($this->playerList as $player){
-			if($player !== $p) {
-				$pk->entries[] = [$player->getUniqueId(), $player->getId(), $player->getDisplayName(), $player->getSkinName(), $player->getSkinData()];
-			}
-		}
-
-		$p->dataPacket($pk);
 	}
 
 	private $craftList = [];
