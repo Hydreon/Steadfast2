@@ -82,18 +82,14 @@ use pocketmine\Server;
 use pocketmine\utils\MainLogger;
 use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
 use pocketmine\network\protocol\RequestChunkRadiusPacket;
-use pocketmine\utils\Binary;
-use pocketmine\network\proxy\ConnectPacket;
-use pocketmine\network\proxy\DisconnectPacket as ProxyDisconnectPacket;
-use pocketmine\network\proxy\Info as ProtocolProxyInfo;
 use pocketmine\utils\BinaryStream;
 use pocketmine\network\protocol\SetCommandsEnabledPacket;
 use pocketmine\network\protocol\AvailableCommandsPacket;
 use pocketmine\network\protocol\CommandStepPacket;
 use pocketmine\network\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
+use pocketmine\network\protocol\ClientToServerHandshakePacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
-use pocketmine\network\proxy\PingPacket;
 use pocketmine\network\protocol\v120\CommandRequestPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
@@ -116,9 +112,6 @@ class Network {
 	
 	/** @var \SplFixedArray */
 	private $packetPool120;
-	
-	/** @var \SplFixedArray */
-	private $proxyPacketPool;
 
 	/** @var Server */
 	private $server;
@@ -140,7 +133,6 @@ class Network {
 		$this->registerPackets105();
 		$this->registerPackets110();
 		$this->registerPackets120();
-		$this->registerProxyPackets();
 
 		$this->server = $server;
 
@@ -267,14 +259,6 @@ class Network {
 		$this->packetPool120[$id] = new $class;
 	}
 	
-	/**
-	 * @param int        $id 0-255
-	 * @param DataPacket $class
-	 */
-	public function registerProxyPacket($id, $class){
-		$this->proxyPacketPool[$id] = new $class;
-	}
-
 	public function getServer(){
 		return $this->server;
 	}
@@ -356,19 +340,6 @@ class Network {
 		return null;
 	}
 	
-		/**
-	 * @param $id
-	 *
-	 * @return DataPacket
-	 */
-	public function getProxyPacket($id){
-		/** @var DataPacket $class */
-		$class = $this->proxyPacketPool[$id];
-		if($class !== null){
-			return clone $class;
-		}
-		return null;
-	}
 
 	/**
 	 * @param string $address
@@ -447,10 +418,10 @@ class Network {
 		$this->registerPacket(ProtocolInfo::AVAILABLE_COMMANDS_PACKET, AvailableCommandsPacket::class);
 		$this->registerPacket(ProtocolInfo::COMMAND_STEP_PACKET, CommandStepPacket::class);
 		$this->registerPacket(ProtocolInfo::TRANSFER_PACKET, TransferPacket::class);
+		$this->registerPacket(ProtocolInfo::CLIENT_TO_SERVER_HANDSHAKE_PACKET, ClientToServerHandshakePacket::class);
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACKS_INFO_PACKET, ResourcePacksInfoPacket::class);
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
-
 	}
 	
 	private function registerPackets105(){
@@ -507,6 +478,7 @@ class Network {
 		$this->registerPacket105(ProtocolInfo105::AVAILABLE_COMMANDS_PACKET, AvailableCommandsPacket::class);
 		$this->registerPacket105(ProtocolInfo105::COMMAND_STEP_PACKET, CommandStepPacket::class);
 		$this->registerPacket105(ProtocolInfo105::TRANSFER_PACKET, TransferPacket::class);
+		$this->registerPacket105(ProtocolInfo105::CLIENT_TO_SERVER_HANDSHAKE_PACKET, ClientToServerHandshakePacket::class);
 		$this->registerPacket105(ProtocolInfo105::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket105(ProtocolInfo105::RESOURCE_PACKS_INFO_PACKET, ResourcePacksInfoPacket::class);
 		$this->registerPacket105(ProtocolInfo105::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
@@ -568,17 +540,11 @@ class Network {
 		$this->registerPacket110(ProtocolInfo110::AVAILABLE_COMMANDS_PACKET, AvailableCommandsPacket::class);
 		$this->registerPacket110(ProtocolInfo110::COMMAND_STEP_PACKET, CommandStepPacket::class);
 		$this->registerPacket110(ProtocolInfo110::TRANSFER_PACKET, TransferPacket::class);
+		$this->registerPacket110(ProtocolInfo110::CLIENT_TO_SERVER_HANDSHAKE_PACKET, ClientToServerHandshakePacket::class);
 		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACKS_INFO_PACKET, ResourcePacksInfoPacket::class);
 		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
 	
-	}
-	
-	private function registerProxyPackets(){
-		$this->proxyPacketPool = new \SplFixedArray(256);
-		$this->registerProxyPacket(ProtocolProxyInfo::CONNECT_PACKET, ConnectPacket::class);
-		$this->registerProxyPacket(ProtocolProxyInfo::DISCONNECT_PACKET, ProxyDisconnectPacket::class);
-		$this->registerProxyPacket(ProtocolProxyInfo::PING_PACKET, PingPacket::class);		
 	}
 	
 	private function registerPackets120() {
@@ -628,6 +594,7 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::CHUNK_RADIUS_UPDATE_PACKET, ChunkRadiusUpdatePacket::class);
 		$this->registerPacket120(ProtocolInfo120::AVAILABLE_COMMANDS_PACKET, AvailableCommandsPacket::class);
 		$this->registerPacket120(ProtocolInfo120::TRANSFER_PACKET, TransferPacket::class);
+		$this->registerPacket120(ProtocolInfo120::CLIENT_TO_SERVER_HANDSHAKE_PACKET, ClientToServerHandshakePacket::class);
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACKS_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);

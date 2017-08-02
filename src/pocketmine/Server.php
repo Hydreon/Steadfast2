@@ -142,7 +142,6 @@ use pocketmine\entity\monster\walking\Wolf;
 use pocketmine\entity\monster\walking\Zombie;
 use pocketmine\entity\monster\walking\ZombieVillager;
 use pocketmine\entity\projectile\FireBall;
-use pocketmine\network\ProxyInterface;
 use pocketmine\utils\MetadataConvertor;
 
 /**
@@ -296,6 +295,11 @@ class Server{
 	private $spawnedEntity = [];
 	
 	private $unloadLevelQueue = [];
+	
+	private $serverPublicKey = '';
+	private $serverPrivateKey = '';
+	private $serverToken = 'hksdYI3has';
+	private $isUseEncrypt = false;
 
 	public function addSpawnedEntity($entity) {
 		if ($entity instanceof Player) {
@@ -306,19 +310,6 @@ class Server{
 
 	public function removeSpawnedEntity($entity) {
 		unset($this->spawnedEntity[$entity->getId()]);
-	}
-	
-	public function despawnEntitiesForPlayer($player) {
-		foreach ($this->spawnedEntity as $entity) {
-			if ($entity->isSpawned($player)) {
-				$entity->despawnFrom($player);
-			}
-		}
-		foreach ($this->playerList as $p) {
-			if ($p->isSpawned($player)) {
-				$p->despawnFrom($player);
-			}
-		}
 	}
 
 	public function isUseAnimal() {
@@ -414,13 +405,6 @@ class Server{
 		return $this->getConfigInt("server-port", 19132);
 	}
 	
-	/**
-	 * @return int
-	 */
-	public function getProxyPort(){
-		return $this->getConfigInt("proxy-port", 10305);
-	}	
-
 	/**
 	 * @return int
 	 */
@@ -1523,7 +1507,6 @@ class Server{
 		$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, [
 			"motd" => "Minecraft: PE Server",
 			"server-port" => 19132,
-			"proxy-port" => 10305,
 			"memory-limit" => "256M",
 			"white-list" => false,
 			"spawn-protection" => 16,
@@ -1548,9 +1531,8 @@ class Server{
 			"auto-save" => true,
 			"auto-generate" => false,
 			"save-player-data" => false,
-			"use-proxy" => false,
-			"use-raklib" => true,
-			"time-update" => true
+			"time-update" => true,
+			"use-encrypt" => false
 		]);
 
 		ServerScheduler::$WORKERS = 4;
@@ -1586,6 +1568,7 @@ class Server{
 		$this->animalLimit = $this->getConfigInt("animals-limit", 0);
 		$this->useMonster = $this->getConfigBoolean("spawn-mobs", false);
 		$this->monsterLimit = $this->getConfigInt("mobs-limit", 0);
+		$this->isUseEncrypt = $this->getConfigBoolean("use-encrypt", false);
 
 		if(($memory = str_replace("B", "", strtoupper($this->getConfigString("memory-limit", "256M")))) !== false){
 			$value = ["M" => 1, "G" => 1024];
@@ -1621,19 +1604,8 @@ class Server{
 		$this->logger->info("Starting Minecraft PE server on " . ($this->getIp() === "" ? "*" : $this->getIp()) . ":" . $this->getPort());
 		define("BOOTUP_RANDOM", @Utils::getRandomBytes(16));
 		$this->serverID = Utils::getMachineUniqueId($this->getIp() . $this->getPort());
-
-		
-		$useRaklib = $this->getConfigBoolean("use-raklib", true);
-		$useProxy = $this->getConfigBoolean("use-proxy", false);
-		if ($useRaklib) {
-			$this->addInterface($this->mainInterface = new RakLibInterface($this));
-		}
-		if ($useProxy) {
-			$this->addInterface($proxyInterface= new ProxyInterface($this));
-			if (!$useRaklib) {
-				$this->mainInterface = $proxyInterface;
-			}
-		}
+	
+		$this->addInterface($this->mainInterface = new RakLibInterface($this));
 
 		$this->logger->info("This server is running " . $this->getName() . " version " . ($version->isDev() ? TextFormat::YELLOW : "") . $version->get(true) . TextFormat::WHITE . " \"" . $this->getCodename() . "\" (API " . $this->getApiVersion() . ")");
 		$this->logger->info($this->getName() . " is distributed under the LGPL License");
@@ -2083,8 +2055,11 @@ class Server{
 	/**
 	 * Starts the PocketMine-MP server and starts processing ticks and packets
 	 */
-	public function start(){	
+	public function start(){			
 		DataPacket::initPackets();
+		if ($this->isUseEncrypt) {
+			\McpeEncrypter::generateKeyPair($this->serverPrivateKey, $this->serverPublicKey);
+		}
 		$jsonCommands = @json_decode(@file_get_contents(__DIR__ . "/command/commands.json"), true);
 		if ($jsonCommands) {
 			$this->jsonCommands = $jsonCommands;
@@ -2608,5 +2583,20 @@ class Server{
 	public function getJsonCommands() {
 		return $this->jsonCommands;
 	}
-
+	
+	public function isUseEncrypt() {
+		return $this->isUseEncrypt;
+	}
+		
+	public function getServerPublicKey() {
+		return $this->serverPublicKey;
+	}
+	
+	public function getServerPrivateKey() {
+		return $this->serverPrivateKey;
+	}
+	
+	public function getServerToken() {	
+		return $this->serverToken;
+	}
 }
