@@ -145,7 +145,7 @@ class Item{
 	const REDSTONE_WIRE = 55;
 	const DIAMOND_ORE = 56;
 	const DIAMOND_BLOCK = 57;
-	const CRAFTING_= 58;
+	const CRAFTING_TABLE = 58;
 	const WORKBENCH = 58;
 	const WHEAT_BLOCK = 59;
 	const FARMLAND = 60;
