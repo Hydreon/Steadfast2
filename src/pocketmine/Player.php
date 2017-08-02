@@ -1630,7 +1630,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
 				$this->protocol = $packet->protocol1;
-				$this->setSkin($packet->skin, $packet->skinName);
+				$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData);
                 if ($packet->osType > 0) {
                     $this->deviceType = $packet->osType;
                 }
