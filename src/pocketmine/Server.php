@@ -2264,10 +2264,9 @@ class Server{
 		$pk->type = PlayerListPacket::TYPE_ADD;
 		$pk->entries[] = [$uuid, $entityId, $name, $skinName, $skinData, $skinGeometryName, $skinGeometryData, $xuid];
 		foreach ($players as $p){
-
-            if($p->getUniqueId()->toString() !== $uuid->toString()){
-                $p->dataPacket($pk);
-            }
+ 			if($p->getUniqueId()->toString() !== $uuid->toString()){
+                		$p->dataPacket($pk);
+            		}
 		}
 	}
 
