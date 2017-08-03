@@ -40,8 +40,7 @@ class PlayerInventory120 extends PlayerInventory {
 	
 	public function setItem($index, Item $item, $sendPacket = true) {
 		if ($index >= 0) {
-			parent::setItem($index, $item, $sendPacket);
-			return;
+			return parent::setItem($index, $item, $sendPacket);
 		}
 		// protocol 120 logic
 		switch ($index) {
@@ -78,6 +77,7 @@ class PlayerInventory120 extends PlayerInventory {
 				}
 				break;
 		}
+		return true;
 	}
 	
 	public function getItem($index) {
