@@ -8,7 +8,6 @@ Steadfast2 is a project for backporting new Minecraft: Pocket Edition changes to
 ## Known bugs
 
 - Players don't fall out of the world naturally, you'll want to handle PlayerMoveEvent as needed to kill them.
-- Chunks won't load, you will want to go to server.properties and set auto-generate value as on.
 
 ## Installation
 
