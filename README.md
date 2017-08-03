@@ -27,12 +27,20 @@ Things you'll want to change on your plugins:
 4) Running `./start` for the first time will take through a set up wizard where and create the 2 main config files for your server `pocketmine.yml` and `server.properties`    
 
 #### Windows
-Instructions coming soon... we suggest a Linux VM in the meantime.  We also suggest using Vagrant and picking a Ubuntu box -> [from here](https://atlas.hashicorp.com/boxes/search?utf8=%E2%9C%93&sort=&provider=&q=ubuntu)
+We suggest a Linux VM in the meantime.  We also suggest using Vagrant and picking a Ubuntu box -> [from here](https://atlas.hashicorp.com/boxes/search?utf8=%E2%9C%93&sort=&provider=&q=ubuntu)
     
- Notes: 
+1) To install SteadyFast2 on windows OS, first you need to download the PocketMine PHP7 installer -> [from here](https://github.com/NotPocketMine/Windows-PocketMine-MP/raw/master/PocketMine-MP-x64.exe) 
+
+2) Next, you need to run the PocketMine installer then follow the instructions provide in the installer. 
+
+3) Then you need to navigate to your user's documents file, and delete PocketMine-MP.phar.
+
+4) Finally, you need to move SteadyFast2.phar into the directory above and run start.cmd.
+  
+  Notes: 
         
    - If using Vagrant have a config of `config.vm.network "public_network"` in the `Vagrantfile` should make your server discoverable from LAN. 
-    
+  
     
 ### Starting/Stopping Server
     

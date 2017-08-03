@@ -52,13 +52,17 @@ class AdventureSettingsPacket extends PEPacket{
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		$this->putVarInt($this->flags);	
+		$this->putVarInt($this->flags);
 		$this->putVarInt(0);
 		switch ($playerProtocol) {
 			case Info::PROTOCOL_120:
 				$this->putVarInt($this->actionPermissions);
 				$this->putVarInt($this->permissionLevel);
-				$this->putLong($this->userId);
+				if ($this->userId & 1) { // userId is odd
+					$this->putLLong(-1 * (($this->userId + 1) >> 1));
+				} else { // userId is even
+					$this->putLLong($this->userId >> 1);
+				}
 				break;
 		}
 	}

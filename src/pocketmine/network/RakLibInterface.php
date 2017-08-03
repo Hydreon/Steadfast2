@@ -179,7 +179,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$player = $this->players[$identifier];
 			try{
 				if($buffer !== ""){
-					$pk = $this->getPacket($buffer, $player->getPlayerProtocol(), $player->isOnline());				
+					$pk = $this->getPacket($buffer, $player);			
 					if (!is_null($pk)) {
 						$pk->decode($player->getPlayerProtocol());
 						$player->handleDataPacket($pk);
@@ -255,16 +255,32 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			if($needACK === true){
 				$pk->identifierACK = $this->identifiersACK[$identifier]++;
 			}
+			
+			if($player->isEncryptEnable()) {
+				$pk->buffer = chr(0xfe) . $player->getEncrypt(substr($pk->buffer,1));
+			}
+
 			if ($immediate) {
 				$pk->reliability = 0;
 			}
+
 			$this->interface->sendEncapsulated($identifier, $pk, ($needACK === true ? RakLib::FLAG_NEED_ACK : 0) | ($immediate === true ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL));
 		}
 
 		return null;
 	}
 	
-	private function getPacket($buffer, $playerProtocol, $isOnline) {
+
+	private function getPacket($buffer, $player){
+		$playerProtocol = $player->getPlayerProtocol();
+		if ($player->isEncryptEnable()) {
+			$buffer = $player->getDecrypt($buffer);
+			if ($playerProtocol >= Info::PROTOCOL_110 && $this->isZlib($buffer)) {
+				$pk = new BatchPacket($buffer);
+				return $pk;
+			}
+		}
+
 		$pid = ord($buffer{0});
 //		var_dump("Recive: 0x" . ($pid < 16 ? '0' . dechex($pid) : dechex($pid)));
 		if (($data = $this->network->getPacket($pid, $playerProtocol)) === null) {
@@ -282,7 +298,10 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		if (isset($this->identifiers[$player])) {	
 			$pk = new EncapsulatedPacket();
 			$pk->buffer = chr(0xfe) . $buffer;
-			$pk->reliability = 3;		
+			$pk->reliability = 3;	
+			if($player->isEncryptEnable()) {
+				$pk->buffer = chr(0xfe) . $player->getEncrypt(substr($pk->buffer,1));
+			}
 			$this->interface->sendEncapsulated($player->getIdentifier(), $pk, RakLib::PRIORITY_NORMAL);			
 		}
 	}
