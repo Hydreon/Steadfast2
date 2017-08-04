@@ -58,10 +58,11 @@ class PlayerListPacket extends PEPacket{
 				if ($playerProtocol >= Info::PROTOCOL_120) {
 					$this->putString($d[3]);
 					$this->putString($d[4]);
-					if (isset($d[7])) {
+					if (isset($d[8])) {
 						$this->putString($d[5]);
 						$this->putString($d[6]);
 						$this->putString($d[7]);
+						$this->putString($d[8]);
 					}
 				} else {
 					$this->putString('Standard_Custom');
