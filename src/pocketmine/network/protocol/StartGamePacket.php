@@ -88,9 +88,9 @@ class StartGamePacket extends PEPacket{
 		$this->putLFloat(0); //lightning level
 		
 		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->putByte(0); // is multiplayer game
-			$this->putByte(0); // Broadcast to LAN?
-			$this->putByte(0); // Broadcast to XBL?
+			$this->putByte(1); // is multiplayer game
+			$this->putByte(1); // Broadcast to LAN?
+			$this->putByte(1); // Broadcast to XBL?
 		}
 		
 		$this->putByte(1);	//commands enabled
@@ -102,6 +102,7 @@ class StartGamePacket extends PEPacket{
 			$this->putByte(0); // is bonus chest enabled
 			$this->putByte(0); // has trust players enabled
 			$this->putSignedVarInt(1); // permission level
+			$this->putSignedVarInt(4); // game publish setting
 		}
 //		$this->putString('iX8AANxLbgA=');
 	}

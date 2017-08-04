@@ -8,4 +8,10 @@ interface CustomUI {
 	
 	public function toJSON();
 	
+	/**
+	 * To handle manual closing
+	 * 
+	 * @var Player $player
+	 */
+	public function close($player);
 }

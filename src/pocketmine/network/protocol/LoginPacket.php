@@ -53,6 +53,9 @@ class LoginPacket extends PEPacket {
 	public $languageCode = 'unknown';
 	public $clientVersion = 'unknown';
 	public $originalProtocol;
+	public $skinGeometryName = "";
+	public $skinGeometryData = "";
+	public $capeData = "";
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -113,10 +116,16 @@ class LoginPacket extends PEPacket {
         if (isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
             $this->xuid = $this->chains['data'][$dataIndex]['extraData']['XUID'];
         }
-        
+		
 		$this->serverAddress = $this->playerData['ServerAddress'];
 		$this->skinName = $this->playerData['SkinId'];
 		$this->skin = base64_decode($this->playerData['SkinData']);
+		if (isset($this->playerData['SkinGeometryName'])) {
+            $this->skinGeometryName = $this->playerData['SkinGeometryName'];    
+        }
+		if (isset($this->playerData['SkinGeometry'])) {
+            $this->skinGeometryData = base64_decode($this->playerData['SkinGeometry']);  
+        }
 		$this->clientSecret = $this->playerData['ClientRandomId'];
         if (isset($this->playerData['DeviceOS'])) {
             $this->osType = $this->playerData['DeviceOS'];    
@@ -129,6 +138,9 @@ class LoginPacket extends PEPacket {
         }
 		if (isset($this->playerData['GameVersion'])) {
             $this->clientVersion = $this->playerData['GameVersion'];
+        }
+		if (isset($this->playerData['CapeData'])) {
+            $this->capeData = base64_decode($this->playerData['CapeData']);
         }
 		$this->originalProtocol = $this->protocol1;
 		$this->protocol1 = self::convertProtocol($this->protocol1);

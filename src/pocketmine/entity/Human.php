@@ -58,6 +58,9 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	protected $skin;
 	protected $skinName = 'Standard_Custom';
+	protected $skinGeometryName = "geometry.humanoid.custom";
+	protected $skinGeometryData = "";
+	protected $capeData = "";
 
 	public function getSkinData(){
 		return $this->skin;
@@ -65,6 +68,18 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	public function getSkinName(){
 		return $this->skinName;
+	}
+	
+	public function getSkinGeometryName(){
+		return $this->skinGeometryName;
+	}
+	
+	public function getSkinGeometryData(){
+		return $this->skinGeometryData;
+	}
+	
+	public function getCapeData(){
+		return $this->capeData;
 	}
 
 	/**
@@ -85,10 +100,19 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	 * @param string $str
 	 * @param bool   $skinName
 	 */
-	public function setSkin($str, $skinName){
+	public function setSkin($str, $skinName, $skinGeometryName = "", $skinGeometryData = "", $capeData = ""){
 		$this->skin = $str;
 		if (is_string($skinName)) {
 			$this->skinName = $skinName;
+		}
+		if (!empty($skinGeometryName)) {
+			$this->skinGeometryName = $skinGeometryName;
+		}
+		if (!empty($skinGeometryData)) {
+			$this->skinGeometryData = $skinGeometryData;
+		}
+		if (!empty($capeData)) {
+			$this->capeData = $capeData;
 		}
 	}
 
@@ -211,20 +235,8 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		if($player !== $this and !isset($this->hasSpawned[$player->getId()])  and isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])){
 			$this->hasSpawned[$player->getId()] = $player;
 
-//			if(strlen($this->skin) < 64 * 32 * 4){
-//				$this->server->getLogger()->info((new \ReflectionClass($this))->getShortName() . " must have a valid skin set");
-//			}
-
-
-//			if(!($this instanceof Player)){
-			$name = ($this instanceof Player) ? $this->getDisplayName() : $this->getName();
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $name, $this->skinName, $this->skin, [$player]);
-//			}
-
-//			$pk = new PlayerListPacket();
-//			$pk->type = PlayerListPacket::TYPE_ADD;
-//			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin];
-//			$player->dataPacket($pk);
+			$xuid = ($this instanceof Player) ? $this->getXUID() : "";
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, $xuid, [$player]);
 
 			$pk = new AddPlayerPacket();
 			$pk->uuid = $this->getUniqueId();
@@ -257,6 +269,9 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			$pk->eid = $this->getId();
 			$player->dataPacket($pk);
 			unset($this->hasSpawned[$player->getId()]);
+			if ($this instanceof Player){
+				$this->server->removePlayerListData($this->getUniqueId(), [$player]);
+			}
 		}
 	}
 
