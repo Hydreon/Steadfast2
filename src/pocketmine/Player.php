@@ -249,8 +249,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastMovement = 0;
 	/** @var Vector3 */
 	protected $forceMovement = null;
-	/** @var Vector3 */
-	protected $teleportPosition = null;
 	protected $connected = true;
 	protected $ip;
 	protected $removeFormat = true;
@@ -310,6 +308,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastDamegeTime = 0;
 	
 	protected $lastTeleportTime = 0;
+	
+	protected $isTeleportedForMoveEvent = false;
 	
 	private $isFirstConnect = true;
 
@@ -785,7 +785,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->level->requestChunk($X, $Z, $this, LevelProvider::ORDER_ZXY);
 			if($this->server->getAutoGenerate()){
 				if(!$this->level->populateChunk($X, $Z, true)){
-					if($this->spawned and $this->teleportPosition === null){
+					if($this->spawned){
 						continue;
 					}else{
 						break;
@@ -1342,9 +1342,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 
 		//$this->timings->startTiming();
-		
-		
-		$this->checkTeleportPosition();
 		
 		if($this->nextChunkOrderRun-- <= 0 or $this->chunk === null){
 			$this->orderChunks();
@@ -2498,6 +2495,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								$this->releaseUseItem();
 								break;
 						}
+						break;
 					default:
 						error_log('Wrong transactionType ' . $packet->transactionType);
 						break;
@@ -2991,29 +2989,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
-	protected function checkTeleportPosition(){
-		if($this->teleportPosition !== null){
-			$chunkX = $this->teleportPosition->x >> 4;
-			$chunkZ = $this->teleportPosition->z >> 4;
-
-//			for($X = -1; $X <= 1; ++$X){
-//				for($Z = -1; $Z <= 1; ++$Z){
-//					if(!isset($this->usedChunks[$index = Level::chunkHash($chunkX + $X, $chunkZ + $Z)]) or $this->usedChunks[$index] === false){
-//						return false;
-//					}
-//				}
-//			}
-
-			$this->sendPosition($this, $this->pitch, $this->yaw, MovePlayerPacket::MODE_RESET);
-			$this->forceMovement = $this->teleportPosition;
-			$this->teleportPosition = null;
-
-			return true;
-		}
-
-		return true;
-	}
-
 	public function teleport(Vector3 $pos, $yaw = null, $pitch = null){
 		if(!$this->isOnline()){
 			return;
@@ -3024,16 +2999,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if (!is_null($this->currentWindow)) {
 				$this->removeWindow($this->currentWindow);
 			}
-			$this->teleportPosition = new Vector3($this->x, $this->y, $this->z);
-
-			if(!$this->checkTeleportPosition()){
-				$this->forceMovement = $oldPos;
-			}
+			$this->forceMovement = new Vector3($this->x, $this->y, $this->z);			
+			$this->sendPosition($this, $this->pitch, $this->yaw, MovePlayerPacket::MODE_RESET);
 
 			$this->resetFallDistance();
 			$this->nextChunkOrderRun = 0;
 			$this->newPosition = null;
 			$this->lastTeleportTime = microtime(true);
+			$this->isTeleportedForMoveEvent = true;
 		}
 	}
 
@@ -4416,7 +4389,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	protected function processMovement($tickDiff) {
-		if (!$this->isAlive() || !$this->spawned || $this->newPosition === null || $this->teleportPosition !== null) {
+		if (!$this->isAlive() || !$this->spawned || $this->newPosition === null) {
 			$this->setMoving(false);
 			return;
 		}
@@ -4478,9 +4451,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}
 					}
 				}
+				$this->isTeleportedForMoveEvent = false;
 				$ev = new PlayerMoveEvent($this, $from, $to);
 				$this->setMoving(true);
 				$this->server->getPluginManager()->callEvent($ev);
+				if ($this->isTeleportedForMoveEvent) {
+					return;
+				}
 				if ($ev->isCancelled()) {
 					$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
 					return;
