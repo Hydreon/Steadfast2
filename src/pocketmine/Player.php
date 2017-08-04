@@ -4375,9 +4375,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return false;
 	}
 
+	/**
+	 * 
+	 * @param integer $formId
+	 * @param string|null $data Sting in JSON format or null
+	 */
 	public function checkModal($formId, $data) {
 		if (isset($this->activeModalWindows[$formId])) {
-			$this->activeModalWindows[$formId]->handle($data, $this);
+			if ($data == null) { // The modal window was closed manually
+				$this->activeModalWindows[$formId]->close($this);
+			} else { // Player send some data
+				$this->activeModalWindows[$formId]->handle($data, $this);
+			}
 			unset($this->activeModalWindows[$formId]);
 		}
 	}

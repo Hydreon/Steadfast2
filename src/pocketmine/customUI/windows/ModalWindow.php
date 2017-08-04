@@ -50,6 +50,14 @@ abstract class ModalWindow implements CustomUI {
 	}
 	
 	/**
+	 * To handle manual closing
+	 * 
+	 * @var Player $player
+	 */
+	public function close($player) {
+	}
+	
+	/**
 	 * @param boolean $response
 	 * @param Player $player
 	 */
