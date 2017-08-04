@@ -2249,7 +2249,7 @@ class Server{
 	}
 
 	public function addOnlinePlayer(Player $player){
-		$this->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getName(), $player->getSkinName(), $player->getSkinData(), $player->getSkinGeometryName(), $player->getSkinGeometryData(), $player->getXUID(), [$player]);		
+//		$this->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getName(), $player->getSkinName(), $player->getSkinData(), $player->getSkinGeometryName(), $player->getSkinGeometryData(), $player->getCapeData(), $player->getXUID(), [$player]);		
 		$this->playerList[$player->getRawUniqueId()] = $player;		
 	}
 
@@ -2259,14 +2259,12 @@ class Server{
 		}
 	}
 
-	public function updatePlayerListData(UUID $uuid, $entityId, $name, $skinName, $skinData, $skinGeometryName, $skinGeometryData, $xuid, $players){
+	public function updatePlayerListData(UUID $uuid, $entityId, $name, $skinName, $skinData, $skinGeometryName, $skinGeometryData, $capeData, $xuid, $players){
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_ADD;
-		$pk->entries[] = [$uuid, $entityId, $name, $skinName, $skinData, $skinGeometryName, $skinGeometryData, $xuid];
+		$pk->entries[] = [$uuid, $entityId, $name, $skinName, $skinData, $capeData, $skinGeometryName, $skinGeometryData, $xuid];
 		foreach ($players as $p){
- 			if($p->getUniqueId()->toString() !== $uuid->toString()){
-                		$p->dataPacket($pk);
-            		}
+			$p->dataPacket($pk);
 		}
 	}
 

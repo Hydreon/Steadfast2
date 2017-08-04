@@ -680,10 +680,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->nameTag;
 	}
 
-	public function setSkin($str, $skinName, $skinGeometryName = "", $skinGeometryData = ""){
-		parent::setSkin($str, $skinName, $skinGeometryName, $skinGeometryData);
+	public function setSkin($str, $skinName, $skinGeometryName = "", $skinGeometryData = "", $capeData = ""){
+		parent::setSkin($str, $skinName, $skinGeometryName, $skinGeometryData, $capeData);
 		if($this->spawned === true){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->getXUID(), $this->getViewers());
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, $this->getXUID(), $this->getViewers());
 		}
 	}
 
@@ -1627,7 +1627,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
 				$this->protocol = $packet->protocol1;
-				$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData);
+				$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData);
                 if ($packet->osType > 0) {
                     $this->deviceType = $packet->osType;
                 }
