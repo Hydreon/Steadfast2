@@ -13,6 +13,8 @@ class CustomForm implements CustomUI {
 	protected $elements = [];
 	/** @var string */
 	protected $json = '';
+	/** @var string Only for server settings*/
+	protected $iconURL = '';
 	
 	public function __construct($title) {
 		$this->title = $title;
@@ -28,6 +30,14 @@ class CustomForm implements CustomUI {
 		$this->json = '';
 	}
 	
+	/**
+	 * Only for server settings
+	 * @param string $url
+	 */
+	public function addIconUrl($url) {
+		$this->iconURL = $url;
+	}
+	
 	final public function toJSON() {
 		if ($this->json != '') {
 			return $this->json;
@@ -37,6 +47,12 @@ class CustomForm implements CustomUI {
 			'title' => $this->title,
 			'content' => []
 		];
+		if ($this->iconURL != '') {
+			$data['icon'] = [
+				"type" => "url",
+				"data" => $this->iconURL
+			];
+		}
 		foreach ($this->elements as $element) {
 			$data['content'][] = $element->getDataToJson();
 		}
