@@ -2249,7 +2249,7 @@ class Server{
 	}
 
 	public function addOnlinePlayer(Player $player){
-//		$this->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getName(), $player->getSkinName(), $player->getSkinData(), $player->getSkinGeometryName(), $player->getSkinGeometryData(), $player->getCapeData(), $player->getXUID(), [$player]);		
+		$this->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getName(), $player->getSkinName(), $player->getSkinData(), $player->getSkinGeometryName(), $player->getSkinGeometryData(), $player->getCapeData(), $player->getXUID(), [$player]);		
 		$this->playerList[$player->getRawUniqueId()] = $player;		
 	}
 
