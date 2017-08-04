@@ -17,6 +17,12 @@ class ModalFormResponsePacket extends PEPacket {
 		
 	}
 
+	/**
+	 * Data will be null if player close form without submit
+	 * (by cross button or ESC)
+	 * 
+	 * @param integer $playerProtocol
+	 */
 	public function decode($playerProtocol) {
 		$this->formId = $this->getVarInt();
 		$this->data = $this->getString();

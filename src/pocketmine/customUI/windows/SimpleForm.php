@@ -58,6 +58,14 @@ class SimpleForm implements CustomUI {
 	}
 	
 	/**
+	 * To handle manual closing
+	 * 
+	 * @var Player $player
+	 */
+	public function close($player) {
+	}
+	
+	/**
 	 * 
 	 * 
 	 * @param type $response Button index

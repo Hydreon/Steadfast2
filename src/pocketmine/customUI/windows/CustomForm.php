@@ -44,6 +44,14 @@ class CustomForm implements CustomUI {
 	}
 	
 	/**
+	 * To handle manual closing
+	 * 
+	 * @var Player $player
+	 */
+	public function close($player) {
+	}
+	
+	/**
 	 * @notice It not final because some logic may 
 	 * depends on some elements at the same time
 	 * 
