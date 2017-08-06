@@ -1039,6 +1039,8 @@ class Item{
 		self::addCreativeItem(Item::get(Item::TRUNK2, 0));
 		self::addCreativeItem(Item::get(Item::TRUNK2, 1));
 		self::addCreativeItem(Item::get(Item::NETHER_BRICKS, 0));
+		//ToDo Nether Wart Block
+		//ToDo Soul Stand
 		self::addCreativeItem(Item::get(Item::NETHERRACK, 0));
 		self::addCreativeItem(Item::get(Item::BEDROCK, 0));
 		self::addCreativeItem(Item::get(Item::COBBLESTONE_STAIRS, 0));
@@ -1054,6 +1056,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::STONE_BRICK_STAIRS, 0));
 		self::addCreativeItem(Item::get(Item::NETHER_BRICKS_STAIRS, 0));
 		self::addCreativeItem(Item::get(Item::QUARTZ_STAIRS, 0));
+		//ToDo Purple Stairs 
 		self::addCreativeItem(Item::get(Item::SLAB, 0));
 		self::addCreativeItem(Item::get(Item::SLAB, 1));
 		self::addCreativeItem(Item::get(Item::RAIL, 0));
@@ -1067,9 +1070,16 @@ class Item{
 		self::addCreativeItem(Item::get(Item::SLAB, 4));
 		self::addCreativeItem(Item::get(Item::SLAB, 5));
 		self::addCreativeItem(Item::get(Item::SLAB, 6));
+		//ToDo Purple Slab
+		//ToDo Bone Block
 		self::addCreativeItem(Item::get(Item::QUARTZ_BLOCK, 0));
 		self::addCreativeItem(Item::get(Item::QUARTZ_BLOCK, 1));
 		self::addCreativeItem(Item::get(Item::QUARTZ_BLOCK, 2));
+		//ToDo Prismarine
+		//ToDo Prismarine Bricks
+		//ToDo Dark Prismarine
+		self::addCreativeItem(Item::get(Item::PURPUR_BLOCK, 0));
+		//ToDo Purple Pillar
 		self::addCreativeItem(Item::get(Item::COAL_ORE, 0));
 		self::addCreativeItem(Item::get(Item::IRON_ORE, 0));
 		self::addCreativeItem(Item::get(Item::GOLD_ORE, 0));
@@ -1078,14 +1088,19 @@ class Item{
 		self::addCreativeItem(Item::get(Item::REDSTONE_ORE, 0));
 		self::addCreativeItem(Item::get(Item::EMERALD_ORE, 0));
 		self::addCreativeItem(Item::get(Item::OBSIDIAN, 0));
+		//ToDo Nether Quartz Ore
 		self::addCreativeItem(Item::get(Item::ICE, 0));
+		//ToDo Packed Ice
 		self::addCreativeItem(Item::get(Item::SNOW_BLOCK, 0));
+		self::addCreativeItem(Item::get(Item::END_BRICKS, 0));
 		self::addCreativeItem(Item::get(Item::END_STONE, 0));
 
 		//Decoration
+		//ToDo Beacon
 		self::addCreativeItem(Item::get(Item::COBBLESTONE_WALL, 0));
 		self::addCreativeItem(Item::get(Item::COBBLESTONE_WALL, 1));
 		self::addCreativeItem(Item::get(Item::WATER_LILY, 0));
+		//ToDo Sea Lantern
 		self::addCreativeItem(Item::get(Item::GOLD_BLOCK, 0));
 		self::addCreativeItem(Item::get(Item::IRON_BLOCK, 0));
 		self::addCreativeItem(Item::get(Item::DIAMOND_BLOCK, 0));
@@ -1099,9 +1114,17 @@ class Item{
 		self::addCreativeItem(Item::get(Item::VINES, 0));
 		self::addCreativeItem(Item::get(Item::LADDER, 0));
 		self::addCreativeItem(Item::get(Item::SPONGE, 0));
+		//ToDo Wet Sponge
 		self::addCreativeItem(Item::get(Item::GLASS_PANE, 0));
 		self::addCreativeItem(Item::get(Item::WOODEN_DOOR, 0));
+		//ToDo Spruce Door
+		//ToDo Birch Door
+		//ToDo Jungle Door
+		//ToDo Acacia Door
+		//ToDo Dark Oak Door
+		//ToDo Iron Door
 		self::addCreativeItem(Item::get(Item::TRAPDOOR, 0));
+		//ToDo Iron TrapDoor
 		self::addCreativeItem(Item::get(Item::FENCE, 0));
 		self::addCreativeItem(Item::get(Item::FENCE, 1));
 		self::addCreativeItem(Item::get(Item::FENCE, 2));
@@ -1116,13 +1139,23 @@ class Item{
 		self::addCreativeItem(Item::get(Item::FENCE_GATE_ACACIA, 0));
 		self::addCreativeItem(Item::get(Item::IRON_BARS, 0));
 		self::addCreativeItem(Item::get(Item::BED, 0));
+		//ToDo All The Bed Colors 
 		self::addCreativeItem(Item::get(Item::BOOKSHELF, 0));
+		self::addCreativeItem(Item::get(Item::SIGN, 0));
 		self::addCreativeItem(Item::get(Item::PAINTING, 0));
 		self::addCreativeItem(Item::get(Item::WORKBENCH, 0));
 		self::addCreativeItem(Item::get(Item::STONECUTTER, 0));
 		self::addCreativeItem(Item::get(Item::CHEST, 0));
 		self::addCreativeItem(Item::get(Item::FURNACE, 0));
+		//ToDo Brewing Stand
+		//ToDo Cauldron
+		//ToDo Noteblock
+		self::addCreativeItem(Item::get(Item::END_ROD, 0));
 		self::addCreativeItem(Item::get(Item::END_PORTAL, 0));
+		//ToDo Shulker Boxes 
+		self::addCreativeItem(Item::get(Item::ANVIL, 0));
+		self::addCreativeItem(Item::get(Item::ANVIL, 4));
+		self::addCreativeItem(Item::get(Item::ANVIL, 8));
 		self::addCreativeItem(Item::get(Item::DANDELION, 0));
 		self::addCreativeItem(Item::get(Item::RED_FLOWER, Flower::TYPE_POPPY));
 		self::addCreativeItem(Item::get(Item::RED_FLOWER, Flower::TYPE_BLUE_ORCHID));
@@ -1165,9 +1198,17 @@ class Item{
 		self::addCreativeItem(Item::get(Item::LEAVES, 3));
 		self::addCreativeItem(Item::get(Item::LEAVES2, 0));
 		self::addCreativeItem(Item::get(Item::LEAVES2, 1));
+		//ToDo All colors of Glazed Terracotta
 		self::addCreativeItem(Item::get(Item::CAKE, 0));
-		self::addCreativeItem(Item::get(Item::SIGN, 0));
+		//ToDo All the Monster Heads
+		//ToDo FlowerPot
+		//ToDo Stone Monster Eggs
+		//ToDo Dragon Eggs
+		//ToDo End Crystal
 		self::addCreativeItem(Item::get(Item::MONSTER_SPAWNER, 0));
+		//ToDo Enchantment Table
+		//ToDo Slime Block
+		self::addCreativeItem(Item::get(Item::ENDER_CHEST, 0));	
 		self::addCreativeItem(Item::get(Item::WOOL, 0));
 		self::addCreativeItem(Item::get(Item::WOOL, 7));
 		self::addCreativeItem(Item::get(Item::WOOL, 6));
@@ -1200,11 +1241,8 @@ class Item{
 		self::addCreativeItem(Item::get(Item::CARPET, 10));
 		self::addCreativeItem(Item::get(Item::CARPET, 9));
 		self::addCreativeItem(Item::get(Item::CARPET, 8));
-
-
-		self::addCreativeItem(Item::get(Item::ANVIL, 0));
-		self::addCreativeItem(Item::get(Item::ANVIL, 4));
-		self::addCreativeItem(Item::get(Item::ANVIL, 8));
+		//ToDo All Colors Of Powder Concrete 
+		//ToDo All Colors of Concrete
 
 		//Tools
 		//TODO self::addCreativeItem(Item::get(Item::RAILS, 0));
@@ -1334,10 +1372,6 @@ class Item{
         // update for 1.0
         self::addCreativeItem(Item::get(Item::CHORUS_FLOWER, 0));
         self::addCreativeItem(Item::get(Item::CHORUS_PLANT, 0));
-        self::addCreativeItem(Item::get(Item::ENDER_CHEST, 0));
-        self::addCreativeItem(Item::get(Item::END_BRICKS, 0));
-        self::addCreativeItem(Item::get(Item::END_ROD, 0));
-        self::addCreativeItem(Item::get(Item::PURPUR_BLOCK, 0));
         
 		self::addCreativeItem(Item::get(Item::REDSTONE_LAMP, 0));
 		self::addCreativeItem(Item::get(Item::REDSTONE_LAMP_ACTIVE, 0));
