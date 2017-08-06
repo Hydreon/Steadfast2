@@ -2395,7 +2395,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				} elseif ($packet->radius < 4) {
 					$packet->radius = 4;
 				}
-				$radius = (int) ($packet->radius / 2);
+				$radius = (int) $packet->radius;
 				$this->setViewRadius($radius);
 				$pk = new ChunkRadiusUpdatePacket();
 				$pk->radius = $radius;
