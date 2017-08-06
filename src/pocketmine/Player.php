@@ -647,7 +647,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public function setViewRadius($radius) {
 		$this->viewRadius = $radius;
-		$this->spawnThreshold = $radius ** 2 * M_PI;
+		$this->spawnThreshold = min($radius, 4) ** 2 * M_PI;
 	}
 
 	/**
