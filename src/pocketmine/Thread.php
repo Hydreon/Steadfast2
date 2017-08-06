@@ -73,10 +73,8 @@ abstract class Thread extends \Thread{
 
 		$this->notify();
 		
-		if($this->isRunning()){
-			$this->shutdown();
-			$this->notify();
-			$this->unstack();
+		if(!$this->isJoined() and !$this->isTerminated()){
+			$this->join();
 		}
 		
 		ThreadManager::getInstance()->remove($this);
