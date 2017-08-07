@@ -274,7 +274,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/** @var Vector3 */
 	public $newPosition;
 
-	protected $spawnThreshold;
+	protected $spawnThreshold = 16 * M_PI;
 	/** @var null|Position */
 	private $spawnPosition = null;
 
@@ -340,7 +340,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     
     protected $xblName = '';
 	
-	protected $viewRadius;
+	protected $viewRadius = 4;
 	
 	protected $identityPublicKey = '';
 
@@ -642,12 +642,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			AvailableCommandsPacket::prepareCommands(self::$availableCommands);
 		}
 		$this->inventory = new PlayerInventory($this); // hack for not null getInventory
-		$this->setViewRadius(2);
 	}
 	
 	public function setViewRadius($radius) {
 		$this->viewRadius = $radius;
-		$this->spawnThreshold = min($radius, 4) ** 2 * M_PI;
 	}
 
 	/**
@@ -2395,10 +2393,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				} elseif ($packet->radius < 4) {
 					$packet->radius = 4;
 				}
-				$radius = (int) $packet->radius;
-				$this->setViewRadius($radius);
+				$this->setViewRadius($packet->radius);
 				$pk = new ChunkRadiusUpdatePacket();
-				$pk->radius = $radius;
+				$pk->radius = $packet->radius;
 				$this->dataPacket($pk);
 				$this->loggedIn = true;
 				$this->scheduleUpdate();
