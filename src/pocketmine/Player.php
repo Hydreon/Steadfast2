@@ -815,6 +815,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk = new PlayStatusPacket();
 			$pk->status = PlayStatusPacket::PLAYER_SPAWN;
 			$this->dataPacket($pk);
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, $this->getXUID(), [$this]);
 
 			$pos = $this->level->getSafeSpawn($this);
 

@@ -2248,8 +2248,7 @@ class Server{
 		}
 	}
 
-	public function addOnlinePlayer(Player $player){
-		$this->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getName(), $player->getSkinName(), $player->getSkinData(), $player->getSkinGeometryName(), $player->getSkinGeometryData(), $player->getCapeData(), $player->getXUID(), [$player]);		
+	public function addOnlinePlayer(Player $player){				
 		$this->playerList[$player->getRawUniqueId()] = $player;		
 	}
 
@@ -2263,8 +2262,17 @@ class Server{
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_ADD;
 		$pk->entries[] = [$uuid, $entityId, $name, $skinName, $skinData, $capeData, $skinGeometryName, $skinGeometryData, $xuid];
+		 
+		$readyPackets = [];
 		foreach ($players as $p){
-			$p->dataPacket($pk);
+			$protocol = $p->getPlayerProtocol();
+			if (!isset($readyPackets[$protocol])) {
+				$pk->encode($protocol);
+				$batch = new BatchPacket();
+				$batch->payload = zlib_encode(Binary::writeVarInt(strlen($pk->getBuffer())) . $pk->getBuffer(), ZLIB_ENCODING_DEFLATE, 7);
+				$readyPackets[$protocol] = $batch;
+			}
+			$p->dataPacket($readyPackets[$protocol]);
 		}
 	}
 
