@@ -1764,15 +1764,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							//Timings::$timerMobEqipmentPacket->stopTiming();
 							break;
 						}
-					}
-				}elseif($item === null or $slot === -1 or !$item->deepEquals($packet->item)){ // packet error or not implemented
-					$this->inventory->sendContents($this);
-					//Timings::$timerMobEqipmentPacket->stopTiming();
-					break;
+					}				
 				}elseif($this->isCreative() && !$this->isSpectator()){
 					$this->inventory->setHeldItemIndex($packet->selectedSlot);
 					$this->inventory->setItem($packet->selectedSlot, $item);
 					$this->inventory->setHeldItemSlot($packet->selectedSlot);
+				}elseif($item === null or $slot === -1 or !$item->deepEquals($packet->item)){ // packet error or not implemented
+					$this->inventory->sendContents($this);
+					//Timings::$timerMobEqipmentPacket->stopTiming();
+					break;
 				}else{
 					if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
 						$hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);
@@ -2466,6 +2466,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			/** @minProtocol 120 */
 			case 'INVENTORY_TRANSACTION_PACKET':
 				switch ($packet->transactionType) {
+					case InventoryTransactionPacket::TRANSACTION_TYPE_INVENTORY_MISMATCH:
+						break;
 					case InventoryTransactionPacket::TRANSACTION_TYPE_NORMAL:
 						$this->normalTransactionLogic($packet);
 						break;
@@ -2580,6 +2582,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				$this->dataPacket($pk);
 			}
 		}
+	}
+	
+	public function sendChatMessage($senderName, $message) {
+		$pk = new TextPacket();
+		$pk->type = TextPacket::TYPE_CHAT;
+		$pk->message = $message;
+		$pk->source = $senderName;
+		$this->dataPacket($pk);
 	}
 
 	public function sendTranslation($message, array $parameters = []){
@@ -4413,8 +4423,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if (!$this->isAlive() || !$this->spawned || $this->newPosition === null) {
 			$this->setMoving(false);
 			return;
-		}
-		$distanceSquared = $this->newPosition->distanceSquared($this);		
+		}		
+		$distanceSquared = ($this->newPosition->x - $this->x) ** 2 + ($this->newPosition->z - $this->z) ** 2;
 		if (($distanceSquared / ($tickDiff ** 2)) > $this->movementSpeed * 100) {
 			$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
 			return;
@@ -4434,6 +4444,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$to = new Location($newPos->x, $newPos->y, $newPos->z, $this->yaw, $this->pitch, $this->level);
 
 		$deltaAngle = abs($from->yaw - $to->yaw) + abs($from->pitch - $to->pitch);
+		$distanceSquared += ($this->newPosition->y - $this->y) ** 2;
 		if (($distanceSquared > 0.0625 || $deltaAngle > 10)) {
 			$isFirst = ($this->lastX === null || $this->lastY === null || $this->lastZ === null);
 			if (!$isFirst) {
