@@ -2569,6 +2569,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 		}
 	}
+	
+	public function sendChatMessage($senderName, $message) {
+		$pk = new TextPacket();
+		$pk->type = TextPacket::TYPE_CHAT;
+		$pk->message = $message;
+		$pk->source = $senderName;
+		$this->dataPacket($pk);
+	}
 
 	public function sendTranslation($message, array $parameters = []){
 		$pk = new TextPacket();
