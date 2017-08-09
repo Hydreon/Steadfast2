@@ -3,6 +3,8 @@
 namespace pocketmine\inventory;
 
 use pocketmine\entity\Human;
+use pocketmine\event\entity\EntityArmorChangeEvent;
+use pocketmine\event\entity\EntityInventoryChangeEvent;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\item\Item;
 use pocketmine\network\protocol\MobArmorEquipmentPacket;
@@ -10,6 +12,7 @@ use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventorySlotPacket;
 use pocketmine\network\protocol\v120\Protocol120;
 use pocketmine\Player;
+use pocketmine\Server;
 
 class PlayerInventory120 extends PlayerInventory {
 
@@ -216,8 +219,55 @@ class PlayerInventory120 extends PlayerInventory {
 		}
 	}
 	
+	/**
+	 * 
+	 * @return Item[]
+	 */
 	public function getCraftContents() {
 		return $this->craftSlots;
+	}
+	
+	/**
+	 * 
+	 * @param integer $slotIndex
+	 * @return boolean
+	 */
+	protected function isArmorSlot($slotIndex) {
+		return $slotIndex >= $this->getSize();
+	}
+	
+	/**
+	 * 
+	 * @param integer $slotIndex
+	 * @return boolean
+	 */
+	public function clear($slotIndex) {
+		if (isset($this->slots[$slotIndex])) {
+			if ($this->isArmorSlot($slotIndex)) { //Armor change
+				$ev = new EntityArmorChangeEvent($this->holder, $this->slots[$slotIndex], clone $this->air, $slotIndex);
+				Server::getInstance()->getPluginManager()->callEvent($ev);
+				if ($ev->isCancelled()) {
+					$this->sendArmorSlot($slotIndex, $this->holder);
+					return false;
+				}
+			} else {
+				$ev = new EntityInventoryChangeEvent($this->holder, $this->slots[$slotIndex], clone $this->air, $slotIndex);
+				Server::getInstance()->getPluginManager()->callEvent($ev);
+				if ($ev->isCancelled()) {
+					$this->sendSlot($slotIndex, $this->holder);
+					return false;
+				}
+			}
+			$oldItem = $this->slots[$slotIndex];
+			$newItem = $ev->getNewItem();
+			if ($newItem->getId() !== Item::AIR) {
+				$this->slots[$slotIndex] = clone $newItem;
+			} else {
+				unset($this->slots[$slotIndex]);
+			}
+			$this->onSlotChange($slotIndex, $oldItem);
+		}
+		return true;
 	}
 
 }
