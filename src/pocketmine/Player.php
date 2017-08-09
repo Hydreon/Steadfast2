@@ -815,6 +815,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk = new PlayStatusPacket();
 			$pk->status = PlayStatusPacket::PLAYER_SPAWN;
 			$this->dataPacket($pk);
+			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, $this->getXUID(), [$this]);
 
 			$pos = $this->level->getSafeSpawn($this);
 
@@ -1762,15 +1763,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							//Timings::$timerMobEqipmentPacket->stopTiming();
 							break;
 						}
-					}
-				}elseif($item === null or $slot === -1 or !$item->deepEquals($packet->item)){ // packet error or not implemented
-					$this->inventory->sendContents($this);
-					//Timings::$timerMobEqipmentPacket->stopTiming();
-					break;
+					}				
 				}elseif($this->isCreative() && !$this->isSpectator()){
 					$this->inventory->setHeldItemIndex($packet->selectedSlot);
 					$this->inventory->setItem($packet->selectedSlot, $item);
 					$this->inventory->setHeldItemSlot($packet->selectedSlot);
+				}elseif($item === null or $slot === -1 or !$item->deepEquals($packet->item)){ // packet error or not implemented
+					$this->inventory->sendContents($this);
+					//Timings::$timerMobEqipmentPacket->stopTiming();
+					break;
 				}else{
 					if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
 						$hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);
@@ -2164,12 +2165,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$craftSlots = $this->inventory->getCraftContents();
 					try {
 						self::tryApplyCraft($craftSlots, $recipe);
-						$this->inventory->setItem(PlayerInventory120::CURSOR_INDEX, $recipe->getResult());
+						$this->inventory->setItem(PlayerInventory120::CRAFT_RESULT_INDEX, $recipe->getResult());
 						foreach ($craftSlots as $slot => $item) {
 							if ($item == null) {
 								continue;
 							}
-							$this->inventory->setitem(PlayerInventory120::CRAFT_INDEX_0 - $slot, $item);
+							$this->inventory->setItem(PlayerInventory120::CRAFT_INDEX_0 - $slot, $item);
 						}
 					} catch (\Exception $e) {
 						var_dump($e->getMessage());
@@ -2464,6 +2465,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			/** @minProtocol 120 */
 			case 'INVENTORY_TRANSACTION_PACKET':
 				switch ($packet->transactionType) {
+					case InventoryTransactionPacket::TRANSACTION_TYPE_INVENTORY_MISMATCH:
+						break;
 					case InventoryTransactionPacket::TRANSACTION_TYPE_NORMAL:
 						$this->normalTransactionLogic($packet);
 						break;

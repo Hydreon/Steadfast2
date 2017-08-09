@@ -64,7 +64,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 
 	public $count = 0;
 	public $maxcount = 31360;
-	public $name = "Lifeboat Network";
+	public $name = "";
 
 	public function setCount($count, $maxcount) {
 		$this->count = $count;
@@ -90,7 +90,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$this->channelCounts[$i] = 0;
 		}
 
-		$this->setCount(count($this->server->getOnlinePlayers()), $this->server->getMaxPlayers());
+		$this->setCount(count($this->server->getOnlinePlayers()), $this->server->getMaxPlayers());		
 	}
 
 	public function setNetwork(Network $network){
