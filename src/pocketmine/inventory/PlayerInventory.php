@@ -406,8 +406,12 @@ class PlayerInventory extends BaseInventory{
 	 * @param Player|Player[] $target
 	 */
 	public function sendArmorSlot($index, $target){
-		if($target instanceof Player){
-			$target = [$target];
+		if (!is_array($target)) {
+			if($target instanceof Player){
+				$target = [$target];
+			} else {
+				return;
+			}
 		}
 		
 		if ($index - $this->getSize() == self::OFFHAND_ARMOR_SLOT_ID) {
@@ -423,7 +427,6 @@ class PlayerInventory extends BaseInventory{
 
 		foreach($target as $player){
 			if($player === $this->getHolder()){
-				/** @var Player $player */
 				$pk2 = new ContainerSetSlotPacket();
 				$pk2->windowid = ContainerSetContentPacket::SPECIAL_ARMOR;
 				$pk2->slot = $index - $this->getSize();
@@ -439,6 +442,9 @@ class PlayerInventory extends BaseInventory{
 	 * @param Player|Player[] $target
 	 */
 	public function sendContents($target) {
+		if (!($this->getHolder() instanceof Player)) {
+			return;
+		}
 		$pk = new ContainerSetContentPacket();
 		$pk->eid = $this->getHolder()->getId();
 		$pk->windowid = ContainerSetContentPacket::SPECIAL_INVENTORY;
@@ -462,6 +468,9 @@ class PlayerInventory extends BaseInventory{
 	 * @param Player|Player[] $target
 	 */
 	public function sendSlot($index, $target){
+		if (!($this->getHolder() instanceof Player)) {
+			return;
+		}
 		$pk = new ContainerSetSlotPacket();
 		$pk->slot = $index;
 		$pk->item = clone $this->getItem($index);
