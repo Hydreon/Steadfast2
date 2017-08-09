@@ -4177,7 +4177,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->x = $packet->x;
 		$pk->y = $packet->y + 1;
 		$pk->z = $packet->z;
-		$pk->data = $blockId;
+		$pk->data = $blockId | ($block->getDamage() << 8);
 		
 		foreach ($recipients as $recipient) {
 			$recipient->dataPacket($pk);
