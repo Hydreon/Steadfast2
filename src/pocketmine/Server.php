@@ -1581,6 +1581,7 @@ class Server{
 			$this->setConfigString("memory-limit", "256M");
 		}
 		$this->network = new Network($this);
+		$this->network->setName($this->getMotd());
 
 		if($this->getConfigBoolean("hardcore", false) === true and $this->getDifficulty() < 3){
 			$this->setConfigInt("difficulty", 3);
