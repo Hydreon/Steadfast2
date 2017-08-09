@@ -2465,6 +2465,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			/** @minProtocol 120 */
 			case 'INVENTORY_TRANSACTION_PACKET':
 				switch ($packet->transactionType) {
+					case InventoryTransactionPacket::TRANSACTION_TYPE_INVENTORY_MISMATCH:
+						break;
 					case InventoryTransactionPacket::TRANSACTION_TYPE_NORMAL:
 						$this->normalTransactionLogic($packet);
 						break;
