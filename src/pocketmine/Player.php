@@ -1763,15 +1763,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							//Timings::$timerMobEqipmentPacket->stopTiming();
 							break;
 						}
-					}
-				}elseif($item === null or $slot === -1 or !$item->deepEquals($packet->item)){ // packet error or not implemented
-					$this->inventory->sendContents($this);
-					//Timings::$timerMobEqipmentPacket->stopTiming();
-					break;
+					}				
 				}elseif($this->isCreative() && !$this->isSpectator()){
 					$this->inventory->setHeldItemIndex($packet->selectedSlot);
 					$this->inventory->setItem($packet->selectedSlot, $item);
 					$this->inventory->setHeldItemSlot($packet->selectedSlot);
+				}elseif($item === null or $slot === -1 or !$item->deepEquals($packet->item)){ // packet error or not implemented
+					$this->inventory->sendContents($this);
+					//Timings::$timerMobEqipmentPacket->stopTiming();
+					break;
 				}else{
 					if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
 						$hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);

@@ -57,7 +57,6 @@ class PlayerInventory extends BaseInventory{
 
 	public function setSize($size){
 		parent::setSize($size + 5);
-		$this->sendContents($this->getViewers());
 	}
 	
 	/**
@@ -195,7 +194,6 @@ class PlayerInventory extends BaseInventory{
 		parent::onSlotChange($index, $before, $sendPacket);
 
 		if ($index >= $this->getSize() && $sendPacket === true) {
-			$this->sendArmorSlot($index, $this->getViewers());
 			$this->sendArmorSlot($index, $this->getHolder()->getViewers());
 		}
 	}
@@ -254,14 +252,14 @@ class PlayerInventory extends BaseInventory{
 		if($index >= $this->getSize()){ //Armor change
 			Server::getInstance()->getPluginManager()->callEvent($ev = new EntityArmorChangeEvent($this->getHolder(), $this->getItem($index), $item, $index));
 			if($ev->isCancelled() and $this->getHolder() instanceof Human){
-				$this->sendArmorSlot($index, $this->getViewers());
+				$this->sendArmorSlot($index, $this->getHolder());
 				return false;
 			}
 			$item = $ev->getNewItem();
 		}else{
 			Server::getInstance()->getPluginManager()->callEvent($ev = new EntityInventoryChangeEvent($this->getHolder(), $this->getItem($index), $item, $index));
 			if($ev->isCancelled()){
-				$this->sendSlot($index, $this->getViewers());
+				$this->sendSlot($index, $this->getHolder());
 				return false;
 			}
 			$index = $ev->getSlot();
@@ -284,9 +282,9 @@ class PlayerInventory extends BaseInventory{
 				Server::getInstance()->getPluginManager()->callEvent($ev = new EntityArmorChangeEvent($this->getHolder(), $old, $item, $index));
 				if($ev->isCancelled()){
 					if($index >= $this->size){
-						$this->sendArmorSlot($index, $this->getViewers());
+						$this->sendArmorSlot($index, $this->getHolder());
 					}else{
-						$this->sendSlot($index, $this->getViewers());
+						$this->sendSlot($index, $this->getHolder());
 					}
 					return false;
 				}
@@ -295,9 +293,9 @@ class PlayerInventory extends BaseInventory{
 				Server::getInstance()->getPluginManager()->callEvent($ev = new EntityInventoryChangeEvent($this->getHolder(), $old, $item, $index));
 				if($ev->isCancelled()){
 					if($index >= $this->size){
-						$this->sendArmorSlot($index, $this->getViewers());
+						$this->sendArmorSlot($index, $this->getHolder());
 					}else{
-						$this->sendSlot($index, $this->getViewers());
+						$this->sendSlot($index, $this->getHolder());
 					}
 					return false;
 				}
@@ -348,8 +346,6 @@ class PlayerInventory extends BaseInventory{
 		$pk = new MobArmorEquipmentPacket();
 		$pk->eid = $this->getHolder()->getId();
 		$pk->slots = $armor;
-//		$pk->encode();
-//		$pk->isEncoded = true;
 
 		foreach($target as $player){
 			if($player === $this->getHolder()){
@@ -424,8 +420,6 @@ class PlayerInventory extends BaseInventory{
 		$pk = new MobArmorEquipmentPacket();
 		$pk->eid = $this->getHolder()->getId();
 		$pk->slots = $armor;
-//		$pk->encode();
-//		$pk->isEncoded = true;
 
 		foreach($target as $player){
 			if($player === $this->getHolder()){
@@ -444,36 +438,23 @@ class PlayerInventory extends BaseInventory{
 	/**
 	 * @param Player|Player[] $target
 	 */
-	public function sendContents($target){
-		if($target instanceof Player){
-			$target = [$target];
-		}
-
+	public function sendContents($target) {
 		$pk = new ContainerSetContentPacket();
-		$pk->slots = [];
 		$pk->eid = $this->getHolder()->getId();
-		for($i = 0; $i < $this->getSize(); ++$i){ //Do not send armor by error here
+		$pk->windowid = ContainerSetContentPacket::SPECIAL_INVENTORY;
+		$pk->slots = [];
+		for ($i = 0; $i < $this->getSize(); ++$i) { //Do not send armor by error here
 			$pk->slots[$i] = $this->getItem($i);
 		}
 		for ($i = $this->getSize(); $i < $this->getSize() + 9; ++$i) {
 			$pk->slots[$i] = clone $this->air;
 		}
-
-		foreach($target as $player){
-			$pk->hotbar = [];
-			if($player === $this->getHolder()){
-				for($i = 0; $i < $this->getHotbarSize(); ++$i){
-					$index = $this->getHotbarSlotIndex($i);
-					$pk->hotbar[] = $index <= -1 ? -1 : $index + 9;					
-				}
-			}
-			if(($id = $player->getWindowId($this)) === -1 or $player->spawned !== true){
-				$this->close($player);
-				continue;
-			}
-			$pk->windowid = $id;
-			$player->dataPacket(clone $pk);
+		$pk->hotbar = [];
+		for ($i = 0; $i < $this->getHotbarSize(); ++$i) {
+			$index = $this->getHotbarSlotIndex($i);
+			$pk->hotbar[] = $index <= -1 ? -1 : $index + 9;
 		}
+		$this->getHolder()->dataPacket($pk);
 	}
 
 	/**
@@ -481,28 +462,11 @@ class PlayerInventory extends BaseInventory{
 	 * @param Player|Player[] $target
 	 */
 	public function sendSlot($index, $target){
-		if($target instanceof Player){
-			$target = [$target];
-		}
-
 		$pk = new ContainerSetSlotPacket();
 		$pk->slot = $index;
 		$pk->item = clone $this->getItem($index);
-
-		foreach($target as $player){
-			if($player === $this->getHolder()){
-				/** @var Player $player */
-				$pk->windowid = 0;
-				$player->dataPacket(clone $pk);
-			}else{
-				if(($id = $player->getWindowId($this)) === -1){
-					$this->close($player);
-					continue;
-				}
-				$pk->windowid = $id;
-				$player->dataPacket(clone $pk);
-			}
-		}
+		$pk->windowid = ContainerSetContentPacket::SPECIAL_INVENTORY;
+		$this->getHolder()->dataPacket($pk);
 	}
 
 	/**
