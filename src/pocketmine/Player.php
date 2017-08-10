@@ -117,6 +117,7 @@ use pocketmine\network\protocol\Info as ProtocolInfo;
 use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\PlayerActionPacket;
 use pocketmine\network\protocol\PlayStatusPacket;
+use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\network\protocol\RespawnPacket;
 use pocketmine\network\protocol\SetEntityDataPacket;
 use pocketmine\network\protocol\StrangePacket;
@@ -168,6 +169,9 @@ use pocketmine\network\protocol\LevelEventPacket;
 use pocketmine\inventory\win10\Win10InvLogic;
 use pocketmine\network\protocol\v120\ShowModalFormPacket;
 use pocketmine\network\protocol\v120\ServerSettingsResponsetPacket;
+use pocketmine\network\protocol\v120\PlayerSkinPacket;
+use pocketmine\network\protocol\AddPlayerPacket;
+use pocketmine\network\protocol\RemoveEntityPacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -676,13 +680,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 */
 	public function getNameTag(){
 		return $this->nameTag;
-	}
-
-	public function setSkin($str, $skinName, $skinGeometryName = "", $skinGeometryData = "", $capeData = ""){
-		parent::setSkin($str, $skinName, $skinGeometryName, $skinGeometryData, $capeData);
-		if($this->spawned === true){
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, $this->getXUID(), $this->getViewers());
-		}
 	}
 
 	/**
@@ -1763,15 +1760,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							//Timings::$timerMobEqipmentPacket->stopTiming();
 							break;
 						}
-					}
-				}elseif($item === null or $slot === -1 or !$item->deepEquals($packet->item)){ // packet error or not implemented
-					$this->inventory->sendContents($this);
-					//Timings::$timerMobEqipmentPacket->stopTiming();
-					break;
+					}				
 				}elseif($this->isCreative() && !$this->isSpectator()){
 					$this->inventory->setHeldItemIndex($packet->selectedSlot);
 					$this->inventory->setItem($packet->selectedSlot, $item);
 					$this->inventory->setHeldItemSlot($packet->selectedSlot);
+				}elseif($item === null or $slot === -1 or !$item->deepEquals($packet->item)){ // packet error or not implemented
+					$this->inventory->sendContents($this);
+					//Timings::$timerMobEqipmentPacket->stopTiming();
+					break;
 				}else{
 					if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
 						$hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);
@@ -2519,6 +2516,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$commandPostprocessEvent = new PlayerCommandPostprocessEvent($this, $commandLine);
 				$this->server->getPluginManager()->callEvent($commandPostprocessEvent);
 				break;
+
+			/** @minProtocol 120 */
+			case 'PLAYER_SKIN_PACKET':				
+				$this->setSkin($packet->newSkinByteData, $packet->newSkinId, $packet->newSkinGeometryName, $packet->newSkinGeometryData, $packet->newCapeByteData);
+				// Send new skin to viewers and to self
+				$this->updatePlayerSkin($packet->oldSkinName, $packet->newSkinName);				
+				break;
+
 			/** @minProtocol 120 */
 			case 'MODAL_FORM_RESPONSE_PACKET':
 				$this->checkModal($packet->formId, json_decode($packet->data, true));
@@ -2568,6 +2573,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				$this->dataPacket($pk);
 			}
 		}
+	}
+	
+	public function sendChatMessage($senderName, $message) {
+		$pk = new TextPacket();
+		$pk->type = TextPacket::TYPE_CHAT;
+		$pk->message = $message;
+		$pk->source = $senderName;
+		$this->dataPacket($pk);
 	}
 
 	public function sendTranslation($message, array $parameters = []){
@@ -4401,8 +4414,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if (!$this->isAlive() || !$this->spawned || $this->newPosition === null) {
 			$this->setMoving(false);
 			return;
-		}
-		$distanceSquared = $this->newPosition->distanceSquared($this);		
+		}		
+		$distanceSquared = ($this->newPosition->x - $this->x) ** 2 + ($this->newPosition->z - $this->z) ** 2;
 		if (($distanceSquared / ($tickDiff ** 2)) > $this->movementSpeed * 100) {
 			$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
 			return;
@@ -4422,6 +4435,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$to = new Location($newPos->x, $newPos->y, $newPos->z, $this->yaw, $this->pitch, $this->level);
 
 		$deltaAngle = abs($from->yaw - $to->yaw) + abs($from->pitch - $to->pitch);
+		$distanceSquared += ($this->newPosition->y - $this->y) ** 2;
 		if (($distanceSquared > 0.0625 || $deltaAngle > 10)) {
 			$isFirst = ($this->lastX === null || $this->lastY === null || $this->lastZ === null);
 			if (!$isFirst) {
@@ -4601,6 +4615,63 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	public function needEncrypt() {
 		return $this->protocol >= Info::PROTOCOL_120;
+	}
+	
+	public function updatePlayerSkin($oldSkinName, $newSkinName) {
+		$pk = new RemoveEntityPacket();
+		$pk->eid = $this->getId();
+
+		$pk2 = new PlayerListPacket();
+		$pk2->type = PlayerListPacket::TYPE_REMOVE;
+		$pk2->entries[] = [$this->getUniqueId()];
+
+		$pk3 = new PlayerListPacket();
+		$pk3->type = PlayerListPacket::TYPE_ADD;
+		$pk3->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->capeData, $this->skinGeometryName, $this->skinGeometryData, $this->getXUID()];
+
+		$pk4 = new AddPlayerPacket();
+		$pk4->uuid = $this->getUniqueId();
+		$pk4->username = $this->getName();
+		$pk4->eid = $this->getId();
+		$pk4->x = $this->x;
+		$pk4->y = $this->y;
+		$pk4->z = $this->z;
+		$pk4->speedX = $this->motionX;
+		$pk4->speedY = $this->motionY;
+		$pk4->speedZ = $this->motionZ;
+		$pk4->yaw = $this->yaw;
+		$pk4->pitch = $this->pitch;
+		$pk4->metadata = $this->dataProperties;
+
+		
+		$pk120 = new PlayerSkinPacket();
+		$pk120->uuid = $this->getUniqueId();
+		$pk120->newSkinId = $this->skinName;
+		$pk120->newSkinName = $newSkinName;
+		$pk120->oldSkinName = $oldSkinName;
+		$pk120->newSkinByteData = $this->skin;
+		$pk120->newCapeByteData = $this->capeData;
+		$pk120->newSkinGeometryName = $this->skinGeometryName;
+		$pk120->newSkinGeometryData = $this->skinGeometryData;
+		
+		$viewers120 = [];
+		$oldViewers = [];
+		$recipients = $this->getViewers();
+		$recipients[] = $this;
+		foreach ($recipients as $viewer) {
+			if ($viewer->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
+				$viewers120[] = $viewer;
+			} else {
+				$oldViewers[] = $viewer;
+			}
+		}
+		
+		if (!empty($viewers120)) {
+			$this->server->batchPackets($viewers120, [$pk120]);
+		}		
+		if (!empty($oldViewers)) {
+			$this->server->batchPackets($oldViewers, [$pk, $pk2, $pk3, $pk4]);
+		}
 	}
 	
 }
