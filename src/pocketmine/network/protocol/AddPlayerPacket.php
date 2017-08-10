@@ -45,6 +45,11 @@ class AddPlayerPacket extends PEPacket{
 	public $yaw;
 	public $item;
 	public $metadata;
+	public $links = [];
+	public $flags = 0;
+	public $commandPermission = 0;
+	public $actionPermissions = AdventureSettingsPacket::ACTION_FLAG_DEFAULT_LEVEL_PERMISSIONS;
+	public $permissionLevel = AdventureSettingsPacket::PERMISSION_LEVEL_MEMBER;
 
 	public function decode($playerProtocol){
 
@@ -70,6 +75,24 @@ class AddPlayerPacket extends PEPacket{
 
 		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->putVarInt($this->flags);
+			$this->putVarInt($this->commandPermission);
+			$this->putVarInt($this->actionPermissions);
+			$this->putVarInt($this->permissionLevel);
+			if ($this->eid & 1) { // userId is odd
+				$this->putLLong(-1 * (($this->eid + 1) >> 1));
+			} else { // userId is even
+				$this->putLLong($this->eid >> 1);
+			}
+			$this->putVarInt(count($this->links));
+			foreach ($this->links as $link) {
+				$this->putVarInt($link['from']);
+				$this->putVarInt($link['to']);
+				$this->putByte($link['type']);
+				$this->putByte(0);
+			}
+		}
 	}
 
 }

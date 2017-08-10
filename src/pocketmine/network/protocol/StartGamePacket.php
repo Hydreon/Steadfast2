@@ -100,6 +100,7 @@ class StartGamePacket extends PEPacket{
 		if ($playerProtocol >= Info::PROTOCOL_120) {
 			$this->putVarInt(0); // rules count
 			$this->putByte(0); // is bonus chest enabled
+			$this->putByte(0); // is start with map enabled
 			$this->putByte(0); // has trust players enabled
 			$this->putSignedVarInt(1); // permission level
 			$this->putSignedVarInt(4); // game publish setting
