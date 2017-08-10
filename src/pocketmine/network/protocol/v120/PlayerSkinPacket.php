@@ -32,5 +32,14 @@ class PlayerSkinPacket extends PEPacket {
 	}
 
 	public function encode($playerProtocol) {
+		$this->reset($playerProtocol);
+		$this->putUUID($this->uuid);
+		$this->putString($this->newSkinId);
+		$this->putString($this->newSkinName);
+		$this->putString($this->oldSkinName);
+		$this->putString($this->newSkinByteData);
+		$this->putString($this->newCapeByteData);
+		$this->putString($this->newSkinGeometryName);
+		$this->putString($this->newSkinGeometryData);
 	}
 }
