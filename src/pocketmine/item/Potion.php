@@ -162,7 +162,7 @@ class Potion extends Item{
 		if($human instanceof Player && $human->getGamemode() === 1){
 			return;
 		}
-		$human->getInventory()->setItemInHand(Item::get(self::GLASS_BOTTLE));
+		$human->getInventory()->setItemInHand(Item::get(self::AIR));
 	}
 	
 	public static function getEffectId(int $meta) : int{
