@@ -173,6 +173,8 @@ use pocketmine\network\protocol\v120\PlayerSkinPacket;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 
+use pocketmine\customUI\CustomUI;
+
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
  */
