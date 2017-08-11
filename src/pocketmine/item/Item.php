@@ -963,6 +963,7 @@ class Item{
 			self::$list[self::FLOWER_POT] = FlowerPot::class;
 			self::$list[self::ELYTRA] = Elytra::class;
 			self::$list[self::PRISMARINE_CRYSTAL] = PrismarineCrystal::class;
+			self::$list[self::POTION] = Potion::class;
             
             // update for 1.0
 			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;
