@@ -153,6 +153,8 @@ class Server{
 
 	/** @var Server */
 	private static $instance = null;
+	
+	private static $serverId =  0;
 
 	/** @var BanList */
 	private $banByName = null;
@@ -1455,6 +1457,10 @@ class Server{
 	public static function getInstance(){
 		return self::$instance;
 	}
+	
+	public static function getServerId(){
+		return self::$serverId;
+	}
 
 	/**
 	 * @param \ClassLoader    $autoloader
@@ -1465,6 +1471,7 @@ class Server{
 	 */
 	public function __construct(\ClassLoader $autoloader, \ThreadedLogger $logger, $filePath, $dataPath, $pluginPath){		
 		self::$instance = $this;
+		self::$serverId =  mt_rand(0, PHP_INT_MAX);
 
 		$this->autoloader = $autoloader;
 		$this->logger = $logger;
