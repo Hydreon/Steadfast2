@@ -4417,8 +4417,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}		
 		$distanceSquared = ($this->newPosition->x - $this->x) ** 2 + ($this->newPosition->z - $this->z) ** 2;
 		if (($distanceSquared / ($tickDiff ** 2)) > $this->movementSpeed * 100) {
-			//$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
-			//return;
+			$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
+			return;
 		}
 
 		$newPos = $this->newPosition;
@@ -4448,9 +4448,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$roundBlock = $from->level->getBlock(new Vector3($toX, round($to->y), $toZ));
 					if ($from->y - $to->y > 0.1) {
 						if (!$roundBlock->isTransparent()) {
-							//$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
-							//return;
-                            $toY+=0.5;
+							$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
+							return;
 						}
 					} else {
 						if (!$block->isTransparent() || !$blockUp->isTransparent()) {
