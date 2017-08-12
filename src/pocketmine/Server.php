@@ -2110,13 +2110,6 @@ class Server{
 		$this->logger->info("Done (" . round(microtime(true) - \pocketmine\START_TIME, 3) . 's)! For help, type "help" or "?"');
 
 		$this->packetMaker = new PacketMaker($this->getLoader());
-		
-		$this->tickAverage = array();
-		$this->useAverage = array();
-		for($i = 0; $i < 1200; $i++) {
-			$this->tickAverage[] = 20;
-			$this->useAverage[] = 0;
-		}
 
 		$this->tickProcessor();
 		$this->forceShutdown();
