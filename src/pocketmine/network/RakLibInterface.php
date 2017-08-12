@@ -74,7 +74,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		"MCPE;".addcslashes($this->name, ";") .";".
 		(Info::CURRENT_PROTOCOL).";".
 		\pocketmine\MINECRAFT_VERSION_NETWORK.";".
-		$this->count.";".$maxcount
+		$this->count.";".$maxcount . ";". Server::getServerId()
 		);
 	}
 

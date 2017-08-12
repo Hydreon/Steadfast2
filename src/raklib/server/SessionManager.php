@@ -187,7 +187,7 @@ class SessionManager{
                     $pk = new UNCONNECTED_PONG();
                     $pk->serverID = $this->getID();
                     $pk->pingID = $packet->pingID;
-                    $pk->serverName = $this->getName().";".$this->serverId;
+                    $pk->serverName = $this->getName();
                     $this->sendPacket($pk, $source, $port);
                 }elseif($pid === UNCONNECTED_PONG::$ID){
                     //ignored
