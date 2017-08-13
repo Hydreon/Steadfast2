@@ -7,7 +7,6 @@ use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\tile\Spawnable;
 
 class Cauldron extends Spawnable {
 	

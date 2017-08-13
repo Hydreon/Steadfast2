@@ -32,7 +32,6 @@ use pocketmine\command\defaults\GamemodeCommand;
 use pocketmine\command\defaults\GiveCommand;
 use pocketmine\command\defaults\HelpCommand;
 use pocketmine\command\defaults\KickCommand;
-use pocketmine\command\defaults\KillCommand;
 use pocketmine\command\defaults\ListCommand;
 //use pocketmine\command\defaults\MeCommand;
 use pocketmine\command\defaults\OpCommand;
@@ -59,7 +58,6 @@ use pocketmine\command\defaults\VersionCommand;
 use pocketmine\command\defaults\WhitelistCommand;
 use pocketmine\Server;
 use pocketmine\utils\MainLogger;
-use pocketmine\command\defaults\TransferCommand;
 use pocketmine\command\defaults\PingCommand;
 
 class SimpleCommandMap implements CommandMap{

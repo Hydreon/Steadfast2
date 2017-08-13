@@ -35,7 +35,6 @@ use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\Network;
 use pocketmine\network\protocol\ContainerSetDataPacket;
 
 class Furnace extends Tile implements InventoryHolder, Container, Nameable{

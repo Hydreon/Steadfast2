@@ -26,7 +26,6 @@ use pocketmine\block\Planks;
 use pocketmine\block\Quartz;
 use pocketmine\block\Sandstone;
 use pocketmine\block\Slab;
-use pocketmine\block\Fence;
 use pocketmine\block\Stone;
 use pocketmine\block\StoneBricks;
 use pocketmine\block\StoneWall;

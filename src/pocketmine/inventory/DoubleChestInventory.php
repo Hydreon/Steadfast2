@@ -23,7 +23,6 @@ namespace pocketmine\inventory;
 
 use pocketmine\item\Item;
 use pocketmine\level\Level;
-use pocketmine\network\Network;
 use pocketmine\network\protocol\TileEventPacket;
 use pocketmine\Player;
 
