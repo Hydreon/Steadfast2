@@ -53,7 +53,7 @@ class StepSlider extends UIElement {
 	 * @param string[] $steps
 	 */
 	public function setSteps($steps) {
-		$this->options = $steps;
+		$this->steps = $steps;
 	}
 
 	/**
