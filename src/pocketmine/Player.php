@@ -1789,6 +1789,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 				//Timings::$timerMobEqipmentPacket->stopTiming();
 				break;
+			case 'LEVEL_SOUND_EVENT_PACKET':
+				$viewers = $this->getViewers();
+				foreach ($viewers as $viewer) {
+					$viewer->dataPacket($packet);
+				}
+				$this->dataPacket($packet);
+				break;
 			case 'USE_ITEM_PACKET':
 				//Timings::$timerUseItemPacket->startTiming();
 				if($this->spawned === false or $this->dead === true or $this->blocked){
