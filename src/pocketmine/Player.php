@@ -3632,7 +3632,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer
 
     public function setImmobile($value = true)
     {
-        $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_IMMOBILE, $value);
+        $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE, $value);
     }
 
     public function checkVersion()
