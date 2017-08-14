@@ -4170,6 +4170,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$recipients = $this->getViewers();
 		$recipients[] = $this;
 		$blockId = $this->level->getBlockIdAt($packet->x, $packet->y, $packet->z);
+		$blockData = $this->level->getBlockDataAt($packet->x, $packet->y, $packet->z);
 		$blockPos = [
 			'x' => $packet->x,
 			'y' => $packet->y,
@@ -4184,7 +4185,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->x = $packet->x;
 		$pk->y = $packet->y + 1;
 		$pk->z = $packet->z;
-		$pk->data = $blockId;
+		$pk->data = $blockId | ($blockData << 8);
 		
 		foreach ($recipients as $recipient) {
 			$recipient->dataPacket($pk);
