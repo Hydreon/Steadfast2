@@ -22,7 +22,6 @@
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\CommandSender;
-use pocketmine\network\protocol\Info;
 use pocketmine\plugin\Plugin;
 use pocketmine\utils\TextFormat;
 

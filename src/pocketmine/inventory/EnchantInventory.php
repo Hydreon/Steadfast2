@@ -21,7 +21,6 @@
 
 namespace pocketmine\inventory;
 
-use pocketmine\inventory\InventoryType;
 use pocketmine\item\Item;
 use pocketmine\level\Position;
 use pocketmine\Player;

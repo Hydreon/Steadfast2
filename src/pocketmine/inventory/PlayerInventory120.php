@@ -5,7 +5,6 @@ namespace pocketmine\inventory;
 use pocketmine\entity\Human;
 use pocketmine\event\entity\EntityArmorChangeEvent;
 use pocketmine\event\entity\EntityInventoryChangeEvent;
-use pocketmine\inventory\PlayerInventory;
 use pocketmine\item\Item;
 use pocketmine\network\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;

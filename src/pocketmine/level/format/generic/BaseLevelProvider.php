@@ -27,7 +27,6 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\StringTag;
 use pocketmine\utils\LevelException;
 
 abstract class BaseLevelProvider implements LevelProvider{

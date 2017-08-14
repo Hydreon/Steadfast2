@@ -23,8 +23,6 @@ namespace pocketmine\nbt\tag;
 
 use pocketmine\nbt\NBT;
 
-use pocketmine\utils\Binary;
-
 class LongTag extends NamedTag{
 
 	public function getType(){

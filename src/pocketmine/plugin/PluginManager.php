@@ -28,7 +28,6 @@ use pocketmine\event\Event;
 use pocketmine\event\EventPriority;
 use pocketmine\event\HandlerList;
 use pocketmine\event\Listener;
-use pocketmine\event\Timings;
 use pocketmine\event\TimingsHandler;
 use pocketmine\permission\Permissible;
 use pocketmine\permission\Permission;

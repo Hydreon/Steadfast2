@@ -2,9 +2,6 @@
 
 namespace pocketmine;
 
-use raklib\protocol\EncapsulatedPacket;
-use raklib\RakLib;
-use pocketmine\network\CachedEncapsulatedPacket;
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\utils\Binary;
 use pocketmine\network\protocol\BatchPacket;

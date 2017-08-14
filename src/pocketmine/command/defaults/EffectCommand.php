@@ -21,11 +21,9 @@
 
 namespace pocketmine\command\defaults;
 
-use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\entity\Effect;
 use pocketmine\entity\InstantEffect;
-use pocketmine\utils\TextFormat;
 
 class EffectCommand extends VanillaCommand{
 
