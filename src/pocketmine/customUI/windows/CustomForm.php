@@ -23,7 +23,7 @@ class CustomForm implements CustomUI {
 	/**
 	 * Add element to form
 	 * 
-	 * @param Button $button
+	 * @param Button $element
 	 */
 	public function addElement(UIElement $element) {
 		$this->elements[] = $element;

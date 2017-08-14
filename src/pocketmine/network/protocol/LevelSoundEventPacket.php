@@ -9,6 +9,7 @@ class LevelSoundEventPacket extends PEPacket {
 	
 	const SOUND_HIT = 1;
 	const SOUND_BREAK = 4;
+	const SOUND_PLACE = 5;
 	const SOUND_EAT = 30;
  	const SOUND_EXPLODE = 45;
 	const SOUND_BREAK_BLOCK = 52;
@@ -20,13 +21,20 @@ class LevelSoundEventPacket extends PEPacket {
 	public $x;
 	public $y;
 	public $z;
-	public $blockId = 0;
+	public $blockId = -1;
 	public $entityType = 1;
 	public $babyMob = 0;
 	public $global = 0;
 
 	public function decode($playerProtocol) {
-		
+		$this->eventId = $this->getByte();
+		$this->x = $this->getLFloat();
+		$this->y = $this->getLFloat();
+		$this->z = $this->getLFloat();
+		$this->blockId = $this->getSignedVarInt();
+		$this->entityType = $this->getSignedVarInt();
+		$this->babyMob = $this->getByte();
+		$this->global = $this->getByte();
 	}
 
 	public function encode($playerProtocol) {
