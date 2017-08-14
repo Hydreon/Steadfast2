@@ -3821,7 +3821,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer
             $pk->text = "";
             $pk->fadeInTime = 5;
             $pk->fadeOutTime = 5;
-            $pk->stayTime = 20 * $time;
+            $pk->stayTime = $time;
             $this->dataPacket($pk);
 
             if (!empty($subtext)) {
