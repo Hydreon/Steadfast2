@@ -6,7 +6,9 @@ use pocketmine\customUI\elements\UIElement;
 
 abstract class Button extends UIElement {
 	
+	/** for in-client side images */
 	const IMAGE_TYPE_PATH = 'path';
+	/** for other images */
 	const IMAGE_TYPE_URL = 'url';
 	
 	/** @va string May contains 'path' or 'url' */
