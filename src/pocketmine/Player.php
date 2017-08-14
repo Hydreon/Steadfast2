@@ -4411,7 +4411,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}		
 		$distanceSquared = ($this->newPosition->x - $this->x) ** 2 + ($this->newPosition->z - $this->z) ** 2;
-		if (($distanceSquared / ($tickDiff ** 2)) > $this->movementSpeed * 100) {
+		if (($distanceSquared / ($tickDiff ** 2)) > $this->movementSpeed * 200) {
 			$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
 			return;
 		}
