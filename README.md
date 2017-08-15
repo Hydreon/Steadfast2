@@ -1,5 +1,5 @@
 #  <img src="https://lbsg.net/wp-content/themes/lifeboat/images/lbsg-logo-sm.png" alt="LBSG logo" title="Aimeos" align="center" height="120" />
-# Steadfast2 MineCraft PE Server Software
+# Steadfast2 Minecraft PE Server Software
 
 ## Introduction
 
@@ -23,9 +23,13 @@ To install SteadyFast on Linux OS/MAC OS please follow the instructions below.
     
 4) Running `./start` for the first time will take through the setup wizard where and create the 2 main config files for your server `pocket####mine.yml` and `server.properties`    
 
+  *Linux VM Notes:* 
+        
+   - If using Vagrant have a config of `config.vm.network "public_network"` in the `Vagrantfile` should make your server discoverable from LAN. 
+
 ### Installing on Windows
 
-Steadfast2 is not the best suited for running on Windows and another fork of Pocketmine would be better for that. But don't worry steadyfast2 will still run on Windows OS with some lack of performance,
+Steadfast2 is not the best suited for running on Windows and another fork of Pocketmine would be better for that. But don't worry steadfast2 will still run on Windows OS with some lack of performance,
 
 To install Steadfast2 on Windows OS please follow the instructions below.
 
@@ -38,10 +42,6 @@ To install Steadfast2 on Windows OS please follow the instructions below.
 4) Finally, you need to move Steadfast2.phar into the directory above and run start.cmd.
 
 We suggest a Linux VM in the meantime.  We also suggest using Vagrant and picking a Ubuntu box -> [from here](https://atlas.hashicorp.com/boxes/search?utf8=%E2%9C%93&sort=&provider=&q=ubuntu)
-
-  Linux VM Notes: 
-        
-   - If using Vagrant have a config of `config.vm.network "public_network"` in the `Vagrantfile` should make your server discoverable from LAN. 
    
 ## Most Commonly Asked Questions
 
@@ -57,7 +57,7 @@ We suggest a Linux VM in the meantime.  We also suggest using Vagrant and pickin
  
 ## Creating the Steadfast2.phar File
 
-To build the SteadyFast server phar file please follow the instructions below.
+To build the Steadfast2 server phar file please follow the instructions below.
 
 1) Download the Steadfast2 master from GitHub, then unzip the master then move the src folder into your server directory, then deleted the old .phar file if you still have it in the server directory. 
 
@@ -65,7 +65,7 @@ To build the SteadyFast server phar file please follow the instructions below.
 
 3) Start the server if you don't know how to start the server follow your Starting/Stopping Server instructions above.
 
-4) Then run makeserve in the server terminal, then it will drop he phar file in its plugin directory.
+4) Then run makeserve in the server terminal, then it will drop the phar file in its plugin directory.
 
 
 
