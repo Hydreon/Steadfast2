@@ -80,6 +80,8 @@ class AddPlayerPacket extends PEPacket{
 			$this->putVarInt($this->commandPermission);
 			$this->putVarInt($this->actionPermissions);
 			$this->putVarInt($this->permissionLevel);
+			// we should put eid as long but in signed varint format
+			// maybe i'm wrong but it works
 			if ($this->eid & 1) { // userId is odd
 				$this->putLLong(-1 * (($this->eid + 1) >> 1));
 			} else { // userId is even

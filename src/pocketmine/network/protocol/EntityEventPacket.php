@@ -62,6 +62,8 @@ class EntityEventPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->eid);
 		$this->putByte($this->event);
+		/** @todo do it right */
+		$this->putSignedVarInt(0); // event data
 	}
 
 }

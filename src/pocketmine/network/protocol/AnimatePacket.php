@@ -28,6 +28,14 @@ class AnimatePacket extends PEPacket{
 	const NETWORK_ID = Info::ANIMATE_PACKET;
 	const PACKET_NAME = "ANIMATE_PACKET";
 
+	const ACTION_NO_ACTION = 0;
+	const ACTION_SWING = 1;
+	const ACTION_WAKE_UP = 3;
+	const ACTION_CRITICAL_HIT = 4;
+	const ACTION_MAGIC_CRITICAL_HIT = 5;
+	const ACTION_ROW_RIGHT = 128;	// for boat?
+	const ACTION_ROW_LEFT = 129;	// for boat?
+	
 	public $action;
 	public $eid;
 
@@ -40,6 +48,12 @@ class AnimatePacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->action);
 		$this->putVarInt($this->eid);
+		switch ($this->action) {
+			case self::ACTION_ROW_RIGHT:
+			case self::ACTION_ROW_LEFT:
+				/** @todo do it right */
+				$this->putLFloat(0);
+		}
 	}
 
 }

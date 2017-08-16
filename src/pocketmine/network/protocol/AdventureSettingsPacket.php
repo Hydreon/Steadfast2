@@ -58,6 +58,8 @@ class AdventureSettingsPacket extends PEPacket{
 			case Info::PROTOCOL_120:
 				$this->putVarInt($this->actionPermissions);
 				$this->putVarInt($this->permissionLevel);
+				// we should put eid as long but in signed varint format
+				// maybe i'm wrong but it works
 				if ($this->userId & 1) { // userId is odd
 					$this->putLLong(-1 * (($this->userId + 1) >> 1));
 				} else { // userId is even
