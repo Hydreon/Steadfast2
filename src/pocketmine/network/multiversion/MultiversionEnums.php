@@ -51,6 +51,30 @@ abstract class MultiversionEnums {
 		],
 	];
 	
+	private static $textPacketType = [
+		'default' => [
+			0 => 'TYPE_RAW',
+			1 => 'TYPE_CHAT',
+			2 => 'TYPE_TRANSLATION',
+			3 => 'TYPE_POPUP',
+			4 => 'TYPE_TIP',
+			5 => 'TYPE_SYSTEM',
+			6 => 'TYPE_WHISPER',
+			7 => 'TYPE_ANNOUNCEMENT',
+		],
+		'120' => [
+			0 => 'TYPE_RAW',
+			1 => 'TYPE_CHAT',
+			2 => 'TYPE_TRANSLATION',
+			3 => 'TYPE_POPUP',
+			4 => 'JUKEBOX_POPUP',
+			5 => 'TYPE_TIP',
+			6 => 'TYPE_SYSTEM',
+			7 => 'TYPE_WHISPER',
+			8 => 'TYPE_ANNOUNCEMENT',
+		],
+	];
+	
 	public static function getPlayerAction($playerProtocol, $actionId) {
 		if (!isset(self::$playerActionType[$playerProtocol])) {
 			$playerProtocol = 'default';
@@ -71,6 +95,28 @@ abstract class MultiversionEnums {
 			}
 		}
 		return -1;
+	}
+	
+	public static function getMessageType($playerProtocol, $typeId) {
+		if (!isset(self::$textPacketType[$playerProtocol])) {
+			$playerProtocol = 'default';
+		}
+		if (!isset(self::$textPacketType[$playerProtocol][$typeId])) {
+			return self::$textPacketType[$playerProtocol][0];
+		}
+		return self::$textPacketType[$playerProtocol][$typeId];
+	}
+	
+	public static function getMessageTypeId($playerProtocol, $typeName) {
+		if (!isset(self::$textPacketType[$playerProtocol])) {
+			$playerProtocol = -1;
+		}
+		foreach (self::$textPacketType[$playerProtocol] as $key => $value) {
+			if ($value == $typeName) {
+				return $key;
+			}
+		}
+		return 0;
 	}
 	
 }

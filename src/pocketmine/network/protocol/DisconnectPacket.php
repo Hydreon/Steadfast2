@@ -30,17 +30,21 @@ class DisconnectPacket extends PEPacket {
 	const PACKET_NAME = "DISCONNECT_PACKET";
 
 	public $hideDisconnectReason = false;
-	public $message;
+	public $message = '';
 
 	public function decode($playerProtocol) {
 		$this->hideDisconnectReason = $this->getByte();
-		$this->message = $this->getString();
+		if ($this->hideDisconnectReason == false) {
+			$this->message = $this->getString();
+		}
 	}
 
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
 		$this->putByte($this->hideDisconnectReason);
-		$this->putString($this->message);
+		if ($this->hideDisconnectReason == false) {
+			$this->putString($this->message);
+		}
 	}
 
 }

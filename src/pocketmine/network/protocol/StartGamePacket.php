@@ -104,8 +104,13 @@ class StartGamePacket extends PEPacket{
 			$this->putByte(0); // has trust players enabled
 			$this->putSignedVarInt(1); // permission level
 			$this->putSignedVarInt(4); // game publish setting
+			$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
+			$this->putString(''); // level name
+			$this->putString(''); // template pack id
+			$this->putByte(0); // is trial?
+			$this->putLong(0); // current level time
+			$this->putSignedVarInt(0); // enchantment seed
 		}
-//		$this->putString('iX8AANxLbgA=');
 	}
 
 }

@@ -916,7 +916,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 		}
 		
-		
 		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
 		if($ev->isCancelled()){
 			return false;
@@ -935,6 +934,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function directDataPacket(DataPacket $packet, $needACK = false){
 		if($this->connected === false){
 			return false;
+		}
+		
+		if ($this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
+			$disallowedPackets = Protocol120::getDisallowedPackets();
+			if (in_array(get_class($packet), $disallowedPackets)) {
+				return;
+			}
 		}
 
 		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
@@ -3302,14 +3308,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if ($this->getHealth() <= 0) {
 			$this->dead = true;
 		}
-		
-		
-//		$pk = new ResourcePackDataInfoPacket();
-//		$this->dataPacket($pk);
-				
-//		$pk = new SetCommandsEnabledPacket();
-//		$pk->enabled = 1;
-//		$this->dataPacket($pk);
 				
 		if (!empty(self::$availableCommands)) {
 			$pk = new AvailableCommandsPacket();
