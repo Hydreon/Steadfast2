@@ -44,6 +44,7 @@ class AdventureSettingsPacket extends PEPacket{
 	public $flags = 0;
 	public $actionPermissions = self::ACTION_FLAG_DEFAULT_LEVEL_PERMISSIONS;
 	public $permissionLevel = self::PERMISSION_LEVEL_MEMBER;
+	public $customStoredPermissions = 0;
 	public $userId = 0;
 	
 	public function decode($playerProtocol){
@@ -58,6 +59,7 @@ class AdventureSettingsPacket extends PEPacket{
 			case Info::PROTOCOL_120:
 				$this->putVarInt($this->actionPermissions);
 				$this->putVarInt($this->permissionLevel);
+				$this->putVarInt($this->customStoredPermissions);
 				// we should put eid as long but in signed varint format
 				// maybe i'm wrong but it works
 				if ($this->userId & 1) { // userId is odd

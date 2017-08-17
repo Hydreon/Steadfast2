@@ -24,19 +24,21 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 use pocketmine\network\protocol\Info;
+use pocketmine\network\multiversion\MultiversionEnums;
 
 class TextPacket extends PEPacket{
 	const NETWORK_ID = Info::TEXT_PACKET;
 	const PACKET_NAME = "TEXT_PACKET";
 
-	const TYPE_RAW = 0;
-	const TYPE_CHAT = 1;
-	const TYPE_TRANSLATION = 2;
-	const TYPE_POPUP = 3;
-	const TYPE_TIP = 4;
-	const TYPE_SYSTEM = 5;
-	const TYPE_WHISPER = 6;
-	const TYPE_ANNOUNCEMENT = 7;
+	const TYPE_RAW = 'TYPE_RAW';
+	const TYPE_CHAT = 'TYPE_CHAT';
+	const TYPE_TRANSLATION = 'TYPE_TRANSLATION';
+	const TYPE_POPUP = 'TYPE_POPUP';
+	const TYPE_JUKEBOX_POPUP = 'TYPE_JUKEBOX_POPUP';
+	const TYPE_TIP = 'TYPE_TIP';
+	const TYPE_SYSTEM = 'TYPE_SYSTEM';
+	const TYPE_WHISPER = 'TYPE_WHISPER';
+	const TYPE_ANNOUNCEMENT = 'TYPE_ANNOUNCEMENT';
 
 	public $type;
 	public $source;
@@ -49,6 +51,7 @@ class TextPacket extends PEPacket{
 		if ($playerProtocol >= Info::PROTOCOL_120) {
 			$this->isLocolize = $this->getByte();
 		}
+		$this->type = MultiversionEnums::getMessageType($playerProtocol, $this->type);
 		switch ($this->type) {
 			case self::TYPE_CHAT:
 			case self::TYPE_WHISPER:
@@ -74,7 +77,8 @@ class TextPacket extends PEPacket{
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		$this->putByte($this->type);
+		$typeId = MultiversionEnums::getMessageTypeId($playerProtocol, $this->type);
+		$this->putByte($typeId);
 		if ($playerProtocol >= Info::PROTOCOL_120) {
 			$this->putByte($this->isLocolize);
 		}
@@ -92,6 +96,7 @@ class TextPacket extends PEPacket{
 				break;
 			case self::TYPE_TRANSLATION:
 			case self::TYPE_POPUP:
+			case self::TYPE_JUKEBOX_POPUP:
 				$this->putString($this->message);
 				$this->putVarInt(count($this->parameters));
 				foreach ($this->parameters as $p) {
