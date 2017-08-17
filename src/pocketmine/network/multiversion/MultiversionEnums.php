@@ -87,7 +87,7 @@ abstract class MultiversionEnums {
 	
 	public static function getPlayerActionId($playerProtocol, $actionName) {
 		if (!isset(self::$playerActionType[$playerProtocol])) {
-			$playerProtocol = -1;
+			$playerProtocol = "default";
 		}
 		foreach (self::$playerActionType[$playerProtocol] as $key => $value) {
 			if ($value == $actionName) {
@@ -109,7 +109,7 @@ abstract class MultiversionEnums {
 	
 	public static function getMessageTypeId($playerProtocol, $typeName) {
 		if (!isset(self::$textPacketType[$playerProtocol])) {
-			$playerProtocol = -1;
+			$playerProtocol = "default";
 		}
 		foreach (self::$textPacketType[$playerProtocol] as $key => $value) {
 			if ($value == $typeName) {
