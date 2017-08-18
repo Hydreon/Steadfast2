@@ -1,10 +1,11 @@
-# Steadfast2
+ #  <img src="https://lbsg.net/wp-content/themes/lifeboat/images/lbsg-logo-sm.png" alt="LBSG logo" title="Aimeos" align="center" height="120" />
+# Steadfast2: Minecraft Server Software
 
 ## Getting Started
  Check out our [wiki](https://github.com/Hydreon/Steadfast2/wiki) for guides on installation for [windows](https://github.com/Hydreon/Steadfast2/wiki/Installation-on-Windows), [MacOS and Linux.](https://github.com/Hydreon/Steadfast2/wiki/Installation-on-Linux-MacOS) You will also find information on how to [stop and start the server](https://github.com/Hydreon/Steadfast2/wiki/Starting-and-Stopping-the-server), along with a detailed guide on [how to use plugins](https://github.com/Hydreon/Steadfast2/wiki/How-to-use-plugins). Remember to check out our helpful [notes](https://github.com/Hydreon/Steadfast2/wiki/Notes)-- Be sure to read these before creating a Steadfast2 phar!
 
 ### About Steadfast
-Steadfast is a project for backporting new Minecraft: Pocket Edition changes to older Pocketmine versions for better stability and performance, while retaining as many features from the new versions as possible. It's currently in production on Lifeboat Survival Games' main servers.
+Steadfast is a project for backporting new Minecraft: Pocket Edition changes to older Pocketmine versions for better stability and performance, while retaining as many features from the new versions as possible. It's currently in production on Lifeboat Survival Games' main servers. Steadfast supports Pocket edition **and** Bedrock Edition (1.2+).
 
 ### How to use plugins
 Plugins normally come in the form of a phar file: a php archive. Steadfast2 is coded in the PHP language, and so are the plugins. To run a plugin in the form of a phar file, place the plugin into the plugins directory of the server.
