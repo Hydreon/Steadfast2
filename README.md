@@ -14,11 +14,11 @@ If the plugin is not in the form of a phar, something which happens often when d
 Download the plugin
 Place it in the plugins directory
 Unzip it, so the file structure is as shown here:
-Steadfast2 Installation Directory 
-├── plugins
-ᅠᅠᅠ└── src
-ᅠᅠᅠᅠᅠᅠ└── PluginName
-ᅠᅠᅠᅠᅠᅠᅠᅠᅠ└── plugin.yml 
+Steadfast2 Installation Directory  <br>
+├── plugins <br>
+ᅠᅠᅠ└── src <br>
+ᅠᅠᅠᅠᅠᅠ└── PluginName <br>
+ᅠᅠᅠᅠᅠᅠᅠᅠᅠ└── plugin.yml  <br>
 4. Once the file structure is as shown above, you are good to go! Start the server and have fun!
 
 ### Installation on Linux and MacOS
