@@ -11,9 +11,9 @@ Plugins normally come in the form of a phar file: a php archive. Steadfast2 is c
 
 If the plugin is not in the form of a phar, something which happens often when downloading the plugin from its github repository, follow these steps:
 
-Download the plugin
-Place it in the plugins directory
-Unzip it, so the file structure is as shown here:
+Download the plugin <br>
+Place it in the plugins directory <br>
+Unzip it, so the file structure is as shown here: <br>
 Steadfast2 Installation Directory  <br>
 ├── plugins <br>
 ᅠᅠᅠ└── src <br>
@@ -22,15 +22,15 @@ Steadfast2 Installation Directory  <br>
 4. Once the file structure is as shown above, you are good to go! Start the server and have fun!
 
 ### Installation on Linux and MacOS
-`git clone git@github.com:Hydreon/Steadfast2.git` or `https://github.com/Hydreon/Steadfast2.git` in directory of your choosing. Or download and extract zip into directory of choosing.
-
-Navigate to `Steadfast2` directory via command line
-
-Run command `./installer`
-
-If successful this will create a `bin` directory with a special Php7 build in it and a `start.sh` shell script
-
-Running `./start` for the first time will take through a set up wizard where and create the 2 main config files for your server `pocketmine.yml` and `server.properties`
+`git clone git@github.com:Hydreon/Steadfast2.git` or `https://github.com/Hydreon/Steadfast2.git` in directory of your choosing. Or download and extract zip into directory of choosing. <br>
+ <br>
+Navigate to `Steadfast2` directory via command line <br>
+ <br>
+Run command `./installer` <br>
+ <br>
+If successful this will create a `bin` directory with a special Php7 build in it and a `start.sh` shell script <br>
+ <br>
+Running `./start` for the first time will take through a set up wizard where and create the 2 main config files for your server `pocketmine.yml` and `server.properties` <br>
 
 #### Notes:
 
