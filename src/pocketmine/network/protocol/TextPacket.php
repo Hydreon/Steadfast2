@@ -45,6 +45,7 @@ class TextPacket extends PEPacket{
 	public $message;
 	public $parameters = [];
 	public $isLocolize = false;
+	public $xuid = '';
 
 	public function decode($playerProtocol){
 		$this->type = $this->getByte();
@@ -72,6 +73,9 @@ class TextPacket extends PEPacket{
 					$this->parameters[] = $this->getString();
 				}
 				break;
+		}
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->xuid = $this->getString();
 		}
 	}
 
@@ -103,6 +107,9 @@ class TextPacket extends PEPacket{
 					$this->putString($p);
 				}
 				break;
+		}
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->putString($this->xuid);
 		}
 	}
 
