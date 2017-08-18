@@ -899,25 +899,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer
         }
     }
 
-    protected function orderChunks()
-    {
+    protected function orderChunks() {
         if ($this->connected === false) {
             return false;
         }
-
+        
         $this->nextChunkOrderRun = 200;
         $radiusSquared = $this->viewRadius ** 2;
         $centerX = $this->x >> 4;
         $centerZ = $this->z >> 4;
         $newOrder = [];
         $lastChunk = $this->usedChunks;
-
         for ($dx = 0; $dx < $this->viewRadius; $dx++) {
             for ($dz = 0; $dz < $this->viewRadius; $dz++) {
                 if ($dx ** 2 + $dz ** 2 > $radiusSquared) {
                     continue;
                 }
-
+                
                 foreach ([$dx, (-$dx - 1)] as $ddx) {
                     foreach ([$dz, (-$dz - 1)] as $ddz) {
                         $chunkX = $centerX + $ddx;
@@ -930,10 +928,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer
                         }
                     }
                 }
-
+                
             }
         }
-
         foreach ($lastChunk as $index => $Yndex) {
             $X = null;
             $Z = null;
@@ -943,57 +940,56 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer
         $this->loadQueue = $newOrder;
         return true;
     }
-
     /**
      * Sends an ordered DataPacket to the send buffer
      *
      * @param DataPacket $packet
-     * @param bool $needACK
+     * @param bool       $needACK
      *
      * @return int|bool
      */
-    public function dataPacket(DataPacket $packet, $needACK = false)
-    {
-        if ($this->connected === false) {
+    public function dataPacket(DataPacket $packet, $needACK = false){
+        if($this->connected === false){
             return false;
         }
-
+        
         if ($this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
             $disallowedPackets = Protocol120::getDisallowedPackets();
             if (in_array(get_class($packet), $disallowedPackets)) {
                 return;
             }
         }
-
-
+        
         $this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
-        if ($ev->isCancelled()) {
+        if($ev->isCancelled()){
             return false;
         }
-
+        
         $this->interface->putPacket($this, $packet, $needACK, false);
         return true;
     }
-
     /**
      * @param DataPacket $packet
-     * @param bool $needACK
+     * @param bool       $needACK
      *
      * @return bool|int
      */
-    public function directDataPacket(DataPacket $packet, $needACK = false)
-    {
-        if ($this->connected === false) {
+    public function directDataPacket(DataPacket $packet, $needACK = false){
+        if($this->connected === false){
             return false;
         }
-
+        
+        if ($this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
+            $disallowedPackets = Protocol120::getDisallowedPackets();
+            if (in_array(get_class($packet), $disallowedPackets)) {
+                return;
+            }
+        }
         $this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
-        if ($ev->isCancelled()) {
+        if($ev->isCancelled()){
             return false;
         }
-
         $this->interface->putPacket($this, $packet, $needACK, true);
-
         return true;
     }
 
@@ -3390,45 +3386,35 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer
 //		$pk->spawnX = (int) $spawnPosition->x;
 //		$pk->spawnY = (int) $spawnPosition->y;
 //		$pk->spawnZ = (int) $spawnPosition->z;
-        /* hack for compass */
-        $pk->spawnX = $compassPosition['x'];
-        $pk->spawnY = $compassPosition['y'];
-        $pk->spawnZ = $compassPosition['z'];
-        $pk->generator = 1; //0 old, 1 infinite, 2 flat
-        $pk->gamemode = $this->gamemode & 0x01;
-        $pk->eid = $this->id;
-        $this->dataPacket($pk);
 
-        $pk = new SetTimePacket();
-        $pk->time = $this->level->getTime();
-        $pk->started = true;
-        $this->dataPacket($pk);
+		/* hack for compass */
+		$pk->spawnX = $compassPosition['x'];
+		$pk->spawnY = $compassPosition['y'];
+		$pk->spawnZ = $compassPosition['z'];
+		$pk->generator = 1; //0 old, 1 infinite, 2 flat
+		$pk->gamemode = $this->gamemode & 0x01;
+		$pk->eid = $this->id;
+		$this->dataPacket($pk);
+		
+		$pk = new SetTimePacket();
+		$pk->time = $this->level->getTime();
+		$pk->started = true;
+		$this->dataPacket($pk);
 
-        $pk = new SetSpawnPositionPacket();
-        $pk->x = (int)$spawnPosition->x;
-        $pk->y = (int)$spawnPosition->y;
-        $pk->z = (int)$spawnPosition->z;
-        $this->dataPacket($pk);
+		$pk = new SetSpawnPositionPacket();
+		$pk->x = (int) $spawnPosition->x;
+		$pk->y = (int) $spawnPosition->y;
+		$pk->z = (int) $spawnPosition->z;
+		$this->dataPacket($pk);
 
-        if ($this->getHealth() <= 0) {
-            $this->dead = true;
-        }
-
-
-//		$pk = new ResourcePackDataInfoPacket();
-//		$this->dataPacket($pk);
-
-//		$pk = new SetCommandsEnabledPacket();
-//		$pk->enabled = 1;
-//		$this->dataPacket($pk);
-
-        if (!empty(self::$availableCommands)) {
-            $pk = new AvailableCommandsPacket();
-            $this->dataPacket($pk);
-        }
-        if ($this->getHealth() <= 0) {
-            $this->dead = true;
-        }
+		if ($this->getHealth() <= 0) {
+			$this->dead = true;
+		}
+				
+		if (!empty(self::$availableCommands)) {
+			$pk = new AvailableCommandsPacket();
+			$this->dataPacket($pk);
+		}			
 
         $pk = new SetDifficultyPacket();
         $pk->difficulty = $this->server->getDifficulty();

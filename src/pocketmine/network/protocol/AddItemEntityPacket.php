@@ -52,6 +52,7 @@ class AddItemEntityPacket extends PEPacket{
 		$this->putLFloat($this->speedX);
 		$this->putLFloat($this->speedY);
 		$this->putLFloat($this->speedZ);
+		$this->putVarInt(0); // metadata counts
 	}
 
 }
