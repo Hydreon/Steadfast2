@@ -44,6 +44,18 @@ class AvailableCommandsPacket extends PEPacket{
 		}
 	}
 	
+    	const ARG_FLAG_VALID = 0x100000;
+    	const ARG_TYPE_INT      = 0x01;
+    	const ARG_TYPE_FLOAT    = 0x02;
+    	const ARG_TYPE_VALUE    = 0x03;
+    	const ARG_TYPE_TARGET   = 0x04;
+    	const ARG_TYPE_STRING   = 0x0c;
+    	const ARG_TYPE_POSITION = 0x0d;
+    	const ARG_TYPE_RAWTEXT  = 0x10;
+    	const ARG_TYPE_TEXT     = 0x12;
+    	const ARG_TYPE_JSON     = 0x15;
+    	const ARG_TYPE_COMMAND  = 0x1c;
+	
 	public static function prepareCommands($commands) {
 		self::$commandsBuffer['default'] = json_encode($commands);
 		
@@ -87,7 +99,7 @@ class AvailableCommandsPacket extends PEPacket{
 				$commandsStream->putVarInt(count($overloadData['input']['parameters']));
 				foreach ($overloadData['input']['parameters'] as $paramData) {
 					$commandsStream->putString($paramData['name']);
-					$commandsStream->putLInt(0);
+                    			$commandsStream->putLInt(self::ARG_FLAG_VALID | self::getFlag($paramData['type']));
 					$commandsStream->putByte(isset($paramData['optional']) && $paramData['optional']);
 				}
 			}
@@ -120,4 +132,34 @@ class AvailableCommandsPacket extends PEPacket{
 		$additionalDataStream->put($commandsStream->buffer);
 		self::$commandsBuffer[Info::PROTOCOL_120] = $additionalDataStream->buffer;
 	}
+	
+	/**
+     	 * @param string $paramName
+     	 * @return int
+     	 */
+    	private static function getFlag($paramName){
+            switch ($paramName){
+            	case "int":
+			    return self::ARG_TYPE_INT;
+            	case "float":
+                	return self::ARG_TYPE_FLOAT;
+            	case "mixed":
+                	return self::ARG_TYPE_VALUE;
+            	case "target":
+               		return self::ARG_TYPE_TARGET;
+            	case "string":
+                	return self::ARG_TYPE_STRING;
+            	case "xyz":
+                	return self::ARG_TYPE_POSITION;
+            	case "rawtext":
+                	return self::ARG_TYPE_RAWTEXT;
+            	case "text":
+                	return self::ARG_TYPE_TEXT;
+            	case "json":
+                	return self::ARG_TYPE_JSON;
+            	case "command":
+                	return self::ARG_TYPE_COMMAND;
+            }
+            return 0;
+    }
 }

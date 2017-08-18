@@ -916,7 +916,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 		}
 		
-		
 		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
 		if($ev->isCancelled()){
 			return false;
@@ -935,6 +934,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function directDataPacket(DataPacket $packet, $needACK = false){
 		if($this->connected === false){
 			return false;
+		}
+		
+		if ($this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
+			$disallowedPackets = Protocol120::getDisallowedPackets();
+			if (in_array(get_class($packet), $disallowedPackets)) {
+				return;
+			}
 		}
 
 		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
@@ -1788,6 +1794,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 				//Timings::$timerMobEqipmentPacket->stopTiming();
+				break;
+			case 'LEVEL_SOUND_EVENT_PACKET':
+				$viewers = $this->getViewers();
+				foreach ($viewers as $viewer) {
+					$viewer->dataPacket($packet);
+				}
+				$this->dataPacket($packet);
 				break;
 			case 'USE_ITEM_PACKET':
 				//Timings::$timerUseItemPacket->startTiming();
@@ -3295,14 +3308,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if ($this->getHealth() <= 0) {
 			$this->dead = true;
 		}
-		
-		
-//		$pk = new ResourcePackDataInfoPacket();
-//		$this->dataPacket($pk);
-				
-//		$pk = new SetCommandsEnabledPacket();
-//		$pk->enabled = 1;
-//		$this->dataPacket($pk);
 				
 		if (!empty(self::$availableCommands)) {
 			$pk = new AvailableCommandsPacket();
@@ -3787,7 +3792,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			EntityDamageEvent::MODIFIER_BASE => isset($damageTable[$item->getId()]) ? $damageTable[$item->getId()] : 1,
 		];
 
-		if ($this->distance($target) > 3) {
+		if ($this->distance($target) > 4) {
 			return;
 		} elseif ($target instanceof Player) {
 			$armorValues = [
@@ -4170,6 +4175,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$recipients = $this->getViewers();
 		$recipients[] = $this;
 		$blockId = $this->level->getBlockIdAt($packet->x, $packet->y, $packet->z);
+		$blockData = $this->level->getBlockDataAt($packet->x, $packet->y, $packet->z);
 		$blockPos = [
 			'x' => $packet->x,
 			'y' => $packet->y,
@@ -4184,7 +4190,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->x = $packet->x;
 		$pk->y = $packet->y + 1;
 		$pk->z = $packet->z;
-		$pk->data = $blockId;
+		$pk->data = $blockId | ($blockData << 8);
 		
 		foreach ($recipients as $recipient) {
 			$recipient->dataPacket($pk);
@@ -4410,7 +4416,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}		
 		$distanceSquared = ($this->newPosition->x - $this->x) ** 2 + ($this->newPosition->z - $this->z) ** 2;
-		if (($distanceSquared / ($tickDiff ** 2)) > $this->movementSpeed * 100) {
+		if (($distanceSquared / ($tickDiff ** 2)) > $this->movementSpeed * 200) {
 			$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
 			return;
 		}

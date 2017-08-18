@@ -67,6 +67,7 @@ use pocketmine\level\format\generic\BaseFullChunk;
 use pocketmine\level\format\generic\BaseLevelProvider;
 use pocketmine\level\format\generic\EmptyChunkSection;
 use pocketmine\level\format\LevelProvider;
+use pocketmine\level\particle\DestroyBlockParticle;
 use pocketmine\level\particle\Particle;
 use pocketmine\level\sound\Sound;
 use pocketmine\math\AxisAlignedBB;
@@ -1376,13 +1377,7 @@ class Level implements ChunkManager, Metadatable{
 			$drops = $ev->getDrops();
 			$player->lastBreak = microtime(true);
 			
-			$pos = [ 'x' => $target->x, 'y' => $target->y, 'z' => $target->z ];
-			$blockId = $target->getId();
-			$player->sendSound(LevelSoundEventPacket::SOUND_BREAK, $pos, 1, $blockId);
-			$viewers = $player->getViewers();
-			foreach ($viewers as $viewer) {
-				$viewer->sendSound(LevelSoundEventPacket::SOUND_BREAK, $pos, 1, $blockId);
-			}
+			$this->addParticle(new DestroyBlockParticle($target->add(0.5, 0.5, 0.5), $target));
 		}elseif($item instanceof Item and !$target->isBreakable($item)){
 			return false;
 		}
@@ -1558,6 +1553,13 @@ class Level implements ChunkManager, Metadatable{
 		if($hand->place($item, $block, $target, $face, $fx, $fy, $fz, $player) === false){
 			return false;
 		}
+		$position = [ 'x' => $target->x, 'y' => $target->y, 'z' => $target->z ];
+		$blockId = $hand->getId();
+		$viewers = $player->getViewers();
+		foreach ($viewers as $viewer) {
+			$viewer->sendSound(LevelSoundEventPacket::SOUND_PLACE, $position, 1, $blockId);
+		}
+		$player->sendSound(LevelSoundEventPacket::SOUND_PLACE, $position, 1, $blockId);
 
 		if($hand->getId() === Item::SIGN_POST or $hand->getId() === Item::WALL_SIGN){
 			$tile = Tile::createTile("Sign", $this->getChunk($block->x >> 4, $block->z >> 4), new Compound(false, [

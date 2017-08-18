@@ -30,8 +30,15 @@ class MovePlayerPacket extends PEPacket{
 
 	const MODE_NORMAL = 0;
 	const MODE_RESET = 1;
-	const MODE_TELEPORT= 2;
+	const MODE_TELEPORT = 2;
 	const MODE_ROTATION = 3;
+	
+	const TELEPORTATION_CAUSE_UNKNOWN = 0;
+	const TELEPORTATION_CAUSE_PROJECTILE = 1;
+	const TELEPORTATION_CAUSE_CHORUS_FRUIT = 2;
+	const TELEPORTATION_CAUSE_COMMAND = 3;
+	const TELEPORTATION_CAUSE_BEHAVIOR = 4;
+	const TELEPORTATION_CAUSE_COUNT = 5; // ???
 
 	public $eid;
 	public $x;
@@ -77,6 +84,12 @@ class MovePlayerPacket extends PEPacket{
 		$this->putLFloat($this->bodyYaw);
 		$this->putByte($this->mode);
 		$this->putByte($this->onGround > 0);
+		/** @todo do it right */
+		$this->putVarInt(0); // riding runtime ID
+		if (self::MODE_TELEPORT == $this->mode) {
+			$this->putInt(self::TELEPORTATION_CAUSE_UNKNOWN);
+			$this->putInt(1);
+		}
 	}
 
 }

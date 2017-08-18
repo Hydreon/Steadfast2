@@ -53,6 +53,7 @@ use pocketmine\network\protocol\Info110 as ProtocolInfo110;
 use pocketmine\network\protocol\Info120 as ProtocolInfo120;
 use pocketmine\network\protocol\InteractPacket;
 use pocketmine\network\protocol\LevelEventPacket;
+use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\network\protocol\DisconnectPacket;
 use pocketmine\network\protocol\LoginPacket;
 use pocketmine\network\protocol\PlayStatusPacket;
@@ -386,6 +387,7 @@ class Network {
 		$this->registerPacket(ProtocolInfo::ADD_PAINTING_PACKET, AddPaintingPacket::class);
 		$this->registerPacket(ProtocolInfo::EXPLODE_PACKET, ExplodePacket::class);
 		$this->registerPacket(ProtocolInfo::LEVEL_EVENT_PACKET, LevelEventPacket::class);
+		$this->registerPacket(ProtocolInfo::LEVEL_SOUND_EVENT_PACKET, LevelSoundEventPacket::class);
 		$this->registerPacket(ProtocolInfo::TILE_EVENT_PACKET, TileEventPacket::class);
 		$this->registerPacket(ProtocolInfo::ENTITY_EVENT_PACKET, EntityEventPacket::class);
 		$this->registerPacket(ProtocolInfo::MOB_EQUIPMENT_PACKET, MobEquipmentPacket::class);
@@ -446,6 +448,7 @@ class Network {
 		$this->registerPacket105(ProtocolInfo105::ADD_PAINTING_PACKET, AddPaintingPacket::class);
 		$this->registerPacket105(ProtocolInfo105::EXPLODE_PACKET, ExplodePacket::class);
 		$this->registerPacket105(ProtocolInfo105::LEVEL_EVENT_PACKET, LevelEventPacket::class);
+		$this->registerPacket105(ProtocolInfo105::LEVEL_SOUND_EVENT_PACKET, LevelSoundEventPacket::class);
 		$this->registerPacket105(ProtocolInfo105::TILE_EVENT_PACKET, TileEventPacket::class);
 		$this->registerPacket105(ProtocolInfo105::ENTITY_EVENT_PACKET, EntityEventPacket::class);
 		$this->registerPacket105(ProtocolInfo105::MOB_EQUIPMENT_PACKET, MobEquipmentPacket::class);
@@ -508,6 +511,7 @@ class Network {
 		$this->registerPacket110(ProtocolInfo110::ADD_PAINTING_PACKET, AddPaintingPacket::class);
 		$this->registerPacket110(ProtocolInfo110::EXPLODE_PACKET, ExplodePacket::class);
 		$this->registerPacket110(ProtocolInfo110::LEVEL_EVENT_PACKET, LevelEventPacket::class);
+		$this->registerPacket110(ProtocolInfo110::LEVEL_SOUND_EVENT_PACKET, LevelSoundEventPacket::class);
 		$this->registerPacket110(ProtocolInfo110::TILE_EVENT_PACKET, TileEventPacket::class);
 		$this->registerPacket110(ProtocolInfo110::ENTITY_EVENT_PACKET, EntityEventPacket::class);
 		$this->registerPacket110(ProtocolInfo110::MOB_EQUIPMENT_PACKET, MobEquipmentPacket::class);
@@ -567,6 +571,7 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::ADD_PAINTING_PACKET, AddPaintingPacket::class);
 		$this->registerPacket120(ProtocolInfo120::EXPLODE_PACKET, ExplodePacket::class);
 		$this->registerPacket120(ProtocolInfo120::LEVEL_EVENT_PACKET, LevelEventPacket::class);
+		$this->registerPacket120(ProtocolInfo120::LEVEL_SOUND_EVENT_PACKET, LevelSoundEventPacket::class);
 		$this->registerPacket120(ProtocolInfo120::TILE_EVENT_PACKET, TileEventPacket::class);
 		$this->registerPacket120(ProtocolInfo120::ENTITY_EVENT_PACKET, EntityEventPacket::class);
 		$this->registerPacket120(ProtocolInfo120::MOB_EQUIPMENT_PACKET, MobEquipmentPacket::class);

@@ -21,6 +21,7 @@ class PlayerHotbarPacket extends PEPacket {
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->selectedSlot);
+		$this->putByte(0); // container ID, 0 - player inventory
 		$slotsNum = count($this->slotsLink);
 		$this->putVarInt($slotsNum);
 		for ($i = 0; $i < $slotsNum; $i++) {
