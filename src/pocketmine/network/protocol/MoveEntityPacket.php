@@ -56,6 +56,9 @@ class MoveEntityPacket extends PEPacket{
 			$this->putByte($d[6] * 0.71111); //pitch
 			$this->putByte($d[5] * 0.71111); //headYaw
 			$this->putByte($d[4] * 0.71111); //yaw
+			/** @todo do it right */
+			$this->putByte(true); // is on ground?
+			$this->putByte(false); // has teleported?
 		}
 	}
 }

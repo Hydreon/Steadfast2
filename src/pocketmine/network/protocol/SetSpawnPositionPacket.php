@@ -28,6 +28,9 @@ class SetSpawnPositionPacket extends PEPacket{
 	const NETWORK_ID = Info::SET_SPAWN_POSITION_PACKET;
 	const PACKET_NAME = "SET_SPAWN_POSITION_PACKET";
 
+	const SPAWN_TYPE_PLAYER_RESPAWN = 0;
+	const SPAWN_TYPE_WORLD_SPAWN = 1;
+	
 	public $x;
 	public $y;
 	public $z;
@@ -38,9 +41,11 @@ class SetSpawnPositionPacket extends PEPacket{
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
+		$this->putSignedVarInt(self::SPAWN_TYPE_PLAYER_RESPAWN);
 		$this->putSignedVarInt($this->x);
 		$this->putVarInt($this->y);
 		$this->putSignedVarInt($this->z);
+		$this->putByte(false); // forced spawn
 	}
 
 }

@@ -21,11 +21,6 @@
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
-
-
-use pocketmine\entity\Attribute;
-
 class UpdateAttributesPacket extends PEPacket{
 	const NETWORK_ID = Info::UPDATE_ATTRIBUTES_PACKET;
 	const PACKET_NAME = "UPDATE_ATTRIBUTES_PACKET";
