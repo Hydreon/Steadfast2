@@ -32,12 +32,10 @@ abstract class MultiversionEnums {
 			0 => 'START_DESTROY_BLOCK',
 			1 => 'ABORT_DESTROY_BLOCK',
 			2 => 'STOP_DESTROY_BLOCK',
-			// new action will be added in this range
-			// from here
 			3 => 'GET_UPDATED_BLOCK',
 			4 => 'DROP_ITEM',
-			5 => 'STOP_SLEEPENG',
-			// to here
+			5 => 'START_SLEEPENG',
+			6 => 'STOP_SLEEPENG',
 			7 => 'RESPAWN',
 			8 => 'START_JUMP',
 			9 => 'START_SPRINTING',
