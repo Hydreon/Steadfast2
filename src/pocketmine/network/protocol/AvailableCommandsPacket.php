@@ -99,7 +99,8 @@ class AvailableCommandsPacket extends PEPacket{
 				$commandsStream->putVarInt(count($overloadData['input']['parameters']));
 				foreach ($overloadData['input']['parameters'] as $paramData) {
 					$commandsStream->putString($paramData['name']);
-                    			$commandsStream->putLInt(self::ARG_FLAG_VALID | self::getFlag($paramData['type']));
+//					$commandsStream->putLInt(self::ARG_FLAG_VALID | self::getFlag($paramData['type']));
+					$commandsStream->putLInt(0);
 					$commandsStream->putByte(isset($paramData['optional']) && $paramData['optional']);
 				}
 			}
