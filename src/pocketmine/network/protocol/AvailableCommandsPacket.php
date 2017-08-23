@@ -44,17 +44,18 @@ class AvailableCommandsPacket extends PEPacket{
 		}
 	}
 	
-    	const ARG_FLAG_VALID = 0x100000;
-    	const ARG_TYPE_INT      = 0x01;
-    	const ARG_TYPE_FLOAT    = 0x02;
-    	const ARG_TYPE_VALUE    = 0x03;
-    	const ARG_TYPE_TARGET   = 0x04;
-    	const ARG_TYPE_STRING   = 0x0c;
-    	const ARG_TYPE_POSITION = 0x0d;
-    	const ARG_TYPE_RAWTEXT  = 0x10;
-    	const ARG_TYPE_TEXT     = 0x12;
-    	const ARG_TYPE_JSON     = 0x15;
-    	const ARG_TYPE_COMMAND  = 0x1c;
+	const ARG_FLAG_VALID = 0x100000;
+	const ARG_FLAG_ENUM = 0x200000;
+	const ARG_TYPE_INT      = 0x01;
+	const ARG_TYPE_FLOAT    = 0x02;
+	const ARG_TYPE_VALUE    = 0x03;
+	const ARG_TYPE_TARGET   = 0x04;
+	const ARG_TYPE_STRING   = 0x0c;
+	const ARG_TYPE_POSITION = 0x0d;
+	const ARG_TYPE_RAWTEXT  = 0x10;
+	const ARG_TYPE_TEXT     = 0x12;
+	const ARG_TYPE_JSON     = 0x15;
+	const ARG_TYPE_COMMAND  = 0x1c;
 	
 	public static function prepareCommands($commands) {
 		self::$commandsBuffer['default'] = json_encode($commands);
@@ -97,10 +98,16 @@ class AvailableCommandsPacket extends PEPacket{
 			$commandsStream->putVarInt(count($commandData['versions'][0]['overloads'])); // overloads
 			foreach ($commandData['versions'][0]['overloads'] as $overloadData) {
 				$commandsStream->putVarInt(count($overloadData['input']['parameters']));
+				$paramNum = count($overloadData['input']['parameters']);
 				foreach ($overloadData['input']['parameters'] as $paramData) {
 					$commandsStream->putString($paramData['name']);
-//					$commandsStream->putLInt(self::ARG_FLAG_VALID | self::getFlag($paramData['type']));
-					$commandsStream->putLInt(0);
+					// rawtext type cause problems on some types of clients
+					$isParamOneAndOptional = ($paramNum == 1 && isset($paramData['optional']) && $paramData['optional']);
+					if ($paramData['type'] == "rawtext" && ($paramNum > 1 || $isParamOneAndOptional)) {
+						$commandsStream->putLInt(self::ARG_FLAG_VALID | self::getFlag('string'));
+					} else {
+						$commandsStream->putLInt(self::ARG_FLAG_VALID | self::getFlag($paramData['type']));
+					}
 					$commandsStream->putByte(isset($paramData['optional']) && $paramData['optional']);
 				}
 			}
