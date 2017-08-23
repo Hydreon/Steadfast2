@@ -23,6 +23,7 @@ namespace pocketmine;
 
 use pocketmine\block\Block;
 use pocketmine\command\CommandSender;
+use pocketmine\customUI\CustomUI;
 use pocketmine\entity\Arrow;
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
