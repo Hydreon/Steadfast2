@@ -97,6 +97,7 @@ use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\PlayerHotbarPacket;
 use pocketmine\network\protocol\v120\ModalFormResponsePacket;
+use pocketmine\network\protocol\v120\PurchaseReceiptPacket;
 use pocketmine\network\protocol\v120\ServerSettingsRequestPacket;
 
 class Network {
@@ -612,5 +613,6 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::PLAYER_SKIN_PACKET, PlayerSkinPacket::class);
 		$this->registerPacket120(ProtocolInfo120::MODAL_FORM_RESPONSE_PACKET, ModalFormResponsePacket::class);
 		$this->registerPacket120(ProtocolInfo120::SERVER_SETTINGS_REQUEST_PACKET, ServerSettingsRequestPacket::class);
+		$this->registerPacket120(ProtocolInfo120::PURCHASE_RECEIPT_PACKET, PurchaseReceiptPacket::class);
 	}
 }
