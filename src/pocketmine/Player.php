@@ -1454,7 +1454,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk = new TextPacket();
 			$pk->type = TextPacket::TYPE_RAW;
 			$pk->message = $message;
-			$pk->xuid = $this->xuid;
 			$this->dataPacket($pk);
 		}
 		
@@ -2590,7 +2589,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->type = TextPacket::TYPE_CHAT;
 		$pk->message = $message;
 		$pk->source = $senderName;
-		$pk->xuid = $this->xuid;
+		$sender = $this->server->getPlayer($senderName);
+		if ($sender !== null) {
+			$pk->xuid = $sender->getXUID();
+		}
 		$this->dataPacket($pk);
 	}
 
@@ -2598,7 +2600,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk = new TextPacket();
 		$pk->type = TextPacket::TYPE_RAW;
 		$pk->message = $message;
-		$pk->xuid = $this->xuid;
 		$this->dataPacket($pk);
 	}
 
@@ -2606,7 +2607,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk = new TextPacket();
 		$pk->type = TextPacket::TYPE_POPUP;
 		$pk->message = $message;
-		$pk->xuid = $this->xuid;
 		$this->dataPacket($pk);
 	}
 
@@ -2614,7 +2614,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk = new TextPacket();
 		$pk->type = TextPacket::TYPE_TIP;
 		$pk->message = $message;
-		$pk->xuid = $this->xuid;
 		$this->dataPacket($pk);
 	}
 
