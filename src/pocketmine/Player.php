@@ -21,7 +21,6 @@
 
 namespace pocketmine;
 
-use pocketmine\block\Block;
 use pocketmine\command\CommandSender;
 use pocketmine\entity\Arrow;
 use pocketmine\entity\Effect;
@@ -31,7 +30,6 @@ use pocketmine\entity\Item as DroppedItem;
 use pocketmine\entity\Living;
 use pocketmine\entity\Projectile;
 use pocketmine\event\block\SignChangeEvent;
-use pocketmine\event\entity\EntityDamageByBlockEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
@@ -58,20 +56,18 @@ use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
+use pocketmine\event\player\PlayerReceiptsReceivedEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\event\player\PlayerRespawnAfterEvent;
 use pocketmine\event\player\PlayerToggleSneakEvent;
 use pocketmine\event\player\PlayerToggleSprintEvent;
-use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\event\TextContainer;
 use pocketmine\event\Timings;
 use pocketmine\inventory\BaseTransaction;
 use pocketmine\inventory\BigShapedRecipe;
 use pocketmine\inventory\BigShapelessRecipe;
-use pocketmine\inventory\CraftingTransactionGroup;
 use pocketmine\inventory\EnchantInventory;
-use pocketmine\inventory\FurnaceInventory;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\inventory\PlayerInventory;
@@ -1575,12 +1571,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			//Timings::$timerBatchPacket->stopTiming();
 			return;
 		}
-	
-//		$this->server->getPluginManager()->callEvent($ev = new DataPacketReceiveEvent($this, $packet));
-//		if($ev->isCancelled()){
-//			return;
-//		}
-
+		
 		$beforeLoginAvailablePackets = ['LOGIN_PACKET', 'REQUEST_CHUNK_RADIUS_PACKET', 'RESOURCE_PACKS_CLIENT_RESPONSE_PACKET', 'CLIENT_TO_SERVER_HANDSHAKE_PACKET'];
 		if (!$this->isOnline() && !in_array($packet->pname(), $beforeLoginAvailablePackets)) {
 			return;
@@ -2111,7 +2102,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}
 //				$this->craftingType = self::CRAFTING_DEFAULT;
-				if($packet->type === TextPacket::TYPE_CHAT){					
+				if($packet->type === TextPacket::TYPE_CHAT){
 					$packet->message = TextFormat::clean($packet->message, $this->removeFormat);
 					foreach(explode("\n", $packet->message) as $message){
 						if(trim($message) != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){
@@ -2540,6 +2531,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			/** @minProtocol 120 */
 			case 'MODAL_FORM_RESPONSE_PACKET':
 				$this->checkModal($packet->formId, json_decode($packet->data, true));
+				break;
+			/** @minProtocol 120 */
+			case 'PURCHASE_RECEIPT_PACKET':
+				$event = new PlayerReceiptsReceivedEvent($this, $packet->receipts);
+				$this->server->getPluginManager()->callEvent($event);
 				break;
 			case 'SERVER_SETTINGS_REQUEST_PACKET':				
 				$this->sendServerSettings();
