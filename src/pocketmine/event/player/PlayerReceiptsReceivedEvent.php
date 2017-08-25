@@ -8,6 +8,8 @@ use pocketmine\Player;
 
 class PlayerReceiptsReceivedEvent extends PlayerEvent implements Cancellable {
 	
+	public static $handlerList = null;
+	/** @var string[] */
 	protected $receipts = [];
 	
 	/**
