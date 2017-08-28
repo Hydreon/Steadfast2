@@ -2358,7 +2358,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$nbt = new NBT(NBT::LITTLE_ENDIAN);
 					$nbt->read($packet->namedtag, false, true);
 					$nbtData = $nbt->getData();
-					$isNotCreator = !isset($t->namedtag->Creator) || $t->namedtag->Creator !== $this->username;
+					$isNotCreator = !isset($t->namedtag->Creator) || $t->namedtag["Creator"] !== $this->username;
 					// check tile id
 					if ($nbtData["id"] !== Tile::SIGN || $isNotCreator) {
 						$t->spawnTo($this);
