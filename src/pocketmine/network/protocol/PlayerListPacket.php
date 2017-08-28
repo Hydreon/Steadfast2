@@ -32,7 +32,18 @@ class PlayerListPacket extends PEPacket{
 	const TYPE_ADD = 0;
 	const TYPE_REMOVE = 1;
 
-	//REMOVE: UUID, ADD: UUID, entity id, name, skinName, skin
+	/**
+	 * Each entry is array
+	 * 0 - UUID
+	 * 1 - Player ID
+	 * 2 - Player Name
+	 * 3 - Skin ID
+	 * 4 - Skin Data
+	 * 5 - Cape Data
+	 * 6 - Skin Geometry Name
+	 * 7 - Skin Geometry Data
+	 * 8 - XUID
+	 */
 	/** @var array[] */
 	public $entries = [];
 	public $type;
@@ -50,28 +61,32 @@ class PlayerListPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putByte($this->type);
 		$this->putVarInt(count($this->entries));
-		foreach($this->entries as $d){
-			if($this->type === self::TYPE_ADD){
-				$this->putUUID($d[0]);
-				$this->putVarInt($d[1]);
-				$this->putString($d[2]);
-				if ($playerProtocol >= Info::PROTOCOL_120) {
-					$this->putString($d[3]);
-					$this->putString($d[4]);
-					if (isset($d[8])) {
-						$this->putString($d[5]);
-						$this->putString($d[6]);
-						$this->putString($d[7]);
-						$this->putString($d[8]);
+		switch ($this->type) {
+			case self::TYPE_ADD:
+				foreach ($this->entries as $d) {
+					$this->putUUID($d[0]);
+					$this->putVarInt($d[1]); // Player ID
+					$this->putString($d[2]); // Player Name
+					if ($playerProtocol >= Info::PROTOCOL_120) {
+						$this->putString($d[3]); // Skin ID
+						$this->putString($d[4]); // Skin Data
+						$this->putString(isset($d[5]) ? $d[5] : ''); // Cape Data
+						$this->putString(isset($d[6]) ? $d[6] : ''); // Skin Geometry Name
+						$this->putString(isset($d[7]) ? $d[7] : ''); // Skin Geometry Data
+						$this->putString(isset($d[8]) ? $d[8] : ''); // XUID
+					} else {
+						$this->putString('Standard_Custom');
+						$this->putString($d[4]);
 					}
-				} else {
-					$this->putString('Standard_Custom');
-					$this->putString($d[4]);
 				}
-			}else{
-				$this->putUUID($d[0]);
-			}
-		}
+				break;
+			case self::TYPE_REMOVE:
+				foreach ($this->entries as $d) {
+					$this->putUUID($d[0]);
+				}
+				break;
+		} 
+			
 	}
 
 }

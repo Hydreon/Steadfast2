@@ -33,7 +33,7 @@ interface Info{
 	const CURRENT_PROTOCOL = 101;
 //	const NEWEST_PROTOCOL = 82;
 //	const OLDEST_PROTOCOL = 81;
-	const ACCEPTED_PROTOCOLS = [101, 102, 105, 106, 107, 110, 111, 112, 113, 134];
+	const ACCEPTED_PROTOCOLS = [101, 102, 105, 106, 107, 110, 111, 112, 113, 134, 135];
 	
 	const BASE_PROTOCOL = 101;
 	/** RELEASE 1.0.x, 1.1.x */
@@ -46,13 +46,14 @@ interface Info{
 	const PROTOCOL_113 = 113;
 	/** 1.2 BETAS */
 	const PROTOCOL_134 = 134; // 1.2.0.20, 1.2.0.22
+	const PROTOCOL_135 = 135; // 1.2.0.24
 	/** OUTDATED (supporting will be removed with next release, may didn't work properly)*/
 	const PROTOCOL_120 = 120; // 1.2.0.xx (beta)
-	const PROTOCOL_121 = 121; // 1.2.0.xx (beta)
-	const PROTOCOL_130 = 130; // 1.2.0.xx (beta)
-	const PROTOCOL_131 = 131; // 1.2.0.xx (beta)
-	const PROTOCOL_132 = 132; // 1.2.0.15 (beta)
-	const PROTOCOL_133 = 133; // 1.2.0.18 (beta)
+//	const PROTOCOL_121 = 121; // 1.2.0.xx (beta)
+//	const PROTOCOL_130 = 130; // 1.2.0.xx (beta)
+//	const PROTOCOL_131 = 131; // 1.2.0.xx (beta)
+//	const PROTOCOL_132 = 132; // 1.2.0.15 (beta)
+//	const PROTOCOL_133 = 133; // 1.2.0.18 (beta)
 
 	/**
 	 * Minecraft: PE packets

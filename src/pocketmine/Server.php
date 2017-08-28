@@ -891,7 +891,7 @@ class Server{
 	/**
 	 * @param string $name
 	 *
-	 * @return Player
+	 * @return Player|null
 	 */
 	public function getPlayer($name){
 		$found = null;
