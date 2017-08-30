@@ -23,6 +23,9 @@ class MapItemDataPacket extends PEPacket {
 
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->putByte(0); // dimension
+		}
 		$this->putSignedVarInt($this->mapId);
 		$this->putVarInt($this->flags);
 		switch ($this->flags) {

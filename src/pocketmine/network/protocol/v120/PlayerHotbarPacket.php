@@ -27,6 +27,7 @@ class PlayerHotbarPacket extends PEPacket {
 		for ($i = 0; $i < $slotsNum; $i++) {
 			$this->putVarInt($this->slotsLink[$i]);
 		}
+		$this->putByte(false); // Should select slot (don't know how it works)
 	}
 	
 }
