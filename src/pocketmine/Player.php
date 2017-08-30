@@ -2544,6 +2544,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case 'CLIENT_TO_SERVER_HANDSHAKE_PACKET':
 				$this->continueLoginProcess();
 				break;
+			case 'SUB_CLIENT_LOGIN_PACKET':
+				$this->kick("COOP play is not allowed");
+				break;
 			default:
 				break;
 		}
