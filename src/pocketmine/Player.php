@@ -3026,7 +3026,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->removeWindow($this->currentWindow);
 			}
 			$this->forceMovement = new Vector3($this->x, $this->y, $this->z);			
-			$this->sendPosition($this, $this->pitch, $this->yaw, MovePlayerPacket::MODE_RESET);
+			$this->sendPosition($this, $this->yaw, $this->pitch, MovePlayerPacket::MODE_RESET);
 
 			$this->resetFallDistance();
 			$this->nextChunkOrderRun = 0;
