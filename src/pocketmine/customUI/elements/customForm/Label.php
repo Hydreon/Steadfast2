@@ -3,6 +3,7 @@
 namespace pocketmine\customUI\elements\customForm;
 
 use pocketmine\customUI\elements\UIElement;
+use pocketmine\Player;
 
 class Label extends UIElement {
 	

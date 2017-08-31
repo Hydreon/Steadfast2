@@ -2,6 +2,8 @@
 
 namespace pocketmine\customUI;
 
+use pocketmine\Player;
+
 interface CustomUI {
 
 	public function handle($response, $player);

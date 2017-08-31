@@ -30,11 +30,11 @@ abstract class Button extends UIElement {
 	 * 
 	 * @param string $imageType
 	 * @param string $imagePath
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function addImage($imageType, $imagePath) {
 		if ($imageType != self::IMAGE_TYPE_PATH && $imageType != self::IMAGE_TYPE_URL) {
-			throw new Exception(__CLASS__.'::'.__METHOD__.' Invalid image type');
+			throw new \Exception(__CLASS__.'::'.__METHOD__.' Invalid image type');
 		}
 		$this->imageType = $imageType;
 		$this->imagePath = $imagePath;
