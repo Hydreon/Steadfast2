@@ -247,8 +247,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $randomClientId;
 
 	protected $lastMovement = 0;
-	/** @var Vector3 */
-	protected $forceMovement = null;
 	protected $connected = true;
 	protected $ip;
 	protected $removeFormat = true;
@@ -307,8 +305,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $lastDamegeTime = 0;
 	
-	protected $lastTeleportTime = 0;
-	
 	protected $isTeleportedForMoveEvent = false;
 	
 	private $isFirstConnect = true;
@@ -358,6 +354,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	/** @var CustomUI[] */
 	protected $activeModalWindows = [];
+	
+	protected $isTeleporting = false;
 	
 	public function getLeaveMessage(){
 		return "";
@@ -1639,24 +1637,22 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
 			case 'MOVE_PLAYER_PACKET':
-				//Timings::$timerMovePacket->startTiming();
-				$revert = false;
 				if ($this->dead === true || $this->spawned !== true) {
-					$revert = true;
-					$this->forceMovement = new Vector3($this->x, $this->y, $this->z);
-				}
-				if ($revert) {
-					$this->sendPosition($this->forceMovement, $packet->yaw, $packet->pitch, MovePlayerPacket::MODE_RESET);
+					$this->sendPosition($this, $packet->yaw, $packet->pitch, MovePlayerPacket::MODE_RESET);
 				} else {
 					$newPos = new Vector3($packet->x, $packet->y - $this->getEyeHeight(), $packet->z);
-					if (!($this->forceMovement instanceof Vector3) || $newPos->distanceSquared($this->forceMovement) <= 0.1) {
+					if ($this->isTeleporting && $newPos->distanceSquared($this) > 1) {
+						return;
+					} else {
+						$this->isTeleporting = false;
+						
 						$packet->yaw %= 360;
 						$packet->pitch %= 360;
 
 						if ($packet->yaw < 0) {
 							$packet->yaw += 360;
 						}
-						
+
 						if (!$this->isMayMove) {
 							if ($this->yaw != $packet->yaw || $this->pitch != $packet->pitch || abs($this->x - $packet->x) >= 0.05 || abs($this->z - $packet->z) >= 0.05) {
 								$this->setMayMove(true);
@@ -1665,17 +1661,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								$this->teleport($spawn);
 							}
 						}
-						
+
 						$this->setRotation($packet->yaw, $packet->pitch);
 						$this->newPosition = $newPos;
-						$this->forceMovement = null;
-					} else if (microtime(true) - $this->lastTeleportTime > 2) {
-						$this->forceMovement = new Vector3($this->x, $this->y, $this->z);
-						$this->sendPosition($this->forceMovement, $packet->yaw, $packet->pitch, MovePlayerPacket::MODE_RESET);
-						$this->lastTeleportTime = microtime(true);
 					}
 				}
-				//Timings::$timerMovePacket->stopTiming();
 				break;
 			case 'MOB_EQUIPMENT_PACKET':
 				//Timings::$timerMobEqipmentPacket->startTiming();
@@ -1883,6 +1873,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->deadTicks = 0;
 						$this->despawnFromAll();
 						$this->dead = false;
+						$this->isTeleporting = true;
 						$this->noDamageTicks = 60;
 
 						$this->setHealth($this->getMaxHealth());
@@ -3024,14 +3015,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if(parent::teleport($pos, $yaw, $pitch)){
 			if (!is_null($this->currentWindow)) {
 				$this->removeWindow($this->currentWindow);
-			}
-			$this->forceMovement = new Vector3($this->x, $this->y, $this->z);			
+			}	
 			$this->sendPosition($this, $this->pitch, $this->yaw, MovePlayerPacket::MODE_RESET);
 
 			$this->resetFallDistance();
 			$this->nextChunkOrderRun = 0;
 			$this->newPosition = null;
-			$this->lastTeleportTime = microtime(true);
+			$this->isTeleporting = true;
 			$this->isTeleportedForMoveEvent = true;
 		}
 	}
@@ -4406,7 +4396,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected function revertMovement(Vector3 $pos, $yaw = 0, $pitch = 0) {
 		$this->sendPosition($pos, $yaw, $pitch, MovePlayerPacket::MODE_RESET);
-		$this->forceMovement = $pos;
 		$this->newPosition = null;
 	}
 
@@ -4445,31 +4434,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$toY = ceil($to->y);
 					$block = $from->level->getBlock(new Vector3($toX, $toY, $toZ));
 					$blockUp = $from->level->getBlock(new Vector3($toX, $toY + 1, $toZ));
-					$roundBlock = $from->level->getBlock(new Vector3($toX, round($to->y), $toZ));
-					if ($from->y - $to->y > 0.1) {
-						if (!$roundBlock->isTransparent()) {
-							$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
-							return;
-						}
-					} else {
-						if (!$block->isTransparent() || !$blockUp->isTransparent()) {
+					if (!$block->isTransparent() || !$blockUp->isTransparent()) {					
+						if (!$blockUp->isTransparent()) {
+							$blockLow = $from->level->getBlock(new Vector3($toX, $toY - 1, $toZ));
+							if ($from->y == $to->y && !$blockLow->isTransparent()) {
+								$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
+								return;
+							}
+						} else {
 							$blockUpUp = $from->level->getBlock(new Vector3($toX, $toY + 2, $toZ));
-							if (!$blockUp->isTransparent()) {
-								$blockLow = $from->level->getBlock(new Vector3($toX, $toY - 1, $toZ));
-								if ($from->y == $to->y && !$blockLow->isTransparent()) {
-									$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
-									return;
-								}
-							} else {
-								if (!$blockUpUp->isTransparent()) {
-									$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
-									return;
-								}
-								$blockFrom = $from->level->getBlock(new Vector3($from->x, $from->y, $from->z));
-								if ($blockFrom instanceof Liquid) {
-									$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
-									return;
-								}
+							if (!$blockUpUp->isTransparent()) {
+								$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
+								return;
+							}
+							$blockFrom = $from->level->getBlock(new Vector3($from->x, $from->y, $from->z));
+							if ($blockFrom instanceof Liquid) {
+								$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
+								return;
 							}
 						}
 					}
@@ -4515,7 +4496,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->nextChunkOrderRun = 20;
 				}
 			}
-			$this->forceMovement = null;
 		}		
 		$this->newPosition = null;
 	}
