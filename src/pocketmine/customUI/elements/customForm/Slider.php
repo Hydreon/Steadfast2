@@ -21,7 +21,7 @@ class Slider extends UIElement {
 	 * @param float $min
 	 * @param float $max
 	 * @param float $step
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function __construct($text, $min, $max, $step = 0) {
 		if ($min > $max) {
@@ -37,7 +37,7 @@ class Slider extends UIElement {
 	/**
 	 * 
 	 * @param float $step
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function setStep($step) {
 		if ($step < 0) {
@@ -49,7 +49,7 @@ class Slider extends UIElement {
 	/**
 	 * 
 	 * @param float $value
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function setDefaultValue($value) {
 		if ($value < $this->min || $value > $this->max) {

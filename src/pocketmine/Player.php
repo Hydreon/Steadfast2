@@ -22,6 +22,7 @@
 namespace pocketmine;
 
 use pocketmine\command\CommandSender;
+use pocketmine\customUI\CustomUI;
 use pocketmine\entity\Arrow;
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
@@ -2556,7 +2557,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * Kicks a player from the server
 	 *
 	 * @param string $reason
-	 * @param bool   $isAdmin
 	 *
 	 * @return bool
 	 */
