@@ -1251,32 +1251,32 @@ class Item{
 		self::addCreativeItem(Item::get(Item::GOLD_PICKAXE, 0));
 		self::addCreativeItem(Item::get(Item::GOLD_AXE, 0));
 		for($i = 298; $i < 318; $i++){ //All armor
-				self::addCreativeItem(Item::get($i, 0));
-			}
+			self::addCreativeItem(Item::get($i, 0));
+		}
 			
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 15));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 10));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 11));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 12));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 13));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 14));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 22));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 16));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 19));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 18));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 33));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 38));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 39));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 34));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 37));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 35));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 32));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 36));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 17));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 40));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 42));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 41));
-			self::addCreativeItem(Item::get(Item::SPAWN_EGG, 43));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 15));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 10));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 11));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 12));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 13));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 14));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 22));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 16));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 19));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 18));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 33));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 38));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 39));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 34));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 37));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 35));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 32));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 36));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 17));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 40));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 42));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 41));
+		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 43));
 
 		self::addCreativeItem(Item::get(Item::SNOWBALL));
 
@@ -1341,7 +1341,7 @@ class Item{
         self::addCreativeItem(Item::get(Item::PURPUR_BLOCK, 0));
         
 		self::addCreativeItem(Item::get(Item::REDSTONE_LAMP, 0));
-		self::addCreativeItem(Item::get(Item::REDSTONE_LAMP_ACTIVE, 0));
+//		self::addCreativeItem(Item::get(Item::REDSTONE_LAMP_ACTIVE, 0));
 		self::addCreativeItem(Item::get(Item::PRISMARINE_CRYSTAL, 0));
 	}
 	

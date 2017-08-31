@@ -2391,8 +2391,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case 'REQUEST_CHUNK_RADIUS_PACKET':
 				//Timings::$timerChunkRudiusPacket->startTiming();
-				if ($packet->radius > 20) {
-					$packet->radius = 20;
+				if ($packet->radius > 12) {
+					$packet->radius = 12;
 				} elseif ($packet->radius < 4) {
 					$packet->radius = 4;
 				}
