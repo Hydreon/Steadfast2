@@ -1081,16 +1081,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->dataPacket($pk);
 		$this->sendSettings();
 
-		if($this->gamemode === Player::SPECTATOR){
-			Multiversion::sendContainer($this, Protocol120::CONTAINER_ID_CREATIVE, []);
-		}elseif($this->gamemode === Player::CREATIVE) {
-			$slots = [];
-			foreach(Item::getCreativeItems() as $item){
-				$slots[] = clone $item;
-			}
-			Multiversion::sendContainer($this, Protocol120::CONTAINER_ID_CREATIVE, $slots);
-		}
-
 		$this->inventory->sendContents($this);
 		$this->inventory->sendContents($this->getViewers());
 		$this->inventory->sendHeldItem($this->hasSpawned);
@@ -3313,15 +3303,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . TextFormat::AQUA . $this->ip . " connected");
 		
-		if ($this->gamemode === Player::SPECTATOR) {
-			Multiversion::sendContainer($this, Protocol120::CONTAINER_ID_CREATIVE, []);
-		} elseif ($this->gamemode === Player::CREATIVE) {
-			$slots = [];
-			foreach(Item::getCreativeItems() as $item){
-				$slots[] = clone $item;
-			}
-			Multiversion::sendContainer($this, Protocol120::CONTAINER_ID_CREATIVE, $slots);
+		$slots = [];
+		foreach(Item::getCreativeItems() as $item){
+			$slots[] = clone $item;
 		}
+		Multiversion::sendContainer($this, Protocol120::CONTAINER_ID_CREATIVE, $slots);
 
 		$this->server->sendRecipeList($this);
 
