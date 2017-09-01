@@ -70,10 +70,9 @@ class AddEntityPacket extends PEPacket{
 			$this->putLFloat($attribute['default']);
 			$this->putLFloat($attribute['max']);			
 		}
-		if(!empty($this->metadata)) {
-			$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
-			$this->put($meta);
-		}
+		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
+		$this->put($meta);
+
 		$this->putVarInt(count($this->links));
 		foreach ($this->links as $link) {
 			$this->putVarInt($link['from']);
