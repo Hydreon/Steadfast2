@@ -285,7 +285,7 @@ class Session{
 		}
 
         if($packet->getTotalLength() + 4 > $this->mtuSize){
-            $buffers = str_split($packet->buffer, $this->mtuSize - 34);
+            $buffers = str_split($packet->buffer, $this->mtuSize - 60);
             $splitID = ++$this->splitID % 65536;
             foreach($buffers as $count => $buffer){
                 $pk = new EncapsulatedPacket();
