@@ -91,7 +91,7 @@ class FloatingTextParticle extends Particle{
 			$pk->pitch = 0;
 			$pk->metadata = [
 				Entity::DATA_FLAGS => [Entity::DATA_TYPE_LONG, (1 << Entity::DATA_FLAG_SHOW_NAMETAG) | (1 << Entity::DATA_FLAG_ALWAYS_SHOW_NAMETAG)],
-				Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, $this->title . ($this->text !== "" ? "\n" . $this->text : "")],
+				Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, $this->title . ($this->text !== "" ? $this->text : "")],
 				Entity::DATA_LEAD_HOLDER => [Entity::DATA_TYPE_LONG, -1],
 				Entity::DATA_SCALE => [Entity::DATA_TYPE_FLOAT, 0.01],
 			];
