@@ -772,7 +772,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->usedChunks[$index] = false;
 
 			$this->level->useChunk($X, $Z, $this);
-			$this->level->requestChunk($X, $Z, $this, LevelProvider::ORDER_ZXY);
+			$this->level->requestChunk($X, $Z, $this);
 			if($this->server->getAutoGenerate()){
 				if(!$this->level->populateChunk($X, $Z, true)){
 					if($this->spawned){

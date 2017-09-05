@@ -37,6 +37,10 @@ use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryStream;
 
 class Chunk extends BaseChunk {
+	
+	protected static $chunkClass = Chunk::class;
+	protected static $chunkSectionClass = ChunkSection::class;
+	protected static $providerClass = Anvil::class;
 
 	/** @var Compound */
 	protected $nbt;
@@ -86,7 +90,7 @@ class Chunk extends BaseChunk {
 			if ($section instanceof Compound) {
 				$y = (int) $section["Y"];
 				if ($y < static::SECTION_COUNT) {
-					$sections[$y] = new ChunkSection($section);
+					$sections[$y] = new static::$chunkSectionClass($section);
 				}
 			}
 		}
@@ -185,7 +189,7 @@ class Chunk extends BaseChunk {
 				return null;
 			}
 
-			return new Chunk($provider instanceof LevelProvider ? $provider : Anvil::class, $chunk->Level);
+			return new static::$chunkClass($provider instanceof LevelProvider ? $provider : static::$providerClass, $chunk->Level);
 		} catch (\Throwable $e) {
 			return null;
 		}
@@ -208,7 +212,7 @@ class Chunk extends BaseChunk {
 				return null;
 			}
 
-			return new Chunk($provider instanceof LevelProvider ? $provider : Anvil::class, $chunk->Level);
+			return new static::$chunkClass($provider instanceof LevelProvider ? $provider : static::$providerClass, $chunk->Level);
 		} catch (\Throwable $e) {
 			return null;
 		}
@@ -335,7 +339,7 @@ class Chunk extends BaseChunk {
 	 */
 	public static function getEmptyChunk($chunkX, $chunkZ, LevelProvider $provider = null) {
 		try {
-			$chunk = new Chunk($provider instanceof LevelProvider ? $provider : Anvil::class, null);
+			$chunk = new static::$chunkClass($provider instanceof LevelProvider ? $provider : static::$providerClass, null);
 			$chunk->x = $chunkX;
 			$chunk->z = $chunkZ;
 

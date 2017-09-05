@@ -92,8 +92,13 @@ class ChunkMaker extends Worker {
 					$chunkData .= str_repeat("\x00", 10240);
 					$chunkData120 .= str_repeat("\x00", 6144);
 				} else {
-					$blockData = $this->sortData($sections['blocks']) . $this->sortHalfData($sections['data']);
-					$lightData = $this->sortHalfData($sections['skyLight']) . $this->sortHalfData($sections['blockLight']);
+					if (isset($data['isSorted']) && $data['isSorted'] == true) {
+						$blockData = $sections['blocks'] . $sections['data'];
+						$lightData = $sections['skyLight'] . $sections['blockLight'];
+					} else {
+						$blockData = $this->sortData($sections['blocks']) . $this->sortHalfData($sections['data']);
+						$lightData = $this->sortHalfData($sections['skyLight']) . $this->sortHalfData($sections['blockLight']);
+					}
 					$chunkData .= $blockData . $lightData;
 					$chunkData120 .= $blockData;
 				}
