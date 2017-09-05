@@ -98,8 +98,8 @@ class Anvil extends McRegion {
 	private function getChunkData($chunk) {
 		$data = [
 			'sections' => [],
-			'heightMap' => pack("C*", ...$chunk->getHeightMapArray()),
-			'biomeColor' => pack("n*", ...$chunk->getBiomeColorArray())	
+			'heightMap' => pack("v*", ...$chunk->getHeightMapArray()),
+			'biomeColor' => $this->convertBiomeColors($chunk->getBiomeColorArray())	
 		];
 		$sections = [];
 		foreach ($chunk->getSections() as $section) {

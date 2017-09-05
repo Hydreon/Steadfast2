@@ -15,21 +15,17 @@ class SetTitlePacket extends PEPacket {
 
 	public $type;
 	public $text;
-	public $fadeInTime;
-	public $stayTime;
-	public $fadeOutTime;
+	public $fadeInTime = 0;
+	public $stayTime = 10;
+	public $fadeOutTime = 0;
 
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
 		$this->putSignedVarInt($this->type);
 		$this->putString($this->text);
-		switch ($this->type) {
-			case self::TITLE_TYPE_TIMES:
-				$this->putSignedVarInt($this->fadeInTime);
-				$this->putSignedVarInt($this->stayTime);
-				$this->putSignedVarInt($this->fadeOutTime);
-				break;
-		}
+		$this->putSignedVarInt($this->fadeInTime);
+		$this->putSignedVarInt($this->stayTime);
+		$this->putSignedVarInt($this->fadeOutTime);
 	}
 
 	public function decode($playerProtocol) {

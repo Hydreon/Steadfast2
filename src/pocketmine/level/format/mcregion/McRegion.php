@@ -133,8 +133,8 @@ class McRegion extends BaseLevelProvider{
 		$data['data'] = $chunk->getBlockDataArray();
 		$data['blockLight'] = $chunk->getBlockLightArray();
 		$data['skyLight'] = $chunk->getBlockSkyLightArray();
-		$data['heightMap'] = pack("C*", ...$chunk->getHeightMapArray());
-		$data['biomeColor'] = pack("n*", ...$chunk->getBiomeColorArray());
+		$data['heightMap'] = pack("v*", ...$chunk->getHeightMapArray());
+		$data['biomeColor'] = $this->convertBiomeColors($chunk->getBiomeColorArray());
 		$this->getLevel()->chunkMaker->pushMainToThreadPacket(serialize($data));
 		return null;
 	}
@@ -316,5 +316,13 @@ class McRegion extends BaseLevelProvider{
 	
 	public static function getYMask() {
 		return 0x7f;
+	}
+	
+	public function convertBiomeColors($array){
+		$result = str_repeat("\x00", 256);
+		foreach($array as $i => $color){
+			$result{$i} = chr(($color >> 24) & 0xff);
+		}
+		return $result;
 	}
 }

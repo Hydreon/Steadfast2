@@ -11,7 +11,7 @@ class InventoryContentPacket extends PEPacket {
 	const PACKET_NAME = "INVENTORY_CONTENT_PACKET";
 	
 	public $inventoryID;
-	public $items;
+	public $items = [];
 	
 	public function decode($playerProtocol) {
 		var_dump('decode: ' . __CLASS__);
