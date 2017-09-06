@@ -2277,7 +2277,7 @@ class Server{
 		foreach ($players as $p){
 			$protocol = $p->getPlayerProtocol();
 			if (!isset($readyPackets[$protocol])) {
-				$pk->encode($protocol);
+				$pk->encode($protocol, $p->getSubClientId());
 				$batch = new BatchPacket();
 				$batch->payload = zlib_encode(Binary::writeVarInt(strlen($pk->getBuffer())) . $pk->getBuffer(), ZLIB_ENCODING_DEFLATE, 7);
 				$readyPackets[$protocol] = $batch;
@@ -2313,7 +2313,7 @@ class Server{
 			foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
 				$pk->addFurnaceRecipe($recipe);
 			}
-			$pk->encode($p->getPlayerProtocol());
+			$pk->encode($p->getPlayerProtocol(), $p->getSubClientId());
 			$pk->isEncoded = true;
 			$this->craftList[$p->getPlayerProtocol()] = $pk;
 		}

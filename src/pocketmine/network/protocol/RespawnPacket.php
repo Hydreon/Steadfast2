@@ -33,6 +33,7 @@ class RespawnPacket extends PEPacket{
 	public $z;
 
 	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
 		$this->x = $this->getLFloat();
 		$this->y = $this->getLFloat();
 		$this->z = $this->getLFloat();

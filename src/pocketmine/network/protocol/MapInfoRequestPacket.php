@@ -10,6 +10,7 @@ class MapInfoRequestPacket extends PEPacket {
 	public $mapId;
 
 	public function decode($playerProtocol) {
+		$this->getHeader($playerProtocol);
 		$this->mapId = $this->getSignedVarInt();
 	}
 

@@ -40,7 +40,7 @@ class ContainerOpenPacket extends PEPacket{
 
 	}
 
-	public function encode($playerProtocol){
+	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
 		$this->putByte($this->windowid);
 		$this->putByte($this->type);

@@ -6,16 +6,39 @@ use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\Info;
 
 abstract class PEPacket extends DataPacket {
+	
+	const CLIENT_ID_MAIN_PLAYER = 0;
+	const CLIENT_ID_SERVER = 0;
+	
+	public $senderSubClientID = self::CLIENT_ID_SERVER;
+	
+	public $targetSubClientID = self::CLIENT_ID_MAIN_PLAYER;
 
 	abstract public function encode($playerProtocol);
 
 	abstract public function decode($playerProtocol);
 
+	/**
+	 * !IMPORTANT! Should be called at first line in decode
+	 * @param integer $playerProtocol
+	 */
+	protected function getHeader($playerProtocol = 0) {
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->senderSubClientID = $this->getByte();
+			$this->targetSubClientID = $this->getByte();
+		}
+	}
+	
+	/**
+	 * !IMPORTANT! Should be called at first line in encode
+	 * @param integer $playerProtocol
+	 */
 	public function reset($playerProtocol = 0) {
 		$this->buffer = chr(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);
 		$this->offset = 0;
 		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->buffer .= "\x00\x00";
+			$this->putByte($this->senderSubClientID);
+			$this->putByte($this->targetSubClientID);
 			$this->offset = 2;
 		}
 	}

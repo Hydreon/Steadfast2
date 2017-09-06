@@ -44,7 +44,8 @@ class ContainerSetContentPacket extends PEPacket{
 		return parent::clean();
 	}
 
-	public function decode($playerProtocol){
+	public function decode($playerProtocol) {
+		$this->getHeader($playerProtocol);
 		$this->windowid = $this->getByte();
 		$count = $this->getVarInt();
 		for($s = 0; $s < $count and !$this->feof(); ++$s){
