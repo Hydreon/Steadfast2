@@ -1868,9 +1868,6 @@ class Server{
 			$neededProtocol[$protocol] = $protocol;
 			$neededSubClientsId[$subClientId] = $subClientId;
 		}
-		$nonSubClientPacket = [
-			'pocketmine\network\protocol\AddPlayerPacket',
-		];
 		$protocolsCount = count($neededProtocol);
 		$newPackets = [];
 		foreach ($packets as $p) {
@@ -1878,16 +1875,13 @@ class Server{
 				if ($p instanceof DataPacket) {
 					if ($protocol >= Info::PROTOCOL_120) {
 						foreach ($neededSubClientsId as $subClientId) {
-							if ($subClientId > 0 && in_array(get_class($p), $nonSubClientPacket)) {
-								continue;
-							}
-							$p->senderSubClientId = $subClientId;
+							$p->senderSubClientID = $subClientId;
 							$p->encode($protocol);
 							$newPackets[$protocol][] = $p->buffer;
 						}
 					} else {
 						if (!$p->isEncoded || $protocolsCount > 1) {
-							$p->senderSubClientId = 0;
+							$p->senderSubClientID = 0;
 							$p->encode($protocol);
 						}
 						$newPackets[$protocol][] = $p->buffer;
