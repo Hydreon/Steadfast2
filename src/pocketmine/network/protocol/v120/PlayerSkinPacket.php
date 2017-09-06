@@ -21,6 +21,7 @@ class PlayerSkinPacket extends PEPacket {
 
 
 	public function decode($playerProtocol) {
+		$this->getHeader($playerProtocol);
 		$this->uuid = $this->getUUID();
 		$this->newSkinId = $this->getString();
 		$this->newSkinName = $this->getString();

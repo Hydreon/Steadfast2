@@ -14,6 +14,7 @@ class PurchaseReceiptPacket extends PEPacket {
 	public $receipts = [];
 	
 	public function decode($playerProtocol) {
+		$this->getHeader($playerProtocol);
 		$receiptsCount = $this->getVarInt();
 		for ($i = 0; $i < $receiptsCount; $i++) {
 			$this->receipts[] = $this->getString();

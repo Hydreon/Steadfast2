@@ -30,7 +30,8 @@ class RequestChunkRadiusPacket extends PEPacket{
 
 	public $radius;
 
-	public function decode($playerProtocol){		
+	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
 		$this->radius = $this->getSignedVarInt();
 	}
 

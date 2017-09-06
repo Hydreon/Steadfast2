@@ -36,6 +36,7 @@ class ContainerSetSlotPacket extends PEPacket{
 	public $item;
 
 	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
 		$this->windowid = $this->getByte();
 		$this->slot = $this->getSignedVarInt();
 		$this->hotbarSlot = $this->getSignedVarInt();

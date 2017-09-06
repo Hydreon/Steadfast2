@@ -32,6 +32,7 @@ class MobArmorEquipmentPacket extends PEPacket{
 	public $slots = [];
 
 	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
 		$this->eid = $this->getVarInt();
 		$this->slots[0] = $this->getSlot($playerProtocol);
 		$this->slots[1] = $this->getSlot($playerProtocol);
