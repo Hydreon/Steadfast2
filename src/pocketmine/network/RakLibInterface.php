@@ -242,7 +242,6 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$protocol = $player->getPlayerProtocol();
 			$packet->encode($protocol);
 //			var_dump("Send: 0x" . ($packet::NETWORK_ID < 16 ? '0' . dechex($packet::NETWORK_ID) : dechex($packet::NETWORK_ID)));
-//			var_dump($packet->senderSubClientID, $packet->targetSubClientID);
 			if(!($packet instanceof BatchPacket) && strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
 				$this->server->batchPackets([$player], [$packet], true);
 				return null;

@@ -736,12 +736,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
-	public function sendChunk($x, $z, $payload){
+	public function sendChunk($x, $z, $data){
 		if($this->connected === false){
 			return;
 		}
-		
-		$data = $payload[$this->getPlayerProtocol()];
 
 		$this->usedChunks[Level::chunkHash($x, $z)] = true;
 		$this->chunkLoadCount++;
@@ -909,7 +907,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 */
 	public function dataPacket(DataPacket $packet, $needACK = false){		
 		if($this->connected === false){
-//			var_dump('not connected');
+			var_dump('not connected');
 			return false;
 		}
 		
@@ -1584,8 +1582,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->subClients[$packet->targetSubClientID]->handleDataPacket($packet);
 			return;
 		}
-		
-//		var_dump($packet->senderSubClientID, $packet->targetSubClientID);
 		
 		switch($packet->pname()){
             case 'SET_PLAYER_GAMETYPE_PACKET':

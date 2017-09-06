@@ -19,7 +19,7 @@ class PMAnvil extends Anvil {
 		return "pmanvil";
 	}
 
-	public function requestChunkTask($x, $z) {
+	public function requestChunkTask($x, $z, $protocols, $subClientsId) {
 		$chunk = $this->getChunk($x, $z, false);
 		if (!($chunk instanceof $this->chunkClass)) {
 			throw new ChunkException("Invalid Chunk sent");
@@ -35,6 +35,8 @@ class PMAnvil extends Anvil {
 		$data = array();
 		$data['chunkX'] = $x;
 		$data['chunkZ'] = $z;
+		$data['protocols'] = $protocols;
+		$data['subClientsId'] = $subClientsId;
 		$data['tiles'] = $tiles;
 		$data['isAnvil'] = true;
 		$data['isSorted'] = true;

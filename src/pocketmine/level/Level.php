@@ -2049,36 +2049,44 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	protected function processChunkRequest(){
-		if(count($this->chunkSendQueue) > 0){
-			//$this->timings->syncChunkSendTimer->startTiming();
-
+		if (count($this->chunkSendQueue) > 0) {
+			$protocols = [];
+			$subClientsId = [];
 			$x = null;
 			$z = null;
-			foreach($this->chunkSendQueue as $index => $players){
-				if(isset($this->chunkSendTasks[$index])){
+			foreach ($this->chunkSendQueue as $index => $players) {
+				if (isset($this->chunkSendTasks[$index])) {
 					continue;
 				}
-				self::getXZ($index, $x, $z);			
-				if(ADVANCED_CACHE == true and ($cache = Cache::get("world:" . $this->getId() . ":" . $index)) !== false){
-					/** @var Player[] $players */
-					foreach($players as $player){
-						if($player->isConnected() and isset($player->usedChunks[$index])){
-							$player->sendChunk($x, $z, $cache);
+				self::getXZ($index, $x, $z);
+				/** @var Player[] $players */
+				foreach ($players as $player) {
+					if ($player->isConnected() && isset($player->usedChunks[$index])) {
+						$protocol = $player->getPlayerProtocol();
+						$subClientId = $player->getSubClientId();
+						if (ADVANCED_CACHE == true) {
+							$playerIndex = "{$protocol}:{$subClientId}";
+							$cache = Cache::get("world:" . $this->getId() . ":{$index}");
+							if ($cache !== false && isset($cache[$playerIndex])) {
+								$player->sendChunk($x, $z, $cache[$playerIndex]);
+								continue;
+							}
 						}
+						$protocols[$protocol] = $protocol;
+						$subClientsId[$subClientId] = $subClientId;
+						
 					}
-					unset($this->chunkSendQueue[$index]);
-				}else{
+				}
+				if ($protocols !== []) {
 					$this->chunkSendTasks[$index] = true;
-					//$this->timings->syncChunkSendPrepareTimer->startTiming();
-					$task = $this->provider->requestChunkTask($x, $z);
+					$task = $this->provider->requestChunkTask($x, $z, $protocols, $subClientsId);
 					if($task instanceof AsyncTask){
 						$this->server->getScheduler()->scheduleAsyncTask($task);
 					}
-					//$this->timings->syncChunkSendPrepareTimer->stopTiming();
+				} else {
+					unset($this->chunkSendQueue[$index]);
 				}
 			}
-
-			//$this->timings->syncChunkSendTimer->stopTiming();
 		}
 	}
 
@@ -2087,16 +2095,19 @@ class Level implements ChunkManager, Metadatable{
 			return;
 		} 
 		$index = self::chunkHash($x, $z);
-		if(isset($this->chunkSendTasks[$index])){
-
-			if(ADVANCED_CACHE == true){
-				Cache::add("world:" . $this->getId() . ":" . $index, $payload, 60);
+		if (isset($this->chunkSendTasks[$index])) {
+			if (ADVANCED_CACHE == true) {
+				$cacheId = "world:" . $this->getId() . ":{$index}";
+				if (($cache = Cache::get($cacheId)) !== false) {
+					$payload = array_merge($cache, $payload);
+				}
+				Cache::add($cacheId, $payload, 60);
 			}
-			foreach($this->chunkSendQueue[$index] as $player){
+			foreach ($this->chunkSendQueue[$index] as $player) {
 				/** @var Player $player */
-				if($player->isConnected() and isset($player->usedChunks[$index])){
-					$player->sendChunk($x, $z, $payload);
-					
+				$playerIndex = $player->getPlayerProtocol() . ":" . $player->getSubClientId();
+				if ($player->isConnected() && isset($player->usedChunks[$index]) && isset($payload[$playerIndex])) {
+					$player->sendChunk($x, $z, $payload[$playerIndex]);
 				}
 			}
 			unset($this->chunkSendQueue[$index]);
@@ -2638,11 +2649,22 @@ class Level implements ChunkManager, Metadatable{
 	public function updateChunk($x, $z) {
 		$index = self::chunkHash($x, $z);
 		$this->chunkSendTasks[$index] = true;		
-		$this->provider->requestChunkTask($x, $z);
 		$this->chunkSendQueue[$index] = [];
+		
+		$protocols = [];
+		$subClientsId = [];
 		foreach ($this->getUsingChunk($x, $z) as $player) {
 			$this->chunkSendQueue[$index][spl_object_hash($player)] = $player;
+			$protocol = $player->getPlayerProtocol();
+			if (!isset($protocols[$protocol])) {
+				$protocols[$protocol] = $protocol;
+			}
+			$subClientId = $player->getSubClientId();
+			if (!isset($subClientsId[$subClientId])) {
+				$subClientsId[$subClientId] = $subClientId;
+			}
 		}
+		$this->provider->requestChunkTask($x, $z, $protocols, $subClientsId);
 	}
 	
 	public function getYMask() {
