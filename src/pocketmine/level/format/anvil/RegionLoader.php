@@ -34,12 +34,15 @@ use pocketmine\utils\Binary;
 use pocketmine\utils\MainLogger;
 
 class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
+	
+	protected $chunkClass = Chunk::class;
+	protected $regionExtension = "mca";
 
 	public function __construct(LevelProvider $level, $regionX, $regionZ){
 		$this->x = $regionX;
 		$this->z = $regionZ;
 		$this->levelProvider = $level;
-		$this->filePath = $this->levelProvider->getPath() . "region/r.$regionX.$regionZ.mca";
+		$this->filePath = $this->levelProvider->getPath() . "region/r.$regionX.$regionZ." . $this->regionExtension;
 		$exists = file_exists($this->filePath);
 		touch($this->filePath);
 		$this->filePointer = fopen($this->filePath, "r+b");
@@ -92,8 +95,8 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 			return null;
 		}
 
-		$chunk = Chunk::fromBinary(fread($this->filePointer, $length - 1), $this->levelProvider);
-		if($chunk instanceof Chunk){
+		$chunk = $this->chunkClass::fromBinary(fread($this->filePointer, $length - 1), $this->levelProvider);
+		if($chunk instanceof $this->chunkClass){
 			return $chunk;
 		}else{
 			return null;

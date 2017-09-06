@@ -34,6 +34,8 @@ use pocketmine\tile\Spawnable;
 use pocketmine\utils\ChunkException;
 
 class McRegion extends BaseLevelProvider{
+	
+	const REGION_FILE_EXTENSION = "mcr";
 
 	/** @var RegionLoader[] */
 	protected $regions = [];
@@ -45,27 +47,23 @@ class McRegion extends BaseLevelProvider{
 		return "mcregion";
 	}
 
-	public static function getProviderOrder(){
-		return self::ORDER_ZXY;
-	}
-
 	public static function usesChunkSection(){
 		return false;
 	}
-
-	public static function isValid($path){
+	
+	public static function isValid($path) {
 		$isValid = (file_exists($path . "/level.dat") and is_dir($path . "/region/"));
-
 		if($isValid){
-			$files = glob($path . "/region/*.mc*");
+			$files = array_filter(scandir($path . "/region/", SCANDIR_SORT_NONE), function($file){
+				return substr($file, strrpos($file, ".") + 1, 2) === "mc"; //region file
+			});
 			foreach($files as $f){
-				if(strpos($f, ".mca") !== false){ //Anvil
+				if(substr($f, strrpos($f, ".") + 1) !== static::REGION_FILE_EXTENSION){
 					$isValid = false;
 					break;
 				}
 			}
 		}
-
 		return $isValid;
 	}
 
