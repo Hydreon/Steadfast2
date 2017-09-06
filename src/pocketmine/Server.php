@@ -1856,24 +1856,48 @@ class Server{
 	public function batchPackets(array $players, array $packets, $forceSync = true){
 		$targets = [];
 		$neededProtocol = [];
-		foreach($players as $p){
-			$targets[] = array($p->getIdentifier(), $p->getPlayerProtocol());
-			$neededProtocol[$p->getPlayerProtocol()] = $p->getPlayerProtocol();
+		$neededSubClientsId = [];
+		foreach ($players as $p) {
+			$protocol = $p->getPlayerProtocol();
+			$subClientId = $p->getSubClientId();
+			$playerIdentifier = $p->getIdentifier();
+			if ($subClientId > 0 && ($parent = $p->getParent()) !== null) {
+				$playerIdentifier = $parent->getIdentifier();
+			}
+			$targets[$playerIdentifier] = [ $playerIdentifier, $protocol ];
+			$neededProtocol[$protocol] = $protocol;
+			$neededSubClientsId[$subClientId] = $subClientId;
 		}
-		$newPackets = array();
-		foreach($packets as $p){
+		$nonSubClientPacket = [
+			'pocketmine\network\protocol\AddPlayerPacket',
+		];
+		$protocolsCount = count($neededProtocol);
+		$newPackets = [];
+		foreach ($packets as $p) {
 			foreach ($neededProtocol as $protocol) {
-				if($p instanceof DataPacket){
-					if(!$p->isEncoded || count($neededProtocol) > 1){					
-						$p->encode($protocol);
+				if ($p instanceof DataPacket) {
+					if ($protocol >= Info::PROTOCOL_120) {
+						foreach ($neededSubClientsId as $subClientId) {
+							if ($subClientId > 0 && in_array(get_class($p), $nonSubClientPacket)) {
+								continue;
+							}
+							$p->senderSubClientId = $subClientId;
+							$p->encode($protocol);
+							$newPackets[$protocol][] = $p->buffer;
+						}
+					} else {
+						if (!$p->isEncoded || $protocolsCount > 1) {
+							$p->senderSubClientId = 0;
+							$p->encode($protocol);
+						}
+						$newPackets[$protocol][] = $p->buffer;
 					}
-					$newPackets[$protocol][] = $p->buffer;
-				}elseif (count($neededProtocol) == 1) {
+				} elseif ($protocolsCount == 1) {
 					$newPackets[$protocol][] = $p;
 				}
 			}
 		}
-		$data = array();
+		$data = [];
 		$data['packets'] = $newPackets;
 		$data['targets'] = $targets;
 		$data['networkCompressionLevel'] = $this->networkCompressionLevel;
