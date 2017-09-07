@@ -34,6 +34,7 @@ class RemoveBlockPacket extends PEPacket{
 	public $z;
 
 	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
 		$this->x = $this->getSignedVarInt();
 		$this->y = $this->getVarInt();
 		$this->z = $this->getSignedVarInt();

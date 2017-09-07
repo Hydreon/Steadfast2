@@ -92,8 +92,13 @@ class ChunkMaker extends Worker {
 					$chunkData .= str_repeat("\x00", 10240);
 					$chunkData120 .= str_repeat("\x00", 6144);
 				} else {
-					$blockData = $this->sortData($sections['blocks']) . $this->sortHalfData($sections['data']);
-					$lightData = $this->sortHalfData($sections['skyLight']) . $this->sortHalfData($sections['blockLight']);
+					if (isset($data['isSorted']) && $data['isSorted'] == true) {
+						$blockData = $sections['blocks'] . $sections['data'];
+						$lightData = $sections['skyLight'] . $sections['blockLight'];
+					} else {
+						$blockData = $this->sortData($sections['blocks']) . $this->sortHalfData($sections['data']);
+						$lightData = $this->sortHalfData($sections['skyLight']) . $this->sortHalfData($sections['blockLight']);
+					}
 					$chunkData .= $blockData . $lightData;
 					$chunkData120 .= $blockData;
 				}
@@ -148,17 +153,32 @@ class ChunkMaker extends Worker {
 		$result = array();
 		$result['chunkX'] = $data['chunkX'];
 		$result['chunkZ'] = $data['chunkZ'];
-		foreach (self::SUPPORTED_PROTOCOL as $protocol) {
+		$protocols = isset($data['protocols']) ? $data['protocols'] : self::SUPPORTED_PROTOCOL;
+		$subClientsId = isset($data['subClientsId']) ? $data['subClientsId'] : [ 0 ];
+		foreach ($protocols as $protocol) {
 			$pk = new FullChunkDataPacket();
 			$pk->chunkX = $data['chunkX'];
 			$pk->chunkZ = $data['chunkZ'];
 			$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
-			$pk->data = $protocol >= Info::PROTOCOL_120 ? $chunkData120 : $chunkData;
-			$pk->encode($protocol);
-			if(!empty($pk->buffer)) {				
-				$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
-				$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
-				$result[$protocol] = $ordered;
+			if ($protocol >= Info::PROTOCOL_120) {
+				$pk->data = $chunkData120;
+				foreach ($subClientsId as $subClientId) {
+					$pk->senderSubClientID = $subClientId;
+					$pk->encode($protocol);
+					if(!empty($pk->buffer)) {
+						$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
+						$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
+						$result[$protocol . ":{$subClientId}"] = $ordered;
+					}
+				}
+			} else {
+				$pk->data = $chunkData;
+				$pk->encode($protocol);
+				if(!empty($pk->buffer)) {
+					$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
+					$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
+					$result[$protocol . ":0"] = $ordered;
+				}
 			}
 		}
 		$this->externalQueue[] = serialize($result);

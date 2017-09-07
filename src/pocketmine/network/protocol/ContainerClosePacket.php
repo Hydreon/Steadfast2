@@ -31,6 +31,7 @@ class ContainerClosePacket extends PEPacket{
 	public $windowid;
 
 	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
 		$this->windowid = $this->getByte();
 	}
 

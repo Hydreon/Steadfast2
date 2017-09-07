@@ -26,9 +26,6 @@ use pocketmine\math\Vector3;
 
 interface LevelProvider{
 
-	const ORDER_YZX = 0;
-	const ORDER_ZXY = 1;
-
 	/**
 	 * @param Level  $level
 	 * @param string $path
@@ -43,11 +40,6 @@ interface LevelProvider{
 	public static function getProviderName();
 
 	/**
-	 * @return int
-	 */
-	public static function getProviderOrder();
-
-	/**
 	 * @return bool
 	 */
 	public static function usesChunkSection();
@@ -60,7 +52,7 @@ interface LevelProvider{
 	 *
 	 * @return \pocketmine\scheduler\AsyncTask|null
 	 */
-	public function requestChunkTask($x, $z);
+	public function requestChunkTask($x, $z, $protocols, $subClientsId);
 
 	/** @return string */
 	public function getPath();

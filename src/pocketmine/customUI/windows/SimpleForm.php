@@ -4,6 +4,7 @@ namespace pocketmine\customUI\windows;
 
 use pocketmine\customUI\CustomUI;
 use pocketmine\customUI\elements\simpleForm\Button;
+use pocketmine\Player;
 
 class SimpleForm implements CustomUI {
 	
@@ -68,9 +69,9 @@ class SimpleForm implements CustomUI {
 	/**
 	 * 
 	 * 
-	 * @param type $response Button index
-	 * @param type $player
-	 * @throws Exception
+	 * @param int $response Button index
+	 * @param Player $player
+	 * @throws \Exception
 	 */
 	final public function handle($response, $player) {
 		if (isset($this->buttons[$response])) {

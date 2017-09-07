@@ -48,6 +48,7 @@ class InventoryTransactionPacket extends PEPacket {
 	public $entityId;
 
 	public function decode($playerProtocol) {
+		$this->getHeader($playerProtocol);
 		$this->transactionType = $this->getVarInt();
 		$this->transactions = $this->getTransactions($playerProtocol);
 		$this->getComplexTransactions($playerProtocol);

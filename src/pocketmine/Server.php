@@ -58,6 +58,7 @@ use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\level\format\anvil\Anvil;
+use pocketmine\level\format\pmanvil\PMAnvil;
 use pocketmine\level\format\LevelProviderManager;
 use pocketmine\level\format\mcregion\McRegion;
 use pocketmine\level\Level;
@@ -1672,6 +1673,7 @@ class Server{
 		$this->enablePlugins(PluginLoadOrder::STARTUP);
 
 		LevelProviderManager::addProvider($this, Anvil::class);
+		LevelProviderManager::addProvider($this, PMAnvil::class);
 		LevelProviderManager::addProvider($this, McRegion::class);
 		
 		foreach((array) $this->getProperty("worlds", []) as $name => $worldSetting){
@@ -1854,24 +1856,42 @@ class Server{
 	public function batchPackets(array $players, array $packets, $forceSync = true){
 		$targets = [];
 		$neededProtocol = [];
-		foreach($players as $p){
-			$targets[] = array($p->getIdentifier(), $p->getPlayerProtocol());
-			$neededProtocol[$p->getPlayerProtocol()] = $p->getPlayerProtocol();
+		$neededSubClientsId = [];
+		foreach ($players as $p) {
+			$protocol = $p->getPlayerProtocol();
+			$subClientId = $p->getSubClientId();
+			$playerIdentifier = $p->getIdentifier();
+			if ($subClientId > 0 && ($parent = $p->getParent()) !== null) {
+				$playerIdentifier = $parent->getIdentifier();
+			}
+			$targets[$playerIdentifier] = [ $playerIdentifier, $protocol ];
+			$neededProtocol[$protocol] = $protocol;
+			$neededSubClientsId[$subClientId] = $subClientId;
 		}
-		$newPackets = array();
-		foreach($packets as $p){
+		$protocolsCount = count($neededProtocol);
+		$newPackets = [];
+		foreach ($packets as $p) {
 			foreach ($neededProtocol as $protocol) {
-				if($p instanceof DataPacket){
-					if(!$p->isEncoded || count($neededProtocol) > 1){					
-						$p->encode($protocol);
+				if ($p instanceof DataPacket) {
+					if ($protocol >= Info::PROTOCOL_120) {
+						foreach ($neededSubClientsId as $subClientId) {
+							$p->senderSubClientID = $subClientId;
+							$p->encode($protocol);
+							$newPackets[$protocol][] = $p->buffer;
+						}
+					} else {
+						if (!$p->isEncoded || $protocolsCount > 1) {
+							$p->senderSubClientID = 0;
+							$p->encode($protocol);
+						}
+						$newPackets[$protocol][] = $p->buffer;
 					}
-					$newPackets[$protocol][] = $p->buffer;
-				}elseif (count($neededProtocol) == 1) {
+				} elseif ($protocolsCount == 1) {
 					$newPackets[$protocol][] = $p;
 				}
 			}
 		}
-		$data = array();
+		$data = [];
 		$data['packets'] = $newPackets;
 		$data['targets'] = $targets;
 		$data['networkCompressionLevel'] = $this->networkCompressionLevel;
@@ -2268,7 +2288,7 @@ class Server{
 		foreach ($players as $p){
 			$protocol = $p->getPlayerProtocol();
 			if (!isset($readyPackets[$protocol])) {
-				$pk->encode($protocol);
+				$pk->encode($protocol, $p->getSubClientId());
 				$batch = new BatchPacket();
 				$batch->payload = zlib_encode(Binary::writeVarInt(strlen($pk->getBuffer())) . $pk->getBuffer(), ZLIB_ENCODING_DEFLATE, 7);
 				$readyPackets[$protocol] = $batch;
@@ -2304,7 +2324,7 @@ class Server{
 			foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
 				$pk->addFurnaceRecipe($recipe);
 			}
-			$pk->encode($p->getPlayerProtocol());
+			$pk->encode($p->getPlayerProtocol(), $p->getSubClientId());
 			$pk->isEncoded = true;
 			$this->craftList[$p->getPlayerProtocol()] = $pk;
 		}

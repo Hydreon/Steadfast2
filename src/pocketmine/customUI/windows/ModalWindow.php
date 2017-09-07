@@ -3,6 +3,7 @@
 namespace pocketmine\customUI\windows;
 
 use pocketmine\customUI\CustomUI;
+use pocketmine\Player;
 
 abstract class ModalWindow implements CustomUI {
 	

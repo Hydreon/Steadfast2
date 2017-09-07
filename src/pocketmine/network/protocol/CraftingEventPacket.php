@@ -41,6 +41,7 @@ class CraftingEventPacket extends PEPacket{
 	}
 
 	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
 		$this->windowId = $this->getByte();
 		$this->type = $this->getSignedVarInt();
 		$this->id = $this->getUUID();

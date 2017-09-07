@@ -200,7 +200,7 @@ class SimpleTransactionGroup implements TransactionGroup {
 				if ($oldTargetItem->getId() != Item::AIR) {
 					$oldTargetItem->count += $newTargetItem->count;
 				} else {
-					$oldTargetItem = $newSourceItem;
+					$oldTargetItem = $newTargetItem;
 				}
 				return new BaseTransaction($sourceTr->getInventory(), $sourceTr->getSlot(), $oldSourceItem, $oldTargetItem);
 			}

@@ -37,7 +37,7 @@ class Chest extends Transparent{
 
 	protected $id = self::CHEST;
 
-	public function __construct($meta = 0){
+	public function __construct($meta = 2){
 		$this->meta = $meta;
 	}
 

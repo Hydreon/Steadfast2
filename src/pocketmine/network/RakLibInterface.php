@@ -240,8 +240,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
 		if(isset($this->identifiers[$player])){			
 			$protocol = $player->getPlayerProtocol();
-//			var_dump("Send: 0x" . ($packet::NETWORK_ID < 16 ? '0' . dechex($packet::NETWORK_ID) : dechex($packet::NETWORK_ID)));
 			$packet->encode($protocol);
+//			var_dump("Send: 0x" . ($packet::NETWORK_ID < 16 ? '0' . dechex($packet::NETWORK_ID) : dechex($packet::NETWORK_ID)));
 			if(!($packet instanceof BatchPacket) && strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
 				$this->server->batchPackets([$player], [$packet], true);
 				return null;
@@ -287,9 +287,6 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			return null;
 		}
 		$offset = 1;
-		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$offset = 3;
-		}
 		$data->setBuffer($buffer, $offset);
 		return $data;
 	}

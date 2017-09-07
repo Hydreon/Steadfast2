@@ -56,6 +56,7 @@ class MovePlayerPacket extends PEPacket{
 	}
 
 	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
 		$this->eid = $this->getVarInt();
 		
 		$this->x = $this->getLFloat();

@@ -36,6 +36,7 @@ class PlayerActionPacket extends PEPacket{
 	public $face;
 
 	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
 		$this->eid = $this->getVarInt();
 		$this->action = $this->getSignedVarInt();
 		$this->x = $this->getSignedVarInt();

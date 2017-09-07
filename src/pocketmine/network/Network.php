@@ -95,10 +95,12 @@ use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\v120\CommandRequestPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
-use pocketmine\network\protocol\v120\PlayerHotbarPacket;
+use pocketmine\network\protocol\v120\LoginPacket as NewLoginPacket;
 use pocketmine\network\protocol\v120\ModalFormResponsePacket;
+use pocketmine\network\protocol\v120\PlayerHotbarPacket;
 use pocketmine\network\protocol\v120\PurchaseReceiptPacket;
 use pocketmine\network\protocol\v120\ServerSettingsRequestPacket;
+use pocketmine\network\protocol\v120\SubClientLoginPacket;
 
 class Network {
 
@@ -555,7 +557,6 @@ class Network {
 	
 	private function registerPackets120() {
 		$this->packetPool120 = new \SplFixedArray(256);
-		$this->registerPacket120(ProtocolInfo120::LOGIN_PACKET, LoginPacket::class);
 		$this->registerPacket120(ProtocolInfo120::PLAY_STATUS_PACKET, PlayStatusPacket::class);
 		$this->registerPacket120(ProtocolInfo120::DISCONNECT_PACKET, DisconnectPacket::class);
 		$this->registerPacket120(ProtocolInfo120::TEXT_PACKET, TextPacket::class);
@@ -606,6 +607,7 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACKS_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
 		// new
+		$this->registerPacket120(ProtocolInfo120::LOGIN_PACKET, NewLoginPacket::class);
 		$this->registerPacket120(ProtocolInfo120::INVENTORY_TRANSACTION_PACKET, InventoryTransactionPacket::class);
 		$this->registerPacket120(ProtocolInfo120::INVENTORY_CONTENT_PACKET, InventoryContentPacket::class);
 		$this->registerPacket120(ProtocolInfo120::PLAYER_HOTBAR_PACKET, PlayerHotbarPacket::class);
@@ -614,5 +616,6 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::MODAL_FORM_RESPONSE_PACKET, ModalFormResponsePacket::class);
 		$this->registerPacket120(ProtocolInfo120::SERVER_SETTINGS_REQUEST_PACKET, ServerSettingsRequestPacket::class);
 		$this->registerPacket120(ProtocolInfo120::PURCHASE_RECEIPT_PACKET, PurchaseReceiptPacket::class);
+		$this->registerPacket120(ProtocolInfo120::SUB_CLIENT_LOGIN_PACKET, SubClientLoginPacket::class);
 	}
 }

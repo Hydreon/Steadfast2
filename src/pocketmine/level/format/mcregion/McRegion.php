@@ -34,6 +34,8 @@ use pocketmine\tile\Spawnable;
 use pocketmine\utils\ChunkException;
 
 class McRegion extends BaseLevelProvider{
+	
+	const REGION_FILE_EXTENSION = "mcr";
 
 	/** @var RegionLoader[] */
 	protected $regions = [];
@@ -45,27 +47,23 @@ class McRegion extends BaseLevelProvider{
 		return "mcregion";
 	}
 
-	public static function getProviderOrder(){
-		return self::ORDER_ZXY;
-	}
-
 	public static function usesChunkSection(){
 		return false;
 	}
-
-	public static function isValid($path){
+	
+	public static function isValid($path) {
 		$isValid = (file_exists($path . "/level.dat") and is_dir($path . "/region/"));
-
 		if($isValid){
-			$files = glob($path . "/region/*.mc*");
+			$files = array_filter(scandir($path . "/region/", SCANDIR_SORT_NONE), function($file){
+				return substr($file, strrpos($file, ".") + 1, 2) === "mc"; //region file
+			});
 			foreach($files as $f){
-				if(strpos($f, ".mca") !== false){ //Anvil
+				if(substr($f, strrpos($f, ".") + 1) !== static::REGION_FILE_EXTENSION){
 					$isValid = false;
 					break;
 				}
 			}
 		}
-
 		return $isValid;
 	}
 
@@ -110,7 +108,7 @@ class McRegion extends BaseLevelProvider{
 		$z = $chunkZ >> 5;
 	}	
 	
-	public function requestChunkTask($x, $z){	
+	public function requestChunkTask($x, $z, $protocols, $subClientsId) {
 		$chunk = $this->getChunk($x, $z, false);
 		if(!($chunk instanceof Chunk)){
 			throw new ChunkException("Invalid Chunk sent");
@@ -128,13 +126,15 @@ class McRegion extends BaseLevelProvider{
 		$data = array();
 		$data['chunkX'] = $x;
 		$data['chunkZ'] = $z;
+		$data['protocols'] = $protocols;
+		$data['subClientsId'] = $subClientsId;
 		$data['tiles'] = $tiles;
 		$data['blocks'] = $chunk->getBlockIdArray();
 		$data['data'] = $chunk->getBlockDataArray();
 		$data['blockLight'] = $chunk->getBlockLightArray();
 		$data['skyLight'] = $chunk->getBlockSkyLightArray();
-		$data['heightMap'] = pack("C*", ...$chunk->getHeightMapArray());
-		$data['biomeColor'] = pack("n*", ...$chunk->getBiomeColorArray());
+		$data['heightMap'] = pack("v*", ...$chunk->getHeightMapArray());
+		$data['biomeColor'] = $this->convertBiomeColors($chunk->getBiomeColorArray());
 		$this->getLevel()->chunkMaker->pushMainToThreadPacket(serialize($data));
 		return null;
 	}
@@ -316,5 +316,13 @@ class McRegion extends BaseLevelProvider{
 	
 	public static function getYMask() {
 		return 0x7f;
+	}
+	
+	public function convertBiomeColors($array){
+		$result = str_repeat("\x00", 256);
+		foreach($array as $i => $color){
+			$result{$i} = chr(($color >> 24) & 0xff);
+		}
+		return $result;
 	}
 }

@@ -40,12 +40,14 @@ class DisconnectPacket extends PEPacket {
 		}
 		$this->offset = 0;
 		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->buffer .= "\x00\x00";
+			$this->putByte($this->senderSubClientID);
+			$this->putByte($this->targetSubClientID);
 			$this->offset = 2;
 		}
 	}
 	
 	public function decode($playerProtocol) {
+		$this->getHeader($playerProtocol);
 		$this->hideDisconnectReason = $this->getByte();
 		if ($this->hideDisconnectReason == false) {
 			$this->message = $this->getString();

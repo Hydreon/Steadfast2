@@ -27,6 +27,7 @@ class LevelSoundEventPacket extends PEPacket {
 	public $global = 0;
 
 	public function decode($playerProtocol) {
+		$this->getHeader($playerProtocol);
 		$this->eventId = $this->getByte();
 		$this->x = $this->getLFloat();
 		$this->y = $this->getLFloat();
