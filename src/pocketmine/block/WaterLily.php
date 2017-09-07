@@ -52,15 +52,22 @@ class WaterLily extends Flowable{
 	public function canPassThrough(){
 		return true;
 	}
+	
+	public function getBoundingBox(){
+		if($this->boundingBox === null){
+			$this->boundingBox = $this->recalculateBoundingBox();
+		}
+		return $this->boundingBox;
+	}
 
 	protected function recalculateBoundingBox(){
 		return new AxisAlignedBB(
 			$this->x,
 			$this->y,
 			$this->z,
-			$this->x,
-			$this->y + 0.0625,
-			$this->z
+			$this->x + 1,
+			$this->y + 1,
+			$this->z + 1
 		);
 	}
 

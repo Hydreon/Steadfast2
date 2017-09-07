@@ -24,35 +24,41 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class MoveEntityPacket extends DataPacket{
+class MoveEntityPacket extends PEPacket{
 	const NETWORK_ID = Info::MOVE_ENTITY_PACKET;
+	const PACKET_NAME = "MOVE_ENTITY_PACKET";
 
 
 	// eid, x, y, z, yaw, pitch
 	/** @var array[] */
 	public $entities = [];
+	
+	public function __construct() {
+		parent::__construct("", 0);
+	}
 
 	public function clean(){
 		$this->entities = [];
 		return parent::clean();
 	}
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putInt(count($this->entities));
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		foreach($this->entities as $d){
-			$this->putLong($d[0]); //eid
-			$this->putFloat($d[1]); //x
-			$this->putFloat($d[2]); //y
-			$this->putFloat($d[3]); //z
-			$this->putFloat($d[4]); //yaw
-			$this->putFloat($d[5]); //headYaw
-			$this->putFloat($d[6]); //pitch
+			$this->putVarInt($d[0]); //eid
+			$this->putLFloat($d[1]); //x
+			$this->putLFloat($d[2]); //y
+			$this->putLFloat($d[3]); //z
+			$this->putByte($d[6] * 0.71111); //pitch
+			$this->putByte($d[5] * 0.71111); //headYaw
+			$this->putByte($d[4] * 0.71111); //yaw
+			/** @todo do it right */
+			$this->putByte(true); // is on ground?
+			$this->putByte(false); // has teleported?
 		}
 	}
-
 }

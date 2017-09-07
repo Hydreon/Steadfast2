@@ -28,20 +28,21 @@ use pocketmine\utils\Binary;
 
 #endif
 
-class SetEntityDataPacket extends DataPacket{
+class SetEntityDataPacket extends PEPacket{
 	const NETWORK_ID = Info::SET_ENTITY_DATA_PACKET;
+	const PACKET_NAME = "SET_ENTITY_DATA_PACKET";
 
 	public $eid;
 	public $metadata;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putLong($this->eid);
-		$meta = Binary::writeMetadata($this->metadata);
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
+		$this->putVarInt($this->eid);
+		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
 	}
 

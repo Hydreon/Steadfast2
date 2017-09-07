@@ -28,8 +28,9 @@ use pocketmine\utils\Binary;
 
 #endif
 
-class AddEntityPacket extends DataPacket{
+class AddEntityPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_ENTITY_PACKET;
+	const PACKET_NAME = "ADD_ENTITY_PACKET";
 
 	public $eid;
 	public $type;
@@ -41,33 +42,43 @@ class AddEntityPacket extends DataPacket{
 	public $speedZ;
 	public $yaw;
 	public $pitch;
-	public $metadata;
+	public $metadata = [];
 	public $links = [];
+	public $attributes = [];
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putLong($this->eid);
-		$this->putInt($this->type);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putFloat($this->speedX);
-		$this->putFloat($this->speedY);
-		$this->putFloat($this->speedZ);
-		$this->putFloat($this->yaw);
-		$this->putFloat($this->pitch);
-		$meta = Binary::writeMetadata($this->metadata);
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);		
+		$this->putVarInt($this->eid);
+		$this->putVarInt($this->eid);
+		$this->putVarInt($this->type);
+		$this->putLFloat($this->x);
+		$this->putLFloat($this->y);
+		$this->putLFloat($this->z);
+		$this->putLFloat($this->speedX);
+		$this->putLFloat($this->speedY);
+		$this->putLFloat($this->speedZ);
+		$this->putLFloat($this->pitch);
+		$this->putLFloat($this->yaw);
+		$this->putVarInt(count($this->attributes));
+		foreach ($this->attributes as $attribute) {
+			$this->putString($attribute['name']);
+			$this->putLFloat($attribute['min']);
+			$this->putLFloat($attribute['default']);
+			$this->putLFloat($attribute['max']);			
+		}
+		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
-		$this->putShort(count($this->links));
-		foreach($this->links as $link){
-			$this->putLong($link[0]);
-			$this->putLong($link[1]);
-			$this->putByte($link[2]);
+
+		$this->putVarInt(count($this->links));
+		foreach ($this->links as $link) {
+			$this->putVarInt($link['from']);
+			$this->putVarInt($link['to']);
+			$this->putByte($link['type']);
+			$this->putByte(0);
 		}
 	}
-
 }

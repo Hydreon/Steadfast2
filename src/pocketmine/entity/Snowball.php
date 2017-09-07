@@ -47,7 +47,7 @@ class Snowball extends Projectile{
 			return false;
 		}
 
-		$this->timings->startTiming();
+		//$this->timings->startTiming();
 
 		$hasUpdate = parent::onUpdate($currentTick);
 
@@ -56,7 +56,7 @@ class Snowball extends Projectile{
 			$hasUpdate = true;
 		}
 
-		$this->timings->stopTiming();
+		//$this->timings->stopTiming();
 
 		return $hasUpdate;
 	}
@@ -71,7 +71,7 @@ class Snowball extends Projectile{
 		$pk->speedX = $this->motionX;
 		$pk->speedY = $this->motionY;
 		$pk->speedZ = $this->motionZ;
-		$pk->metadata = $this->dataProperties;
+//		$pk->metadata = $this->dataProperties;
 		$player->dataPacket($pk);
 
 		parent::spawnTo($player);

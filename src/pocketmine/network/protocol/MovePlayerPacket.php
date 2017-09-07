@@ -24,12 +24,21 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class MovePlayerPacket extends DataPacket{
+class MovePlayerPacket extends PEPacket{
 	const NETWORK_ID = Info::MOVE_PLAYER_PACKET;
+	const PACKET_NAME = "MOVE_PLAYER_PACKET";
 
 	const MODE_NORMAL = 0;
 	const MODE_RESET = 1;
-	const MODE_ROTATION = 2;
+	const MODE_TELEPORT = 2;
+	const MODE_ROTATION = 3;
+	
+	const TELEPORTATION_CAUSE_UNKNOWN = 0;
+	const TELEPORTATION_CAUSE_PROJECTILE = 1;
+	const TELEPORTATION_CAUSE_CHORUS_FRUIT = 2;
+	const TELEPORTATION_CAUSE_COMMAND = 3;
+	const TELEPORTATION_CAUSE_BEHAVIOR = 4;
+	const TELEPORTATION_CAUSE_COUNT = 5; // ???
 
 	public $eid;
 	public $x;
@@ -46,29 +55,42 @@ class MovePlayerPacket extends DataPacket{
 		return parent::clean();
 	}
 
-	public function decode(){
-		$this->eid = $this->getLong();
-		$this->x = $this->getFloat();
-		$this->y = $this->getFloat();
-		$this->z = $this->getFloat();
-		$this->yaw = $this->getFloat();
-		$this->bodyYaw = $this->getFloat();
-		$this->pitch = $this->getFloat();
+	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
+		$this->eid = $this->getVarInt();
+		
+		$this->x = $this->getLFloat();
+		$this->y = $this->getLFloat();
+		$this->z = $this->getLFloat();
+		
+		$this->pitch = $this->getLFloat();
+		$this->yaw = $this->getLFloat();
+		
+		$this->bodyYaw = $this->getLFloat();
 		$this->mode = $this->getByte();
 		$this->onGround = $this->getByte() > 0;
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putLong($this->eid);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putFloat($this->yaw);
-		$this->putFloat($this->bodyYaw); //TODO
-		$this->putFloat($this->pitch);
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
+		$this->putVarInt($this->eid);
+		
+		$this->putLFloat($this->x);
+		$this->putLFloat($this->y);
+		$this->putLFloat($this->z);
+		
+		$this->putLFloat($this->pitch);
+		$this->putLFloat($this->yaw);
+		
+		$this->putLFloat($this->bodyYaw);
 		$this->putByte($this->mode);
 		$this->putByte($this->onGround > 0);
+		/** @todo do it right */
+		$this->putVarInt(0); // riding runtime ID
+		if (self::MODE_TELEPORT == $this->mode) {
+			$this->putInt(self::TELEPORTATION_CAUSE_UNKNOWN);
+			$this->putInt(1);
+		}
 	}
 
 }

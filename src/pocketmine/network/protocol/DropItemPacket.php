@@ -24,18 +24,20 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class DropItemPacket extends DataPacket{
+class DropItemPacket extends PEPacket{
 	const NETWORK_ID = Info::DROP_ITEM_PACKET;
+	const PACKET_NAME = "DROP_ITEM_PACKET";
 
 	public $type;
 	public $item;
 
-	public function decode(){
+	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
 		$this->type = $this->getByte();
-		$this->item = $this->getSlot();
+		$this->item = $this->getSlot($playerProtocol);
 	}
 
-	public function encode(){
+	public function encode($playerProtocol){
 
 	}
 

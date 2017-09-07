@@ -26,10 +26,12 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\ExplosionPrimeEvent;
 use pocketmine\level\Explosion;
-use pocketmine\nbt\tag\Byte;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
+use pocketmine\network\protocol\SetEntityDataPacket;
+use pocketmine\Server;
 
 class PrimedTNT extends Entity implements Explosive{
 	const NETWORK_ID = 65;
@@ -44,6 +46,8 @@ class PrimedTNT extends Entity implements Explosive{
 	protected $fuse;
 
 	public $canCollide = false;
+
+	protected $owner = null;
 
 
 	public function attack($damage, EntityDamageEvent $source){
@@ -67,7 +71,7 @@ class PrimedTNT extends Entity implements Explosive{
 
 	public function saveNBT(){
 		parent::saveNBT();
-		$this->namedtag->Fuse = new Byte("Fuse", $this->fuse);
+		$this->namedtag->Fuse = new ByteTag("Fuse", $this->fuse);
 	}
 
 	public function onUpdate($currentTick){
@@ -76,7 +80,7 @@ class PrimedTNT extends Entity implements Explosive{
 			return false;
 		}
 
-		$this->timings->startTiming();
+		//$this->timings->startTiming();
 
 		$tickDiff = max(1, $currentTick - $this->lastUpdate);
 		$this->lastUpdate = $currentTick;
@@ -87,7 +91,7 @@ class PrimedTNT extends Entity implements Explosive{
 
 			$this->motionY -= $this->gravity;
 
-			$this->move($this->motionX, $this->motionY, $this->motionZ);
+			//$this->move($this->motionX, $this->motionY, $this->motionZ);
 
 			$friction = 1 - $this->drag;
 
@@ -104,7 +108,14 @@ class PrimedTNT extends Entity implements Explosive{
 			}
 
 			$this->fuse -= $tickDiff;
-
+			if ($this->fuse % 2 == 0) {
+				$time = (int) $this->fuse / 2;
+				$pk = new SetEntityDataPacket();
+				$pk->eid = $this->getId();
+				$pk->metadata = [Entity::DATA_EXPLODE_TIMER => [Entity::DATA_TYPE_INT, $time]];
+				Server::broadcastPacket($this->hasSpawned, $pk);
+			}
+			
 			if($this->fuse <= 0){
 				$this->kill();
 				$this->explode();
@@ -120,7 +131,7 @@ class PrimedTNT extends Entity implements Explosive{
 		$this->server->getPluginManager()->callEvent($ev = new ExplosionPrimeEvent($this, 4));
 
 		if(!$ev->isCancelled()){
-			$explosion = new Explosion($this, $ev->getForce(), $this);
+			$explosion = new Explosion($this, $ev->getForce(), $this->owner);
 			if($ev->isBlockBreaking()){
 				$explosion->explodeA();
 			}
@@ -138,9 +149,13 @@ class PrimedTNT extends Entity implements Explosive{
 		$pk->speedX = $this->motionX;
 		$pk->speedY = $this->motionY;
 		$pk->speedZ = $this->motionZ;
-		$pk->metadata = $this->dataProperties;
+//		$pk->metadata = $this->dataProperties;
 		$player->dataPacket($pk);
 
 		parent::spawnTo($player);
+	}
+
+	public function setOwner($owner){
+		$this->owner = $owner;
 	}
 }

@@ -30,6 +30,11 @@ use pocketmine\utils\TextFormat;
 class EffectCommand extends VanillaCommand{
 
 	public function __construct($name){
+		parent::__construct(
+			$name,
+			"Adds/Removes effects on players",
+			"commands.effect.usage=/effect <player> <effect> [seconds] [amplifier] [hideParticles] OR /effect <player> clear"
+		);
 		$this->setPermission("pocketmine.command.effect");
 	}
 

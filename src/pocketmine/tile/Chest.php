@@ -31,9 +31,9 @@ use pocketmine\nbt\NBT;
 
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Enum;
-use pocketmine\nbt\tag\Int;
+use pocketmine\nbt\tag\IntTag;
 
-use pocketmine\nbt\tag\String;
+use pocketmine\nbt\tag\StringTag;
 
 class Chest extends Spawnable implements InventoryHolder, Container, Nameable{
 
@@ -196,7 +196,7 @@ class Chest extends Spawnable implements InventoryHolder, Container, Nameable{
 			return;
 		}
 
-		$this->namedtag->CustomName = new String("CustomName", $str);
+		$this->namedtag->CustomName = new StringTag("CustomName", $str);
 	}
 
 	public function isPaired(){
@@ -236,11 +236,11 @@ class Chest extends Spawnable implements InventoryHolder, Container, Nameable{
 	}
 
 	private function createPair(Chest $tile){
-		$this->namedtag->pairx = new Int("pairx", $tile->x);
-		$this->namedtag->pairz = new Int("pairz", $tile->z);
+		$this->namedtag->pairx = new IntTag("pairx", $tile->x);
+		$this->namedtag->pairz = new IntTag("pairz", $tile->z);
 
-		$tile->namedtag->pairx = new Int("pairx", $this->x);
-		$tile->namedtag->pairz = new Int("pairz", $this->z);
+		$tile->namedtag->pairx = new IntTag("pairx", $this->x);
+		$tile->namedtag->pairz = new IntTag("pairz", $this->z);
 	}
 
 	public function unpair(){
@@ -266,19 +266,19 @@ class Chest extends Spawnable implements InventoryHolder, Container, Nameable{
 	public function getSpawnCompound(){
 		if($this->isPaired()){
 			$c = new Compound("", [
-				new String("id", Tile::CHEST),
-				new Int("x", (int) $this->x),
-				new Int("y", (int) $this->y),
-				new Int("z", (int) $this->z),
-				new Int("pairx", (int) $this->namedtag["pairx"]),
-				new Int("pairz", (int) $this->namedtag["pairz"])
+				new StringTag("id", Tile::CHEST),
+				new IntTag("x", (int) $this->x),
+				new IntTag("y", (int) $this->y),
+				new IntTag("z", (int) $this->z),
+				new IntTag("pairx", (int) $this->namedtag["pairx"]),
+				new IntTag("pairz", (int) $this->namedtag["pairz"])
 			]);
 		}else{
 			$c = new Compound("", [
-				new String("id", Tile::CHEST),
-				new Int("x", (int) $this->x),
-				new Int("y", (int) $this->y),
-				new Int("z", (int) $this->z)
+				new StringTag("id", Tile::CHEST),
+				new IntTag("x", (int) $this->x),
+				new IntTag("y", (int) $this->y),
+				new IntTag("z", (int) $this->z)
 			]);
 		}
 

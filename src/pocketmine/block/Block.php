@@ -72,16 +72,19 @@ class Block extends Position implements Metadatable{
 	const GLASS = 20;
 	const LAPIS_ORE = 21;
 	const LAPIS_BLOCK = 22;
-
+	const DISPENSER = 23;
 	const SANDSTONE = 24;
-
+	const NOTE_BLOCK = 25;
 	const BED_BLOCK = 26;
-
-
+	const POWERED_RAIL = 27;
+	const DETECTOR_RAIL = 28;
+	const STICKY_PISTON = 29;
 	const COBWEB = 30;
 	const TALL_GRASS = 31;
 	const BUSH = 32;
 	const DEAD_BUSH = 32;
+	const PISTON = 33;
+	const PISTON_HEAD = 34;
 	const WOOL = 35;
 	const DANDELION = 37;
 	const ROSE = 38;
@@ -95,6 +98,7 @@ class Block extends Position implements Metadatable{
 	const DOUBLE_SLABS = 43;
 	const SLAB = 44;
 	const SLABS = 44;
+	const STONE_SLAB = 44;
 	const BRICKS = 45;
 	const BRICKS_BLOCK = 45;
 	const TNT = 46;
@@ -110,7 +114,7 @@ class Block extends Position implements Metadatable{
 	const OAK_WOOD_STAIRS = 53;
 	const OAK_WOODEN_STAIRS = 53;
 	const CHEST = 54;
-
+	const REDSTONE_WIRE = 55;
 	const DIAMOND_ORE = 56;
 	const DIAMOND_BLOCK = 57;
 	const CRAFTING_TABLE = 58;
@@ -125,17 +129,20 @@ class Block extends Position implements Metadatable{
 	const WOODEN_DOOR_BLOCK = 64;
 	const WOOD_DOOR_BLOCK = 64;
 	const LADDER = 65;
-
+	const RAIL = 66;
 	const COBBLE_STAIRS = 67;
 	const COBBLESTONE_STAIRS = 67;
 	const WALL_SIGN = 68;
-
+	const LEVER = 69;
+	const STONE_PRESSURE_PLATE = 70;
 	const IRON_DOOR_BLOCK = 71;
-
+	const WOODEN_PRESSURE_PLATE = 72;
 	const REDSTONE_ORE = 73;
 	const GLOWING_REDSTONE_ORE = 74;
 	const LIT_REDSTONE_ORE = 74;
-
+	const REDSTONE_TORCH = 75;
+	const REDSTONE_TORCH_ACTIVE = 76;
+	const STONE_BUTTON = 77;
 	const SNOW = 78;
 	const SNOW_LAYER = 78;
 	const ICE = 79;
@@ -144,26 +151,28 @@ class Block extends Position implements Metadatable{
 	const CLAY_BLOCK = 82;
 	const REEDS = 83;
 	const SUGARCANE_BLOCK = 83;
-
 	const FENCE = 85;
 	const PUMPKIN = 86;
 	const NETHERRACK = 87;
 	const SOUL_SAND = 88;
 	const GLOWSTONE = 89;
 	const GLOWSTONE_BLOCK = 89;
-
-
+	const PORTAL = 90;
 	const LIT_PUMPKIN = 91;
 	const JACK_O_LANTERN = 91;
 	const CAKE_BLOCK = 92;
-
+	const REDSTONE_REPEATER_BLOCK = 93;
+	const REDSTONE_REPEATER_BLOCK_ACTIVE = 94;
+	const INVISIBLE_BEDROCK = 95;
 	const TRAPDOOR = 96;
 	const WOODEN_TRAPDOOR = 96;
 	const WOOD_TRAPDOOR = 96;
-
+	const MONSTER_EGG = 97;
 	const STONE_BRICKS = 98;
 	const STONE_BRICK = 98;
-
+	const STONEBRICK = 98;
+	const BROWN_MUSHROOM_BLOCK = 99;
+	const RED_MUSHROOM_BLOCK = 100;
 	const IRON_BAR = 101;
 	const IRON_BARS = 101;
 	const GLASS_PANE = 102;
@@ -181,19 +190,28 @@ class Block extends Position implements Metadatable{
 	const LILY_PAD = 111;
 	const NETHER_BRICKS = 112;
 	const NETHER_BRICK_BLOCK = 112;
-
+	const NETHER_BRICK_FENCE = 113;
 	const NETHER_BRICKS_STAIRS = 114;
-
+	const NETHER_WART_BLOCK = 115;
 	const ENCHANTING_TABLE = 116;
 	const ENCHANT_TABLE = 116;
 	const ENCHANTMENT_TABLE = 116;
-
+	const BREWING_STAND_BLOCK = 117;
+	const CAULDRON_BLOCK = 118;
+	const END_PORTAL = 119;
 	const END_PORTAL_FRAME = 120;
 	const END_STONE = 121;
-
+	const DRAGON_EGG = 122;
+	const REDSTONE_LAMP = 123;
+	const REDSTONE_LAMP_ACTIVE = 124;
+	const DROPPER = 125;
+	const ACTIVATOR_RAIL = 126;
+	const COCOA = 127;
 	const SANDSTONE_STAIRS = 128;
 	const EMERALD_ORE = 129;
-
+    const ENDER_CHEST = 130;
+	const TRIPWIRE_HOOK = 131;
+	const TRIPWIRE = 132;
 	const EMERALD_BLOCK = 133;
 	const SPRUCE_WOOD_STAIRS = 134;
 	const SPRUCE_WOODEN_STAIRS = 134;
@@ -201,18 +219,24 @@ class Block extends Position implements Metadatable{
 	const BIRCH_WOODEN_STAIRS = 135;
 	const JUNGLE_WOOD_STAIRS = 136;
 	const JUNGLE_WOODEN_STAIRS = 136;
-
 	const COBBLE_WALL = 139;
 	const STONE_WALL = 139;
 	const COBBLESTONE_WALL = 139;
-
+	const FLOWER_POT_BLOCK = 140;
 	const CARROT_BLOCK = 141;
 	const POTATO_BLOCK = 142;
-
+	const WOODEN_BUTTON = 143;
+	const MOB_HEAD_BLOCK = 144;
 	const ANVIL = 145;
-
+	const TRAPPED_CHEST = 146;
+	const WEIGHTED_PRESSURE_PLATE_LIGHT = 147;
+	const WEIGHTED_PRESSURE_PLATE_HEAVY = 148;
+	const REDSTONE_COMPARATOR_BLOCK = 149;
+	const REDSTONE_COMPARATOR_BLOCK_POWERED = 150;
+	const DAYLIGHT_SENSOR = 151;
 	const REDSTONE_BLOCK = 152;
-
+	const NETHER_QUARTZ_ORE = 153;
+	const HOPPER_BLOCK = 154;
 	const QUARTZ_BLOCK = 155;
 	const QUARTZ_STAIRS = 156;
 	const DOUBLE_WOOD_SLAB = 157;
@@ -225,7 +249,7 @@ class Block extends Position implements Metadatable{
 	const WOODEN_SLABS = 158;
 	const STAINED_CLAY = 159;
 	const STAINED_HARDENED_CLAY = 159;
-
+	const STAINED_GLASS_PANE = 160;
 	const LEAVES2 = 161;
 	const LEAVE2 = 161;
 	const WOOD2 = 162;
@@ -235,22 +259,38 @@ class Block extends Position implements Metadatable{
 	const ACACIA_WOODEN_STAIRS = 163;
 	const DARK_OAK_WOOD_STAIRS = 164;
 	const DARK_OAK_WOODEN_STAIRS = 164;
-
+	const SLIME_BLOCK = 165;
+	const IRON_TRAPDOOR = 167;
 	const HAY_BALE = 170;
 	const CARPET = 171;
 	const HARDENED_CLAY = 172;
 	const COAL_BLOCK = 173;
-
+	const PACKED_ICE = 174;
 	const DOUBLE_PLANT = 175;
-
+	const INVERTED_DAYLIGHT_SENSOR = 178;
+	const RED_SANDSTONE = 179;
+	const RED_SANDSTONE_STAIRS = 180;
+	const DOUBLE_RED_SANDSTONE_SLAB = 181;
+	const RED_SANDSTONE_SLAB = 182;
 	const FENCE_GATE_SPRUCE = 183;
 	const FENCE_GATE_BIRCH = 184;
 	const FENCE_GATE_JUNGLE = 185;
 	const FENCE_GATE_DARK_OAK = 186;
 	const FENCE_GATE_ACACIA = 187;
-
+	const SPRUCE_DOOR_BLOCK = 193;
+	const BIRCH_DOOR_BLOCK = 194;
+	const JUNGLE_DOOR_BLOCK = 195;
+	const ACACIA_DOOR_BLOCK = 196;
+	const DARK_OAK_DOOR_BLOCK = 197;
 	const GRASS_PATH = 198;
-
+	const ITEM_FRAME_BLOCK = 199;
+    const CHORUS_FLOWER = 200;
+    const PURPUR_BLOCK = 201;
+    const END_BRICKS = 206;
+    const END_ROD = 208;
+    const END_GATEWAY = 209;
+    const CHORUS_PLANT = 240;
+    const STAINED_GLASS = 241;
 	const PODZOL = 243;
 	const BEETROOT_BLOCK = 244;
 	const STONECUTTER = 245;
@@ -371,8 +411,9 @@ class Block extends Position implements Metadatable{
 			self::$list[self::BURNING_FURNACE] = BurningFurnace::class;
 			self::$list[self::SIGN_POST] = SignPost::class;
 			self::$list[self::WOOD_DOOR_BLOCK] = WoodDoor::class;
+			self::$list[self::SPRUCE_DOOR_BLOCK] = SpruceDoor::class;
 			self::$list[self::LADDER] = Ladder::class;
-
+			self::$list[self::RAIL] = Rail::class;
 			self::$list[self::COBBLESTONE_STAIRS] = CobblestoneStairs::class;
 			self::$list[self::WALL_SIGN] = WallSign::class;
 
@@ -397,6 +438,7 @@ class Block extends Position implements Metadatable{
 			self::$list[self::CAKE_BLOCK] = Cake::class;
 
 			self::$list[self::TRAPDOOR] = Trapdoor::class;
+			self::$list[self::IRON_TRAPDOOR] = IronTrapdoor::class;
 
 			self::$list[self::STONE_BRICKS] = StoneBricks::class;
 
@@ -413,6 +455,7 @@ class Block extends Position implements Metadatable{
 			self::$list[self::MYCELIUM] = Mycelium::class;
 			self::$list[self::WATER_LILY] = WaterLily::class;
 			self::$list[self::NETHER_BRICKS] = NetherBrick::class;
+			self::$list[self::NETHER_BRICK_FENCE] = NetherBrickFence::class;
 
 			self::$list[self::NETHER_BRICKS_STAIRS] = NetherBrickStairs::class;
 
@@ -466,7 +509,58 @@ class Block extends Position implements Metadatable{
 			self::$list[self::STONECUTTER] = Stonecutter::class;
 			self::$list[self::GLOWING_OBSIDIAN] = GlowingObsidian::class;
 			self::$list[self::NETHER_REACTOR] = NetherReactor::class;
+			
+			self::$list[self::SLIME_BLOCK] = SlimeBlock::class;
+			
+			self::$list[self::WOODEN_BUTTON] = WoodenButton::class;
+			self::$list[self::STONE_BUTTON] = StoneButton::class;
+			
+			self::$list[self::ACACIA_DOOR_BLOCK] = AcaciaDoor::class;
+			self::$list[self::BIRCH_DOOR_BLOCK] = BirchDoor::class;
+			self::$list[self::DARK_OAK_DOOR_BLOCK] = DarkOakDoor::class;
+			self::$list[self::JUNGLE_DOOR_BLOCK] = JungleDoor::class;
+			
+			self::$list[self::TRIPWIRE] = Tripwire::class;
+			self::$list[self::TRIPWIRE_HOOK] = TripwireHook::class;
+			
+			self::$list[self::LEVER] = Lever::class;
+			
+			self::$list[self::WOODEN_PRESSURE_PLATE] = WoodenPressurePlate::class;
+			self::$list[self::STONE_PRESSURE_PLATE] = StonePressurePlate::class;
+			
+			self::$list[self::REDSTONE_WIRE] = RedstoneWire::class;
+			self::$list[self::REDSTONE_REPEATER_BLOCK] = RedstoneRepeater::class;
+			self::$list[self::REDSTONE_REPEATER_BLOCK_ACTIVE] = RedstoneRepeaterActive::class;
+			
+			self::$list[self::POWERED_RAIL] = PoweredRail::class;
+			self::$list[self::DETECTOR_RAIL] = DetectorRail::class;
+			self::$list[self::ACTIVATOR_RAIL] = ActivatorRail::class;
+			
+			self::$list[self::WEIGHTED_PRESSURE_PLATE_HEAVY] = WeightedPressurePlateHeavy::class;
+			self::$list[self::WEIGHTED_PRESSURE_PLATE_LIGHT] = WeightedPressurePlateLight::class;
+			
+			self::$list[self::MOB_HEAD_BLOCK] = MobHead::class;
+			self::$list[self::FLOWER_POT_BLOCK] = FlowerPot::class;
+            
+			// update 1.0
+			self::$list[self::CHORUS_FLOWER] = ChorusFlower::class;
+			self::$list[self::CHORUS_PLANT] = ChorusPlant::class;
+			self::$list[self::ENDER_CHEST] = EnderChest::class;
+			self::$list[self::END_GATEWAY] = EndGateway::class;
+			self::$list[self::END_PORTAL] = EndPortal::class;
+			self::$list[self::END_BRICKS] = EndBricks::class;
+			self::$list[self::END_ROD] = EndRod::class;
+			self::$list[self::DRAGON_EGG] = DragonEgg::class;
+			self::$list[self::PURPUR_BLOCK] = PurpurBlock::class;
+			self::$list[self::STAINED_GLASS] = StainedGlass::class;
+			self::$list[self::STAINED_GLASS_PANE] = StainedGlassPane::class;
 
+			self::$list[self::REDSTONE_LAMP] = RedstoneLamp::class;
+			self::$list[self::REDSTONE_LAMP_ACTIVE] = RedstoneLampActive::class;
+			
+			self::$list[self::REDSTONE_TORCH] = RedstoneTorch::class;
+			self::$list[self::REDSTONE_TORCH_ACTIVE] = RedstoneTorchActive::class;
+            
 			foreach(self::$list as $id => $class){
 				if($class !== null){
 					/** @var Block $block */
@@ -760,47 +854,76 @@ class Block extends Position implements Metadatable{
 	/**
 	 * Returns the seconds that this block takes to be broken using an specific Item
 	 *
+	 * Not implemented:
+	 *  - enchantment effects (Efficiency)
+	 *  - status effect on player (haste, mining fatigue)
+	 *  - player not on ground, player in water
+	 * 
 	 * @param Item $item
 	 *
 	 * @return float
 	 */
-	public function getBreakTime(Item $item){
-		$base = $this->getHardness() * 1.5;
-		if($this->canBeBrokenWith($item)){
-			if($this->getToolType() === Tool::TYPE_SHEARS and $item->isShears()){
-				$base /= 15;
-			}elseif(
-				($this->getToolType() === Tool::TYPE_PICKAXE and ($tier = $item->isPickaxe()) !== false) or
-				($this->getToolType() === Tool::TYPE_AXE and ($tier = $item->isAxe()) !== false) or
-				($this->getToolType() === Tool::TYPE_SHOVEL and ($tier = $item->isShovel()) !== false)
-			){
-				switch($tier){
-					case Tool::TIER_WOODEN:
-						$base /= 2;
-						break;
-					case Tool::TIER_STONE:
-						$base /= 4;
-						break;
-					case Tool::TIER_IRON:
-						$base /= 6;
-						break;
-					case Tool::TIER_DIAMOND:
-						$base /= 8;
-						break;
-					case Tool::TIER_GOLD:
-						$base /= 12;
-						break;
+	public function getBreakTime(Item $item) {
+		static $tierMultipliers = [
+			Tool::TIER_WOODEN => 2,
+			Tool::TIER_STONE => 4,
+			Tool::TIER_IRON => 6,
+			Tool::TIER_DIAMOND => 8,
+			Tool::TIER_GOLD => 12,
+		];
+		
+		/** @docs http://minecraft.gamepedia.com/Breaking */
+		if (!$this->canBeBrokenWith($item)) {
+			return -1;
+		}
+		$toolType = $this->getToolType();
+		$isSuitableForHarvest = !empty($this->getDrops($item)) || $toolType == Tool::TYPE_NONE;
+		$secondsForBreak = $this->getHardness() * ($isSuitableForHarvest ? 1.5 : 5);
+		if ($secondsForBreak == 0) {
+			$secondsForBreak = 0.05;
+		}
+		
+		switch ($toolType) {
+			case Tool::TYPE_SWORD:
+				if ($item->isSword()) {
+					if ($this->id == self::COBWEB) {
+						$secondsForBreak = $secondsForBreak / 15;
+					}
+					return $secondsForBreak;
 				}
-			}
-		}else{
-			$base *= 3.33;
+				break;
+			case Tool::TYPE_SHEARS:
+				if ($item->isShears()) {
+					if ($this->id == self::WOOL) {
+						// line below is simplification of $baseTime = $baseTime * 1.5 / 5
+						$secondsForBreak = $secondsForBreak / 5;
+					} else {
+						$secondsForBreak = $secondsForBreak / 15;
+					}
+					return $secondsForBreak;
+				}
+				break;
+			case Tool::TYPE_SHOVEL:
+				$tier = $item->isShovel();
+				if ($tier !== false && isset($tierMultipliers[$tier])) {
+					return $secondsForBreak / $tierMultipliers[$tier];
+				}
+				break;
+			case Tool::TYPE_PICKAXE:
+				$tier = $item->isPickaxe();
+				if ($tier !== false && isset($tierMultipliers[$tier])) {
+					return $secondsForBreak / $tierMultipliers[$tier];
+				}
+				break;
+			case Tool::TYPE_AXE:
+				$tier = $item->isAxe();
+				if ($tier !== false && isset($tierMultipliers[$tier])) {
+					return $secondsForBreak / $tierMultipliers[$tier];
+				}
+				break;
 		}
-
-		if($item->isSword()){
-			$base *= 0.5;
-		}
-
-		return $base;
+		
+		return $secondsForBreak;
 	}
 
 	public function canBeBrokenWith(Item $item){

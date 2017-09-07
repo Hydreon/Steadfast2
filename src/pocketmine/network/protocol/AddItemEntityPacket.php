@@ -24,8 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class AddItemEntityPacket extends DataPacket{
+class AddItemEntityPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_ITEM_ENTITY_PACKET;
+	const PACKET_NAME = "ADD_ITEM_ENTITY_PACKET";
 
 	public $eid;
 	public $item;
@@ -36,20 +37,22 @@ class AddItemEntityPacket extends DataPacket{
 	public $speedY;
 	public $speedZ;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putLong($this->eid);
-		$this->putSlot($this->item);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putFloat($this->speedX);
-		$this->putFloat($this->speedY);
-		$this->putFloat($this->speedZ);
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
+		$this->putVarInt($this->eid);
+		$this->putVarInt($this->eid);
+		$this->putSlot($this->item, $playerProtocol);
+		$this->putLFloat($this->x);
+		$this->putLFloat($this->y);
+		$this->putLFloat($this->z);
+		$this->putLFloat($this->speedX);
+		$this->putLFloat($this->speedY);
+		$this->putLFloat($this->speedZ);
+		$this->putVarInt(0); // metadata counts
 	}
 
 }

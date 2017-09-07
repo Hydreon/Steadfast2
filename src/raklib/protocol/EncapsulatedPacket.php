@@ -21,31 +21,26 @@
 
 namespace raklib\protocol;
 
-
+#ifndef COMPILE
 use raklib\Binary;
+#endif
 
-
-
-
-
-
-
-
+#include <rules/RakLibPacket.h>
 
 class EncapsulatedPacket{
 
     public $reliability;
-    public $hasSplit = \false;
+    public $hasSplit = false;
     public $length = 0;
-    public $messageIndex = \null;
-    public $orderIndex = \null;
-    public $orderChannel = \null;
-    public $splitCount = \null;
-    public $splitID = \null;
-    public $splitIndex = \null;
+    public $messageIndex = null;
+    public $orderIndex = null;
+    public $orderChannel = null;
+    public $splitCount = null;
+    public $splitID = null;
+    public $splitIndex = null;
     public $buffer;
-    public $needACK = \false;
-    public $identifierACK = \null;
+    public $needACK = false;
+    public $identifierACK = null;
 
     /**
      * @param string $binary
@@ -54,21 +49,21 @@ class EncapsulatedPacket{
      *
      * @return EncapsulatedPacket
      */
-    public static function fromBinary($binary, $internal = \false, &$offset = \null){
+    public static function fromBinary($binary, $internal = false, &$offset = null){
 
 	    $packet = new EncapsulatedPacket();
 
-        $flags = \ord($binary{0});
+        $flags = ord($binary{0});
         $packet->reliability = $reliability = ($flags & 0b11100000) >> 5;
         $packet->hasSplit = $hasSplit = ($flags & 0b00010000) > 0;
         if($internal){
-            $length = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($binary, 1, 4))[1] << 32 >> 32 : \unpack("N", \substr($binary, 1, 4))[1]);
-            $packet->identifierACK = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($binary, 5, 4))[1] << 32 >> 32 : \unpack("N", \substr($binary, 5, 4))[1]);
+            $length = Binary::readInt(substr($binary, 1, 4));
+            $packet->identifierACK = Binary::readInt(substr($binary, 5, 4));
             $offset = 9;
         }else{
-            $length = (int) \ceil(\unpack("n", \substr($binary, 1, 2))[1] / 8);
+            $length = (int) ceil(Binary::readShort(substr($binary, 1, 2)) / 8);
             $offset = 3;
-	        $packet->identifierACK = \null;
+	        $packet->identifierACK = null;
         }
 
 
@@ -87,54 +82,36 @@ class EncapsulatedPacket{
          * 7: RELIABLE_ORDERED_WITH_ACK_RECEIPT
          */
 
-        if(
-            $reliability === 2 or
-            $reliability === 3 or
-            $reliability === 4 or
-            $reliability === 6 or
-            $reliability === 7
-        ){
-            $packet->messageIndex = \unpack("V", \substr($binary, $offset, 3) . "\x00")[1];
-            $offset += 3;
-        }else{
-	        $packet->messageIndex = \null;
-        }
+		if($reliability > 0){
+			if($reliability >= 2 and $reliability !== 5){
+				$packet->messageIndex = Binary::readLTriad(substr($binary, $offset, 3));
+				$offset += 3;
+			}
 
-        if(
-            $reliability === 1 or
-            $reliability === 3 or
-            $reliability === 4 or
-            $reliability === 7
-        ){
-            $packet->orderIndex = \unpack("V", \substr($binary, $offset, 3) . "\x00")[1];
-            $offset += 3;
-            $packet->orderChannel = \ord($binary{$offset++});
-        }else{
-	        $packet->orderIndex = \null;
-	        $packet->orderChannel = \null;
-        }
+			if($reliability <= 4 and $reliability !== 2){
+				$packet->orderIndex = Binary::readLTriad(substr($binary, $offset, 3));
+				$offset += 3;
+				$packet->orderChannel = ord($binary{$offset++});
+			}
+		}
 
         if($hasSplit){
-            $packet->splitCount = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($binary, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($binary, $offset, 4))[1]);
+            $packet->splitCount = Binary::readInt(substr($binary, $offset, 4));
             $offset += 4;
-            $packet->splitID = \unpack("n", \substr($binary, $offset, 2))[1];
+            $packet->splitID = Binary::readShort(substr($binary, $offset, 2));
             $offset += 2;
-            $packet->splitIndex = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($binary, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($binary, $offset, 4))[1]);
+            $packet->splitIndex = Binary::readInt(substr($binary, $offset, 4));
             $offset += 4;
-        }else{
-	        $packet->splitCount = \null;
-	        $packet->splitID = \null;
-	        $packet->splitIndex = \null;
         }
 
-        $packet->buffer = \substr($binary, $offset, $length);
+        $packet->buffer = substr($binary, $offset, $length);
         $offset += $length;
 
         return $packet;
     }
 
     public function getTotalLength(){
-        return 3 + \strlen($this->buffer) + ($this->messageIndex !== \null ? 3 : 0) + ($this->orderIndex !== \null ? 4 : 0) + ($this->hasSplit ? 9 : 0);
+        return 3 + strlen($this->buffer) + ($this->messageIndex !== null ? 3 : 0) + ($this->orderIndex !== null ? 4 : 0) + ($this->hasSplit ? 10 : 0);
     }
 
     /**
@@ -142,38 +119,17 @@ class EncapsulatedPacket{
      *
      * @return string
      */
-    public function toBinary($internal = \false){
-        $binary = \chr(($this->reliability << 5) | ($this->hasSplit ? 0b00010000 : 0));
-        if($internal){
-            $binary .= \pack("N", \strlen($this->buffer));
-            $binary .= \pack("N", $this->identifierACK);
-        }else{
-            $binary .= \pack("n", \strlen($this->buffer) << 3);
-        }
-        if(
-            $this->reliability === 2 or
-            $this->reliability === 3 or
-            $this->reliability === 4 or
-            $this->reliability === 6 or
-            $this->reliability === 7
-        ){
-            $binary .= \substr(\pack("V", $this->messageIndex), 0, -1);
-        }
-
-        if(
-            $this->reliability === 1 or
-            $this->reliability === 3 or
-            $this->reliability === 4 or
-            $this->reliability === 7
-        ){
-            $binary .= \substr(\pack("V", $this->orderIndex), 0, -1) . \chr($this->orderChannel);
-        }
-
-        if($this->hasSplit){
-            $binary .= \pack("N", $this->splitCount) . \pack("n", $this->splitID) . \pack("N", $this->splitIndex);
-        }
-
-        return $binary . $this->buffer;
+    public function toBinary($internal = false){
+        return
+			chr(($this->reliability << 5) | ($this->hasSplit ? 0b00010000 : 0)) .
+			($internal ? Binary::writeInt(strlen($this->buffer)) . Binary::writeInt($this->identifierACK) : Binary::writeShort(strlen($this->buffer) << 3)) .
+			($this->reliability > 0 ?
+				(($this->reliability >= 2 and $this->reliability !== 5) ? Binary::writeLTriad($this->messageIndex) : "") .
+				(($this->reliability <= 4 and $this->reliability !== 2) ? Binary::writeLTriad($this->orderIndex) . chr($this->orderChannel) : "")
+				: ""
+			) .
+			($this->hasSplit ? Binary::writeInt($this->splitCount) . Binary::writeShort($this->splitID) . Binary::writeInt($this->splitIndex) : "")
+			. $this->buffer;
     }
 
     public function __toString(){

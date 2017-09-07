@@ -24,8 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class AddPaintingPacket extends DataPacket{
+class AddPaintingPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_PAINTING_PACKET;
+	const PACKET_NAME = "ADD_PAINTING_PACKET";
 
 	public $eid;
 	public $x;
@@ -34,17 +35,18 @@ class AddPaintingPacket extends DataPacket{
 	public $direction;
 	public $title;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putLong($this->eid);
-		$this->putInt($this->x);
-		$this->putInt($this->y);
-		$this->putInt($this->z);
-		$this->putInt($this->direction);
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
+		$this->putVarInt($this->eid);
+		$this->putVarInt($this->eid);
+		$this->putSignedVarInt($this->x);
+		$this->putVarInt($this->y);
+		$this->putSignedVarInt($this->z);
+		$this->putSignedVarInt($this->direction);
 		$this->putString($this->title);
 	}
 

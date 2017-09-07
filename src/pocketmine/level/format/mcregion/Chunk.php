@@ -24,13 +24,13 @@ namespace pocketmine\level\format\mcregion;
 use pocketmine\level\format\generic\BaseFullChunk;
 use pocketmine\level\format\LevelProvider;
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\Byte;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\ByteArray;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Enum;
-use pocketmine\nbt\tag\Int;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\IntArray;
-use pocketmine\nbt\tag\Long;
+use pocketmine\nbt\tag\LongTag;
 use pocketmine\Player;
 use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryStream;
@@ -70,10 +70,11 @@ class Chunk extends BaseFullChunk{
 			$this->nbt->TileTicks->setTagType(NBT::TAG_Compound);
 		}
 
-        $this->nbt->BiomeColors = new IntArray("BiomeColors", array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a")));
+		$this->nbt->BiomeColors = new IntArray("BiomeColors", array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a")));
 
 		if(!isset($this->nbt->HeightMap) or !($this->nbt->HeightMap instanceof IntArray)){
 			$this->nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, 0));
+			$this->incorrectHeightMap = true;
 		}
 
 		if(!isset($this->nbt->Blocks)){
@@ -249,28 +250,33 @@ class Chunk extends BaseFullChunk{
 	 * @return bool
 	 */
 	public function isPopulated(){
-		return $this->nbt["TerrainPopulated"] > 0;
+		return isset($this->nbt->TerrainPopulated) and $this->nbt->TerrainPopulated->getValue() > 0;
 	}
 
 	/**
 	 * @param int $value
 	 */
 	public function setPopulated($value = 1){
-		$this->nbt->TerrainPopulated = new Byte("TerrainPopulated", $value);
+		$this->nbt->TerrainPopulated = new ByteTag("TerrainPopulated", $value);
 	}
 
 	/**
 	 * @return bool
 	 */
 	public function isGenerated(){
-		return $this->nbt["TerrainPopulated"] > 0 or (isset($this->nbt->TerrainGenerated) and $this->nbt["TerrainGenerated"] > 0);
+		if(isset($this->nbt->TerrainGenerated)){
+			return $this->nbt->TerrainGenerated->getValue() > 0;
+		}elseif(isset($this->nbt->TerrainPopulated)){
+			return $this->nbt->TerrainPopulated->getValue() > 0;
+		}
+		return false;
 	}
 
 	/**
 	 * @param int $value
 	 */
 	public function setGenerated($value = 1){
-		$this->nbt->TerrainGenerated = new Byte("TerrainGenerated", $value);
+		$this->nbt->TerrainGenerated = new ByteTag("TerrainGenerated", $value);
 	}
 
 	/**
@@ -302,7 +308,6 @@ class Chunk extends BaseFullChunk{
 			$offset = 0;
 
 			$chunk = new Chunk($provider instanceof LevelProvider ? $provider : McRegion::class, null);
-			$chunk->provider = $provider;
 			$chunk->x = Binary::readInt(substr($data, $offset, 4));
 			$offset += 4;
 			$chunk->z = Binary::readInt(substr($data, $offset, 4));
@@ -324,9 +329,9 @@ class Chunk extends BaseFullChunk{
 
 			$flags = ord($data{$offset++});
 
-			$chunk->nbt->TerrainGenerated = new Byte("TerrainGenerated", $flags & 0b1);
-			$chunk->nbt->TerrainPopulated = new Byte("TerrainPopulated", ($flags >> 1) & 0b1);
-			$chunk->nbt->LightPopulated = new Byte("LightPopulated", ($flags >> 2) & 0b1);
+			$chunk->nbt->TerrainGenerated = new ByteTag("TerrainGenerated", $flags & 0b1);
+			$chunk->nbt->TerrainPopulated = new ByteTag("TerrainPopulated", ($flags >> 1) & 0b1);
+			$chunk->nbt->LightPopulated = new ByteTag("LightPopulated", ($flags >> 2) & 0b1);
 
 			return $chunk;
 		}catch(\Exception $e){
@@ -350,8 +355,8 @@ class Chunk extends BaseFullChunk{
 	public function toBinary(){
 		$nbt = clone $this->getNBT();
 
-		$nbt->xPos = new Int("xPos", $this->x);
-		$nbt->zPos = new Int("zPos", $this->z);
+		$nbt->xPos = new IntTag("xPos", $this->x);
+		$nbt->zPos = new IntTag("zPos", $this->z);
 
 		if($this->isGenerated()){
 			$nbt->Blocks = new ByteArray("Blocks", $this->getBlockIdArray());
@@ -367,7 +372,7 @@ class Chunk extends BaseFullChunk{
 		$entities = [];
 
 		foreach($this->getEntities() as $entity){
-			if(!($entity instanceof Player) and !$entity->closed){
+			if (!($entity instanceof Player) && !$entity->closed) {
 				$entity->saveNBT();
 				$entities[] = $entity->namedtag;
 			}
@@ -430,15 +435,20 @@ class Chunk extends BaseFullChunk{
 			$chunk->heightMap = array_fill(0, 256, 0);
 			$chunk->biomeColors = array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a"));
 
-			$chunk->nbt->V = new Byte("V", 1);
-			$chunk->nbt->InhabitedTime = new Long("InhabitedTime", 0);
-			$chunk->nbt->TerrainGenerated = new Byte("TerrainGenerated", 0);
-			$chunk->nbt->TerrainPopulated = new Byte("TerrainPopulated", 0);
-			$chunk->nbt->LightPopulated = new Byte("LightPopulated", 0);
+			$chunk->nbt->V = new ByteTag("V", 1);
+			$chunk->nbt->InhabitedTime = new LongTag("InhabitedTime", 0);
+			$chunk->nbt->TerrainGenerated = new ByteTag("TerrainGenerated", 0);
+			$chunk->nbt->TerrainPopulated = new ByteTag("TerrainPopulated", 0);
+			$chunk->nbt->LightPopulated = new ByteTag("LightPopulated", 0);
 
 			return $chunk;
 		}catch(\Exception $e){
 			return null;
 		}
+	}
+	
+	public function setLightPopulated($value = 1){
+		$this->nbt->LightPopulated = new ByteTag("LightPopulated", $value ? 1 : 0);
+		$this->hasChanged = true;
 	}
 }

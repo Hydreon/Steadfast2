@@ -118,6 +118,16 @@ class ServerScheduler{
 			unset($this->tasks[$taskId]);
 		}
 	}
+	
+	public function getAsyncTaskPoolSize(){
+		return $this->asyncPool->getSize();
+	}
+	
+	public function scheduleAsyncTaskToWorker(AsyncTask $task, $worker){
+		$id = $this->nextId();
+		$task->setTaskId($id);
+		$this->asyncPool->submitTaskToWorker($task, $worker);
+	}
 
 	/**
 	 * @param Plugin $plugin
@@ -223,17 +233,14 @@ class ServerScheduler{
 				unset($this->tasks[$task->getTaskId()]);
 				continue;
 			}else{
-				$task->timings->startTiming();
+				//$task->timings->startTiming();
 				try{
 					$task->run($this->currentTick);
-				}catch(\Exception $e){
+				}catch(\Throwable $e){
 					Server::getInstance()->getLogger()->critical("Could not execute task " . $task->getTaskName() . ": " . $e->getMessage());
-					$logger = Server::getInstance()->getLogger();
-					if($logger instanceof MainLogger){
-						$logger->logException($e);
-					}
+					Server::getInstance()->getLogger()->logException($e);
 				}
-				$task->timings->stopTiming();
+				//$task->timings->stopTiming();
 			}
 			if($task->isRepeating()){
 				$task->setNextRun($this->currentTick + $task->getPeriod());

@@ -1,0 +1,116 @@
+{
+    "transfer": {
+        "versions": [
+            {
+                "description": "Transfer command",
+                "permission": "any",
+                "show-in-help": false,
+                "overloads": {
+                    "default": {
+                        "input": {
+                            "parameters": [
+                                {
+                                    "name": "address",
+                                    "type": "rawtext"
+                                },
+                                {
+                                    "name": "port",
+                                    "type": "int",
+                                    "optional": true
+                                }
+                            ]
+                        },
+                        "output": {
+                            "parameters": []
+                        }
+                    }
+                }
+            }
+        ]
+    },
+    "version": {
+        "versions": [
+            {
+                "description": "Gets the version of this server",
+                "permission": "any",
+                "aliases": [
+                    "ver",
+                    "about"
+                ],
+                "overloads": {
+                    "byPass": {
+                        "input": {
+                            "parameters": []
+                        },
+                        "output": {
+                            "parameters": []
+                        }
+                    }
+                }
+            }
+        ]
+    },
+	"help": {
+        "versions": [
+            {
+                "description": "Show list of available commands",
+                "permission": "any",
+				"aliases": [],
+                "overloads": {
+                    "byPage": {
+                        "input": {
+							"parameters": [
+								{
+									"name": "page",
+									"type": "int",
+									"optional": true
+								}
+							]
+						},
+                        "output": {
+                            "parameters": []
+                        }
+                    },
+					"byName": {
+                        "input": {
+							"parameters": [
+								{
+									"name": "command",
+									"type": "rawtext",
+									"optional": true
+								},
+								{
+									"name": "page",
+									"type": "int",
+									"optional": true
+								}
+							]
+						},
+                        "output": {
+                            "parameters": []
+                        }
+					}
+                }
+            }
+        ]
+    },
+    "ping": {
+        "versions": [
+            {
+                "description": "Return player ping",
+                "permission": "any",
+                "aliases": [],
+                "overloads": {
+                    "byPass": {
+                        "input": {
+                            "parameters": []
+                        },
+                        "output": {
+                            "parameters": []
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}

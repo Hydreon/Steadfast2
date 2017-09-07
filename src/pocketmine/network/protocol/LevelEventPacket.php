@@ -24,8 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class LevelEventPacket extends DataPacket{
+class LevelEventPacket extends PEPacket{
 	const NETWORK_ID = Info::LEVEL_EVENT_PACKET;
+	const PACKET_NAME = "LEVEL_EVENT_PACKET";
 
 	const EVENT_SOUND_CLICK = 1000;
 	const EVENT_SOUND_CLICK_FAIL = 1001;
@@ -54,35 +55,39 @@ class LevelEventPacket extends DataPacket{
 	const EVENT_PARTICLE_SPLASH = 2002;
 	const EVENT_PARTICLE_EYE_DESPAWN = 2003;
 	const EVENT_PARTICLE_SPAWN = 2004;
-
+	const EVENT_PARTICLE_CRACK_BLOCK = 2014;
+	
+	// couldron 3501 - 3508
+	
 	const EVENT_START_RAIN = 3001;
 	const EVENT_START_THUNDER = 3002;
 	const EVENT_STOP_RAIN = 3003;
 	const EVENT_STOP_THUNDER = 3004;
-
+	
+	const EVENT_START_BLOCK_CRACKING = 3600;
+	const EVENT_STOP_BLOCK_CRACKING = 3601;
+	
 	const EVENT_SET_DATA = 4000;
-
 	const EVENT_PLAYERS_SLEEPING = 9800;
-
 	const EVENT_ADD_PARTICLE_MASK = 0x4000;
 
 	public $evid;
 	public $x;
 	public $y;
 	public $z;
-	public $data;
+	public $data = 0;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putShort($this->evid);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putInt($this->data);
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
+		$this->putSignedVarInt($this->evid);
+		$this->putLFloat($this->x);
+		$this->putLFloat($this->y);
+		$this->putLFloat($this->z);
+		$this->putSignedVarInt($this->data);
 	}
 
 }

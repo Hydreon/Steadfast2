@@ -24,24 +24,26 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class RespawnPacket extends DataPacket{
+class RespawnPacket extends PEPacket{
 	const NETWORK_ID = Info::RESPAWN_PACKET;
+	const PACKET_NAME = "RESPAWN_PACKET";
 
 	public $x;
 	public $y;
 	public $z;
 
-	public function decode(){
-		$this->x = $this->getFloat();
-		$this->y = $this->getFloat();
-		$this->z = $this->getFloat();
+	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
+		$this->x = $this->getLFloat();
+		$this->y = $this->getLFloat();
+		$this->z = $this->getLFloat();
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
+		$this->putLFloat($this->x);
+		$this->putLFloat($this->y);
+		$this->putLFloat($this->z);
 	}
 
 }

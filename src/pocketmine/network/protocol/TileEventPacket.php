@@ -24,8 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class TileEventPacket extends DataPacket{
+class TileEventPacket extends PEPacket{
 	const NETWORK_ID = Info::TILE_EVENT_PACKET;
+	const PACKET_NAME = "TILE_EVENT_PACKET";
 
 	public $x;
 	public $y;
@@ -33,17 +34,17 @@ class TileEventPacket extends DataPacket{
 	public $case1;
 	public $case2;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putInt($this->x);
-		$this->putInt($this->y);
-		$this->putInt($this->z);
-		$this->putInt($this->case1);
-		$this->putInt($this->case2);
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
+		$this->putSignedVarInt($this->x);
+		$this->putVarInt($this->y);
+		$this->putSignedVarInt($this->z);
+		$this->putSignedVarInt($this->case1);
+		$this->putSignedVarInt($this->case2);
 	}
 
 }

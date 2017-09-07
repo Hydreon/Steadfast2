@@ -24,22 +24,22 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class ContainerSetDataPacket extends DataPacket{
+class ContainerSetDataPacket extends PEPacket{
 	const NETWORK_ID = Info::CONTAINER_SET_DATA_PACKET;
+	const PACKET_NAME = "CONTAINER_SET_DATA_PACKET";
 
 	public $windowid;
 	public $property;
 	public $value;
 
-	public function decode(){
-
+	public function decode($playerProtocol){
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putByte($this->windowid);
-		$this->putShort($this->property);
-		$this->putShort($this->value);
+		$this->putSignedVarInt($this->property);
+		$this->putSignedVarInt($this->value);
 	}
 
 }

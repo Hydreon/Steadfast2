@@ -24,12 +24,13 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class UpdateBlockPacket extends DataPacket{
+class UpdateBlockPacket extends PEPacket{
 	const NETWORK_ID = Info::UPDATE_BLOCK_PACKET;
+	const PACKET_NAME = "UPDATE_BLOCK_PACKET";
 
 	const FLAG_NONE      = 0b0000;
 	const FLAG_NEIGHBORS = 0b0001;
-    const FLAG_NETWORK   = 0b0010;
+	const FLAG_NETWORK   = 0b0010;
 	const FLAG_NOGRAPHIC = 0b0100;
 	const FLAG_PRIORITY  = 0b1000;
 
@@ -37,20 +38,23 @@ class UpdateBlockPacket extends DataPacket{
 	const FLAG_ALL_PRIORITY = (self::FLAG_ALL | self::FLAG_PRIORITY);
 
 	public $records = []; //x, z, y, blockId, blockData, flags
-
-	public function decode(){
+	
+	public function __construct() {
+		parent::__construct("", 0);
+	}
+	
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putInt(count($this->records));
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		foreach($this->records as $r){
-			$this->putInt($r[0]);
-			$this->putInt($r[1]);
-			$this->putByte($r[2]);
-			$this->putByte($r[3]);
-			$this->putByte(($r[5] << 4) | $r[4]);
+			$this->putSignedVarInt($r[0]);			
+			$this->putVarInt($r[2]);
+			$this->putSignedVarInt($r[1]);
+			$this->putVarInt($r[3]);
+			$this->putVarInt(($r[5] << 4) | $r[4]);
 		}
 	}
 

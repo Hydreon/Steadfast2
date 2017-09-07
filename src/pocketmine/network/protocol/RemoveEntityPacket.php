@@ -24,18 +24,19 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class RemoveEntityPacket extends DataPacket{
+class RemoveEntityPacket extends PEPacket{
 	const NETWORK_ID = Info::REMOVE_ENTITY_PACKET;
+	const PACKET_NAME = "REMOVE_ENTITY_PACKET";
 
 	public $eid;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putLong($this->eid);
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
+		$this->putVarInt($this->eid);
 	}
 
 }

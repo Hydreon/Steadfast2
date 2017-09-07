@@ -165,7 +165,7 @@ class Leaves extends Transparent{
 			if(mt_rand(1, 20) === 1){ //Saplings
 				$drops[] = [Item::SAPLING, $this->meta & 0x03, 1];
 			}
-			if(($this->meta & 0x03) === self::OAK and mt_rand(1, 200) === 1){ //Apples
+			if(($this->meta & 0x03) === self::OAK and mt_rand(1, 10) === 1){ //Apples
 				$drops[] = [Item::APPLE, 0, 1];
 			}
 		}

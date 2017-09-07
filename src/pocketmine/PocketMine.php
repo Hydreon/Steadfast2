@@ -75,8 +75,8 @@ namespace pocketmine {
 	const VERSION = '1.5.1-hybrid';
 	const API_VERSION = "1.12.0";
 	const CODENAME = "刀 (Katana)";
-	const MINECRAFT_VERSION = "v0.12.1 alpha";
-	const MINECRAFT_VERSION_NETWORK = "0.12.1";
+	const MINECRAFT_VERSION = "v1.x";
+	const MINECRAFT_VERSION_NETWORK = "1.2";
 
 	/*
 	 * Startup code. Do not look at it, it may harm you.
@@ -91,6 +91,12 @@ namespace pocketmine {
 		@define("pocketmine\\PATH", getcwd() . DIRECTORY_SEPARATOR);
 	}
 
+	if(version_compare("7.0", PHP_VERSION) > 0){
+		echo "[CRITICAL] You must use PHP >= 7.0" . PHP_EOL;
+		echo "[CRITICAL] Please use the installer provided on the homepage." . PHP_EOL;
+		exit(1);
+	}
+
 	if(!extension_loaded("pthreads")){
 		echo "[CRITICAL] Unable to find the pthreads extension." . PHP_EOL;
 		echo "[CRITICAL] Please use the installer provided on the homepage." . PHP_EOL;
@@ -98,7 +104,6 @@ namespace pocketmine {
 	}
 
 	if(!class_exists("ClassLoader", false)){
-		require_once(\pocketmine\PATH . "src/spl/ThreadedFactory.php");
 		require_once(\pocketmine\PATH . "src/spl/ClassLoader.php");
 		require_once(\pocketmine\PATH . "src/spl/BaseClassLoader.php");
 		require_once(\pocketmine\PATH . "src/pocketmine/CompatibleClassLoader.php");
@@ -119,7 +124,8 @@ namespace pocketmine {
 	ini_set("display_errors", 1);
 	ini_set("display_startup_errors", 1);
 	ini_set("default_charset", "utf-8");
-
+	ini_set("error_log", "logs/" . date('Y.m.d') . "_php_error.log");
+	
 	ini_set("memory_limit", -1);
 	define("pocketmine\\START_TIME", microtime(true));
 
@@ -314,8 +320,8 @@ namespace pocketmine {
 			case "linux":
 			default:
 				exec("kill -9 " . ((int) $pid) . " > /dev/null 2>&1");
+				}
 		}
-	}
 
 	/**
 	 * @param object $value
@@ -369,14 +375,7 @@ namespace pocketmine {
 		return rtrim(str_replace(["\\", ".php", "phar://", rtrim(str_replace(["\\", "phar://"], ["/", ""], \pocketmine\PATH), "/"), rtrim(str_replace(["\\", "phar://"], ["/", ""], \pocketmine\PLUGIN_PATH), "/")], ["/", "", "", "", ""], $path), "/");
 	}
 
-	set_error_handler([\ExceptionHandler::class, "handler"], -1);
-
 	$errors = 0;
-
-	if(version_compare("5.6.0", PHP_VERSION) > 0){
-		$logger->critical("You must use PHP >= 5.6");
-		++$errors;
-	}
 
 	if(php_sapi_name() !== "cli"){
 		$logger->critical("You must run PocketMine-MP using the CLI.");
@@ -392,8 +391,8 @@ namespace pocketmine {
 	if(substr_count($pthreads_version, ".") < 2){
 		$pthreads_version = "0.$pthreads_version";
 	}
-	if(version_compare($pthreads_version, "2.0.9") < 0){
-		$logger->critical("pthreads >= 2.0.9 is required, while you have $pthreads_version.");
+	if(version_compare($pthreads_version, "3.0.7") < 0){
+		$logger->critical("pthreads >= 3.0.7 is required, while you have $pthreads_version.");
 		++$errors;
 	}
 
@@ -411,23 +410,18 @@ namespace pocketmine {
 		}
 	}
 
-	if(!extension_loaded("Weakref") and !extension_loaded("weakref")){
-		$logger->critical("Unable to find the Weakref extension.");
-		++$errors;
-	}
-
 	if(!extension_loaded("curl")){
 		$logger->critical("Unable to find the cURL extension.");
 		++$errors;
 	}
 
-	if(!extension_loaded("sqlite3")){
-		$logger->critical("Unable to find the SQLite3 extension.");
+	if(!extension_loaded("yaml")){
+		$logger->critical("Unable to find the YAML extension.");
 		++$errors;
 	}
 
-	if(!extension_loaded("yaml")){
-		$logger->critical("Unable to find the YAML extension.");
+	if(!extension_loaded("sqlite3")){
+		$logger->critical("Unable to find the SQLite3 extension.");
 		++$errors;
 	}
 
@@ -473,7 +467,6 @@ namespace pocketmine {
 
 	$killer = new ServerKiller(8);
 	$killer->start();
-	$killer->detach();
 
 	$logger->shutdown();
 	$logger->join();

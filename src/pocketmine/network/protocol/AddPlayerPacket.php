@@ -28,8 +28,9 @@ use pocketmine\utils\Binary;
 
 #endif
 
-class AddPlayerPacket extends DataPacket{
+class AddPlayerPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_PLAYER_PACKET;
+	const PACKET_NAME = "ADD_PLAYER_PACKET";
 
 	public $uuid;
 	public $username;
@@ -44,29 +45,58 @@ class AddPlayerPacket extends DataPacket{
 	public $yaw;
 	public $item;
 	public $metadata;
+	public $links = [];
+	public $flags = 0;
+	public $commandPermission = 0;
+	public $actionPermissions = AdventureSettingsPacket::ACTION_FLAG_DEFAULT_LEVEL_PERMISSIONS;
+	public $permissionLevel = AdventureSettingsPacket::PERMISSION_LEVEL_MEMBER;
+	public $storedCustomPermissions = 0;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
 		$this->putUUID($this->uuid);
 		$this->putString($this->username);
-		$this->putLong($this->eid);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putFloat($this->speedX);
-		$this->putFloat($this->speedY);
-		$this->putFloat($this->speedZ);
-		$this->putFloat($this->yaw);
-		$this->putFloat($this->yaw); //TODO headrot
-		$this->putFloat($this->pitch);
-		$this->putSlot($this->item);
+		$this->putVarInt($this->eid);
+		$this->putVarInt($this->eid);
+		$this->putLFloat($this->x);
+		$this->putLFloat($this->y);
+		$this->putLFloat($this->z);
+		$this->putLFloat($this->speedX);
+		$this->putLFloat($this->speedY);
+		$this->putLFloat($this->speedZ);
+		$this->putLFloat($this->pitch);
+		$this->putLFloat($this->yaw);
+		$this->putLFloat($this->yaw);//TODO headrot	
+		$this->putSignedVarInt(0);
+//		$this->putSlot($this->item, $playerProtocol);
 
-		$meta = Binary::writeMetadata($this->metadata);
+		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->putVarInt($this->flags);
+			$this->putVarInt($this->commandPermission);
+			$this->putVarInt($this->actionPermissions);
+			$this->putVarInt($this->permissionLevel);
+			$this->putVarInt($this->storedCustomPermissions);
+			// we should put eid as long but in signed varint format
+			// maybe i'm wrong but it works
+			if ($this->eid & 1) { // userId is odd
+				$this->putLLong(-1 * (($this->eid + 1) >> 1));
+			} else { // userId is even
+				$this->putLLong($this->eid >> 1);
+			}
+			$this->putVarInt(count($this->links));
+			foreach ($this->links as $link) {
+				$this->putVarInt($link['from']);
+				$this->putVarInt($link['to']);
+				$this->putByte($link['type']);
+				$this->putByte(0);
+			}
+		}
 	}
 
 }

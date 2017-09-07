@@ -24,9 +24,11 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class ContainerOpenPacket extends DataPacket{
+class ContainerOpenPacket extends PEPacket{
 	const NETWORK_ID = Info::CONTAINER_OPEN_PACKET;
+	const PACKET_NAME = "CONTAINER_OPEN_PACKET";
 
+	public $entityId;
 	public $windowid;
 	public $type;
 	public $slots;
@@ -34,18 +36,21 @@ class ContainerOpenPacket extends DataPacket{
 	public $y;
 	public $z;
 
-	public function decode(){
+	public function decode($playerProtocol){
 
 	}
 
-	public function encode(){
-		$this->reset();
+	public function encode($playerProtocol) {
+		$this->reset($playerProtocol);
 		$this->putByte($this->windowid);
 		$this->putByte($this->type);
-		$this->putShort($this->slots);
-		$this->putInt($this->x);
-		$this->putInt($this->y);
-		$this->putInt($this->z);
+		if ($playerProtocol < Info::PROTOCOL_110) {
+			$this->putSignedVarInt($this->slots);
+		}
+		$this->putSignedVarInt($this->x);
+		$this->putVarInt($this->y);
+		$this->putSignedVarInt($this->z);
+		$this->putSignedVarInt(-1);
 	}
 
 }

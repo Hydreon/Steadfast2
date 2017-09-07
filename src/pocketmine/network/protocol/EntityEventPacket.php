@@ -24,8 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class EntityEventPacket extends DataPacket{
+class EntityEventPacket extends PEPacket{
 	const NETWORK_ID = Info::ENTITY_EVENT_PACKET;
+	const PACKET_NAME = "ENTITY_EVENT_PACKET";
 
 	const HURT_ANIMATION = 2;
 	const DEATH_ANIMATION = 3;
@@ -40,23 +41,30 @@ class EntityEventPacket extends DataPacket{
 	const FISH_HOOK_HOOK = 13;
 	const FISH_HOOK_TEASE = 14;
 	const SQUID_INK_CLOUD = 15;
-	const AMBIENT_SOUND = 16;
-	const RESPAWN = 17;
+	const AMBIENT_SOUND = 17;
+	const RESPAWN = 18;
+	const ENCHANT = 34;
+	const FEED = 57;
 
 	//TODO add new events
 
 	public $eid;
 	public $event;
+	public $theThing;
 
-	public function decode(){
-		$this->eid = $this->getLong();
+	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
+		$this->eid = $this->getVarInt();
 		$this->event = $this->getByte();
+		$this->theThing = $this->getSignedVarInt();
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putLong($this->eid);
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
+		$this->putVarInt($this->eid);
 		$this->putByte($this->event);
+		/** @todo do it right */
+		$this->putSignedVarInt(0); // event data
 	}
 
 }

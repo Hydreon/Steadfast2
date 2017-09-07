@@ -55,17 +55,21 @@ class InventoryType{
 		if(count(static::$default) > 0){
 			return;
 		}
-
+		
+		// 5 - ANVIL
+		// 4 - BREWING_STAND
+		// 3 - ENCHANT_TABLE
+		// 2 - FURNACE
 		static::$default[static::CHEST] = new InventoryType(27, "Chest", 0);
 		static::$default[static::DOUBLE_CHEST] = new InventoryType(27 + 27, "Double Chest", 0);
-		static::$default[static::PLAYER] = new InventoryType(40, "Player", 0); //27 CONTAINER, 4 ARMOR (9 reference HOTBAR slots)
+		static::$default[static::PLAYER] = new InventoryType(41, "Player", 0); //27 CONTAINER, 4 ARMOR (9 reference HOTBAR slots), 1 OFFHAND
 		static::$default[static::FURNACE] = new InventoryType(3, "Furnace", 2);
 		static::$default[static::CRAFTING] = new InventoryType(5, "Crafting", 1); //4 CRAFTING slots, 1 RESULT
 		static::$default[static::WORKBENCH] = new InventoryType(10, "Crafting", 1); //9 CRAFTING slots, 1 RESULT
 		static::$default[static::STONECUTTER] = new InventoryType(10, "Crafting", 1); //9 CRAFTING slots, 1 RESULT
-		static::$default[static::ENCHANT_TABLE] = new InventoryType(2, "Enchant", 4); //1 INPUT/OUTPUT, 1 LAPIS
-		static::$default[static::BREWING_STAND] = new InventoryType(4, "Brewing", 5); //1 INPUT, 3 POTION
-		static::$default[static::ANVIL] = new InventoryType(3, "Anvil", 6); //2 INPUT, 1 OUTPUT
+		static::$default[static::ENCHANT_TABLE] = new InventoryType(2, "Enchant", 3); //1 INPUT/OUTPUT, 1 LAPIS
+ 		static::$default[static::BREWING_STAND] = new InventoryType(4, "Brewing", 4); //1 INPUT, 3 POTION
+ 		static::$default[static::ANVIL] = new InventoryType(3, "Anvil", 5); //2 INPUT, 1 OUTPUT
 	}
 
 	/**

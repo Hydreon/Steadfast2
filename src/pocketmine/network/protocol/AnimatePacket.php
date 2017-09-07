@@ -24,21 +24,37 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class AnimatePacket extends DataPacket{
+class AnimatePacket extends PEPacket{
 	const NETWORK_ID = Info::ANIMATE_PACKET;
+	const PACKET_NAME = "ANIMATE_PACKET";
 
+	const ACTION_NO_ACTION = 0;
+	const ACTION_SWING = 1;
+	const ACTION_WAKE_UP = 3;
+	const ACTION_CRITICAL_HIT = 4;
+	const ACTION_MAGIC_CRITICAL_HIT = 5;
+	const ACTION_ROW_RIGHT = 128;	// for boat?
+	const ACTION_ROW_LEFT = 129;	// for boat?
+	
 	public $action;
 	public $eid;
 
-	public function decode(){
-		$this->action = $this->getByte();
-		$this->eid = $this->getLong();
+	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
+		$this->action = $this->getVarInt();
+		$this->eid = $this->getVarInt();
 	}
 
-	public function encode(){
-		$this->reset();
-		$this->putByte($this->action);
-		$this->putLong($this->eid);
+	public function encode($playerProtocol){
+		$this->reset($playerProtocol);
+		$this->putVarInt($this->action);
+		$this->putVarInt($this->eid);
+		switch ($this->action) {
+			case self::ACTION_ROW_RIGHT:
+			case self::ACTION_ROW_LEFT:
+				/** @todo do it right */
+				$this->putLFloat(0);
+		}
 	}
 
 }

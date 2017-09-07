@@ -28,6 +28,7 @@ use pocketmine\nbt\tag\Compound;
 use pocketmine\Player;
 use pocketmine\tile\Tile;
 use pocketmine\utils\Binary;
+use pocketmine\block\Block;
 
 abstract class BaseFullChunk implements FullChunk{
 
@@ -70,6 +71,9 @@ abstract class BaseFullChunk implements FullChunk{
 
 	protected $hasChanged = false;
 
+	public $allowUnload = true;
+	
+	public $incorrectHeightMap = false;
 	/**
 	 * @param LevelProvider $provider
 	 * @param int           $x
@@ -96,13 +100,14 @@ abstract class BaseFullChunk implements FullChunk{
 		if(count($biomeColors) === 256){
 			$this->biomeColors = $biomeColors;
 		}else{
-			$this->biomeColors = array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a"));
+			$this->biomeColors = array_fill(0, 256, 0);
 		}
 
 		if(count($heightMap) === 256){
 			$this->heightMap = $heightMap;
 		}else{
-			$this->heightMap = array_fill(0, 256, 127);
+			$this->heightMap = array_fill(0, 256, $provider::getMaxY() - 1);
+			$this->incorrectHeightMap = true;
 		}
 
 		$this->NBTtiles = $tiles;
@@ -111,7 +116,7 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function initChunk(){
 		if($this->getProvider() instanceof LevelProvider and $this->NBTentities !== null){
-			$this->getProvider()->getLevel()->timings->syncChunkLoadEntitiesTimer->startTiming();
+			//$this->getProvider()->getLevel()->timings->syncChunkLoadEntitiesTimer->startTiming();
 			foreach($this->NBTentities as $nbt){
 				if($nbt instanceof Compound){
 					if(!isset($nbt->id)){
@@ -132,9 +137,9 @@ abstract class BaseFullChunk implements FullChunk{
 					}
 				}
 			}
-			$this->getProvider()->getLevel()->timings->syncChunkLoadEntitiesTimer->stopTiming();
+			//$this->getProvider()->getLevel()->timings->syncChunkLoadEntitiesTimer->stopTiming();
 
-			$this->getProvider()->getLevel()->timings->syncChunkLoadTileEntitiesTimer->startTiming();
+			//$this->getProvider()->getLevel()->timings->syncChunkLoadTileEntitiesTimer->startTiming();
 			foreach($this->NBTtiles as $nbt){
 				if($nbt instanceof Compound){
 					if(!isset($nbt->id)){
@@ -154,7 +159,7 @@ abstract class BaseFullChunk implements FullChunk{
 				}
 			}
 
-			$this->getProvider()->getLevel()->timings->syncChunkLoadTileEntitiesTimer->stopTiming();
+			//$this->getProvider()->getLevel()->timings->syncChunkLoadTileEntitiesTimer->stopTiming();
 
 			$this->NBTentities = null;
 			$this->NBTtiles = null;
@@ -199,12 +204,12 @@ abstract class BaseFullChunk implements FullChunk{
 	}
 
 	public function getBiomeId($x, $z){
-		return ord($this->biomeIds{($z << 4) + $x});
+		return ($this->biomeColors[($z << 4) + $x] & 0xFF000000) >> 24;
 	}
 
 	public function setBiomeId($x, $z, $biomeId){
 		$this->hasChanged = true;
-		$this->biomeIds{($z << 4) + $x} = chr($biomeId);
+		$this->biomeColors[($z << 4) + $x] = ($this->biomeColors[($z << 4) + $x] & 0xFFFFFF) | ($biomeId << 24);
 	}
 
 	public function getBiomeColor($x, $z){
@@ -215,7 +220,7 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function setBiomeColor($x, $z, $R, $G, $B){
 		$this->hasChanged = true;
-		$this->biomeColors[($z << 4) + $x] = 0 | (($R & 0xFF) << 16) | (($G & 0xFF) << 8) | ($B & 0xFF);
+		$this->biomeColors[($z << 4) + $x] = ($this->biomeColors[($z << 4) + $x] & 0xFF000000) | (($R & 0xFF) << 16) | (($G & 0xFF) << 8) | ($B & 0xFF);
 	}
 
 	public function getHeightMap($x, $z){
@@ -228,7 +233,8 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function getHighestBlockAt($x, $z){
 		$column = $this->getBlockIdColumn($x, $z);
-		for($y = 127; $y >= 0; --$y){
+		$provider = $this->provider;
+		for($y = $provider::getMaxY() - 1; $y >= 0; --$y){
 			if($column{$y} !== "\x00"){
 				return $y;
 			}
@@ -293,6 +299,9 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function unload($save = true, $safe = true){
 		$level = $this->getProvider();
+		if(!$this->allowUnload){
+			return false;
+		}
 		if($level === null){
 			return true;
 		}
@@ -316,7 +325,6 @@ abstract class BaseFullChunk implements FullChunk{
 		foreach($this->getTiles() as $tile){
 			$tile->close();
 		}
-		$this->provider = null;
 		return true;
 	}
 
@@ -347,7 +355,7 @@ abstract class BaseFullChunk implements FullChunk{
 	public function getHeightMapArray(){
 		return $this->heightMap;
 	}
-
+	
 	public function hasChanged(){
 		return $this->hasChanged;
 	}
@@ -362,6 +370,48 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function toFastBinary(){
 		return $this->toBinary();
+	}
+	
+	public function recalculateHeightMap(){
+		for($z = 0; $z < 16; ++$z){
+			for($x = 0; $x < 16; ++$x){
+				$this->setHeightMap($x, $z, $this->getHighestBlockAt($x, $z, false));
+			}
+		}
+	}
+	
+	public function populateSkyLight(){
+		for($z = 0; $z < 16; ++$z){
+			for($x = 0; $x < 16; ++$x){
+				$top = $this->getHeightMap($x, $z);
+				$provider = $this->provider;
+				for($y = $provider::getMaxY() - 1; $y > $top; --$y){
+					$this->setBlockSkyLight($x, $y, $z, 15);
+				}
+
+				for($y = $top; $y >= 0; --$y){
+					if(Block::$solid[$this->getBlockId($x, $y, $z)]){
+						break;
+					}
+
+					$this->setBlockSkyLight($x, $y, $z, 15);
+				}
+
+				$this->setHeightMap($x, $z, $this->getHighestBlockAt($x, $z, false));
+			}
+		}
+	}
+	
+	public function setLightPopulated($value = 1){
+
+	}
+	
+	public function setBlockIdArray($arr){
+		$this->blocks = $arr;
+	}
+	
+	public function setBlockDataArray($arr){
+		$this->data = $arr;
 	}
 
 }

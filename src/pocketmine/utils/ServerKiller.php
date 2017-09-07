@@ -17,27 +17,42 @@
  * @link http://www.pocketmine.net/
  *
  *
-*/
+ */
 
 namespace pocketmine\utils;
 
 use pocketmine\Thread;
 
-class ServerKiller extends Thread{
+class ServerKiller extends Thread {
 
 	public $time;
 
-	public function __construct($time = 15){
+	public function __construct($time = 15) {
 		$this->time = $time;
 	}
 
-	public function run(){
-		sleep($this->time);
-		echo "\nTook too long to stop, server was killed forcefully!\n";
-		@\pocketmine\kill(getmypid());
+	public function start(int $options = PTHREADS_INHERIT_NONE) {
+		parent::start($options);
 	}
 
-	public function getThreadName(){
+	public function run() {
+		$start = time();
+		$this->synchronized(function() {
+			$this->wait($this->time * 1000000);
+		});
+		if (time() - $start >= $this->time) {
+			echo "\nTook too long to stop, server was killed forcefully!\n";
+			$uname = php_uname("s");
+			if (stripos($uname, "Win") !== false or $uname === "Msys") {
+				exec("taskkill.exe /F /PID " . ((int) getmypid()) . " > NUL");
+			} else {
+				exec("kill -9 " . ((int) $pid) . " > /dev/null 2>&1");
+			}
+		}
+	}
+
+	public function getThreadName() {
 		return "Server Killer";
 	}
+
 }

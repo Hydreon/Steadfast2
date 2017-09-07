@@ -31,8 +31,8 @@ use pocketmine\level\format\FullChunk;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Int;
-use pocketmine\nbt\tag\String;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\utils\ChunkException;
 
 abstract class Tile extends Position{
@@ -44,6 +44,9 @@ abstract class Tile extends Position{
 	const SKULL = "Skull";
 	const BREWING_STAND = "Cauldron";
 	const ENCHANT_TABLE = "EnchantTable";
+	const ENDER_CHEST = "EnderChest";
+	const BED = "Bed";
+	const CAULDRON = "Cauldron";
 
 	public static $tileCount = 1;
 
@@ -138,10 +141,10 @@ abstract class Tile extends Position{
 	}
 
 	public function saveNBT(){
-		$this->namedtag->id = new String("id", $this->getSaveId());
-		$this->namedtag->x = new Int("x", $this->x);
-		$this->namedtag->y = new Int("y", $this->y);
-		$this->namedtag->z = new Int("z", $this->z);
+		$this->namedtag->id = new StringTag("id", $this->getSaveId());
+		$this->namedtag->x = new IntTag("x", $this->x);
+		$this->namedtag->y = new IntTag("y", $this->y);
+		$this->namedtag->z = new IntTag("z", $this->z);
 	}
 
 	/**

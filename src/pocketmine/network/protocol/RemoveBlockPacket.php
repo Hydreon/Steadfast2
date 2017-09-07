@@ -24,22 +24,23 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
-class RemoveBlockPacket extends DataPacket{
+class RemoveBlockPacket extends PEPacket{
 	const NETWORK_ID = Info::REMOVE_BLOCK_PACKET;
+	const PACKET_NAME = "REMOVE_BLOCK_PACKET";
 
 	public $eid;
 	public $x;
 	public $y;
 	public $z;
 
-	public function decode(){
-		$this->eid = $this->getLong();
-		$this->x = $this->getInt();
-		$this->z = $this->getInt();
-		$this->y = $this->getByte();
+	public function decode($playerProtocol){
+		$this->getHeader($playerProtocol);
+		$this->x = $this->getSignedVarInt();
+		$this->y = $this->getVarInt();
+		$this->z = $this->getSignedVarInt();
 	}
 
-	public function encode(){
+	public function encode($playerProtocol){
 
 	}
 

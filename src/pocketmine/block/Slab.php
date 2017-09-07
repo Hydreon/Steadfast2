@@ -28,6 +28,15 @@ use pocketmine\Player;
 
 class Slab extends Transparent{
 
+	const STONE = 0;
+	const SANDSTONE = 1;
+	const WOODEN = 2;
+	const COBBLESTONE = 3;
+	const BRICK = 4;
+	const STONE_BRICK = 5;
+	const QUARTZ = 6;
+	const NETHER_BRICK = 7;
+	
 	protected $id = self::SLAB;
 
 	public function __construct($meta = 0){

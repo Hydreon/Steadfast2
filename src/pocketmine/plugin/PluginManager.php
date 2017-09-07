@@ -403,7 +403,7 @@ class PluginManager{
 	 * @param Permission $permission
 	 */
 	private function calculatePermissionDefault(Permission $permission){
-		Timings::$permissionDefaultTimer->startTiming();
+		//Timings::$permissionDefaultTimer->startTiming();
 		if($permission->getDefault() === Permission::DEFAULT_OP or $permission->getDefault() === Permission::DEFAULT_TRUE){
 			$this->defaultPermsOp[$permission->getName()] = $permission;
 			$this->dirtyPermissibles(true);
@@ -413,7 +413,7 @@ class PluginManager{
 			$this->defaultPerms[$permission->getName()] = $permission;
 			$this->dirtyPermissibles(false);
 		}
-		Timings::$permissionDefaultTimer->startTiming();
+		//Timings::$permissionDefaultTimer->startTiming();
 	}
 
 	/**
@@ -433,7 +433,7 @@ class PluginManager{
 		if(!isset($this->permSubs[$permission])){
 			$this->permSubs[$permission] = [];
 		}
-		$this->permSubs[$permission][spl_object_hash($permissible)] = new \WeakRef($permissible);
+		$this->permSubs[$permission][spl_object_hash($permissible)] = $permissible;
 	}
 
 	/**
@@ -454,13 +454,16 @@ class PluginManager{
 	 *
 	 * @return Permissible[]
 	 */
-	public function getPermissionSubscriptions($permission){
+			
+		public function getPermissionSubscriptions($permission){
 		if(isset($this->permSubs[$permission])){
+			return $this->permSubs[$permission];
 			$subs = [];
 			foreach($this->permSubs[$permission] as $k => $perm){
 				/** @var \WeakRef $perm */
-				if($perm->valid()){
+				if($perm->acquire()){
 					$subs[] = $perm->get();
+					$perm->release();
 				}else{
 					unset($this->permSubs[$permission][$k]);
 				}
@@ -478,9 +481,9 @@ class PluginManager{
 	 */
 	public function subscribeToDefaultPerms($op, Permissible $permissible){
 		if($op === true){
-			$this->defSubsOp[spl_object_hash($permissible)] = new \WeakRef($permissible);
+			$this->defSubsOp[spl_object_hash($permissible)] = $permissible;
 		}else{
-			$this->defSubs[spl_object_hash($permissible)] = new \WeakRef($permissible);
+			$this->defSubs[spl_object_hash($permissible)] = $permissible;
 		}
 	}
 
@@ -505,19 +508,23 @@ class PluginManager{
 		$subs = [];
 
 		if($op === true){
+			return $this->defSubsOp;
 			foreach($this->defSubsOp as $k => $perm){
 				/** @var \WeakRef $perm */
-				if($perm->valid()){
+				if($perm->acquire()){
 					$subs[] = $perm->get();
+					$perm->release();
 				}else{
 					unset($this->defSubsOp[$k]);
 				}
 			}
 		}else{
+			return $this->defSubs;
 			foreach($this->defSubs as $k => $perm){
 				/** @var \WeakRef $perm */
-				if($perm->valid()){
+				if($perm->acquire()){
 					$subs[] = $perm->get();
+					$perm->release();
 				}else{
 					unset($this->defSubs[$k]);
 				}
@@ -574,45 +581,64 @@ class PluginManager{
 	 */
 	protected function parseYamlCommands(Plugin $plugin){
 		$pluginCmds = [];
-
-		foreach($plugin->getDescription()->getCommands() as $key => $data){
-			if(strpos($key, ":") !== false){
-				$this->server->getLogger()->critical("Could not load command " . $key . " for plugin " . $plugin->getDescription()->getName());
-				continue;
+		
+		if (!empty($jsonCommands = $plugin->getJsonCommands())) {
+			foreach ($jsonCommands as $name => $options) {
+				if (!isset($options['shouldBeRegistered']) || $options['shouldBeRegistered'] === true) {
+					$newCmd = new PluginCommand($name, $plugin);
+					if(isset($options['versions'][0]['description'])){
+						$newCmd->setDescription($options['versions'][0]['description']);
+					}
+					if(isset($options['versions'][0]['aliases']) && is_array($options['versions'][0]['aliases'])){
+						$newCmd->setAliases($options['versions'][0]['aliases']);
+					}
+					if(isset($options['versions'][0]['show-in-help'])){
+						$newCmd->setAvailableForHelp($options['versions'][0]['show-in-help']);
+					}
+					$pluginCmds[] = $newCmd;
+				}
 			}
-			if(is_array($data)){
-				$newCmd = new PluginCommand($key, $plugin);
-				if(isset($data["description"])){
-					$newCmd->setDescription($data["description"]);
+		} else {
+			foreach($plugin->getDescription()->getCommands() as $key => $data){
+				if(strpos($key, ":") !== false){
+					$this->server->getLogger()->critical("Could not load command " . $key . " for plugin " . $plugin->getDescription()->getName());
+					continue;
 				}
-
-				if(isset($data["usage"])){
-					$newCmd->setUsage($data["usage"]);
-				}
-
-				if(isset($data["aliases"]) and is_array($data["aliases"])){
-					$aliasList = [];
-					foreach($data["aliases"] as $alias){
-						if(strpos($alias, ":") !== false){
-							$this->server->getLogger()->critical("Could not load alias " . $alias . " for plugin " . $plugin->getDescription()->getName());
-							continue;
-						}
-						$aliasList[] = $alias;
+				if(is_array($data)){
+					$newCmd = new PluginCommand($key, $plugin);
+					if(isset($data["description"])){
+						$newCmd->setDescription($data["description"]);
 					}
 
-					$newCmd->setAliases($aliasList);
-				}
+					if(isset($data["usage"])){
+						$newCmd->setUsage($data["usage"]);
+					}
 
-				if(isset($data["permission"])){
-					$newCmd->setPermission($data["permission"]);
-				}
+					if(isset($data["aliases"]) and is_array($data["aliases"])){
+						$aliasList = [];
+						foreach($data["aliases"] as $alias){
+							if(strpos($alias, ":") !== false){
+								$this->server->getLogger()->critical("Could not load alias " . $alias . " for plugin " . $plugin->getDescription()->getName());
+								continue;
+							}
+							$aliasList[] = $alias;
+						}
 
-				if(isset($data["permission-message"])){
-					$newCmd->setPermissionMessage($data["permission-message"]);
-				}
+						$newCmd->setAliases($aliasList);
+					}
 
-				$pluginCmds[] = $newCmd;
+					if(isset($data["permission"])){
+						$newCmd->setPermission($data["permission"]);
+					}
+
+					if(isset($data["permission-message"])){
+						$newCmd->setPermissionMessage($data["permission-message"]);
+					}
+
+					$pluginCmds[] = $newCmd;
+				}
 			}
+			$plugin->generateJsonCommands($pluginCmds);
 		}
 
 		return $pluginCmds;

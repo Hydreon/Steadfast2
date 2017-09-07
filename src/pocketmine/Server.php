@@ -40,9 +40,9 @@ use pocketmine\entity\Human;
 use pocketmine\entity\Item as DroppedItem;
 use pocketmine\entity\PrimedTNT;
 use pocketmine\entity\Snowball;
+use pocketmine\entity\Egg;
 use pocketmine\entity\Squid;
 use pocketmine\entity\Villager;
-use pocketmine\entity\Zombie;
 use pocketmine\event\HandlerList;
 use pocketmine\event\level\LevelInitEvent;
 use pocketmine\event\level\LevelLoadEvent;
@@ -58,6 +58,7 @@ use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\level\format\anvil\Anvil;
+use pocketmine\level\format\pmanvil\PMAnvil;
 use pocketmine\level\format\LevelProviderManager;
 use pocketmine\level\format\mcregion\McRegion;
 use pocketmine\level\Level;
@@ -65,15 +66,15 @@ use pocketmine\metadata\EntityMetadataStore;
 use pocketmine\metadata\LevelMetadataStore;
 use pocketmine\metadata\PlayerMetadataStore;
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\Byte;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\Double;
+use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\Enum;
-use pocketmine\nbt\tag\Float;
-use pocketmine\nbt\tag\Int;
-use pocketmine\nbt\tag\Long;
-use pocketmine\nbt\tag\Short;
-use pocketmine\nbt\tag\String;
+use pocketmine\nbt\tag\FloatTag;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\LongTag;
+use pocketmine\nbt\tag\ShortTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\CompressBatchedTask;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\BatchPacket;
@@ -95,10 +96,15 @@ use pocketmine\scheduler\CallbackTask;
 use pocketmine\scheduler\GarbageCollectionTask;
 use pocketmine\scheduler\SendUsageTask;
 use pocketmine\scheduler\ServerScheduler;
+use pocketmine\tile\Bed;
+use pocketmine\tile\Cauldron;
 use pocketmine\tile\Chest;
 use pocketmine\tile\EnchantTable;
+use pocketmine\tile\EnderChest;
 use pocketmine\tile\Furnace;
 use pocketmine\tile\Sign;
+use pocketmine\tile\Skull;
+use pocketmine\tile\FlowerPot;
 use pocketmine\tile\Tile;
 use pocketmine\utils\Binary;
 use pocketmine\utils\Cache;
@@ -112,6 +118,32 @@ use pocketmine\utils\TextWrapper;
 use pocketmine\utils\Utils;
 use pocketmine\utils\UUID;
 use pocketmine\utils\VersionString;
+use pocketmine\network\protocol\Info;
+use pocketmine\level\generator\biome\Biome;
+use pocketmine\scheduler\FileWriteTask;
+use pocketmine\entity\animal\walking\Chicken;
+use pocketmine\entity\animal\walking\Cow;
+use pocketmine\entity\animal\walking\Mooshroom;
+use pocketmine\entity\animal\walking\Ocelot;
+use pocketmine\entity\animal\walking\Pig;
+use pocketmine\entity\animal\walking\Rabbit;
+use pocketmine\entity\animal\walking\Sheep;
+use pocketmine\entity\monster\flying\Blaze;
+use pocketmine\entity\monster\flying\Ghast;
+use pocketmine\entity\monster\walking\CaveSpider;
+use pocketmine\entity\monster\walking\Creeper;
+use pocketmine\entity\monster\walking\Enderman;
+use pocketmine\entity\monster\walking\IronGolem;
+use pocketmine\entity\monster\walking\PigZombie;
+use pocketmine\entity\monster\walking\Silverfish;
+use pocketmine\entity\monster\walking\Skeleton;
+use pocketmine\entity\monster\walking\SnowGolem;
+use pocketmine\entity\monster\walking\Spider;
+use pocketmine\entity\monster\walking\Wolf;
+use pocketmine\entity\monster\walking\Zombie;
+use pocketmine\entity\monster\walking\ZombieVillager;
+use pocketmine\entity\projectile\FireBall;
+use pocketmine\utils\MetadataConvertor;
 
 /**
  * The class that manages everything
@@ -122,6 +154,8 @@ class Server{
 
 	/** @var Server */
 	private static $instance = null;
+	
+	private static $serverId =  0;
 
 	/** @var BanList */
 	private $banByName = null;
@@ -183,6 +217,12 @@ class Server{
 
 	/** @var bool */
 	private $autoSave;
+	
+	/** @var bool */
+	private $autoGenerate;
+	
+	/** @var bool */
+	private $savePlayerData;
 
 	/** @var RCON */
 	private $rcon;
@@ -239,7 +279,58 @@ class Server{
 
 	/** @var Level */
 	private $levelDefault = null;
+	
+	private $useAnimal;
+	private $animalLimit;
+	private $useMonster ;
+	private $monsterLimit;
+		
 
+	public $packetMaker = null;
+	
+	private $globalCompasPosition = array(
+		'x' => 15000,
+		'y' => 10,
+		'z' => -1000000
+	);
+	
+	private $jsonCommands = [];
+	private $spawnedEntity = [];
+	
+	private $unloadLevelQueue = [];
+	
+	private $serverPublicKey = '';
+	private $serverPrivateKey = '';
+	private $serverToken = 'hksdYI3has';
+	private $isUseEncrypt = false;
+
+	public function addSpawnedEntity($entity) {
+		if ($entity instanceof Player) {
+			return;
+		}
+		$this->spawnedEntity[$entity->getId()] = $entity;
+	}
+
+	public function removeSpawnedEntity($entity) {
+		unset($this->spawnedEntity[$entity->getId()]);
+	}
+
+	public function isUseAnimal() {
+		return $this->useAnimal;
+	}
+
+	public function getAnimalLimit() {
+		return $this->animalLimit;
+	}
+
+	public function isUseMonster() {
+		return $this->useMonster;
+	}
+
+	public function getMonsterLimit() {
+		return $this->monsterLimit;
+	}
+	
 	/**
 	 * @return string
 	 */
@@ -316,7 +407,7 @@ class Server{
 	public function getPort(){
 		return $this->getConfigInt("server-port", 19132);
 	}
-
+	
 	/**
 	 * @return int
 	 */
@@ -353,6 +444,35 @@ class Server{
 		foreach($this->getLevels() as $level){
 			$level->setAutoSave($this->autoSave);
 		}
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getAutoGenerate(){
+		return $this->autoGenerate;
+	}
+
+	/**
+	 * @param bool $value
+	 */
+	public function setAutoGenerate($value){
+		$this->autoGenerate = (bool) $value;		
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getSavePlayerData(){
+		return $this->savePlayerData;
+	}
+
+	
+	/**
+	 * @param bool $value
+	 */
+	public function setSavePlayerData($value) {
+		$this->savePlayerData = (bool) $value;		
 	}
 
 	/**
@@ -705,37 +825,37 @@ class Server{
 		}
 		$spawn = $this->getDefaultLevel()->getSafeSpawn();
 		$nbt = new Compound("", [
-			new Long("firstPlayed", floor(microtime(true) * 1000)),
-			new Long("lastPlayed", floor(microtime(true) * 1000)),
+			new LongTag("firstPlayed", floor(microtime(true) * 1000)),
+			new LongTag("lastPlayed", floor(microtime(true) * 1000)),
 			new Enum("Pos", [
-				new Double(0, $spawn->x),
-				new Double(1, $spawn->y),
-				new Double(2, $spawn->z)
+				new DoubleTag(0, $spawn->x),
+				new DoubleTag(1, $spawn->y),
+				new DoubleTag(2, $spawn->z)
 			]),
-			new String("Level", $this->getDefaultLevel()->getName()),
-			//new String("SpawnLevel", $this->getDefaultLevel()->getName()),
-			//new Int("SpawnX", (int) $spawn->x),
-			//new Int("SpawnY", (int) $spawn->y),
-			//new Int("SpawnZ", (int) $spawn->z),
-			//new Byte("SpawnForced", 1), //TODO
+			new StringTag("Level", $this->getDefaultLevel()->getName()),
+			//new StringTag("SpawnLevel", $this->getDefaultLevel()->getName()),
+			//new IntTag("SpawnX", (int) $spawn->x),
+			//new IntTag("SpawnY", (int) $spawn->y),
+			//new IntTag("SpawnZ", (int) $spawn->z),
+			//new ByteTag("SpawnForced", 1), //TODO
 			new Enum("Inventory", []),
 			new Compound("Achievements", []),
-			new Int("playerGameType", $this->getGamemode()),
+			new IntTag("playerGameType", $this->getGamemode()),
 			new Enum("Motion", [
-				new Double(0, 0.0),
-				new Double(1, 0.0),
-				new Double(2, 0.0)
+				new DoubleTag(0, 0.0),
+				new DoubleTag(1, 0.0),
+				new DoubleTag(2, 0.0)
 			]),
 			new Enum("Rotation", [
-				new Float(0, 0.0),
-				new Float(1, 0.0)
+				new FloatTag(0, 0.0),
+				new FloatTag(1, 0.0)
 			]),
-			new Float("FallDistance", 0.0),
-			new Short("Fire", 0),
-			new Short("Air", 300),
-			new Byte("OnGround", 1),
-			new Byte("Invulnerable", 0),
-			new String("NameTag", $name),
+			new FloatTag("FallDistance", 0.0),
+			new ShortTag("Fire", 0),
+			new ShortTag("Air", 300),
+			new ByteTag("OnGround", 1),
+			new ByteTag("Invulnerable", 0),
+			new StringTag("NameTag", $name),
 		]);
 		$nbt->Pos->setTagType(NBT::TAG_Double);
 		$nbt->Inventory->setTagType(NBT::TAG_Compound);
@@ -752,26 +872,41 @@ class Server{
 	 * @param string   $name
 	 * @param Compound $nbtTag
 	 */
-	public function saveOfflinePlayerData($name, Compound $nbtTag){
+	public function saveOfflinePlayerData($name, Compound $nbtTag, $async = false){
+			$nbt = new NBT(NBT::BIG_ENDIAN);
+		try{
+			$nbt->setData($nbtTag);
+			if($async){
+				$this->getScheduler()->scheduleAsyncTask(new FileWriteTask($this->getDataPath() . "players/" . strtolower($name) . ".dat", $nbt->writeCompressed()));
+			}else{
+				file_put_contents($this->getDataPath() . "players/" . strtolower($name) . ".dat", $nbt->writeCompressed());
+			}
+		}catch(\Exception $e){
+			$this->logger->critical($this->getLanguage()->translateString("pocketmine.data.saveError", [$name, $e->getMessage()]));
+			if(\pocketmine\DEBUG > 1 and $this->logger instanceof MainLogger){
+				$this->logger->logException($e);
+			}
+		}
 	}
 
 	/**
 	 * @param string $name
 	 *
-	 * @return Player
+	 * @return Player|null
 	 */
 	public function getPlayer($name){
 		$found = null;
 		$name = strtolower($name);
 		$delta = PHP_INT_MAX;
-		foreach($this->getOnlinePlayers() as $player){
-			if(stripos($player->getName(), $name) === 0){
-				$curDelta = strlen($player->getName()) - strlen($name);
-				if($curDelta < $delta){
+		foreach ($this->getOnlinePlayers() as $player) {
+			$playerName = strtolower($player->getName());
+			if (strpos($playerName, $name) === 0) {
+				$curDelta = strlen($playerName) - strlen($name);
+				if ($curDelta < $delta) {
 					$found = $player;
 					$delta = $curDelta;
 				}
-				if($curDelta === 0){
+				if ($curDelta == 0) {
 					break;
 				}
 			}
@@ -805,10 +940,11 @@ class Server{
 		$partialName = strtolower($partialName);
 		$matchedPlayers = [];
 		foreach($this->getOnlinePlayers() as $player){
-			if(strtolower($player->getName()) === $partialName){
+			$playerName = strtolower($player->getName());
+			if ($playerName === $partialName) {
 				$matchedPlayers = [$player];
 				break;
-			}elseif(stripos($player->getName(), $partialName) !== false){
+			} else if (strpos($playerName, $partialName) !== false) {
 				$matchedPlayers[] = $player;
 			}
 		}
@@ -906,11 +1042,14 @@ class Server{
 	 *
 	 * @return bool
 	 */
-	public function unloadLevel(Level $level, $forceUnload = false){
-		if($level->unload($forceUnload) === true){
-			unset($this->levels[$level->getId()]);
-
-			return true;
+	public function unloadLevel(Level $level, $forceUnload = false, $direct = false){
+		if ($direct) {
+			if($level->unload($forceUnload) === true){
+				unset($this->levels[$level->getId()]);
+				return true;
+			}
+		} else {
+			$this->unloadLevelQueue[$level->getId()] = ['level' => $level, 'force' => $forceUnload];
 		}
 
 		return false;
@@ -984,7 +1123,7 @@ class Server{
 			return false;
 		}
 
-		$seed = $seed === null ? (PHP_INT_SIZE === 8 ? unpack("N", @Utils::getRandomBytes(4, false))[1] << 32 >> 32 : unpack("N", @Utils::getRandomBytes(4, false))[1]) : (int) $seed;
+		$seed = $seed === null ? Binary::readInt(@Utils::getRandomBytes(4, false)) : (int) $seed;
 
 		if(($provider = LevelProviderManager::getProviderByName($providerName = $this->getProperty("level-settings.default-format", "mcregion"))) === null){
 			$provider = LevelProviderManager::getProviderByName($providerName = "mcregion");
@@ -1010,27 +1149,29 @@ class Server{
 		$this->getPluginManager()->callEvent(new LevelInitEvent($level));
 
 		$this->getPluginManager()->callEvent(new LevelLoadEvent($level));
+		
+		if ($this->getAutoGenerate()) {
+			$centerX = $level->getSpawnLocation()->getX() >> 4;
+			$centerZ = $level->getSpawnLocation()->getZ() >> 4;
 
-		$centerX = $level->getSpawnLocation()->getX() >> 4;
-		$centerZ = $level->getSpawnLocation()->getZ() >> 4;
+			$order = [];
 
-		$order = [];
-
-		for($X = -3; $X <= 3; ++$X){
-			for($Z = -3; $Z <= 3; ++$Z){
-				$distance = $X ** 2 + $Z ** 2;
-				$chunkX = $X + $centerX;
-				$chunkZ = $Z + $centerZ;
-				$index = Level::chunkHash($chunkX, $chunkZ);
-				$order[$index] = $distance;
+			for($X = -3; $X <= 3; ++$X){
+				for($Z = -3; $Z <= 3; ++$Z){
+					$distance = $X ** 2 + $Z ** 2;
+					$chunkX = $X + $centerX;
+					$chunkZ = $Z + $centerZ;
+					$index = Level::chunkHash($chunkX, $chunkZ);
+					$order[$index] = $distance;
+				}
 			}
-		}
 
-		asort($order);
+			asort($order);
 
-		foreach($order as $index => $distance){
-			Level::getXZ($index, $chunkX, $chunkZ);
-			$level->generateChunk($chunkX, $chunkZ, true);
+			foreach($order as $index => $distance){
+				Level::getXZ($index, $chunkX, $chunkZ);
+				$level->generateChunk($chunkX, $chunkZ, true);
+			}
 		}
 
 		return true;
@@ -1317,6 +1458,10 @@ class Server{
 	public static function getInstance(){
 		return self::$instance;
 	}
+	
+	public static function getServerId(){
+		return self::$serverId;
+	}
 
 	/**
 	 * @param \ClassLoader    $autoloader
@@ -1325,8 +1470,9 @@ class Server{
 	 * @param string          $dataPath
 	 * @param string          $pluginPath
 	 */
-	public function __construct(\ClassLoader $autoloader, \ThreadedLogger $logger, $filePath, $dataPath, $pluginPath){
+	public function __construct(\ClassLoader $autoloader, \ThreadedLogger $logger, $filePath, $dataPath, $pluginPath){		
 		self::$instance = $this;
+		self::$serverId =  mt_rand(0, PHP_INT_MAX);
 
 		$this->autoloader = $autoloader;
 		$this->logger = $logger;
@@ -1371,12 +1517,13 @@ class Server{
 			"server-port" => 19132,
 			"memory-limit" => "256M",
 			"white-list" => false,
-			"announce-player-achievements" => true,
 			"spawn-protection" => 16,
 			"max-players" => 20,
 			"allow-flight" => false,
 			"spawn-animals" => true,
+			"animals-limit" => 0,
 			"spawn-mobs" => true,
+			"mobs-limit" => 0,
 			"gamemode" => 0,
 			"force-gamemode" => false,
 			"hardcore" => false,
@@ -1390,6 +1537,10 @@ class Server{
 			"enable-rcon" => false,
 			"rcon.password" => substr(base64_encode(@Utils::getRandomBytes(20, false)), 3, 10),
 			"auto-save" => true,
+			"auto-generate" => false,
+			"save-player-data" => false,
+			"time-update" => true,
+			"use-encrypt" => false
 		]);
 
 		ServerScheduler::$WORKERS = 4;
@@ -1418,6 +1569,14 @@ class Server{
 
 		$this->maxPlayers = $this->getConfigInt("max-players", 20);
 		$this->setAutoSave($this->getConfigBoolean("auto-save", true));
+		$this->setAutoGenerate($this->getConfigBoolean("auto-generate", false));
+		$this->setSavePlayerData($this->getConfigBoolean("save-player-data", false));
+		
+		$this->useAnimal = $this->getConfigBoolean("spawn-animals", false);
+		$this->animalLimit = $this->getConfigInt("animals-limit", 0);
+		$this->useMonster = $this->getConfigBoolean("spawn-mobs", false);
+		$this->monsterLimit = $this->getConfigInt("mobs-limit", 0);
+		$this->isUseEncrypt = $this->getConfigBoolean("use-encrypt", false);
 
 		if(($memory = str_replace("B", "", strtoupper($this->getConfigString("memory-limit", "256M")))) !== false){
 			$value = ["M" => 1, "G" => 1024];
@@ -1430,6 +1589,7 @@ class Server{
 			$this->setConfigString("memory-limit", "256M");
 		}
 		$this->network = new Network($this);
+		$this->network->setName($this->getMotd());
 
 		if($this->getConfigBoolean("hardcore", false) === true and $this->getDifficulty() < 3){
 			$this->setConfigInt("difficulty", 3);
@@ -1453,7 +1613,7 @@ class Server{
 		$this->logger->info("Starting Minecraft PE server on " . ($this->getIp() === "" ? "*" : $this->getIp()) . ":" . $this->getPort());
 		define("BOOTUP_RANDOM", @Utils::getRandomBytes(16));
 		$this->serverID = Utils::getMachineUniqueId($this->getIp() . $this->getPort());
-
+	
 		$this->addInterface($this->mainInterface = new RakLibInterface($this));
 
 		$this->logger->info("This server is running " . $this->getName() . " version " . ($version->isDev() ? TextFormat::YELLOW : "") . $version->get(true) . TextFormat::WHITE . " \"" . $this->getCodename() . "\" (API " . $this->getApiVersion() . ")");
@@ -1470,13 +1630,17 @@ class Server{
 
 		InventoryType::init();
 		Block::init();
+		Enchantment::init();
 		Item::init();
+		Biome::init();
 		TextWrapper::init();
+		MetadataConvertor::init();
 		$this->craftingManager = new CraftingManager();
 
 		$this->pluginManager = new PluginManager($this, $this->commandMap);
 		$this->pluginManager->subscribeToPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, $this->consoleSender);
-		$this->pluginManager->setUseTimings($this->getProperty("settings.enable-profiling", false));
+//		$this->pluginManager->setUseTimings($this->getProperty("settings.enable-profiling", false));
+		$this->pluginManager->setUseTimings(true);
 		$this->pluginManager->registerInterface(PharPluginLoader::class);
 
 		\set_exception_handler([$this, "exceptionHandler"]);
@@ -1509,8 +1673,9 @@ class Server{
 		$this->enablePlugins(PluginLoadOrder::STARTUP);
 
 		LevelProviderManager::addProvider($this, Anvil::class);
+		LevelProviderManager::addProvider($this, PMAnvil::class);
 		LevelProviderManager::addProvider($this, McRegion::class);
-
+		
 		foreach((array) $this->getProperty("worlds", []) as $name => $worldSetting){
 			if($this->loadLevel($name) === false){
 				$seed = $this->getProperty("worlds.$name.seed", time());
@@ -1567,7 +1732,7 @@ class Server{
 		if($this->getAdvancedProperty("main.player-shuffle", 0) > 0){
 			$this->scheduler->scheduleDelayedRepeatingTask(new CallbackTask([$this, "shufflePlayers"]), $this->getAdvancedProperty("main.player-shuffle", 0), $this->getAdvancedProperty("main.player-shuffle", 0));
 		}
-
+		
 		$this->start();
 	}
 
@@ -1672,14 +1837,7 @@ class Server{
 	 * @param Player[]   $players
 	 * @param DataPacket $packet
 	 */
-	public static function broadcastPacket(array $players, DataPacket $packet){
-		$packet->encode();
-		$packet->isEncoded = true;
-		if(Network::$BATCH_THRESHOLD >= 0 and strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
-			Server::getInstance()->batchPackets($players, [$packet->buffer], false);
-			return;
-		}
-
+	public static function broadcastPacket(array $players, DataPacket $packet) {
 		foreach($players as $player){
 			$player->dataPacket($packet);
 		}
@@ -1696,40 +1854,50 @@ class Server{
 	 * @param bool                 $forceSync
 	 */
 	public function batchPackets(array $players, array $packets, $forceSync = true){
-		$str = "";
-
-		foreach($packets as $p){
-			if($p instanceof DataPacket){
-				if(!$p->isEncoded){
-					$p->encode();
-				}
-				$str .= Binary::writeInt(strlen($p->buffer)) . $p->buffer;
-			}else{
-				$str .= Binary::writeInt(strlen($p)) . $p;
-			}
-		}
-
 		$targets = [];
-		foreach($players as $p){
-			$targets[] = $this->identifiers[spl_object_hash($p)];
+		$neededProtocol = [];
+		$neededSubClientsId = [];
+		foreach ($players as $p) {
+			$protocol = $p->getPlayerProtocol();
+			$subClientId = $p->getSubClientId();
+			$playerIdentifier = $p->getIdentifier();
+			if ($subClientId > 0 && ($parent = $p->getParent()) !== null) {
+				$playerIdentifier = $parent->getIdentifier();
+			}
+			$targets[$playerIdentifier] = [ $playerIdentifier, $protocol ];
+			$neededProtocol[$protocol] = $protocol;
+			$neededSubClientsId[$subClientId] = $subClientId;
 		}
-
-		$this->broadcastPacketsCallback(zlib_encode($str, ZLIB_ENCODING_DEFLATE, $this->networkCompressionLevel), $targets);
-	}
-
-	public function broadcastPacketsCallback($data, array $identifiers){
-		$pk = new BatchPacket();
-		$pk->payload = $data;
-		$pk->encode();
-		$pk->isEncoded = true;
-
-		foreach($identifiers as $i){
-			if(isset($this->players[$i])){
-				$this->players[$i]->dataPacket($pk);
+		$protocolsCount = count($neededProtocol);
+		$newPackets = [];
+		foreach ($packets as $p) {
+			foreach ($neededProtocol as $protocol) {
+				if ($p instanceof DataPacket) {
+					if ($protocol >= Info::PROTOCOL_120) {
+						foreach ($neededSubClientsId as $subClientId) {
+							$p->senderSubClientID = $subClientId;
+							$p->encode($protocol);
+							$newPackets[$protocol][] = $p->buffer;
+						}
+					} else {
+						if (!$p->isEncoded || $protocolsCount > 1) {
+							$p->senderSubClientID = 0;
+							$p->encode($protocol);
+						}
+						$newPackets[$protocol][] = $p->buffer;
+					}
+				} elseif ($protocolsCount == 1) {
+					$newPackets[$protocol][] = $p;
+				}
 			}
 		}
+		$data = [];
+		$data['packets'] = $newPackets;
+		$data['targets'] = $targets;
+		$data['networkCompressionLevel'] = $this->networkCompressionLevel;
+		$data['isBatch'] = true;
+		$this->packetMaker->pushMainToThreadPacket(serialize($data));
 	}
-
 
 	/**
 	 * @param int $type
@@ -1768,14 +1936,14 @@ class Server{
 	}
 
 	public function checkConsole(){
-		Timings::$serverCommandTimer->startTiming();
+		//Timings::$serverCommandTimer->startTiming();
 		if(($line = $this->console->getLine()) !== null){
 			$this->pluginManager->callEvent($ev = new ServerCommandEvent($this->consoleSender, $line));
 			if(!$ev->isCancelled()){
 				$this->dispatchCommand($ev->getSender(), $ev->getCommand());
 			}
 		}
-		Timings::$serverCommandTimer->stopTiming();
+		//Timings::$serverCommandTimer->stopTiming();
 	}
 
 	/**
@@ -1870,6 +2038,15 @@ class Server{
 
 		try{
 			$this->hasStopped = true;
+			
+			foreach($this->players as $player){
+				$player->close(TextFormat::YELLOW . $player->getName() . " has left the game", $this->getProperty("settings.shutdown-message", "Server closed"));
+			}
+
+			foreach($this->network->getInterfaces() as $interface){
+				$interface->shutdown();
+				$this->network->unregisterInterface($interface);
+			}
 
 			$this->shutdown();
 			if($this->rcon instanceof RCON){
@@ -1883,12 +2060,8 @@ class Server{
 
 			$this->pluginManager->disablePlugins();
 
-			foreach($this->players as $player){
-				$player->close(TextFormat::YELLOW . $player->getName() . " has left the game", $this->getProperty("settings.shutdown-message", "Server closed"));
-			}
-
 			foreach($this->getLevels() as $level){
-				$this->unloadLevel($level, true);
+				$this->unloadLevel($level, true, true);
 			}
 
 			HandlerList::unregisterAll();
@@ -1898,12 +2071,8 @@ class Server{
 
 			$this->properties->save();
 
-			$this->console->kill();
-
-			foreach($this->network->getInterfaces() as $interface){
-				$interface->shutdown();
-				$this->network->unregisterInterface($interface);
-			}
+			$this->console->shutdown();
+			$this->console->notify();			
 		}catch(\Exception $e){
 			$this->logger->emergency("Crashed while crashing, killing process");
 			@kill(getmypid());
@@ -1914,7 +2083,15 @@ class Server{
 	/**
 	 * Starts the PocketMine-MP server and starts processing ticks and packets
 	 */
-	public function start(){
+	public function start(){			
+		DataPacket::initPackets();
+		if ($this->isUseEncrypt) {
+			\McpeEncrypter::generateKeyPair($this->serverPrivateKey, $this->serverPublicKey);
+		}
+		$jsonCommands = @json_decode(@file_get_contents(__DIR__ . "/command/commands.json"), true);
+		if ($jsonCommands) {
+			$this->jsonCommands = $jsonCommands;
+		}
 		if($this->getConfigBoolean("enable-query", true) === true){
 			$this->queryHandler = new QueryHandler();
 		}
@@ -1923,10 +2100,10 @@ class Server{
 			$this->network->blockAddress($entry->getName(), -1);
 		}
 
-		if($this->getProperty("settings.send-usage", true) !== false){
-			$this->scheduler->scheduleDelayedRepeatingTask(new CallbackTask([$this, "sendUsage"]), 6000, 6000);
-			$this->sendUsage();
-		}
+//		if($this->getProperty("settings.send-usage", true) !== false){
+//			$this->scheduler->scheduleDelayedRepeatingTask(new CallbackTask([$this, "sendUsage"]), 6000, 6000);
+//			$this->sendUsage();
+//		}
 
 
 		if($this->getProperty("settings.upnp-forwarding", false) == true){
@@ -1952,6 +2129,15 @@ class Server{
 
 		$this->logger->info("Done (" . round(microtime(true) - \pocketmine\START_TIME, 3) . 's)! For help, type "help" or "?"');
 
+		$this->packetMaker = new PacketMaker($this->getLoader());
+		
+		$this->tickAverage = array();
+		$this->useAverage = array();
+		for($i = 0; $i < 1200; $i++) {
+			$this->tickAverage[] = 20;
+			$this->useAverage[] = 0;
+		}
+
 		$this->tickProcessor();
 		$this->forceShutdown();
 
@@ -1970,7 +2156,7 @@ class Server{
 		}
 	}
 
-	public function exceptionHandler(\Exception $e, $trace = null){
+	public function exceptionHandler(\Throwable $e, $trace = null){
 		if($e === null){
 			return;
 		}
@@ -2074,71 +2260,82 @@ class Server{
 		return [];
 	}
 
-	private function tickProcessor(){
+
+		private function tickProcessor(){
+		$this->nextTick = microtime(true);
 		while($this->isRunning){
 			$this->tick();
-			usleep((int) max(1, ($this->nextTick - microtime(true)) * 1000000));
+			$next = $this->nextTick - 0.0001;
+			if($next > microtime(true)){
+				try{
+					@time_sleep_until($next);
+				}catch(\Throwable $e){
+					//Sometimes $next is less than the current time. High load?
+				}
+			}
 		}
 	}
 
-	public function addOnlinePlayer(Player $player){
-		$this->playerList[$player->getRawUniqueId()] = $player;
-
-		$this->updatePlayerListData($player->getUniqueId(), $player->getId(), $player->getDisplayName(), $player->isSkinSlim(), $player->getSkinData());
+	public function addOnlinePlayer(Player $player){				
+		$this->playerList[$player->getRawUniqueId()] = $player;		
 	}
 
-	public function removeOnlinePlayer(Player $player){
-		if(isset($this->playerList[$player->getRawUniqueId()])){
+	public function removeOnlinePlayer(Player $player) {
+		if (isset($this->playerList[$player->getRawUniqueId()])) {
 			unset($this->playerList[$player->getRawUniqueId()]);
-
-			$pk = new PlayerListPacket();
-			$pk->type = PlayerListPacket::TYPE_REMOVE;
-			$pk->entries[] = [$player->getUniqueId()];
-			Server::broadcastPacket($this->playerList, $pk);
 		}
 	}
 
-	public function updatePlayerListData(UUID $uuid, $entityId, $name, $isSlim, $skinData, array $players = null){
+	public function updatePlayerListData(UUID $uuid, $entityId, $name, $skinName, $skinData, $skinGeometryName, $skinGeometryData, $capeData, $xuid, $players){
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_ADD;
-		$pk->entries[] = [$uuid, $entityId, $name, $isSlim, $skinData];
-		Server::broadcastPacket($players === null ? $this->playerList : $players, $pk);
+		$pk->entries[] = [$uuid, $entityId, $name, $skinName, $skinData, $capeData, $skinGeometryName, $skinGeometryData, $xuid];
+		 
+		$readyPackets = [];
+		foreach ($players as $p){
+			$protocol = $p->getPlayerProtocol();
+			if (!isset($readyPackets[$protocol])) {
+				$pk->encode($protocol, $p->getSubClientId());
+				$batch = new BatchPacket();
+				$batch->payload = zlib_encode(Binary::writeVarInt(strlen($pk->getBuffer())) . $pk->getBuffer(), ZLIB_ENCODING_DEFLATE, 7);
+				$readyPackets[$protocol] = $batch;
+			}
+			$p->dataPacket($readyPackets[$protocol]);
+		}
 	}
 
-	public function removePlayerListData(UUID $uuid, array $players = null){
+	public function removePlayerListData(UUID $uuid, $players){
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_REMOVE;
 		$pk->entries[] = [$uuid];
-		Server::broadcastPacket($players === null ? $this->playerList : $players, $pk);
-	}
-
-	public function sendFullPlayerListData(Player $p){
-		$pk = new PlayerListPacket();
-		$pk->type = PlayerListPacket::TYPE_ADD;
-		foreach($this->playerList as $player){
-			$pk->entries[] = [$player->getUniqueId(), $player->getId(), $player->getDisplayName(), $player->isSkinSlim(), $player->getSkinData()];
+		foreach ($players as $p){
+			$p->dataPacket($pk);
 		}
-
-		$p->dataPacket($pk);
 	}
 
+	private $craftList = [];
+	
 	public function sendRecipeList(Player $p){
-		$pk = new CraftingDataPacket();
-		$pk->cleanRecipes = true;
+		if(!isset($this->craftList[$p->getPlayerProtocol()])) {
+			$pk = new CraftingDataPacket();
+			$pk->cleanRecipes = true;
 
-		foreach($this->getCraftingManager()->getRecipes() as $recipe){
-			if($recipe instanceof ShapedRecipe){
-				$pk->addShapedRecipe($recipe);
-			}elseif($recipe instanceof ShapelessRecipe){
-				$pk->addShapelessRecipe($recipe);
+			foreach($this->getCraftingManager()->getRecipes() as $recipe){
+				if($recipe instanceof ShapedRecipe){
+					$pk->addShapedRecipe($recipe);
+				}elseif($recipe instanceof ShapelessRecipe){
+					$pk->addShapelessRecipe($recipe);
+				}
 			}
-		}
 
-		foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
-			$pk->addFurnaceRecipe($recipe);
+			foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
+				$pk->addFurnaceRecipe($recipe);
+			}
+			$pk->encode($p->getPlayerProtocol(), $p->getSubClientId());
+			$pk->isEncoded = true;
+			$this->craftList[$p->getPlayerProtocol()] = $pk;
 		}
-
-		$p->dataPacket($pk);
+		$this->batchPackets([$p], [$this->craftList[$p->getPlayerProtocol()]]);
 	}
 
 	public function addPlayer($identifier, Player $player){
@@ -2163,7 +2360,7 @@ class Server{
 
 	public function doAutoSave(){
 		if($this->getAutoSave()){
-			Timings::$worldSaveTimer->startTiming();
+			//Timings::$worldSaveTimer->startTiming();
 			foreach($this->getOnlinePlayers() as $index => $player){
 				if($player->isOnline()){
 					$player->save();
@@ -2175,7 +2372,7 @@ class Server{
 			foreach($this->getLevels() as $level){
 				$level->save(false);
 			}
-			Timings::$worldSaveTimer->stopTiming();
+			//Timings::$worldSaveTimer->stopTiming();
 		}
 	}
 
@@ -2185,39 +2382,39 @@ class Server{
 		}
 	}
 
-	public function sendUsage(){
-		if($this->lastSendUsage instanceof SendUsageTask){
-			if(!$this->lastSendUsage->isGarbage()){ //do not call multiple times
-				return;
-			}
-		}
-
-		$plist = "";
-		foreach($this->getPluginManager()->getPlugins() as $p){
-			$d = $p->getDescription();
-			$plist .= str_replace([";", ":"], "", $d->getName()) . ":" . str_replace([";", ":"], "", $d->getVersion()) . ";";
-		}
-
-		$version = new VersionString();
-		$this->lastSendUsage = new SendUsageTask("http://stats.pocketmine.net/usage.php", [
-			"serverid" => 0, // todo: fix for real
-			"port" => $this->getPort(),
-			"os" => Utils::getOS(),
-			"name" => $this->getName(),
-			"memory_total" => $this->getConfigString("memory-limit"),
-			"memory_usage" => memory_get_usage(),
-			"php_version" => PHP_VERSION,
-			"version" => $version->get(true),
-			"build" => $version->getBuild(),
-			"mc_version" => \pocketmine\MINECRAFT_VERSION,
-			"protocol" => \pocketmine\network\protocol\Info::CURRENT_PROTOCOL,
-			"online" => count($this->players),
-			"max" => $this->getMaxPlayers(),
-			"plugins" => $plist,
-		]);
-
-		$this->scheduler->scheduleAsyncTask($this->lastSendUsage);
-	}
+//	public function sendUsage(){
+//		if($this->lastSendUsage instanceof SendUsageTask){
+//			if(!$this->lastSendUsage->isGarbage()){ //do not call multiple times
+//				return;
+//			}
+//		}
+//
+//		$plist = "";
+//		foreach($this->getPluginManager()->getPlugins() as $p){
+//			$d = $p->getDescription();
+//			$plist .= str_replace([";", ":"], "", $d->getName()) . ":" . str_replace([";", ":"], "", $d->getVersion()) . ";";
+//		}
+//
+//		$version = new VersionString();
+//		$this->lastSendUsage = new SendUsageTask("http://stats.pocketmine.net/usage.php", [
+//			"serverid" => 0, // todo: fix for real
+//			"port" => $this->getPort(),
+//			"os" => Utils::getOS(),
+//			"name" => $this->getName(),
+//			"memory_total" => $this->getConfigString("memory-limit"),
+//			"memory_usage" => memory_get_usage(),
+//			"php_version" => PHP_VERSION,
+//			"version" => $version->get(true),
+//			"build" => $version->getBuild(),
+//			"mc_version" => \pocketmine\MINECRAFT_VERSION,
+//			"protocol" => \pocketmine\network\protocol\Info::CURRENT_PROTOCOL,
+//			"online" => count($this->players),
+//			"max" => $this->getMaxPlayers(),
+//			"plugins" => $plist,
+//		]);
+//
+//		$this->scheduler->scheduleAsyncTask($this->lastSendUsage);
+//	}
 
 	/**
 	 * @return Network
@@ -2228,10 +2425,10 @@ class Server{
 
 	private function titleTick(){
 		if(defined("pocketmine\\DEBUG") and \pocketmine\DEBUG >= 0 and \pocketmine\ANSI === true){
-			echo "\x1b]0;" . $this->getName() . " " . $this->getPocketMineVersion() . " | Online " . count($this->players) . "/" . $this->getMaxPlayers() . " | RAM " . round((memory_get_usage() / 1024) / 1024, 2) . "/" . round((memory_get_usage(true) / 1024) / 1024, 2) . " MB | U " . round($this->mainInterface->getUploadUsage() / 1024, 2) . " D " . round($this->mainInterface->getDownloadUsage() / 1024, 2) . " kB/s | TPS " . $this->getTicksPerSecond() . " | Load " . $this->getTickUsage() . "%\x07";
+			echo "\x1b]0;" . $this->getName() . " " . $this->getPocketMineVersion() . " | Online " . count($this->players) . "/" . $this->getMaxPlayers() . " | RAM " . round((memory_get_usage() / 1024) / 1024, 2) . "/" . round((memory_get_usage(true) / 1024) / 1024, 2) . " MB | U " . round($this->network->getUpload() / 1024, 2) . " D " . round($this->network->getDownload() / 1024, 2) . " kB/s | TPS " . $this->getTicksPerSecond() . " | Load " . $this->getTickUsage() . "%\x07";
 		}
 	}
-
+	
 	/**
 	 * @param string $address
 	 * @param int    $port
@@ -2265,20 +2462,35 @@ class Server{
 		if($tickTime < $this->nextTick){
 			return false;
 		}
+		
+		//TimingsHandler::reload();
 
-		Timings::$serverTickTimer->startTiming();
+		//Timings::$serverTickTimer->startTiming();
 
 		++$this->tickCounter;
-
+		
 		$this->checkConsole();
+		
+		foreach ($this->unloadLevelQueue as $levelForUnload) {
+			$this->unloadLevel($levelForUnload['level'], $levelForUnload['force'], true);
+		}
+		$this->unloadLevelQueue = [];
 
-		Timings::$connectionTimer->startTiming();
+		while(strlen($str = $this->packetMaker->readThreadToMainPacket()) > 0){
+			$data = unserialize($str);
+			if (isset($this->players[$data['identifier']])) {
+				$player = $this->players[$data['identifier']];
+				$player->getInterface()->putReadyPacket($player, $data['buffer']);
+			}
+		}
+	
+		//Timings::$connectionTimer->startTiming();
 		$this->network->processInterfaces();
-		Timings::$connectionTimer->stopTiming();
+		//Timings::$connectionTimer->stopTiming();
 
-		Timings::$schedulerTimer->startTiming();
+		//Timings::$schedulerTimer->startTiming();
 		$this->scheduler->mainThreadHeartbeat($this->tickCounter);
-		Timings::$schedulerTimer->stopTiming();
+		//Timings::$schedulerTimer->stopTiming();
 
 		$this->checkTickUpdates($this->tickCounter);
 
@@ -2300,23 +2512,36 @@ class Server{
 				$level->clearCache();
 			}
 		}
+		
 
+		if ($this->tickCounter % 200 === 0 && ($this->isUseAnimal() || $this->isUseMonster())) {
+			SpawnerCreature::generateEntity($this, $this->isUseAnimal(), $this->isUseMonster());
+		}
+		//Timings::$serverTickTimer->stopTiming();
 
-		Timings::$serverTickTimer->stopTiming();
-
-		TimingsHandler::tick();
+		//TimingsHandler::tick();
 
 		$now = microtime(true);
 		array_shift($this->tickAverage);
-		$this->tickAverage[] = min(20, 1 / max(0.001, $now - $tickTime));
+		$tickDiff = $now - $tickTime;
+		$this->tickAverage[] = ($tickDiff <= 0.05) ? 20 : 1 / $tickDiff;
 		array_shift($this->useAverage);
-		$this->useAverage[] = min(1, ($now - $tickTime) / 0.05);
+		$this->useAverage[] = min(1, $tickDiff * 20);
 
 		if(($this->nextTick - $tickTime) < -1){
 			$this->nextTick = $tickTime;
 		}
 		$this->nextTick += 0.05;
 
+//		if(microtime(true) - $tickTime > 0.06){
+//			$timingFolder = $this->getDataPath() . "timings/";
+//
+//			if(!file_exists($timingFolder)){
+//				mkdir($timingFolder, 0777);
+//			}
+//			$timings = $timingFolder . "timings.txt";
+//			TimingsHandler::printTimings($timings);
+//		}
 		return true;
 	}
 
@@ -2326,11 +2551,33 @@ class Server{
 		Entity::registerEntity(FallingSand::class);
 		Entity::registerEntity(PrimedTNT::class);
 		Entity::registerEntity(Snowball::class);
+		Entity::registerEntity(Egg::class);
 		Entity::registerEntity(Villager::class);
-		Entity::registerEntity(Zombie::class);
 		Entity::registerEntity(Squid::class);
-
-		Entity::registerEntity(Human::class, true);
+		Entity::registerEntity(Human::class, true);		
+		
+		Entity::registerEntity(Blaze::class);
+		Entity::registerEntity(CaveSpider::class);
+		Entity::registerEntity(Chicken::class);
+		Entity::registerEntity(Cow::class);
+		Entity::registerEntity(Creeper::class);
+		Entity::registerEntity(Enderman::class);
+		Entity::registerEntity(Ghast::class);
+		Entity::registerEntity(IronGolem::class);
+		Entity::registerEntity(Mooshroom::class);
+		Entity::registerEntity(Ocelot::class);
+		Entity::registerEntity(Pig::class);
+		Entity::registerEntity(PigZombie::class);
+		Entity::registerEntity(Rabbit::class);
+		Entity::registerEntity(Sheep::class);
+		Entity::registerEntity(Silverfish::class);
+		Entity::registerEntity(Skeleton::class);
+		Entity::registerEntity(SnowGolem::class);
+		Entity::registerEntity(Spider::class);
+		Entity::registerEntity(Wolf::class);
+		Entity::registerEntity(Zombie::class);
+		Entity::registerEntity(ZombieVillager::class);
+		Entity::registerEntity(FireBall::class);
 	}
 
 	private function registerTiles(){
@@ -2338,6 +2585,11 @@ class Server{
 		Tile::registerTile(Furnace::class);
 		Tile::registerTile(Sign::class);
 		Tile::registerTile(EnchantTable::class);
+		Tile::registerTile(Skull::class);
+		Tile::registerTile(FlowerPot::class);
+        Tile::registerTile(EnderChest::class);
+		Tile::registerTile(Bed::class);
+		Tile::registerTile(Cauldron::class);
 	}
 
 	public function shufflePlayers(){
@@ -2354,5 +2606,33 @@ class Server{
 
 		$this->players = $random;
 	}
+		
+	public function setGlobalCompassPosition($x, $z) {
+		$this->globalCompasPosition['x'] = $x;
+		$this->globalCompasPosition['z'] = $z;
+	}
 
+	public function getGlobalCompassPosition() {
+		return $this->globalCompasPosition;
+	}	
+	
+	public function getJsonCommands() {
+		return $this->jsonCommands;
+	}
+	
+	public function isUseEncrypt() {
+		return $this->isUseEncrypt;
+	}
+		
+	public function getServerPublicKey() {
+		return $this->serverPublicKey;
+	}
+	
+	public function getServerPrivateKey() {
+		return $this->serverPrivateKey;
+	}
+	
+	public function getServerToken() {	
+		return $this->serverToken;
+	}
 }

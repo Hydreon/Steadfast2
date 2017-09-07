@@ -114,39 +114,39 @@ class Enum extends NamedTag implements \ArrayAccess, \Countable{
 		return $this->tagType;
 	}
 
-	public function read(NBT $nbt){
+	public function read(NBT $nbt, $new = false){
 		$this->value = [];
 		$this->tagType = ord($nbt->get(1));
-		$size = $nbt->endianness === 1 ? (PHP_INT_SIZE === 8 ? unpack("N", $nbt->get(4))[1] << 32 >> 32 : unpack("N", $nbt->get(4))[1]) : (PHP_INT_SIZE === 8 ? unpack("V", $nbt->get(4))[1] << 32 >> 32 : unpack("V", $nbt->get(4))[1]);
+		$size = $nbt->getInt();	
 		for($i = 0; $i < $size and !$nbt->feof(); ++$i){
 			switch($this->tagType){
 				case NBT::TAG_Byte:
-					$tag = new Byte("");
+					$tag = new ByteTag("");
 					$tag->read($nbt);
 					$this->{$i} = $tag;
 					break;
 				case NBT::TAG_Short:
-					$tag = new Short("");
+					$tag = new ShortTag("");
 					$tag->read($nbt);
 					$this->{$i} = $tag;
 					break;
 				case NBT::TAG_Int:
-					$tag = new Int("");
-					$tag->read($nbt);
+					$tag = new IntTag("");
+					$tag->read($nbt, $new);
 					$this->{$i} = $tag;
 					break;
 				case NBT::TAG_Long:
-					$tag = new Long("");
+					$tag = new LongTag("");
 					$tag->read($nbt);
 					$this->{$i} = $tag;
 					break;
 				case NBT::TAG_Float:
-					$tag = new Float("");
+					$tag = new FloatTag("");
 					$tag->read($nbt);
 					$this->{$i} = $tag;
 					break;
 				case NBT::TAG_Double:
-					$tag = new Double("");
+					$tag = new DoubleTag("");
 					$tag->read($nbt);
 					$this->{$i} = $tag;
 					break;
@@ -156,18 +156,18 @@ class Enum extends NamedTag implements \ArrayAccess, \Countable{
 					$this->{$i} = $tag;
 					break;
 				case NBT::TAG_String:
-					$tag = new String("");
-					$tag->read($nbt);
+					$tag = new StringTag("");
+					$tag->read($nbt, $new);
 					$this->{$i} = $tag;
 					break;
 				case NBT::TAG_Enum:
 					$tag = new TagEnum("");
-					$tag->read($nbt);
+					$tag->read($nbt, $new);
 					$this->{$i} = $tag;
 					break;
 				case NBT::TAG_Compound:
 					$tag = new Compound("");
-					$tag->read($nbt);
+					$tag->read($nbt, $new);
 					$this->{$i} = $tag;
 					break;
 				case NBT::TAG_IntArray:
@@ -179,7 +179,7 @@ class Enum extends NamedTag implements \ArrayAccess, \Countable{
 		}
 	}
 
-	public function write(NBT $nbt){
+	public function write(NBT $nbt, $old = false){
 		if(!isset($this->tagType)){
 			$id = null;
 			foreach($this as $tag){
@@ -205,7 +205,7 @@ class Enum extends NamedTag implements \ArrayAccess, \Countable{
 		}
 		$nbt->buffer .= $nbt->endianness === 1 ? pack("N", count($tags)) : pack("V", count($tags));
 		foreach($tags as $tag){
-			$tag->write($nbt);
+			$tag->write($nbt, $old);
 		}
 	}
 

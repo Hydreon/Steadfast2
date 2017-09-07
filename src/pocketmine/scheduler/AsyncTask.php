@@ -22,24 +22,27 @@
 namespace pocketmine\scheduler;
 
 use pocketmine\Server;
+use pocketmine\Collectable;
 
 /**
  * Class used to run async tasks in other threads.
  *
  * WARNING: Do not call PocketMine-MP API methods, or save objects from/on other Threads!!
  */
-abstract class AsyncTask extends \Collectable{
+abstract class AsyncTask extends Collectable{
 
 	private $result = null;
 	/** @var int */
 	private $taskId = null;
+	
+	protected $isFinished = false;
 
-	public function run(){
+	public function run(){		
 		$this->result = null;
 
 		$this->onRun();
-
-		$this->setGarbage();
+		$this->isFinished = true;
+		//$this->setGarbage();
 	}
 
 	/**
@@ -48,7 +51,7 @@ abstract class AsyncTask extends \Collectable{
 	 * @return bool
 	 */
 	public function isFinished(){
-		return $this->isGarbage();
+		return $this->isFinished;
 	}
 
 	/**
@@ -112,6 +115,18 @@ abstract class AsyncTask extends \Collectable{
 	}
 
 	/**
+	 * Gets something into the local thread store.
+	 * You have to initialize this in some way from the task on run
+	 *
+	 * @param string $identifier
+	 * @return mixed
+	 */
+	public function getFromThreadStore($identifier){
+		global $store;
+		return $this->isFinished() ? null : $store[$identifier];
+	}
+	
+	/**
 	 * @return bool
 	 */
 	public function hasResult(){
@@ -151,5 +166,20 @@ abstract class AsyncTask extends \Collectable{
 	public function onCompletion(Server $server){
 
 	}
+	
+	public function cleanObject(){
+		foreach($this as $p => $v){
+			if(!($v instanceof \Threaded)){
+				$this->{$p} = null;
+			}
+		}
+	}
 
+	public function saveToThreadStore($identifier, $value){
+		global $store;
+		if(!$this->isFinished()){
+			$store[$identifier] = $value;
+		}
+	}
+	
 }

@@ -42,10 +42,10 @@ class CrashDump{
 		$this->time = time();
 		$this->server = $server;
 
-        if(!is_dir($this->server->getDataPath()) . "CrashDumps")
-            mkdir($this->server->getDataPath() . "CrashDumps");
+		if(!is_dir($this->server->getDataPath() . "logs"))
+			mkdir($this->server->getDataPath() . "logs");
 
-		$this->path = $this->server->getDataPath() . "CrashDumps/" . date("D_M_j-H.i.s-T_Y", $this->time) . ".log";
+		$this->path = $this->server->getDataPath() . "logs/" . date("D_M_j-H.i.s-T_Y", $this->time) . ".log";
 		$this->fp = @fopen($this->path, "wb");
 		if(!is_resource($this->fp)){
 			throw new \RuntimeException("Could not create Crash Dump");
