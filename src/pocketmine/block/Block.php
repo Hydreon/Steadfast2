@@ -760,7 +760,7 @@ class Block extends Position implements Metadatable{
 	}
 
 	public function isSolid(){
-		return true;
+		return false;
 	}
 
 	/**
@@ -1109,5 +1109,9 @@ class Block extends Position implements Metadatable{
 		if($this->getLevel() instanceof Level){
 			$this->getLevel()->getBlockMetadata()->removeMetadata($this, $metadataKey, $plugin);
 		}
+	}
+	
+	public function getPoweredState() {
+		return 0; /** @see Solid::POWERED_NONE */
 	}
 }
