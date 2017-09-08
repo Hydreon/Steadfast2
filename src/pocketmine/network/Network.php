@@ -291,11 +291,7 @@ class Network {
 					if ($pk::NETWORK_ID === Info::BATCH_PACKET) {
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
 					}
-					$offset = 1;
-					if ($p->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
-						$offset = 3;
-					}
-					$pk->setBuffer($buf, $offset);
+					$pk->setBuffer($buf, 1);
 					$pk->decode($p->getPlayerProtocol());
 					$p->handleDataPacket($pk);
 					if ($pk->getOffset() <= 0) {
