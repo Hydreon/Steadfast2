@@ -17,32 +17,100 @@
  * @link http://www.pocketmine.net/
  * 
  *
-*/
+ */
 
 namespace pocketmine\block;
 
+use pocketmine\block\redstoneBehavior\TransparentRedstoneComponent;
+use pocketmine\block\Solid;
 use pocketmine\item\Item;
-use pocketmine\item\Tool;
+use pocketmine\Player;
 
-class RedstoneWire extends Transparent{
+class RedstoneWire extends TransparentRedstoneComponent {
 
 	protected $id = self::REDSTONE_WIRE;
 
-	public function __construct(){
-
+	public function __construct($meta = 0) {
+		parent::__construct($this->id, $meta);
 	}
 
-	public function getHardness(){
+	public function getHardness() {
 		return 1;
 	}
-	
-	public function getName(){
+
+	public function getName() {
 		return "Redstone Wire";
 	}
 
-	public function getDrops(Item $item){
+	public function getDrops(Item $item) {
 		return [
-			[Item::REDSTONE_WIRE, 0, 1],
+			[Item::REDSTONE_DUST, 0, 1],
 		];
 	}
+	
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null) {
+		$this->updateNeighbors();
+		$powerDirection = self::DIRECTION_SELF;
+		foreach ($this->neighbors as $direction => $neighbor) {
+			if ($direction == self::DIRECTION_TOP) {
+				continue;
+			}
+			$neighborId = $neighbor->getId();
+			switch ($neighborId) {
+				case Block::REDSTONE_WIRE:
+					$neighborMeta = $neighbor->getDamage();
+					if ($neighborMeta > $this->meta) {
+						$this->meta = $neighborMeta;
+						$powerDirection = $direction;
+					}
+					break;
+				case Block::REDSTONE_TORCH_ACTIVE:
+					$this->meta = self::REDSTONE_POWER_MAX;
+					$powerDirection = $direction;
+					break 2;
+				default:
+					if ($neighbor->isSolid() && $neighbor->getPoweredState() == Solid::POWERED_STRONGLY) {
+						$this->meta = self::REDSTONE_POWER_MAX;
+						$powerDirection = $direction;
+						break 2;
+					}
+					break;
+			}
+		}
+		return parent::place($item, $block, $target, $face, $fx, $fy, $fz, $player);
+	}
+
+	protected function isSuitableBlock($blockId, $direction) {
+		switch ($direction) {
+			case self::DIRECTION_NORTH:
+			case self::DIRECTION_EAST:
+			case self::DIRECTION_SOUTH:
+			case self::DIRECTION_WEST:
+				return in_array($blockId, self::REDSTONE_BLOCKS) || isset(Block::$solid[$blockId]);
+			case self::DIRECTION_TOP:
+				return isset(Block::$solid[$blockId]) || isset(Block::$transparent[$blockId]);
+			default:
+				return false;
+		}
+	}
+
+	protected function redstoneUpdate($power, $fromDirection, $fromSolid = false) {
+	}
+
+	protected function updateNeighbors() {
+		static $offsets = [
+			self::DIRECTION_TOP => [0, 1, 0],
+			self::DIRECTION_NORTH => [1, 0, 0],
+			self::DIRECTION_SOUTH => [-1, 0, 0],
+			self::DIRECTION_EAST => [0, 0, 1],
+			self::DIRECTION_WEST => [0, 0, -1],
+		];
+		foreach ($offsets as $direction => $offset) {
+			$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
+			if ($this->isSuitableBlock($blockId, $direction)) {
+				$this->neighbors[$direction] = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]));
+			}
+		}
+	}
+
 }

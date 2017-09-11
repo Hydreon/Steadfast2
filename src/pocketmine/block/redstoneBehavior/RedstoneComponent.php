@@ -35,6 +35,6 @@ abstract class RedstoneComponent extends Block {
 	
 	abstract protected function updateNeighbors();
 	
-	abstract protected function redstoneUpdate($power, $fromDirection);
+	abstract protected function redstoneUpdate($power, $fromDirection, $fromSolid = false);
 	
 }

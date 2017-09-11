@@ -27,7 +27,10 @@ class RedstoneTorch extends RedstoneTorchActive {
 		];
 	}
 	
-	protected function redstoneUpdate($power, $fromDirection) {
+	protected function redstoneUpdate($power, $fromDirection, $fromSolid = false) {
+		if (!$fromSolid && $fromDirection != self::DIRECTION_SELF) {
+			return;
+		}
 		$this->updateNeighbors();
 		if ($fromDirection == $this->meta && $power == self::REDSTONE_POWER_MIN) { // power from attached block
 			$litTorch = Block::get(Block::REDSTONE_TORCH_ACTIVE, $this->meta);
@@ -35,9 +38,9 @@ class RedstoneTorch extends RedstoneTorchActive {
 			$power = self::REDSTONE_POWER_MAX;
 		}
 				
-		foreach ($this->neighbors as $neighbor) {
+		foreach ($this->neighbors as $neighborDirection => $neighbor) {
 			if (in_array($neighbor->getId(), self::REDSTONE_BLOCKS)) {
-				$neighbor->redstoneUpdate($power);
+				$neighbor->redstoneUpdate($power, $neighborDirection);
 			} else if ($neighbor->isSolid()) {
 				static $offsets = [
 					self::DIRECTION_TOP => [0, 1, 0],
@@ -52,7 +55,7 @@ class RedstoneTorch extends RedstoneTorchActive {
 						continue;
 					}		
 					$rsComponent = $this->level->getBlock(new Vector3($neighbor->x + $offset[0], $neighbor->y + $offset[1], $neighbor->z + $offset[2]));
-					$rsComponent->redstoneUpdate($power, $direction);
+					$rsComponent->redstoneUpdate($power, $direction, true);
 				}
 			}
 		}
