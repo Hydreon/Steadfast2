@@ -2580,7 +2580,7 @@ class Level implements ChunkManager, Metadatable{
 				];
 			}
 			$motion[4] = $subClientId;
-			$this->motionToSend[$p->getIdentifier()]['data'][] = $motion;
+			$this->motionToSend[$playerIdentifier]['data'][] = $motion;
 		}
 	}
 
