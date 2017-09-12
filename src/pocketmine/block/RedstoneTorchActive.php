@@ -158,6 +158,8 @@ class RedstoneTorchActive extends FlowableRedstoneComponent {
 			if (in_array($neighbor->getId(), self::REDSTONE_BLOCKS)) {
 				$neighbor->redstoneUpdate($power, $neighborDirection);
 			} else if ($neighbor->isSolid()) {
+				// if top neighbor is solid it become strongly charged 
+				// and pass charge in another 5 directions
 				static $offsets = [
 					self::DIRECTION_TOP => [0, 1, 0],
 					self::DIRECTION_NORTH => [1, 0, 0],

@@ -23,8 +23,28 @@ abstract class RedstoneComponent extends Block {
 	const DIRECTION_BOTTOM = 0;
 	const DIRECTION_SELF = 6;
 
+	/* @var $neighbors Block[] */
 	protected $neighbors = [];
 	
+	function getOppositeDirection($direction) {
+		switch ($direction) {
+			case self::DIRECTION_BOTTOM:
+				return self::DIRECTION_TOP;
+			case self::DIRECTION_TOP:
+				return self::DIRECTION_BOTTOM;
+			case self::DIRECTION_NORTH;
+				return self::DIRECTION_SOUTH;
+			case self::DIRECTION_SOUTH;
+				return self::DIRECTION_NORTH;
+			case self::DIRECTION_EAST;
+				return self::DIRECTION_WEST;
+			case self::DIRECTION_WEST;
+				return self::DIRECTION_EAST;
+		}
+		return -1;
+	}
+
+
 	/**
 	 * 
 	 * @param integer $blockId
