@@ -271,7 +271,6 @@ class Network {
 	public function processBatch(BatchPacket $packet, Player $p){
 		$str = @\zlib_decode($packet->payload, 1024 * 1024 * 64); //Max 64MB
 		if ($str === false) {
-			$p->checkVersion();
 			return;
 		}
 		try{

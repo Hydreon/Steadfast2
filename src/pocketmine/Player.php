@@ -1605,9 +1605,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
 				}
-				if($packet->isValidProtocol === false) {
-					$this->protocol = $packet->protocol1; // we need protocol for correct encoding DisconnectPacket
-					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
+				$this->protocol = $packet->protocol1; // we need protocol for correct encoding DisconnectPacket
+				if($packet->isValidProtocol === false) {					
+					$this->close("", $this->getNonValidProtocolMessage($this->protocol));
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
 				}
@@ -1628,7 +1628,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
-				$this->protocol = $packet->protocol1;
 				$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData);
                 if ($packet->osType > 0) {
                     $this->deviceType = $packet->osType;
@@ -3518,14 +3517,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		$this->updateSpeed($this->movementSpeed);
 	}
-
-	public function checkVersion() {
-		if (!$this->loggedIn) {
-			$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
-		} else {
-			var_dump('zlib_decode error');
-		}
-	}
 	
 	public function getProtectionEnchantments() {
 		$result = [
@@ -4749,6 +4740,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->completeLogin();
 		
 		return $this->loggedIn;
+	}
+	
+	private function getNonValidProtocolMessage($protocol) {
+		if ($protocol > ProtocolInfo::PROTOCOL_137 || ($protocol > ProtocolInfo::PROTOCOL_113 && $protocol < ProtocolInfo::PROTOCOL_120)) {
+			return TextFormat::WHITE . "We don't support this client version yet.\n" . TextFormat::WHITE ."        The update is coming soon.";
+		} else {
+			return TextFormat::WHITE . "Please update your client version to join";
+		}
 	}
 	
 }
