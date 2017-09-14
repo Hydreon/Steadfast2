@@ -114,6 +114,7 @@ use pocketmine\utils\TextWrapper;
 use pocketmine\utils\Utils;
 use pocketmine\utils\UUID;
 use pocketmine\utils\VersionString;
+use pocketmine\network\protocol\Info;
 use pocketmine\level\generator\biome\Biome;
 use pocketmine\scheduler\FileWriteTask;
 use pocketmine\entity\animal\walking\Chicken;
@@ -2083,12 +2084,6 @@ class Server{
 			$this->network->blockAddress($entry->getName(), -1);
 		}
 
-//		if($this->getProperty("settings.send-usage", true) !== false){
-//			$this->scheduler->scheduleDelayedRepeatingTask(new CallbackTask([$this, "sendUsage"]), 6000, 6000);
-//			$this->sendUsage();
-//		}
-
-
 		if($this->getProperty("settings.upnp-forwarding", false) == true){
 			$this->logger->info("[UPnP] Trying to port forward...");
 			UPnP::PortForward($this->getPort());
@@ -2364,40 +2359,6 @@ class Server{
 			$level->doChunkGarbageCollection();
 		}
 	}
-
-//	public function sendUsage(){
-//		if($this->lastSendUsage instanceof SendUsageTask){
-//			if(!$this->lastSendUsage->isGarbage()){ //do not call multiple times
-//				return;
-//			}
-//		}
-//
-//		$plist = "";
-//		foreach($this->getPluginManager()->getPlugins() as $p){
-//			$d = $p->getDescription();
-//			$plist .= str_replace([";", ":"], "", $d->getName()) . ":" . str_replace([";", ":"], "", $d->getVersion()) . ";";
-//		}
-//
-//		$version = new VersionString();
-//		$this->lastSendUsage = new SendUsageTask("http://stats.pocketmine.net/usage.php", [
-//			"serverid" => 0, // todo: fix for real
-//			"port" => $this->getPort(),
-//			"os" => Utils::getOS(),
-//			"name" => $this->getName(),
-//			"memory_total" => $this->getConfigString("memory-limit"),
-//			"memory_usage" => memory_get_usage(),
-//			"php_version" => PHP_VERSION,
-//			"version" => $version->get(true),
-//			"build" => $version->getBuild(),
-//			"mc_version" => \pocketmine\MINECRAFT_VERSION,
-//			"protocol" => \pocketmine\network\protocol\Info::CURRENT_PROTOCOL,
-//			"online" => count($this->players),
-//			"max" => $this->getMaxPlayers(),
-//			"plugins" => $plist,
-//		]);
-//
-//		$this->scheduler->scheduleAsyncTask($this->lastSendUsage);
-//	}
 
 	/**
 	 * @return Network
