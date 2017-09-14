@@ -7,7 +7,9 @@ use pocketmine\event\entity\EntityArmorChangeEvent;
 use pocketmine\event\entity\EntityInventoryChangeEvent;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\item\Item;
+use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\MobArmorEquipmentPacket;
+use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventorySlotPacket;
 use pocketmine\network\protocol\v120\Protocol120;
@@ -168,8 +170,8 @@ class PlayerInventory120 extends PlayerInventory {
 			foreach($target as $player){
 				if ($player === $this->holder) {
 					/** @var Player $player */
-					$pk2 = new ContainerSetSlotPacket();
-					$pk2->windowid = ContainerSetContentPacket::SPECIAL_ARMOR;
+					$pk2 = new InventorySlotPacket();
+					$pk2->containerId = Protocol120::CONTAINER_ID_ARMOR;
 					$pk2->slot = $index - $this->getSize();
 					$pk2->item = $this->getItem($index);
 					$player->dataPacket($pk2);
@@ -208,14 +210,24 @@ class PlayerInventory120 extends PlayerInventory {
 	 * @param Player[] $target
 	 */
 	private function sendOffHandContents($targets) {
-		$offHandIndex = $this->getSize() + 4;
-		$pk = new InventorySlotPacket();
-		$pk->containerId = Protocol120::CONTAINER_ID_OFFHAND;
-		$pk->slot = 0;
-		$pk->item = $this->getItem($offHandIndex);
-		$target[] = $this->holder;
-		foreach ($targets as $target) {
-			$target->dataPacket($pk);
+		$pk = new MobEquipmentPacket();
+		$pk->eid = $this->getHolder()->getId();
+		$pk->item = $this->getItem($this->getSize() + self::OFFHAND_ARMOR_SLOT_ID);
+		$pk->slot = $this->getHeldItemSlot();
+		$pk->selectedSlot = $this->getHeldItemIndex();
+		$pk->windowId = MobEquipmentPacket::WINDOW_ID_PLAYER_OFFHAND;
+		foreach ($targets as $player) {
+			if ($player->getPlayerProtocol() >= Info::PROTOCOL_110) {
+				if ($player === $this->getHolder()) {
+					$pk2 = new InventorySlotPacket();
+					$pk2->containerId = Protocol120::CONTAINER_ID_OFFHAND;
+					$pk2->slot = 0;
+					$pk2->item = $this->getItem($this->getSize() + self::OFFHAND_ARMOR_SLOT_ID);
+					$player->dataPacket($pk2);
+				} else {
+					$player->dataPacket($pk);
+				}
+			}
 		}
 	}
 	

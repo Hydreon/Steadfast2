@@ -18,7 +18,7 @@ abstract class Protocol120 {
 	private static $disallowedPackets = [
 		'pocketmine\network\protocol\AddItemPacket',
 		'pocketmine\network\protocol\ContainerSetContentPacket',
-		'pocketmine\network\protocol\ContainerSetSlotpacket',
+		'pocketmine\network\protocol\ContainerSetSlotPacket',
 		'pocketmine\network\protocol\DropItemPacket',
 		'pocketmine\network\protocol\InventoryActionPacket',
 		'pocketmine\network\protocol\ReplaceSelectedItemPacket',
