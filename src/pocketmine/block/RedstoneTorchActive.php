@@ -143,7 +143,7 @@ class RedstoneTorchActive extends FlowableRedstoneComponent {
 		return false;
 	}
 	
-	protected function redstoneUpdate($power, $fromDirection, $fromSolid = false) {
+	public function redstoneUpdate($power, $fromDirection, $fromSolid = false) {
 		if (!$fromSolid && $fromDirection != self::DIRECTION_SELF) {
 			return;
 		}

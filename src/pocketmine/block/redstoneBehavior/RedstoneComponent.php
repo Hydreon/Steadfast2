@@ -44,7 +44,6 @@ abstract class RedstoneComponent extends Block {
 		return -1;
 	}
 
-
 	/**
 	 * 
 	 * @param integer $blockId
@@ -55,6 +54,6 @@ abstract class RedstoneComponent extends Block {
 	
 	abstract protected function updateNeighbors();
 	
-	abstract protected function redstoneUpdate($power, $fromDirection, $fromSolid = false);
+	abstract public function redstoneUpdate($power, $fromDirection, $fromSolid = false);
 	
 }
