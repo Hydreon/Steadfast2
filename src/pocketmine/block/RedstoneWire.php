@@ -71,6 +71,7 @@ class RedstoneWire extends TransparentRedstoneComponent {
 	}
 
 	public function redstoneUpdate($power, $fromDirection, $fromSolid = false) {
+		var_dump('на провод пршёл заряд ' . $power);
 		$this->updateNeighbors();
 		$power = max($power, self::REDSTONE_POWER_MIN);
 		$oppositeFromDirection = $this->getOppositeDirection($fromDirection);
@@ -120,33 +121,42 @@ class RedstoneWire extends TransparentRedstoneComponent {
 						break;
 				}
 			}
+			// check block below
+			$blockBelowId = $this->level->getBlockIdAt($this->x, $this->y - 1, $this->z);
+			if (Block::$solid[$blockBelowId]) {
+				$blockBelow = $this->level->getBlock(new Vector3($this->x, $this->y - 1, $this->z));
+				if ($blockBelow->getPoweredState() == Solid::POWERED_STRONGLY) {
+					$targetPower = self::REDSTONE_POWER_MAX;
+					$targetDirection = self::DIRECTION_SELF;
+				}
+			}
 			
 			// power in net decreasing
 			if ($power == self::REDSTONE_POWER_MIN && $fromDirection !== self::DIRECTION_SELF) {
-//				var_dump('заряд в сети падает');
+				var_dump('заряд в сети падает');
 				// found another power source in net
 				if ($targetPower >= $this->meta && $targetDirection !== self::DIRECTION_SELF) {
-//					var_dump('мы нашли источник заряда в сети');
-//					var_dump('обновили зярад элемента на ' . $targetPower);
+					var_dump('мы нашли источник заряда в сети');
+					var_dump('обновили заряд элемента на ' . $targetPower);
 					$this->meta = $targetPower;
 					$this->level->setBlock($this, $this);
 					// send charge back
 					if (isset($this->neighbors[$oppositeFromDirection]) && in_array($this->neighbors[$oppositeFromDirection]->getId(), self::REDSTONE_BLOCKS)) {
-//						var_dump('отправили заряд назад');
+						var_dump('отправили заряд назад');
 						$this->neighbors[$oppositeFromDirection]->redstoneUpdate($this->meta - 1, $oppositeFromDirection);
 					}
 					return;
 				} else {
 					// remove power from element
-//					var_dump('сняли заряд с элемента');
+					var_dump('сняли заряд с элемента');
 					$this->meta = self::REDSTONE_POWER_MIN;
 					$this->level->setBlock($this, $this);
 				}
 			} else {
 				// power in net is increasing
-//				var_dump('заряд в сети растёт');
+				var_dump('заряд в сети растёт');
 				if ($targetPower > $this->meta) {
-//					var_dump('обновили зярад элемента на ' . $targetPower);
+					var_dump('обновили зярад элемента на ' . $targetPower);
 					$this->meta = $targetPower;
 					$this->level->setBlock($this, $this);
 					$power = $targetPower;
@@ -207,13 +217,16 @@ class RedstoneWire extends TransparentRedstoneComponent {
 					}
 				}
 				// try update block above
+				$blockAboveId = $this->level->getBlockIdAt($neighbor->x, $neighbor->y + 1, $neighbor->z);
 				if (Block::$transparent[$blockAboveWireId]) {
-					$blockAboveId = $this->level->getBlockIdAt($neighbor->x, $neighbor->y + 1, $neighbor->z);
-					$isValidRedstoneComponent = (Block::$transparent[$blockAboveId] && $blockAboveId == Block::REDSTONE_WIRE) ||
-						(Block::$solid[$blockAboveId] && $blockAboveId != Block::REDSTONE_TORCH && $blockAboveId != Block::REDSTONE_TORCH_ACTIVE);
-					if ($isValidRedstoneComponent) {
+					if ($blockAboveId == Block::REDSTONE_WIRE) {
 						$blockAbove = $this->level->getBlock(new Vector3($neighbor->x, $neighbor->y + 1, $neighbor->z));
 						$blockAbove->redstoneUpdate($power - 1, $direction, false);
+					}
+				} else {
+					if ($blockAboveId == Block::REDSTONE_TORCH || $blockAboveId == Block::REDSTONE_TORCH_ACTIVE) {
+						$blockAbove = $this->level->getBlock(new Vector3($neighbor->x, $neighbor->y + 1, $neighbor->z));
+						$blockAbove->redstoneUpdate(self::REDSTONE_POWER_MAX, self::DIRECTION_TOP, true);
 					}
 				}
 			}

@@ -45,11 +45,12 @@ abstract class Solid extends Block{
 				RedstoneComponent::DIRECTION_EAST => [0, 0, 1],
 				RedstoneComponent::DIRECTION_WEST => [0, 0, -1],
 			];
+			$power = $this->getPoweredState() == self::POWERED_STRONGLY ? RedstoneComponent::REDSTONE_POWER_MAX : RedstoneComponent::REDSTONE_POWER_MIN;
 			foreach ($offsets as $direction => $offset) {
 				$neighborId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y, $this->z + $offset[2]);
 				if (in_array($neighborId, RedstoneComponent::REDSTONE_BLOCKS)) {
 					$neighbor = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y, $this->z + $offset[2]));
-					$neighbor->redstoneUpdate(RedstoneComponent::REDSTONE_POWER_MIN, $direction, true);
+					$neighbor->redstoneUpdate($power, $direction, true);
 				}
 			}
 		}
@@ -60,24 +61,56 @@ abstract class Solid extends Block{
 		$result = parent::onBreak($item);
 		if ($result) {
 			$blockBelowId = $this->level->getBlockIdAt($this->x, $this->y - 1, $this->z);
-			if ($blockBelowId !== Block::REDSTONE_WIRE) {
+			if ($blockBelowId !== Block::REDSTONE_WIRE && $blockBelowId !== Block::REDSTONE_TORCH_ACTIVE) {
 				return;
 			}
-			$wirePower = $this->level->getBlockDataAt($this->x, $this->y - 1, $this->z);
-			if ($wirePower > RedstoneComponent::REDSTONE_POWER_MIN) {
-				static $offsets = [
-					RedstoneComponent::DIRECTION_NORTH => [1, 0, 0],
-					RedstoneComponent::DIRECTION_SOUTH => [-1, 0, 0],
-					RedstoneComponent::DIRECTION_EAST => [0, 0, 1],
-					RedstoneComponent::DIRECTION_WEST => [0, 0, -1],
-				];
-				foreach ($offsets as $direction => $offset) {
-					$neighborId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y, $this->z + $offset[2]);
-					if (in_array($neighborId, RedstoneComponent::REDSTONE_BLOCKS)) {
-						$neighbor = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y, $this->z + $offset[2]));
-						$neighbor->redstoneUpdate($wirePower - 1, $direction, true);
-					}
+			if ($blockBelowId == Block::REDSTONE_WIRE) {
+				$wirePower = $this->level->getBlockDataAt($this->x, $this->y - 1, $this->z) - 1;
+			} else {
+				$wirePower = RedstoneComponent::REDSTONE_POWER_MIN;
+			}
+			static $offsets = [
+				RedstoneComponent::DIRECTION_NORTH => [1, 0, 0],
+				RedstoneComponent::DIRECTION_SOUTH => [-1, 0, 0],
+				RedstoneComponent::DIRECTION_EAST => [0, 0, 1],
+				RedstoneComponent::DIRECTION_WEST => [0, 0, -1],
+			];
+			foreach ($offsets as $direction => $offset) {
+				switch($direction) {
+					case RedstoneComponent::DIRECTION_NORTH:
+						var_dump('NORTH');
+						break;
+					case RedstoneComponent::DIRECTION_SOUTH:
+						var_dump('SOUTH');
+						break;
+					case RedstoneComponent::DIRECTION_EAST:
+						var_dump('EAST');
+						break;
+					case RedstoneComponent::DIRECTION_WEST:
+						var_dump('WEST');
+						break;
 				}
+				$neighborId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y, $this->z + $offset[2]);
+				if (in_array($neighborId, RedstoneComponent::REDSTONE_BLOCKS)) {
+					$neighbor = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y, $this->z + $offset[2]));
+					var_dump("Block power: " . $neighbor->getDamage());
+					$neighbor->redstoneUpdate($wirePower, $direction, true);
+				}
+				static $a = [
+					[1, 0, 0],
+					[1, 0, 1],
+					[0, 0, 1],
+					[-1, 0, 1],
+					[-1, 0, 0],
+					[-1, 0, -1],
+					[0, 0, -1],
+					[1, 0, -1],
+				];
+				echo PHP_EOL;
+				foreach ($a as $b) {
+					echo $this->level->getBlockDataAt($this->x + $b[0], $this->y, $this->z + $b[2]) . ' ';
+				}
+				echo PHP_EOL . PHP_EOL;
 			}
 		}
 		return $result;
