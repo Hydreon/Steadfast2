@@ -107,16 +107,18 @@ class RedstoneWire extends TransparentRedstoneComponent {
 						$targetDirection = self::DIRECTION_SELF;
 					}
 				}
+				$isSwitchOff = false;
 				if ($this->meta < $targetPower) {
 					$this->meta = $targetPower;
-					$this->level->setBlock($this, $this);
+					$this->level->setBlock($this, $this, false, false);
 				} else {
 					if ($this->meta == $targetPower && $targetDirection == self::DIRECTION_NONE) {
 						$this->meta = self::REDSTONE_POWER_MIN;
 						$this->level->setBlock($this, $this, false, false);
+						$isSwitchOff = true;
 					}
 				}
-				$this->level->scheduleUpdate($this, 5);
+				$this->level->scheduleUpdate($this, $isSwitchOff ? 10 : 5);
 				break;
 		}
 	}
