@@ -15,6 +15,7 @@ abstract class RedstoneComponent extends Block {
 	const REDSTONE_POWER_MIN = 0;
 	const REDSTONE_POWER_MAX = 15;
 	
+	const DIRECTION_NONE = -1;
 	const DIRECTION_TOP = 5;
 	const DIRECTION_NORTH = 1;
 	const DIRECTION_EAST = 3;
@@ -54,6 +55,6 @@ abstract class RedstoneComponent extends Block {
 	
 	abstract protected function updateNeighbors();
 	
-	abstract public function redstoneUpdate($power, $fromDirection, $fromSolid = false);
+//	abstract public function redstoneUpdate($power, $fromDirection, $fromSolid = false);
 	
 }
