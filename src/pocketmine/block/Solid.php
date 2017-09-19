@@ -21,10 +21,7 @@
 
 namespace pocketmine\block;
 
-use pocketmine\block\redstoneBehavior\RedstoneComponent;
-use pocketmine\item\Item;
 use pocketmine\math\Vector3;
-use pocketmine\Player;
 
 abstract class Solid extends Block{
 

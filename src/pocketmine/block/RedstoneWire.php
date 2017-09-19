@@ -71,11 +71,24 @@ class RedstoneWire extends TransparentRedstoneComponent {
 							$targetPower = self::REDSTONE_POWER_MAX;
 							$targetDirection = $neighborDirection;
 							break 2;
-						default:
-							if (Block::$solid[$neighborId] && $neighbor->getPoweredState() == Solid::POWERED_STRONGLY) {
+						case Block::WOODEN_BUTTON:
+						case Block::STONE_BUTTON:
+							if ($neighbor->isActive()) {
 								$targetPower = self::REDSTONE_POWER_MAX;
 								$targetDirection = $neighborDirection;
 								break 2;
+							}
+							break;
+						default:
+							if (Block::$solid[$neighborId]) {
+								if ($neighbor->getPoweredState() == Solid::POWERED_STRONGLY) {
+									$targetPower = self::REDSTONE_POWER_MAX;
+									$targetDirection = $neighborDirection;
+									break 2;
+								}
+								if ($neighborDirection == self::DIRECTION_TOP || $neighborDirection == self::DIRECTION_BOTTOM) {
+									break;
+								}
 							}
 							if (Block::$transparent[$neighborId]) {
 								$blockBelowId = $this->level->getBlockIdAt($neighbor->x, $neighbor->y - 1, $neighbor->z);
@@ -118,11 +131,11 @@ class RedstoneWire extends TransparentRedstoneComponent {
 						$isSwitchOff = true;
 					}
 				}
-				$this->level->scheduleUpdate($this, $isSwitchOff ? 10 : 5);
+				$this->level->scheduleUpdate($this, $isSwitchOff ? 10 : 2);
 				break;
 		}
 	}
-
+	
 	protected function isSuitableBlock($blockId, $direction) {
 	}
 
@@ -132,13 +145,30 @@ class RedstoneWire extends TransparentRedstoneComponent {
 			self::DIRECTION_SOUTH => [0, 0, 1],
 			self::DIRECTION_EAST => [1, 0, 0],
 			self::DIRECTION_WEST => [-1, 0, 0],
+			self::DIRECTION_TOP => [0, 1, 0],
+			self::DIRECTION_BOTTOM => [0, -1, 0],
 		];
 		foreach ($offsets as $direction => $offset) {
-			$this->neighbors[$direction] = $this->level->getBlock(new Vector3(
-				$this->x + $offset[0], 
-				$this->y + $offset[1], 
-				$this->z + $offset[2]
-			));
+			switch ($direction) {
+				case self::DIRECTION_TOP:
+				case self::DIRECTION_BOTTOM:
+					$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
+					if ($blockId == Block::WOODEN_BUTTON || $blockId == Block::STONE_BUTTON || Block::$solid[$blockId]) {
+						$this->neighbors[$direction] = $this->level->getBlock(new Vector3(
+							$this->x + $offset[0], 
+							$this->y + $offset[1], 
+							$this->z + $offset[2]
+						));
+					}
+					break;
+				default:
+					$this->neighbors[$direction] = $this->level->getBlock(new Vector3(
+						$this->x + $offset[0], 
+						$this->y + $offset[1], 
+						$this->z + $offset[2]
+					));
+					break;
+			}
 		}
 	}
 
