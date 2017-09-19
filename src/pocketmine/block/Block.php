@@ -41,6 +41,14 @@ use pocketmine\plugin\Plugin;
 
 
 class Block extends Position implements Metadatable{
+	
+	const FACE_DOWN = 0;
+	const FACE_UP = 1;
+	const FACE_NORTH = 2;
+	const FACE_SOUTH = 3;
+	const FACE_WEST = 4;
+	const FACE_EAST = 5;
+	
 	const AIR = 0;
 	const STONE = 1;
 	const GRASS = 2;
@@ -1114,4 +1122,5 @@ class Block extends Position implements Metadatable{
 	public function getPoweredState() {
 		return 0; /** @see Solid::POWERED_NONE */
 	}
+	
 }

@@ -40,17 +40,18 @@ abstract class Solid extends Block{
 	public function getPoweredState() {
 		// !IMPORTANT! bottom should be first in the list
 		static $offsets = [
-			[0, -1, 0], // bottom
-			[1, 0, 0], // north
-			[-1, 0, 0], // south
-			[0, 0, 1], // east
-			[0, 0, -1], // west
+			Vector3::SIDE_UP => [0, 1, 0],
+			Vector3::SIDE_DOWN => [0, -1, 0],
+			Vector3::SIDE_EAST => [1, 0, 0],
+			Vector3::SIDE_WEST => [-1, 0, 0],
+			Vector3::SIDE_SOUTH => [0, 0, 1],
+			Vector3::SIDE_NORTH => [0, 0, -1],
 		];
-		foreach ($offsets as $direction => $offset) {
+		foreach ($offsets as $side => $offset) {
 			$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
 			switch ($blockId) {
 				case self::REDSTONE_WIRE:
-					if ($offset[1] == 0) { // all except bottom
+					if ($offset[1] == 0) { // all except up and down
 						$wire = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]));
 						if ($wire->getDamage() > 0) {
 							return self::POWERED_WEAKLY;
@@ -58,7 +59,14 @@ abstract class Solid extends Block{
 					}
 					break;
 				case self::REDSTONE_TORCH_ACTIVE;
-					if ($offset[1] == -1) { // only bottom
+					if ($offset[1] == -1) { // only bottom block
+						return self::POWERED_STRONGLY;
+					}
+					break;
+				case self::WOODEN_BUTTON:
+				case self::STONE_BUTTON:
+					$button = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]));
+					if ($button->getFace() == $side && $button->isActive()) {
 						return self::POWERED_STRONGLY;
 					}
 					break;

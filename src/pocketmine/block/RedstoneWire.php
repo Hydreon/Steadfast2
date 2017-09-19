@@ -128,10 +128,10 @@ class RedstoneWire extends TransparentRedstoneComponent {
 
 	protected function updateNeighbors() {
 		static $offsets = [
-			self::DIRECTION_NORTH => [1, 0, 0],
-			self::DIRECTION_SOUTH => [-1, 0, 0],
-			self::DIRECTION_EAST => [0, 0, 1],
-			self::DIRECTION_WEST => [0, 0, -1],
+			self::DIRECTION_NORTH => [0, 0, -1],
+			self::DIRECTION_SOUTH => [0, 0, 1],
+			self::DIRECTION_EAST => [1, 0, 0],
+			self::DIRECTION_WEST => [-1, 0, 0],
 		];
 		foreach ($offsets as $direction => $offset) {
 			$this->neighbors[$direction] = $this->level->getBlock(new Vector3(
