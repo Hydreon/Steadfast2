@@ -30,6 +30,7 @@ use pocketmine\entity\Human;
 use pocketmine\entity\Item as DroppedItem;
 use pocketmine\entity\Living;
 use pocketmine\entity\Projectile;
+use pocketmine\entity\Boat;
 use pocketmine\event\block\SignChangeEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
@@ -1655,6 +1656,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					} else {
 						$this->isTeleporting = false;
 						
+						if($this->linkedEntity instanceof Entity){
+							$entity = $this->linkedEntity;
+							if($entity instanceof Boat){
+								$entity->setPosition(new Vector3($packet->x, $packet->y , $packet->z));//y - 0.3
+							}
+						}
+						
 						$packet->yaw %= 360;
 						$packet->pitch %= 360;
 
@@ -1968,10 +1976,30 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case 'MOB_ARMOR_EQUIPMENT_PACKET':
 				break;
 			case 'INTERACT_PACKET':
-				if ($packet->action === InteractPacket::ACTION_DAMAGE) {
-					$this->attackByTargetId($packet->target);
-				} else {
-					$this->customInteract($packet);
+				$target = $this->level->getEntity($packet->target);
+				switch ($packet->action) {
+					case InteractPacket::ACTION_DAMAGE : 
+						if ($target instanceof Boat){
+							if ($this->linkedEntity == $target){
+								$target->unLinkEntity($this);
+							}
+							$target->close();
+						} else {
+							$this->attackByTargetId($packet->target);
+						}
+						break;
+					case InteractPacket::ACTION_LEAVE_VEHICLE :
+						if ($target instanceof Boat){
+							$this->unLinkEntity($target);
+						}
+						break;
+					default :
+						if ($target instanceof Boat){
+							$this->linkEntity($target);
+						} else {
+							$this->customInteract($packet);
+						}
+						break;
 				}
 				break;
 			case 'ANIMATE_PACKET':
