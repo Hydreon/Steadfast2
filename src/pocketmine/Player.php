@@ -1989,6 +1989,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}
 						break;
 					case InteractPacket::ACTION_LEAVE_VEHICLE :
+						var_dump(get_class($target));
 						if ($target instanceof Boat){
 							$this->unLinkEntity($target);
 						}

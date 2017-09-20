@@ -1558,7 +1558,6 @@ abstract class Entity extends Location implements Metadatable{
 		}
 		switch($type){
 			case 0:
-				var_dump($this->linkedType);
 				if($this->linkedType == 0){
 					return true;
 				}
