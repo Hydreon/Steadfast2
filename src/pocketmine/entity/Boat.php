@@ -117,4 +117,11 @@ class Boat extends Vehicle{
 		$class = new \ReflectionClass(static::class);
 		return $class->getShortName();
 	}
+	
+	public function isAllowEntranceButton () {
+		if(!$this->isAlive()){
+			return false;
+		}
+		return true;
+	}
 }

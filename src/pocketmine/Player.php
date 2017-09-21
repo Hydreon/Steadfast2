@@ -1584,7 +1584,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->subClients[$packet->targetSubClientID]->handleDataPacket($packet);
 			return;
 		}
-		
 		switch($packet->pname()){
             case 'SET_PLAYER_GAMETYPE_PACKET':
                 file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " SET_PLAYER_GAMETYPE_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
@@ -1989,9 +1988,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}
 						break;
 					case InteractPacket::ACTION_LEAVE_VEHICLE :
-						var_dump(get_class($target));
 						if ($target instanceof Boat){
 							$this->unLinkEntity($target);
+						}
+						break;
+					case InteractPacket::ACTION_SEE :
+						if ($target->isAllowEntranceButton()){
+							$this->setDataProperty(self::DATA_BUTTON_TEXT, self::DATA_TYPE_STRING, 'hi');
 						}
 						break;
 					default :

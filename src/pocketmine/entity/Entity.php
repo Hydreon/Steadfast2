@@ -1558,6 +1558,7 @@ abstract class Entity extends Location implements Metadatable{
 		}
 		switch($type){
 			case 0:
+				var_dump('exit');
 				if($this->linkedType == 0){
 					return true;
 				}
@@ -1580,6 +1581,7 @@ abstract class Entity extends Location implements Metadatable{
 				$this->linkedEntity = null;
 				return true;
 			case 1:
+				var_dump('ride');
 				if(!$entity->isAlive()){
 					return false;
 				}
@@ -1601,6 +1603,7 @@ abstract class Entity extends Location implements Metadatable{
 				}
 				return true;
 			case 2:
+				var_dump('hz');
 				if(!$entity->isAlive()){
 					return false;
 				}
@@ -1622,4 +1625,9 @@ abstract class Entity extends Location implements Metadatable{
 	public function getLinkedType(){
 		return $this->linkedType;
 	}
+	
+	public function isAllowEntranceButton () {
+		return false;
+	}
+	
 }
