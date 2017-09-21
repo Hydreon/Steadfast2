@@ -181,7 +181,12 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				if($buffer !== ""){
 					$pk = $this->getPacket($buffer, $player);			
 					if (!is_null($pk)) {
-						$pk->decode($player->getPlayerProtocol());
+						try {
+							$pk->decode($player->getPlayerProtocol());
+						}catch(\Exception $e){
+							file_put_contents("logs/" . date('Y.m.d') . "_decode_error.log", $e->getMessage() . "\n", FILE_APPEND | LOCK_EX);
+							return;
+						}
 						$player->handleDataPacket($pk);
 					}
 				}
@@ -274,15 +279,14 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	private function getPacket($buffer, $player){
 		$playerProtocol = $player->getPlayerProtocol();
 		if ($player->isEncryptEnable()) {
-			$buffer = $player->getDecrypt($buffer);
-			if ($playerProtocol >= Info::PROTOCOL_110 && $this->isZlib($buffer)) {
-				$pk = new BatchPacket($buffer);
-				return $pk;
-			}
+			$buffer = $player->getDecrypt($buffer);			
+		}		
+		if ($playerProtocol >= Info::PROTOCOL_110 || $player->getOriginalProtocol() == 0 && $this->isZlib($buffer)) {
+			$pk = new BatchPacket($buffer);
+			$pk->is110 = true;
+			return $pk;
 		}
-
 		$pid = ord($buffer{0});
-//		var_dump("Recive: 0x" . ($pid < 16 ? '0' . dechex($pid) : dechex($pid)));
 		if (($data = $this->network->getPacket($pid, $playerProtocol)) === null) {
 			return null;
 		}

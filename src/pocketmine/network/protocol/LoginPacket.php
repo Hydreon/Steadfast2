@@ -70,6 +70,10 @@ class LoginPacket extends PEPacket {
 			$this->getShort();
 		}
 		$this->protocol1 = $this->getInt();
+		// dirty useless hack
+		if ($this->protocol1 > 137 && $this->protocol1 < 150) {
+			$this->protocol1 = 137;
+		}
 		if (!in_array($this->protocol1, $acceptedProtocols)) {
 			$this->isValidProtocol = false;
 			return;

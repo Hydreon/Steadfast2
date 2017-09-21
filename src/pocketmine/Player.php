@@ -351,7 +351,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $clientVersion = '';
 	
-	protected $originalProtocol;
+	protected $originalProtocol = 0;
 	
 	protected $lastModalId = 1;
 	
@@ -1605,9 +1605,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
 				}
-				if($packet->isValidProtocol === false) {
-					$this->protocol = $packet->protocol1; // we need protocol for correct encoding DisconnectPacket
-					$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
+				$this->protocol = $packet->protocol1; // we need protocol for correct encoding DisconnectPacket
+				if($packet->isValidProtocol === false) {					
+					$this->close("", $this->getNonValidProtocolMessage($this->protocol));
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
 				}
@@ -1628,7 +1628,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
-				$this->protocol = $packet->protocol1;
 				$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData);
                 if ($packet->osType > 0) {
                     $this->deviceType = $packet->osType;
@@ -3530,6 +3529,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			var_dump('zlib_decode error');
 		}
 	}
+
 	
 	public function getProtectionEnchantments() {
 		$result = [
@@ -4108,7 +4108,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		//  check transaction and real data
 		$inventory = $transaction->getInventory();
 		$item = $inventory->getItem($transaction->getSlot());
-		if (!$item->equals($dropItem) || $item->count < $dropItem->count) {
+		if ($item == null || !$item->equals($dropItem) || $item->count < $dropItem->count) {
 			$inventory->sendContents($this);
 			return;
 		}
@@ -4753,6 +4753,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->completeLogin();
 		
 		return $this->loggedIn;
+	}
+	
+	private function getNonValidProtocolMessage($protocol) {
+		if ($protocol > ProtocolInfo::PROTOCOL_137 || ($protocol > ProtocolInfo::PROTOCOL_113 && $protocol < ProtocolInfo::PROTOCOL_120)) {
+			return TextFormat::WHITE . "We don't support this client version yet.\n" . TextFormat::WHITE ."        The update is coming soon.";
+		} else {
+			return TextFormat::WHITE . "Please update your client version to join";
+		}
 	}
 	
 }

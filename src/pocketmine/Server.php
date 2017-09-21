@@ -32,7 +32,6 @@ use pocketmine\command\ConsoleCommandSender;
 use pocketmine\command\PluginIdentifiableCommand;
 use pocketmine\command\SimpleCommandMap;
 use pocketmine\entity\Arrow;
-use pocketmine\entity\Attribute;
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
 use pocketmine\entity\FallingSand;
@@ -46,7 +45,6 @@ use pocketmine\entity\Villager;
 use pocketmine\event\HandlerList;
 use pocketmine\event\level\LevelInitEvent;
 use pocketmine\event\level\LevelLoadEvent;
-use pocketmine\event\server\QueryRegenerateEvent;
 use pocketmine\event\server\ServerCommandEvent;
 use pocketmine\event\Timings;
 use pocketmine\event\TimingsHandler;
@@ -61,6 +59,7 @@ use pocketmine\level\format\anvil\Anvil;
 use pocketmine\level\format\pmanvil\PMAnvil;
 use pocketmine\level\format\LevelProviderManager;
 use pocketmine\level\format\mcregion\McRegion;
+use pocketmine\level\generator\Generator;
 use pocketmine\level\Level;
 use pocketmine\metadata\EntityMetadataStore;
 use pocketmine\metadata\LevelMetadataStore;
@@ -75,7 +74,6 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\CompressBatchedTask;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\BatchPacket;
 use pocketmine\network\protocol\CraftingDataPacket;
@@ -94,7 +92,6 @@ use pocketmine\plugin\PluginLoadOrder;
 use pocketmine\plugin\PluginManager;
 use pocketmine\scheduler\CallbackTask;
 use pocketmine\scheduler\GarbageCollectionTask;
-use pocketmine\scheduler\SendUsageTask;
 use pocketmine\scheduler\ServerScheduler;
 use pocketmine\tile\Bed;
 use pocketmine\tile\Cauldron;
@@ -112,7 +109,6 @@ use pocketmine\utils\Config;
 use pocketmine\utils\LevelException;
 use pocketmine\utils\MainLogger;
 use pocketmine\utils\ServerException;
-use pocketmine\utils\Terminal;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\TextWrapper;
 use pocketmine\utils\Utils;
@@ -177,14 +173,8 @@ class Server{
 	/** @var PluginManager */
 	private $pluginManager = null;
 
-	/** @var AutoUpdater */
-	private $updater = null;
-
 	/** @var ServerScheduler */
 	private $scheduler = null;
-
-	/** @var GenerationRequestManager */
-	private $generationManager = null;
 
 	/**
 	 * Counts the ticks since the server start
@@ -201,7 +191,6 @@ class Server{
 
 	/** @var CommandReader */
 	private $console = null;
-	private $consoleThreaded;
 
 	/** @var SimpleCommandMap */
 	private $commandMap = null;
@@ -238,8 +227,7 @@ class Server{
 
 	/** @var Network */
 	private $network;
-
-	private $networkCompressionAsync = true;
+	
 	public $networkCompressionLevel = 7;
 
 	private $serverID;
@@ -249,13 +237,8 @@ class Server{
 	private $dataPath;
 	private $pluginPath;
 
-	private $lastSendUsage = null;
-
 	/** @var QueryHandler */
 	private $queryHandler;
-
-	/** @var QueryRegenerateEvent */
-	private $queryRegenerateTask = null;
 
 	/** @var Config */
 	private $properties;
@@ -871,6 +854,7 @@ class Server{
 	/**
 	 * @param string   $name
 	 * @param Compound $nbtTag
+ 	 * @param bool $async
 	 */
 	public function saveOfflinePlayerData($name, Compound $nbtTag, $async = false){
 			$nbt = new NBT(NBT::BIG_ENDIAN);
@@ -882,7 +866,7 @@ class Server{
 				file_put_contents($this->getDataPath() . "players/" . strtolower($name) . ".dat", $nbt->writeCompressed());
 			}
 		}catch(\Exception $e){
-			$this->logger->critical($this->getLanguage()->translateString("pocketmine.data.saveError", [$name, $e->getMessage()]));
+			$this->logger->critical("Could not save player " . $name . ": " . $e->getMessage());
 			if(\pocketmine\DEBUG > 1 and $this->logger instanceof MainLogger){
 				$this->logger->logException($e);
 			}
@@ -1582,7 +1566,7 @@ class Server{
 			$value = ["M" => 1, "G" => 1024];
 			$real = ((int) substr($memory, 0, -1)) * $value[substr($memory, -1)];
 			if($real < 128){
-				$this->logger->warning($this->getName() . " may not work right with less than 128MB of RAM", true, true, 0);
+				$this->logger->warning($this->getName() . " may not work right with less than 128MB of RAM");
 			}
 			@ini_set("memory_limit", $memory);
 		}else{
@@ -1679,6 +1663,7 @@ class Server{
 		foreach((array) $this->getProperty("worlds", []) as $name => $worldSetting){
 			if($this->loadLevel($name) === false){
 				$seed = $this->getProperty("worlds.$name.seed", time());
+				$options = explode(":", $this->getProperty("worlds.$name.generator", Generator::getGenerator("default")));
 				if(count($options) > 0){
 					$options = [
 						"preset" => implode(":", $options),
@@ -1851,9 +1836,8 @@ class Server{
 	 *
 	 * @param Player[]            $players
 	 * @param DataPacket[]|string $packets
-	 * @param bool                 $forceSync
 	 */
-	public function batchPackets(array $players, array $packets, $forceSync = true){
+	public function batchPackets(array $players, array $packets){
 		$targets = [];
 		$neededProtocol = [];
 		$neededSubClientsId = [];
@@ -1996,7 +1980,7 @@ class Server{
 			$value = ["M" => 1, "G" => 1024];
 			$real = ((int) substr($memory, 0, -1)) * $value[substr($memory, -1)];
 			if($real < 256){
-				$this->logger->warning($this->getName() . " may not work right with less than 256MB of RAM", true, true, 0);
+				$this->logger->warning($this->getName() . " may not work right with less than 256MB of RAM");
 			}
 			@ini_set("memory_limit", $memory);
 		}else{
@@ -2099,12 +2083,6 @@ class Server{
 		foreach($this->getIPBans()->getEntries() as $entry){
 			$this->network->blockAddress($entry->getName(), -1);
 		}
-
-//		if($this->getProperty("settings.send-usage", true) !== false){
-//			$this->scheduler->scheduleDelayedRepeatingTask(new CallbackTask([$this, "sendUsage"]), 6000, 6000);
-//			$this->sendUsage();
-//		}
-
 
 		if($this->getProperty("settings.upnp-forwarding", false) == true){
 			$this->logger->info("[UPnP] Trying to port forward...");
@@ -2374,40 +2352,6 @@ class Server{
 			$level->doChunkGarbageCollection();
 		}
 	}
-
-//	public function sendUsage(){
-//		if($this->lastSendUsage instanceof SendUsageTask){
-//			if(!$this->lastSendUsage->isGarbage()){ //do not call multiple times
-//				return;
-//			}
-//		}
-//
-//		$plist = "";
-//		foreach($this->getPluginManager()->getPlugins() as $p){
-//			$d = $p->getDescription();
-//			$plist .= str_replace([";", ":"], "", $d->getName()) . ":" . str_replace([";", ":"], "", $d->getVersion()) . ";";
-//		}
-//
-//		$version = new VersionString();
-//		$this->lastSendUsage = new SendUsageTask("http://stats.pocketmine.net/usage.php", [
-//			"serverid" => 0, // todo: fix for real
-//			"port" => $this->getPort(),
-//			"os" => Utils::getOS(),
-//			"name" => $this->getName(),
-//			"memory_total" => $this->getConfigString("memory-limit"),
-//			"memory_usage" => memory_get_usage(),
-//			"php_version" => PHP_VERSION,
-//			"version" => $version->get(true),
-//			"build" => $version->getBuild(),
-//			"mc_version" => \pocketmine\MINECRAFT_VERSION,
-//			"protocol" => \pocketmine\network\protocol\Info::CURRENT_PROTOCOL,
-//			"online" => count($this->players),
-//			"max" => $this->getMaxPlayers(),
-//			"plugins" => $plist,
-//		]);
-//
-//		$this->scheduler->scheduleAsyncTask($this->lastSendUsage);
-//	}
 
 	/**
 	 * @return Network

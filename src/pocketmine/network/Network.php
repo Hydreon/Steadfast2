@@ -271,7 +271,6 @@ class Network {
 	public function processBatch(BatchPacket $packet, Player $p){
 		$str = @\zlib_decode($packet->payload, 1024 * 1024 * 64); //Max 64MB
 		if ($str === false) {
-			$p->checkVersion();
 			return;
 		}
 		try{
@@ -292,7 +291,12 @@ class Network {
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
 					}
 					$pk->setBuffer($buf, 1);
-					$pk->decode($p->getPlayerProtocol());
+					try {
+						$pk->decode($p->getPlayerProtocol());
+					}catch(\Exception $e){
+						file_put_contents("logs/" . date('Y.m.d') . "_decode_error.log", $e->getMessage() . "\n", FILE_APPEND | LOCK_EX);
+						return;
+					}
 					$p->handleDataPacket($pk);
 					if ($pk->getOffset() <= 0) {
 						return;
