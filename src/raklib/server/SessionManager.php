@@ -74,8 +74,6 @@ class SessionManager{
     protected $ipSec = [];
 
     public $portChecking = true;
-	
-	private $spamPacket;
 
     public function __construct(RakLibServer $server, UDPServerSocket $socket){
         $this->server = $server;
@@ -83,7 +81,6 @@ class SessionManager{
         $this->registerPackets();
 
 	    $this->serverId = mt_rand(0, PHP_INT_MAX);
-		$this->spamPacket = hex2bin('210400');
 
         $this->run();
     }
@@ -213,22 +210,8 @@ class SessionManager{
 		$id = $session->getAddress() . ":" . $session->getPort();
 		if (ord($packet->buffer{0}) == 0xfe) {
 			$buff = substr($packet->buffer, 1);
-			if (ord($buff{0}) == 0x78) {
-				$decoded = zlib_decode($buff);
-				$stream = new BinaryStream($decoded);
-				$length = strlen($decoded);
-				while ($stream->getOffset() < $length) {
-					$buf = $stream->getString();
-					if ($buf == $this->spamPacket) {
-						continue;
-					}
-					$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buf;
-					$this->server->pushThreadToMainPacket($buffer);
-				}
-			} else {
-				$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buff;
-				$this->server->pushThreadToMainPacket($buffer);
-			}
+			$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buff;
+			$this->server->pushThreadToMainPacket($buffer);
 		}
     }
 	

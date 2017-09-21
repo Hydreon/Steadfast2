@@ -351,7 +351,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $clientVersion = '';
 	
-	protected $originalProtocol;
+	protected $originalProtocol = 0;
 	
 	protected $lastModalId = 1;
 	

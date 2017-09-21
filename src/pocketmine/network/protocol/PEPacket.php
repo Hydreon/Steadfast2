@@ -20,7 +20,7 @@ abstract class PEPacket extends DataPacket {
 	
 	protected function checkLength(int $len) {
 		if ($this->offset + $len > strlen($this->buffer)) {
-			throw new \Exception( get_class($this) .": Try get {$len} bytes, offset = " . $this->offset . ", bufflen = " . strlen($this->buffer));
+			throw new \Exception("Packet decode error");
 		}
 	}
 
@@ -32,6 +32,9 @@ abstract class PEPacket extends DataPacket {
 		if ($playerProtocol >= Info::PROTOCOL_120) {
 			$this->senderSubClientID = $this->getByte();
 			$this->targetSubClientID = $this->getByte();
+			if ($this->senderSubClientID > 4 || $this->targetSubClientID > 4) {
+				throw new \Exception("Packet decode error");
+			}
 		}
 	}
 	

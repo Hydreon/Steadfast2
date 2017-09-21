@@ -279,15 +279,14 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	private function getPacket($buffer, $player){
 		$playerProtocol = $player->getPlayerProtocol();
 		if ($player->isEncryptEnable()) {
-			$buffer = $player->getDecrypt($buffer);
-			if ($playerProtocol >= Info::PROTOCOL_110 && $this->isZlib($buffer)) {
-				$pk = new BatchPacket($buffer);
-				return $pk;
-			}
+			$buffer = $player->getDecrypt($buffer);			
+		}		
+		if ($playerProtocol >= Info::PROTOCOL_110 || $player->getOriginalProtocol() == 0 && $this->isZlib($buffer)) {
+			$pk = new BatchPacket($buffer);
+			$pk->is110 = true;
+			return $pk;
 		}
-
 		$pid = ord($buffer{0});
-//		var_dump("Recive: 0x" . ($pid < 16 ? '0' . dechex($pid) : dechex($pid)));
 		if (($data = $this->network->getPacket($pid, $playerProtocol)) === null) {
 			return null;
 		}
