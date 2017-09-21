@@ -17,6 +17,12 @@ abstract class PEPacket extends DataPacket {
 	abstract public function encode($playerProtocol);
 
 	abstract public function decode($playerProtocol);
+	
+	protected function checkLength(int $len) {
+		if ($this->offset + $len > strlen($this->buffer)) {
+			throw new \Exception( get_class($this) .": Try get {$len} bytes, offset = " . $this->offset . ", bufflen = " . strlen($this->buffer));
+		}
+	}
 
 	/**
 	 * !IMPORTANT! Should be called at first line in decode

@@ -181,7 +181,12 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				if($buffer !== ""){
 					$pk = $this->getPacket($buffer, $player);			
 					if (!is_null($pk)) {
-						$pk->decode($player->getPlayerProtocol());
+						try {
+							$pk->decode($player->getPlayerProtocol());
+						}catch(\Exception $e){
+							file_put_contents("logs/" . date('Y.m.d') . "_decode_error.log", $e->getMessage() . "\n", FILE_APPEND | LOCK_EX);
+							return;
+						}
 						$player->handleDataPacket($pk);
 					}
 				}
