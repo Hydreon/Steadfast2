@@ -409,7 +409,7 @@ class Server{
 	 * @return string
 	 */
 	public function getServerName(){
-		return $this->getConfigString("motd", "Minecraft: PE Server");
+		return $this->getConfigString("motd", "An MCPE Server");
 	}
 
 	/**
@@ -483,7 +483,7 @@ class Server{
 	 * @return bool
 	 */
 	public function getForceGamemode(){
-		return $this->getConfigBoolean("force-gamemode", false);
+		return $this->getConfigBoolean("force-gamemode", true);
 	}
 
 	/**
@@ -534,6 +534,7 @@ class Server{
 
 			case (string) Player::SPECTATOR:
 			case "spectator":
+			case "sp":
 			case "view":
 			case "v":
 				return Player::SPECTATOR;
@@ -575,7 +576,7 @@ class Server{
 	 * @return int
 	 */
 	public function getDifficulty(){
-		return $this->getConfigInt("difficulty", 1);
+		return $this->getConfigInt("difficulty", 2);
 	}
 
 	/**
@@ -589,7 +590,7 @@ class Server{
 	 * @return int
 	 */
 	public function getSpawnRadius(){
-		return $this->getConfigInt("spawn-protection", 16);
+		return $this->getConfigInt("spawn-protection", 9);
 	}
 
 	/**
@@ -617,7 +618,7 @@ class Server{
 	 * @return string
 	 */
 	public function getMotd(){
-		return $this->getConfigString("motd", "Minecraft: PE Server");
+		return $this->getConfigString("motd", "An MCPE Server");
 	}
 
 	/**
@@ -1497,11 +1498,11 @@ class Server{
 
 		$this->logger->info("Loading server properties...");
 		$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, [
-			"motd" => "Minecraft: PE Server",
+			"motd" => "An MCPE Server",
 			"server-port" => 19132,
 			"memory-limit" => "256M",
 			"white-list" => false,
-			"spawn-protection" => 16,
+			"spawn-protection" => 9,
 			"max-players" => 20,
 			"allow-flight" => false,
 			"spawn-animals" => true,
@@ -1509,10 +1510,10 @@ class Server{
 			"spawn-mobs" => true,
 			"mobs-limit" => 0,
 			"gamemode" => 0,
-			"force-gamemode" => false,
+			"force-gamemode" => true,
 			"hardcore" => false,
 			"pvp" => true,
-			"difficulty" => 1,
+			"difficulty" => 2,
 			"generator-settings" => "",
 			"level-name" => "world",
 			"level-seed" => "",
