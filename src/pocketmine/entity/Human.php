@@ -214,8 +214,9 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		if($player !== $this and !isset($this->hasSpawned[$player->getId()])  and isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])){
 			$this->hasSpawned[$player->getId()] = $player;
 
-			$xuid = ($this instanceof Player) ? $this->getXUID() : "";
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, $xuid, [$player]);
+			if(!($this instanceof Player)) {
+				$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, "", [$player]);
+			}
 
 			$pk = new AddPlayerPacket();
 			$pk->uuid = $this->getUniqueId();
@@ -236,7 +237,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			$this->inventory->sendArmorContents($player);
 			$this->level->addPlayerHandItem($this, $player);
 
-			if(!($this instanceof Player)){
+			if(!($this instanceof Player)) {
 				$this->server->removePlayerListData($this->getUniqueId(), [$player]);
 			}
 		}
@@ -248,9 +249,6 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			$pk->eid = $this->getId();
 			$player->dataPacket($pk);
 			unset($this->hasSpawned[$player->getId()]);
-			if ($this instanceof Player){
-				$this->server->removePlayerListData($this->getUniqueId(), [$player]);
-			}
 		}
 	}
 
