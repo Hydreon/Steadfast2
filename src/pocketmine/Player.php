@@ -813,7 +813,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk = new PlayStatusPacket();
 			$pk->status = PlayStatusPacket::PLAYER_SPAWN;
 			$this->dataPacket($pk);
-			$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, $this->getXUID(), [$this]);
 
 			$pos = $this->level->getSafeSpawn($this);
 
@@ -4754,6 +4753,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		} else {
 			return TextFormat::WHITE . "Please update your client version to join";
 		}
+	}
+	
+	public function sendFullPlayerList() {
+		$players = $this->server->getOnlinePlayers();
+		if (count($players) > 0) {
+			$pk = new PlayerListPacket();
+			$pk->type = PlayerListPacket::TYPE_ADD;
+			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->getSkinName(), $this->getSkinData(), $this->getCapeData(), $this->getSkinGeometryName(), $this->getSkinGeometryData(), $this->getXUID()];
+			$this->server->batchPackets($players, [$pk]);
+		}
+		$players[] = $this;
+		$pk = new PlayerListPacket();
+		$pk->type = PlayerListPacket::TYPE_ADD;
+		foreach ($players as $player) {
+			$pk->entries[] = [$player->getUniqueId(), $player->getId(), $player->getName(), $player->getSkinName(), $player->getSkinData(), $player->getCapeData(), $player->getSkinGeometryName(), $player->getSkinGeometryData(), $player->getXUID()];
+		}
+		$this->server->batchPackets([$this], [$pk]);
 	}
 	
 }
