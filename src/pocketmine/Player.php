@@ -1650,9 +1650,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->sendPosition($this, $packet->yaw, $packet->pitch, MovePlayerPacket::MODE_RESET);
 				} else {
 					$newPos = new Vector3($packet->x, $packet->y - $this->getEyeHeight(), $packet->z);
-					if ($this->isTeleporting && $newPos->distanceSquared($this) > 1) {
+					if ($this->isTeleporting && $newPos->distanceSquared($this) > 2) {
 						return;
 					} else {
+						if (!is_null($this->newPosition)) {
+							$distanceSquared = ($newPos->x - $this->newPosition->x) ** 2 + ($newPos->z - $this->newPosition->z) ** 2;						
+						} else {
+							$distanceSquared = ($newPos->x - $this->x) ** 2 + ($newPos->z - $this->z) ** 2;
+						}
+						if ($distanceSquared > $this->movementSpeed * 200) {							
+							$this->revertMovement($this, $this->yaw, $this->pitch);
+							$this->isTeleporting = true;
+							return;
+						}
+
 						$this->isTeleporting = false;
 						
 						$packet->yaw %= 360;
@@ -4416,12 +4427,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->setMoving(false);
 			return;
 		}		
-		$distanceSquared = ($this->newPosition->x - $this->x) ** 2 + ($this->newPosition->z - $this->z) ** 2;
-		if (($distanceSquared / ($tickDiff ** 2)) > $this->movementSpeed * 200) {
-			$this->revertMovement($this, $this->lastYaw, $this->lastPitch);
-			return;
-		}
-
+	
 		$newPos = $this->newPosition;
 		if ($this->chunk === null || !$this->chunk->isGenerated()) {
 			$chunk = $this->level->getChunk($newPos->x >> 4, $newPos->z >> 4);
@@ -4436,7 +4442,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$to = new Location($newPos->x, $newPos->y, $newPos->z, $this->yaw, $this->pitch, $this->level);
 
 		$deltaAngle = abs($from->yaw - $to->yaw) + abs($from->pitch - $to->pitch);
-		$distanceSquared += ($this->newPosition->y - $this->y) ** 2;
+		$distanceSquared = ($this->newPosition->x - $this->x) ** 2 + ($this->newPosition->y - $this->y) ** 2 + ($this->newPosition->z - $this->z) ** 2;
 		if (($distanceSquared > 0.0625 || $deltaAngle > 10)) {
 			$isFirst = ($this->lastX === null || $this->lastY === null || $this->lastZ === null);
 			if (!$isFirst) {
