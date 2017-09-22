@@ -1650,6 +1650,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				} else {
 					$newPos = new Vector3($packet->x, $packet->y - $this->getEyeHeight(), $packet->z);
 					if ($this->isTeleporting && $newPos->distanceSquared($this) > 2) {
+						$this->isTeleporting = false;
 						return;
 					} else {
 						if (!is_null($this->newPosition)) {
