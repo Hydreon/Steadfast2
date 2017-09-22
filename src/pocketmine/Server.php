@@ -2247,13 +2247,15 @@ class Server{
 		}
 	}
 
-	public function addOnlinePlayer(Player $player){				
+	public function addOnlinePlayer(Player $player){	
+		$player->sendFullPlayerList();
 		$this->playerList[$player->getRawUniqueId()] = $player;		
 	}
 
 	public function removeOnlinePlayer(Player $player) {
 		if (isset($this->playerList[$player->getRawUniqueId()])) {
 			unset($this->playerList[$player->getRawUniqueId()]);
+			$this->removePlayerListData($player->getUniqueId(), $this->playerList);
 		}
 	}
 
