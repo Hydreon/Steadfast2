@@ -768,6 +768,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$count = 0;
 		foreach($this->loadQueue as $index => $distance){
+			if($count >= 10){
+				break;
+			}
 			$X = null;
 			$Z = null;
 			Level::getXZ($index, $X, $Z);
