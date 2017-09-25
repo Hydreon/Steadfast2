@@ -400,4 +400,26 @@ abstract class MultiversionEnums {
 		return 0;
 	}
 	
+	public static function getLevelSoundEventName($playerProtocol, $eventId) {
+		if (!isset(self::$levelSoundEvent[$playerProtocol])) {
+			$playerProtocol = 'default';
+		}
+		if (!isset(self::$levelSoundEvent[$playerProtocol][$eventId])) {
+			return end(self::$levelSoundEvent);
+		}
+		return self::$levelSoundEvent[$playerProtocol][$eventId];
+	}
+	
+	public static function getLevelSoundEventId($playerProtocol, $eventName) {
+		if (!isset(self::$levelSoundEvent[$playerProtocol])) {
+			$playerProtocol = 'default';
+		}
+		foreach (self::$levelSoundEvent[$playerProtocol] as $key => $value) {
+			if ($value == $eventName) {
+				return $key;
+			}
+		}
+		return count(self::$levelSoundEvent[$playerProtocol]) - 1;
+	}
+	
 }

@@ -1798,6 +1798,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerMobEqipmentPacket->stopTiming();
 				break;
 			case 'LEVEL_SOUND_EVENT_PACKET':
+				if ($packet->eventId == LevelSoundEventPacket::SOUND_UNDEFINED) {
+					break;
+				}
 				$viewers = $this->getViewers();
 				foreach ($viewers as $viewer) {
 					$viewer->dataPacket($packet);
