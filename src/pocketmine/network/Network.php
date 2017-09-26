@@ -281,11 +281,7 @@ class Network {
 				if(strlen($buf) === 0){
 					throw new \InvalidStateException("Empty or invalid BatchPacket received");
 				}
-
-//				if (ord($buf{0}) !== 0x13) {
-//					echo 'Recive: 0x'. bin2hex($buf{0}).PHP_EOL;
-//				}
-				
+//				var_dump("Recive: 0x" . (ord($buf{0}) < 16 ? '0' . dechex(ord($buf{0})) : dechex(ord($buf{0}))));
 				if (($pk = $this->getPacket(ord($buf{0}), $p->getPlayerProtocol())) !== null) {
 					if ($pk::NETWORK_ID === Info::BATCH_PACKET) {
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
@@ -302,7 +298,7 @@ class Network {
 						return;
 					}
 				} else {
-//					echo "UNKNOWN PACKET: ".bin2hex($buf{0}).PHP_EOL;
+//					echo "UNKNOWN PACKET: 0x" . (ord($buf{0}) < 16 ? '0' . dechex(ord($buf{0})) : dechex(ord($buf{0}))) . PHP_EOL;
 //					echo "Buffer DEC: ".$buf.PHP_EOL;
 //					echo "Buffer HEX: ".bin2hex($buf).PHP_EOL;
 				}
