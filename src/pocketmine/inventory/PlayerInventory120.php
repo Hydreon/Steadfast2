@@ -34,13 +34,16 @@ class PlayerInventory120 extends PlayerInventory {
 	/** @var Item */
 	protected $cursor;
 	/** @var Item[] */
-	protected $craftSlots = [ 0 => null, 1 => null, 2 => null, 3 => null, 4 => null, 5 => null, 6 => null, 7 => null, 8 => null ];
+	protected $craftSlots = [];
 	/** @var Item */
 	protected $craftResult = null;
 	
 	public function __construct(Human $player) {
 		parent::__construct($player);
 		$this->cursor = Item::get(Item::AIR, 0, 0);
+		for ($i = 0; $i < 9; $i++) {
+			$this->craftSlots[$i] = Item::get(Item::AIR, 0, 0);
+		}
 	}
 	
 	public function setItem($index, Item $item, $sendPacket = true) {
@@ -280,6 +283,16 @@ class PlayerInventory120 extends PlayerInventory {
 			$this->onSlotChange($slotIndex, $oldItem);
 		}
 		return true;
+	}
+	
+	public function close(Player $who) {
+		parent::close($who);
+		foreach ($this->craftSlots as $index => $slot) {
+			if ($slot->getId() != Item::AIR) {
+				$this->addItem($slot);
+				$this->craftSlots[$index] = Item::get(Item::AIR, 0, 0);
+			}
+		}
 	}
 
 }

@@ -2191,6 +2191,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->server->getPluginManager()->callEvent(new InventoryCloseEvent($this->currentWindow, $this));
 					$this->removeWindow($this->currentWindow);
 				}
+				if ($this->protocol >= Info::PROTOCOL_120) {
+					// duck tape
+					if ($packet->windowid == 0xff) { // player inventory and workbench
+						$this->inventory->close($this);
+					}
+				}
 				//Timings::$timerContainerClosePacket->stopTiming();
 				break;
 			case 'CRAFTING_EVENT_PACKET':
@@ -2230,7 +2236,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						self::tryApplyCraft($craftSlots, $recipe);
 						$this->inventory->setItem(PlayerInventory120::CRAFT_RESULT_INDEX, $recipe->getResult());
 						foreach ($craftSlots as $slot => $item) {
-							if ($item == null) {
+							if ($item == null || $item->getId() == Item::AIR) {
 								continue;
 							}
 							$this->inventory->setItem(PlayerInventory120::CRAFT_INDEX_0 - $slot, $item);
