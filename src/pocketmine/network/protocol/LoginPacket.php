@@ -128,10 +128,6 @@ class LoginPacket extends PEPacket {
 		}
 		if (isset($this->playerData['SkinGeometry'])) {
 			$this->skinGeometryData = base64_decode($this->playerData['SkinGeometry']);
-			$skinGeometry = json_decode($this->skinGeometryData, true);
-			if ($skinGeometry && isset($skinGeometry[$this->skinGeometryName])) {
-				$this->skinGeometryData = json_encode($skinGeometry[$this->skinGeometryName]);
-			}
 		}
 		$this->clientSecret = $this->playerData['ClientRandomId'];
 		if (isset($this->playerData['DeviceOS'])) {
