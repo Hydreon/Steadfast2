@@ -131,7 +131,6 @@ class LoginPacket extends PEPacket {
 			$skinGeometry = json_decode($this->skinGeometryData, true);
 			if ($skinGeometry && isset($skinGeometry[$this->skinGeometryName])) {
 				$this->skinGeometryData = json_encode($skinGeometry[$this->skinGeometryName]);
-				var_dump($this->skinGeometryData);
 			}
 		}
 		$this->clientSecret = $this->playerData['ClientRandomId'];
