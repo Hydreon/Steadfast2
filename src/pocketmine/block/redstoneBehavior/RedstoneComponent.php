@@ -12,6 +12,21 @@ abstract class RedstoneComponent extends Block {
 		self::REDSTONE_TORCH_ACTIVE,
 	];
 	
+	const REDSTONE_FLOW_CHANGING_BLOCKS = [
+		self::REDSTONE_WIRE,
+		self::REDSTONE_TORCH,
+		self::REDSTONE_TORCH_ACTIVE,
+		self::WOODEN_BUTTON,
+		self::STONE_BUTTON,
+		/** @todo comparator */
+		/** @todo repeater */
+		/** @todo lever */
+		/** @todo pressure plate */
+		/** @todo observer ??? */
+		/** @todo tripwire hook */
+		/** @todo daylight sensor */
+	];
+	
 	const REDSTONE_POWER_MIN = 0;
 	const REDSTONE_POWER_MAX = 15;
 	
@@ -53,8 +68,5 @@ abstract class RedstoneComponent extends Block {
 	 */
 	abstract protected function isSuitableBlock($blockId, $direction);
 	
-	abstract protected function updateNeighbors();
-	
-//	abstract public function redstoneUpdate($power, $fromDirection, $fromSolid = false);
-	
+	abstract protected function updateNeighbors();	
 }

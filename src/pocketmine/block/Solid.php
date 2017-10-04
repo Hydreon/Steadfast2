@@ -44,6 +44,7 @@ abstract class Solid extends Block{
 			Vector3::SIDE_SOUTH => [0, 0, 1],
 			Vector3::SIDE_NORTH => [0, 0, -1],
 		];
+		$poweredState = self::POWERED_NONE;
 		foreach ($offsets as $side => $offset) {
 			$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
 			switch ($blockId) {
@@ -51,7 +52,7 @@ abstract class Solid extends Block{
 					if ($offset[1] == 0) { // all except up and down
 						$wire = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]));
 						if ($wire->getDamage() > 0) {
-							return self::POWERED_WEAKLY;
+							$poweredState = self::POWERED_WEAKLY;
 						}
 					}
 					break;
@@ -69,6 +70,6 @@ abstract class Solid extends Block{
 					break;
 			}
 		}
-		return self::POWERED_NONE;
+		return $poweredState;
 	}
 }

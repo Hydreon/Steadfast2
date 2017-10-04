@@ -24,9 +24,8 @@
  */
 namespace pocketmine\block;
 
+use pocketmine\block\redstoneBehavior\RedstoneComponent;
 use pocketmine\entity\Entity;
-
-
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 use pocketmine\level\Level;
@@ -1121,6 +1120,70 @@ class Block extends Position implements Metadatable{
 	
 	public function getPoweredState() {
 		return 0; /** @see Solid::POWERED_NONE */
+	}
+	
+	final public function isConnectedWithWireFromSide($side) {
+		switch ($side) {
+			case Vector3::SIDE_NORTH:
+				if ($this->level->getBlockIdAt($this->x, $this->y, $this->z - 1) == self::REDSTONE_WIRE) {
+					return self::isHaveWireOnSide(Vector3::SIDE_WEST, $this->x, $this->y, $this->z - 1) && 
+						self::isHaveWireOnSide(Vector3::SIDE_EAST, $this->x, $this->y, $this->z - 1);
+				}
+				break;
+			case Vector3::SIDE_SOUTH:
+				if ($this->level->getBlockIdAt($this->x, $this->y, $this->z + 1) == self::REDSTONE_WIRE) {
+					return self::isHaveWireOnSide(Vector3::SIDE_WEST, $this->x, $this->y, $this->z + 1) && 
+						self::isHaveWireOnSide(Vector3::SIDE_EAST, $this->x, $this->y, $this->z + 1);
+				}
+				break;
+			case Vector3::SIDE_WEST:
+				if ($this->level->getBlockIdAt($this->x - 1, $this->y, $this->z) == self::REDSTONE_WIRE) {
+					return self::isHaveWireOnSide(Vector3::SIDE_NORTH, $this->x - 1, $this->y, $this->z) && 
+						self::isHaveWireOnSide(Vector3::SIDE_SOUTH, $this->x - 1, $this->y, $this->z);
+				}
+				break;
+			case Vector3::SIDE_EAST:
+				if ($this->level->getBlockIdAt($this->x + 1, $this->y, $this->z) == self::REDSTONE_WIRE) {
+					return self::isHaveWireOnSide(Vector3::SIDE_NORTH, $this->x + 1, $this->y, $this->z) && 
+						self::isHaveWireOnSide(Vector3::SIDE_SOUTH, $this->x + 1, $this->y, $this->z);
+				}
+				break;
+		}
+		return false;
+	}
+	
+	private static function isHaveWireOnSide($side, $x, $y, $z) {
+		static $offsets = [
+			Vector3::SIDE_NORTH => [ 0, 0, -1],
+			Vector3::SIDE_SOUTH => [ 0, 0, 1],
+			Vector3::SIDE_WEST => [ -1, 0, 0],
+			Vector3::SIDE_EAST => [ 1, 0, 0],
+		];
+		
+		if (!isset($offsets[$side])) {
+			return false;
+		}
+		$x = $x + $offsets[$side][0];
+		$y = $y + $offsets[$side][1];
+		$z = $z + $offsets[$side][2];
+		
+		$blockId = $this->level->getBlockIdAt($x, $y, $z);
+		if ($blockId == self::REDSTONE_WIRE) {
+			return true;
+		}
+		if (self::$solid[$blockId] || self::$transparent[$blockId]) {
+			$blockAboveId = $this->level->getBlockIdAt($x, $y + 1, $z);
+			if ($blockAboveId == self::REDSTONE_WIRE) {
+				return true;
+			}
+		}
+		if (self::$transparent[$blockId]) {
+			$blockBelowId = $this->level->getBlockIdAt($x, $y - 1, $z);
+			if ($blockBelowId == self::REDSTONE_WIRE) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }
