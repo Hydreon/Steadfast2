@@ -21,7 +21,10 @@
 
 namespace pocketmine\block;
 
+use pocketmine\event\block\BlockUpdateEvent;
+use pocketmine\level\Level;
 use pocketmine\math\Vector3;
+use pocketmine\Server;
 
 abstract class Solid extends Block{
 
@@ -29,8 +32,33 @@ abstract class Solid extends Block{
 	const POWERED_WEAKLY = 1;
 	const POWERED_STRONGLY = 2;
 	
-	public function isSolid(){
+	public function isSolid() {
 		return true;
+	}
+	
+	public function onUpdate($type) {
+		parent::onUpdate($type);
+		static $offsets = [
+			[0, 1, 0],
+			[0, -1, 0],
+			[1, 0, 0],
+			[-1, 0, 0],
+			[0, 0, 1],
+			[0, 0, -1],
+		];
+		$pluginManager = Server::getInstance()->getPluginManager();
+		$tmpVector = new Vector3();
+		foreach ($offsets as $offset) {
+			$tmpVector->setComponents($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
+			$block = $this->level->getBlock($tmpVector);
+			if (in_array($block->getId(), self::REDSTONE_BLOCKS) || $block->getId() == self::IRON_DOOR_BLOCK) {
+				$ev = new BlockUpdateEvent($block);
+				$pluginManager->callEvent($ev);
+				if(!$ev->isCancelled()){
+					$ev->getBlock()->onUpdate(Level::BLOCK_UPDATE_NORMAL);
+				}
+			}
+		}
 	}
 	
 	/** @todo */

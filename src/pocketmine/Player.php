@@ -4264,8 +4264,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected function onJump() {
 		$this->inventory->addItem(Item::get(Item::REDSTONE_TORCH_ACTIVE, 0, 10));
 		$this->inventory->addItem(Item::get(Item::REDSTONE, 0, 10));
-		$this->inventory->addItem(Item::get(Item::DIRT, 0, 10));
-		$this->inventory->addItem(Item::get(Item::WOODEN_BUTTON, 0, 10));
+		$this->inventory->addItem(Item::get(Item::IRON_BLOCK, 0, 10));
+		$this->inventory->addItem(Item::get(Item::STONE_BUTTON, 0, 10));
+		$this->inventory->addItem(Item::get(Item::IRON_DOOR, 0, 1));
  	}
 	
 	 protected function releaseUseItem() {

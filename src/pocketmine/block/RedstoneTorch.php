@@ -49,10 +49,9 @@ class RedstoneTorch extends RedstoneTorchActive {
 				return;
 			}
 		}
-		$this->level->scheduleUpdate($this, 5);
 		if ($block->isSolid() && $block->getPoweredState() == Solid::POWERED_NONE) {
 			$litTorch = Block::get(Block::REDSTONE_TORCH_ACTIVE, $this->meta);
-			$this->level->setBlock($this, $litTorch, true, true);
+			$this->level->setBlock($this, $litTorch);
 		}			
 	}
 

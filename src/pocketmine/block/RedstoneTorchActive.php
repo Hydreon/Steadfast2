@@ -2,13 +2,12 @@
 
 namespace pocketmine\block;
 
-use pocketmine\block\redstoneBehavior\FlowableRedstoneComponent;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
-class RedstoneTorchActive extends FlowableRedstoneComponent {
+class RedstoneTorchActive extends Flowable {
 	
 	protected $id = self::REDSTONE_TORCH_ACTIVE;
 	
@@ -92,17 +91,10 @@ class RedstoneTorchActive extends FlowableRedstoneComponent {
 				return;
 			}
 		}
-		$this->level->scheduleUpdate($this, 5);
 		if ($block->isSolid() && $block->getPoweredState() !== Solid::POWERED_NONE) {
 			$unlitTorch = Block::get(Block::REDSTONE_TORCH, $this->meta);
-			$this->level->setBlock($this, $unlitTorch, true, true);
+			$this->level->setBlock($this, $unlitTorch);
 		}			
-	}
-	
-	protected function isSuitableBlock($blockId, $direction) {
-	}
-	
-	protected function updateNeighbors() {
 	}
 	
 }

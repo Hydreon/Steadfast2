@@ -21,16 +21,17 @@
 
 namespace pocketmine\block;
 
-use pocketmine\block\redstoneBehavior\TransparentRedstoneComponent;
 use pocketmine\block\Solid;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
-class RedstoneWire extends TransparentRedstoneComponent {
+class RedstoneWire extends Transparent {
 
 	protected $id = self::REDSTONE_WIRE;
+	/* @var $neighbors Block[] */
+	protected $neighbors = [];
 
 	public function __construct($meta = 0) {
 		parent::__construct($this->id, $meta);
@@ -51,95 +52,82 @@ class RedstoneWire extends TransparentRedstoneComponent {
 	}
 	
 	public function onUpdate($type) {
-		switch ($type) {
-			case Level::BLOCK_UPDATE_NORMAL:
-			case Level::BLOCK_UPDATE_SCHEDULED:
-				$this->updateNeighbors();
-				$targetPower = $this->meta;
-				$targetDirection = self::DIRECTION_NONE;
-				foreach ($this->neighbors as $neighborDirection => $neighbor) {
-					$neighborId = $neighbor->getId();
-					switch ($neighborId) {
-						case Block::REDSTONE_WIRE:
-							$wirePower = $neighbor->getDamage();
+		$this->collectNeighbors();
+		$targetPower = $this->meta;
+		$targetDirection = self::DIRECTION_NONE;
+		foreach ($this->neighbors as $neighborDirection => $neighbor) {
+			$neighborId = $neighbor->getId();
+			switch ($neighborId) {
+				case Block::REDSTONE_WIRE:
+					$wirePower = $neighbor->getDamage();
+					if ($wirePower > $targetPower) {
+						$targetPower = $wirePower - 1;
+						$targetDirection = $neighborDirection;
+					}
+					break;
+				case Block::REDSTONE_TORCH_ACTIVE:
+					$targetPower = self::REDSTONE_POWER_MAX;
+					$targetDirection = $neighborDirection;
+					break 2;
+				case Block::WOODEN_BUTTON:
+				case Block::STONE_BUTTON:
+					if ($neighbor->isActive()) {
+						$targetPower = self::REDSTONE_POWER_MAX;
+						$targetDirection = $neighborDirection;
+						break 2;
+					}
+					break;
+				default:
+					if (Block::$solid[$neighborId]) {
+						if ($neighbor->getPoweredState() == Solid::POWERED_STRONGLY) {
+							$targetPower = self::REDSTONE_POWER_MAX;
+							$targetDirection = $neighborDirection;
+							break 2;
+						}
+						if ($neighborDirection == self::DIRECTION_TOP || $neighborDirection == self::DIRECTION_BOTTOM) {
+							break;
+						}
+					}
+					if (Block::$transparent[$neighborId]) {
+						$blockBelowId = $this->level->getBlockIdAt($neighbor->x, $neighbor->y - 1, $neighbor->z);
+						if ($blockBelowId == Block::REDSTONE_WIRE) {
+							$wirePower = $this->level->getBlockDataAt($neighbor->x, $neighbor->y - 1, $neighbor->z);;
 							if ($wirePower > $targetPower) {
 								$targetPower = $wirePower - 1;
 								$targetDirection = $neighborDirection;
 							}
-							break;
-						case Block::REDSTONE_TORCH_ACTIVE:
-							$targetPower = self::REDSTONE_POWER_MAX;
+						}
+					}
+					$blockAboveId = $this->level->getBlockIdAt($neighbor->x, $neighbor->y + 1, $neighbor->z);
+					if ($blockAboveId == Block::REDSTONE_WIRE) {
+						$wirePower = $this->level->getBlockDataAt($neighbor->x, $neighbor->y + 1, $neighbor->z);;
+						if ($wirePower > $targetPower) {
+							$targetPower = $wirePower - 1;
 							$targetDirection = $neighborDirection;
-							break 2;
-						case Block::WOODEN_BUTTON:
-						case Block::STONE_BUTTON:
-							if ($neighbor->isActive()) {
-								$targetPower = self::REDSTONE_POWER_MAX;
-								$targetDirection = $neighborDirection;
-								break 2;
-							}
-							break;
-						default:
-							if (Block::$solid[$neighborId]) {
-								if ($neighbor->getPoweredState() == Solid::POWERED_STRONGLY) {
-									$targetPower = self::REDSTONE_POWER_MAX;
-									$targetDirection = $neighborDirection;
-									break 2;
-								}
-								if ($neighborDirection == self::DIRECTION_TOP || $neighborDirection == self::DIRECTION_BOTTOM) {
-									break;
-								}
-							}
-							if (Block::$transparent[$neighborId]) {
-								$blockBelowId = $this->level->getBlockIdAt($neighbor->x, $neighbor->y - 1, $neighbor->z);
-								if ($blockBelowId == Block::REDSTONE_WIRE) {
-									$wirePower = $this->level->getBlockDataAt($neighbor->x, $neighbor->y - 1, $neighbor->z);;
-									if ($wirePower > $targetPower) {
-										$targetPower = $wirePower - 1;
-										$targetDirection = $neighborDirection;
-									}
-								}
-							}
-							$blockAboveId = $this->level->getBlockIdAt($neighbor->x, $neighbor->y + 1, $neighbor->z);
-							if ($blockAboveId == Block::REDSTONE_WIRE) {
-								$wirePower = $this->level->getBlockDataAt($neighbor->x, $neighbor->y + 1, $neighbor->z);;
-								if ($wirePower > $targetPower) {
-									$targetPower = $wirePower - 1;
-									$targetDirection = $neighborDirection;
-								}
-							}
-							break;
+						}
 					}
-				}
-				// check block below
-				$blockBelowId = $this->level->getBlockIdAt($this->x, $this->y - 1, $this->z);
-				if (Block::$solid[$blockBelowId]) {
-					$blockBelow = $this->level->getBlock(new Vector3($this->x, $this->y - 1, $this->z));
-					if ($blockBelow->getPoweredState() == Solid::POWERED_STRONGLY) {
-						$targetPower = self::REDSTONE_POWER_MAX;
-						$targetDirection = self::DIRECTION_SELF;
-					}
-				}
-				$isSwitchOff = false;
-				if ($this->meta < $targetPower) {
-					$this->meta = $targetPower;
-					$this->level->setBlock($this, $this, false, false);
-				} else {
-					if ($this->meta == $targetPower && $targetDirection == self::DIRECTION_NONE) {
-						$this->meta = self::REDSTONE_POWER_MIN;
-						$this->level->setBlock($this, $this, false, false);
-						$isSwitchOff = true;
-					}
-				}
-				$this->level->scheduleUpdate($this, $isSwitchOff ? 10 : 2);
-				break;
+					break;
+			}
+		}
+		// check block below
+		$blockBelowId = $this->level->getBlockIdAt($this->x, $this->y - 1, $this->z);
+		if (Block::$solid[$blockBelowId]) {
+			$blockBelow = $this->level->getBlock(new Vector3($this->x, $this->y - 1, $this->z));
+			if ($blockBelow->getPoweredState() == Solid::POWERED_STRONGLY) {
+				$targetPower = self::REDSTONE_POWER_MAX;
+				$targetDirection = self::DIRECTION_SELF;
+			}
+		}
+		if ($targetDirection == self::DIRECTION_NONE && $this->meta != self::REDSTONE_POWER_MIN) { // lose charge
+			$this->meta = self::REDSTONE_POWER_MIN;
+			$this->level->setBlock($this, $this);
+		} else if ($this->meta < $targetPower) { // found new power source
+			$this->meta = $targetPower;
+			$this->level->setBlock($this, $this);
 		}
 	}
 	
-	protected function isSuitableBlock($blockId, $direction) {
-	}
-
-	protected function updateNeighbors() {
+	protected function collectNeighbors() {
 		static $offsets = [
 			self::DIRECTION_NORTH => [0, 0, -1],
 			self::DIRECTION_SOUTH => [0, 0, 1],

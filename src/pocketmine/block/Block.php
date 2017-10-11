@@ -24,7 +24,7 @@
  */
 namespace pocketmine\block;
 
-use pocketmine\block\redstoneBehavior\RedstoneComponent;
+use pocketmine\block\Solid;
 use pocketmine\entity\Entity;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
@@ -40,6 +40,35 @@ use pocketmine\plugin\Plugin;
 
 
 class Block extends Position implements Metadatable{
+	
+	/** REDSTONE CONSTS BEGIN **/
+	const REDSTONE_POWER_MIN = 0;
+	const REDSTONE_POWER_MAX = 15;
+	
+	const DIRECTION_NONE = -1;
+	const DIRECTION_BOTTOM = 0;
+	const DIRECTION_TOP = 1;
+	const DIRECTION_NORTH = 2;
+	const DIRECTION_SOUTH = 3;
+	const DIRECTION_WEST = 4;
+	const DIRECTION_EAST = 5;
+	const DIRECTION_SELF = 6;
+	
+	const REDSTONE_BLOCKS = [
+		self::REDSTONE_WIRE,
+		self::REDSTONE_TORCH,
+		self::REDSTONE_TORCH_ACTIVE,
+		self::WOODEN_BUTTON,
+		self::STONE_BUTTON,
+		/** @todo comparator */
+		/** @todo repeater */
+		/** @todo lever */
+		/** @todo pressure plate */
+		/** @todo observer ??? */
+		/** @todo tripwire hook */
+		/** @todo daylight sensor */
+	];
+	/** REDSTONE CONSTS END **/
 	
 	const FACE_DOWN = 0;
 	const FACE_UP = 1;
@@ -1184,6 +1213,17 @@ class Block extends Position implements Metadatable{
 			}
 		}
 		return false;
+	}
+	
+	public function isCharged() {
+		switch ($this->id) {
+			case self::REDSTONE_WIRE:
+				return $this->meta > 0;
+			case self::REDSTONE_TORCH_ACTIVE:
+				return true;
+			default:
+				return self::$solid[$this->id] && $this->getPoweredState() != Solid::POWERED_NONE;
+		}
 	}
 	
 }
