@@ -4233,7 +4233,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * 
 	 * @param PlayerActionPacket $packet
 	 */
-	private function crackBlock($packet) {
+	protected function crackBlock($packet) {
 		if (!isset($this->actionsNum['CRACK_BLOCK'])) {
 			$this->actionsNum['CRACK_BLOCK'] = 0;
 		}
