@@ -1616,6 +1616,7 @@ class Server{
 		Enchantment::init();
 		Item::init();
 		Biome::init();
+		TextWrapper::init();
 		$this->craftingManager = new CraftingManager();
 
 		$this->pluginManager = new PluginManager($this, $this->commandMap);
