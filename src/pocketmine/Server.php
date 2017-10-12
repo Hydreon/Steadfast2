@@ -139,7 +139,6 @@ use pocketmine\entity\monster\walking\Wolf;
 use pocketmine\entity\monster\walking\Zombie;
 use pocketmine\entity\monster\walking\ZombieVillager;
 use pocketmine\entity\projectile\FireBall;
-use pocketmine\utils\MetadataConvertor;
 
 /**
  * The class that manages everything
@@ -1617,8 +1616,6 @@ class Server{
 		Enchantment::init();
 		Item::init();
 		Biome::init();
-		TextWrapper::init();
-		MetadataConvertor::init();
 		$this->craftingManager = new CraftingManager();
 
 		$this->pluginManager = new PluginManager($this, $this->commandMap);
@@ -1857,19 +1854,11 @@ class Server{
 		foreach ($packets as $p) {
 			foreach ($neededProtocol as $protocol) {
 				if ($p instanceof DataPacket) {
-					if ($protocol >= Info::PROTOCOL_120) {
-						foreach ($neededSubClientsId as $subClientId) {
-							$p->senderSubClientID = $subClientId;
-							$p->encode($protocol);
-							$newPackets[$protocol][] = $p->buffer;
-						}
-					} else {
-						if (!$p->isEncoded || $protocolsCount > 1) {
-							$p->senderSubClientID = 0;
-							$p->encode($protocol);
-						}
+					foreach ($neededSubClientsId as $subClientId) {
+						$p->senderSubClientID = $subClientId;
+						$p->encode($protocol);
 						$newPackets[$protocol][] = $p->buffer;
-					}
+					}					
 				} elseif ($protocolsCount == 1) {
 					$newPackets[$protocol][] = $p;
 				}

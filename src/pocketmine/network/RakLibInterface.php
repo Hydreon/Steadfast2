@@ -22,15 +22,10 @@
 namespace pocketmine\network;
 
 use pocketmine\event\player\PlayerCreationEvent;
-use pocketmine\event\server\QueryRegenerateEvent;
 use pocketmine\network\protocol\DataPacket;
-use pocketmine\network\protocol\Info as ProtocolInfo;
 use pocketmine\network\protocol\Info;
-use pocketmine\network\protocol\UnknownPacket;
 use pocketmine\Player;
 use pocketmine\Server;
-use pocketmine\utils\MainLogger;
-use pocketmine\utils\TextFormat;
 use raklib\protocol\EncapsulatedPacket;
 use raklib\RakLib;
 use raklib\server\RakLibServer;
@@ -254,7 +249,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$identifier = $this->identifiers[$player];	
 
 			$pk = new EncapsulatedPacket();				
-			$pk->buffer = chr(0xfe) . $this->getPacketBuffer($packet, $protocol);
+			$pk->buffer = chr(0xfe) . $this->getPacketBuffer($packet);
 			$pk->reliability = 3;
 
 			if($needACK === true){
@@ -281,18 +276,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		if ($player->isEncryptEnable()) {
 			$buffer = $player->getDecrypt($buffer);			
 		}		
-		if ($playerProtocol >= Info::PROTOCOL_110 || $player->getOriginalProtocol() == 0 && $this->isZlib($buffer)) {
-			$pk = new BatchPacket($buffer);
-			$pk->is110 = true;
-			return $pk;
-		}
-		$pid = ord($buffer{0});
-		if (($data = $this->network->getPacket($pid, $playerProtocol)) === null) {
-			return null;
-		}
-		$offset = 1;
-		$data->setBuffer($buffer, $offset);
-		return $data;
+		$pk = new BatchPacket($buffer);
+		return $pk;
 	}
 
 	public function putReadyPacket($player, $buffer) {
@@ -307,11 +292,10 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		}
 	}
 	
-	private function getPacketBuffer($packet, $protocol) {
-		if ($protocol < Info::PROTOCOL_110 || ($packet instanceof BatchPacket)) {
+	private function getPacketBuffer($packet) {		
+		if ($packet instanceof BatchPacket) {
 			return $packet->buffer;
 		}
-		
 		return $this->fakeZlib(Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer);
 	}
 	
@@ -319,13 +303,6 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		static $startBytes = "\x78\x01\x01";
 		$len = strlen($buffer);
 		return $startBytes . Binary::writeLShort($len) . Binary::writeLShort($len ^ 0xffff) . $buffer . hex2bin(hash('adler32', $buffer, false));
-	}
-	
-	private function isZlib($buffer) {
-		if (ord($buffer{0}) == 120) {
-			return true;
-		}
-		return false;
 	}
 
 }

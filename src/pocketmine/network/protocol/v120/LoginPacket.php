@@ -3,14 +3,13 @@
 namespace pocketmine\network\protocol\v120;
 
 use pocketmine\network\protocol\Info;
-use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
 use pocketmine\utils\UUID;
 use pocketmine\utils\Binary;
 
 class LoginPacket extends PEPacket {
 
-	const NETWORK_ID = Info120::LOGIN_PACKET;
+	const NETWORK_ID = Info::LOGIN_PACKET;
 	const PACKET_NAME = "LOGIN_PACKET";
 
 	public $username;
@@ -44,7 +43,7 @@ class LoginPacket extends PEPacket {
 	}
 
 	public function decode($playerProtocol) {
-		$this->getHeader(Info::PROTOCOL_120);
+		$this->getHeader($playerProtocol);
 		$this->protocol1 = $this->getInt();
 		if (!in_array($this->protocol1, Info::ACCEPTED_PROTOCOLS)) {
 			$this->isValidProtocol = false;

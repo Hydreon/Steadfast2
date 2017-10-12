@@ -24,21 +24,15 @@ namespace pocketmine\entity;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\item\Item as ItemItem;
-use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\utils\UUID;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Enum;
-use pocketmine\nbt\tag\ShortTag;
-use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\Network;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\Player;
 use pocketmine\level\Level;
-
-use pocketmine\network\multiversion\Multiversion;
 
 class Human extends Creature implements ProjectileSource, InventoryHolder{
 
@@ -124,15 +118,10 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 		$this->setDataFlag(self::DATA_PLAYER_FLAGS, self::DATA_PLAYER_FLAG_SLEEP, false);
 		$this->setDataProperty(self::DATA_PLAYER_BED_POSITION, self::DATA_TYPE_POS, [0, 0, 0]);
-		
-		if ($this instanceof Player){
-			$this->inventory = Multiversion::getPlayerInventory($this);
+		$this->inventory = new PlayerInventory($this);
+		if ($this instanceof Player){			
 			$this->addWindow($this->inventory, 0);
 		} else {
-			$this->inventory = new PlayerInventory($this);
-		}
-
-		if(!($this instanceof Player)){
 			if(isset($this->namedtag->NameTag)){
 				$this->setNameTag($this->namedtag["NameTag"]);
 			}

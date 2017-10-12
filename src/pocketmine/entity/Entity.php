@@ -111,7 +111,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_LEAD_HOLDER = 38; // type: long
 	const DATA_SCALE = 39; // type: float
 	const DATA_BUTTON_TEXT = 40; // type: string !IMPORTANT! Send to player
-	const DATA_MAX_AIR = 44; // type: short
+	const DATA_MAX_AIR = 43; // type: short
 	const DATA_SEAT_RIDER_OFFSET = 57; // type: vector3
 	
 	const DATA_EXPLODE_TIMER = 56;
@@ -150,20 +150,20 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_NO_AI = 16;
 	const DATA_FLAG_SILENT = 17;
 	const DATA_FLAG_IS_CLIMBING = 18;
-	const DATA_FLAG_RESTING_BAT = 19;
-	const DATA_FLAG_ANIMAL_SIT = 20;
-	const DATA_FLAG_ANGRY_WOLF = 21;
-	const DATA_FLAG_INTERESTED = 22; //for mobs following players with food?
-	const DATA_FLAG_ANGRY_BLAZE = 23;
-	const DATA_FLAG_TAME_WOLF = 24; //works with DATA_COLOR
-	const DATA_FLAG_LEASHED = 25;
-	const DATA_FLAG_SHAVED_SHIP = 26;
-	const DATA_FLAG_FALL_FLYING = 27;
-	const DATA_FLAG_ELDER_GUARDIAN = 28;
-	const DATA_FLAG_MOVING = 29; // ???
-	const DATA_FLAG_NOT_IN_WATER = 30;
-	const DATA_FLAG_CHESTED_MOUNT = 31;
-	const DATA_FLAG_STACKABLE = 32; //???
+	const DATA_FLAG_RESTING_BAT = 22;
+	const DATA_FLAG_ANIMAL_SIT = 23;
+	const DATA_FLAG_ANGRY_WOLF = 24;
+	const DATA_FLAG_INTERESTED = 25; //for mobs following players with food?
+	const DATA_FLAG_ANGRY_BLAZE = 26;
+	const DATA_FLAG_TAME_WOLF = 27; //works with DATA_COLOR
+	const DATA_FLAG_LEASHED = 28;
+	const DATA_FLAG_SHAVED_SHIP = 29;
+	const DATA_FLAG_FALL_FLYING = 30;
+	const DATA_FLAG_ELDER_GUARDIAN = 31;
+	const DATA_FLAG_MOVING = 32; // ???
+	const DATA_FLAG_NOT_IN_WATER = 33;
+	const DATA_FLAG_CHESTED_MOUNT = 34;
+	const DATA_FLAG_STACKABLE = 35; //???
 	
 	/* 1.1.0 new flags
 	const DATA_FLAG_CAN_CLIMBING = 19; 
