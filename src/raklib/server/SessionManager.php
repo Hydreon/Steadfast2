@@ -208,8 +208,11 @@ class SessionManager{
 
     public function streamEncapsulated(Session $session, EncapsulatedPacket $packet, $flags = RakLib::PRIORITY_NORMAL){
 		$id = $session->getAddress() . ":" . $session->getPort();
-		if (ord($packet->buffer{0}) == 0xfe) {
+		if ($packet->buffer{0} == "\xfe") {
 			$buff = substr($packet->buffer, 1);
+			if ($session->isEncryptEnable()) {
+				$buff = $session->getDecrypt($buff);
+			}
 			$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buff;
 			$this->server->pushThreadToMainPacket($buffer);
 		}
@@ -279,6 +282,26 @@ class SessionManager{
                     $buffer = substr($packet, $offset);
                     $this->sessions[$identifier]->addEncapsulatedToQueue(EncapsulatedPacket::fromBinary($buffer, true), $flags);
                 }else{
+                    $this->streamInvalid($identifier);
+                }
+			}elseif($id === RakLib::PACKET_ENABLE_ENCRYPT){
+				$len = ord($packet{$offset++});
+                $identifier = substr($packet, $offset, $len);
+                $offset += $len;
+				if(isset($this->sessions[$identifier])){
+					$len = Binary::readShort(substr($packet, $offset, 2));
+					$offset += 2;
+					$token = substr($packet, $offset, $len);
+					$offset += $len;
+					$len = Binary::readShort(substr($packet, $offset, 2));
+					$offset += 2;
+					$privateKey = substr($packet, $offset, $len);
+					$offset += $len;
+					$len = Binary::readShort(substr($packet, $offset, 2));
+					$offset += 2;
+					$publicKey = substr($packet, $offset, $len);
+					$this->sessions[$identifier]->enableEncrypt($token, $privateKey, $publicKey);
+				}else{
                     $this->streamInvalid($identifier);
                 }
             }elseif($id === RakLib::PACKET_RAW){

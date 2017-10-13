@@ -39,9 +39,11 @@ class DisconnectPacket extends PEPacket {
 			$this->buffer = chr(Info::DISCONNECT_PACKET);
 		}
 		$this->offset = 0;
-		$this->putByte($this->senderSubClientID);
-		$this->putByte($this->targetSubClientID);
-		$this->offset = 2;
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->putByte($this->senderSubClientID);
+			$this->putByte($this->targetSubClientID);
+			$this->offset = 2;
+		}
 	}
 	
 	public function decode($playerProtocol) {

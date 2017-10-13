@@ -249,15 +249,11 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$identifier = $this->identifiers[$player];	
 
 			$pk = new EncapsulatedPacket();				
-			$pk->buffer = chr(0xfe) . $this->getPacketBuffer($packet);
+			$pk->buffer = $this->getPacketBuffer($packet);
 			$pk->reliability = 3;
 
 			if($needACK === true){
 				$pk->identifierACK = $this->identifiersACK[$identifier]++;
-			}
-			
-			if($player->isEncryptEnable()) {
-				$pk->buffer = chr(0xfe) . $player->getEncrypt(substr($pk->buffer,1));
 			}
 
 			if ($immediate) {
@@ -272,10 +268,6 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	
 
 	private function getPacket($buffer, $player){
-		$playerProtocol = $player->getPlayerProtocol();
-		if ($player->isEncryptEnable()) {
-			$buffer = $player->getDecrypt($buffer);			
-		}		
 		$pk = new BatchPacket($buffer);
 		return $pk;
 	}
@@ -283,11 +275,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	public function putReadyPacket($player, $buffer) {
 		if (isset($this->identifiers[$player])) {	
 			$pk = new EncapsulatedPacket();
-			$pk->buffer = chr(0xfe) . $buffer;
+			$pk->buffer = $buffer;
 			$pk->reliability = 3;	
-			if($player->isEncryptEnable()) {
-				$pk->buffer = chr(0xfe) . $player->getEncrypt(substr($pk->buffer,1));
-			}
 			$this->interface->sendEncapsulated($player->getIdentifier(), $pk, RakLib::PRIORITY_NORMAL);			
 		}
 	}
@@ -303,6 +292,11 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		static $startBytes = "\x78\x01\x01";
 		$len = strlen($buffer);
 		return $startBytes . Binary::writeLShort($len) . Binary::writeLShort($len ^ 0xffff) . $buffer . hex2bin(hash('adler32', $buffer, false));
+	}
+	
+	public function enableEncryptForPlayer(Player $player, $token, $privateKey, $publicKey){
+		$identifier = $this->identifiers[$player];	
+		$this->interface->enableEncrypt($identifier, $token, $privateKey, $publicKey);
 	}
 
 }

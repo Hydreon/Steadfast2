@@ -100,6 +100,8 @@ class Session{
 	private $lastReliableIndex = -1;
 	
 	private $pingAverage = [0.025];
+	private $encrypter = null;
+	private $encryptEnabled = false;
 
     public function __construct(SessionManager $sessionManager, $address, $port){
         $this->sessionManager = $sessionManager;
@@ -265,7 +267,11 @@ class Session{
      * @param int                $flags
      */
     public function addEncapsulatedToQueue(EncapsulatedPacket $packet, $flags = RakLib::PRIORITY_NORMAL){
-
+		if ($this->isEncryptEnable()) {
+			$packet->buffer = "\xfe" . $this->getEncrypt($packet->buffer);
+		} else {
+			$packet->buffer = "\xfe" . $packet->buffer;
+		}
         if(($packet->needACK = ($flags & RakLib::FLAG_NEED_ACK) > 0) === true){
 	        $this->needACK[$packet->identifierACK] = [];
         }
@@ -545,5 +551,22 @@ class Session{
 	
 	public function getPing(){
 		return round((array_sum($this->pingAverage) / count($this->pingAverage)) * 1000);
+	}
+
+	public function enableEncrypt($token, $privateKey, $publicKey) {
+		$this->encrypter = new \McpeEncrypter($token, $privateKey, $publicKey);
+		$this->encryptEnabled = true;
+	}
+	
+	public function getEncrypt($sStr) {		
+		return $this->encrypter->encrypt($sStr);
+	}	
+
+	public function getDecrypt($sStr) {
+		return $this->encrypter->decrypt($sStr);
+	}
+	
+	public function isEncryptEnable() {
+		return $this->encryptEnabled;
 	}
 }

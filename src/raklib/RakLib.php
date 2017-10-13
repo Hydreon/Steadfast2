@@ -141,6 +141,8 @@ abstract class RakLib{
     const PACKET_BLOCK_ADDRESS = 0x09;
 	
 	const PACKET_PING = 0x0a;
+	
+	const PACKET_ENABLE_ENCRYPT = 0x0b;
 
     /*
      * No payload
