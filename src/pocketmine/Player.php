@@ -3491,7 +3491,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$item = $this->inventory->getItemInHand();
 		$damage = [
-			EntityDamageEvent::MODIFIER_BASE => $item instanceof Tool ? $item->getDamage() : 1,
+			EntityDamageEvent::MODIFIER_BASE => $item instanceof Tool ? $item->getAttackDamage() : 1,
 		];
 
 		if ($target instanceof Player) {
