@@ -17,17 +17,19 @@
  * @link http://www.pocketmine.net/
  * 
  *
-*/
+ */
 
 namespace pocketmine\item;
 
+class WoodenAxe extends Tool {
 
-class WoodenAxe extends Tool{
-	public function __construct($meta = 0, $count = 1){
+	public function __construct($meta = 0, $count = 1) {
 		parent::__construct(self::WOODEN_AXE, $meta, $count, "Wooden Axe");
+		$this->damage = 3;
 	}
 
-	public function isAxe(){
+	public function isAxe() {
 		return Tool::TIER_WOODEN;
 	}
+
 }

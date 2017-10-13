@@ -39,6 +39,8 @@ abstract class Tool extends Item{
 	const TYPE_AXE = 4;
 	const TYPE_SHEARS = 5;
 
+	protected $damage = 1;
+	
 	public function __construct($id, $meta = 0, $count = 1, $name = "Unknown"){
 		parent::__construct($id, $meta, $count, $name);
 	}
@@ -128,4 +130,9 @@ abstract class Tool extends Item{
 	public function isTool(){
 		return ($this->id === self::FLINT_STEEL or $this->id === self::SHEARS or $this->id === self::BOW or $this->isPickaxe() !== false or $this->isAxe() !== false or $this->isShovel() !== false or $this->isSword() !== false);
 	}
+	
+	public function getDamage() {
+		return $this->damage;
+	}
+	
 }
