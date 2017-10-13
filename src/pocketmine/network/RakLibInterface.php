@@ -266,10 +266,13 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		return null;
 	}
 	
-
 	private function getPacket($buffer, $player){
-		$pk = new BatchPacket($buffer);
-		return $pk;
+		$playerProtocol = $player->getPlayerProtocol();	
+		if (!is_null($pk = $this->network->getPacket(ord($buffer{0}), $playerProtocol))) {
+			$pk->setBuffer($buffer, 1);
+			return $pk;
+		}
+		return null;
 	}
 
 	public function putReadyPacket($player, $buffer) {

@@ -30,7 +30,6 @@ use pocketmine\network\protocol\AddPaintingPacket;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\AdventureSettingsPacket;
 use pocketmine\network\protocol\AnimatePacket;
-use pocketmine\network\protocol\BatchPacket;
 use pocketmine\network\protocol\ContainerClosePacket;
 use pocketmine\network\protocol\ContainerOpenPacket;
 use pocketmine\network\protocol\ContainerSetDataPacket;
@@ -38,7 +37,6 @@ use pocketmine\network\protocol\CraftingDataPacket;
 use pocketmine\network\protocol\CraftingEventPacket;
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\FullChunkDataPacket;
-use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\SetEntityLinkPacket;
 use pocketmine\network\protocol\TileEntityDataPacket;
 use pocketmine\network\protocol\EntityEventPacket;
@@ -70,12 +68,10 @@ use pocketmine\network\protocol\TransferPacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
 use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\network\protocol\v120\PlayerSkinPacket;
-use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\MainLogger;
 use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
 use pocketmine\network\protocol\RequestChunkRadiusPacket;
-use pocketmine\utils\BinaryStream;
 use pocketmine\network\protocol\SetCommandsEnabledPacket;
 use pocketmine\network\protocol\AvailableCommandsPacket;
 use pocketmine\network\protocol\ResourcePackDataInfoPacket;
@@ -216,49 +212,6 @@ class Network {
 	
 	public function getServer(){
 		return $this->server;
-	}
-			
-	public function processBatch(BatchPacket $packet, Player $p){
-		$str = @\zlib_decode($packet->payload, 1024 * 1024 * 64); //Max 64MB
-		if ($str === false) {
-			return;
-		}
-		try{
-			$stream = new BinaryStream($str);
-			$length = strlen($str);
-			while ($stream->getOffset() < $length) {
-				$buf = $stream->getString();
-				if(strlen($buf) === 0){
-					throw new \InvalidStateException("Empty or invalid BatchPacket received");
-				}
-//				var_dump("Recive: 0x" . (ord($buf{0}) < 16 ? '0' . dechex(ord($buf{0})) : dechex(ord($buf{0}))));
-				if (($pk = $this->getPacket(ord($buf{0}), $p->getPlayerProtocol())) !== null) {
-					$pk->setBuffer($buf, 1);
-					try {
-						$pk->decode($p->getPlayerProtocol());
-					}catch(\Exception $e){
-						file_put_contents("logs/" . date('Y.m.d') . "_decode_error.log", $e->getMessage() . "\n", FILE_APPEND | LOCK_EX);
-						return;
-					}
-					$p->handleDataPacket($pk);
-					if ($pk->getOffset() <= 0) {
-						return;
-					}
-				} else {
-//					echo "UNKNOWN PACKET: 0x" . (ord($buf{0}) < 16 ? '0' . dechex(ord($buf{0})) : dechex(ord($buf{0}))) . PHP_EOL;
-//					echo "Buffer DEC: ".$buf.PHP_EOL;
-//					echo "Buffer HEX: ".bin2hex($buf).PHP_EOL;
-				}
-			}
-		}catch(\Exception $e){
-			if(\pocketmine\DEBUG > 1){
-				$logger = $this->server->getLogger();
-				if($logger instanceof MainLogger){
-					$logger->debug("BatchPacket " . " 0x" . bin2hex($packet->payload));
-					$logger->logException($e);
-				}
-			}
-		}
 	}
 
 	/**

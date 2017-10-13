@@ -213,8 +213,17 @@ class SessionManager{
 			if ($session->isEncryptEnable()) {
 				$buff = $session->getDecrypt($buff);
 			}
-			$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buff;
-			$this->server->pushThreadToMainPacket($buffer);
+			$decoded = zlib_decode($buff);
+			$stream = new BinaryStream($decoded);
+			$length = strlen($decoded);
+			while ($stream->getOffset() < $length) {
+				$buf = $stream->getString();
+				if (empty($buf)) {
+					continue;
+				}
+				$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buf;
+				$this->server->pushThreadToMainPacket($buffer);
+			}
 		}
     }
 	
