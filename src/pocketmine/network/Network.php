@@ -67,6 +67,7 @@ use pocketmine\network\protocol\TileEventPacket;
 use pocketmine\network\protocol\TransferPacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
 use pocketmine\network\protocol\PlayerListPacket;
+use pocketmine\network\protocol\LoginPacket;
 use pocketmine\network\protocol\v120\PlayerSkinPacket;
 use pocketmine\Server;
 use pocketmine\utils\MainLogger;
@@ -80,7 +81,6 @@ use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\v120\CommandRequestPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
-use pocketmine\network\protocol\v120\LoginPacket as NewLoginPacket;
 use pocketmine\network\protocol\v120\ModalFormResponsePacket;
 use pocketmine\network\protocol\v120\PlayerHotbarPacket;
 use pocketmine\network\protocol\v120\PurchaseReceiptPacket;
@@ -308,7 +308,7 @@ class Network {
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACKS_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
 		// new
-		$this->registerPacket(ProtocolInfo::LOGIN_PACKET, NewLoginPacket::class);
+		$this->registerPacket(ProtocolInfo::LOGIN_PACKET, LoginPacket::class);
 		$this->registerPacket(ProtocolInfo::INVENTORY_TRANSACTION_PACKET, InventoryTransactionPacket::class);
 		$this->registerPacket(ProtocolInfo::INVENTORY_CONTENT_PACKET, InventoryContentPacket::class);
 		$this->registerPacket(ProtocolInfo::PLAYER_HOTBAR_PACKET, PlayerHotbarPacket::class);
