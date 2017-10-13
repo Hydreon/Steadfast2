@@ -28,6 +28,7 @@ use pocketmine\item\Item;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
+use pocketmine\network\protocol\v120\InventorySlotPacket;
 
 abstract class BaseInventory implements Inventory{
 

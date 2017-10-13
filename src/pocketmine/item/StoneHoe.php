@@ -17,17 +17,18 @@
  * @link http://www.pocketmine.net/
  * 
  *
-*/
+ */
 
 namespace pocketmine\item;
 
+class StoneHoe extends Tool {
 
-class StoneHoe extends Tool{
-	public function __construct($meta = 0, $count = 1){
+	public function __construct($meta = 0, $count = 1) {
 		parent::__construct(self::STONE_HOE, $meta, $count, "Stone Hoe");
 	}
 
-	public function isHoe(){
+	public function isHoe() {
 		return Tool::TIER_STONE;
 	}
+
 }
