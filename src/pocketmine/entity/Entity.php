@@ -150,6 +150,9 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_NO_AI = 16;
 	const DATA_FLAG_SILENT = 17;
 	const DATA_FLAG_IS_CLIMBING = 18;
+	const DATA_FLAG_CAN_CLIMBING = 19; 
+	const DATA_FLAG_IS_SWIMMER = 20; 
+	const DATA_FLAG_CAN_FLY = 21; 
 	const DATA_FLAG_RESTING_BAT = 22;
 	const DATA_FLAG_ANIMAL_SIT = 23;
 	const DATA_FLAG_ANGRY_WOLF = 24;
@@ -164,15 +167,10 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_NOT_IN_WATER = 33;
 	const DATA_FLAG_CHESTED_MOUNT = 34;
 	const DATA_FLAG_STACKABLE = 35; //???
-	
-	/* 1.1.0 new flags
-	const DATA_FLAG_CAN_CLIMBING = 19; 
-	const DATA_FLAG_IS_SWIMMER = 20; 
-	const DATA_FLAG_CAN_FLY = 21; 
 	const DATA_FLAG_IS_STAING = 37; 
 	const DATA_FLAG_IS_WASD_CONTROLLED = 43; 
 	const DATA_FLAG_CAN_POWER_JUMP = 44;
-	 */
+	
 	
 	const DATA_PLAYER_FLAG_SLEEP = 1;
 	const DATA_PLAYER_FLAG_DEAD = 2;
@@ -335,6 +333,7 @@ abstract class Entity extends Location implements Metadatable{
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SHOW_NAMETAG, true, self::DATA_TYPE_LONG, false);
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ALWAYS_SHOW_NAMETAG, true, self::DATA_TYPE_LONG, false);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_CAN_CLIMBING, true, self::DATA_TYPE_LONG, false);
 //		$this->setDataProperty(self::DATA_AIR, self::DATA_TYPE_SHORT, $this->namedtag["Air"]);
 
 		if(!isset($this->namedtag->OnGround)){
