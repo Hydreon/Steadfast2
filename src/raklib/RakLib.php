@@ -56,7 +56,7 @@ abstract class RakLib{
     const PRIORITY_NORMAL = 0;
     const PRIORITY_IMMEDIATE = 1;
 
-    const FLAG_NEED_ACK = 0b00001000;
+	const FLAG_NEED_ZLIB = 0b00000001;
 
     /*
      * Internal Packet:

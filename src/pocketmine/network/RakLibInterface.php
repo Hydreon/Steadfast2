@@ -211,12 +211,6 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->interface->sendRaw($address, $port, $payload);
 	}
 
-	public function notifyACK($identifier, $identifierACK){
-		if(isset($this->players[$identifier])){
-			$this->players[$identifier]->handleACK($identifierACK);
-		}
-	}
-
 	public function setName($name){
 		if(strlen($name) > 1) {
 			$this->name = $name;
@@ -237,30 +231,18 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	/*
 	 * $player - packet recipient
 	 */
-	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
+	public function putPacket(Player $player, DataPacket $packet, $immediate = false){
 		if(isset($this->identifiers[$player])){			
 			$protocol = $player->getPlayerProtocol();
 			$packet->encode($protocol);
-//			var_dump("Send: 0x" . ($packet::NETWORK_ID < 16 ? '0' . dechex($packet::NETWORK_ID) : dechex($packet::NETWORK_ID)));
-			if(!($packet instanceof BatchPacket) && strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
-				$this->server->batchPackets([$player], [$packet], true);
-				return null;
-			}
 			$identifier = $this->identifiers[$player];	
-
 			$pk = new EncapsulatedPacket();				
-			$pk->buffer = $this->getPacketBuffer($packet);
+			$pk->buffer = $packet->buffer;
 			$pk->reliability = 3;
-
-			if($needACK === true){
-				$pk->identifierACK = $this->identifiersACK[$identifier]++;
-			}
-
 			if ($immediate) {
 				$pk->reliability = 0;
 			}
-
-			$this->interface->sendEncapsulated($identifier, $pk, ($needACK === true ? RakLib::FLAG_NEED_ACK : 0) | ($immediate === true ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL));
+			$this->interface->sendEncapsulated($identifier, $pk, (!($packet instanceof BatchPacket) ? RakLib::FLAG_NEED_ZLIB : 0) | ($immediate === true ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL));
 		}
 
 		return null;
@@ -282,20 +264,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$pk->reliability = 3;	
 			$this->interface->sendEncapsulated($player->getIdentifier(), $pk, RakLib::PRIORITY_NORMAL);			
 		}
-	}
-	
-	private function getPacketBuffer($packet) {		
-		if ($packet instanceof BatchPacket) {
-			return $packet->buffer;
-		}
-		return $this->fakeZlib(Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer);
-	}
-	
-	private function fakeZlib($buffer) {
-		static $startBytes = "\x78\x01\x01";
-		$len = strlen($buffer);
-		return $startBytes . Binary::writeLShort($len) . Binary::writeLShort($len ^ 0xffff) . $buffer . hex2bin(hash('adler32', $buffer, false));
-	}
+	}	
+
 	
 	public function enableEncryptForPlayer(Player $player, $token, $privateKey, $publicKey){
 		$identifier = $this->identifiers[$player];	
