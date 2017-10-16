@@ -25,38 +25,16 @@ namespace pocketmine\network\protocol;
 
 
 class BatchPacket extends PEPacket{
-	const NETWORK_ID = Info::BATCH_PACKET;
 	const PACKET_NAME = "BATCH_PACKET";
 
 	public $payload;
-	public $is110 = false;
 
 	public function decode($playerProtocol) {
-		if ($this->is110) {
-			$playerProtocol = Info::PROTOCOL_110;
-		}
-		switch ($playerProtocol) {
-			case Info::PROTOCOL_120:
-			case Info::PROTOCOL_110:
-				$this->payload = $this->get(true);
-				break;
-			default:
-				$this->payload = $this->getString();
-				break;
-		}
+		$this->payload = $this->get(true);
 	}
 
 	public function encode($playerProtocol) {
-		switch ($playerProtocol) {
-			case Info::PROTOCOL_120:
-			case Info::PROTOCOL_110:
-				$this->buffer = $this->payload;
-				break;
-			default:
-				$this->reset($playerProtocol);
-				$this->putString($this->payload);
-				break;
-		}
+		$this->buffer = $this->payload;
 	}
 
 }

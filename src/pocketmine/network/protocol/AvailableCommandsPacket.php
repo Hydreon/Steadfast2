@@ -37,11 +37,7 @@ class AvailableCommandsPacket extends PEPacket{
 	
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		if (isset(self::$commandsBuffer[$playerProtocol])) {
-			$this->put(self::$commandsBuffer[$playerProtocol]);
-		} else {
-			$this->putString(self::$commandsBuffer['default']);
-		}
+		$this->put(self::$commandsBuffer['default']);
 	}
 	
 	const ARG_FLAG_VALID = 0x100000;
@@ -57,9 +53,7 @@ class AvailableCommandsPacket extends PEPacket{
 	const ARG_TYPE_JSON     = 0x15;
 	const ARG_TYPE_COMMAND  = 0x1c;
 	
-	public static function prepareCommands($commands) {
-		self::$commandsBuffer['default'] = json_encode($commands);
-		
+	public static function prepareCommands($commands) {		
 		$enumValues = [];
 		$enumValuesCount = 0;
 		$enumAdditional = [];
@@ -147,7 +141,7 @@ class AvailableCommandsPacket extends PEPacket{
 		
 		$additionalDataStream->putVarInt(count($commands));
 		$additionalDataStream->put($commandsStream->buffer);
-		self::$commandsBuffer[Info::PROTOCOL_120] = $additionalDataStream->buffer;
+		self::$commandsBuffer['default'] = $additionalDataStream->buffer;
 	}
 	
 	/**
