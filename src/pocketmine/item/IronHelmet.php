@@ -17,16 +17,17 @@
  * @link http://www.pocketmine.net/
  * 
  *
-*/
+ */
 
 namespace pocketmine\item;
 
+class IronHelmet extends Armor {
 
-class IronHelmet extends Armor{
-	
 	const SLOT_NUMBER = 0;
-	
-	public function __construct($meta = 0, $count = 1){
+
+	public function __construct($meta = 0, $count = 1) {
 		parent::__construct(self::IRON_HELMET, $meta, $count, "Iron Helmet");
+		$this->defence = 2;
 	}
+
 }

@@ -37,11 +37,7 @@ class AvailableCommandsPacket extends PEPacket{
 	
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		if (isset(self::$commandsBuffer[$playerProtocol])) {
-			$this->put(self::$commandsBuffer[$playerProtocol]);
-		} else {
-			$this->putString(self::$commandsBuffer['default']);
-		}
+		$this->put(self::$commandsBuffer['default']);
 	}
 	
 	const ARG_FLAG_VALID = 0x100000;
@@ -57,15 +53,13 @@ class AvailableCommandsPacket extends PEPacket{
 	const ARG_TYPE_JSON     = 0x15;
 	const ARG_TYPE_COMMAND  = 0x1c;
 	
-	public static function prepareCommands($commands) {
-		self::$commandsBuffer['default'] = json_encode($commands);
-		
+	public static function prepareCommands($commands) {		
 		$enumValues = [];
 		$enumValuesCount = 0;
 		$enumAdditional = [];
 		$enums = [];
 		$commandsStream = new BinaryStream();
-		foreach ($commands as $commandName => $commandData) {
+		foreach ($commands as $commandName => &$commandData) { // Replace &$commandData with $commandData when alises fix for 1.2 won't be needed anymore
 			if ($commandName == 'help') { //temp fix for 1.2
 				continue;
 			}
@@ -73,27 +67,36 @@ class AvailableCommandsPacket extends PEPacket{
 			$commandsStream->putString($commandData['versions'][0]['description']);
 			$commandsStream->putByte(0); // flags
 			$commandsStream->putByte(0); // permission level
+//			if (isset($commandData['versions'][0]['aliases']) && !empty($commandData['versions'][0]['aliases'])) {
+//				$aliases = [];
+//				foreach ($commandData['versions'][0]['aliases'] as $alias) {
+//					if (!isset($enumAdditional[$alias])) {
+//						$enumValues[$enumValuesCount] = $alias;
+//						$enumAdditional[$alias] = $enumValuesCount;
+//						$targetIndex = $enumValuesCount;
+//						$enumValuesCount++;
+//					} else {
+//						$targetIndex = $enumAdditional[$alias];
+//					}
+//					$aliases[] = $targetIndex;
+//				}
+//				$enums[] = [
+//					'name' => $commandName . 'CommandAliases',
+//					'data' => $aliases,
+//				];
+//				$aliasesEnumId = count($enums) - 1;
+//			} else {
+//				$aliasesEnumId = -1;
+//			}
 			if (isset($commandData['versions'][0]['aliases']) && !empty($commandData['versions'][0]['aliases'])) {
-				$aliases = [];
 				foreach ($commandData['versions'][0]['aliases'] as $alias) {
-					if (!isset($enumAdditional[$alias])) {
-						$enumValues[$enumValuesCount] = $alias;
-						$enumAdditional[$alias] = $enumValuesCount;
-						$targetIndex = $enumValuesCount;
-						$enumValuesCount++;
-					} else {
-						$targetIndex = $enumAdditional[$alias];
-					}
-					$aliases[] = $targetIndex;
+					$aliasAsCommand = $commandData;
+					$aliasAsCommand['versions'][0]['aliases'] = [];
+					$commands[$alias] = $aliasAsCommand;
 				}
-				$enums[] = [
-					'name' => $commandName . 'CommandAliases',
-					'data' => $aliases,
-				];
-				$aliasesEnumId = count($enums) - 1;
-			} else {
-				$aliasesEnumId = -1;
+				$commandData['versions'][0]['aliases'] = [];
 			}
+			$aliasesEnumId = -1; // temp aliases fix for 1.2
 			$commandsStream->putLInt($aliasesEnumId);
 			$commandsStream->putVarInt(count($commandData['versions'][0]['overloads'])); // overloads
 			foreach ($commandData['versions'][0]['overloads'] as $overloadData) {
@@ -138,7 +141,7 @@ class AvailableCommandsPacket extends PEPacket{
 		
 		$additionalDataStream->putVarInt(count($commands));
 		$additionalDataStream->put($commandsStream->buffer);
-		self::$commandsBuffer[Info::PROTOCOL_120] = $additionalDataStream->buffer;
+		self::$commandsBuffer['default'] = $additionalDataStream->buffer;
 	}
 	
 	/**

@@ -15,7 +15,6 @@
 
 namespace raklib\server;
 
-use raklib\Binary;
 use raklib\protocol\ACK;
 use raklib\protocol\CLIENT_CONNECT_DataPacket;
 use raklib\protocol\CLIENT_DISCONNECT_DataPacket;
@@ -36,6 +35,7 @@ use raklib\protocol\SERVER_HANDSHAKE_DataPacket;
 use raklib\protocol\UNCONNECTED_PING;
 use raklib\protocol\UNCONNECTED_PONG;
 use raklib\RakLib;
+use pocketmine\utils\Binary;
 
 class Session{
     const STATE_UNCONNECTED = 0;
@@ -84,9 +84,6 @@ class Session{
 	/** @var DataPacket[][] */
 	private $splitPackets = [];
 
-    /** @var int[][] */
-    private $needACK = [];
-
     /** @var DataPacket */
     private $sendQueue;
 
@@ -100,6 +97,8 @@ class Session{
 	private $lastReliableIndex = -1;
 	
 	private $pingAverage = [0.025];
+	private $encrypter = null;
+	private $encryptEnabled = false;
 
     public function __construct(SessionManager $sessionManager, $address, $port){
         $this->sessionManager = $sessionManager;
@@ -173,15 +172,6 @@ class Session{
 			}
         }
 
-        if(count($this->needACK) > 0){
-            foreach($this->needACK as $identifierACK => $indexes){
-                if(count($indexes) === 0){
-                    unset($this->needACK[$identifierACK]);
-                    $this->sessionManager->notifyACK($this, $identifierACK);
-                }
-            }
-        }
-
 
 		foreach($this->recoveryQueue as $seq => $pk){
 			if($pk->sendTime < (time() - 8)){
@@ -228,9 +218,6 @@ class Session{
      */
     private function addToQueue(EncapsulatedPacket $pk, $flags = RakLib::PRIORITY_NORMAL){
         $priority = $flags & 0b0000111;
-        if($pk->needACK and $pk->messageIndex !== null){
-            $this->needACK[$pk->identifierACK][$pk->messageIndex] = $pk->messageIndex;
-        }
         if($priority === RakLib::PRIORITY_IMMEDIATE){ //Skip queues
             $packet = new DATA_PACKET_0();
             $packet->seqNumber = $this->sendSeqNumber++;
@@ -259,16 +246,31 @@ class Session{
 		    $this->sendQueue->packets[] = $pk->toBinary();
 	    }
     }
+	
+	private function fakeZlib($buffer) {
+		static $startBytes = "\x78\x01\x01";
+		$len = strlen($buffer);
+		return $startBytes . Binary::writeLShort($len) . Binary::writeLShort($len ^ 0xffff) . $buffer . hex2bin(hash('adler32', $buffer, false));
+	}
 
     /**
      * @param EncapsulatedPacket $packet
      * @param int                $flags
      */
-    public function addEncapsulatedToQueue(EncapsulatedPacket $packet, $flags = RakLib::PRIORITY_NORMAL){
-
-        if(($packet->needACK = ($flags & RakLib::FLAG_NEED_ACK) > 0) === true){
-	        $this->needACK[$packet->identifierACK] = [];
-        }
+    public function addEncapsulatedToQueue(EncapsulatedPacket $packet, $flags = RakLib::PRIORITY_NORMAL){		
+		if (($flags & RakLib::FLAG_NEED_ZLIB) > 0 ) {
+			if (strlen($packet->buffer > 512)) {
+				$packet->buffer = zlib_encode(Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer, ZLIB_ENCODING_DEFLATE, 7);
+			} else {
+				$packet->buffer = $this->fakeZlib(Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer);
+			}
+		}
+		
+		if ($this->isEncryptEnable()) {
+			$packet->buffer = "\xfe" . $this->getEncrypt($packet->buffer);
+		} else {
+			$packet->buffer = "\xfe" . $packet->buffer;
+		}
 
 		if(
 			$packet->reliability === 2 or
@@ -488,11 +490,6 @@ class Session{
                     $packet->decode();
                     foreach($packet->packets as $seq){
                         if(isset($this->recoveryQueue[$seq])){
-                            foreach($this->recoveryQueue[$seq]->packets as $pk){
-                                if($pk instanceof EncapsulatedPacket and $pk->needACK and $pk->messageIndex !== null){
-                                    unset($this->needACK[$pk->identifierACK][$pk->messageIndex]);
-                                }
-                            }
 							$this->pingAverage[] = microtime(true) - $this->recoveryQueue[$seq]->sendTime;
 							if (count($this->pingAverage) > 20) {
 								array_shift($this->pingAverage);
@@ -545,5 +542,22 @@ class Session{
 	
 	public function getPing(){
 		return round((array_sum($this->pingAverage) / count($this->pingAverage)) * 1000);
+	}
+
+	public function enableEncrypt($token, $privateKey, $publicKey) {
+		$this->encrypter = new \McpeEncrypter($token, $privateKey, $publicKey);
+		$this->encryptEnabled = true;
+	}
+	
+	public function getEncrypt($sStr) {		
+		return $this->encrypter->encrypt($sStr);
+	}	
+
+	public function getDecrypt($sStr) {
+		return $this->encrypter->decrypt($sStr);
+	}
+	
+	public function isEncryptEnable() {
+		return $this->encryptEnabled;
 	}
 }
