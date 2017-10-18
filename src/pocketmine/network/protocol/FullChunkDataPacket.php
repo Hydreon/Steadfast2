@@ -27,9 +27,13 @@ namespace pocketmine\network\protocol;
 class FullChunkDataPacket extends PEPacket{
 	const NETWORK_ID = Info::FULL_CHUNK_DATA_PACKET;
 	const PACKET_NAME = "FULL_CHUNK_DATA_PACKET";
+	
+	const ORDER_COLUMNS = 0;
+	const ORDER_LAYERED = 1;
 
 	public $chunkX;
 	public $chunkZ;
+	public $order = self::ORDER_COLUMNS;
 	public $data;
 
 	public function decode($playerProtocol){
@@ -40,6 +44,7 @@ class FullChunkDataPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putSignedVarInt($this->chunkX);
 		$this->putSignedVarInt($this->chunkZ);
+//		$this->putByte($this->order);
 		$this->putString($this->data);
 	}
 

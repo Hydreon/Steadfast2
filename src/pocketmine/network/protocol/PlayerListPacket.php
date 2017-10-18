@@ -67,13 +67,18 @@ class PlayerListPacket extends PEPacket{
 					$this->putUUID($d[0]);
 					$this->putVarInt($d[1]); // Player ID
 					$this->putString($d[2]); // Player Name
-					$this->putString($d[3]); // Skin ID
-					$this->putString($d[4]); // Skin Data
-					$this->putString(isset($d[5]) ? $d[5] : ''); // Cape Data
-					$this->putString(isset($d[6]) ? $d[6] : ''); // Skin Geometry Name
-					$this->putString(isset($d[7]) ? $d[7] : ''); // Skin Geometry Data
-					$this->putString(''); //temp hack for prevent xbox and chat lags
-					//$this->putString(isset($d[8]) ? $d[8] : ''); // XUID
+					if ($playerProtocol >= Info::PROTOCOL_120) {
+						$this->putString($d[3]); // Skin ID
+						$this->putString($d[4]); // Skin Data
+						$this->putString(isset($d[5]) ? $d[5] : ''); // Cape Data
+						$this->putString(isset($d[6]) ? $d[6] : ''); // Skin Geometry Name
+						$this->putString(isset($d[7]) ? $d[7] : ''); // Skin Geometry Data
+						$this->putString(''); //temp hack for prevent xbox and chat lags
+						//$this->putString(isset($d[8]) ? $d[8] : ''); // XUID
+					} else {
+						$this->putString('Standard_Custom');
+						$this->putString($d[4]);
+					}
 				}
 				break;
 			case self::TYPE_REMOVE:

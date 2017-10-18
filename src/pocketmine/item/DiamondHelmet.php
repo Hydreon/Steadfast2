@@ -17,17 +17,15 @@
  * @link http://www.pocketmine.net/
  * 
  *
- */
+*/
 
 namespace pocketmine\item;
 
-class DiamondHelmet extends Armor {
-
+class DiamondHelmet extends Armor{
+	
 	const SLOT_NUMBER = 0;
-
-	public function __construct($meta = 0, $count = 1) {
+	
+	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::DIAMOND_HELMET, $meta, $count, "Diamond Helmet");
-		$this->defence = 3;
 	}
-
 }

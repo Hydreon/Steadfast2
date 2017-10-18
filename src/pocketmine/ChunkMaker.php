@@ -16,7 +16,7 @@ class ChunkMaker extends Worker {
 	protected $externalQueue;
 	protected $internalQueue;
 	
-	const SUPPORTED_PROTOCOL = [Info::BASE_PROTOCOL];
+	const SUPPORTED_PROTOCOL = [Info::BASE_PROTOCOL, Info::PROTOCOL_105, Info::PROTOCOL_110, Info::PROTOCOL_120];
 
 	public function __construct(\ClassLoader $loader = null) {
 		$this->externalQueue = new \Threaded;
@@ -81,43 +81,62 @@ class ChunkMaker extends Worker {
 	}
 
 	protected function doChunk($data) {
+		$chunkData120 = '';
 		if (isset($data['isAnvil']) && $data['isAnvil'] == true) {
 			$chunkData = chr(count($data['chunk']['sections']));
+			$chunkData120 = chr(count($data['chunk']['sections']));
 			foreach ($data['chunk']['sections'] as $y => $sections) {
 				$chunkData .= chr(0);
+				$chunkData120 .= chr(0);
 				if ($sections['empty'] == true) {
-					$chunkData .= str_repeat("\x00", 6144);
+					$chunkData .= str_repeat("\x00", 10240);
+					$chunkData120 .= str_repeat("\x00", 6144);
 				} else {
 					if (isset($data['isSorted']) && $data['isSorted'] == true) {
 						$blockData = $sections['blocks'] . $sections['data'];
+						$lightData = $sections['skyLight'] . $sections['blockLight'];
 					} else {
 						$blockData = $this->sortData($sections['blocks']) . $this->sortHalfData($sections['data']);
+						$lightData = $this->sortHalfData($sections['skyLight']) . $this->sortHalfData($sections['blockLight']);
 					}
-					$chunkData .= $blockData;
+					$chunkData .= $blockData . $lightData;
+					$chunkData120 .= $blockData;
 				}
 			}
 			$chunkData .= $data['chunk']['heightMap'] .
 					$data['chunk']['biomeColor'] .
 					Binary::writeLInt(0) .
 					$data['tiles'];		
+			$chunkData120 .= $data['chunk']['heightMap'] .
+					$data['chunk']['biomeColor'] .
+					Binary::writeLInt(0) .
+					$data['tiles'];
 		} else {
 			$blockIdArray = $data['blocks'];	
 			$blockDataArray = $data['data'];
+			$skyLightArray = $data['skyLight'];	
+			$blockLightArray = $data['blockLight'];
 
 			$countBlocksInChunk = 8;
-			$chunkData = chr($countBlocksInChunk);				
+			$chunkData = chr($countBlocksInChunk);		
+			$chunkData120 = chr($countBlocksInChunk);		
 			
 			for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
 				$blockIdData = '';
 				$blockDataData = '';
+				$skyLightData = '';
+				$blockLightData = '';
 				for ($i = 0; $i < 256; $i++) {
 //					$startIndex = $blockIndex * 8 + $i * 64;
 					$startIndex = ($blockIndex + ($i << 3)) << 3;
 					$blockIdData .= substr($blockIdArray, $startIndex << 1, 16);
 					$blockDataData .= substr($blockDataArray, $startIndex, 8);
+					$skyLightData .= substr($skyLightArray, $startIndex, 8);
+					$blockLightData .= substr($blockLightArray, $startIndex, 8);
 				}
 				
-				$chunkData .= chr(0) . $blockIdData . $blockDataData;
+				$chunkData .= chr(0) . $blockIdData . $blockDataData . $skyLightData . $blockLightData;
+				$chunkData120 .= chr(0) . $blockIdData . $blockDataData;
 			}
 
 
@@ -125,6 +144,10 @@ class ChunkMaker extends Worker {
 					$data['biomeColor'] .
 					Binary::writeLInt(0) .
 					$data['tiles'];		
+			$chunkData120 .= $data['heightMap'] .
+					$data['biomeColor'] .
+					Binary::writeLInt(0) .
+					$data['tiles'];
 		}
 		
 		$result = array();
@@ -136,14 +159,25 @@ class ChunkMaker extends Worker {
 			$pk = new FullChunkDataPacket();
 			$pk->chunkX = $data['chunkX'];
 			$pk->chunkZ = $data['chunkZ'];
-			$pk->data = $chunkData;
-			foreach ($subClientsId as $subClientId) {
-				$pk->senderSubClientID = $subClientId;
+			$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
+			if ($protocol >= Info::PROTOCOL_120) {
+				$pk->data = $chunkData120;
+				foreach ($subClientsId as $subClientId) {
+					$pk->senderSubClientID = $subClientId;
+					$pk->encode($protocol);
+					if(!empty($pk->buffer)) {
+						$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
+						$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
+						$result[$protocol . ":{$subClientId}"] = $ordered;
+					}
+				}
+			} else {
+				$pk->data = $chunkData;
 				$pk->encode($protocol);
 				if(!empty($pk->buffer)) {
 					$str = Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;
 					$ordered = zlib_encode($str, ZLIB_ENCODING_DEFLATE, 7);
-					$result[$protocol . ":{$subClientId}"] = $ordered;
+					$result[$protocol . ":0"] = $ordered;
 				}
 			}
 		}

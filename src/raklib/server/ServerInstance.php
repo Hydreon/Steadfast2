@@ -48,6 +48,12 @@ interface ServerInstance{
     public function handleRaw($address, $port, $payload);
 
     /**
+     * @param string $identifier
+     * @param int    $identifierACK
+     */
+    public function notifyACK($identifier, $identifierACK);
+
+    /**
      * @param string $option
      * @param string $value
      */

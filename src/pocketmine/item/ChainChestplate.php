@@ -17,17 +17,16 @@
  * @link http://www.pocketmine.net/
  * 
  *
- */
+*/
 
 namespace pocketmine\item;
 
-class ChainChestplate extends Armor {
 
+class ChainChestplate extends Armor{
+	
 	const SLOT_NUMBER = 1;
-
-	public function __construct($meta = 0, $count = 1) {
+	
+	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::CHAIN_CHESTPLATE, $meta, $count, "Chain Chestplate");
-		$this->defence = 5;
 	}
-
 }

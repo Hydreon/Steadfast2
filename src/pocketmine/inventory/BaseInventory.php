@@ -25,10 +25,9 @@ use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityInventoryChangeEvent;
 use pocketmine\event\inventory\InventoryOpenEvent;
 use pocketmine\item\Item;
+use pocketmine\network\multiversion\Multiversion;
 use pocketmine\Player;
 use pocketmine\Server;
-use pocketmine\network\protocol\v120\InventoryContentPacket;
-use pocketmine\network\protocol\v120\InventorySlotPacket;
 
 abstract class BaseInventory implements Inventory{
 
@@ -440,10 +439,7 @@ abstract class BaseInventory implements Inventory{
 				$this->close($player);
 				continue;
 			}
-			$pk = new InventoryContentPacket();
-			$pk->inventoryID = $id;
-			$pk->items = $slots;
-			$player->dataPacket($pk);
+			Multiversion::sendContainer($player, $id, $slots);
 		}
 	}
 
@@ -462,11 +458,7 @@ abstract class BaseInventory implements Inventory{
 				$this->close($player);
 				continue;
 			}
-			$pk = new InventorySlotPacket();
-			$pk->containerId = $id;
-			$pk->item = $item;
-			$pk->slot = $index;
-			$player->dataPacket($pk);
+			Multiversion::sendContainerSlot($player, $id, $item, $index);
 		}
 	}
 

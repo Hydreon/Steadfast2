@@ -19,10 +19,15 @@ class ServerToClientHandshakePacket extends PEPacket {
 
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
-		$header = ['alg' => 'ES384', 'x5u' => $this->publicKey];
-		$payload = ['salt' => JWT::base64UrlEncode($this->serverToken)];
-		$jwt = JWT::createJwt($header, $payload, $this->privateKey);
-		$this->putString($jwt);
+		if ($playerProtocol < Info::PROTOCOL_120) {
+			$this->putString($this->publicKey);
+			$this->putString($this->serverToken);
+		} else {
+			$header = ['alg' => 'ES384', 'x5u' => $this->publicKey];
+			$payload = ['salt' => JWT::base64UrlEncode($this->serverToken)];
+			$jwt = JWT::createJwt($header, $payload, $this->privateKey);
+			$this->putString($jwt);
+		}
 	}
 
 }

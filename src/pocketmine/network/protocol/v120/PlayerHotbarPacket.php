@@ -2,12 +2,12 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\network\protocol\Info;
+use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
 
 class PlayerHotbarPacket extends PEPacket {
 	
-	const NETWORK_ID = Info::PLAYER_HOTBAR_PACKET;
+	const NETWORK_ID = Info120::PLAYER_HOTBAR_PACKET;
 	const PACKET_NAME = "PLAYER_HOTBAR_PACKET";
 	
 	public $selectedSlot;

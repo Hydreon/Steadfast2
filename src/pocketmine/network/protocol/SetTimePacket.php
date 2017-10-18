@@ -40,6 +40,9 @@ class SetTimePacket extends PEPacket{
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putSignedVarInt((int) (($this->time / Level::TIME_FULL) * 19200));
+		if ($playerProtocol < Info::PROTOCOL_120) {
+			$this->putByte($this->started ? 1 : 0);
+		}
 	}
 
 }
