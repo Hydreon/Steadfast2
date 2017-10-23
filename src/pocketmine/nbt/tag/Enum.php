@@ -117,7 +117,7 @@ class Enum extends NamedTag implements \ArrayAccess, \Countable{
 	public function read(NBT $nbt, $new = false){
 		$this->value = [];
 		$this->tagType = ord($nbt->get(1));
-		$size = $nbt->getInt();	
+		$size = $new ? $nbt->getVarInt() : $nbt->getInt();	
 		for($i = 0; $i < $size and !$nbt->feof(); ++$i){
 			switch($this->tagType){
 				case NBT::TAG_Byte:
@@ -203,7 +203,11 @@ class Enum extends NamedTag implements \ArrayAccess, \Countable{
 				$tags[] = $tag;
 			}
 		}
-		$nbt->buffer .= $nbt->endianness === 1 ? pack("N", count($tags)) : pack("V", count($tags));
+		if ($old) {
+			$nbt->buffer .= $nbt->endianness === 1 ? pack("N", count($tags)) : pack("V", count($tags));
+		} else {
+			$nbt->putVarInt(count($tags));
+		}
 		foreach($tags as $tag){
 			$tag->write($nbt, $old);
 		}
