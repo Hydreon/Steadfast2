@@ -48,7 +48,10 @@ class StartGamePacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->eid); //EntityUniqueID
 		$this->putVarInt($this->eid); //EntityUniqueID
-		$this->putSignedVarInt($this->gamemode);	// Entity gamemode
+		
+		if ($playerProtocol >= Info::PROTOCOL_110) {
+ 			$this->putSignedVarInt($this->gamemode);	// Entity gamemode
+ 		}
 		
 		$this->putLFloat($this->x); // default position (4)
 		$this->putLFloat($this->y); // (4)
@@ -84,26 +87,30 @@ class StartGamePacket extends PEPacket{
 
 		$this->putLFloat(0); //lightning level
 		
-		$this->putByte(1); // is multiplayer game
-		$this->putByte(1); // Broadcast to LAN?
-		$this->putByte(1); // Broadcast to XBL?
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->putByte(1); // is multiplayer game
+			$this->putByte(1); // Broadcast to LAN?
+			$this->putByte(1); // Broadcast to XBL?
+		}
 		
 		$this->putByte(1);	//commands enabled
 		
 		$this->putByte(0); // isTexturepacksRequired 1x Byte
 		
-		$this->putVarInt(0); // rules count
-		$this->putByte(0); // is bonus chest enabled
-		$this->putByte(0); // is start with map enabled
-		$this->putByte(0); // has trust players enabled
-		$this->putSignedVarInt(1); // permission level
-		$this->putSignedVarInt(4); // game publish setting
-		$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
-		$this->putString(''); // level name
-		$this->putString(''); // template pack id
-		$this->putByte(0); // is trial?
-		$this->putLong(0); // current level time
-		$this->putSignedVarInt(0); // enchantment seed
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->putVarInt(0); // rules count
+			$this->putByte(0); // is bonus chest enabled
+			$this->putByte(0); // is start with map enabled
+			$this->putByte(0); // has trust players enabled
+			$this->putSignedVarInt(1); // permission level
+			$this->putSignedVarInt(4); // game publish setting
+			$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
+			$this->putString(''); // level name
+			$this->putString(''); // template pack id
+			$this->putByte(0); // is trial?
+			$this->putLong(0); // current level time
+			$this->putSignedVarInt(0); // enchantment seed
+		}
 	}
 
 }

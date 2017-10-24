@@ -537,14 +537,14 @@ class CraftingManager{
 	}
 
 	private function createOneIngedientRecipe($recipeshape, $resultitem, $resultitemmeta, $resultitemamound, $ingedienttype, $ingredientmeta, $ingredientname, $inventoryType = ""){
-		$ingredientamount = 0;
+		$ingredientamount = 1;
 		$height = 0;
 		// count how many of the ingredient are in the recipe and check height for big or small recipe.
 		foreach ($recipeshape as $line){
 			$height += 1;
 			$width = strlen($line);
-			$ingredientamount += substr_count($line, $ingredientname);
-		}		
+//			$ingredientamount += substr_count($line, $ingredientname);
+		}
 		$recipe = null;
 		if ($height < 3){
 			// Process small recipe

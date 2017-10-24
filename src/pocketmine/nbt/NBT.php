@@ -463,7 +463,7 @@ class NBT{
 		if($doMultiple and $this->offset < strlen($this->buffer)){
 			$this->data = [$this->data];
 			do{
-				$this->data[] = $this->readTag($new);
+				$this->data[] = $this->readTag($new);				
 			}while($this->offset < strlen($this->buffer));
 		}
 		$this->buffer = "";

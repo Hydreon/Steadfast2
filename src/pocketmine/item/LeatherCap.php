@@ -17,17 +17,16 @@
  * @link http://www.pocketmine.net/
  * 
  *
- */
+*/
 
 namespace pocketmine\item;
 
-class LeatherCap extends Armor {
 
+class LeatherCap extends Armor{
+	
 	const SLOT_NUMBER = 0;
-
-	public function __construct($meta = 0, $count = 1) {
+	
+	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::LEATHER_CAP, $meta, $count, "Leather Cap");
-		$this->defence = 1;
 	}
-
 }

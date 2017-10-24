@@ -17,19 +17,17 @@
  * @link http://www.pocketmine.net/
  * 
  *
- */
+*/
 
 namespace pocketmine\item;
 
-class GoldSword extends Tool {
 
-	public function __construct($meta = 0, $count = 1) {
+class GoldSword extends Tool{
+	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::GOLD_SWORD, $meta, $count, "Gold Sword");
-		$this->damage = 4;
 	}
 
-	public function isSword() {
+	public function isSword(){
 		return Tool::TIER_GOLD;
 	}
-
 }

@@ -3,13 +3,13 @@
 namespace pocketmine\network\protocol\v120;
 
 use pocketmine\inventory\transactions\SimpleTransactionData;
-use pocketmine\network\protocol\Info;
+use pocketmine\network\protocol\ContainerSetContentPacket;
+use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
-use pocketmine\network\protocol\v120\Protocol120;
 
 class InventoryTransactionPacket extends PEPacket {
 
-	const NETWORK_ID = Info::INVENTORY_TRANSACTION_PACKET;
+	const NETWORK_ID = Info120::INVENTORY_TRANSACTION_PACKET;
 	const PACKET_NAME = "INVENTORY_TRANSACTION_PACKET";
 	
 	const TRANSACTION_TYPE_NORMAL = 0;
@@ -75,7 +75,7 @@ class InventoryTransactionPacket extends PEPacket {
 					$tr->flags = $this->getVarInt(); // flags NoFlag = 0 WorldInteraction_Random = 1
 					break;
 				case self::INV_SOURCE_TYPE_CREATIVE:
-					$tr->inventoryId = Protocol120::CONTAINER_ID_CREATIVE;
+					$tr->inventoryId = ContainerSetContentPacket::SPECIAL_CREATIVE;
 					break;
 				case self::INV_SOURCE_TYPE_CRAFT:
 					$tr->action = $this->getVarInt();

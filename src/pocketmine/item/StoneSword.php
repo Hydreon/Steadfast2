@@ -17,19 +17,17 @@
  * @link http://www.pocketmine.net/
  * 
  *
- */
+*/
 
 namespace pocketmine\item;
 
-class StoneSword extends Tool {
 
-	public function __construct($meta = 0, $count = 1) {
+class StoneSword extends Tool{
+	public function __construct($meta = 0, $count = 1){
 		parent::__construct(self::STONE_SWORD, $meta, $count, "Stone Sword");
-		$this->damage = 5;
 	}
 
-	public function isSword() {
+	public function isSword(){
 		return Tool::TIER_STONE;
 	}
-
 }
