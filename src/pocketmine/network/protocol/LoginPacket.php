@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-
 use pocketmine\utils\UUID;
 use pocketmine\utils\Binary;
 use pocketmine\network\protocol\Info;
@@ -47,9 +46,9 @@ class LoginPacket extends PEPacket {
 	public $playerDataLength;
 	public $playerData;
 	public $isValidProtocol = true;
-    public $inventoryType = -1;
-    public $osType = -1;
-    public $xuid = '';
+	public $inventoryType = -1;
+	public $osType = -1;
+	public $xuid = '';
 	public $languageCode = 'unknown';
 	public $clientVersion = 'unknown';
 	public $originalProtocol;
@@ -70,15 +69,19 @@ class LoginPacket extends PEPacket {
 			$this->getShort();
 		}
 		$this->protocol1 = $this->getInt();
+		// dirty useless hack
+		if ($this->protocol1 > 137 && $this->protocol1 < 150) {
+			$this->protocol1 = 137;
+		}
 		if (!in_array($this->protocol1, $acceptedProtocols)) {
 			$this->isValidProtocol = false;
 			return;
 		}
 		if ($this->protocol1 < Info::PROTOCOL_120) {
 			$this->getByte();
-		}	
+		}
 		$data = $this->getString();
-		if ($this->protocol1 >= Info::PROTOCOL_110) {			
+		if ($this->protocol1 >= Info::PROTOCOL_110) {
 			if (ord($data{0}) != 120 || (($decodedData = @zlib_decode($data)) === false)) {
 				$body = $data;
 			} else {
@@ -92,7 +95,7 @@ class LoginPacket extends PEPacket {
 
 		$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));
 		$this->playerData = $this->getFromString($body, $this->playerDataLength);
-        
+
 		$this->chains['data'] = array();
 		$index = 0;
 		foreach ($this->chains['chain'] as $key => $jwt) {
@@ -107,41 +110,41 @@ class LoginPacket extends PEPacket {
 			$this->isValidProtocol = false;
 			return;
 		}
-		
+
 		$this->playerData = self::load($this->playerData);
 		$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
 		$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
 		$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
 		$this->identityPublicKey = $this->chains['data'][$dataIndex]['identityPublicKey'];
-        if (isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
-            $this->xuid = $this->chains['data'][$dataIndex]['extraData']['XUID'];
-        }
-		
+		if (isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
+			$this->xuid = $this->chains['data'][$dataIndex]['extraData']['XUID'];
+		}
+
 		$this->serverAddress = $this->playerData['ServerAddress'];
 		$this->skinName = $this->playerData['SkinId'];
 		$this->skin = base64_decode($this->playerData['SkinData']);
 		if (isset($this->playerData['SkinGeometryName'])) {
-            $this->skinGeometryName = $this->playerData['SkinGeometryName'];    
-        }
+			$this->skinGeometryName = $this->playerData['SkinGeometryName'];
+		}
 		if (isset($this->playerData['SkinGeometry'])) {
-            $this->skinGeometryData = base64_decode($this->playerData['SkinGeometry']);  
-        }
+			$this->skinGeometryData = base64_decode($this->playerData['SkinGeometry']);
+		}
 		$this->clientSecret = $this->playerData['ClientRandomId'];
-        if (isset($this->playerData['DeviceOS'])) {
-            $this->osType = $this->playerData['DeviceOS'];    
-        }
-        if (isset($this->playerData['UIProfile'])) {
-            $this->inventoryType = $this->playerData['UIProfile'];
-        }
+		if (isset($this->playerData['DeviceOS'])) {
+			$this->osType = $this->playerData['DeviceOS'];
+		}
+		if (isset($this->playerData['UIProfile'])) {
+			$this->inventoryType = $this->playerData['UIProfile'];
+		}
 		if (isset($this->playerData['LanguageCode'])) {
-            $this->languageCode = $this->playerData['LanguageCode'];
-        }
+			$this->languageCode = $this->playerData['LanguageCode'];
+		}
 		if (isset($this->playerData['GameVersion'])) {
-            $this->clientVersion = $this->playerData['GameVersion'];
-        }
+			$this->clientVersion = $this->playerData['GameVersion'];
+		}
 		if (isset($this->playerData['CapeData'])) {
-            $this->capeData = base64_decode($this->playerData['CapeData']);
-        }
+			$this->capeData = base64_decode($this->playerData['CapeData']);
+		}
 		$this->originalProtocol = $this->protocol1;
 		$this->protocol1 = self::convertProtocol($this->protocol1);
 	}

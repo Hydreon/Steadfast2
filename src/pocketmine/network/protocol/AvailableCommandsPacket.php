@@ -65,7 +65,7 @@ class AvailableCommandsPacket extends PEPacket{
 		$enumAdditional = [];
 		$enums = [];
 		$commandsStream = new BinaryStream();
-		foreach ($commands as $commandName => $commandData) {
+		foreach ($commands as $commandName => &$commandData) { // Replace &$commandData with $commandData when alises fix for 1.2 won't be needed anymore
 			if ($commandName == 'help') { //temp fix for 1.2
 				continue;
 			}
@@ -73,27 +73,36 @@ class AvailableCommandsPacket extends PEPacket{
 			$commandsStream->putString($commandData['versions'][0]['description']);
 			$commandsStream->putByte(0); // flags
 			$commandsStream->putByte(0); // permission level
+//			if (isset($commandData['versions'][0]['aliases']) && !empty($commandData['versions'][0]['aliases'])) {
+//				$aliases = [];
+//				foreach ($commandData['versions'][0]['aliases'] as $alias) {
+//					if (!isset($enumAdditional[$alias])) {
+//						$enumValues[$enumValuesCount] = $alias;
+//						$enumAdditional[$alias] = $enumValuesCount;
+//						$targetIndex = $enumValuesCount;
+//						$enumValuesCount++;
+//					} else {
+//						$targetIndex = $enumAdditional[$alias];
+//					}
+//					$aliases[] = $targetIndex;
+//				}
+//				$enums[] = [
+//					'name' => $commandName . 'CommandAliases',
+//					'data' => $aliases,
+//				];
+//				$aliasesEnumId = count($enums) - 1;
+//			} else {
+//				$aliasesEnumId = -1;
+//			}
 			if (isset($commandData['versions'][0]['aliases']) && !empty($commandData['versions'][0]['aliases'])) {
-				$aliases = [];
 				foreach ($commandData['versions'][0]['aliases'] as $alias) {
-					if (!isset($enumAdditional[$alias])) {
-						$enumValues[$enumValuesCount] = $alias;
-						$enumAdditional[$alias] = $enumValuesCount;
-						$targetIndex = $enumValuesCount;
-						$enumValuesCount++;
-					} else {
-						$targetIndex = $enumAdditional[$alias];
-					}
-					$aliases[] = $targetIndex;
+					$aliasAsCommand = $commandData;
+					$aliasAsCommand['versions'][0]['aliases'] = [];
+					$commands[$alias] = $aliasAsCommand;
 				}
-				$enums[] = [
-					'name' => $commandName . 'CommandAliases',
-					'data' => $aliases,
-				];
-				$aliasesEnumId = count($enums) - 1;
-			} else {
-				$aliasesEnumId = -1;
+				$commandData['versions'][0]['aliases'] = [];
 			}
+			$aliasesEnumId = -1; // temp aliases fix for 1.2
 			$commandsStream->putLInt($aliasesEnumId);
 			$commandsStream->putVarInt(count($commandData['versions'][0]['overloads'])); // overloads
 			foreach ($commandData['versions'][0]['overloads'] as $overloadData) {

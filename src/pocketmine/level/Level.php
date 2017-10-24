@@ -2661,13 +2661,17 @@ class Level implements ChunkManager, Metadatable{
 	}
 	
 	public function updateChunk($x, $z) {
+		$players = $this->getUsingChunk($x, $z);
+		if (empty($players)) {
+			return;
+		}
 		$index = self::chunkHash($x, $z);
 		$this->chunkSendTasks[$index] = true;		
 		$this->chunkSendQueue[$index] = [];
 		
 		$protocols = [];
 		$subClientsId = [];
-		foreach ($this->getUsingChunk($x, $z) as $player) {
+		foreach ($players as $player) {
 			$this->chunkSendQueue[$index][spl_object_hash($player)] = $player;
 			$protocol = $player->getPlayerProtocol();
 			if (!isset($protocols[$protocol])) {

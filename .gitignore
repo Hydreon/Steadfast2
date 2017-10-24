@@ -1,2 +1,7 @@
 .idea
 nbproject/
+bin/
+worlds/
+plugins/
+logs/
+.history/

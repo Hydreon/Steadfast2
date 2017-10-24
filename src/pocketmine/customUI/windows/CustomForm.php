@@ -4,6 +4,7 @@ namespace pocketmine\customUI\windows;
 
 use pocketmine\customUI\CustomUI;
 use pocketmine\customUI\elements\UIElement;
+use pocketmine\Player;
 
 class CustomForm implements CustomUI {
 	

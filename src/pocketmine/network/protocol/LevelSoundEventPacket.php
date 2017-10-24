@@ -2,20 +2,24 @@
 
 namespace pocketmine\network\protocol;
 
+use pocketmine\network\multiversion\MultiversionEnums;
+
 class LevelSoundEventPacket extends PEPacket {
 
 	const NETWORK_ID = Info::LEVEL_SOUND_EVENT_PACKET;
 	const PACKET_NAME = "LEVEL_SOUND_EVENT_PACKET";
 	
-	const SOUND_HIT = 1;
-	const SOUND_BREAK = 4;
-	const SOUND_PLACE = 5;
-	const SOUND_EAT = 30;
- 	const SOUND_EXPLODE = 45;
-	const SOUND_BREAK_BLOCK = 52;
- 	const SOUND_CHEST_OPEN = 60;
- 	const SOUND_CHEST_CLOSED = 61;
-	const SOUND_NOTE = 72;
+	const SOUND_HIT = 'SOUND_HIT';
+	const SOUND_BREAK = 'SOUND_BREAK';
+	const SOUND_PLACE = 'SOUND_PLACE';
+	const SOUND_EAT = 'SOUND_EAT';
+ 	const SOUND_EXPLODE = 'SOUND_EXPLODE';
+	const SOUND_BREAK_BLOCK = 'SOUND_BREAK_BLOCK';
+ 	const SOUND_CHEST_OPEN = 'SOUND_CHEST_OPEN';
+ 	const SOUND_CHEST_CLOSED = 'SOUND_CHEST_CLOSED';
+	const SOUND_NOTE = 'SOUND_NOTE';
+	const SOUND_BOW = 'SOUND_BOW';
+	const SOUND_UNDEFINED = 'SOUND_UNDEFINED';
 
 	public $eventId;
 	public $x;
@@ -29,6 +33,7 @@ class LevelSoundEventPacket extends PEPacket {
 	public function decode($playerProtocol) {
 		$this->getHeader($playerProtocol);
 		$this->eventId = $this->getByte();
+		$this->eventId = MultiversionEnums::getLevelSoundEventName($playerProtocol, $this->eventId);
 		$this->x = $this->getLFloat();
 		$this->y = $this->getLFloat();
 		$this->z = $this->getLFloat();
@@ -39,11 +44,9 @@ class LevelSoundEventPacket extends PEPacket {
 	}
 
 	public function encode($playerProtocol) {
-		if ($playerProtocol < Info::PROTOCOL_110 && $this->eventId == self::SOUND_NOTE) {
-			$this->eventId = 70;
-		}
 		$this->reset($playerProtocol);
-		$this->putByte($this->eventId);
+		$eventId = MultiversionEnums::getLevelSoundEventId($playerProtocol, $this->eventId);
+		$this->putByte($eventId);
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);

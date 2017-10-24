@@ -114,7 +114,7 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		$nbt->V = new ByteTag("V", self::VERSION);
 		$nbt->InhabitedTime = new LongTag("InhabitedTime", 0);
 		$nbt->Biomes = new ByteArray("Biomes", str_repeat(chr(-1), 256));
-		$nbt->BiomeColors = new IntArray("BiomeColors", array_fill(0, 156, Binary::readInt("\x00\x85\xb2\x4a")));
+		$nbt->BiomeColors = new IntArray("BiomeColors", array_fill(0, 256, Binary::readInt("\x00\x85\xb2\x4a")));
 		$nbt->HeightMap = new IntArray("HeightMap", array_fill(0, 256, $levelProvider::getMaxY() - 1));
 		$nbt->Sections = new Enum("Sections", []);
 		$nbt->Sections->setTagType(NBT::TAG_Compound);
