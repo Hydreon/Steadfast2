@@ -2,6 +2,7 @@
 
 namespace pocketmine\tile;
 
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
@@ -16,6 +17,7 @@ class PistonArm extends Spawnable {
 			new IntTag("y", (int)$this->y),
 			new IntTag("z", (int)$this->z),
 			new FloatTag("Progress", $this->namedtag['Progress']),
+			new ByteTag("State", $this->namedtag['State']),
 		]);
 	}
 
