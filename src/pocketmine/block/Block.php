@@ -596,7 +596,10 @@ class Block extends Position implements Metadatable{
 			
 			self::$list[self::REDSTONE_TORCH] = RedstoneTorch::class;
 			self::$list[self::REDSTONE_TORCH_ACTIVE] = RedstoneTorchActive::class;
-            
+			
+			self::$list[self::PISTON] = Piston::class;
+			self::$list[self::PISTON_HEAD] = PistonHead::class;
+			
 			foreach(self::$list as $id => $class){
 				if($class !== null){
 					/** @var Block $block */
