@@ -60,6 +60,7 @@ class PlayerInteractEvent extends PlayerEvent implements Cancellable{
 		if($block instanceof Block){
 			$this->blockTouched = $block;
 			$this->touchVector = new Vector3(0, 0, 0);
+			var_dump($block->getX() . ":" . $block->getY() . ":" . $block->getZ() . " " . $block->getId() . ":" . $block->getDamage());
 		}else{
 			$this->touchVector = $block;
 			$this->blockTouched = Block::get(0, 0, new Position(0, 0, 0, $player->level));
@@ -76,6 +77,7 @@ class PlayerInteractEvent extends PlayerEvent implements Cancellable{
 				$player->getInventory()->sendContents($player);
 			}
 		}
+		
 	}
 
 	/**
