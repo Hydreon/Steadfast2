@@ -151,8 +151,12 @@ abstract class BaseFullChunk implements FullChunk{
 						$this->setChanged();
 						continue; //Fixes tiles allocated in wrong chunks.
 					}
-
-					if(Tile::createTile($nbt["id"], $this, $nbt) === null){
+					$tileName = $nbt["id"];
+					// this part for pc maps
+//					if (substr($nbt["id"], 0, 10) == 'minecraft:') {
+//						$tileName = str_replace("_", "", ucwords(substr($tileName, 10), "_"));
+//					}
+					if(Tile::createTile($tileName, $this, $nbt) === null){
 						$this->setChanged();
 						continue;
 					}
