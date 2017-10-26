@@ -4176,7 +4176,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$item->count -= $dropItem->count;
 		}
 		$inventory->setItem($transaction->getSlot(), $item);
-		$motion = $this->getDirectionVector()->multiply(0.4);
+		$motion = $this->getDirectionVector()->multiply(1.0);
 		$this->level->dropItem($this->add(0, 1.3, 0), $dropItem, $motion, 40);
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 	}
