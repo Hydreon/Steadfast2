@@ -69,16 +69,16 @@ class Piston extends Solid {
 				$sideToExtend = self::SIDE_UP;
 				break;
 			case 2:
-				$sideToExtend = self::SIDE_NORTH;
-				break;
-			case 3:
 				$sideToExtend = self::SIDE_SOUTH;
 				break;
+			case 3:
+				$sideToExtend = self::SIDE_NORTH;
+				break;
 			case 4:
-				$sideToExtend = self::SIDE_WEST;
+				$sideToExtend = self::SIDE_EAST;
 				break;
 			case 5:
-				$sideToExtend = self::SIDE_EAST;
+				$sideToExtend = self::SIDE_WEST;
 				break;
 			default:
 				return;
