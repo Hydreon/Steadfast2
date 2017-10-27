@@ -52,7 +52,7 @@ class WoodenPressurePlate extends Transparent{
 	}
 	
 	public function canBeFlowedInto(){
-		return true;
+		return false;
 	}
 
 	public function getToolType(){
