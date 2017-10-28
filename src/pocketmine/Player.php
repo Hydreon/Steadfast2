@@ -3390,9 +3390,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk = new AvailableCommandsPacket();
 			$this->dataPacket($pk);
 		}			
-		if($this->getHealth() <= 0){
-			$this->dead = true;
-		}
 
 		$pk = new SetDifficultyPacket();
 		$pk->difficulty = $this->server->getDifficulty();
