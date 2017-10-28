@@ -1845,11 +1845,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if ($packet->eventId == LevelSoundEventPacket::SOUND_UNDEFINED) {
 					break;
 				}
-				$viewers = $this->getViewers();
-				foreach ($viewers as $viewer) {
-					$viewer->dataPacket($packet);
-				}
-				$this->dataPacket($packet);
+				Server::broadcastPacket($this->level->getUsingChunk($packet->x >> 4, $packet->z >> 4), $packet);
 				break;
 			case 'USE_ITEM_PACKET':
 				//Timings::$timerUseItemPacket->startTiming();
@@ -3031,6 +3027,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$source->setCancelled();
 		}
 
+		if($source->getCause() === EntityDamageEvent::CAUSE_FALL){
+			if($this->elytraIsActivated){
+				//These values are totally wrong, but more okay.
+				//The damage of a player using elytra is calculated by the speed of its landing.
+				//In any case, a player who is using their elytra will take less damage than a player who isn't using one.
+				$damage /= 5;
+				$damage = round($damage, 1);
+				$source->setDamage($damage);
+			}
+		}
+
 		parent::attack($damage, $source);
 
 		if($source->isCancelled()){
@@ -3813,8 +3820,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if ($this->spawned === false || $this->dead === true || $this->blocked) {
 			return;
 		}
-
 		$target = $this->level->getEntity($targetId);
+
+		$pk = new LevelSoundEventPacket();
+		$pk->eventId = LevelSoundEventPacket::SOUND_ATTACK_NO_DAMAGE;
+		$pk->x = $target->x;
+		$pk->y = $target->y;
+		$pk->z = $target->z;
+		$pk->entityType = 319;
+		Server::broadcastPacket($this->level->getUsingChunk($pk->x >> 4, $pk->z >> 4), $pk);
+
 		if ($target instanceof Player && ($this->server->getConfigBoolean("pvp", true) === false || ($target->getGamemode() & 0x01) > 0)) {
 			return;
 		}
@@ -4261,7 +4276,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			foreach ($recipients as $recipient) {
 				$recipient->dataPacket($pk);
-				$recipient->sendSound(LevelSoundEventPacket::SOUND_HIT, $blockPos, 1, $blockId);
 			}
 		}
 	}
@@ -4383,8 +4397,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$projectile->spawnToAll();
 						$recipients = $this->hasSpawned;
 						$recipients[$this->id] = $this;
+						
 						$pk = new LevelSoundEventPacket();
-						$pk->eventId = 20;
+						$pk->eventId = LevelSoundEventPacket::SOUND_BOW;
 						$pk->x = $this->x;
 						$pk->y = $this->y;
 						$pk->z = $this->z;

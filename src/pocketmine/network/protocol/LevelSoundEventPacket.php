@@ -13,6 +13,7 @@ class LevelSoundEventPacket extends PEPacket {
 	const SOUND_BREAK = 'SOUND_BREAK';
 	const SOUND_PLACE = 'SOUND_PLACE';
 	const SOUND_EAT = 'SOUND_EAT';
+	const SOUND_ATTACK_NO_DAMAGE = 'SOUND_ATTACK_NO_DAMAGE';
  	const SOUND_EXPLODE = 'SOUND_EXPLODE';
 	const SOUND_BREAK_BLOCK = 'SOUND_BREAK_BLOCK';
  	const SOUND_CHEST_OPEN = 'SOUND_CHEST_OPEN';
@@ -32,8 +33,7 @@ class LevelSoundEventPacket extends PEPacket {
 
 	public function decode($playerProtocol) {
 		$this->getHeader($playerProtocol);
-		$this->eventId = $this->getByte();
-		$this->eventId = MultiversionEnums::getLevelSoundEventName($playerProtocol, $this->eventId);
+		$this->eventId = MultiversionEnums::getLevelSoundEventName($playerProtocol, $this->getByte());
 		$this->x = $this->getLFloat();
 		$this->y = $this->getLFloat();
 		$this->z = $this->getLFloat();
