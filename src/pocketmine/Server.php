@@ -42,6 +42,7 @@ use pocketmine\entity\Snowball;
 use pocketmine\entity\Egg;
 use pocketmine\entity\Squid;
 use pocketmine\entity\Villager;
+use pocketmine\entity\Boat;
 use pocketmine\event\HandlerList;
 use pocketmine\event\level\LevelInitEvent;
 use pocketmine\event\level\LevelLoadEvent;
@@ -2501,7 +2502,7 @@ class Server{
 		Entity::registerEntity(Villager::class);
 		Entity::registerEntity(Squid::class);
 		Entity::registerEntity(Human::class, true);		
-		
+		Entity::registerEntity(Boat::class);
 		Entity::registerEntity(Blaze::class);
 		Entity::registerEntity(CaveSpider::class);
 		Entity::registerEntity(Chicken::class);

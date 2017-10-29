@@ -29,6 +29,7 @@ class InteractPacket extends PEPacket{
 	const PACKET_NAME = "INTERACT_PACKET";
 	
 	const ACTION_DAMAGE = 2;
+	const ACTION_LEAVE_VEHICLE = 3;
 	const ACTION_SEE = 4;
 
 	public $action;

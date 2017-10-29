@@ -964,6 +964,7 @@ class Item{
 			self::$list[self::ELYTRA] = Elytra::class;
 			self::$list[self::PRISMARINE_CRYSTAL] = PrismarineCrystal::class;
 			self::$list[self::POTION] = Potion::class;
+			self::$list[self::BOAT] = Boat::class;
             
             // update for 1.0
 			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;

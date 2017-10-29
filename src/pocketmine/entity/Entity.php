@@ -62,6 +62,7 @@ use pocketmine\network\protocol\MoveEntityPacket;
 use pocketmine\network\protocol\MovePlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\SetEntityDataPacket;
+use pocketmine\network\protocol\SetEntityLinkPacket;
 use pocketmine\network\protocol\SetTimePacket;
 use pocketmine\Player;
 use pocketmine\plugin\Plugin;
@@ -277,6 +278,9 @@ abstract class Entity extends Location implements Metadatable{
 
 	public $closed = false;
 
+	/** @var Entity */
+	protected $linkedEntity = null;
+	protected $linkedType = null;
 	/** @var \pocketmine\event\TimingsHandler */
 	protected $timings;
 	
@@ -1362,6 +1366,8 @@ abstract class Entity extends Location implements Metadatable{
 
 	public function despawnFromAll(){
 		foreach($this->hasSpawned as $player){
+			debug_print_backtrace(0, 5);
+			var_dump('///////////////////////////////////////////////');
 			$this->despawnFrom($player);
 		}
 	}
@@ -1372,6 +1378,9 @@ abstract class Entity extends Location implements Metadatable{
 			$this->server->getPluginManager()->callEvent(new EntityDespawnEvent($this));
 			$this->closed = true;
 			$this->despawnFromAll();
+			if ($this->linkedEntity) {
+				$this->linkedEntity->unLinkEntity($this->linkedEntity);
+			}
 			if($this->chunk !== null){
 				$this->chunk->removeEntity($this);
 			}
@@ -1485,4 +1494,140 @@ abstract class Entity extends Location implements Metadatable{
 		return true;
 	}
 
+	public function linkEntity(Entity $entity){
+		/*
+		if(!$entity->isAlive()){
+			return false;
+		}
+		if($this instanceof Player) {
+			$pk = new SetEntityLinkPacket();
+			$pk->to = $entity->getId();
+			$pk->from = $this->getId();
+			$pk->type = SetEntityLinkPacket::TYPE_RIDE;
+			foreach ($this->getViewers() as $p) {
+				$p->dataPacket($pk);
+			}
+
+			$pk = new SetEntityLinkPacket();
+			$pk->to = $entity->getId();
+			$pk->from = $this->getId();
+			$pk->type = SetEntityLinkPacket::TYPE_RIDE;
+			$this->dataPacket($pk);
+			$this->setDataProperty(self::DATA_SEAT_RIDER_OFFSET, self::DATA_TYPE_VECTOR3, [0,0,0]);
+			$this->sendSelfData();
+			$this->linkedEntity = $entity;
+		}
+		*/
+		return $this->setLinked(1, $entity);
+	}
+	
+	public function unLinkEntity(Entity $entity) {
+		/*
+		if ($this->linkedEntity == null) {
+			return;
+		}
+		if ($this instanceof Player) {
+			$pk = new SetEntityLinkPacket();
+			$pk->to = $entity->getId();
+			$pk->from = $this->getId();
+			$pk->type = SetEntityLinkPacket::TYPE_REMOVE;
+			foreach ($this->getViewers() as $p) {
+				$p->dataPacket($pk);
+			}
+
+			$pk = new SetEntityLinkPacket();
+			$pk->to = $entity->getId();
+			$pk->from = $this->getId();
+			$pk->type = SetEntityLinkPacket::TYPE_REMOVE;
+			$this->dataPacket($pk);
+			$this->setDataProperty(self::DATA_SEAT_RIDER_OFFSET, self::DATA_TYPE_VECTOR3, [0, 0, 0]);
+			$this->sendSelfData();
+			$this->removeDataProperty(self::DATA_SEAT_RIDER_OFFSET, false);
+			$this->linkedEntity = null;
+		}
+		 */
+		return $this->setLinked(0, $entity);
+	}
+	
+	public function setLinked($type = 0, Entity $entity){
+		if($type != 0 and $entity === null){
+			return false;
+		}
+		if($entity === $this){
+			return false;
+		}
+		switch($type){
+			case 0:
+				var_dump('exit');
+				if($this->linkedType == 0){
+					return true;
+				}
+				$this->linkedType = 0;
+				$pk = new SetEntityLinkPacket();
+				$pk->from = $entity->getId();
+				$pk->to = $this->getId();
+				$pk->type = SetEntityLinkPacket::TYPE_REMOVE;
+				$this->server->broadcastPacket($this->level->getPlayers(), $pk);
+				if($this instanceof Player){
+					$pk = new SetEntityLinkPacket();
+					$pk->from = $entity->getId();
+					$pk->to = 0;
+					$pk->type = SetEntityLinkPacket::TYPE_REMOVE;
+					$this->dataPacket($pk);
+				}
+				if($this->linkedEntity->getLinkedType()){
+					$this->linkedEntity->setLinked(0, $this);
+				}
+				$this->linkedEntity = null;
+				return true;
+			case 1:
+				var_dump('ride');
+				if(!$entity->isAlive()){
+					return false;
+				}
+				$this->linkedEntity = $entity;
+				$this->linkedType = 1;
+				$entity->linkedEntity = $this;
+				$entity->linkedType = 1;
+				$pk = new SetEntityLinkPacket();
+				$pk->from = $entity->getId();
+				$pk->to = $this->getId();
+				$pk->type = SetEntityLinkPacket::TYPE_RIDE;
+				$this->server->broadcastPacket($this->level->getPlayers(), $pk);
+				if($this instanceof Player){
+					$pk = new SetEntityLinkPacket();
+					$pk->from = $entity->getId();
+					$pk->to = 0;
+					$pk->type = SetEntityLinkPacket::TYPE_RIDE;
+					$this->dataPacket($pk);
+				}
+				return true;
+			case 2:
+				var_dump('hz');
+				if(!$entity->isAlive()){
+					return false;
+				}
+				if($entity->getLinkedEntity() !== $this){
+					return $entity->linkEntity($this);
+				}
+				$this->linkedEntity = $entity;
+				$this->linkedType = 2;
+				return true;
+			default:
+				return false;
+		}
+	}
+	
+	public function getLinkedEntity(){
+		return $this->linkedEntity;
+	}
+
+	public function getLinkedType(){
+		return $this->linkedType;
+	}
+	
+	public function isAllowEntranceButton () {
+		return false;
+	}
+	
 }
