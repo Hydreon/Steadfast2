@@ -103,6 +103,7 @@ use pocketmine\tile\Sign;
 use pocketmine\tile\Skull;
 use pocketmine\tile\FlowerPot;
 use pocketmine\tile\Tile;
+use pocketmine\tile\PistonArm;
 use pocketmine\utils\Binary;
 use pocketmine\utils\Cache;
 use pocketmine\utils\Config;
@@ -2536,6 +2537,7 @@ class Server{
         Tile::registerTile(EnderChest::class);
 		Tile::registerTile(Bed::class);
 		Tile::registerTile(Cauldron::class);
+		Tile::registerTile(PistonArm::class);
 	}
 
 	public function shufflePlayers(){

@@ -1484,18 +1484,17 @@ class Level implements ChunkManager, Metadatable{
 		}elseif($target->canBeActivated() === true and $target->onActivate($item, $player) === true){
 			return true;
 		}
-
+		
 		if($item->isPlaceable()){
 			$hand = $item->getBlock();
 			$hand->position($block);
 		}elseif($block->getId() === Item::FIRE){
 			$this->setBlock($block, new Air(), true);
-
 			return false;
 		}else{
 			return false;
 		}
-
+		
 		if(!($block->canBeReplaced() === true or ($hand->getId() === Item::SLAB and $block->getId() === Item::SLAB))){
 			return false;
 		}

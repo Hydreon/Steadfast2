@@ -973,6 +973,8 @@ class Item{
 					self::$list[$i] = Block::$list[$i];
 				}
 			}
+			
+			self::$list[self::REDSTONE_DUST] = Redstone::class;
 		}
 
 		self::initCreativeItems();

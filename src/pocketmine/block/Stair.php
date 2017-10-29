@@ -151,4 +151,8 @@ abstract class Stair extends Transparent{
 			return [];
 		}
 	}
+	
+	public function isUpsideDown() {
+		return $this->meta & 0x04;
+	}
 }

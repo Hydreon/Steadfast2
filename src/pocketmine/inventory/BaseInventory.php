@@ -59,7 +59,7 @@ abstract class BaseInventory implements Inventory{
 	 */
 	public function __construct(InventoryHolder $holder, InventoryType $type, array $items = [], $overrideSize = null, $overrideTitle = null){
 		$this->holder = $holder;
-
+		
 		$this->type = $type;		
 		if($overrideSize !== null){
 			$this->size = (int) $overrideSize;
