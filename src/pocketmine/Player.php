@@ -3809,6 +3809,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
  		parent::setOnFire($seconds, $damage);
  	}
 	
+	public function attackInCreative($player) {
+		
+	}
+
+
 	public function attackByTargetId($targetId) {
 		if ($this->spawned === false || $this->dead === true || $this->blocked) {
 			return;
@@ -3816,6 +3821,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$target = $this->level->getEntity($targetId);
 		if ($target instanceof Player && ($this->server->getConfigBoolean("pvp", true) === false || ($target->getGamemode() & 0x01) > 0)) {
+			$target->attackInCreative($this);
 			return;
 		}
 
