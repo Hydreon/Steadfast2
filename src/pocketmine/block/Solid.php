@@ -89,10 +89,11 @@ abstract class Solid extends Block{
 						return self::POWERED_STRONGLY;
 					}
 					break;
+				case self::LEVER:
 				case self::WOODEN_BUTTON:
 				case self::STONE_BUTTON:
-					$button = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]));
-					if ($button->getFace() == $side && $button->isActive()) {
+					$element = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]));
+					if ($element->getFace() == $side && $element->isActive()) {
 						return self::POWERED_STRONGLY;
 					}
 					break;
