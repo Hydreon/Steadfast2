@@ -65,9 +65,17 @@ class RedstoneRepeaterActive extends RedstoneRepeater {
 					}
 					break;
 			}
-			$this->level->setBlock($this, Block::get(Block::REDSTONE_REPEATER_BLOCK, $this->meta));
+			$result = $this->level->setBlock($this, Block::get(Block::REDSTONE_REPEATER_BLOCK, $this->meta), false, false);
+			if ($result) {
+				$delay = ($this->getDelay() + 1) * 2;
+				$this->level->scheduleUpdate($this, $delay);
+			}
 		} else if ($type == Level::BLOCK_UPDATE_SCHEDULED) {
-			$this->level->updateAround($this);
+			$frontCoords = $this->getFrontBlockCoords();
+			$frontBlock = $this->level->getBlock($frontCoords);
+			if ($frontBlock !== null) {
+				$frontBlock->onUpdate(Level::BLOCK_UPDATE_NORMAL);
+			}
 		}
 	}
 

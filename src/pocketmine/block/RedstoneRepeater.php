@@ -30,6 +30,10 @@ use pocketmine\Player;
 
 class RedstoneRepeater extends Transparent {
 
+	const FACE_NORTH = 0;
+	const FACE_EAST = 1;
+	const FACE_SOUTH = 2;
+	const FACE_WEST = 3;
 	const MAX_DELAY = 3;
 	
 	protected $id = self::REDSTONE_REPEATER_BLOCK;
@@ -68,13 +72,13 @@ class RedstoneRepeater extends Transparent {
 		switch ($face) {
 			case 1:
 				if ($player->yaw <= 45 || $player->yaw >= 315) { // south
-					$this->meta = 2;
+					$this->meta = self::FACE_SOUTH;
 				} else if ($player->yaw >= 135 && $player->yaw <= 225) { // north
-					$this->meta = 0;
+					$this->meta = self::FACE_NORTH;
 				} else if ($player->yaw > 45 && $player->yaw < 135) { // west
-					$this->meta = 3;
+					$this->meta = self::FACE_WEST;
 				} else { // east
-					$this->meta = 1;
+					$this->meta = self::FACE_EAST;
 				}
 				break;
 			case 0:
@@ -109,9 +113,7 @@ class RedstoneRepeater extends Transparent {
 			switch ($backBlockID) {
 				case self::REDSTONE_WIRE:
 					$wire = $this->level->getBlock($backPosition);
-					if ($wire->meta > 0) {
-						$isNeedSetBlock = true;
-					}
+					$isNeedSetBlock = $wire->meta > 0;
 					break;
 				case self::REDSTONE_TORCH_ACTIVE:
 					$isNeedSetBlock = true;
@@ -122,16 +124,16 @@ class RedstoneRepeater extends Transparent {
 				case self::WOODEN_PRESSURE_PLATE:
 				case self::STONE_PRESSURE_PLATE:
 					$backBlock = $this->level->getBlock($backPosition);
-					if ($backBlock->isActive()) {
-						$isNeedSetBlock = true;
-					}
+					$isNeedSetBlock = $backBlock->isActive();
+					break;
+				case self::REDSTONE_REPEATER_BLOCK_ACTIVE:
+					$activeRepeater = $this->level->getBlock($backPosition);
+					$isNeedSetBlock = ($this->getFace() == $activeRepeater->getFace());
 					break;
 				default:
 					if (Block::$solid[$backBlockID]) {
 						$solidBlock = $this->level->getBlock($backPosition);
-						if ($solidBlock->getPoweredState() != Solid::POWERED_NONE) {
-							$isNeedSetBlock = true;
-						}
+						$isNeedSetBlock = $solidBlock->getPoweredState() != Solid::POWERED_NONE;
 					}
 					break;
 			}
@@ -142,21 +144,45 @@ class RedstoneRepeater extends Transparent {
 					$this->level->scheduleUpdate($this, $delay);
 				}
 			}
+		} else if ($type == Level::BLOCK_UPDATE_SCHEDULED) {
+			$frontCoords = $this->getFrontBlockCoords();
+			$frontBlock = $this->level->getBlock($frontCoords);
+			if ($frontBlock !== null) {
+				$frontBlock->onUpdate(Level::BLOCK_UPDATE_NORMAL);
+			}
 		}
 	}
 	
 	protected function getBackBlockCoords() {
 		$face = $this->meta & 0x03;
 		switch ($face) {
-			case 0: // face north
+			case self::FACE_NORTH:
 				return new Vector3($this->x, $this->y, $this->z + 1);
-			case 1: // face east
+			case self::FACE_EAST:
 				return new Vector3($this->x - 1, $this->y, $this->z);
-			case 2: // face south
+			case self::FACE_SOUTH:
 				return new Vector3($this->x, $this->y, $this->z - 1);
-			case 3: // face west
+			case self::FACE_WEST:
 				return new Vector3($this->x + 1, $this->y, $this->z);
 		}
+	}
+	
+	protected function getFrontBlockCoords() {
+		$face = $this->meta & 0x03;
+		switch ($face) {
+			case self::FACE_NORTH:
+				return new Vector3($this->x, $this->y, $this->z - 1);
+			case self::FACE_EAST:
+				return new Vector3($this->x + 1, $this->y, $this->z);
+			case self::FACE_SOUTH:
+				return new Vector3($this->x, $this->y, $this->z + 1);
+			case self::FACE_WEST:
+				return new Vector3($this->x - 1, $this->y, $this->z);
+		}
+	}
+	
+	public function getFace() {
+		return $this->meta & 0x03;
 	}
 
 }
