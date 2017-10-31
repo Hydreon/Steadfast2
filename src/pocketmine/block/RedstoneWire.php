@@ -73,6 +73,7 @@ class RedstoneWire extends Transparent {
 				case Block::WOODEN_BUTTON:
 				case Block::STONE_BUTTON:
 				case Block::WOODEN_PRESSURE_PLATE:
+				case Block::STONE_PRESSURE_PLATE:
 					if ($neighbor->isActive()) {
 						$targetPower = self::REDSTONE_POWER_MAX;
 						$targetDirection = $neighborDirection;

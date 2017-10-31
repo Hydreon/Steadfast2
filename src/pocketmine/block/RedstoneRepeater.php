@@ -22,7 +22,10 @@
 namespace pocketmine\block;
 
 use pocketmine\block\Block;
+use pocketmine\block\Solid;
+use pocketmine\level\Level;
 use pocketmine\item\Item;
+use pocketmine\math\Vector3;
 use pocketmine\Player;
 
 class RedstoneRepeater extends Transparent {
@@ -96,6 +99,64 @@ class RedstoneRepeater extends Transparent {
 		}
 		$this->meta = ($this->meta & 0x03) | ($delay << 2);
 		$this->level->setBlock($this, $this, true, true);
+	}
+	
+	public function onUpdate($type) {
+		if ($type == Level::BLOCK_UPDATE_NORMAL) {
+			$backPosition = $this->getBackBlockCoords();
+			$backBlockID = $this->level->getBlockIdAt($backPosition->x, $backPosition->y, $backPosition->z);
+			$isNeedSetBlock = false;
+			switch ($backBlockID) {
+				case self::REDSTONE_WIRE:
+					$wire = $this->level->getBlock($backPosition);
+					if ($wire->meta > 0) {
+						$isNeedSetBlock = true;
+					}
+					break;
+				case self::REDSTONE_TORCH_ACTIVE:
+					$isNeedSetBlock = true;
+					break;
+				case self::WOODEN_BUTTON:
+				case self::STONE_BUTTON:
+				case self::LEVER:
+				case self::WOODEN_PRESSURE_PLATE:
+				case self::STONE_PRESSURE_PLATE:
+					$backBlock = $this->level->getBlock($backPosition);
+					if ($backBlock->isActive()) {
+						$isNeedSetBlock = true;
+					}
+					break;
+				default:
+					if (Block::$solid[$backBlockID]) {
+						$solidBlock = $this->level->getBlock($backPosition);
+						if ($solidBlock->getPoweredState() != Solid::POWERED_NONE) {
+							$isNeedSetBlock = true;
+						}
+					}
+					break;
+			}
+			if ($isNeedSetBlock) {
+				$result = $this->level->setBlock($this, Block::get(Block::REDSTONE_REPEATER_BLOCK_ACTIVE, $this->meta), false, false);
+				if ($result) {
+					$delay = ($this->getDelay() + 1) * 2;
+					$this->level->scheduleUpdate($this, $delay);
+				}
+			}
+		}
+	}
+	
+	protected function getBackBlockCoords() {
+		$face = $this->meta & 0x03;
+		switch ($face) {
+			case 0: // face north
+				return new Vector3($this->x, $this->y, $this->z + 1);
+			case 1: // face east
+				return new Vector3($this->x - 1, $this->y, $this->z);
+			case 2: // face south
+				return new Vector3($this->x, $this->y, $this->z - 1);
+			case 3: // face west
+				return new Vector3($this->x + 1, $this->y, $this->z);
+		}
 	}
 
 }
