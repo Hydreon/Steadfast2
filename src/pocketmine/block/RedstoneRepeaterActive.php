@@ -30,10 +30,4 @@ class RedstoneRepeaterActive extends RedstoneRepeater{
 	public function __construct($meta = 0){
 		$this->meta = $meta;
 	}
-
-	public function getDrops(Item $item){
-		return [
-			[Item::REDSTONE_REPEATER, 0, 1],
-		];
-	}
 }

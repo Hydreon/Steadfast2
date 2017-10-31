@@ -70,10 +70,10 @@ class Lever extends Transparent{
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null) {	
 		switch ($face) {
 			case 0:
-				if (($player->yaw <= 45 && $player->yaw >= 315) || ($player->yaw <= 135 && $player->yaw >= 225)) {
-					$this->meta = 0;
-				} else {
+				if (($player->yaw > 45 && $player->yaw < 135) || ($player->yaw > 225 && $player->yaw < 315)) {
 					$this->meta = 7;
+				} else {
+					$this->meta = 0;
 				}
 				break;
 			case 1:
