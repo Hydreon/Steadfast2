@@ -2671,7 +2671,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->message = $message;
 		$pk->source = $senderName;
 		$sender = $this->server->getPlayer($senderName);
-		if ($sender !== null) {
+		if ($sender !== null && $sender->getOriginalProtocol() >= ProtocolInfo::PROTOCOL_140) {
 			$pk->xuid = $sender->getXUID();
 		}
 		$this->dataPacket($pk);
@@ -4710,7 +4710,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$pk3 = new PlayerListPacket();
 		$pk3->type = PlayerListPacket::TYPE_ADD;
-		$pk3->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->capeData, $this->skinGeometryName, $this->skinGeometryData, $this->getXUID()];
+		$pk3->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->capeData, $this->skinGeometryName, $this->skinGeometryData];
 
 		$pk4 = new AddPlayerPacket();
 		$pk4->uuid = $this->getUniqueId();
@@ -4843,19 +4843,39 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public function sendFullPlayerList() {
 		$players = $this->server->getOnlinePlayers();
-		if (count($players) > 0) {
-			$pk = new PlayerListPacket();
-			$pk->type = PlayerListPacket::TYPE_ADD;
-			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->getSkinName(), $this->getSkinData(), $this->getCapeData(), $this->getSkinGeometryName(), $this->getSkinGeometryData(), $this->getXUID()];
-			$this->server->batchPackets($players, [$pk]);
-		}
+		$isNeedSendXUID = $this->originalProtocol >= ProtocolInfo::PROTOCOL_140;
+		$playersWithProto140 = [];
+		$otherPlayers = [];
 		$players[] = $this;
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_ADD;
 		foreach ($players as $player) {
-			$pk->entries[] = [$player->getUniqueId(), $player->getId(), $player->getName(), $player->getSkinName(), $player->getSkinData(), $player->getCapeData(), $player->getSkinGeometryName(), $player->getSkinGeometryData(), $player->getXUID()];
+			$entry = [$player->getUniqueId(), $player->getId(), $player->getName(), $player->getSkinName(), $player->getSkinData(), $player->getCapeData(), $player->getSkinGeometryName(), $player->getSkinGeometryData()];
+			if ($isNeedSendXUID) {
+				$entry[] = $player->getXUID();
+			}
+			$pk->entries[] = $entry;
+			// collect player with different packet logic
+			if ($player->getOriginalProtocol() >= ProtocolInfo::PROTOCOL_140) {
+				$playersWithProto140[] = $player;
+			} else {
+				$otherPlayers[] = $player;
+			}
 		}
 		$this->server->batchPackets([$this], [$pk]);
+		
+		if (count($playersWithProto140) > 0) {
+			$pk = new PlayerListPacket();
+			$pk->type = PlayerListPacket::TYPE_ADD;
+			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->getSkinName(), $this->getSkinData(), $this->getCapeData(), $this->getSkinGeometryName(), $this->getSkinGeometryData(), $this->getXUID()];
+			$this->server->batchPackets($playersWithProto140, [$pk]);
+		}
+		if (count($otherPlayers) > 0) {
+			$pk = new PlayerListPacket();
+			$pk->type = PlayerListPacket::TYPE_ADD;
+			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->getSkinName(), $this->getSkinData(), $this->getCapeData(), $this->getSkinGeometryName(), $this->getSkinGeometryData()];
+			$this->server->batchPackets($otherPlayers, [$pk]);
+		}
 	}
 	
 }
