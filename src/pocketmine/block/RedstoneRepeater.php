@@ -64,7 +64,6 @@ class RedstoneRepeater extends Transparent {
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null) {
 		switch ($face) {
 			case 1:
-				var_dump($player->yaw);
 				if ($player->yaw <= 45 || $player->yaw >= 315) { // south
 					$this->meta = 2;
 				} else if ($player->yaw >= 135 && $player->yaw <= 225) { // north
@@ -96,7 +95,6 @@ class RedstoneRepeater extends Transparent {
 			$delay = 0;
 		}
 		$this->meta = ($this->meta & 0x03) | ($delay << 2);
-		var_dump($this->meta);
 		$this->level->setBlock($this, $this, true, true);
 	}
 
