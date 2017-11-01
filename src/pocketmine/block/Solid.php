@@ -77,7 +77,7 @@ abstract class Solid extends Block{
 			$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
 			switch ($blockId) {
 				case self::REDSTONE_WIRE:
-					if ($offset[1] == 0) { // all except up and down
+					if ($offset[1] >= 0) { // all except down
 						$wire = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]));
 						if ($wire->getDamage() > 0) {
 							$poweredState = self::POWERED_WEAKLY;
@@ -98,6 +98,7 @@ abstract class Solid extends Block{
 					}
 					break;
 				case self::WOODEN_PRESSURE_PLATE:
+				case self::STONE_PRESSURE_PLATE:
 					if ($side == Vector3::SIDE_UP) {
 						$pressurePlate = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]));
 						if ($pressurePlate->isActive()) {
