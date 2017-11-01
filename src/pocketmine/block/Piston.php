@@ -80,79 +80,88 @@ class Piston extends Solid {
 	}
 	
 	public function onUpdate($type) {
-		$sideToExtend = $this->getExtendSide();
-		if ($sideToExtend == null) {
-			return;
-		}
-		static $offsets = [
-			self::SIDE_NORTH => [0, 0, -1],
-			self::SIDE_SOUTH => [0, 0, 1],
-			self::SIDE_EAST => [1, 0, 0],
-			self::SIDE_WEST => [-1, 0, 0],
-			self::SIDE_UP => [0, 1, 0],
-			self::SIDE_DOWN => [0, -1, 0],
-		];
-		$isShouldBeExpanded = false;
-		foreach ($offsets as $side => $offset) {
-			if ($side == $sideToExtend) {
-				continue;
+		if ($type != Level::BLOCK_UPDATE_TOUCH) {
+			$sideToExtend = $this->getExtendSide();
+			if ($sideToExtend == null) {
+				return;
 			}
-			$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
-			switch ($blockId) {
-				case self::REDSTONE_TORCH_ACTIVE:
-					$isShouldBeExpanded = true;
-					break 2;
-				case self::REDSTONE_WIRE:
-					$wirePower = $this->level->getBlockDataAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
-					if ($wirePower > 0) {
+			static $offsets = [
+				self::SIDE_NORTH => [0, 0, -1],
+				self::SIDE_SOUTH => [0, 0, 1],
+				self::SIDE_EAST => [1, 0, 0],
+				self::SIDE_WEST => [-1, 0, 0],
+				self::SIDE_UP => [0, 1, 0],
+				self::SIDE_DOWN => [0, -1, 0],
+			];
+			$isShouldBeExpanded = false;
+			foreach ($offsets as $side => $offset) {
+				if ($side == $sideToExtend) {
+					continue;
+				}
+				$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
+				switch ($blockId) {
+					case self::REDSTONE_TORCH_ACTIVE:
 						$isShouldBeExpanded = true;
 						break 2;
-					}
-					break;
-				default:
-					if (isset(Block::$solid[$blockId]) && Block::$solid[$blockId]) {
-						$vector = new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
-						$block = $this->level->getBlock($vector);
-						if ($block->getPoweredState() != Solid::POWERED_NONE) {
+					case self::REDSTONE_WIRE:
+						$wirePower = $this->level->getBlockDataAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
+						if ($wirePower > 0) {
 							$isShouldBeExpanded = true;
 							break 2;
 						}
-					}
-					break;
+						break;
+					default:
+						if (isset(Block::$solid[$blockId]) && Block::$solid[$blockId]) {
+							$vector = new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
+							$block = $this->level->getBlock($vector);
+							if ($block->getPoweredState() != Solid::POWERED_NONE) {
+								$isShouldBeExpanded = true;
+								break 2;
+							}
+						}
+						break;
+				}
 			}
-		}
-		$pistonTile = $this->level->getTile($this);
-		if ($pistonTile !== null) {
-			if ($isShouldBeExpanded && $pistonTile->namedtag['Progress'] < 1) {
-				if ($this->isMayBeExtended()) {
+			$pistonTile = $this->level->getTile($this);
+			if ($pistonTile !== null) {
+				if ($isShouldBeExpanded && $pistonTile->namedtag['Progress'] < 1) {
+					if ($this->isMayBeExtended()) {
+						$expandBlock = $this->getSide($sideToExtend);
+						$this->getLevel()->setBlock($expandBlock, Block::get(self::PISTON_HEAD), true, true);
+						$pistonTile->namedtag['Progress'] = 1;
+						$pistonTile->namedtag['State'] = 2;
+						$pistonTile->namedtag['HaveCharge'] = 0;
+						$pistonTile->spawnToAll();
+						if ($expandBlock->getId() !== self::AIR) {
+							$anotherBlock = $expandBlock->getSide($sideToExtend);
+							$this->getLevel()->setBlock($anotherBlock, $expandBlock);
+						}
+					} else {
+						$pistonTile->namedtag['HaveCharge'] = 1;
+					}
+				} else if (!$isShouldBeExpanded && $pistonTile->namedtag['Progress'] > 0) {
 					$expandBlock = $this->getSide($sideToExtend);
-					$this->getLevel()->setBlock($expandBlock, Block::get(self::PISTON_HEAD), true, true);
-					$pistonTile->namedtag['Progress'] = 1;
-					$pistonTile->namedtag['State'] = 2;
+					$this->getLevel()->setBlock($expandBlock, Block::get(self::AIR), true, true);
+					$pistonTile->namedtag['Progress'] = 0;
+					$pistonTile->namedtag['State'] = 0;
 					$pistonTile->namedtag['HaveCharge'] = 0;
 					$pistonTile->spawnToAll();
 				} else {
-					$pistonTile->namedtag['HaveCharge'] = 1;
+					if ($pistonTile->namedtag['HaveCharge'] && $this->isMayBeExtended()) {
+						$expandBlock = $this->getSide($sideToExtend);
+						$this->getLevel()->setBlock($expandBlock, Block::get(self::PISTON_HEAD), true, true);
+						$pistonTile->namedtag['Progress'] = 1;
+						$pistonTile->namedtag['State'] = 2;
+						$pistonTile->namedtag['HaveCharge'] = 0;
+						$pistonTile->spawnToAll();
+						if ($expandBlock->getId() !== self::AIR) {
+							$anotherBlock = $expandBlock->getSide($sideToExtend);
+							$this->getLevel()->setBlock($anotherBlock, $expandBlock);
+						}
+					} else {
+						$pistonTile->namedtag['HaveCharge'] = 0;
+					}
 				}
-			} else if (!$isShouldBeExpanded && $pistonTile->namedtag['Progress'] > 0) {
-				$expandBlock = $this->getSide($sideToExtend);
-				$this->getLevel()->setBlock($expandBlock, Block::get(self::AIR), true, true);
-				$pistonTile->namedtag['Progress'] = 0;
-				$pistonTile->namedtag['State'] = 0;
-				$pistonTile->spawnToAll();
-			} else {
-//				if ($pistonTile->namedtag['HaveCharge'] && $this->isMayBeExtended()) {
-//					var_dump("Extend using charge");
-//					$expandBlock = $this->getSide($sideToExtend);
-//					$this->getLevel()->setBlock($expandBlock, Block::get(self::PISTON_HEAD), true, true);
-//					$pistonTile->namedtag['Progress'] = 1;
-//					$pistonTile->namedtag['State'] = 2;
-//					$pistonTile->namedtag['HaveCharge'] = 0;
-//					$pistonTile->spawnToAll();
-//				} else {
-//					var_dump("Remove charge");
-//					$pistonTile->namedtag['HaveCharge'] = 0;
-//				}
 			}
 		}
 	}
