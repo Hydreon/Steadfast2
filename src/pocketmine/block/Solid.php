@@ -105,6 +105,13 @@ abstract class Solid extends Block{
 						}
 					}
 					break;
+				case self::REDSTONE_REPEATER_BLOCK_ACTIVE:
+					$repeater = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]));
+					$frontBlockCoords = $repeater->getFrontBlockCoords();
+					if ($this->x == $frontBlockCoords->x && $this->y == $frontBlockCoords->y && $this->z == $frontBlockCoords->z) {
+						return self::POWERED_STRONGLY;
+					}
+					break;
 			}
 		}
 		return $poweredState;

@@ -80,6 +80,14 @@ class RedstoneWire extends Transparent {
 						break 2;
 					}
 					break;
+				case Block::REDSTONE_REPEATER_BLOCK_ACTIVE:
+					$frontBlockCoords = $neighbor->getFrontBlockCoords();
+					if ($frontBlockCoords->x == $this->x && $frontBlockCoords->y == $this->y && $frontBlockCoords->z == $this->z) {
+						$targetPower = self::REDSTONE_POWER_MAX;
+						$targetDirection = $neighborDirection;
+						break 2;
+					}
+					break;
 				default:
 					if (Block::$solid[$neighborId]) {
 						if ($neighbor->getPoweredState() == Solid::POWERED_STRONGLY) {

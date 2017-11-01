@@ -46,6 +46,12 @@ class RedstoneRepeaterActive extends RedstoneRepeater {
 					break;
 				case self::REDSTONE_TORCH_ACTIVE:
 					return;
+				case self::REDSTONE_REPEATER_BLOCK_ACTIVE:
+					$activeRepeater = $this->level->getBlock($backPosition);
+					if ($this->getFace() == $activeRepeater->getFace()) {
+						return;
+					}
+					break;
 				case self::WOODEN_BUTTON:
 				case self::STONE_BUTTON:
 				case self::LEVER:

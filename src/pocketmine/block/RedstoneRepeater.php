@@ -153,7 +153,7 @@ class RedstoneRepeater extends Transparent {
 		}
 	}
 	
-	protected function getBackBlockCoords() {
+	public function getBackBlockCoords() {
 		$face = $this->meta & 0x03;
 		switch ($face) {
 			case self::FACE_NORTH:
@@ -167,7 +167,7 @@ class RedstoneRepeater extends Transparent {
 		}
 	}
 	
-	protected function getFrontBlockCoords() {
+	public function getFrontBlockCoords() {
 		$face = $this->meta & 0x03;
 		switch ($face) {
 			case self::FACE_NORTH:
