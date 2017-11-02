@@ -92,6 +92,7 @@ class RedstoneTorchActive extends Flowable {
 			}
 		}
 		if ($block->isSolid() && $block->getPoweredState() !== Solid::POWERED_NONE) {
+//			echo "X: " . $this->x . " Z: " . $this->z . " Update active torch" . PHP_EOL;
 			$unlitTorch = Block::get(Block::REDSTONE_TORCH, $this->meta);
 			$this->level->setBlock($this, $unlitTorch);
 		}			

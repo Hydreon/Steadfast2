@@ -50,6 +50,7 @@ class RedstoneTorch extends RedstoneTorchActive {
 			}
 		}
 		if ($block->isSolid() && $block->getPoweredState() == Solid::POWERED_NONE) {
+//			echo "X: " . $this->x . " Z: " . $this->z . " Update torch" . PHP_EOL;
 			$litTorch = Block::get(Block::REDSTONE_TORCH_ACTIVE, $this->meta);
 			$this->level->setBlock($this, $litTorch);
 		}			

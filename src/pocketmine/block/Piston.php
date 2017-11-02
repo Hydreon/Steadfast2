@@ -124,44 +124,54 @@ class Piston extends Solid {
 			}
 			$pistonTile = $this->level->getTile($this);
 			if ($pistonTile !== null) {
+//				echo "X: " . $this->x . " Z: " . $this->z . " Update piston" . PHP_EOL;
 				if ($isShouldBeExpanded && $pistonTile->namedtag['Progress'] < 1) {
 					if ($this->isMayBeExtended()) {
 						$this->extend($pistonTile, $sideToExtend);
 					} else {
+//						var_dump("Piston recive charge " . $this->x . " " . $this->z);
 						$pistonTile->namedtag['HaveCharge'] = 1;
 					}
 				} else if (!$isShouldBeExpanded && $pistonTile->namedtag['Progress'] > 0) {
+//					var_dump($pistonTile->namedtag);
 					$this->retract($pistonTile, $sideToExtend);
 				} else {
 					if ($pistonTile->namedtag['HaveCharge'] && $this->isMayBeExtended()) {
 						$this->extend($pistonTile, $sideToExtend);
 					} else {
+//						var_dump("Piston remove charge 1 " . $this->x . " " . $this->z);
 						$pistonTile->namedtag['HaveCharge'] = 0;
 					}
 				}
 			}
 		}
+//		$pistonTile = $this->level->getTile($this);
+//		echo "X: " . $this->x . " Z: " . $this->z . " Charge: " . ($pistonTile->namedtag['HaveCharge'] ? "true" : "false") . PHP_EOL;
 	}
 	
 	protected function extend($tile, $extendSide) {
-		$extendBlock = $this->getSide($extendSide);
-		$this->getLevel()->setBlock($extendBlock, Block::get(self::PISTON_HEAD), true, true);
+//		echo "X: " . $this->x . " Z: " . $this->z . " Extend piston" . PHP_EOL;
 		$tile->namedtag['Progress'] = 1;
 		$tile->namedtag['State'] = 2;
 		$tile->namedtag['HaveCharge'] = 0;
+//		var_dump("Piston remove charge 2 " . $this->x . " " . $this->z);
+		$extendBlock = $this->getSide($extendSide);
+		$this->getLevel()->setBlock($extendBlock, Block::get(self::PISTON_HEAD), true, false);
 		$tile->spawnToAll();
 		if ($extendBlock->getId() !== self::AIR) {
 			$anotherBlock = $extendBlock->getSide($extendSide);
-			$this->getLevel()->setBlock($anotherBlock, $extendSide);
+			$this->getLevel()->setBlock($anotherBlock, $extendBlock);
 		}
 	}
 	
 	protected function retract($tile, $extendSide) {
-		$extendBlock = $this->getSide($extendSide);
-		$this->getLevel()->setBlock($extendBlock, Block::get(self::AIR), true, true);
+//		echo "X: " . $this->x . " Z: " . $this->z . " Retract piston" . PHP_EOL;
 		$tile->namedtag['Progress'] = 0;
 		$tile->namedtag['State'] = 0;
 		$tile->namedtag['HaveCharge'] = 0;
+		$extendBlock = $this->getSide($extendSide);
+		$this->getLevel()->setBlock($extendBlock, Block::get(self::AIR), true, false);
+//		var_dump("Piston remove charge 3 " . $this->x . " " . $this->z);
 		$tile->spawnToAll();
 	}
 
