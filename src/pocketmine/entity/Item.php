@@ -138,7 +138,7 @@ class Item extends Entity{
 				}
 				
 				$blockId = $this->level->getBlockIdAt(floor($this->x), floor($this->y), floor($this->z));
-				if ($blockId == Block::WATER) {			
+				if ($blockId == Block::WATER || $blockId == Block::STILL_WATER) {			
 					$water = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y), floor($this->z)));
 					$flowVector = $water->getFlowVector();
 					$this->motionX = $flowVector->x * 0.1;
