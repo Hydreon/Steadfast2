@@ -128,10 +128,11 @@ class Minecart extends Vehicle {
 		if ($this->isUsing) {
 			return;
 		}
-		if ($player->getInventory()->getItemInHand()->getId() !== 0) {
-			$this->kill();
-			return;
-		}
+		//TODO minecart
+//		if ($player->getInventory()->getItemInHand()->getId() !== 0) {
+//			$this->kill();
+//			return;
+//		}
 		$this->isUsing = true;
 		$this->linkedEntity = $player;
 		$player->setVehicle($this);
