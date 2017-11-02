@@ -381,6 +381,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/** @var boolean */ 
 	protected $hungerEnabled = true;
 	
+	protected $currentVehicle = null;
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -2636,6 +2638,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->close('', 'client disconnect');
 				}
 				break;
+			case 'PLAYER_INPUT_PACKET':
+				if (!is_null($this->currentVehicle)) {
+					$this->currentVehicle->playerAcceleration($packet->sideway);
+				}				
+				break;
 			default:
 				break;
 		}
@@ -4859,4 +4866,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->server->batchPackets([$this], [$pk]);
 	}
 	
+	
+	public function setVehicle($vehicle) {
+		$this->currentVehicle = $vehicle;
+	}
 }
