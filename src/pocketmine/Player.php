@@ -171,6 +171,7 @@ use pocketmine\network\protocol\v120\PlayerSkinPacket;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\v120\SubClientLoginPacket;
+use pocketmine\entity\Minecart;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -379,6 +380,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $foodTick = 0;
 	/** @var boolean */ 
 	protected $hungerEnabled = true;
+	
+	protected $currentVehicle = null;
 	
 	public function getLeaveMessage(){
 		return "";
@@ -2031,7 +2034,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case 'INTERACT_PACKET':
 				if ($packet->action === InteractPacket::ACTION_DAMAGE) {
 					$this->attackByTargetId($packet->target);
-				} else {
+				} else {					
+					if ($packet->action === 3) {
+						$target = $this->getLevel()->getEntity($packet->target);
+						if ($target instanceof Minecart) {
+							$target->dissMount();
+						}
+					}
 					$this->customInteract($packet);
 				}
 				break;
@@ -2628,6 +2637,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if ($this->subClientId > 0) {
 					$this->close('', 'client disconnect');
 				}
+				break;
+			case 'PLAYER_INPUT_PACKET':
+				if (!is_null($this->currentVehicle)) {
+					$this->currentVehicle->playerAcceleration($packet->sideway);
+				}				
 				break;
 			default:
 				break;
@@ -4883,4 +4897,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 	
+	
+	public function setVehicle($vehicle) {
+		$this->currentVehicle = $vehicle;
+	}
 }

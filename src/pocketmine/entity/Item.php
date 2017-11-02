@@ -95,6 +95,8 @@ class Item extends Entity{
 		if($this->closed){
 			return false;
 		}
+		
+		
 
 		$tickDiff = $currentTick - $this->lastUpdate;
 		if ($tickDiff < 1) {

@@ -890,6 +890,7 @@ class Item{
 			self::$list[self::BEETROOT_SEEDS] = BeetrootSeeds::class;
 			self::$list[self::SIGN] = Sign::class;
 			self::$list[self::WOODEN_DOOR] = WoodenDoor::class;
+			self::$list[self::MINECART] = Minecart::class;
 			self::$list[self::BUCKET] = Bucket::class;
 			self::$list[self::IRON_DOOR] = IronDoor::class;
 			self::$list[self::SPRUCE_DOOR_BLOCK] = SpruceDoor::class;
