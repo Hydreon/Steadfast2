@@ -294,5 +294,10 @@ class PlayerInventory120 extends PlayerInventory {
 			}
 		}
 	}
+	
+	public function clearAll() {
+		parent::clearAll();
+		$this->cursor = null;
+	}
 
 }

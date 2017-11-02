@@ -110,8 +110,8 @@ class TextPacket extends PEPacket{
 				break;
 		}
 		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->putString('');//temp hack for prevent xbox and chat lags
-//			$this->putString($this->xuid);		
+//			$this->putString('');//temp hack for prevent xbox and chat lags
+			$this->putString($this->xuid);		
 		}
 	}
 

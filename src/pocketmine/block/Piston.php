@@ -52,6 +52,7 @@ class Piston extends Solid {
 				new IntTag("z", $this->z),
 				new FloatTag("Progress", 0.0),
 				new ByteTag("State", 0),
+				new ByteTag("HaveCharge", 0),
 			]);
 			$chunk = $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4);
 			Tile::createTile(Tile::PISTON_ARM, $chunk, $nbt);
@@ -59,83 +60,126 @@ class Piston extends Solid {
 		}
 	}
 	
-	public function onUpdate($type) {
+	protected function getExtendSide() {
 		$face = $this->getFace();
 		switch ($face) {
 			case 0:
-				$sideToExtend = self::SIDE_DOWN;
-				break;
+				return self::SIDE_DOWN;
 			case 1:
-				$sideToExtend = self::SIDE_UP;
-				break;
+				return self::SIDE_UP;
 			case 2:
-				$sideToExtend = self::SIDE_SOUTH;
-				break;
+				return self::SIDE_SOUTH;
 			case 3:
-				$sideToExtend = self::SIDE_NORTH;
-				break;
+				return self::SIDE_NORTH;
 			case 4:
-				$sideToExtend = self::SIDE_EAST;
-				break;
+				return self::SIDE_EAST;
 			case 5:
-				$sideToExtend = self::SIDE_WEST;
-				break;
-			default:
-				return;
+				return self::SIDE_WEST;
 		}
-		static $offsets = [
-			self::SIDE_NORTH => [0, 0, -1],
-			self::SIDE_SOUTH => [0, 0, 1],
-			self::SIDE_EAST => [1, 0, 0],
-			self::SIDE_WEST => [-1, 0, 0],
-			self::SIDE_UP => [0, 1, 0],
-			self::SIDE_DOWN => [0, -1, 0],
-		];
-		$isShouldBeExpanded = false;
-		foreach ($offsets as $side => $offset) {
-			if ($side == $sideToExtend) {
-				continue;
+		return null;
+	}
+	
+	public function onUpdate($type) {
+		if ($type != Level::BLOCK_UPDATE_TOUCH) {
+			static $offsets = [
+				self::SIDE_NORTH => [0, 0, -1],
+				self::SIDE_SOUTH => [0, 0, 1],
+				self::SIDE_EAST => [1, 0, 0],
+				self::SIDE_WEST => [-1, 0, 0],
+				self::SIDE_UP => [0, 1, 0],
+				self::SIDE_DOWN => [0, -1, 0],
+			];
+			$sideToExtend = $this->getExtendSide();
+			if ($sideToExtend == null) {
+				return;
 			}
-			$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
-			switch ($blockId) {
-				case self::REDSTONE_TORCH_ACTIVE:
-					$isShouldBeExpanded = true;
-					break 2;
-				case self::REDSTONE_WIRE:
-					$wirePower = $this->level->getBlockDataAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
-					if ($wirePower > 0) {
+			$isShouldBeExpanded = false;
+			foreach ($offsets as $side => $offset) {
+				if ($side == $sideToExtend) {
+					continue;
+				}
+				$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
+				switch ($blockId) {
+					case self::REDSTONE_TORCH_ACTIVE:
 						$isShouldBeExpanded = true;
 						break 2;
-					}
-					break;
-				default:
-					if (isset(Block::$solid[$blockId]) && Block::$solid[$blockId]) {
-						$vector = new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
-						$block = $this->level->getBlock($vector);
-						if ($block->getPoweredState() != Solid::POWERED_NONE) {
+					case self::REDSTONE_WIRE:
+						$wirePower = $this->level->getBlockDataAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
+						if ($wirePower > 0) {
 							$isShouldBeExpanded = true;
 							break 2;
 						}
+						break;
+					default:
+						if (isset(Block::$solid[$blockId]) && Block::$solid[$blockId]) {
+							$vector = new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
+							$block = $this->level->getBlock($vector);
+							if ($block->getPoweredState() != Solid::POWERED_NONE) {
+								$isShouldBeExpanded = true;
+								break 2;
+							}
+						}
+						break;
+				}
+			}
+			$pistonTile = $this->level->getTile($this);
+			if ($pistonTile !== null) {
+				if ($isShouldBeExpanded && $pistonTile->namedtag['Progress'] < 1) {
+					if ($this->isMayBeExtended()) {
+						$this->extend($pistonTile, $sideToExtend);
+					} else {
+						$pistonTile->namedtag['HaveCharge'] = 1;
 					}
-					break;
+				} else if (!$isShouldBeExpanded && $pistonTile->namedtag['Progress'] > 0) {
+					$this->retract($pistonTile, $sideToExtend);
+				} else {
+					if ($pistonTile->namedtag['HaveCharge'] && $this->isMayBeExtended()) {
+						$this->extend($pistonTile, $sideToExtend);
+					} else {
+						$pistonTile->namedtag['HaveCharge'] = 0;
+					}
+				}
 			}
 		}
-		$pistonTile = $this->level->getTile($this);
-		if ($pistonTile !== null) {
-			if ($isShouldBeExpanded && $pistonTile->namedtag['Progress'] < 1) {
-				$expandBlock = $this->getSide($sideToExtend);
-				$this->getLevel()->setBlock($expandBlock, Block::get(self::PISTON_HEAD), true, true);
-				$pistonTile->namedtag['Progress'] = 1;
-				$pistonTile->namedtag['State'] = 2;
-				$pistonTile->spawnToAll();
-			} else if (!$isShouldBeExpanded && $pistonTile->namedtag['Progress'] > 0) {
-				$expandBlock = $this->getSide($sideToExtend);
-				$this->getLevel()->setBlock($expandBlock, Block::get(self::AIR), true, true);
-				$pistonTile->namedtag['Progress'] = 0;
-				$pistonTile->namedtag['State'] = 0;
-				$pistonTile->spawnToAll();
+	}
+	
+	protected function extend($tile, $extendSide) {
+		$extendBlock = $this->getSide($extendSide);
+		$this->getLevel()->setBlock($extendBlock, Block::get(self::PISTON_HEAD), true, true);
+		$tile->namedtag['Progress'] = 1;
+		$tile->namedtag['State'] = 2;
+		$tile->namedtag['HaveCharge'] = 0;
+		$tile->spawnToAll();
+		if ($extendBlock->getId() !== self::AIR) {
+			$anotherBlock = $extendBlock->getSide($extendSide);
+			$this->getLevel()->setBlock($anotherBlock, $extendSide);
+		}
+	}
+	
+	protected function retract($tile, $extendSide) {
+		$extendBlock = $this->getSide($extendSide);
+		$this->getLevel()->setBlock($extendBlock, Block::get(self::AIR), true, true);
+		$tile->namedtag['Progress'] = 0;
+		$tile->namedtag['State'] = 0;
+		$tile->namedtag['HaveCharge'] = 0;
+		$tile->spawnToAll();
+	}
+
+	public function isMayBeExtended() {
+		$sideToExtend = $this->getExtendSide();
+		if ($sideToExtend == null) {
+			return false;
+		}
+		$firstBlock = $this->getSide($sideToExtend);
+		if ($firstBlock->getId() == self::AIR) {
+			return true;
+		} else if (self::$solid[$firstBlock->getId()]) {
+			$secondBlock = $firstBlock->getSide($sideToExtend);
+			if ($secondBlock->getId() == self::AIR) {
+				return true;
 			}
 		}
+		return false;
 	}
 	
 }
