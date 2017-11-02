@@ -1132,37 +1132,37 @@ abstract class Entity extends Location implements Metadatable{
 		return false;
 	}
 	
-//	protected function getBlocksAround(){
-//		$x = floor($this->x);
-//		$z = floor($this->z);	
-//		$blocksAround = [];
-//		$blocksAround[] = $this->level->getBlock(new Vector3($x, floor($this->y), $z));
-//		$blocksAround[] = $this->level->getBlock(new Vector3($x, floor($this->y + $this->eyeHeight), $z));
-//		return $blocksAround;
-//	}
-	
-	
-	protected function getBlocksAround() {
-		if($this->blocksAround === null){
-			$bb = $this->boundingBox->grow(0.01, 0.01, 0.01);
-			$minX = Math::floorFloat($bb->minX);
-			$minY = Math::floorFloat($bb->minY);
-			$minZ = Math::floorFloat($bb->minZ);
-			$maxX = Math::ceilFloat($bb->maxX);
-			$maxY = Math::ceilFloat($bb->maxY);
-			$maxZ = Math::ceilFloat($bb->maxZ);
-			$this->blocksAround = [];
-			for($z = $minZ; $z <= $maxZ; ++$z){
-				for($x = $minX; $x <= $maxX; ++$x){
-					for($y = $minY; $y <= $maxY; ++$y){
-						$block = $this->level->getBlock(new Vector3($x, $y, $z));
-						$this->blocksAround[] = $block;
-					}
-				}
-			}
-		}
-		return $this->blocksAround;
+	protected function getBlocksAround(){
+		$x = floor($this->x);
+		$z = floor($this->z);	
+		$blocksAround = [];
+		$blocksAround[] = $this->level->getBlock(new Vector3($x, floor($this->y), $z));
+		$blocksAround[] = $this->level->getBlock(new Vector3($x, floor($this->y + $this->eyeHeight), $z));
+		return $blocksAround;
 	}
+	
+	
+//	protected function getBlocksAround() {
+//		if($this->blocksAround === null){
+//			$bb = $this->boundingBox->grow(0.01, 0.01, 0.01);
+//			$minX = Math::floorFloat($bb->minX);
+//			$minY = Math::floorFloat($bb->minY);
+//			$minZ = Math::floorFloat($bb->minZ);
+//			$maxX = Math::ceilFloat($bb->maxX);
+//			$maxY = Math::ceilFloat($bb->maxY);
+//			$maxZ = Math::ceilFloat($bb->maxZ);
+//			$this->blocksAround = [];
+//			for($z = $minZ; $z <= $maxZ; ++$z){
+//				for($x = $minX; $x <= $maxX; ++$x){
+//					for($y = $minY; $y <= $maxY; ++$y){
+//						$block = $this->level->getBlock(new Vector3($x, $y, $z));
+//						$this->blocksAround[] = $block;
+//					}
+//				}
+//			}
+//		}
+//		return $this->blocksAround;
+//	}
 
 	
 	protected function checkBlockCollision(){
