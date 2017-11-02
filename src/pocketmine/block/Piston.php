@@ -154,9 +154,9 @@ class Piston extends Solid {
 		$tile->namedtag['Progress'] = 1;
 		$tile->namedtag['State'] = 2;
 		$tile->namedtag['HaveCharge'] = 0;
-//		var_dump("Piston remove charge 2 " . $this->x . " " . $this->z);
 		$extendBlock = $this->getSide($extendSide);
-		$this->getLevel()->setBlock($extendBlock, Block::get(self::PISTON_HEAD), true, false);
+		$this->getLevel()->setBlock($extendBlock, Block::get(self::PISTON_HEAD), true, true);
+//		var_dump("Piston remove charge 2 " . $this->x . " " . $this->z);
 		$tile->spawnToAll();
 		if ($extendBlock->getId() !== self::AIR) {
 			$anotherBlock = $extendBlock->getSide($extendSide);
@@ -170,7 +170,7 @@ class Piston extends Solid {
 		$tile->namedtag['State'] = 0;
 		$tile->namedtag['HaveCharge'] = 0;
 		$extendBlock = $this->getSide($extendSide);
-		$this->getLevel()->setBlock($extendBlock, Block::get(self::AIR), true, false);
+		$this->getLevel()->setBlock($extendBlock, Block::get(self::AIR), true, true);
 //		var_dump("Piston remove charge 3 " . $this->x . " " . $this->z);
 		$tile->spawnToAll();
 	}
