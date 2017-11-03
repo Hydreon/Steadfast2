@@ -26,7 +26,7 @@ class Minecart extends Vehicle {
 	protected $state = Minecart::STATE_INITIAL;
 	protected $direction = -1;
 	protected $moveVector = [];
-	protected $moveSpeed = 0;
+	protected $moveSpeed = 0.01;
 	protected $isUsing = false;
 	protected $linkedEntity = null;
 	protected $links = [];
