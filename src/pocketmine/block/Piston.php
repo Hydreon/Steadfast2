@@ -129,8 +129,9 @@ class Piston extends Solid {
 					if ($this->isMayBeExtended()) {
 						$this->extend($pistonTile, $sideToExtend);
 					} else {
-//						var_dump("Piston recive charge " . $this->x . " " . $this->z);
-						$pistonTile->namedtag['HaveCharge'] = 1;
+//						echo "X: " . $this->x . " Z: " . $this->z . " Piston recive charge" . PHP_EOL;
+//						$pistonTile->namedtag['HaveCharge'] = 1;
+						$this->level->scheduleUpdate($this, 1);
 					}
 				} else if (!$isShouldBeExpanded && $pistonTile->namedtag['Progress'] > 0) {
 //					var_dump($pistonTile->namedtag);
@@ -140,7 +141,7 @@ class Piston extends Solid {
 						$this->extend($pistonTile, $sideToExtend);
 					} else {
 //						var_dump("Piston remove charge 1 " . $this->x . " " . $this->z);
-						$pistonTile->namedtag['HaveCharge'] = 0;
+//						$pistonTile->namedtag['HaveCharge'] = 0;
 					}
 				}
 			}
@@ -153,7 +154,7 @@ class Piston extends Solid {
 //		echo "X: " . $this->x . " Z: " . $this->z . " Extend piston" . PHP_EOL;
 		$tile->namedtag['Progress'] = 1;
 		$tile->namedtag['State'] = 2;
-		$tile->namedtag['HaveCharge'] = 0;
+//		$tile->namedtag['HaveCharge'] = 0;
 		$extendBlock = $this->getSide($extendSide);
 		$this->getLevel()->setBlock($extendBlock, Block::get(self::PISTON_HEAD), true, true);
 //		var_dump("Piston remove charge 2 " . $this->x . " " . $this->z);
@@ -168,7 +169,7 @@ class Piston extends Solid {
 //		echo "X: " . $this->x . " Z: " . $this->z . " Retract piston" . PHP_EOL;
 		$tile->namedtag['Progress'] = 0;
 		$tile->namedtag['State'] = 0;
-		$tile->namedtag['HaveCharge'] = 0;
+//		$tile->namedtag['HaveCharge'] = 0;
 		$extendBlock = $this->getSide($extendSide);
 		$this->getLevel()->setBlock($extendBlock, Block::get(self::AIR), true, true);
 //		var_dump("Piston remove charge 3 " . $this->x . " " . $this->z);

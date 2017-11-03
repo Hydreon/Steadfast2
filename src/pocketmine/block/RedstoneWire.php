@@ -134,15 +134,11 @@ class RedstoneWire extends Transparent {
 		if ($targetDirection == self::DIRECTION_NONE && $this->meta != self::REDSTONE_POWER_MIN) { // lose charge
 //			echo "X: " . $this->x . " Z: " . $this->z . " Redstone wire (loose charge) Old: " . $this->meta . " New: " . self::REDSTONE_POWER_MIN . PHP_EOL;
 			$this->meta = self::REDSTONE_POWER_MIN;
-			$this->level->setBlock($this, $this, false, false);
-//			$this->level->updateAround($this);
-			$this->updateAround();
+			$this->level->setBlock($this, $this, true, true);
 		} else if ($this->meta < $targetPower) { // found new power source
 //			echo "X: " . $this->x . " Z: " . $this->z . " Redstone wire (set charge) Old: " . $this->meta . " New: " . $targetPower . PHP_EOL;
 			$this->meta = $targetPower;
-			$this->level->setBlock($this, $this, false, false);
-//			$this->level->updateAround($this);
-			$this->updateAround();
+			$this->level->setBlock($this, $this, true, true);
 		}
 	}
 	
@@ -176,39 +172,6 @@ class RedstoneWire extends Transparent {
 						$this->z + $offset[2]
 					));
 					break;
-			}
-		}
-	}
-	
-	protected function updateAround() {
-		static $offsets = [
-			self::DIRECTION_NORTH => [0, 0, -1],
-			self::DIRECTION_SOUTH => [0, 0, 1],
-			self::DIRECTION_EAST => [1, 0, 0],
-			self::DIRECTION_WEST => [-1, 0, 0],
-			self::DIRECTION_TOP => [0, 1, 0],
-			self::DIRECTION_BOTTOM => [0, -1, 0],
-		];
-		$pluginManager = Server::getInstance()->getPluginManager();
-		$tmpVector = new Vector3();
-		
-		foreach ($offsets as $direction => $offset) {
-			$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
-			if ($direction !== self::DIRECTION_NORTH && $direction !== self::DIRECTION_SOUTH && $blockId == Block::AIR) {
-				$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1] - 1, $this->z + $offset[2]);
-				if (in_array($blockId, self::REDSTONE_BLOCKS)) {
-					$block = $this->level->getBlock($tmpVector->setComponents($this->x + $offset[0], $this->y + $offset[1] - 1, $this->z + $offset[2]));
-					$pluginManager->callEvent($ev = new BlockUpdateEvent($block));
-					if (!$ev->isCancelled()) {
-						$ev->getBlock()->onUpdate(Level::BLOCK_UPDATE_NORMAL);
-					}
-				}
-			} else {
-				$block = $this->level->getBlock($tmpVector->setComponents($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]));
-				$pluginManager->callEvent($ev = new BlockUpdateEvent($block));
-				if (!$ev->isCancelled()) {
-					$ev->getBlock()->onUpdate(Level::BLOCK_UPDATE_NORMAL);
-				}
 			}
 		}
 	}
