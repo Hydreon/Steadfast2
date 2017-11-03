@@ -22,11 +22,11 @@ class Minecart extends Vehicle {
 
 	public $height = 0.7;
 	public $width = 0.98;
-	public $isMoving = false;
-	public $moveSpeed = 0;
-	private $state = Minecart::STATE_INITIAL;
-	private $direction = -1;
-	private $moveVector = [];
+	
+	protected $state = Minecart::STATE_INITIAL;
+	protected $direction = -1;
+	protected $moveVector = [];
+	protected $moveSpeed = 0;
 	protected $isUsing = false;
 	protected $linkedEntity = null;
 	protected $links = [];
@@ -84,7 +84,6 @@ class Minecart extends Vehicle {
 			}
 		}
 
-
 		return true;
 	}
 
@@ -128,11 +127,6 @@ class Minecart extends Vehicle {
 		if ($this->isUsing) {
 			return;
 		}
-		//TODO minecart
-//		if ($player->getInventory()->getItemInHand()->getId() !== 0) {
-//			$this->kill();
-//			return;
-//		}
 		$this->isUsing = true;
 		$this->linkedEntity = $player;
 		$player->setVehicle($this);
@@ -153,10 +147,6 @@ class Minecart extends Vehicle {
 			$p->dataPacket($pk);
 		}
 
-		$pk = new SetEntityLinkPacket();
-		$pk->to = $player->getId();
-		$pk->from = $this->getId();
-		$pk->type = SetEntityLinkPacket::TYPE_RIDE;
 		$player->dataPacket($pk);
 		$player->setDataProperty(self::DATA_SEAT_RIDER_OFFSET, self::DATA_TYPE_VECTOR3, $this->riderOffset);
 		$player->sendSelfData();
@@ -170,6 +160,7 @@ class Minecart extends Vehicle {
 		$this->isUsing = false;
 		$this->links = [];
 		$this->direction = -1;
+		$this->moveSpeed = 0;
 
 		$pk = new SetEntityLinkPacket();
 		$pk->to = $this->linkedEntity->getId();

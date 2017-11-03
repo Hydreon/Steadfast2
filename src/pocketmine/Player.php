@@ -2034,7 +2034,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case 'INTERACT_PACKET':
 				if ($packet->action === InteractPacket::ACTION_DAMAGE) {
 					$this->attackByTargetId($packet->target);
-				} else {					
+				} else {		
 					if ($packet->action === 3) {
 						$target = $this->getLevel()->getEntity($packet->target);
 						if ($target instanceof Minecart) {
@@ -4901,4 +4901,24 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setVehicle($vehicle) {
 		$this->currentVehicle = $vehicle;
 	}
+	
+	protected function getBlocksAround() {
+		if ($this->blocksAround === null) {
+			$minX = floor($this->x - 0.3);
+			$minZ = floor($this->z - 0.3);
+			$maxX = floor($this->x + 0.3);
+			$maxZ = floor($this->z + 0.3);
+			$this->blocksAround = [];
+			$this->blocksAround[] = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y), floor($this->z)));
+			$y = floor($this->y + 1);
+			for ($z = $minZ; $z <= $maxZ; $z++) {
+				for ($x = $minX; $x <= $maxX; $x++) {
+					$block = $this->level->getBlock(new Vector3($x, $y, $z));
+					$this->blocksAround[] = $block;
+				}
+			}
+		}
+		return $this->blocksAround;
+	}
+
 }
