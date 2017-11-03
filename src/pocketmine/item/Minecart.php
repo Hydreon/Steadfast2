@@ -54,5 +54,9 @@ class Minecart extends Item {
 
 		return true;
 	}
+	
+	public function getMaxStackSize() {
+		return 1;
+	}
 
 }

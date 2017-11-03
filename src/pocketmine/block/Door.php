@@ -173,12 +173,12 @@ abstract class Door extends Transparent {
 
 	public function onBreak(Item $item) {
 		if (($this->getDamage() & 0x08) === 0x08) {
-			$down = $this->getSide(0);
+			$down = $this->getSide(self::SIDE_DOWN);
 			if ($down->getId() === $this->getId()) {
 				$this->getLevel()->setBlock($down, new Air(), true);
 			}
 		} else {
-			$up = $this->getSide(1);
+			$up = $this->getSide(self::SIDE_UP);
 			if ($up->getId() === $this->getId()) {
 				$this->getLevel()->setBlock($up, new Air(), true);
 			}
@@ -231,7 +231,9 @@ abstract class Door extends Transparent {
 		}
 		if ($isShouldCheckAnotherPart) {
 			$anotherPart = $this->getSide($isTopPart ? Vector3::SIDE_DOWN : Vector3::SIDE_UP);
-			return $anotherPart->isConnectedWithChargedBlock(false);
+			if ($anotherPart instanceof Door) {
+				return $anotherPart->isConnectedWithChargedBlock(false);
+			}
 		}
 		return false;
 	}
