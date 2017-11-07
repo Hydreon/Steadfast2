@@ -53,6 +53,13 @@ class BaseTransaction implements Transaction {
 		$this->targetItem = clone $targetItem;
 		$this->creationTime = microtime(true);
 	}
+	
+	public function __toString() {
+		return get_class($this->inventory) . PHP_EOL .
+				'Slot: ' . $this->slot . PHP_EOL .
+				'Old item: ' . $this->sourceItem . PHP_EOL .
+				'New item: ' . $this->targetItem . PHP_EOL;
+	}
 
 	public function getCreationTime() {
 		return $this->creationTime;
