@@ -121,14 +121,14 @@ class Trapdoor extends Transparent{
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		if(($target->isTransparent() === false or $target->getId() === self::SLAB) and $face !== 0 and $face !== 1){
 			$faces = [
-				2 => 0,
-				3 => 1,
-				4 => 2,
-				5 => 3,
+				2 => 3,
+				3 => 2,
+				4 => 1,
+				5 => 0,
 			];
-			$this->meta = $faces[$face] & 0x03;
-			if($fy > 0.5){
-				$this->meta |= 0x08;
+			$this->meta = $faces[$face];
+			if ($fy > 0.5) {
+				$this->meta |= 0x04;
 			}
 			$this->getLevel()->setBlock($block, $this, true, true);
 
@@ -145,7 +145,7 @@ class Trapdoor extends Transparent{
 	}
 
 	public function onActivate(Item $item, Player $player = null){
-		$this->meta ^= 0x04;
+		$this->meta ^= 0x08;
 		$this->getLevel()->setBlock($this, $this, true);
 		$this->level->addSound(new DoorSound($this));
 		return true;
