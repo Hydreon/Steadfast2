@@ -600,6 +600,8 @@ class Block extends Position implements Metadatable{
 			self::$list[self::PISTON] = Piston::class;
 			self::$list[self::PISTON_HEAD] = PistonHead::class;
 			
+			self::$list[self::DROPPER] = Dropper::class;
+			
 			foreach(self::$list as $id => $class){
 				if($class !== null){
 					/** @var Block $block */
