@@ -1390,7 +1390,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->elytraIsActivated = false;
 					}
 				}else{
-					if(!$this->isUseElytra() && !$this->allowFlight && !$this->isSleeping()){
+					if(!$this->isUseElytra() && !$this->allowFlight && !$this->isSleeping() && !$this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE)){
 						$expectedVelocity = (-$this->gravity) / $this->drag - ((-$this->gravity) / $this->drag) * exp(-$this->drag * ($this->inAirTicks - $this->startAirTicks));
 						$diff = ($this->speed->y - $expectedVelocity) ** 2;
 
