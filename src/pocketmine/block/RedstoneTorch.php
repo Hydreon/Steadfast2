@@ -23,7 +23,7 @@ class RedstoneTorch extends RedstoneTorchActive {
 
 	public function getDrops(Item $item) {
 		return [
-			[self::REDSTONE_TORCH_ACTIVE, 0, 1],
+			[self::REDSTONE_TORCH, 0, 1],
 		];
 	}
 	

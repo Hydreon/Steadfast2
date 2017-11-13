@@ -31,11 +31,10 @@ class Dropper extends Solid {
 				$this->meta = 4;
 			}
 		}
-		var_dump($this->meta);
 		return parent::place($item, $block, $target, $face, $fx, $fy, $fz, $player);
 	}
 	
 	public function onUpdate($type) {
-		
+		// undone
 	}
 }

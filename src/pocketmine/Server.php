@@ -96,6 +96,7 @@ use pocketmine\scheduler\ServerScheduler;
 use pocketmine\tile\Bed;
 use pocketmine\tile\Cauldron;
 use pocketmine\tile\Chest;
+use pocketmine\tile\Dispenser;
 use pocketmine\tile\EnchantTable;
 use pocketmine\tile\EnderChest;
 use pocketmine\tile\Furnace;
@@ -2539,6 +2540,7 @@ class Server{
 		Tile::registerTile(Bed::class);
 		Tile::registerTile(Cauldron::class);
 		Tile::registerTile(PistonArm::class);
+		Tile::registerTile(Dispenser::class);
 	}
 
 	public function shufflePlayers(){
