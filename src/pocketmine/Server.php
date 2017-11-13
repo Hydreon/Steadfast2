@@ -2339,8 +2339,7 @@ class Server{
 	}
 
 	public function doAutoSave(){
-		if($this->getAutoSave()){
-			//Timings::$worldSaveTimer->startTiming();
+		if($this->getSavePlayerData()){
 			foreach($this->getOnlinePlayers() as $index => $player){
 				if($player->isOnline()){
 					$player->save();
@@ -2348,11 +2347,11 @@ class Server{
 					$this->removePlayer($player);
 				}
 			}
-
+		}
+		if($this->getAutoSave()){
 			foreach($this->getLevels() as $level){
 				$level->save(false);
 			}
-			//Timings::$worldSaveTimer->stopTiming();
 		}
 	}
 
