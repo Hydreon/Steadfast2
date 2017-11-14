@@ -992,7 +992,7 @@ class Block extends Position implements Metadatable{
 	 * @return string
 	 */
 	public function __toString(){
-		return "Block[" . $this->getName() . "] (" . $this->getId() . ":" . $this->getDamage() . ")";
+		return "Block[" . $this->getName() . "] (" . $this->getId() . ":" . $this->getDamage() . ") [ x: " . $this->x . ", y: " . $this->y . ", z: " . $this->z . " ]";
 	}
 
 	/**

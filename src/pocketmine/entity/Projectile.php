@@ -87,11 +87,11 @@ abstract class Projectile extends Entity{
 					continue;
 				}
 				$axisalignedbb = $entity->boundingBox->grow(0.3, 0.3, 0.3);
-				$ob = $axisalignedbb->calculateIntercept($this, $moveVector);
-				if($ob === null){
+				$itersectionPoint = new Vector3();
+				if(!$axisalignedbb->getIntersectionWithLine($this, $moveVector, $itersectionPoint)){
 					continue;
 				}
-				$distance = $this->distanceSquared($ob->hitVector);
+				$distance = $this->distanceSquared($itersectionPoint);
 				if($distance < $nearDistance){
 					$nearDistance = $distance;
 					$nearEntity = $entity;
@@ -127,7 +127,8 @@ abstract class Projectile extends Entity{
 				}
 			}
 			
-			$blockList = $this->getLevel()->getCollisionBlocks($this->boundingBox->addCoord($this->motionX, $this->motionY, $this->motionZ)->expand(1, 1, 1), $this);
+//			$blockList = $this->getLevel()->getCollisionBlocks($this->boundingBox->addCoord($this->motionX, $this->motionY, $this->motionZ)->expand(1, 1, 1), $this);
+			$blockList = $this->getLevel()->getCollisionBlocks($this->boundingBox->addCoord($this->motionX, $this->motionY, $this->motionZ), $this);
 			$nearBlockDistance = PHP_INT_MAX;
 			$nearBlock = null;
 			foreach ($blockList as $block) {

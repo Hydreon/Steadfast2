@@ -22,6 +22,7 @@
 namespace pocketmine\math;
 
 use pocketmine\level\MovingObjectPosition;
+use pocketmine\math\Vector3;
 
 class AxisAlignedBB{
 
@@ -222,6 +223,124 @@ class AxisAlignedBB{
 
 	public function isVectorInXY(Vector3 $vector){
 		return $vector->x >= $this->minX and $vector->x <= $this->maxX and $vector->y >= $this->minY and $vector->y <= $this->maxY;
+	}
+	
+	public function getDistanceToLineStart(Vector3 $lineStart, Vector3 $lineStop) {
+		$tMin = ($this->minX - $lineStart->x) / $lineStop->x;
+		$tMax = ($this->maxX - $lineStart->x) / $lineStop->x;
+
+		if ($tMin > $tMax) {
+			$tmp = $tMin;
+			$tMin = $tMax;
+			$tMax = $tmp;
+		}
+
+		$tYMin = ($this->minY - $lineStart->y) / $lineStop->y;
+		$tYMax = ($this->minY - $lineStart->y) / $lineStop->y;
+
+		if ($tYMin > $tYMax) {
+			$tmp = $tYMin;
+			$tYMin = $tYMax;
+			$tYMax = $tmp;
+		}
+
+		if (($tMin > $tYMax) || ($tYMin > $tMax)) {
+			return false;
+		}
+
+		if ($tYMin > $tMin) {
+			$tMin = $tYmin;
+		}
+
+		if ($tYMax < $tMax) {
+			$tMax = $tYMax;
+		}
+
+		$tZMin = ($this->minZ - $lineStart->z) / $lineStop->z;
+		$tZMax = ($this->maxZ - $lineStart->z) / $lineStop->z;
+
+		if ($tZMin > $tZMax) {
+			$tmp = $tZMin;
+			$tZMin = $tZMax;
+			$tZMax = $tmp;
+		}
+
+		if (($tMin > $tZMax) || ($tZMin > $tMax)) {
+			return false;
+		}
+
+		if ($tZMin > $tMin) {
+			$tMin = $tZMin;
+		}
+
+		if ($tZMax < $tMax) {
+			$tMax = $tZMax;
+		}
+		
+		var_dump($tMin, $tMax);
+
+		return true; 
+	}
+	
+	/**
+	 * I don't know yet how it exactly works
+	 * 
+	 * @param float $dst1
+	 * @param float $dst2
+	 * @param Vector3 $a
+	 * @param Vector3 $b
+	 * @param Vector3 $result
+	 * @return boolean
+	 */
+	protected function getIntersection($dst1, $dst2, Vector3 $a, Vector3 $b, Vector3 &$result) {
+		if ($dst1 * $dst2 >= 0.0 || $dst1 == $dst2) return false;
+		$result->x = $a->x + ($b->x - $a->x) * ($dst1 / ($dst1 - $dst2));
+		$result->y = $a->y + ($b->y - $a->y) * ($dst1 / ($dst1 - $dst2));
+		$result->z = $a->z + ($b->z - $a->z) * ($dst1 / ($dst1 - $dst2));
+		return true;
+	}
+
+	/**
+	 * I don't know yet how it exactly works
+	 * 
+	 * @param Vector3 $result
+	 * @param type $axis
+	 * @return boolean
+	 */
+	protected function inBox(Vector3 &$result, $axis) {
+		if ($axis == 1 && $result->z > $this->minZ && $result->z < $this->maxZ && $result->y > $this->minY && $result->y < $this->maxY) return true;
+		if ($axis == 2 && $result->z > $this->minZ && $result->z < $this->maxZ && $result->x > $this->minX && $result->x < $this->maxX) return true;
+		if ($axis == 3 && $result->x > $this->minX && $result->x < $this->maxX && $result->y > $this->minY && $result->y < $this->maxY) return true;
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param Vector3 $a line start
+	 * @param Vector3 $b line stop
+	 * @param Vector3 $result intersection point
+	 * @return boolean
+	 */
+	public function getIntersectionWithLine(Vector3 $a, Vector3 $b, Vector3 &$result) {
+		if ($a->x > $this->minX && $a->x < $this->maxX &&
+			$a->y > $this->minY && $a->y < $this->maxY &&
+			$a->z > $this->minZ && $a->z < $this->maxZ) {
+			
+			$result = $a;
+			return true;
+		}
+		
+		if ( ($this->getIntersection($a->x - $this->minX, $b->x - $this->minX, $a, $b, $result) && $this->inBox($result, 1))
+		  || ($this->getIntersection($a->y - $this->minY, $b->y - $this->minY, $a, $b, $result) && $this->inBox($result, 2)) 
+		  || ($this->getIntersection($a->z - $this->minZ, $b->z - $this->minZ, $a, $b, $result) && $this->inBox($result, 3)) 
+		  || ($this->getIntersection($a->x - $this->maxX, $b->x - $this->maxX, $a, $b, $result) && $this->inBox($result, 1))
+		  || ($this->getIntersection($a->y - $this->maxY, $b->y - $this->maxY, $a, $b, $result) && $this->inBox($result, 2)) 
+		  || ($this->getIntersection($a->z - $this->maxZ, $b->z - $this->maxZ, $a, $b, $result) && $this->inBox($result, 3))) {
+		  
+			return true;
+		}
+
+		return false;
 	}
 
 	public function calculateIntercept(Vector3 $pos1, Vector3 $pos2){

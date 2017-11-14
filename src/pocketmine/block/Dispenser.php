@@ -4,11 +4,14 @@ namespace pocketmine\block;
 
 use pocketmine\block\Block;
 use pocketmine\block\Solid;
+use pocketmine\entity\Entity;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\Enum;
+use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
@@ -16,7 +19,7 @@ use pocketmine\tile\Dispenser as DispenserTile;
 use pocketmine\tile\Tile;
 
 class Dispenser extends Solid {
-		
+	
 	public function __construct($meta = 0){
 		$this->id = self::DISPENSER;
 		$this->meta = $meta;
@@ -123,7 +126,7 @@ class Dispenser extends Solid {
 	private function activate() {
 		$this->meta |= 0x08;
 		$this->level->setBlock($this, $this, false, false);
-		/** @todo add item shooting */
+		$this->shoot();
 	}
 	
 	private function deactivate() {
@@ -150,5 +153,67 @@ class Dispenser extends Solid {
 		}
 		$player->addWindow($tile->getInventory());
 		return true;
+	}
+	
+	public function getFace() {
+		return $this->meta & 0x07;
+	}
+	
+	protected function shoot() {
+		$tile = $this->level->getTile($this);
+		if ($tile instanceof DispenserTile) {
+			$item = $tile->getInventory()->getFirstItem();
+			if ($item != null) {
+				$x = $this->x;
+				$y = $this->y;
+				$z = $this->z;
+				$yawRad = 0;
+				$pitchRad = 0;
+				$face = $this->getFace();
+				if ($face == self::FACE_DOWN) {
+					$pitchRad = 0.5 * M_PI;
+				} else if ($face == self::FACE_UP) {
+					$pitchRad = -0.5 * M_PI;
+				} else {
+					$y += 0.5;
+					if ($face == self::FACE_SOUTH) {
+						$x += 0.5;
+						$z += 2;
+					} else if ($face == self::FACE_NORTH) {
+						$yawRad = M_PI;
+						$x += 0.5;
+						$z -= 1;
+					} else if ($face == self::FACE_WEST) {
+						$yawRad = 0.5 * M_PI;
+						$x -= 1;
+						$z += 0.5;
+					} else if ($face == self::FACE_EAST) {
+						$yawRad = 1.5 * M_PI;
+						$x += 2;
+						$z += 0.5;
+					}
+					$angleOffset = M_PI / 18; // 10 degree
+					$pitchRad = -$angleOffset * 3;
+					$yawRad += mt_rand(-$angleOffset, $angleOffset);
+				}
+
+				$nbt = new Compound("", [
+					"Pos" => new Enum("Pos", [ new DoubleTag("", $x), new DoubleTag("", $y), new DoubleTag("", $z) ]),
+					"Motion" => new Enum("Motion", [
+						new DoubleTag("", -sin($yawRad) * cos($pitchRad)),
+						new DoubleTag("", -sin($pitchRad)),
+						new DoubleTag("", cos($yawRad) * cos($pitchRad))
+					]),
+					"Rotation" => new Enum("Rotation", [
+						new FloatTag("", $yawRad * 180 / M_PI),
+						new FloatTag("", $pitchRad * 180 / M_PI)
+					]),
+				]);
+
+				$entityType = $item->getId() == Item::ARROW ? "Arrow" : "Item";
+				$projectile = Entity::createEntity($entityType, $this->level->getChunk($this->x >> 4, $this->z >> 4), $nbt);
+				$projectile->spawnToAll();
+			}
+		}
 	}
 }
