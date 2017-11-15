@@ -53,9 +53,14 @@ class DispenserInventory extends ContainerInventory {
 		parent::onClose($who);
 	}
 	
-	public function getFirstItem() {
+	/**
+	 * 
+	 * @return Item | null
+	 */
+	public function getFirstItem(&$itemIndex) {
 		foreach($this->getContents() as $index => $item){
 			if ($item->getId() != Item::AIR && $item->getCount() >= 0) {
+				$itemIndex = $index;
 				return $item;
 			}
 		}

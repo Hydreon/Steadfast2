@@ -13,6 +13,7 @@ use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
 use pocketmine\tile\Dispenser as DispenserTile;
@@ -162,58 +163,86 @@ class Dispenser extends Solid {
 	protected function shoot() {
 		$tile = $this->level->getTile($this);
 		if ($tile instanceof DispenserTile) {
-			$item = $tile->getInventory()->getFirstItem();
+			$dispenserInventory = $tile->getInventory();
+			$item = $dispenserInventory->getFirstItem($index);
 			if ($item != null) {
-				$x = $this->x;
-				$y = $this->y;
-				$z = $this->z;
-				$yawRad = 0;
-				$pitchRad = 0;
-				$face = $this->getFace();
-				if ($face == self::FACE_DOWN) {
-					$pitchRad = 0.5 * M_PI;
-				} else if ($face == self::FACE_UP) {
-					$pitchRad = -0.5 * M_PI;
+				// decreasing item logic
+				if ($item->count == 1) { // we shoot last item in slot
+					$dispenserInventory->clear($index);
 				} else {
-					$y += 0.5;
-					if ($face == self::FACE_SOUTH) {
-						$x += 0.5;
-						$z += 2;
-					} else if ($face == self::FACE_NORTH) {
-						$yawRad = M_PI;
-						$x += 0.5;
-						$z -= 1;
-					} else if ($face == self::FACE_WEST) {
-						$yawRad = 0.5 * M_PI;
-						$x -= 1;
-						$z += 0.5;
-					} else if ($face == self::FACE_EAST) {
-						$yawRad = 1.5 * M_PI;
-						$x += 2;
-						$z += 0.5;
-					}
-					$angleOffset = M_PI / 18; // 10 degree
-					$pitchRad = -$angleOffset * 3;
-					$yawRad += mt_rand(-$angleOffset, $angleOffset);
+					$item->count--;
+					$dispenserInventory->setItem($index, $item);
 				}
+				// drop item or shoot arrow logic
+				$params = $this->calculateShootingParams();
 
 				$nbt = new Compound("", [
-					"Pos" => new Enum("Pos", [ new DoubleTag("", $x), new DoubleTag("", $y), new DoubleTag("", $z) ]),
-					"Motion" => new Enum("Motion", [
-						new DoubleTag("", -sin($yawRad) * cos($pitchRad)),
-						new DoubleTag("", -sin($pitchRad)),
-						new DoubleTag("", cos($yawRad) * cos($pitchRad))
-					]),
+					"Pos" => new Enum("Pos", [ new DoubleTag("", $params['x']), new DoubleTag("", $params['y']), new DoubleTag("", $params['z']) ]),
 					"Rotation" => new Enum("Rotation", [
-						new FloatTag("", $yawRad * 180 / M_PI),
-						new FloatTag("", $pitchRad * 180 / M_PI)
+						new FloatTag("", $params['yawRad'] * 180 / M_PI),
+						new FloatTag("", $params['pitchRad'] * 180 / M_PI)
 					]),
 				]);
-
-				$entityType = $item->getId() == Item::ARROW ? "Arrow" : "Item";
+				
+				if ($item->getId() == Item::ARROW) {
+					$entityType = "Arrow";
+					$nbt->Motion = new Enum("Motion", [
+						new DoubleTag("", -sin($params['yawRad']) * cos($params['pitchRad'])),
+						new DoubleTag("", -sin($params['pitchRad'])),
+						new DoubleTag("", cos($params['yawRad']) * cos($params['pitchRad']))
+					]);
+				} else {
+					$entityType = "Item";
+					$nbt->Motion = new Enum("Motion", [
+						new DoubleTag("", -sin($params['yawRad']) * cos($params['pitchRad']) / 10),
+						new DoubleTag("", 0),
+						new DoubleTag("", cos($params['yawRad']) * cos($params['pitchRad']) / 10)
+					]);
+					$nbt->Health = new ShortTag("Health", 5);
+					$nbt->Item = NBT::putItemHelper(Item::get($item->getId(), $item->getDamage()));
+					$nbt->PickupDelay = new ShortTag("PickupDelay", 20);
+				}
 				$projectile = Entity::createEntity($entityType, $this->level->getChunk($this->x >> 4, $this->z >> 4), $nbt);
 				$projectile->spawnToAll();
 			}
 		}
+	}
+	
+	protected function calculateShootingParams() {
+		$data = [
+			'x' => $this->x,
+			'y' => $this->y,
+			'z' => $this->z,
+			'yawRad' => 0,
+			'pitchRad' => 0,
+		];
+		$face = $this->getFace();
+		if ($face == self::FACE_DOWN) {
+			$data['pitchRad'] = 0.5 * M_PI;
+		} else if ($face == self::FACE_UP) {
+			$data['pitchRad'] = -0.5 * M_PI;
+		} else {
+			$data['y'] += 0.5;
+			if ($face == self::FACE_SOUTH) {
+				$data['x'] += 0.5;
+				$data['z'] += 2;
+			} else if ($face == self::FACE_NORTH) {
+				$data['yawRad'] = M_PI;
+				$data['x'] += 0.5;
+				$data['x'] -= 1;
+			} else if ($face == self::FACE_WEST) {
+				$data['yawRad'] = 0.5 * M_PI;
+				$data['x'] -= 1;
+				$data['x'] += 0.5;
+			} else if ($face == self::FACE_EAST) {
+				$data['yawRad'] = 1.5 * M_PI;
+				$data['x'] += 2;
+				$data['x'] += 0.5;
+			}
+			$angleOffset = M_PI / 18; // 10 degree
+			$data['pitchRad'] = -$angleOffset * 3;
+			$data['yawRad'] += mt_rand(-$angleOffset, $angleOffset);
+		}
+		return $data;
 	}
 }
