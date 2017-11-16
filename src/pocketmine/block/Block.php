@@ -54,20 +54,6 @@ class Block extends Position implements Metadatable{
 	const DIRECTION_EAST = 5;
 	const DIRECTION_SELF = 6;
 	
-	const REDSTONE_BLOCKS = [
-		self::REDSTONE_WIRE,
-		self::REDSTONE_TORCH,
-		self::REDSTONE_TORCH_ACTIVE,
-		self::WOODEN_BUTTON,
-		self::STONE_BUTTON,
-		/** @todo comparator */
-		/** @todo repeater */
-		/** @todo lever */
-		/** @todo pressure plate */
-		/** @todo observer ??? */
-		/** @todo tripwire hook */
-		/** @todo daylight sensor */
-	];
 	/** REDSTONE CONSTS END **/
 	
 	const FACE_DOWN = 0;
@@ -609,7 +595,7 @@ class Block extends Position implements Metadatable{
 					/** @var Block $block */
 					$block = new $class();
 
-					for($data = 0; $data < 16; ++$data){
+					for($data = 0; $data < 16; $data++){
 						self::$fullList[($id << 4) | $data] = new $class($data);
 					}
 
@@ -1228,6 +1214,11 @@ class Block extends Position implements Metadatable{
 				return $this->meta > 0;
 			case self::REDSTONE_TORCH_ACTIVE:
 				return true;
+			case self::WOODEN_PRESSURE_PLATE:
+			case self::STONE_PRESSURE_PLATE:
+			case self::WEIGHTED_PRESSURE_PLATE_LIGHT:
+			case self::WEIGHTED_PRESSURE_PLATE_HEAVY:
+				return $this->isActive();
 			default:
 				return self::$solid[$this->id] && $this->getPoweredState() != Solid::POWERED_NONE;
 		}

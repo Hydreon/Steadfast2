@@ -68,6 +68,7 @@ class RedstoneWire extends Transparent {
 					}
 					break;
 				case Block::REDSTONE_TORCH_ACTIVE:
+				case Block::REDSTONE_BLOCK:
 					$targetPower = self::REDSTONE_POWER_MAX;
 					$targetDirection = $neighborDirection;
 					break 2;

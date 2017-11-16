@@ -42,7 +42,6 @@ class Piston extends Solid {
 				$this->meta = 4;
 				break;
 		}
-		$this->meta += 128;
 		$isWasPlaced = $this->getLevel()->setBlock($this, $this, true, true);
 		if ($isWasPlaced) {
 			$nbt = new Compound("", [
@@ -145,6 +144,8 @@ class Piston extends Solid {
 					}
 				}
 			}
+		} else {
+			echo "Class: " . get_class($this) . " X: " . $this->x . " Z: " . $this->z . " Meta: " . $this->meta . PHP_EOL;
 		}
 //		$pistonTile = $this->level->getTile($this);
 //		echo "X: " . $this->x . " Z: " . $this->z . " Charge: " . ($pistonTile->namedtag['HaveCharge'] ? "true" : "false") . PHP_EOL;
@@ -161,7 +162,7 @@ class Piston extends Solid {
 		$tile->spawnToAll();
 		if ($extendBlock->getId() !== self::AIR) {
 			$anotherBlock = $extendBlock->getSide($extendSide);
-			$this->getLevel()->setBlock($anotherBlock, $extendBlock);
+			$this->getLevel()->setBlock($anotherBlock, $extendBlock, true, true);
 		}
 	}
 	

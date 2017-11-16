@@ -105,7 +105,7 @@ class Dispenser extends Solid {
 					default:
 						if ($isSolidBlock) {
 							$solidBlock = $this->level->getBlock($tmpVector);
-							$isNeedSetBlock = $solidBlock->getPoweredState() != Solid::POWERED_NONE;
+							$isShouldBeActivated = $solidBlock->getPoweredState() != Solid::POWERED_NONE;
 						}
 						break;
 				}

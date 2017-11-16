@@ -2,14 +2,12 @@
 
 namespace pocketmine\block;
 
-use pocketmine\math\Vector3;
-
 class StickyPiston extends Piston {
 	
 	protected $id = self::STICKY_PISTON;
 	
 	public function __construct($meta = 0) {
-		parent::__construct($this->id, $meta);
+		parent::__construct($meta);
 	}
 	
 	protected function retract($tile, $extendSide) {
@@ -19,7 +17,7 @@ class StickyPiston extends Piston {
 //		$tile->namedtag['HaveCharge'] = 0;
 		$extendBlock = $this->getSide($extendSide);
 		$movingBlock = $extendBlock->getSide($extendSide);
-		echo $extendBlock . PHP_EOL;
+//		echo $extendBlock . PHP_EOL;
 		if ($movingBlock instanceof Solid) {
 			$this->getLevel()->setBlock($movingBlock, Block::get(self::AIR), true, true);
 			$this->getLevel()->setBlock($extendBlock, $movingBlock, true, true);
