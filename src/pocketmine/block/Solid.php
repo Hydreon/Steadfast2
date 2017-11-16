@@ -99,6 +99,8 @@ abstract class Solid extends Block{
 					break;
 				case self::WOODEN_PRESSURE_PLATE:
 				case self::STONE_PRESSURE_PLATE:
+				case self::WEIGHTED_PRESSURE_PLATE_LIGHT:
+				case self::WEIGHTED_PRESSURE_PLATE_HEAVY:
 					if ($side == Vector3::SIDE_UP) {
 						$pressurePlate = $this->level->getBlock(new Vector3($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]));
 						if ($pressurePlate->isActive()) {

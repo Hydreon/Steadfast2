@@ -76,6 +76,8 @@ class RedstoneWire extends Transparent {
 				case Block::STONE_BUTTON:
 				case Block::WOODEN_PRESSURE_PLATE:
 				case Block::STONE_PRESSURE_PLATE:
+				case Block::WEIGHTED_PRESSURE_PLATE_LIGHT:
+				case Block::WEIGHTED_PRESSURE_PLATE_HEAVY:
 					if ($neighbor->isActive()) {
 						$targetPower = self::REDSTONE_POWER_MAX;
 						$targetDirection = $neighborDirection;
@@ -157,7 +159,9 @@ class RedstoneWire extends Transparent {
 				case self::DIRECTION_BOTTOM:
 					$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
 					// why i put this code here? it's impossible
-					if ($blockId == Block::WOODEN_BUTTON || $blockId == Block::STONE_BUTTON || Block::$solid[$blockId]) {
+					if ($blockId == Block::WOODEN_BUTTON || $blockId == Block::STONE_BUTTON || Block::$solid[$blockId] || 
+						$blockId == Block::REDSTONE_TORCH_ACTIVE || $blockId == Block::REDSTONE_TORCH) {
+						
 						$this->neighbors[$direction] = $this->level->getBlock(new Vector3(
 							$this->x + $offset[0], 
 							$this->y + $offset[1], 

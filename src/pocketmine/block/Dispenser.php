@@ -92,6 +92,8 @@ class Dispenser extends Solid {
 					case self::LEVER:
 					case self::WOODEN_PRESSURE_PLATE:
 					case self::STONE_PRESSURE_PLATE:
+					case self::WEIGHTED_PRESSURE_PLATE_LIGHT:
+					case self::WEIGHTED_PRESSURE_PLATE_HEAVY:
 						$backBlock = $this->level->getBlock($tmpVector);
 						$isShouldBeActivated = $backBlock->isActive();
 						break;
@@ -239,9 +241,9 @@ class Dispenser extends Solid {
 				$data['x'] += 2;
 				$data['x'] += 0.5;
 			}
-			$angleOffset = M_PI / 18; // 10 degree
-			$data['pitchRad'] = -$angleOffset * 3;
-			$data['yawRad'] += mt_rand(-$angleOffset, $angleOffset);
+//			$angleOffset = M_PI / 18; // 10 degree
+//			$data['pitchRad'] = -$angleOffset * 3;
+//			$data['yawRad'] += mt_rand(-$angleOffset, $angleOffset);
 		}
 		return $data;
 	}

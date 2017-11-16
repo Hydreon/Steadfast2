@@ -123,6 +123,8 @@ class RedstoneRepeater extends Transparent {
 				case self::LEVER:
 				case self::WOODEN_PRESSURE_PLATE:
 				case self::STONE_PRESSURE_PLATE:
+				case self::WEIGHTED_PRESSURE_PLATE_LIGHT:
+				case self::WEIGHTED_PRESSURE_PLATE_HEAVY:
 					$backBlock = $this->level->getBlock($backPosition);
 					$isNeedSetBlock = $backBlock->isActive();
 					break;
