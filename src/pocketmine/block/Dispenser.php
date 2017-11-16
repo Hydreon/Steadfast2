@@ -5,6 +5,7 @@ namespace pocketmine\block;
 use pocketmine\block\Block;
 use pocketmine\block\Solid;
 use pocketmine\entity\Entity;
+use pocketmine\item\Bucket;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\NBT;
@@ -168,46 +169,81 @@ class Dispenser extends Solid {
 			$dispenserInventory = $tile->getInventory();
 			$item = $dispenserInventory->getFirstItem($index);
 			if ($item != null) {
-				// decreasing item logic
-				if ($item->count == 1) { // we shoot last item in slot
-					$dispenserInventory->clear($index);
+				$itemId = $item->getId();
+				$itemMeta = $item->getDamage();
+				if ($itemId == Item::BUCKET && ($itemMeta == Bucket::BUCKET_WATER || $itemMeta == Bucket::BUCKET_LAVA)) {
+					$dispenserInventory->setItem($index, Item::get(Item::BUCKET));
+					$params = $this->calculateShootingParams();
+					$position = $this->getPositionOfFaceNextBlock();
+					$this->level->setBlock($position, Block::get($itemMeta == Bucket::BUCKET_WATER ? Block::WATER : Block::LAVA));
 				} else {
-					$item->count--;
-					$dispenserInventory->setItem($index, $item);
-				}
-				// drop item or shoot arrow logic
-				$params = $this->calculateShootingParams();
+					// decreasing item logic
+					if ($item->count == 1) { // we shoot last item in slot
+						$dispenserInventory->clear($index);
+					} else {
+						$item->count--;
+						$dispenserInventory->setItem($index, $item);
+					}
+					// drop item or shoot arrow logic
+					$params = $this->calculateShootingParams();
 
-				$nbt = new Compound("", [
-					"Pos" => new Enum("Pos", [ new DoubleTag("", $params['x']), new DoubleTag("", $params['y']), new DoubleTag("", $params['z']) ]),
-					"Rotation" => new Enum("Rotation", [
-						new FloatTag("", $params['yawRad'] * 180 / M_PI),
-						new FloatTag("", $params['pitchRad'] * 180 / M_PI)
-					]),
-				]);
-				
-				if ($item->getId() == Item::ARROW) {
-					$entityType = "Arrow";
-					$nbt->Motion = new Enum("Motion", [
-						new DoubleTag("", -sin($params['yawRad']) * cos($params['pitchRad'])),
-						new DoubleTag("", -sin($params['pitchRad'])),
-						new DoubleTag("", cos($params['yawRad']) * cos($params['pitchRad']))
+					$nbt = new Compound("", [
+						"Pos" => new Enum("Pos", [ new DoubleTag("", $params['x']), new DoubleTag("", $params['y']), new DoubleTag("", $params['z']) ]),
+						"Rotation" => new Enum("Rotation", [
+							new FloatTag("", $params['yawRad'] * 180 / M_PI),
+							new FloatTag("", $params['pitchRad'] * 180 / M_PI)
+						]),
 					]);
-				} else {
-					$entityType = "Item";
-					$nbt->Motion = new Enum("Motion", [
-						new DoubleTag("", -sin($params['yawRad']) * cos($params['pitchRad']) / 10),
-						new DoubleTag("", 0),
-						new DoubleTag("", cos($params['yawRad']) * cos($params['pitchRad']) / 10)
-					]);
-					$nbt->Health = new ShortTag("Health", 5);
-					$nbt->Item = NBT::putItemHelper(Item::get($item->getId(), $item->getDamage()));
-					$nbt->PickupDelay = new ShortTag("PickupDelay", 20);
+
+					if ($item->getId() == Item::ARROW) {
+						$entityType = "Arrow";
+						$nbt->Motion = new Enum("Motion", [
+							new DoubleTag("", -sin($params['yawRad']) * cos($params['pitchRad'])),
+							new DoubleTag("", -sin($params['pitchRad'])),
+							new DoubleTag("", cos($params['yawRad']) * cos($params['pitchRad']))
+						]);
+					} else {
+						$entityType = "Item";
+						$nbt->Motion = new Enum("Motion", [
+							new DoubleTag("", -sin($params['yawRad']) * cos($params['pitchRad']) / 10),
+							new DoubleTag("", 0),
+							new DoubleTag("", cos($params['yawRad']) * cos($params['pitchRad']) / 10)
+						]);
+						$nbt->Health = new ShortTag("Health", 5);
+						$nbt->Item = NBT::putItemHelper(Item::get($item->getId(), $item->getDamage()));
+						$nbt->PickupDelay = new ShortTag("PickupDelay", 20);
+					}
+					$projectile = Entity::createEntity($entityType, $this->level->getChunk($this->x >> 4, $this->z >> 4), $nbt);
+					$projectile->spawnToAll();
 				}
-				$projectile = Entity::createEntity($entityType, $this->level->getChunk($this->x >> 4, $this->z >> 4), $nbt);
-				$projectile->spawnToAll();
 			}
 		}
+	}
+	
+	protected function getPositionOfFaceNextBlock() {
+		$position = new Vector3($this->x, $this->y, $this->z);
+		$face = $this->getFace();
+		switch ($face) {
+			case self::FACE_DOWN:
+				$position->y--;
+				break;
+			case self::FACE_UP:
+				$position->y++;
+				break;
+			case self::FACE_SOUTH:
+				$position->z++;
+				break;
+			case self::FACE_NORTH:
+				$position->z--;
+				break;
+			case self::FACE_WEST:
+				$position->x--;
+				break;
+			case self::FACE_EAST:
+				$position->x++;
+				break;
+		}
+		return $position;
 	}
 	
 	protected function calculateShootingParams() {
