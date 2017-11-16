@@ -1774,52 +1774,22 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					Win10InvLogic::packetHandler($packet, $this);
 					break;
 				}
-
-				/** @var Item $item */
-				$item = null;
-
-				if($this->isCreative() && !$this->isSpectator()){ //Creative mode match
-					$item = $packet->item;
-					$slot = Item::getCreativeItemIndex($item);
-				}else{
-					$item = $this->inventory->getItem($packet->slot);
-					$slot = $packet->slot;
-				}
+				$item = $this->inventory->getItem($packet->slot);
+				$slot = $packet->slot;
 				
 				if($packet->slot === -1){ //Air
-					if($this->isCreative()){
-						$found = false;
-						for($i = 0; $i < $this->inventory->getHotbarSize(); ++$i){
-							if($this->inventory->getHotbarSlotIndex($i) === -1){
-								$this->inventory->setHeldItemIndex($i);
-								$found = true;
-								break;
-							}
-						}
-
-						if(!$found){ //couldn't find a empty slot (error)
-							$this->inventory->sendContents($this);
-							//Timings::$timerMobEqipmentPacket->stopTiming();
-							break;
-						}
-					}else{
-						if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
-							$hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);
-							$isNeedSendToHolder = !($hotbarItem->deepEquals($packet->item));
-							$this->inventory->setHeldItemIndex($packet->selectedSlot, $isNeedSendToHolder);
-							$this->inventory->setHeldItemSlot($packet->slot);
-							$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
-							break;
-						} else {
-							$this->inventory->sendContents($this);
-							//Timings::$timerMobEqipmentPacket->stopTiming();
-							break;
-						}
-					}				
-				}elseif($this->isCreative() && !$this->isSpectator()){
-					$this->inventory->setHeldItemIndex($packet->selectedSlot);
-					$this->inventory->setItem($packet->selectedSlot, $item);
-					$this->inventory->setHeldItemSlot($packet->selectedSlot);
+					if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
+						$hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);
+						$isNeedSendToHolder = !($hotbarItem->deepEquals($packet->item));
+						$this->inventory->setHeldItemIndex($packet->selectedSlot, $isNeedSendToHolder);
+						$this->inventory->setHeldItemSlot($packet->slot);
+						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
+						break;
+					} else {
+						$this->inventory->sendContents($this);
+						//Timings::$timerMobEqipmentPacket->stopTiming();
+						break;
+					}								
 				}elseif($item === null or $slot === -1 or !$item->deepEquals($packet->item)){ // packet error or not implemented
 					$this->inventory->sendContents($this);
 					//Timings::$timerMobEqipmentPacket->stopTiming();
