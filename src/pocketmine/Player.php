@@ -171,7 +171,7 @@ use pocketmine\network\protocol\v120\PlayerSkinPacket;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\v120\SubClientLoginPacket;
-use pocketmine\entity\Minecart;
+use pocketmine\entity\Vehicle;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -1734,6 +1734,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 				}
 				break;
+			case 'MOVE_ENTITY_PACKET':
+				if (!is_null($this->currentVehicle) && $this->currentVehicle->getId() == $packet->eid) {
+					$this->currentVehicle->updateByOwner($packet->x, $packet->y, $packet->z, $packet->yaw, $packet->pitch);
+				}
+				break;
 			case 'MOB_EQUIPMENT_PACKET':
 				//Timings::$timerMobEqipmentPacket->startTiming();
 				if($this->spawned === false or $this->dead === true){
@@ -2037,7 +2042,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				} else {		
 					if ($packet->action === 3) {
 						$target = $this->getLevel()->getEntity($packet->target);
-						if ($target instanceof Minecart) {
+						if ($target instanceof Vehicle) {
 							$target->dissMount();
 						}
 					}
@@ -2058,7 +2063,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 
 				$pk = new AnimatePacket();
-				$pk->eid = $this->id;
+				$pk->eid = $packet->eid;
 				$pk->action = $ev->getAnimationType();
 				Server::broadcastPacket($this->getViewers(), $pk);
 				//Timings::$timerAnimatePacket->stopTiming();
@@ -2640,7 +2645,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case 'PLAYER_INPUT_PACKET':
 				if (!is_null($this->currentVehicle)) {
-					$this->currentVehicle->playerAcceleration($packet->sideway);
+					$this->currentVehicle->playerMoveVehicle($packet->forward, $packet->sideway);
 				}				
 				break;
 			default:
@@ -4903,18 +4908,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	protected function getBlocksAround() {
-		if ($this->blocksAround === null) {
-			$minX = floor($this->x - 0.3);
-			$minZ = floor($this->z - 0.3);
-			$maxX = floor($this->x + 0.3);
-			$maxZ = floor($this->z + 0.3);
+		if ($this->blocksAround === null) {			
 			$this->blocksAround = [];
 			$this->blocksAround[] = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y), floor($this->z)));
-			$y = floor($this->y + 1);
-			for ($z = $minZ; $z <= $maxZ; $z++) {
-				for ($x = $minX; $x <= $maxX; $x++) {
-					$block = $this->level->getBlock(new Vector3($x, $y, $z));
-					$this->blocksAround[] = $block;
+			if (is_null($this->currentVehicle)) {
+				$minX = floor($this->x - 0.3);
+				$minZ = floor($this->z - 0.3);
+				$maxX = floor($this->x + 0.3);
+				$maxZ = floor($this->z + 0.3);
+				$y = floor($this->y + 1);
+				for ($z = $minZ; $z <= $maxZ; $z++) {
+					for ($x = $minX; $x <= $maxX; $x++) {
+						$block = $this->level->getBlock(new Vector3($x, $y, $z));
+						$this->blocksAround[] = $block;
+					}
 				}
 			}
 		}

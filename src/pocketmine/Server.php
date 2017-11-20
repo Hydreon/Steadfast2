@@ -143,6 +143,7 @@ use pocketmine\entity\monster\walking\ZombieVillager;
 use pocketmine\entity\projectile\FireBall;
 use pocketmine\utils\MetadataConvertor;
 use pocketmine\entity\Minecart;
+use pocketmine\entity\Boat;
 
 /**
  * The class that manages everything
@@ -2495,6 +2496,7 @@ class Server{
 
 	private function registerEntities(){
 		Entity::registerEntity(Minecart::class);
+		Entity::registerEntity(Boat::class);
 		Entity::registerEntity(Arrow::class);
 		Entity::registerEntity(DroppedItem::class);
 		Entity::registerEntity(FallingSand::class);

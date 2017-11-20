@@ -5,12 +5,7 @@ namespace pocketmine\entity;
 use pocketmine\block\Block;
 use pocketmine\block\Rail;
 use pocketmine\math\Vector3;
-use pocketmine\network\protocol\AddEntityPacket;
-use pocketmine\event\entity\EntityDamageByEntityEvent;
-use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\Player;
-use pocketmine\network\protocol\SetEntityLinkPacket;
-use pocketmine\level\Level;
 
 class Minecart extends Vehicle {
 
@@ -27,9 +22,6 @@ class Minecart extends Vehicle {
 	protected $direction = -1;
 	protected $moveVector = [];
 	protected $moveSpeed = 0.01;
-	protected $isUsing = false;
-	protected $linkedEntity = null;
-	protected $links = [];
 	protected $riderOffset = [0, 0.6, 0];
 
 	public function initEntity() {
@@ -84,104 +76,14 @@ class Minecart extends Vehicle {
 			}
 		}
 
-		return true;
+		return $hasUpdate;
 	}
 
-	public function spawnTo(Player $player) {
-		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
-			$this->hasSpawned[$player->getId()] = $player;
-			$pk = new AddEntityPacket();
-			$pk->eid = $this->getId();
-			$pk->type = Minecart::NETWORK_ID;
-			$pk->x = $this->x;
-			$pk->y = $this->y;
-			$pk->z = $this->z;
-			$pk->speedX = 0;
-			$pk->speedY = 0;
-			$pk->speedZ = 0;
-			$pk->yaw = 0;
-			$pk->pitch = 0;
-			$pk->metadata = $this->dataProperties;
-			$pk->links = $this->links;
-			$player->dataPacket($pk);
-		}
-	}
-
-	public function attack($damage, EntityDamageEvent $source) {
-		if ($this->isUsing) {
-			return;
-		}
-		if ($source instanceof EntityDamageByEntityEvent) {
-			$player = $source->getDamager();
-			if ($player instanceof Player) {
-				$this->mount($player);
-			}
-		}
-	}
-
-	public function getLinkedEntity() {
-		return $this->linkedEntity;
-	}
-
-	public function mount($player) {
-		if ($this->isUsing) {
-			return;
-		}
-		$this->isUsing = true;
-		$this->linkedEntity = $player;
-		$player->setVehicle($this);
-
-		$this->links = [
-			[
-				'to' => $player->getId(),
-				'from' => $this->getId(),
-				'type' => SetEntityLinkPacket::TYPE_RIDE
-			]
-		];
-
-		$pk = new SetEntityLinkPacket();
-		$pk->to = $player->getId();
-		$pk->from = $this->getId();
-		$pk->type = SetEntityLinkPacket::TYPE_RIDE;
-		foreach ($player->getViewers() as $p) {
-			$p->dataPacket($pk);
-		}
-
-		$player->dataPacket($pk);
-		$player->setDataProperty(self::DATA_SEAT_RIDER_OFFSET, self::DATA_TYPE_VECTOR3, $this->riderOffset);
-		$player->sendSelfData();
-		$this->scheduleUpdate();
-	}
-
-	public function dissMount() {
-		if (!$this->isUsing) {
-			return;
-		}
-		$this->isUsing = false;
-		$this->links = [];
+	protected function onDissMount() {
 		$this->direction = -1;
 		$this->moveSpeed = 0;
-
-		$pk = new SetEntityLinkPacket();
-		$pk->to = $this->linkedEntity->getId();
-		$pk->from = $this->getId();
-		$pk->type = SetEntityLinkPacket::TYPE_REMOVE;
-		foreach ($this->linkedEntity->getViewers() as $p) {
-			$p->dataPacket($pk);
-		}
-
-		$pk = new SetEntityLinkPacket();
-		$pk->to = $this->linkedEntity->getId();
-		$pk->from = $this->getId();
-		$pk->type = SetEntityLinkPacket::TYPE_REMOVE;
-		$this->linkedEntity->dataPacket($pk);
-		$this->linkedEntity->setDataProperty(self::DATA_SEAT_RIDER_OFFSET, self::DATA_TYPE_VECTOR3, [0, 0, 0]);
-		$this->linkedEntity->sendSelfData();
-		$this->linkedEntity->removeDataProperty(self::DATA_SEAT_RIDER_OFFSET, false);
-		$this->linkedEntity->setVehicle(null);
-		$this->linkedEntity = null;
-		$this->state = Minecart::STATE_INITIAL;
 	}
+	
 
 	private function isRail(Block $rail) {
 		return ($rail !== null && in_array($rail->getId(), [Block::RAIL, Block::ACTIVATOR_RAIL, Block::DETECTOR_RAIL, Block::POWERED_RAIL]));
@@ -487,7 +389,7 @@ class Minecart extends Vehicle {
 		}
 	}
 
-	public function playerAcceleration($sideway) {
+	public function playerMoveVehicle($forward, $sideway) {
 		if ($sideway == 0) {
 			return;
 		}
