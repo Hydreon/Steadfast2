@@ -24,6 +24,8 @@ use pocketmine\nbt\tag\Compound;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
+use pocketmine\math\Vector3;
+
 class Arrow extends Projectile{
 	const NETWORK_ID = 80;
 	public $width = 0.5;
@@ -78,6 +80,29 @@ class Arrow extends Projectile{
 	
 	public function getBoundingBox() {
 		$bb = clone parent::getBoundingBox();
-		return $bb->expand(1, 1, 1);
+//		return $bb->expand(1, 1, 1);
+		return $bb;
+	}
+	
+	public function move($dx, $dy, $dz) {
+		$this->blocksAround = null;
+		if ($dx == 0 && $dz == 0 && $dy == 0) {
+			return true;
+		}
+
+		if ($this->keepMovement) {
+			$this->boundingBox->offset($dx, $dy, $dz);
+			$this->setPosition(new Vector3(($this->boundingBox->minX + $this->boundingBox->maxX) / 2, $this->boundingBox->minY, ($this->boundingBox->minZ + $this->boundingBox->maxZ) / 2));
+			return true;
+		}
+		$pos = new Vector3($this->x + $dx, $this->y + $dy, $this->z + $dz);
+		if (!$this->setPosition($pos)) {
+			return false;
+		}
+		$bb = clone $this->boundingBox;
+		$this->onGround = count($this->level->getCollisionBlocks($bb)) > 0;
+		$this->isCollided = $this->onGround;
+		$this->updateFallState($dy, $this->onGround);
+		return true;
 	}
 }

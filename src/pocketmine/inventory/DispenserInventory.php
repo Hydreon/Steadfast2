@@ -3,6 +3,7 @@
 namespace pocketmine\inventory;
 
 use pocketmine\inventory\InventoryType;
+use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\network\protocol\TileEventPacket;
 use pocketmine\Player;
@@ -23,7 +24,6 @@ class DispenserInventory extends ContainerInventory {
 	}
 
 	public function onOpen(Player $who) {
-		var_dump(__METHOD__);
 		parent::onOpen($who);
 		if (count($this->getViewers()) === 1) {
 			$pk = new TileEventPacket();
@@ -51,6 +51,20 @@ class DispenserInventory extends ContainerInventory {
 			}
 		}
 		parent::onClose($who);
+	}
+	
+	/**
+	 * 
+	 * @return Item | null
+	 */
+	public function getFirstItem(&$itemIndex) {
+		foreach($this->getContents() as $index => $item){
+			if ($item->getId() != Item::AIR && $item->getCount() >= 0) {
+				$itemIndex = $index;
+				return $item;
+			}
+		}
+		return null;
 	}
 	
 }

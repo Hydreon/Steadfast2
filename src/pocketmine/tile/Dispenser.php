@@ -15,6 +15,7 @@ use pocketmine\tile\Tile;
 
 class Dispenser extends Spawnable implements InventoryHolder, Container, Nameable {
 
+	/** @var DispenserInventory */
 	protected $inventory = null;
 
 	public function __construct(FullChunk $chunk, Compound $nbt) {
@@ -49,6 +50,10 @@ class Dispenser extends Spawnable implements InventoryHolder, Container, Nameabl
 		}
 	}
 
+	/**
+	 * 
+	 * @return DispenserInventory
+	 */
 	public function getInventory() {
 		return $this->inventory;
 	}
