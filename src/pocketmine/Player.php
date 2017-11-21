@@ -382,6 +382,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $hungerEnabled = true;
 	
 	protected $currentVehicle = null;
+	protected $fishingHook = null;
+	protected $interactButtonText= '';
 	
 	public function getLeaveMessage(){
 		return "";
@@ -1789,6 +1791,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->inventory->setHeldItemIndex($packet->selectedSlot, $isNeedSendToHolder);
 						$this->inventory->setHeldItemSlot($packet->slot);
 						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
+						if ($hotbarItem->getId() === Item::FISHING_ROD) {
+							$this->setInteractButtonText('Fish');
+						} else {
+							$this->setInteractButtonText('');
+						}
 						break;
 					} else {
 						$this->inventory->sendContents($this);
@@ -1806,6 +1813,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->inventory->setHeldItemIndex($packet->selectedSlot, $isNeedSendToHolder);
 						$this->inventory->setHeldItemSlot($slot);
 						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
+						if ($hotbarItem->getId() === Item::FISHING_ROD) {
+							$this->setInteractButtonText('Fish');
+						} else {
+							$this->setInteractButtonText('');
+						}
 						break;
 					} else {
 						$this->inventory->sendContents($this);
@@ -4047,6 +4059,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$projectile->spawnToAll();
 					}
 				}
+				if ($itemInHand->getId() === Item::FISHING_ROD) {
+					$this->tryFishingHook();
+				}
 
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, true);
 				$this->startAction = $this->server->getTick();
@@ -4570,6 +4585,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->lastYaw = $to->yaw;
 			$this->lastPitch = $to->pitch;
 			$this->level->addEntityMovement($this->getViewers(), $this->getId(), $this->x, $this->y + $this->getVisibleEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw, true);
+			if (!is_null($this->fishingHook)) {
+				if ($this->distanceSquared($this->fishingHook) > 400 || $this->inventory->getItemInHand()->getId() !== Item::FISHING_ROD) {
+					$this->clearFishingHook();
+				}
+			}
+
 			if (!$this->isSpectator()) {
 				$this->checkNearEntities($tickDiff);
 			}
@@ -4896,6 +4917,57 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 		}
 		return $this->blocksAround;
+	}
+	
+	public function setFishingHook($hook) {
+		$this->fishingHook = $hook;
+	}
+	
+	public function clearFishingHook() {
+		if (!is_null($this->fishingHook)) {
+			$this->fishingHook->close();
+			$this->fishingHook = null;
+		}
+	}
+	
+	public function tryFishingHook() {
+		if (is_null($this->fishingHook)) {
+			$yawRad = $this->yaw / 180 * M_PI;
+			$pitchRad = $this->pitch / 180 * M_PI;
+			$nbt = new Compound("", [
+				"Pos" => new Enum("Pos", [
+					new DoubleTag("", $this->x),
+					new DoubleTag("", $this->y + $this->getEyeHeight()),
+					new DoubleTag("", $this->z)
+						]),
+				"Motion" => new Enum("Motion", [
+					new DoubleTag("", -sin($yawRad) * cos($pitchRad)),
+					new DoubleTag("", -sin($pitchRad)),
+					new DoubleTag("", cos($yawRad) * cos($pitchRad))
+						]),
+				"Rotation" => new Enum("Rotation", [
+					new FloatTag("", $this->yaw),
+					new FloatTag("", $this->pitch)
+						]),
+			]);
+			$hook = Entity::createEntity("FishingHook", $this->chunk, $nbt, $this);
+			if (!is_null($hook)) {
+				$hook->spawnToAll();
+				$this->setFishingHook($hook);
+			}
+		} else {
+			$this->clearFishingHook();
+		}
+	}
+	
+	public function setInteractButtonText($text) {
+		if ($this->interactButtonText != $text) {
+			$this->interactButtonText = $text;
+			$pk = new SetEntityDataPacket();
+			$pk->eid = $this->id;
+			$pk->metadata = [self::DATA_BUTTON_TEXT => [self::DATA_TYPE_STRING, $this->interactButtonText]];
+			$this->dataPacket($pk);
+		}
 	}
 
 }
