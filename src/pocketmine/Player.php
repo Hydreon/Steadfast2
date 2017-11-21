@@ -2021,6 +2021,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case 'INTERACT_PACKET':
 				if ($packet->action === InteractPacket::ACTION_DAMAGE) {
 					$this->attackByTargetId($packet->target);
+				} elseif ($packet->action === InteractPacket::ACTION_SEE) {
+					$target = $this->getLevel()->getEntity($packet->target);
+					if ($target instanceof Vehicle) {
+						$target->onNearPlayer($this);
+					}
 				} else {		
 					if ($packet->action === 3) {
 						$target = $this->getLevel()->getEntity($packet->target);
@@ -2536,8 +2541,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->normalTransactionLogic($packet);
 						break;
 					case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_USE_ON_ENTITY:
-						if ($packet->actionType == InventoryTransactionPacket::ITEM_USE_ON_ENTITY_ACTION_ATTACK) {
-							$this->attackByTargetId($packet->entityId);
+						switch ($packet->actionType) {
+							case InventoryTransactionPacket::ITEM_USE_ON_ENTITY_ACTION_ATTACK:
+								$this->attackByTargetId($packet->entityId);
+								break;
+							case InventoryTransactionPacket::ITEM_USE_ON_ENTITY_ACTION_INTERACT:
+								$target = $this->getLevel()->getEntity($packet->entityId);
+								if ($target instanceof Vehicle) {
+									$target->onPlayerInteract($this);
+								}
+								break;
 						}
 						break;
 					case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_USE:

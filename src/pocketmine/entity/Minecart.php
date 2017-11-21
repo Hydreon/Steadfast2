@@ -25,7 +25,7 @@ class Minecart extends Vehicle {
 	protected $riderOffset = [0, 0.6, 0];
 
 	public function initEntity() {
-		$this->setMaxHealth(1);
+		$this->setMaxHealth(10);
 		$this->setHealth($this->getMaxHealth());
 		$this->moveVector[self::DIRECTION_NORTH] = new Vector3(-1, 0, 0);
 		$this->moveVector[self::DIRECTION_SOUTH] = new Vector3(1, 0, 0);

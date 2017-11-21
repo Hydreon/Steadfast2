@@ -15,6 +15,7 @@ abstract class Vehicle extends Entity implements Rideable {
 	protected $linkedEntity = null;
 	protected $links = [];
 	protected $riderOffset = [0, 0, 0];
+	protected $interactText = "Ride";
 
 	public function getLinkedEntity() {
 		return $this->linkedEntity;
@@ -89,11 +90,15 @@ abstract class Vehicle extends Entity implements Rideable {
 		if ($this->isUsing) {
 			return;
 		}
-		if ($source instanceof EntityDamageByEntityEvent) {
-			$player = $source->getDamager();
-			if ($player instanceof Player) {
-				$this->mount($player);
-			}
+		parent::attack($damage, $source);
+	}
+	
+	public function onPlayerInteract($player) {
+		if ($this->isUsing) {
+			return;
+		}
+		if ($player instanceof Player) {
+			$this->mount($player);
 		}
 	}
 
@@ -123,6 +128,10 @@ abstract class Vehicle extends Entity implements Rideable {
 
 	public function updateByOwner($x, $y, $z, $yaw, $pitch) {
 		
+	}
+	
+	public function onNearPlayer($player) {
+		$player->setInteractButtonText($this->interactText);
 	}
 
 }

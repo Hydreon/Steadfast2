@@ -13,6 +13,7 @@ class Boat extends Vehicle {
 	public $width = 1.6;
 	protected $riderOffset = [0, 0.6, 0];
 	protected $afterMovement = false;
+	protected $interactText = "Board";
 	
 	public function __construct(FullChunk $chunk, Compound $nbt) {
 		parent::__construct($chunk, $nbt);
@@ -21,7 +22,7 @@ class Boat extends Vehicle {
 	}
 	
 	public function initEntity() {
-		$this->setMaxHealth(1);
+		$this->setMaxHealth(10);
 		$this->setHealth($this->getMaxHealth());
 		parent::initEntity();
 	}
