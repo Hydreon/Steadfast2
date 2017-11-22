@@ -2038,20 +2038,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case 'ANIMATE_PACKET':
 				//Timings::$timerAnimatePacket->startTiming();
-				if($this->spawned === false or $this->dead === true){
+				if ($this->spawned === false or $this->dead === true) {
 					//Timings::$timerAnimatePacket->stopTiming();
 					break;
 				}
-
 				$this->server->getPluginManager()->callEvent($ev = new PlayerAnimationEvent($this, $packet->action));
-				if($ev->isCancelled()){
+				if ($ev->isCancelled()) {
 					//Timings::$timerAnimatePacket->stopTiming();
 					break;
 				}
-
 				$pk = new AnimatePacket();
 				$pk->eid = $packet->eid;
 				$pk->action = $ev->getAnimationType();
+				$pk->data = $packet->data;
 				Server::broadcastPacket($this->getViewers(), $pk);
 				//Timings::$timerAnimatePacket->stopTiming();
 				break;
