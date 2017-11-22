@@ -114,8 +114,8 @@ abstract class Vehicle extends Entity implements Rideable {
 			$pk->speedX = 0;
 			$pk->speedY = 0;
 			$pk->speedZ = 0;
-			$pk->yaw = 0;
-			$pk->pitch = 0;
+			$pk->yaw = $this->yaw;
+			$pk->pitch = $this->pitch;
 			$pk->metadata = $this->dataProperties;
 			$pk->links = $this->links;
 			$player->dataPacket($pk);

@@ -35,7 +35,7 @@ class Boat extends Item {
 				new DoubleTag("", 0)
 					]),
 			"Rotation" => new Enum("Rotation", [
-				new FloatTag("", 0),
+				new FloatTag("", 180),
 				new FloatTag("", 0)
 					]),
 		]));
