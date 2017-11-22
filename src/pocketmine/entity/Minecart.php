@@ -90,16 +90,16 @@ class Minecart extends Vehicle {
 	}
 
 	private function moveIfRail() {
-		$nextMoveVector = $this->moveVector[$this->direction];
-		$nextMoveVector = $nextMoveVector->multiply($this->moveSpeed);
+		$nextMoveVector = $this->moveVector[$this->direction]->multiply($this->moveSpeed);
 		$newVector = $this->add($nextMoveVector->x, $nextMoveVector->y, $nextMoveVector->z);
-		$possibleRail = $this->getCurrentRail();
-		if (in_array($possibleRail->getId(), [Block::RAIL, Block::ACTIVATOR_RAIL, Block::DETECTOR_RAIL, Block::POWERED_RAIL])) {
-			$this->moveUsingVector($newVector);
-			return true;
+		$rail = $this->getCurrentRail($newVector);
+		if ($rail === null) {
+			$this->moveSpeed = 0;
+			$this->state = Minecart::STATE_INITIAL;
+			return false;
 		}
-
-		return false;
+		$this->moveUsingVector($newVector);
+		return true;
 	}
 
 	private function checkIfOnRail() {
@@ -116,25 +116,25 @@ class Minecart extends Vehicle {
 		$this->state = Minecart::STATE_OFF_RAIL;
 	}
 
-	private function getCurrentRail() {
-		$block = $this->getLevel()->getBlock(new Vector3(floor($this->x), floor($this->y), floor($this->z)));
+	private function getCurrentRail(Vector3 $pos) {
+		$block = $this->getLevel()->getBlock(new Vector3(floor($pos->x), floor($pos->y), floor($pos->z)));
 		if ($this->isRail($block)) {
 			return $block;
 		}
-		$down = $this->getLevel()->getBlock(new Vector3(floor($this->x), floor($this->y) - 1, floor($this->z)));
+		$down = $this->getLevel()->getBlock(new Vector3(floor($pos->x), floor($pos->y) - 1, floor($pos->z)));
 		if ($this->isRail($down)) {
 			return $down;
 		}
 		return null;
 	}
-
+	
 	private function forwardOnRail(Player $player) {
 		if ($this->direction === -1) {
 			$candidateDirection = $player->getDirection();
 		} else {
 			$candidateDirection = $this->direction;
 		}
-		$rail = $this->getCurrentRail();
+		$rail = $this->getCurrentRail($this);
 		if ($rail !== null) {
 			$railType = $rail->getDamage();
 			if ($rail->getId() != Block::RAIL) {
