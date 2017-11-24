@@ -310,7 +310,7 @@ abstract class Liquid extends Transparent {
 					}
 				}
 //				var_dump($j . " not flowable");
-				$costs[$j] = 1000;
+				$costs[$j] = 7;
 				continue;
 			}
 		}
