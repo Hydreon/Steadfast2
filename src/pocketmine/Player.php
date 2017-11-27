@@ -1928,6 +1928,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->setSneaking(false);
 
 						$this->extinguish();
+						$this->blocksAround = null;
 						$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
 						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
 						$this->deadTicks = 0;
@@ -2943,8 +2944,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->server->getPluginManager()->callEvent($ev = new PlayerDeathEvent($this, $this->getDrops(), $message));
 		
 		$this->freeChunks();
-		
-		if(!$ev->getKeepInventory()){
+		if (!is_null($this->currentVehicle)) {
+			$this->currentVehicle->dissMount();
+		}
+		if (!$ev->getKeepInventory()){
 			foreach($ev->getDrops() as $item){
 				$this->level->dropItem($this, $item);
 			}
