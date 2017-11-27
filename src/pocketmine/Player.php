@@ -1725,9 +1725,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						if (!$this->isMayMove) {
 							if ($this->yaw != $packet->yaw || $this->pitch != $packet->pitch || abs($this->x - $packet->x) >= 0.05 || abs($this->z - $packet->z) >= 0.05) {
 								$this->setMayMove(true);
-								$spawn = $this->getSpawn();
-								$spawn->y += 0.1;
-								$this->teleport($spawn);
 							}
 						}
 
