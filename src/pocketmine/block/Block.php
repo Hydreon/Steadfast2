@@ -311,6 +311,7 @@ class Block extends Position implements Metadatable{
     const END_BRICKS = 206;
     const END_ROD = 208;
     const END_GATEWAY = 209;
+	const RED_NETHER_BRICKS = 215;
     const CHORUS_PLANT = 240;
     const STAINED_GLASS = 241;
 	const PODZOL = 243;
@@ -477,6 +478,7 @@ class Block extends Position implements Metadatable{
 			self::$list[self::MYCELIUM] = Mycelium::class;
 			self::$list[self::WATER_LILY] = WaterLily::class;
 			self::$list[self::NETHER_BRICKS] = NetherBrick::class;
+			self::$list[self::RED_NETHER_BRICKS] = RedNetherBrick::class;
 			self::$list[self::NETHER_BRICK_FENCE] = NetherBrickFence::class;
 
 			self::$list[self::NETHER_BRICKS_STAIRS] = NetherBrickStairs::class;
