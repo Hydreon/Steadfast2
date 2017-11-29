@@ -100,7 +100,10 @@ class Dispenser extends Solid {
 						break;
 					case self::REDSTONE_REPEATER_BLOCK_ACTIVE:
 						$activeRepeater = $this->level->getBlock($tmpVector);
-						$activeRepeater->getFace();
+						$frontBlockCoords = $activeRepeater->getFrontBlockCoords();
+						if ($this->x == $frontBlockCoords->x && $this->y == $frontBlockCoords->y && $this->z == $frontBlockCoords->z) {
+							$isShouldBeActivated = true;
+						}
 						break;
 					default:
 						if ($isSolidBlock) {

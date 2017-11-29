@@ -56,6 +56,9 @@ abstract class Solid extends Block{
 			self::DISPENSER,
 			self::PISTON,
 			self::STICKY_PISTON,
+			self::IRON_TRAPDOOR,
+			self::REDSTONE_REPEATER_BLOCK,
+			self::REDSTONE_REPEATER_BLOCK_ACTIVE,
 		];
 		$pluginManager = Server::getInstance()->getPluginManager();
 		$tmpVector = new Vector3();

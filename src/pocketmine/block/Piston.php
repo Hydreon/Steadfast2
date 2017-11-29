@@ -100,6 +100,7 @@ class Piston extends Solid {
 				$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
 				switch ($blockId) {
 					case self::REDSTONE_TORCH_ACTIVE:
+					case self::REDSTONE_REPEATER_BLOCK_ACTIVE:
 						$isShouldBeExpanded = true;
 						break 2;
 					case self::REDSTONE_WIRE:
