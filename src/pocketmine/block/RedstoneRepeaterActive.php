@@ -64,6 +64,12 @@ class RedstoneRepeaterActive extends RedstoneRepeater {
 						return;
 					}
 					break;
+				case self::REDSTONE_COMPARATOR_BLOCK:
+					$comparator = $this->level->getBlock($backPosition);
+					if ($comparator->isActive() && $this->getFace() == $comparator->getFace()) {
+						return;
+					}
+					break;
 				default:
 					if (Block::$solid[$backBlockID]) {
 						$solidBlock = $this->level->getBlock($backPosition);

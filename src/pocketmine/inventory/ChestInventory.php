@@ -21,8 +21,10 @@
 
 namespace pocketmine\inventory;
 
+use pocketmine\block\Block;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
+use pocketmine\math\Vector3;
 use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\network\protocol\TileEventPacket;
 use pocketmine\Player;
@@ -85,6 +87,20 @@ class ChestInventory extends ContainerInventory {
 		if (parent::setItem($index, $item)) {
 			if ($isShouldUpdateBlock) {
 				$this->holder->getBlock()->onUpdate(Level::BLOCK_UPDATE_WEAK);
+			}
+			static $offsets = [
+				[1, 0, 0],
+				[-1, 0, 0],
+				[0, 0, -1],
+				[0, 0, 1],
+			];
+			$tmpVector = new Vector3(0, 0, 0);
+			foreach ($offsets as $offset) {
+				$tmpVector->setComponents($this->holder->x + $offset[0], $this->holder->y, $this->holder->z + $offset[2]);
+				if ($this->holder->level->getBlockIdAt($tmpVector->x, $tmpVector->y, $tmpVector->z) == Block::REDSTONE_COMPARATOR_BLOCK) {
+					$comparator = $this->holder->level->getBlock($tmpVector);
+					$comparator->onUpdate(Level::BLOCK_UPDATE_NORMAL);
+				}
 			}
 			return true;
 		}

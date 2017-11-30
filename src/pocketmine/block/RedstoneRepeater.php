@@ -132,6 +132,10 @@ class RedstoneRepeater extends Transparent {
 					$activeRepeater = $this->level->getBlock($backPosition);
 					$isNeedSetBlock = ($this->getFace() == $activeRepeater->getFace());
 					break;
+				case self::REDSTONE_COMPARATOR_BLOCK:
+					$comparator = $this->level->getBlock($backPosition);
+					$isNeedSetBlock = $comparator->isActive() && $this->getFace() == $comparator->getFace();
+					break;
 				default:
 					if (Block::$solid[$backBlockID]) {
 						$solidBlock = $this->level->getBlock($backPosition);
