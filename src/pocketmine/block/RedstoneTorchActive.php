@@ -22,6 +22,10 @@ class RedstoneTorchActive extends Flowable {
 	public function getLightLevel() {
 		return 7;
 	}
+	
+	public function isMayBeDestroyedByPiston() {
+		return true;
+	}
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null) {
 		static $faces = [

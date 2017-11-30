@@ -161,7 +161,7 @@ class Piston extends Solid {
 		$this->getLevel()->setBlock($extendBlock, Block::get(self::PISTON_HEAD), true, true);
 //		var_dump("Piston remove charge 2 " . $this->x . " " . $this->z);
 		$tile->spawnToAll();
-		if ($extendBlock->getId() !== self::AIR) {
+		if ($extendBlock->getId() !== self::AIR && !$extendBlock->isMayBeDestroyedByPiston()) {
 			$anotherBlock = $extendBlock->getSide($extendSide);
 			$this->getLevel()->setBlock($anotherBlock, $extendBlock, true, true);
 		}
@@ -184,11 +184,11 @@ class Piston extends Solid {
 			return false;
 		}
 		$firstBlock = $this->getSide($sideToExtend);
-		if ($firstBlock->getId() == self::AIR) {
+		if ($firstBlock->getId() == self::AIR || $firstBlock->isMayBeDestroyedByPiston()) {
 			return true;
 		} else if (self::$solid[$firstBlock->getId()]) {
 			$secondBlock = $firstBlock->getSide($sideToExtend);
-			if ($secondBlock->getId() == self::AIR) {
+			if ($secondBlock->getId() == self::AIR || $secondBlock->isMayBeDestroyedByPiston()) {
 				return true;
 			}
 		}

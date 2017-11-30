@@ -23,7 +23,9 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
+use pocketmine\level\Level;
 use pocketmine\math\AxisAlignedBB;
+use pocketmine\math\Vector3;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Enum;
@@ -181,5 +183,30 @@ class Chest extends Transparent{
 		return [
 			[$this->id, 0, 1],
 		];
+	}
+	
+	public function onUpdate($type) {
+		if ($type == Level::BLOCK_UPDATE_WEAK) {
+			$blockBelowId = $this->level->getBlockIdAt($this->x, $this->y - 1, $this->z);
+			if ($blockBelowId == self::HOPPER_BLOCK) {
+				$blockBelowHopperId = $this->level->getBlockIdAt($this->x, $this->y - 2, $this->z);
+				if ($blockBelowHopperId == self::CHEST) {
+					$anotherChest = $this->level->getBlock(new Vector3($this->x, $this->y - 2, $this->z));
+					$chestInventory = $this->level->getTile($this)->getInventory();
+					$chestItems = $chestInventory->getContents();
+					$anotherChestInventory = $this->level->getTile($anotherChest)->getInventory();
+					foreach ($chestItems as $index => $item) {
+						if ($item->getId() != self::AIR) {
+							if (empty($anotherChestInventory->addItem($item))) {
+								unset($chestItems[$index]);
+							} else {
+								break;
+							}
+						}
+					}
+					$chestInventory->setContents($chestItems);
+				}
+			}
+		}
 	}
 }

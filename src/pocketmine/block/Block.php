@@ -794,6 +794,10 @@ class Block extends Position implements Metadatable{
 	public function isSolid(){
 		return false;
 	}
+	
+	public function isMayBeDestroyedByPiston() {
+		return false;
+	}
 
 	/**
 	 * AKA: Block->isFlowable

@@ -21,13 +21,13 @@
 
 namespace pocketmine\inventory;
 
+use pocketmine\item\Item;
 use pocketmine\level\Level;
-use pocketmine\network\Network;
+use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\network\protocol\TileEventPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\tile\Chest;
-use pocketmine\network\protocol\LevelSoundEventPacket;
 
 class ChestInventory extends ContainerInventory {
 
@@ -78,6 +78,17 @@ class ChestInventory extends ContainerInventory {
 		parent::onClose($who);
 		$position = [ 'x' => $this->holder->x, 'y' => $this->holder->y, 'z' => $this->holder->z ];
  		$who->sendSound(LevelSoundEventPacket::SOUND_CHEST_CLOSED, $position);
+	}
+	
+	public function setItem($index, Item $item) {
+		$isShouldUpdateBlock = $item->getId() != Item::AIR && !$item->equals($this->getItem($index));
+		if (parent::setItem($index, $item)) {
+			if ($isShouldUpdateBlock) {
+				$this->holder->getBlock()->onUpdate(Level::BLOCK_UPDATE_WEAK);
+			}
+			return true;
+		}
+		return false;
 	}
 
 }
