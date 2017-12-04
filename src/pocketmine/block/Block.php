@@ -594,6 +594,7 @@ class Block extends Position implements Metadatable{
 			self::$list[self::DISPENSER] = Dispenser::class;
 			
 			self::$list[self::REDSTONE_COMPARATOR_BLOCK] = RedstoneComparator::class;
+			self::$list[self::TRAPPED_CHEST] = TrappedChest::class;
 			
 			foreach(self::$list as $id => $class){
 				if($class !== null){
