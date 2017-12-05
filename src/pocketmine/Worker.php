@@ -71,15 +71,16 @@ abstract class Worker extends \Worker{
 	 */
 	public function quit(){
 		$this->isKilled = true;
-
 		$this->notify();
-		
 		if($this->isRunning()){
 			$this->shutdown();
 			$this->notify();
 			$this->unstack();
+		}elseif(!$this->isJoined()){
+			if(!$this->isTerminated()){
+				$this->join();
+			}
 		}
-
 		ThreadManager::getInstance()->remove($this);
 	}
 

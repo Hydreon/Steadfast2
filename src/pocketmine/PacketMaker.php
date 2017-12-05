@@ -12,7 +12,7 @@ use pocketmine\network\protocol\MoveEntityPacket;
 use pocketmine\network\protocol\SetEntityMotionPacket;
 use pocketmine\network\protocol\MovePlayerPacket;
 
-class PacketMaker extends Worker {
+class PacketMaker extends Thread {
 
 
 	protected $classLoader;
@@ -167,10 +167,11 @@ class PacketMaker extends Worker {
 		return serialize($data);
 	}
 	
-	public function shutdown(){		
+	public function join() {
 		$this->shutdown = true;
-		var_dump("Packet thread shutdown!");
+		parent::join();
 	}
+	
 	
 	
 	public function errorHandler($errno, $errstr, $errfile, $errline, $context, $trace = null){
