@@ -1884,6 +1884,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 									$viewer->dataPacket($pk);
 								}
 							}
+							
+							$topBlockId = $this->level->getBlockIdAt($packet->x, $packet->y + 1, $packet->z);
+							if ($topBlockId == block\Block::FIRE) {
+								$fireBlock = $this->level->getBlock(new Vector3($packet->x, $packet->y + 1, $packet->z));
+								$this->level->sendBlocks([$this], [$fireBlock], UpdateBlockPacket::FLAG_ALL_PRIORITY);
+							}
 						}
 						break;
 					case 'ABORT_DESTROY_BLOCK':

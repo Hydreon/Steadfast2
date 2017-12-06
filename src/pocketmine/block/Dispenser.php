@@ -270,15 +270,15 @@ class Dispenser extends Solid {
 			} else if ($face == self::FACE_NORTH) {
 				$data['yawRad'] = M_PI;
 				$data['x'] += 0.5;
-				$data['x'] -= 1;
+				$data['z'] -= 1;
 			} else if ($face == self::FACE_WEST) {
 				$data['yawRad'] = 0.5 * M_PI;
 				$data['x'] -= 1;
-				$data['x'] += 0.5;
+				$data['z'] += 0.5;
 			} else if ($face == self::FACE_EAST) {
 				$data['yawRad'] = 1.5 * M_PI;
 				$data['x'] += 2;
-				$data['x'] += 0.5;
+				$data['z'] += 0.5;
 			}
 //			$angleOffset = M_PI / 18; // 10 degree
 //			$data['pitchRad'] = -$angleOffset * 3;
