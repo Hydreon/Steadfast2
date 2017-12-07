@@ -36,7 +36,11 @@ abstract class Button extends Transparent{
 		return $this->level->setBlock($block, $this, true, true);
 	}
 	
-	public function onUpdate($type) {
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		switch ($type) {
 			case Level::BLOCK_UPDATE_NORMAL:
 				static $sides = [
@@ -55,7 +59,7 @@ abstract class Button extends Transparent{
 				break;
 			case Level::BLOCK_UPDATE_SCHEDULED:
 				$this->setActive(false);
-				$this->level->setBlock($this, $this);
+				$this->level->setBlock($this, $this, false, true, $deep);
 				break;
 		}
 	}

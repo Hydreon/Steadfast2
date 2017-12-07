@@ -53,7 +53,11 @@ class RedstoneWire extends Transparent {
 		];
 	}
 	
-	public function onUpdate($type) {
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		$this->collectNeighbors();
 		$targetPower = $this->meta;
 		$targetDirection = self::DIRECTION_NONE;
@@ -147,11 +151,11 @@ class RedstoneWire extends Transparent {
 		if ($targetDirection == self::DIRECTION_NONE && $this->meta != self::REDSTONE_POWER_MIN) { // lose charge
 //			echo "X: " . $this->x . " Z: " . $this->z . " Redstone wire (loose charge) Old: " . $this->meta . " New: " . self::REDSTONE_POWER_MIN . PHP_EOL;
 			$this->meta = self::REDSTONE_POWER_MIN;
-			$this->level->setBlock($this, $this, true, true);
+			$this->level->setBlock($this, $this, true, true, $deep);
 		} else if ($this->meta < $targetPower) { // found new power source
 //			echo "X: " . $this->x . " Z: " . $this->z . " Redstone wire (set charge) Old: " . $this->meta . " New: " . $targetPower . PHP_EOL;
 			$this->meta = $targetPower;
-			$this->level->setBlock($this, $this, true, true);
+			$this->level->setBlock($this, $this, true, true, $deep);
 		}
 	}
 	

@@ -105,7 +105,15 @@ class RedstoneRepeater extends Transparent {
 		$this->level->setBlock($this, $this, true, true);
 	}
 	
-	public function onUpdate($type) {
+	public function needScheduleOnUpdate() {
+		return true;
+	}
+	
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		if ($type == Level::BLOCK_UPDATE_NORMAL) {
 			$backPosition = $this->getBackBlockCoords();
 			$backBlockID = $this->level->getBlockIdAt($backPosition->x, $backPosition->y, $backPosition->z);
@@ -144,7 +152,7 @@ class RedstoneRepeater extends Transparent {
 					break;
 			}
 			if ($isNeedSetBlock) {
-				$result = $this->level->setBlock($this, Block::get(Block::REDSTONE_REPEATER_BLOCK_ACTIVE, $this->meta), false, false);
+				$result = $this->level->setBlock($this, Block::get(Block::REDSTONE_REPEATER_BLOCK_ACTIVE, $this->meta), false, false, $deep);
 				if ($result) {
 					$delay = ($this->getDelay() + 1) * 2;
 					$this->level->scheduleUpdate($this, $delay);
@@ -154,7 +162,7 @@ class RedstoneRepeater extends Transparent {
 			$frontCoords = $this->getFrontBlockCoords();
 			$frontBlock = $this->level->getBlock($frontCoords);
 			if ($frontBlock !== null) {
-				$frontBlock->onUpdate(Level::BLOCK_UPDATE_NORMAL);
+				$frontBlock->onUpdate(Level::BLOCK_UPDATE_NORMAL, $deep);
 			}
 		}
 	}

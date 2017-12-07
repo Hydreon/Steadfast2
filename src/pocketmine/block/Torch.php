@@ -42,7 +42,10 @@ class Torch extends Flowable{
 	}
 
 
-	public function onUpdate($type){
+	public function onUpdate($type, $deep){
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			$below = $this->getSide(0);
 			$side = $this->getDamage();

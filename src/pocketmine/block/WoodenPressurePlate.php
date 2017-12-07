@@ -82,40 +82,21 @@ class WoodenPressurePlate extends Transparent{
 		}
 	}
 	
-	public function onUpdate($type) {
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		if ($type == Level::BLOCK_UPDATE_SCHEDULED) {
 			$now = microtime(true);
 			if ($this->meta > 0 && ($this->lastInteractWithEntity < 0 || $now - $this->lastInteractWithEntity >= 1)) {
 				$this->lastInteractWithEntity = -1;
 				$this->meta = 0;
-				$this->level->setBlock($this, $this, true, true);
+				$this->level->setBlock($this, $this, true, true, $deep);
 			} else {
 				$this->level->scheduleUpdate($this, 20);
 			}
 		}
 	}
-	
-	public function updateNeighbours() {
-		static $offsets = [
-			[0, -1, 0],
-			[1, 0, 0],
-			[-1, 0, 0],
-			[0, 0, 1],
-			[0, 0, -1],
-		];
-		$pluginManager = Server::getInstance()->getPluginManager();
-		$tmpVector = new Vector3();
-		foreach ($offsets as $offset) {
-			$tmpVector->setComponents($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
-			$block = $this->level->getBlock($tmpVector);
-			// block beneath is solid or not beneath and redstone wire
-			if (($offset[1] == -1 && $block instanceof Solid) || ($offset[1] != -1 && $block instanceof RedstoneWire)) {
-				$ev = new BlockUpdateEvent($block);
-				$pluginManager->callEvent($ev);
-				if(!$ev->isCancelled()){
-					$ev->getBlock()->onUpdate(Level::BLOCK_UPDATE_NORMAL);
-				}
-			}
-		}
-	}
+
 }

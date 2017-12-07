@@ -27,7 +27,11 @@ class RedstoneTorch extends RedstoneTorchActive {
 		];
 	}
 	
-	public function onUpdate($type) {
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		static $faces = [
 			1 => 4,
 			2 => 5,
@@ -52,7 +56,7 @@ class RedstoneTorch extends RedstoneTorchActive {
 		if ($block->isSolid() && $block->getPoweredState() == Solid::POWERED_NONE) {
 //			echo "X: " . $this->x . " Z: " . $this->z . " Update torch" . PHP_EOL;
 			$litTorch = Block::get(Block::REDSTONE_TORCH_ACTIVE, $this->meta);
-			$this->level->setBlock($this, $litTorch);
+			$this->level->setBlock($this, $litTorch, false, true, $deep);
 		}			
 	}
 

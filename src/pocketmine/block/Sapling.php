@@ -73,7 +73,10 @@ class Sapling extends Flowable{
 		return false;
 	}
 
-	public function onUpdate($type){
+	public function onUpdate($type, $deep){
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
 		return false;
 	}
 

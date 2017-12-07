@@ -73,7 +73,15 @@ class RedstoneTorchActive extends Flowable {
 		return false;
 	}
 	
-	public function onUpdate($type) {
+	public function needScheduleOnUpdate() {
+		return true;
+	}
+	
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		static $faces = [
 			1 => 4,
 			2 => 5,
@@ -98,7 +106,7 @@ class RedstoneTorchActive extends Flowable {
 		if ($block->isSolid() && $block->getPoweredState() !== Solid::POWERED_NONE) {
 //			echo "X: " . $this->x . " Z: " . $this->z . " Update active torch" . PHP_EOL;
 			$unlitTorch = Block::get(Block::REDSTONE_TORCH, $this->meta);
-			$this->level->setBlock($this, $unlitTorch);
+			$this->level->setBlock($this, $unlitTorch, false, true, $deep);
 		}			
 	}
 	

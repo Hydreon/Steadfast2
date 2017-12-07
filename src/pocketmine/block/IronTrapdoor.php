@@ -23,10 +23,14 @@ class IronTrapdoor extends Trapdoor {
 		return Tool::TYPE_PICKAXE;
 	}
 	
-	public function onUpdate($type) {
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		if ($type == Level::BLOCK_UPDATE_NORMAL) {
 			$this->meta ^= 0x08;
-			$this->getLevel()->setBlock($this, $this, true, false);
+			$this->getLevel()->setBlock($this, $this, true, false, $deep);
 		}
 	}
 	

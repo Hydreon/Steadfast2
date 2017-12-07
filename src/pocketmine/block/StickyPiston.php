@@ -10,7 +10,7 @@ class StickyPiston extends Piston {
 		parent::__construct($meta);
 	}
 	
-	protected function retract($tile, $extendSide) {
+	protected function retract($tile, $extendSide, $deep) {
 //		echo "X: " . $this->x . " Z: " . $this->z . " Retract sticky piston" . PHP_EOL;
 		$tile->namedtag['Progress'] = 0;
 		$tile->namedtag['State'] = 0;
@@ -19,10 +19,10 @@ class StickyPiston extends Piston {
 		$movingBlock = $extendBlock->getSide($extendSide);
 //		echo $extendBlock . PHP_EOL;
 		if ($movingBlock instanceof Solid) {
-			$this->getLevel()->setBlock($movingBlock, Block::get(self::AIR), true, true);
-			$this->getLevel()->setBlock($extendBlock, $movingBlock, true, true);
+			$this->getLevel()->setBlock($movingBlock, Block::get(self::AIR), true, true, $deep);
+			$this->getLevel()->setBlock($extendBlock, $movingBlock, true, true, $deep);
 		} else {
-			$this->getLevel()->setBlock($extendBlock, Block::get(self::AIR), true, true);
+			$this->getLevel()->setBlock($extendBlock, Block::get(self::AIR), true, true, $deep);
 		}
 //		var_dump("Piston remove charge 3 " . $this->x . " " . $this->z);
 		$tile->spawnToAll();

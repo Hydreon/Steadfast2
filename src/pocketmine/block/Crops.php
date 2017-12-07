@@ -67,7 +67,11 @@ abstract class Crops extends Flowable{
 		return false;
 	}
 
-	public function onUpdate($type){
+	public function onUpdate($type, $deep){
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			if($this->getSide(0)->isTransparent() === true){
 				$this->getLevel()->useBreakOn($this);
@@ -81,7 +85,7 @@ abstract class Crops extends Flowable{
 					Server::getInstance()->getPluginManager()->callEvent($ev = new BlockGrowEvent($this, $block));
 
 					if(!$ev->isCancelled()){
-						$this->getLevel()->setBlock($this, $ev->getNewState(), true, true);
+						$this->getLevel()->setBlock($this, $ev->getNewState(), true, true, $deep);
 					}else{
 						return Level::BLOCK_UPDATE_RANDOM;
 					}
