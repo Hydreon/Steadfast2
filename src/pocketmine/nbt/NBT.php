@@ -93,7 +93,7 @@ class NBT{
 
 		if($item->hasCompound()){
 			$tag->tag = clone $item->getNamedTag();
-			$tag->tag->setName("tag");
+//			$tag->tag->setName("tag");
 		}
 
 		return $tag;
@@ -150,7 +150,7 @@ class NBT{
 	}
 
 	public static function matchTree(Compound $tag1, Compound $tag2){
-		if($tag1->getName() !== $tag2->getName() or $tag1->getCount() !== $tag2->getCount()){
+		if($tag1->getCount() !== $tag2->getCount()){
 			return false;
 		}
 
