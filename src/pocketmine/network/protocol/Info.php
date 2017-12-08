@@ -50,6 +50,7 @@ interface Info{
 	const PROTOCOL_136 = 136; // 1.2.0.31
 	const PROTOCOL_137 = 137; // 1.2.0
 	const PROTOCOL_140 = 140; // 1.2.5.11
+	const PROTOCOL_150 = 150; // 1.2.6
 	/** OUTDATED (supporting will be removed with next release, may didn't work properly)*/
 	const PROTOCOL_120 = 120; // 1.2.0.xx (beta)
 //	const PROTOCOL_121 = 121; // 1.2.0.xx (beta)
