@@ -2185,7 +2185,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case 'CONTAINER_CLOSE_PACKET':
 				//Timings::$timerContainerClosePacket->startTiming();
-				if($this->spawned === false or $packet->windowid === 0){					
+				if ($this->spawned === false || $packet->windowid === 0){					
 					break;
 				}
 				$this->craftingType = self::CRAFTING_DEFAULT;
@@ -2198,6 +2198,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if ($this->protocol >= Info::PROTOCOL_120) {
 					// duck tape
 					if ($packet->windowid == 0xff) { // player inventory and workbench
+						$this->onCloseSelfInventory();
 						$this->inventory->close($this);
 					}
 				}
@@ -4986,6 +4987,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->metadata = [self::DATA_BUTTON_TEXT => [self::DATA_TYPE_STRING, $this->interactButtonText]];
 			$this->dataPacket($pk);
 		}
+	}
+	
+	protected function onCloseSelfInventory() {
+		
 	}
 
 }
