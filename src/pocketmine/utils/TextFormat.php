@@ -472,5 +472,56 @@ abstract class TextFormat{
 
 		return $newString;
 	}
+	
+	private static $charPixelLength = [
+		'default' => 5,
+		' ' => 3,
+		'I' => 3,
+		'f' => 4,
+		'i' => 1,
+		'j' => 4,
+		'k' => 4,
+		'l' => 2,
+		't' => 3,
+		'!' => 1,
+		'@' => 6,
+		'*' => 4,
+		'(' => 4,
+		')' => 4,
+		'[' => 3,
+		']' => 3,
+		'{' => 4,
+		'}' => 4,
+		':' => 1,
+		';' => 1,
+		'\'' => 2,
+		'"' => 4,
+		',' => 1,
+		'.' => 1,
+		'<' => 4,
+		'>' => 4,
+		'|' => 1,
+		'`' => 2,
+		'~' => 6,
+	];
+	const SPACE_PIXEL_LENGTH = 3;
+	
+	public static function centerLatinText($lines) {
+		$pixelLengths = [];
+		foreach ($lines as $index => $line) {
+			$linePixelLength = 0;
+			$lineLength = strlen($line);
+			for ($i = 0; $i < $lineLength; $i++) {
+				$linePixelLength += isset(static::$charPixelLength[$line[$i]]) ? static::$charPixelLength[$line[$i]] : static::$charPixelLength['default'];
+			}
+			$pixelLengths[$index] = $linePixelLength + $lineLength + ($lineLength == 1 ? 0 : $lineLength - 1);
+		}
+		$maxLength = max($pixelLengths);
+		foreach ($pixelLengths as $index => $pixelLength) {
+			$spaceNumOnOneSide = intval(($maxLength - $pixelLength) / static::SPACE_PIXEL_LENGTH) >> 1;
+			$lines[$index] = str_repeat(" ", $spaceNumOnOneSide) . $lines[$index];
+		}
+		return $lines;
+	}
 
 }

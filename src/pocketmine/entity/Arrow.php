@@ -80,7 +80,6 @@ class Arrow extends Projectile{
 	
 	public function getBoundingBox() {
 		$bb = clone parent::getBoundingBox();
-//		return $bb->expand(1, 1, 1);
 		return $bb;
 	}
 	

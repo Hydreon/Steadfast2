@@ -64,17 +64,17 @@ abstract class Thread extends \Thread{
 
 		return false;
 	}
-
+	
 	/**
 	 * Stops the thread using the best way possible. Try to stop it yourself before calling this.
 	 */
 	public function quit(){
 		$this->isKilled = true;
-
 		$this->notify();
-		
-		if(!$this->isJoined() and !$this->isTerminated()){
-			$this->join();
+		if(!$this->isJoined()){
+			if(!$this->isTerminated()){
+				$this->join();
+			}
 		}
 		
 		ThreadManager::getInstance()->remove($this);

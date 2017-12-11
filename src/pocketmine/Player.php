@@ -1884,6 +1884,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 									$viewer->dataPacket($pk);
 								}
 							}
+							
+							$topBlockId = $this->level->getBlockIdAt($packet->x, $packet->y + 1, $packet->z);
+							if ($topBlockId == block\Block::FIRE) {
+								$fireBlock = $this->level->getBlock(new Vector3($packet->x, $packet->y + 1, $packet->z));
+								$this->level->sendBlocks([$this], [$fireBlock], UpdateBlockPacket::FLAG_ALL_PRIORITY);
+							}
 						}
 						break;
 					case 'ABORT_DESTROY_BLOCK':
@@ -2179,7 +2185,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case 'CONTAINER_CLOSE_PACKET':
 				//Timings::$timerContainerClosePacket->startTiming();
-				if($this->spawned === false or $packet->windowid === 0){					
+				if ($this->spawned === false || $packet->windowid === 0){					
 					break;
 				}
 				$this->craftingType = self::CRAFTING_DEFAULT;
@@ -2192,6 +2198,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if ($this->protocol >= Info::PROTOCOL_120) {
 					// duck tape
 					if ($packet->windowid == 0xff) { // player inventory and workbench
+						$this->onCloseSelfInventory();
 						$this->inventory->close($this);
 					}
 				}
@@ -4223,6 +4230,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		} else if ($recipe instanceof ShapelessRecipe) {
 			$ingredients = $recipe->getIngredientList();
 		}
+		$isAllCraftSlotsEmpty = true;
 		$ingredientsCount = count($ingredients);
 		$firstIndex = 0;
 		foreach ($craftSlots as &$item) {
@@ -4240,6 +4248,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if ($isItemsNotEquals) {
 					throw new \Exception('Recive bad recipe');
 				}
+				$isAllCraftSlotsEmpty = false;
 				$firstIndex = $i + 1;
 				$item->count -= $ingredient->count;
 				if ($item->count == 0) {
@@ -4248,6 +4257,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				break;
 			}
+		}
+		if ($isAllCraftSlotsEmpty) {
+			throw new \Exception('All craft slots are empty');
 		}
 	}
 
@@ -4980,6 +4992,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->metadata = [self::DATA_BUTTON_TEXT => [self::DATA_TYPE_STRING, $this->interactButtonText]];
 			$this->dataPacket($pk);
 		}
+	}
+	
+	protected function onCloseSelfInventory() {
+		
 	}
 
 }
