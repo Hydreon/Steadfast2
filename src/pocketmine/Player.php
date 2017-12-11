@@ -4175,6 +4175,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		} else if ($recipe instanceof ShapelessRecipe) {
 			$ingredients = $recipe->getIngredientList();
 		}
+		$isAllCraftSlotsEmpty = true;
 		$ingredientsCount = count($ingredients);
 		$firstIndex = 0;
 		foreach ($craftSlots as &$item) {
@@ -4192,6 +4193,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if ($isItemsNotEquals) {
 					throw new \Exception('Recive bad recipe');
 				}
+				$isAllCraftSlotsEmpty = false;
 				$firstIndex = $i + 1;
 				$item->count -= $ingredient->count;
 				if ($item->count == 0) {
@@ -4200,6 +4202,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				break;
 			}
+		}
+		if ($isAllCraftSlotsEmpty) {
+			throw new \Exception('All craft slots are empty');
 		}
 	}
 
