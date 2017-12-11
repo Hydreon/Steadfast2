@@ -2148,7 +2148,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case 'CONTAINER_CLOSE_PACKET':
 				//Timings::$timerContainerClosePacket->startTiming();
-				if($this->spawned === false or $packet->windowid === 0){					
+				if ($this->spawned === false || $packet->windowid === 0){					
 					break;
 				}
 				$this->craftingType = self::CRAFTING_DEFAULT;
@@ -2161,6 +2161,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if ($this->protocol >= Info::PROTOCOL_120) {
 					// duck tape
 					if ($packet->windowid == 0xff) { // player inventory and workbench
+						$this->onCloseSelfInventory();
 						$this->inventory->close($this);
 					}
 				}
@@ -4843,6 +4844,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->getSkinName(), $this->getSkinData(), $this->getCapeData(), $this->getSkinGeometryName(), $this->getSkinGeometryData()];
 			$this->server->batchPackets($otherPlayers, [$pk]);
 		}
+	}
+	
+	protected function onCloseSelfInventory() {
+		
 	}
 	
 }

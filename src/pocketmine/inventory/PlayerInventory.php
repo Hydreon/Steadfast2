@@ -27,6 +27,7 @@ use pocketmine\event\entity\EntityInventoryChangeEvent;
 use pocketmine\event\player\PlayerItemHeldEvent;
 use pocketmine\item\Item;
 use pocketmine\network\Network;
+use pocketmine\network\protocol\ContainerOpenPacket;
 use pocketmine\network\protocol\ContainerSetContentPacket;
 use pocketmine\network\protocol\ContainerSetSlotPacket;
 use pocketmine\network\protocol\MobArmorEquipmentPacket;
@@ -500,4 +501,15 @@ class PlayerInventory extends BaseInventory{
 		parent::removeItem($searchItem);
 	}
 	
+	public function openSelfInventory() {
+		$pk = new ContainerOpenPacket();
+		$pk->windowid = ContainerSetContentPacket::SPECIAL_INVENTORY;
+		$pk->type = -1;
+		$pk->slots = $this->getSize();
+		$pk->x = $this->getHolder()->getX();
+		$pk->y = $this->getHolder()->getY();
+		$pk->z = $this->getHolder()->getZ();
+		$this->getHolder()->dataPacket($pk);
+	}
+
 }
