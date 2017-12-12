@@ -202,6 +202,9 @@ class Explosion{
 					]),
 					"Fuse" => new ByteTag("Fuse", mt_rand(10, 30))
 				]));
+				if($this->what instanceof Entity){
+					$tnt->setOwner($this->what);
+				}
 				$tnt->spawnToAll();
 			}elseif(mt_rand(0, 100) < $yield){
 				foreach($block->getDrops($air) as $drop){
