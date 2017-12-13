@@ -1661,6 +1661,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->protocol = $packet->protocol1; // we need protocol for correct encoding DisconnectPacket
 				if($packet->isValidProtocol === false) {					
 					$this->close("", $this->getNonValidProtocolMessage($this->protocol));
+					error_log("Login from unsupported protocol " . $this->protocol);
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
 				}
@@ -4817,7 +4818,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	private function getNonValidProtocolMessage($protocol) {
-		if ($protocol > ProtocolInfo::PROTOCOL_137 || ($protocol > ProtocolInfo::PROTOCOL_113 && $protocol < ProtocolInfo::PROTOCOL_120)) {
+		if ($protocol > ProtocolInfo::PROTOCOL_160) {
 			return TextFormat::WHITE . "We don't support this client version yet.\n" . TextFormat::WHITE ."        The update is coming soon.";
 		} else {
 			return TextFormat::WHITE . "Please update your client version to join";
