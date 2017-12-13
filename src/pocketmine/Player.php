@@ -2252,9 +2252,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						self::tryApplyCraft($craftSlots, $recipe);
 						$this->inventory->setItem(PlayerInventory120::CRAFT_RESULT_INDEX, $recipe->getResult());
 						foreach ($craftSlots as $slot => $item) {
-							if ($item == null || $item->getId() == Item::AIR) {
-								continue;
-							}
+//							if ($item == null || $item->getId() == Item::AIR) {
+//								continue;
+//							}
 							$this->inventory->setItem(PlayerInventory120::CRAFT_INDEX_0 - $slot, $item);
 						}
 					} catch (\Exception $e) {
