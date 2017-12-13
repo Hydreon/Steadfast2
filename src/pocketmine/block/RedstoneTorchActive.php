@@ -23,6 +23,12 @@ class RedstoneTorchActive extends Flowable {
 		return 7;
 	}
 	
+	public function getDrops(Item $item) {
+		return [
+			[self::REDSTONE_TORCH_ACTIVE, 0, 1],
+		];
+	}
+	
 	public function isMayBeDestroyedByPiston() {
 		return true;
 	}

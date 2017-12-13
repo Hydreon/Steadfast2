@@ -20,12 +20,6 @@ class RedstoneTorch extends RedstoneTorchActive {
 	public function getLightLevel() {
 		return 0;
 	}
-
-	public function getDrops(Item $item) {
-		return [
-			[self::REDSTONE_TORCH, 0, 1],
-		];
-	}
 	
 	public function onUpdate($type, $deep) {
 		if (!Block::onUpdate($type, $deep)) {

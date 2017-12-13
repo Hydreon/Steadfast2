@@ -114,6 +114,7 @@ class Item{
 	const TALL_GRASS = 31;
 	const BUSH = 32;
 	const DEAD_BUSH = 32;
+	const PISTON = 33;
 	const WOOL = 35;
 	const DANDELION = 37;
 	const POPPY = 38;
@@ -967,6 +968,7 @@ class Item{
 			self::$list[self::ELYTRA] = Elytra::class;
 			self::$list[self::PRISMARINE_CRYSTAL] = PrismarineCrystal::class;
 			self::$list[self::POTION] = Potion::class;
+			self::$list[self::REDSTONE_REPEATER] = Repeater::class;
             
             // update for 1.0
 			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;
