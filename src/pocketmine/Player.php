@@ -384,6 +384,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $currentVehicle = null;
 	protected $fishingHook = null;
 	protected $interactButtonText= '';
+	protected $isFlying = false;
 	
 	public function getLeaveMessage(){
 		return "";
@@ -1640,12 +1641,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " UPDATE_ATTRIBUTES_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
                 break;
             case 'ADVENTURE_SETTINGS_PACKET':
-                $isHacker = ($this->allowFlight === false && ($packet->flags >> 9) & 0x01 === 1) || 
+				$isFlying = ($packet->flags >> 9) & 0x01 === 1;
+                $isHacker = ($this->allowFlight === false && $isFlying) || 
                     (!$this->isSpectator() && ($packet->flags >> 7) & 0x01 === 1);
                 if ($isHacker) {
                     file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " ADVENTURE_SETTINGS_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
                     $this->kick("Sorry, hack mods are not permitted on Steadfast... at all.");
                 }
+				if ($this->isFlying != $isFlying) {
+					if ($isFlying) {
+						$this->onStartFly();
+					} else {
+						$this->onStopFly();
+					}
+					$this->isFlying = $isFlying;
+				}
                 break;
 			case 'LOGIN_PACKET':
 				//Timings::$timerLoginPacket->startTiming();
@@ -1656,6 +1666,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->protocol = $packet->protocol1; // we need protocol for correct encoding DisconnectPacket
 				if($packet->isValidProtocol === false) {					
 					$this->close("", $this->getNonValidProtocolMessage($this->protocol));
+					error_log("Login from unsupported protocol " . $this->protocol);
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
 				}
@@ -4873,7 +4884,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	private function getNonValidProtocolMessage($protocol) {
-		if ($protocol > ProtocolInfo::PROTOCOL_137 || ($protocol > ProtocolInfo::PROTOCOL_113 && $protocol < ProtocolInfo::PROTOCOL_120)) {
+		if ($protocol > ProtocolInfo::PROTOCOL_160) {
 			return TextFormat::WHITE . "We don't support this client version yet.\n" . TextFormat::WHITE ."        The update is coming soon.";
 		} else {
 			return TextFormat::WHITE . "Please update your client version to join";
@@ -4997,5 +5008,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected function onCloseSelfInventory() {
 		
 	}
-
+	
+	protected function onStartFly() {
+		
+	}
+	
+	protected function onStopFly() {
+		
+	}
+	
 }
