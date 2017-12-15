@@ -4374,7 +4374,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$recipients = $this->hasSpawned;
 						$recipients[$this->id] = $this;
 						$pk = new LevelSoundEventPacket();
-						$pk->eventId = 20;
+						$pk->eventId = LevelSoundEventPacket::SOUND_BOW;
 						$pk->x = $this->x;
 						$pk->y = $this->y;
 						$pk->z = $this->z;
