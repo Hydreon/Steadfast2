@@ -163,7 +163,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_MOVING = 29; // ???
 	const DATA_FLAG_NOT_IN_WATER = 30;
 	const DATA_FLAG_CHESTED_MOUNT = 31;
-	const DATA_FLAG_STACKABLE = 32; //???
+	const DATA_FLAG_STACKABLE = 32; //???	
 	
 	/* 1.1.0 new flags
 	const DATA_FLAG_CAN_CLIMBING = 19; 
@@ -173,6 +173,9 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_IS_WASD_CONTROLLED = 43; 
 	const DATA_FLAG_CAN_POWER_JUMP = 44;
 	 */
+	
+	const DATA_FLAG_HAS_COLLISION = 45;
+	const DATA_FLAG_AFFECTED_BY_GRAVITY = 46;
 	
 	const DATA_PLAYER_FLAG_SLEEP = 1;
 	const DATA_PLAYER_FLAG_DEAD = 2;
