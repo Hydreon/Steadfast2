@@ -510,6 +510,7 @@ abstract class TextFormat{
 		$pixelLengths = [];
 		foreach ($lines as $index => $line) {
 			$linePixelLength = 0;
+			$line = TextFormat::clean($line);
 			$lineLength = strlen($line);
 			for ($i = 0; $i < $lineLength; $i++) {
 				$linePixelLength += isset(static::$charPixelLength[$line[$i]]) ? static::$charPixelLength[$line[$i]] : static::$charPixelLength['default'];

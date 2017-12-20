@@ -166,7 +166,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_MOVING = 29; // ???
 	const DATA_FLAG_NOT_IN_WATER = 30;
 	const DATA_FLAG_CHESTED_MOUNT = 31;
-	const DATA_FLAG_STACKABLE = 32; //???
+	const DATA_FLAG_STACKABLE = 32; //???	
 	
 	/* 1.1.0 new flags
 	const DATA_FLAG_CAN_CLIMBING = 19; 
