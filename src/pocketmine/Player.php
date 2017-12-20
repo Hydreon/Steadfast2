@@ -348,8 +348,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	private $actionsNum = [];
 	
-	private $isMayMove = false;
-	
 	protected $serverAddress = '';
 	
 	protected $clientVersion = '';
@@ -664,6 +662,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			AvailableCommandsPacket::prepareCommands(self::$availableCommands);
 		}
 		$this->inventory = new PlayerInventory($this); // hack for not null getInventory
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_HAS_COLLISION, true, self::DATA_TYPE_LONG, false);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_AFFECTED_BY_GRAVITY, true, self::DATA_TYPE_LONG, false);
 	}
 	
 	public function setViewRadius($radius) {
@@ -1700,9 +1700,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
 			case 'MOVE_PLAYER_PACKET':
-				if ($this->dead === true || $this->spawned !== true) {
-					$this->sendPosition($this, $packet->yaw, $packet->pitch, MovePlayerPacket::MODE_RESET);
-				} else {
+				if ($this->dead !== true && $this->spawned === true) {
 					$newPos = new Vector3($packet->x, $packet->y - $this->getEyeHeight(), $packet->z);
 					if ($this->isTeleporting && $newPos->distanceSquared($this) > 2) {
 						$this->isTeleporting = false;
@@ -1726,12 +1724,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 						if ($packet->yaw < 0) {
 							$packet->yaw += 360;
-						}
-
-						if (!$this->isMayMove) {
-							if ($this->yaw != $packet->yaw || $this->pitch != $packet->pitch || abs($this->x - $packet->x) >= 0.05 || abs($this->z - $packet->z) >= 0.05) {
-								$this->setMayMove(true);
-							}
 						}
 
 						$this->setRotation($packet->yaw, $packet->pitch);
@@ -2930,10 +2922,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk = new RespawnPacket();
 			$pos = $this->getSpawn();
 			$pk->x = $pos->x;
-			$pk->y = $pos->y;
+			$pk->y = $pos->y +  $this->getEyeHeight();
 			$pk->z = $pos->z;
 			$this->dataPacket($pk);
-			$this->setMayMove(false);
 		}
 	}
 
@@ -3389,7 +3380,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->sendSelfData();				
 		$this->updateSpeed(self::DEFAULT_SPEED);
-		$this->setMayMove(false);
 //		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
 	}
 
@@ -4285,15 +4275,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->blockId = $blockId;
 		$pk->entityType = $entityType;
 		$this->dataPacket($pk);
-	}
-	
-	private function setMayMove($state) {
-		if ($this->protocol >= ProtocolInfo::PROTOCOL_120) {
-			$this->setDataFlag(self::DATA_FLAGS, 46, $state);
-			$this->isMayMove = $state;
-		} else {
-			$this->isMayMove = true;
-		}
 	}
 
 	public function customInteract($packet) {
