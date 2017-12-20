@@ -55,7 +55,7 @@ class TNT extends Solid{
 		if (!Block::onUpdate($type, $deep)) {
 			return false;
 		}
-		parent::onUpdate($type);
+		parent::onUpdate($type, $deep);
 		if ($this->getPoweredState() != self::POWERED_NONE) {
 			$this->onActivate(Item::get(Item::FLINT_STEEL));
 		}

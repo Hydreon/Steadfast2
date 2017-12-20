@@ -207,7 +207,10 @@ class Rail extends Transparent{
 		return null;
 	}
 	
-	public function onUpdate($type) {
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
 		// south +z
 		// north -z
 		// east +x

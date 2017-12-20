@@ -69,10 +69,10 @@ abstract class Fallable extends Solid {
 
 				$fall->spawnToAll();
 			} else {
-				parent::onUpdate($type);
+				parent::onUpdate($type, $deep);
 			}
 		} else {
-			parent::onUpdate($type);
+			parent::onUpdate($type, $deep);
 		}
 	}
 
