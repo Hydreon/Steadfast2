@@ -180,9 +180,6 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_HAS_COLLISION = 45;
 	const DATA_FLAG_AFFECTED_BY_GRAVITY = 46;
 	
-	const DATA_FLAG_HAS_COLLISION = 45;
-	const DATA_FLAG_AFFECTED_BY_GRAVITY = 46;
-	
 	const DATA_PLAYER_FLAG_SLEEP = 1;
 	const DATA_PLAYER_FLAG_DEAD = 2;
 	
