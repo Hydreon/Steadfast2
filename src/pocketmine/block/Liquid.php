@@ -197,7 +197,7 @@ abstract class Liquid extends Transparent {
 		}
 		$deep++;
 		if ($type === Level::BLOCK_UPDATE_NORMAL) {
-			$this->checkForHarden();
+			$this->checkForHarden($deep);
 			$this->getLevel()->scheduleUpdate($this, $this->tickRate());
 		} elseif ($type === Level::BLOCK_UPDATE_SCHEDULED) {
 			if ($this->temporalVector === null) {
@@ -247,7 +247,7 @@ abstract class Liquid extends Transparent {
 				}
 //				sleep(5);
 			}
-			$this->checkForHarden();
+			$this->checkForHarden($deep);
 		}
 	}
 
