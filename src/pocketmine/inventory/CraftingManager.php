@@ -346,7 +346,7 @@ class CraftingManager{
 			" P ",
 			"   "
 		))->setIngredient("P", Item::get(Item::WOODEN_PLANKS, -1)));
-
+		
 		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::MINECART, 0, 1),
 			"I I",
 			"III",
@@ -460,6 +460,11 @@ class CraftingManager{
 			"GG ",
 			"   "
 		))->setIngredient("G", Item::get(Item::GOLD_INGOT)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::RAIL, 0, 16),
+			"I I",
+			"ISI",
+			"I I"
+		))->setIngredient("S", Item::get(Item::STICK))->setIngredient("I", Item::get(Item::IRON_INGOT)));
 	}
 
 	protected function registerFurnace(){
