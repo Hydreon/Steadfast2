@@ -88,18 +88,20 @@ class ChestInventory extends ContainerInventory {
 			if ($isShouldUpdateBlock) {
 				$this->holder->getBlock()->onUpdate(Level::BLOCK_UPDATE_WEAK);
 			}
-			static $offsets = [
-				[1, 0, 0],
-				[-1, 0, 0],
-				[0, 0, -1],
-				[0, 0, 1],
-			];
-			$tmpVector = new Vector3(0, 0, 0);
-			foreach ($offsets as $offset) {
-				$tmpVector->setComponents($this->holder->x + $offset[0], $this->holder->y, $this->holder->z + $offset[2]);
-				if ($this->holder->level->getBlockIdAt($tmpVector->x, $tmpVector->y, $tmpVector->z) == Block::REDSTONE_COMPARATOR_BLOCK) {
-					$comparator = $this->holder->level->getBlock($tmpVector);
-					$comparator->onUpdate(Level::BLOCK_UPDATE_NORMAL);
+			if (!is_null($this->holder->level)) {
+				static $offsets = [
+					[1, 0, 0],
+					[-1, 0, 0],
+					[0, 0, -1],
+					[0, 0, 1],
+				];
+				$tmpVector = new Vector3(0, 0, 0);
+				foreach ($offsets as $offset) {
+					$tmpVector->setComponents($this->holder->x + $offset[0], $this->holder->y, $this->holder->z + $offset[2]);
+					if ($this->holder->level->getBlockIdAt($tmpVector->x, $tmpVector->y, $tmpVector->z) == Block::REDSTONE_COMPARATOR_BLOCK) {
+						$comparator = $this->holder->level->getBlock($tmpVector);
+						$comparator->onUpdate(Level::BLOCK_UPDATE_NORMAL);
+					}
 				}
 			}
 			return true;
