@@ -35,6 +35,7 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\protocol\AddItemEntityPacket;
 use pocketmine\Player;
 use pocketmine\block\Block;
+use pocketmine\block\Water;
 
 class Item extends Entity{
 	const NETWORK_ID = 64;
@@ -142,10 +143,12 @@ class Item extends Entity{
 				$blockId = $this->level->getBlockIdAt(floor($this->x), floor($this->y), floor($this->z));
 				if ($blockId == Block::WATER || $blockId == Block::STILL_WATER) {			
 					$water = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y), floor($this->z)));
-					$flowVector = $water->getFlowVector();
-					$this->motionX = $flowVector->x * 0.1;
-//					$this->motionY = -0.05;
-					$this->motionZ = $flowVector->z * 0.1;
+					if ($water instanceof Water) {
+						$flowVector = $water->getFlowVector();
+						$this->motionX = $flowVector->x * 0.1;
+	//					$this->motionY = -0.05;
+						$this->motionZ = $flowVector->z * 0.1;
+					}
 				}
 
 				if ($this->age > 1200) {
