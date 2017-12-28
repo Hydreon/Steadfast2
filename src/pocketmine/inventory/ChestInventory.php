@@ -85,10 +85,10 @@ class ChestInventory extends ContainerInventory {
 	public function setItem($index, Item $item) {
 		$isShouldUpdateBlock = $item->getId() != Item::AIR && !$item->equals($this->getItem($index));
 		if (parent::setItem($index, $item)) {
-			if ($isShouldUpdateBlock) {
-				$this->holder->getBlock()->onUpdate(Level::BLOCK_UPDATE_WEAK, 0);
-			}
 			if (!is_null($this->holder->level)) {
+				if ($isShouldUpdateBlock) {
+					$this->holder->getBlock()->onUpdate(Level::BLOCK_UPDATE_WEAK, 0);
+				}			
 				static $offsets = [
 					[1, 0, 0],
 					[-1, 0, 0],
