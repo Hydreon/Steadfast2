@@ -2213,7 +2213,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->inventory->setItem(PlayerInventory120::CRAFT_INDEX_0 - $slot, $item);
 						}
 					} catch (\Exception $e) {
-						var_dump($e->getMessage());
+						$pk = new ContainerClosePacket();
+						$pk->windowid = ContainerSetContentPacket::SPECIAL_INVENTORY;
+						$this->dataPacket($pk);
 					}
 					return;
 				}
@@ -4176,36 +4178,42 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		} else if ($recipe instanceof ShapelessRecipe) {
 			$ingredients = $recipe->getIngredientList();
 		}
+		foreach ($ingredients as $ingKey => $ingredient) {
+			if ($ingredient == null || $ingredient->getId() == Item::AIR) {
+				unset($ingredients[$ingKey]);
+			}
+		}
 		$isAllCraftSlotsEmpty = true;
-		$ingredientsCount = count($ingredients);
-		$firstIndex = 0;
-		foreach ($craftSlots as &$item) {
+		$usedItemData = [];
+		foreach ($craftSlots as $itemKey => &$item) {
 			if ($item == null || $item->getId() == Item::AIR) {
 				continue;
 			}
-			for ($i = $firstIndex; $i < $ingredientsCount; $i++) {
-				$ingredient = $ingredients[$i];
-				if ($ingredient->getId() == Item::AIR) {
-					continue;
-				}
-				$isItemsNotEquals = $item->getId() != $ingredient->getId() || 
-						($item->getDamage() != $ingredient->getDamage() && $ingredient->getDamage() != 32767) || 
+			foreach ($ingredients as $ingKey => $ingredient) {
+				$isItemsNotEquals = $item->getId() != $ingredient->getId() ||
+						($item->getDamage() != $ingredient->getDamage() && $ingredient->getDamage() != 32767) ||
 						$item->count < $ingredient->count;
 				if ($isItemsNotEquals) {
 					throw new \Exception('Recive bad recipe');
 				}
 				$isAllCraftSlotsEmpty = false;
-				$firstIndex = $i + 1;
-				$item->count -= $ingredient->count;
-				if ($item->count == 0) {
-					/** @important count = 0 is important */
-					$item = Item::get(Item::AIR, 0, 0);
-				}
+				$usedItemData[$itemKey] = $ingredient->count;
+				unset($ingredients[$ingKey]);
 				break;
 			}
 		}
+		if (!empty($ingredients)) {
+			throw new \Exception('Recive bad recipe');
+		}
 		if ($isAllCraftSlotsEmpty) {
 			throw new \Exception('All craft slots are empty');
+		}
+		foreach ($usedItemData as $itemKey => $itemCount) {
+			$craftSlots[$itemKey]->count -= $itemCount;
+			if ($craftSlots[$itemKey]->count == 0) {
+				/** @important count = 0 is important */
+				$craftSlots[$itemKey] = Item::get(Item::AIR, 0, 0);
+			}
 		}
 	}
 
