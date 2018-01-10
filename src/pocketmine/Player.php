@@ -2491,6 +2491,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case 'RESOURCE_PACKS_CLIENT_RESPONSE_PACKET':
 				switch ($packet->status) {
 					case ResourcePackClientResponsePacket::STATUS_REFUSED:
+						$pk = new ResourcePackStackPacket();
+						$this->dataPacket($pk);
+						break;
 					case ResourcePackClientResponsePacket::STATUS_SEND_PACKS:
 						$modsManager = $this->server->getModsManager();
 						foreach ($packet->packIds as $packId) {
@@ -2505,8 +2508,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->dataPacket($pk);
 						}
 						break;
-					case ResourcePackClientResponsePacket::STATUS_HAVE_ALL_PACKS:
+					case ResourcePackClientResponsePacket::STATUS_HAVE_ALL_PACKS:						
+						$modsManager = $this->server->getModsManager();
 						$pk = new ResourcePackStackPacket();
+						$pk->isRequired = $modsManager->isModsRequired();
+						$pk->addons = $modsManager->getAddons();
+						$pk->resourcePacks = $modsManager->getResourcePacks();
 						$this->dataPacket($pk);
 						break;
 					case ResourcePackClientResponsePacket::STATUS_COMPLETED:
@@ -2522,7 +2529,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if (is_null($resourcePack)) {
 					$this->close("Request invalid resource pack", "Request invalid resource pack");
 				} else {
-					var_dump("Request " . $packet->requestChunkIndex);
 					$pk = new ResourcePackChunkDataPacket();
 					$pk->resourcePackId = $packet->resourcePackId;
 					$pk->chunkIndex = $packet->requestChunkIndex;
