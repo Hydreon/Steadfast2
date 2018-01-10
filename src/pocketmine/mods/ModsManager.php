@@ -8,7 +8,7 @@ use pocketmine\Server;
 
 class ModsManager {
 	
-	const MODS_DIR = __DIR__."/../../../mods/";
+	const MODS_DIR = __DIR__."/../../../../mods/"; // Mods folder located in server root
 	
 	/** @var ResourcePack[] */
 	private $resourcePacks = [];
@@ -29,18 +29,18 @@ class ModsManager {
 			mkdir(self::MODS_DIR, 0755);
 		}
 		foreach ($modsNames as $modName) {
-			if (!is_file(self::MODS_DIR . $modName)) {
+			if (!is_file(self::MODS_DIR . $modName.'.zip')) {
 				$server->getLogger()->warning("Mod with name \"{$modName}\" doesn't exists.");
 			} else {
 				try {
-					$resourcePack = new ResourcePack(self::MODS_DIR . $modName);
+					$resourcePack = new ResourcePack(self::MODS_DIR . $modName.'.zip', $modName);
 					if (!isset($this->resourcePacks[$resourcePack->id])) {
 						$this->resourcePacks[$resourcePack->id] = $resourcePack;
 					} else {
-						$server->getLogger()->warning("Resurce pack: " . $modName . " Error: UUID duplication");
+						$server->getLogger()->warning("Resource pack: " . $modName . " Error: UUID duplication");
 					}
 				} catch (\Exception $e) {
-					$server->getLogger()->warning("Resurce pack: " . $modName . " Error: " . $e->getMessage());
+					$server->getLogger()->warning("Resource pack: " . $modName . " Error: " . $e->getMessage());
 				}
 			}
 		}

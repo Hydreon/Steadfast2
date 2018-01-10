@@ -11,11 +11,11 @@ class ResourcePack {
 	public $hash = 0;
 	private $zippedData = "";
 	
-	public function __construct($path) {
+	public function __construct($path, $modName) {
 		$manifestData = "";
 		$zipFileHandler = zip_open($path);
 		while (($zipEntry = zip_read($zipFileHandler)) !== false) {
-			if (zip_entry_name($zipEntry) == "manifest.json") {
+			if (zip_entry_name($zipEntry) == $modName."/manifest.json") {
 				if (zip_entry_open($zipFileHandler, $zipEntry)) {
 					$manifestData = zip_entry_read($zipEntry, 8192);
 					zip_entry_close($zipEntry);
@@ -36,7 +36,7 @@ class ResourcePack {
 				$this->hash = hash_file("sha256", $path, true);
 				$this->zippedData = file_get_contents($path);
 			} else {
-				throw new \Exception("Wrong resource pack minifest file");
+				throw new \Exception("Wrong resource pack manifest file");
 			}
 		} else {
 			throw new \Exception("Wrong resource pack file");
