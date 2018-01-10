@@ -21,12 +21,15 @@ class ModsManager {
 		$server = Server::getInstance();
 		$this->isModsRequired = $server->getConfigBoolean("mods-required", false);
 		$modsConfig = $server->getConfigString("mods-enabled", "");
+		if (empty($modsConfig)) {
+			return;
+		}
 		$modsNames = explode(";", $modsConfig);
 		if (!file_exists(self::MODS_DIR)) {
 			mkdir(self::MODS_DIR, 0755);
 		}
 		foreach ($modsNames as $modName) {
-			if (!file_exists(self::MODS_DIR . $modName)) {
+			if (!is_file(self::MODS_DIR . $modName)) {
 				$server->getLogger()->warning("Mod with name \"{$modName}\" doesn't exists.");
 			} else {
 				try {
