@@ -64,6 +64,7 @@ use pocketmine\level\Level;
 use pocketmine\metadata\EntityMetadataStore;
 use pocketmine\metadata\LevelMetadataStore;
 use pocketmine\metadata\PlayerMetadataStore;
+use pocketmine\mods\ModsManager;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
@@ -291,6 +292,8 @@ class Server{
 	private $serverPrivateKey = '';
 	private $serverToken = 'hksdYI3has';
 	private $isUseEncrypt = false;
+	
+	private $modsManager = null;
 
 	public function addSpawnedEntity($entity) {
 		if ($entity instanceof Player) {
@@ -679,6 +682,13 @@ class Server{
 	 */
 	public function getScheduler(){
 		return $this->scheduler;
+	}
+	
+	/**
+	 * @return ModsManager
+	 */
+	public function getModsManager() {
+		return $this->modsManager;
 	}
 
 	/**
@@ -1722,6 +1732,8 @@ class Server{
 		if($this->getAdvancedProperty("main.player-shuffle", 0) > 0){
 			$this->scheduler->scheduleDelayedRepeatingTask(new CallbackTask([$this, "shufflePlayers"]), $this->getAdvancedProperty("main.player-shuffle", 0), $this->getAdvancedProperty("main.player-shuffle", 0));
 		}
+		
+		$this->modsManager = new ModsManager();
 		
 		$this->start();
 	}
