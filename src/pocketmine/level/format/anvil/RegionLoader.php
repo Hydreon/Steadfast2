@@ -96,9 +96,7 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		}
 
 		$chunk = $this->chunkClass::fromBinary(fread($this->filePointer, $length - 1), $this->levelProvider);
-		if($chunk instanceof $this->chunkClass){
-			$chunk->setX($x);
-			$chunk->setZ($z);
+		if($chunk instanceof $this->chunkClass){			
 			return $chunk;
 		}else{
 			return null;

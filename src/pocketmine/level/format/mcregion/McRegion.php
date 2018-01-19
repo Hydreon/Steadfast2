@@ -186,6 +186,8 @@ class McRegion extends BaseLevelProvider{
 		//$this->level->timings->syncChunkLoadDataTimer->stopTiming();
 
 		if($chunk !== null){
+			$chunk->setX($chunkX);
+			$chunk->setZ($chunkZ);
 			$this->chunks[$index] = $chunk;
 			return true;
 		}else{
