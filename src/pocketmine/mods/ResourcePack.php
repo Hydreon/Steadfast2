@@ -15,7 +15,7 @@ class ResourcePack {
 		$manifestData = "";
 		$zipFileHandler = zip_open($path);
 		while (($zipEntry = zip_read($zipFileHandler)) !== false) {
-			if (zip_entry_name($zipEntry) == $modName."/manifest.json") {
+			if (zip_entry_name($zipEntry) == "manifest.json") {
 				if (zip_entry_open($zipFileHandler, $zipEntry)) {
 					$manifestData = zip_entry_read($zipEntry, 8192);
 					zip_entry_close($zipEntry);

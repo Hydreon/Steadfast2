@@ -8,7 +8,7 @@ use pocketmine\Server;
 
 class ModsManager {
 	
-	const MODS_DIR = __DIR__."/../../../../mods/"; // Mods folder located in server root
+	const MODS_DIR = "mods/"; // Mods folder located in server root
 	
 	/** @var ResourcePack[] */
 	private $resourcePacks = [];
