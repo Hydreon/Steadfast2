@@ -24,6 +24,8 @@ use pocketmine\nbt\tag\Compound;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
+use pocketmine\level\Level;
+
 class Arrow extends Projectile{
 	const NETWORK_ID = 80;
 	public $width = 0.5;
@@ -62,18 +64,20 @@ class Arrow extends Projectile{
 		return $hasUpdate;
 	}
 	public function spawnTo(Player $player){
-		$pk = new AddEntityPacket();
-		$pk->type = Arrow::NETWORK_ID;
-		$pk->eid = $this->getId();
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->speedX = $this->motionX;
-		$pk->speedY = $this->motionY;
-		$pk->speedZ = $this->motionZ;
-//		$pk->metadata = $this->dataProperties;
-		$player->dataPacket($pk);
-		parent::spawnTo($player);
+		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
+			$this->hasSpawned[$player->getId()] = $player;
+			$pk = new AddEntityPacket();
+			$pk->type = Arrow::NETWORK_ID;
+			$pk->eid = $this->getId();
+			$pk->x = $this->x;
+			$pk->y = $this->y;
+			$pk->z = $this->z;
+			$pk->speedX = $this->motionX;
+			$pk->speedY = $this->motionY;
+			$pk->speedZ = $this->motionZ;
+	//		$pk->metadata = $this->dataProperties;
+			$player->dataPacket($pk);
+		}
 	}
 	
 	public function getBoundingBox() {
