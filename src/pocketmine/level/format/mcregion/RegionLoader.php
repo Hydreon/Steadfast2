@@ -123,8 +123,6 @@ class RegionLoader{
 
 		$chunk = Chunk::fromBinary(fread($this->filePointer, $length - 1), $this->levelProvider);
 		if($chunk instanceof Chunk){
-			$chunk->setX($x);
-			$chunk->setZ($z);
 			return $chunk;
 		}else{
 			return null;
