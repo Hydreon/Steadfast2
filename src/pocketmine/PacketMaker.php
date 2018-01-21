@@ -88,19 +88,8 @@ class PacketMaker extends Thread {
 			foreach ($data['moveData'] as $identifier => $moveData) {
 				$moveStr = "";
 				foreach ($moveData['data'] as $singleMoveData) {
-					if ($singleMoveData[7]) {
-						$pk = new MovePlayerPacket();
-						$pk->eid = $singleMoveData[0];
-						$pk->x = $singleMoveData[1];
-						$pk->y = $singleMoveData[2];
-						$pk->z = $singleMoveData[3];
-						$pk->pitch = $singleMoveData[6];
-						$pk->yaw = $singleMoveData[5];
-						$pk->bodyYaw = $singleMoveData[4];
-					} else {
-						$pk = new MoveEntityPacket();
-						$pk->entities = [$singleMoveData];
-					}
+					$pk = new MoveEntityPacket();
+					$pk->entities = [$singleMoveData];
 					$pk->senderSubClientID = $singleMoveData[8];
 					$pk->encode($moveData['playerProtocol']);
 					$moveStr .= Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer;					
