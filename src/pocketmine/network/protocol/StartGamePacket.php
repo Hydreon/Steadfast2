@@ -70,11 +70,11 @@ class StartGamePacket extends PEPacket{
 		
 		$this->putSignedVarInt($this->gamemode);
 		
-		$this->putSignedVarInt(0); // Difficulty
+		$this->putSignedVarInt(1); // Difficulty
 		
 		// default spawn 3x VarInt
 		$this->putSignedVarInt($this->spawnX);
-		$this->putSignedVarInt($this->spawnY);
+		$this->putVarInt($this->spawnY);
 		$this->putSignedVarInt($this->spawnZ);
 		
 		$this->putByte(1); // hasAchievementsDisabled
@@ -104,6 +104,10 @@ class StartGamePacket extends PEPacket{
 			$this->putByte(0); // has trust players enabled
 			$this->putSignedVarInt(1); // permission level
 			$this->putSignedVarInt(4); // game publish setting
+			$this->putLInt(0);
+			$this->putByte(0);
+			$this->putSignedVarInt(0);
+			$this->putByte(0);
 			$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
 			$this->putString(''); // level name
 			$this->putString(''); // template pack id

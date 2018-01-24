@@ -2,6 +2,7 @@
 
 namespace pocketmine\network\protocol\v120;
 
+use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
 
@@ -38,8 +39,18 @@ class PlayerSkinPacket extends PEPacket {
 		$this->putString($this->newSkinId);
 		$this->putString($this->newSkinName);
 		$this->putString($this->oldSkinName);
+		if ($playerProtocol >= Info::PROTOCOL_200) {
+			$this->putInt(1); // num skin data, always 1
+			$this->putInt(strlen($this->newSkinByteData));
+		}
 		$this->putString($this->newSkinByteData);
-		$this->putString($this->newCapeByteData);
+		if ($playerProtocol >= Info::PROTOCOL_200) {
+			$this->putInt(empty($this->newCapeByteData));
+			$this->putInt(strlen($this->newCapeByteData));
+			$this->putString($this->newCapeByteData);
+		} else {
+			$this->putString($this->newCapeByteData);
+		}
 		$this->putString($this->newSkinGeometryName);
 		$this->putString($this->newSkinGeometryData);
 	}

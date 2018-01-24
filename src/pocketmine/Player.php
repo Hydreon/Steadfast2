@@ -1761,10 +1761,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 				}
 
-				if($packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
-					$packet->slot = -1; //Air
-				}else{
-					$packet->slot -= 9; //Get real block slot
+				if ($this->protocol < ProtocolInfo::PROTOCOL_200) {
+					if($packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
+						$packet->slot = -1; //Air
+					}else{
+						$packet->slot -= 9; //Get real block slot
+					}
 				}
 				
 				// not so good solution
@@ -3403,10 +3405,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($this->getHealth() <= 0){
 			$this->dead = true;
 		}
-
-		$pk = new SetDifficultyPacket();
-		$pk->difficulty = $this->server->getDifficulty();
-		$this->dataPacket($pk);
 
 		$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . TextFormat::AQUA . $this->ip . " connected");
 		
