@@ -53,6 +53,9 @@ class AddItemEntityPacket extends PEPacket{
 		$this->putLFloat($this->speedY);
 		$this->putLFloat($this->speedZ);
 		$this->putVarInt(0); // metadata counts
+		if ($playerProtocol >= Info::PROTOCOL_200) {
+			$this->putByte(0); // isFromFishing
+		}
 	}
 
 }

@@ -59,6 +59,10 @@ class TextPacket extends PEPacket{
 			case self::TYPE_WHISPER:
 			case self::TYPE_ANNOUNCEMENT:
 				$this->source = $this->getString();
+				if ($playerProtocol >= Info::PROTOCOL_200) {
+					$this->getString(); // third party name
+					$this->getSignedVarInt(); // platform id
+				}
 				$this->message = $this->getString();
 				break;
 			case self::TYPE_RAW:
@@ -77,6 +81,9 @@ class TextPacket extends PEPacket{
 		}
 		if ($playerProtocol >= Info::PROTOCOL_120) {
 			$this->xuid = $this->getString();
+			if ($playerProtocol >= Info::PROTOCOL_200) {
+				$this->getString(); // platform id
+			}
 		}
 	}
 
@@ -92,6 +99,10 @@ class TextPacket extends PEPacket{
 			case self::TYPE_WHISPER:
 			case self::TYPE_ANNOUNCEMENT:
 				$this->putString($this->source);
+				if ($playerProtocol >= Info::PROTOCOL_200) {
+					$this->putString(""); // third party name
+					$this->putSignedVarInt(0); // platform id
+				}
 				$this->putString($this->message);
 				break;
 			case self::TYPE_RAW:
@@ -107,11 +118,18 @@ class TextPacket extends PEPacket{
 				foreach ($this->parameters as $p) {
 					$this->putString($p);
 				}
+				if ($playerProtocol >= Info::PROTOCOL_200) { // it's not should be here, but it prevent client crushing
+					$this->putString(""); // third party name
+					$this->putSignedVarInt(0); // platform id
+				}
 				break;
 		}
 		if ($playerProtocol >= Info::PROTOCOL_120) {
 //			$this->putString('');//temp hack for prevent xbox and chat lags
-			$this->putString($this->xuid);		
+			$this->putString($this->xuid);
+			if ($playerProtocol >= Info::PROTOCOL_200) {
+				$this->putString(""); // platform id
+			}
 		}
 	}
 
