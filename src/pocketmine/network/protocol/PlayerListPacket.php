@@ -67,14 +67,34 @@ class PlayerListPacket extends PEPacket{
 					$this->putUUID($d[0]);
 					$this->putVarInt($d[1]); // Player ID
 					$this->putString($d[2]); // Player Name
+					if ($playerProtocol >= Info::PROTOCOL_200) {
+						$this->putString(""); // third party name
+						$this->putSignedVarInt(0); // platform id
+					}
 					if ($playerProtocol >= Info::PROTOCOL_120) {
 						$this->putString($d[3]); // Skin ID
+						if ($playerProtocol >= Info::PROTOCOL_200) {
+							$this->putLInt(1); // num skins, always 1
+						}
 						$this->putString($d[4]); // Skin Data
-						$this->putString(isset($d[5]) ? $d[5] : ''); // Cape Data
+						$capeData = isset($d[5]) ? $d[5] : '';
+						if ($playerProtocol >= Info::PROTOCOL_200) {
+							if (!empty($capeData)) {
+								$this->putLInt(1); // isNotEmpty
+								$this->putString($capeData); // Cape Data
+							} else {
+								$this->putLInt(0); // isEmpty
+							}
+						} else {
+							$this->putString($capeData); // Cape Data
+						}
 						$this->putString(isset($d[6]) ? $d[6] : ''); // Skin Geometry Name
 						$this->putString(isset($d[7]) ? $d[7] : ''); // Skin Geometry Data
 //						$this->putString(''); //temp hack for prevent xbox and chat lags
 						$this->putString(isset($d[8]) ? $d[8] : ''); // XUID
+						if ($playerProtocol >= Info::PROTOCOL_200) {
+							$this->putString(""); // platform chat id
+						}
 					} else {
 						$this->putString('Standard_Custom');
 						$this->putString($d[4]);

@@ -2,6 +2,7 @@
 
 namespace pocketmine\network\protocol\v120;
 
+use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
 
@@ -22,10 +23,12 @@ class PlayerHotbarPacket extends PEPacket {
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->selectedSlot);
 		$this->putByte(0); // container ID, 0 - player inventory
-		$slotsNum = count($this->slotsLink);
-		$this->putVarInt($slotsNum);
-		for ($i = 0; $i < $slotsNum; $i++) {
-			$this->putVarInt($this->slotsLink[$i]);
+		if ($playerProtocol < Info::PROTOCOL_200) {
+			$slotsNum = count($this->slotsLink);
+			$this->putVarInt($slotsNum);
+			for ($i = 0; $i < $slotsNum; $i++) {
+				$this->putVarInt($this->slotsLink[$i]);
+			}
 		}
 		$this->putByte(false); // Should select slot (don't know how it works)
 	}

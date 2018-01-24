@@ -515,7 +515,9 @@ abstract class TextFormat{
 			for ($i = 0; $i < $lineLength; $i++) {
 				$linePixelLength += isset(static::$charPixelLength[$line[$i]]) ? static::$charPixelLength[$line[$i]] : static::$charPixelLength['default'];
 			}
-			$pixelLengths[$index] = $linePixelLength + $lineLength + ($lineLength == 1 ? 0 : $lineLength - 1);
+			// don't know why i made this
+//			$pixelLengths[$index] = $linePixelLength + $lineLength + ($lineLength == 1 ? 0 : $lineLength - 1);
+			$pixelLengths[$index] = $linePixelLength;
 		}
 		$maxLength = max($pixelLengths);
 		foreach ($pixelLengths as $index => $pixelLength) {

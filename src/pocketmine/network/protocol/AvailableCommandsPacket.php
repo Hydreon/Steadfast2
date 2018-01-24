@@ -148,6 +148,7 @@ class AvailableCommandsPacket extends PEPacket{
 		$additionalDataStream->putVarInt(count($commands));
 		$additionalDataStream->put($commandsStream->buffer);
 		self::$commandsBuffer[Info::PROTOCOL_120] = $additionalDataStream->buffer;
+		self::$commandsBuffer[Info::PROTOCOL_200] = $additionalDataStream->buffer;
 	}
 	
 	/**
