@@ -39,6 +39,8 @@ class BaseTransaction implements Transaction {
 
 	/** @var float */
 	protected $creationTime;
+	
+	protected $needInventoryUpdate = false;
 
 	/**
 	 * @param Inventory $inventory
@@ -72,6 +74,15 @@ class BaseTransaction implements Transaction {
 
 	public function getTargetItem() {
 		return clone $this->targetItem;
+	}
+	
+	public function setTargetItem($item) {
+		$this->targetItem = $item;
+		$this->needInventoryUpdate = true;
+	}
+	
+	public function isNeedInventoryUpdate() {
+		return $this->needInventoryUpdate;
 	}
 
 	/**

@@ -4145,7 +4145,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
 			}
 		} catch (\Exception $ex) {
-			echo '[INFO] Transaction execute exception. ' . $ex->getMessage() .PHP_EOL;
+//			echo '[INFO] Transaction execute exception. ' . $ex->getMessage() .PHP_EOL;
 		}
 	}
 	
@@ -4172,6 +4172,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		//  check transaction and real data
 		$inventory = $transaction->getInventory();
+		if (!($inventory instanceof PlayerInventory)) {
+			$inventory->sendContents($this);
+			return;
+		}
 		$item = $inventory->getItem($transaction->getSlot());
 		if ($item == null || !$item->equals($dropItem) || $item->count < $dropItem->count) {
 			$inventory->sendContents($this);
