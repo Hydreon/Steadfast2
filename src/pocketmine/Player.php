@@ -316,8 +316,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	private $isFirstConnect = true;
 
-	const MAX_EXPERIENCE = 2147483648;
-	const MAX_EXPERIENCE_LEVEL = 21863;
+	const MAX_EXPERIENCE = 1.0; // experience is percents
+	const MAX_EXPERIENCE_LEVEL = PHP_INT_MAX;
 	private $exp = 0;
 	private $expLevel = 0;
 
@@ -1761,10 +1761,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 				}
 
-				if($packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
-					$packet->slot = -1; //Air
-				}else{
-					$packet->slot -= 9; //Get real block slot
+				if ($this->protocol < ProtocolInfo::PROTOCOL_200) {
+					if($packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
+						$packet->slot = -1; //Air
+					}else{
+						$packet->slot -= 9; //Get real block slot
+					}
 				}
 				
 				// not so good solution
@@ -3404,10 +3406,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->dead = true;
 		}
 
-		$pk = new SetDifficultyPacket();
-		$pk->difficulty = $this->server->getDifficulty();
-		$this->dataPacket($pk);
-
 		$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . TextFormat::AQUA . $this->ip . " connected");
 		
 		$slots = [];
@@ -3629,14 +3627,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->exp = $exp;
 		$this->expLevel = $level;
 
-		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE, $exp, 0, self::MAX_EXPERIENCE, 100);
-		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, $level, 0, self::MAX_EXPERIENCE_LEVEL, 100);
-
 		if($this->hasEnoughExperience() && $checkNextLevel){
-			$exp = 0; // TODO - Calculate the amount of XP for the next level
+			$exp = $this->getExperience() - $this->getExperienceNeeded();
 			$level = $this->getExperienceLevel() + 1;
 			$this->updateExperience($exp, $level, false);
 		}
+		
+		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE, $this->getExperience() / $this->getExperienceNeeded(), 0, self::MAX_EXPERIENCE, 0);
+		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, $level, 0, self::MAX_EXPERIENCE_LEVEL, 0);
 	}
 
 	public function addExperience($exp = 0, $level = 0, $checkNextLevel = true)
@@ -3663,13 +3661,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return PHP_INT_MAX;
 	}
 
-	public function hasEnoughExperience()
-	{
-		return $this->getExperienceNeeded() - $this->getRealExperience() <= 0;
-	}
-
-	public function getRealExperience(){
-		return $this->getExperienceNeeded() * $this->getExperience();
+	public function hasEnoughExperience() {
+		return $this->getExperience() >= $this->getExperienceNeeded();
 	}
 	
 	public function isUseElytra() {
