@@ -916,7 +916,7 @@ class Block extends Position implements Metadatable{
 			return -1;
 		}
 		$toolType = $this->getToolType();
-		$isSuitableForHarvest = !empty($this->getDrops($item)) || $toolType == Tool::TYPE_NONE;
+		$isSuitableForHarvest = ($this->getId() != Block::QUARTZ_BLOCK || $item->isPickaxe()) && (!empty($this->getDrops($item)) || $toolType == Tool::TYPE_NONE);
 		$secondsForBreak = $this->getHardness() * ($isSuitableForHarvest ? 1.5 : 5);
 		if ($secondsForBreak == 0) {
 			$secondsForBreak = 0.05;
