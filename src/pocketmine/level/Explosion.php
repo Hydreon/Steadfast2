@@ -111,7 +111,7 @@ class Explosion{
 							}
 							$block = $this->level->getBlock($vBlock);
 
-							if($block->getId() !== 0){
+							if($block->getId() !== 0 && $block->getId() !== Block::BEDROCK){
 								$blastForce -= ($block->getHardness() / 5 + 0.3) * $this->stepLen;
 								if($blastForce > 0){
 									if(!isset($this->affectedBlocks[$index = Level::blockHash($block->x, $block->y, $block->z)])){
