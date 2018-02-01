@@ -1,9 +1,9 @@
 #  <img src="https://lbsg.net/wp-content/themes/lifeboat/images/lbsg-logo-sm.png" alt="LBSG logo" title="Aimeos" align="center" height="120" />
-# Steadfast2 Minecraft PE Server Software
+# Steadfast2 & MineplexPE Minecraft PE Server Software
 
 ## Introduction
 
-Steadfast2 is a project for backporting new Minecraft: Pocket Edition changes to older Pocketmine versions for better stability and performance, while retaining as many features from the new versions as possible. It's currently in production on Lifeboat Survival Games' main servers.
+Steadfast2 is a project for backporting new Minecraft: Pocket Edition changes to older Pocketmine versions for better stability and performance, while retaining as many features from the new versions as possible. It's currently in production on Lifeboat Survival Games' main servers and MineplexPE.
 
 ## Known bugs
 
