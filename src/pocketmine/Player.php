@@ -2686,7 +2686,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case 'PLAYER_INPUT_PACKET':
 				if (!is_null($this->currentVehicle)) {
 					$this->currentVehicle->playerMoveVehicle($packet->forward, $packet->sideway);
-				}				
+				} else {
+					$this->onPlayerInput($packet->forward, $packet->sideway, $packet->jump, $packet->sneak);
+				}			
 				break;
 			default:
 				break;
@@ -5038,6 +5040,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	protected function onStopFly() {
+		
+	}
+	
+	protected function onPlayerInput($forward, $sideway, $isJump, $isSneak) {
 		
 	}
 	
