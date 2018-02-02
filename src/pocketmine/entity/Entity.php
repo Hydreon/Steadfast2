@@ -1131,6 +1131,10 @@ abstract class Entity extends Location implements Metadatable{
 		if ($topBlockId == Block::WATER || $topBlockId == Block::STILL_WATER) {			
 			return true;
 		}
+		$bottomBlockId = $this->level->getBlockIdAt($x, floor($this->y - 1),$z);
+		if ($bottomBlockId == Block::WATER || $bottomBlockId == Block::STILL_WATER) {			
+			return true;
+		}
 		return false;
 	}
 	
