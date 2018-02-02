@@ -101,6 +101,7 @@ use pocketmine\network\protocol\v120\PlayerHotbarPacket;
 use pocketmine\network\protocol\v120\PurchaseReceiptPacket;
 use pocketmine\network\protocol\v120\ServerSettingsRequestPacket;
 use pocketmine\network\protocol\v120\SubClientLoginPacket;
+use pocketmine\network\protocol\ResourcePackChunkRequestPacket;
 
 class Network {
 
@@ -323,6 +324,7 @@ class Network {
 		/** @var DataPacket $class */
 		switch ($playerProtocol) {
 			case Info::PROTOCOL_120:
+			case Info::PROTOCOL_200:
 				$class = $this->packetPool120[$id];
 				break;
 			case Info::PROTOCOL_110:
@@ -424,6 +426,7 @@ class Network {
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACKS_INFO_PACKET, ResourcePacksInfoPacket::class);
 		$this->registerPacket(ProtocolInfo::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
+		$this->registerPacket(ProtocolInfo::RESOURCE_PACK_CHUNK_REQUEST_PACKET, ResourcePackChunkRequestPacket::class);
 	}
 	
 	private function registerPackets105(){
@@ -485,8 +488,7 @@ class Network {
 		$this->registerPacket105(ProtocolInfo105::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket105(ProtocolInfo105::RESOURCE_PACKS_INFO_PACKET, ResourcePacksInfoPacket::class);
 		$this->registerPacket105(ProtocolInfo105::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
-		
-		
+		$this->registerPacket105(ProtocolInfo105::RESOURCE_PACK_CHUNK_REQUEST_PACKET, ResourcePackChunkRequestPacket::class);
 	}
 	
 	
@@ -548,6 +550,7 @@ class Network {
 		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACKS_INFO_PACKET, ResourcePacksInfoPacket::class);
 		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
+		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACK_CHUNK_REQUEST_PACKET, ResourcePackChunkRequestPacket::class);
 	
 	}
 	
@@ -602,6 +605,7 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACKS_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
+		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACK_CHUNK_REQUEST_PACKET, ResourcePackChunkRequestPacket::class);
 		// new
 		$this->registerPacket120(ProtocolInfo120::LOGIN_PACKET, NewLoginPacket::class);
 		$this->registerPacket120(ProtocolInfo120::INVENTORY_TRANSACTION_PACKET, InventoryTransactionPacket::class);

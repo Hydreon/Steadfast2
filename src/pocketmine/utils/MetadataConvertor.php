@@ -89,6 +89,7 @@ class MetadataConvertor {
 	private static function updateMetaIds($meta, $protocol) {
 		switch ($protocol) {
 			case Info::PROTOCOL_120:
+			case Info::PROTOCOL_200:
 				$protocolMeta = self::$entityMetaIds120;
 				break;
 			case Info::PROTOCOL_110:
@@ -114,6 +115,7 @@ class MetadataConvertor {
 		}
 		switch ($protocol) {
 			case Info::PROTOCOL_120:
+			case Info::PROTOCOL_200:
 				$newflags = 1 << 19; //DATA_FLAG_CAN_CLIMBING
 				$protocolFlags = self::$entityFlags120;
 				break;

@@ -60,8 +60,15 @@ class AddPlayerPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putUUID($this->uuid);
 		$this->putString($this->username);
+		if ($playerProtocol >= Info::PROTOCOL_200) {
+			$this->putString(""); // third party name
+			$this->putSignedVarInt(0); // platform id
+		}
 		$this->putVarInt($this->eid);
 		$this->putVarInt($this->eid);
+		if ($playerProtocol >= Info::PROTOCOL_200) {
+			$this->putString(""); // platform chat id
+		}
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);

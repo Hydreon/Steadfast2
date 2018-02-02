@@ -75,6 +75,10 @@ class Carpet extends Flowable{
 			$this->z + 1
 		);
 	}
+	
+	public function getBoundingBox() {
+		return Block::getBoundingBox();
+	}
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
 		$down = $this->getSide(0);
