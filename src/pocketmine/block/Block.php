@@ -1230,6 +1230,7 @@ class Block extends Position implements Metadatable{
 			case self::STONE_PRESSURE_PLATE:
 			case self::WEIGHTED_PRESSURE_PLATE_LIGHT:
 			case self::WEIGHTED_PRESSURE_PLATE_HEAVY:
+			case self::LEVER:
 				return $this->isActive();
 			default:
 				return self::$solid[$this->id] && $this->getPoweredState() != Solid::POWERED_NONE;
