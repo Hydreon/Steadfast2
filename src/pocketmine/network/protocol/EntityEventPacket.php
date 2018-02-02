@@ -30,6 +30,7 @@ class EntityEventPacket extends PEPacket{
 
 	const HURT_ANIMATION = 2;
 	const DEATH_ANIMATION = 3;
+	const START_ATACKING = 4;
 
 	const TAME_FAIL = 6;
 	const TAME_SUCCESS = 7;
