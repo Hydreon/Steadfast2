@@ -2638,6 +2638,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->close('', 'client disconnect');
 				}
 				break;
+			case 'PLAYER_INPUT_PACKET':
+				$this->onPlayerInput($packet->forward, $packet->sideway, $packet->jump, $packet->sneak);
+				break;
 			default:
 				break;
 		}
@@ -4895,6 +4898,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	protected function onStopFly() {
+		
+	}
+	
+	protected function onPlayerInput($forward, $sideway, $isJump, $isSneak) {
 		
 	}
 	
