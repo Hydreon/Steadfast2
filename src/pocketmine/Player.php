@@ -1901,44 +1901,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->setBanned(true);
 							break;
 						}
-						$this->craftingType = self::CRAFTING_DEFAULT;
-
-						$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
-
-						$this->teleport($ev->getRespawnPosition());
-
-						$this->setSprinting(false, true);
-						$this->setSneaking(false);
-
-						$this->extinguish();
-						$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
-						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
-						$this->deadTicks = 0;
-						$this->despawnFromAll();
-						$this->dead = false;
-						$this->isTeleporting = true;
-						$this->noDamageTicks = 60;
-
-						$this->setHealth($this->getMaxHealth());
-						$this->setFood(20);
-
-						$this->foodTick = 0;
-						$this->exhaustion = 0;
-						$this->saturation = 5;
-						$this->lastSentVitals = 10;
-
-						$this->removeAllEffects();
-						$this->sendSelfData();
-
-						$this->sendSettings();
-						$this->inventory->sendContents($this);
-						$this->inventory->sendArmorContents($this);
-
-						$this->blocked = false;
-
-						$this->scheduleUpdate();
-						
-						$this->server->getPluginManager()->callEvent(new PlayerRespawnAfterEvent($this));
+						$this->respawn();
 						break;
 					case 'START_SPRINTING':
 						$ev = new PlayerToggleSprintEvent($this, true);
@@ -2644,6 +2607,47 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			default:
 				break;
 		}
+	}
+	
+	protected function respawn() {
+		$this->craftingType = self::CRAFTING_DEFAULT;
+
+		$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
+
+		$this->teleport($ev->getRespawnPosition());
+
+		$this->setSprinting(false, true);
+		$this->setSneaking(false);
+
+		$this->extinguish();
+		$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
+		$this->deadTicks = 0;
+		$this->despawnFromAll();
+		$this->dead = false;
+		$this->isTeleporting = true;
+		$this->noDamageTicks = 60;
+
+		$this->setHealth($this->getMaxHealth());
+		$this->setFood(20);
+
+		$this->foodTick = 0;
+		$this->exhaustion = 0;
+		$this->saturation = 5;
+		$this->lastSentVitals = 10;
+
+		$this->removeAllEffects();
+		$this->sendSelfData();
+
+		$this->sendSettings();
+		$this->inventory->sendContents($this);
+		$this->inventory->sendArmorContents($this);
+
+		$this->blocked = false;
+
+		$this->scheduleUpdate();
+
+		$this->server->getPluginManager()->callEvent(new PlayerRespawnAfterEvent($this));
 	}
 
 	/**
