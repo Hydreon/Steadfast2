@@ -4530,6 +4530,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$from = new Location($this->x, $this->y, $this->z, $this->lastYaw, $this->lastPitch, $this->level);
 		$to = new Location($newPos->x, $newPos->y, $newPos->z, $this->yaw, $this->pitch, $this->level);
 
+		$this->isTeleportedForMoveEvent = false;
 		$deltaAngle = abs($from->yaw - $to->yaw) + abs($from->pitch - $to->pitch);
 		$distanceSquared = ($this->newPosition->x - $this->x) ** 2 + ($this->newPosition->y - $this->y) ** 2 + ($this->newPosition->z - $this->z) ** 2;
 		if (($distanceSquared > 0.0625 || $deltaAngle > 10)) {
@@ -4561,8 +4562,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							}
 						}
 					}
-				}
-				$this->isTeleportedForMoveEvent = false;
+				}				
 				$ev = new PlayerMoveEvent($this, $from, $to);
 				$this->setMoving(true);
 				$this->server->getPluginManager()->callEvent($ev);
@@ -4582,6 +4582,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$dy = $to->y - $from->y;
 			$dz = $to->z - $from->z;
 			$this->move($dx, $dy, $dz);
+			if ($this->isTeleportedForMoveEvent) {
+				return;
+			}
 			$this->x = $to->x;
 			$this->y = $to->y;
 			$this->z = $to->z;
