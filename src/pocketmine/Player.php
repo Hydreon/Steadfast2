@@ -1927,45 +1927,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->setBanned(true);
 							break;
 						}
-						$this->craftingType = self::CRAFTING_DEFAULT;
-
-						$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
-
-						$this->teleport($ev->getRespawnPosition());
-
-						$this->setSprinting(false, true);
-						$this->setSneaking(false);
-
-						$this->extinguish();
-						$this->blocksAround = null;
-						$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
-						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
-						$this->deadTicks = 0;
-						$this->despawnFromAll();
-						$this->dead = false;
-						$this->isTeleporting = true;
-						$this->noDamageTicks = 60;
-
-						$this->setHealth($this->getMaxHealth());
-						$this->setFood(20);
-
-						$this->foodTick = 0;
-						$this->exhaustion = 0;
-						$this->saturation = 5;
-						$this->lastSentVitals = 10;
-
-						$this->removeAllEffects();
-						$this->sendSelfData();
-
-						$this->sendSettings();
-						$this->inventory->sendContents($this);
-						$this->inventory->sendArmorContents($this);
-
-						$this->blocked = false;
-
-						$this->scheduleUpdate();
-						
-						$this->server->getPluginManager()->callEvent(new PlayerRespawnAfterEvent($this));
+						$this->respawn();
 						break;
 					case 'START_SPRINTING':
 						$ev = new PlayerToggleSprintEvent($this, true);
@@ -2693,6 +2655,48 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			default:
 				break;
 		}
+	}
+	
+	protected function respawn() {		
+		$this->craftingType = self::CRAFTING_DEFAULT;
+
+		$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
+
+		$this->teleport($ev->getRespawnPosition());
+
+		$this->setSprinting(false, true);
+		$this->setSneaking(false);
+
+		$this->extinguish();
+		$this->blocksAround = null;
+		$this->dataProperties[self::DATA_AIR] = [self::DATA_TYPE_SHORT, 300];
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_IN_WATER, true, self::DATA_TYPE_LONG, false);
+		$this->deadTicks = 0;
+		$this->despawnFromAll();
+		$this->dead = false;
+		$this->isTeleporting = true;
+		$this->noDamageTicks = 60;
+
+		$this->setHealth($this->getMaxHealth());
+		$this->setFood(20);
+
+		$this->foodTick = 0;
+		$this->exhaustion = 0;
+		$this->saturation = 5;
+		$this->lastSentVitals = 10;
+
+		$this->removeAllEffects();
+		$this->sendSelfData();
+
+		$this->sendSettings();
+		$this->inventory->sendContents($this);
+		$this->inventory->sendArmorContents($this);
+
+		$this->blocked = false;
+
+		$this->scheduleUpdate();
+
+		$this->server->getPluginManager()->callEvent(new PlayerRespawnAfterEvent($this));
 	}
 
 	/**
@@ -4585,6 +4589,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$from = new Location($this->x, $this->y, $this->z, $this->lastYaw, $this->lastPitch, $this->level);
 		$to = new Location($newPos->x, $newPos->y, $newPos->z, $this->yaw, $this->pitch, $this->level);
 
+		$this->isTeleportedForMoveEvent = false;
 		$deltaAngle = abs($from->yaw - $to->yaw) + abs($from->pitch - $to->pitch);
 		$distanceSquared = ($this->newPosition->x - $this->x) ** 2 + ($this->newPosition->y - $this->y) ** 2 + ($this->newPosition->z - $this->z) ** 2;
 		if (($distanceSquared > 0.0625 || $deltaAngle > 10)) {
@@ -4616,8 +4621,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							}
 						}
 					}
-				}
-				$this->isTeleportedForMoveEvent = false;
+				}				
 				$ev = new PlayerMoveEvent($this, $from, $to);
 				$this->setMoving(true);
 				$this->server->getPluginManager()->callEvent($ev);
@@ -4637,6 +4641,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$dy = $to->y - $from->y;
 			$dz = $to->z - $from->z;
 			$this->move($dx, $dy, $dz);
+			if ($this->isTeleportedForMoveEvent) {
+				return;
+			}
 			$this->x = $to->x;
 			$this->y = $to->y;
 			$this->z = $to->z;
