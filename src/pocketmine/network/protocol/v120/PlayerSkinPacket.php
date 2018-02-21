@@ -27,10 +27,21 @@ class PlayerSkinPacket extends PEPacket {
 		$this->newSkinId = $this->getString();
 		$this->newSkinName = $this->getString();
 		$this->oldSkinName = $this->getString();
+		if ($playerProtocol >= Info::PROTOCOL_200) {
+			$this->getLInt(); // num skin data, always 1
+			$this->getLInt();
+		}
 		$this->newSkinByteData = $this->getString();
-		$this->newCapeByteData = $this->getString();
+		if ($playerProtocol >= Info::PROTOCOL_200) {
+			$this->getLInt();
+			$this->getLInt();
+			$this->newCapeByteData = $this->getString();
+		} else {
+			$this->newCapeByteData = $this->getString();
+		}
 		$this->newSkinGeometryName = $this->getString();
 		$this->newSkinGeometryData = $this->getString();
+		file_put_contents("playerSkin.packet", bin2hex($this->buffer));
 	}
 
 	public function encode($playerProtocol) {
@@ -40,13 +51,13 @@ class PlayerSkinPacket extends PEPacket {
 		$this->putString($this->newSkinName);
 		$this->putString($this->oldSkinName);
 		if ($playerProtocol >= Info::PROTOCOL_200) {
-			$this->putInt(1); // num skin data, always 1
-			$this->putInt(strlen($this->newSkinByteData));
+			$this->putLInt(1); // num skin data, always 1
+			$this->putLInt(strlen($this->newSkinByteData));
 		}
 		$this->putString($this->newSkinByteData);
 		if ($playerProtocol >= Info::PROTOCOL_200) {
-			$this->putInt(empty($this->newCapeByteData));
-			$this->putInt(strlen($this->newCapeByteData));
+			$this->putLInt(empty($this->newCapeByteData));
+			$this->putLInt(strlen($this->newCapeByteData));
 			$this->putString($this->newCapeByteData);
 		} else {
 			$this->putString($this->newCapeByteData);
