@@ -53,6 +53,7 @@ use pocketmine\inventory\InventoryType;
 use pocketmine\inventory\Recipe;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
+use pocketmine\inventory\FurnaceRecipe;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\level\format\anvil\Anvil;
@@ -141,6 +142,7 @@ use pocketmine\entity\monster\walking\Zombie;
 use pocketmine\entity\monster\walking\ZombieVillager;
 use pocketmine\entity\projectile\FireBall;
 use pocketmine\utils\MetadataConvertor;
+use pocketmine\event\server\SendRecipiesList;
 
 /**
  * The class that manages everything
@@ -2311,18 +2313,28 @@ class Server{
 		if(!isset($this->craftList[$p->getPlayerProtocol()])) {
 			$pk = new CraftingDataPacket();
 			$pk->cleanRecipes = true;
-
+			
+			$recipies = [];
+			
 			foreach($this->getCraftingManager()->getRecipes() as $recipe){
+				$recipies[] = $recipe;
+			}
+			foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
+				$recipies[] = $recipe;
+			}
+			
+			$this->getPluginManager()->callEvent($ev = new SendRecipiesList($recipies));
+			
+			foreach($ev->getRecipies() as $recipe){
 				if($recipe instanceof ShapedRecipe){
 					$pk->addShapedRecipe($recipe);
 				}elseif($recipe instanceof ShapelessRecipe){
 					$pk->addShapelessRecipe($recipe);
+				}elseif($recipe instanceof FurnaceRecipe) {
+					$pk->addFurnaceRecipe($recipe);
 				}
-			}
-
-			foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
-				$pk->addFurnaceRecipe($recipe);
-			}
+			}		
+			
 			$pk->encode($p->getPlayerProtocol(), $p->getSubClientId());
 			$pk->isEncoded = true;
 			$this->craftList[$p->getPlayerProtocol()] = $pk;
