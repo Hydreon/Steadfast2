@@ -308,7 +308,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $movementSpeed = self::DEFAULT_SPEED;
 	
-	private static $damegeTimeList = ['0.1' => 0, '0.15' => 0.4, '0.2' => 0.6, '0.25' => 0.8];
+	protected static $damegeTimeList = ['0.1' => 0, '0.15' => 0.4, '0.2' => 0.6, '0.25' => 0.8];
 	
 	protected $lastDamegeTime = 0;
 	
