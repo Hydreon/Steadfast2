@@ -816,7 +816,9 @@ class Server{
 				$this->logger->warning("Corrupted data found for \"" . $name . "\", creating new profile");
 			}
 		}else{
+			if($this->getConfigBoolean('save-player-data') == true){
 			$this->logger->notice("Player data not found for \"" . $name . "\", creating new profile");
+		    }
 		}
 		$spawn = $this->getDefaultLevel()->getSafeSpawn();
 		$nbt = new Compound("", [
