@@ -48,8 +48,20 @@ class MetadataConvertor {
 	private static $diffEntityMetaIds120 = [
 		'DATA_MAX_AIR' => 43,
 	];
+
+	private static $diffEntityMetaIds220 = [
+		'DATA_PLAYER_FLAGS' => 26,
+		'DATA_PLAYER_BED_POSITION' => 28,
+		'DATA_LEAD_HOLDER' => 37,
+		'DATA_SCALE' => 38,
+		'DATA_BUTTON_TEXT' => 39,
+		'DATA_MAX_AIR' => 42,
+		'DATA_SEAT_RIDER_OFFSET' => 56,
+		'DATA_EXPLODE_TIMER' => 55,
+	];
 	private static $entityMetaIds110 = [];
 	private static $entityMetaIds120 = [];
+	private static $entityMetaIds220 = [];
 
 	public static function init() {
 		$oClass = new \ReflectionClass('pocketmine\entity\Entity');
@@ -78,6 +90,12 @@ class MetadataConvertor {
 				self::$entityMetaIds120[self::$initialMeta[$key]] = $value;
 			}
 		}
+		
+		foreach (self::$diffEntityMetaIds220 as $key => $value) {
+			if (isset(self::$initialMeta[$key])) {
+				self::$entityMetaIds220[self::$initialMeta[$key]] = $value;
+			}
+		}
 	}
 
 	public static function updateMeta($meta, $protocol) {
@@ -88,9 +106,11 @@ class MetadataConvertor {
 
 	private static function updateMetaIds($meta, $protocol) {
 		switch ($protocol) {
-			case Info::PROTOCOL_120:
-			case Info::PROTOCOL_200:
 			case Info::PROTOCOL_220:
+				$protocolMeta = self::$entityMetaIds220;
+				break;
+			case Info::PROTOCOL_120:
+			case Info::PROTOCOL_200:			
 				$protocolMeta = self::$entityMetaIds120;
 				break;
 			case Info::PROTOCOL_110:
