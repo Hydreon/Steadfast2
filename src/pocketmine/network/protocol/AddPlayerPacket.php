@@ -25,6 +25,7 @@ namespace pocketmine\network\protocol;
 
 #ifndef COMPILE
 use pocketmine\utils\Binary;
+use pocketmine\entity\Entity;
 
 #endif
 
@@ -59,7 +60,12 @@ class AddPlayerPacket extends PEPacket{
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putUUID($this->uuid);
-		$this->putString($this->username);
+		//hack for display name 200+ protocol
+		if ($playerProtocol >= Info::PROTOCOL_200 && !empty($this->metadata[Entity::DATA_NAMETAG])) {
+			$this->putString($this->metadata[Entity::DATA_NAMETAG][1]);
+		} else {
+			$this->putString($this->username);
+		}
 		if ($playerProtocol >= Info::PROTOCOL_200) {
 			$this->putString(""); // third party name
 			$this->putSignedVarInt(0); // platform id

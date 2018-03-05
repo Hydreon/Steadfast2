@@ -2,10 +2,11 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\utils\UUID;
-use pocketmine\utils\Binary;
-use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\Info120;
+use pocketmine\network\protocol\PEPacket;
+use pocketmine\utils\Binary;
+use pocketmine\utils\JWT;
+use pocketmine\utils\UUID;
 
 class SubClientLoginPacket extends PEPacket {
 
@@ -26,6 +27,7 @@ class SubClientLoginPacket extends PEPacket {
 	public $skinGeometryName = "";
 	public $skinGeometryData = "";
 	public $capeData = "";
+	public $isVerified = true;
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -45,51 +47,56 @@ class SubClientLoginPacket extends PEPacket {
 		$this->chains['data'] = array();
 		$index = 0;
 		foreach ($this->chains['chain'] as $key => $jwt) {
-			$data = self::load($jwt);
-			if (isset($data['extraData'])) {
-				$dataIndex = $index;
+			$data = JWT::parseJwt($jwt);
+			if ($data) {
+				if (!$data['isVerified']) {
+					$this->isVerified = false;
+				}
+				if (isset($data['extraData'])) {
+					$dataIndex = $index;
+				}
+				$this->chains['data'][$index] = $data;
+				$index++;
+			} else {
+				$this->isVerified = false;
 			}
-			$this->chains['data'][$index] = $data;
-			$index++;
 		}
 
-		$this->playerData = self::load($this->playerData);
-		$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
-		$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
-		$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
-		$this->identityPublicKey = $this->chains['data'][$dataIndex]['identityPublicKey'];
-		if (isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
-			$this->xuid = $this->chains['data'][$dataIndex]['extraData']['XUID'];
-		}
+		$this->playerData = JWT::parseJwt($this->playerData);
+		if ($this->playerData) {
+			if (!$this->playerData['isVerified']) {
+				$this->isVerified = false;
+			}
+			$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
+			$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
+			$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
+			$this->identityPublicKey = $this->chains['data'][$dataIndex]['identityPublicKey'];
+			if (isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
+				$this->xuid = $this->chains['data'][$dataIndex]['extraData']['XUID'];
+			}
 
-		$this->skinName = $this->playerData['SkinId'];
-		$this->skin = base64_decode($this->playerData['SkinData']);
-		if (isset($this->playerData['SkinGeometryName'])) {
-			$this->skinGeometryName = $this->playerData['SkinGeometryName'];
-		}
-		if (isset($this->playerData['SkinGeometry'])) {
-			$this->skinGeometryData = base64_decode($this->playerData['SkinGeometry']);
-		}
-		$this->clientSecret = $this->playerData['ClientRandomId'];
-		if (isset($this->playerData['UIProfile'])) {
-			$this->inventoryType = $this->playerData['UIProfile'];
-		}
-		if (isset($this->playerData['CapeData'])) {
-			$this->capeData = base64_decode($this->playerData['CapeData']);
+			$this->skinName = $this->playerData['SkinId'];
+			$this->skin = base64_decode($this->playerData['SkinData']);
+			if (isset($this->playerData['SkinGeometryName'])) {
+				$this->skinGeometryName = $this->playerData['SkinGeometryName'];
+			}
+			if (isset($this->playerData['SkinGeometry'])) {
+				$this->skinGeometryData = base64_decode($this->playerData['SkinGeometry']);
+			}
+			$this->clientSecret = $this->playerData['ClientRandomId'];
+			if (isset($this->playerData['UIProfile'])) {
+				$this->inventoryType = $this->playerData['UIProfile'];
+			}
+			if (isset($this->playerData['CapeData'])) {
+				$this->capeData = base64_decode($this->playerData['CapeData']);
+			}
+		} else {
+			$this->isVerified = false;
 		}
 	}
 
 	public function encode($playerProtocol) {
 		
-	}
-
-	public static function load($jwsTokenString) {
-		$parts = explode('.', $jwsTokenString);
-		if (isset($parts[1])) {
-			$payload = json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true);
-			return $payload;
-		}
-		return "";
 	}
 
 }

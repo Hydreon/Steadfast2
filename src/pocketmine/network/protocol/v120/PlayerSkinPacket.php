@@ -27,12 +27,12 @@ class PlayerSkinPacket extends PEPacket {
 		$this->newSkinId = $this->getString();
 		$this->newSkinName = $this->getString();
 		$this->oldSkinName = $this->getString();
-		if ($playerProtocol >= Info::PROTOCOL_200) {
+		if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
 			$this->getLInt(); // num skin data, always 1
 			$this->getLInt();
 		}
 		$this->newSkinByteData = $this->getString();
-		if ($playerProtocol >= Info::PROTOCOL_200) {
+		if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
 			$this->getLInt();
 			$this->getLInt();
 			$this->newCapeByteData = $this->getString();
@@ -50,12 +50,12 @@ class PlayerSkinPacket extends PEPacket {
 		$this->putString($this->newSkinId);
 		$this->putString($this->newSkinName);
 		$this->putString($this->oldSkinName);
-		if ($playerProtocol >= Info::PROTOCOL_200) {
+		if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
 			$this->putLInt(1); // num skin data, always 1
 			$this->putLInt(strlen($this->newSkinByteData));
 		}
 		$this->putString($this->newSkinByteData);
-		if ($playerProtocol >= Info::PROTOCOL_200) {
+		if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
 			$this->putLInt(empty($this->newCapeByteData));
 			$this->putLInt(strlen($this->newCapeByteData));
 			$this->putString($this->newCapeByteData);

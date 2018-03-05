@@ -36,9 +36,9 @@ class EntityDamageByChildEntityEvent extends EntityDamageByEntityEvent{
 	 * @param int       $cause
 	 * @param int|int[] $damage
 	 */
-	public function __construct(Entity $damager, Entity $childEntity, Entity $entity, $cause, $damage){
+	public function __construct(Entity $damager, Entity $childEntity, Entity $entity, $cause, $damage, $knockBack = 0.4){
 		$this->childEntity = $childEntity;
-		parent::__construct($damager, $entity, $cause, $damage);
+		parent::__construct($damager, $entity, $cause, $damage, $knockBack);
 	}
 
 	/**

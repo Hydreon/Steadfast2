@@ -309,7 +309,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $movementSpeed = self::DEFAULT_SPEED;
 	
-	private static $damegeTimeList = ['0.1' => 0, '0.15' => 0.4, '0.2' => 0.6, '0.25' => 0.8];
+	protected static $damegeTimeList = ['0.1' => 0, '0.15' => 0.4, '0.2' => 0.6, '0.25' => 0.8];
 	
 	protected $lastDamegeTime = 0;
 	
@@ -1669,6 +1669,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->close("", $this->getNonValidProtocolMessage($this->protocol));
 					error_log("Login from unsupported protocol " . $this->protocol);
 					//Timings::$timerLoginPacket->stopTiming();
+					break;
+				}
+				if (!$packet->isVerified) {
+					$this->close("", "Invalid Identity Public Key");
+					error_log("Invalid Identity Public Key " . $packet->username);
 					break;
 				}
 				
@@ -5052,6 +5057,35 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected function onPlayerInput($forward, $sideway, $isJump, $isSneak) {
 		
+	}
+	
+	//hack for display name 200+ protocol
+	public function setNameTag($name){
+		if ($this->getDataProperty(self::DATA_NAMETAG) != $name) {
+			$this->dataProperties[self::DATA_NAMETAG] = [self::DATA_TYPE_STRING, $name];
+			$players = $this->getViewers();
+			$viewers200 = [];
+			$viewers = [];
+			foreach ($players as $viewer) {
+				if ($viewer->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_200) {
+					$viewers200[] = $viewer;
+				} else {
+					$viewers[] = $viewer;
+				}
+			}
+			if (!empty($viewers)) {
+				$pk = new SetEntityDataPacket();
+				$pk->eid = $this->id;
+				$pk->metadata = [self::DATA_NAMETAG => self::DATA_TYPE_STRING, $name];
+				Server::broadcastPacket($viewers, $pk);
+			}
+			if (!empty($viewers200)) {
+				foreach ($viewers200 as $viewer) {
+					$this->despawnFrom($viewer);
+					$this->spawnTo($viewer);
+				}
+			}
+		}
 	}
 	
 }
