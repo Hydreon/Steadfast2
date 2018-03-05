@@ -95,7 +95,6 @@ use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\v120\CommandRequestPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
-use pocketmine\network\protocol\v120\LoginPacket as NewLoginPacket;
 use pocketmine\network\protocol\v120\ModalFormResponsePacket;
 use pocketmine\network\protocol\v120\PlayerHotbarPacket;
 use pocketmine\network\protocol\v120\PurchaseReceiptPacket;
@@ -612,7 +611,6 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACK_CHUNK_REQUEST_PACKET, ResourcePackChunkRequestPacket::class);
 		$this->registerPacket120(ProtocolInfo120::PLAYER_INPUT_PACKET, PlayerInputPacket::class);
 		// new
-		$this->registerPacket120(ProtocolInfo120::LOGIN_PACKET, NewLoginPacket::class);
 		$this->registerPacket120(ProtocolInfo120::INVENTORY_TRANSACTION_PACKET, InventoryTransactionPacket::class);
 		$this->registerPacket120(ProtocolInfo120::INVENTORY_CONTENT_PACKET, InventoryContentPacket::class);
 		$this->registerPacket120(ProtocolInfo120::PLAYER_HOTBAR_PACKET, PlayerHotbarPacket::class);
