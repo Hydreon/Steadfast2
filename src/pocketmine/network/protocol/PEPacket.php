@@ -54,6 +54,8 @@ abstract class PEPacket extends DataPacket {
 	
 	public final static function convertProtocol($protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_220:
+				return Info::PROTOCOL_220;
 			case Info::PROTOCOL_200:
 				return Info::PROTOCOL_200;
 			case Info::PROTOCOL_134:
@@ -78,6 +80,38 @@ abstract class PEPacket extends DataPacket {
 			default:
 				return Info::BASE_PROTOCOL;
 		}
+	}
+	
+	private static $blockPallet = [];
+	private static $blockPalletRevert = [];
+	
+	public static function initPallet() {
+		$data = json_decode(file_get_contents(__DIR__ . "/../../BlockPallet.json"), true);
+		$result = [];
+		$revert = [];
+		foreach ($data as $blockInfo) {
+			$result[$blockInfo['id']][$blockInfo['data']] = $blockInfo['runtimeID'];
+			$revert[$blockInfo['runtimeID']] = [$blockInfo['id'], $blockInfo['data']];
+		}
+		self::$blockPallet = $result;
+		self::$blockPalletRevert = $revert;
+	}
+	
+	public static function getBlockIDByRuntime($runtimeID) {
+		if (isset(self::$blockPalletRevert[$runtimeID])) {
+			return self::$blockPalletRevert[$runtimeID];
+		}
+		return [0, 0];
+	}
+	
+	public static function getBlockRuntimeID($id, $meta) {
+		if (isset(self::$blockPallet[$id][$meta])) {
+			return self::$blockPallet[$id][$meta];
+		}
+		if (isset(self::$blockPallet[$id][0])) {
+			return self::$blockPallet[$id][0];
+		}
+		return 0;
 	}
 
 }

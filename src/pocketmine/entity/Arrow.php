@@ -68,7 +68,7 @@ class Arrow extends Projectile{
 		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
 			$this->hasSpawned[$player->getId()] = $player;
 			$pk = new AddEntityPacket();
-			$pk->type = Arrow::NETWORK_ID;
+			$pk->type = static::NETWORK_ID;
 			$pk->eid = $this->getId();
 			$pk->x = $this->x;
 			$pk->y = $this->y;
@@ -85,7 +85,7 @@ class Arrow extends Projectile{
 		$bb = clone parent::getBoundingBox();
 		return $bb;
 	}
-	
+		
 	public function move($dx, $dy, $dz) {
 		$this->blocksAround = null;
 		if ($dx == 0 && $dz == 0 && $dy == 0) {

@@ -53,6 +53,7 @@ use pocketmine\inventory\InventoryType;
 use pocketmine\inventory\Recipe;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
+use pocketmine\inventory\FurnaceRecipe;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\level\format\anvil\Anvil;
@@ -97,7 +98,6 @@ use pocketmine\scheduler\ServerScheduler;
 use pocketmine\tile\Bed;
 use pocketmine\tile\Cauldron;
 use pocketmine\tile\Chest;
-use pocketmine\tile\Dispenser;
 use pocketmine\tile\EnchantTable;
 use pocketmine\tile\EnderChest;
 use pocketmine\tile\Furnace;
@@ -105,7 +105,6 @@ use pocketmine\tile\Sign;
 use pocketmine\tile\Skull;
 use pocketmine\tile\FlowerPot;
 use pocketmine\tile\Tile;
-use pocketmine\tile\PistonArm;
 use pocketmine\utils\Binary;
 use pocketmine\utils\Cache;
 use pocketmine\utils\Config;
@@ -143,9 +142,8 @@ use pocketmine\entity\monster\walking\Zombie;
 use pocketmine\entity\monster\walking\ZombieVillager;
 use pocketmine\entity\projectile\FireBall;
 use pocketmine\utils\MetadataConvertor;
-use pocketmine\entity\Minecart;
-use pocketmine\entity\Boat;
-use pocketmine\entity\FishingHook;
+use pocketmine\event\server\SendRecipiesList;
+use pocketmine\network\protocol\PEPacket;
 
 /**
  * The class that manages everything
@@ -1469,7 +1467,7 @@ class Server{
 	 * @param string          $dataPath
 	 * @param string          $pluginPath
 	 */
-	public function __construct(\ClassLoader $autoloader, \ThreadedLogger $logger, $filePath, $dataPath, $pluginPath){		
+	public function __construct(\ClassLoader $autoloader, \ThreadedLogger $logger, $filePath, $dataPath, $pluginPath){	
 		self::$instance = $this;
 		self::$serverId =  mt_rand(0, PHP_INT_MAX);
 
@@ -1635,6 +1633,7 @@ class Server{
 		TextWrapper::init();
 		MetadataConvertor::init();
 		$this->craftingManager = new CraftingManager();
+		PEPacket::initPallet();
 
 		$this->pluginManager = new PluginManager($this, $this->commandMap);
 		$this->pluginManager->subscribeToPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, $this->consoleSender);
@@ -2316,18 +2315,28 @@ class Server{
 		if(!isset($this->craftList[$p->getPlayerProtocol()])) {
 			$pk = new CraftingDataPacket();
 			$pk->cleanRecipes = true;
-
+			
+			$recipies = [];
+			
 			foreach($this->getCraftingManager()->getRecipes() as $recipe){
+				$recipies[] = $recipe;
+			}
+			foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
+				$recipies[] = $recipe;
+			}
+			
+			$this->getPluginManager()->callEvent($ev = new SendRecipiesList($recipies));
+			
+			foreach($ev->getRecipies() as $recipe){
 				if($recipe instanceof ShapedRecipe){
 					$pk->addShapedRecipe($recipe);
 				}elseif($recipe instanceof ShapelessRecipe){
 					$pk->addShapelessRecipe($recipe);
+				}elseif($recipe instanceof FurnaceRecipe) {
+					$pk->addFurnaceRecipe($recipe);
 				}
-			}
-
-			foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
-				$pk->addFurnaceRecipe($recipe);
-			}
+			}		
+			
 			$pk->encode($p->getPlayerProtocol(), $p->getSubClientId());
 			$pk->isEncoded = true;
 			$this->craftList[$p->getPlayerProtocol()] = $pk;
@@ -2508,9 +2517,6 @@ class Server{
 	}
 
 	private function registerEntities(){
-		Entity::registerEntity(Minecart::class);
-		Entity::registerEntity(Boat::class);
-		Entity::registerEntity(FishingHook::class);
 		Entity::registerEntity(Arrow::class);
 		Entity::registerEntity(DroppedItem::class);
 		Entity::registerEntity(FallingSand::class);
@@ -2555,8 +2561,6 @@ class Server{
         Tile::registerTile(EnderChest::class);
 		Tile::registerTile(Bed::class);
 		Tile::registerTile(Cauldron::class);
-		Tile::registerTile(PistonArm::class);
-		Tile::registerTile(Dispenser::class);
 	}
 
 	public function shufflePlayers(){
