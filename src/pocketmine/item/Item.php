@@ -1924,5 +1924,9 @@ class Item{
 	public function getObtainTime(){
 		return $this->obtainTime;
 	}
+	
+	public function isArmor(){
+		return false;
+	}
 
 }

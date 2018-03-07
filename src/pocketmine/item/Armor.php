@@ -28,6 +28,14 @@ abstract class Armor extends Item{
 		return 1;
 	}
 	
+	public function removeDurability($count = 1) {
+		$this->meta += $count;
+	}
+	
+	public function isArmor(){
+		return true;
+	}
+	
 	/**
 	 * The following types of damage are reduced by armor and, consequently, damage the armor itself:
 	 *  - Direct attacks from mobs and players
@@ -67,9 +75,5 @@ abstract class Armor extends Item{
 	 *	Chain/Iron	166		241			226			196
 	 *	Diamond		364		529			496			430
 	 */
-	public function getMaxDurability() {
-		// need name this method abstract
-		return 0;
-	}
 	
 }
