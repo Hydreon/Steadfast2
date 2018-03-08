@@ -38,7 +38,11 @@ class StartGamePacket extends PEPacket{
 	public $spawnZ;
 	public $x;
 	public $y;
-	public $z;
+	public $z;	
+	public static $defaultRules = [
+		['name' => 'naturalRegeneration', 'type' => 1, 'value' => 0],
+//		['name' => 'showcoordinates', 'type' => 1, 'value' => 1]
+	];
 
 	public function decode($playerProtocol){
 
@@ -98,7 +102,23 @@ class StartGamePacket extends PEPacket{
 		$this->putByte(0); // isTexturepacksRequired 1x Byte
 		
 		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->putVarInt(0); // rules count
+			$this->putVarInt(count(self::$defaultRules)); // rules count
+			foreach (self::$defaultRules as $rule) {
+				$this->putString($rule['name']);
+				$this->putVarInt($rule['type']);
+				switch ($rule['type']) {
+					case 1:
+						$this->putByte($rule['value']);
+						break;
+					case 2:
+						$this->putSignedVarInt($rule['value']);
+						break;
+					case 3:
+						$this->putLFloat($rule['value']);
+						break;
+				}
+				
+			}
 			$this->putByte(0); // is bonus chest enabled
 			$this->putByte(0); // is start with map enabled
 			$this->putByte(0); // has trust players enabled
