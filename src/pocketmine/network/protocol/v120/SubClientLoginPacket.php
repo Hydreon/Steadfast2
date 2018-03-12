@@ -61,6 +61,10 @@ class SubClientLoginPacket extends PEPacket {
 				$this->isVerified = false;
 			}
 		}
+		if (!isset($dataIndex)) {
+			$this->isValidProtocol = false;
+			return;
+		}
 
 		$this->playerData = JWT::parseJwt($this->playerData);
 		if ($this->playerData) {

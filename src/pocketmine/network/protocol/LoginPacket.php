@@ -113,10 +113,8 @@ class LoginPacket extends PEPacket {
 					$dataIndex = $index;
 				} else {
 					if (!isset($data['payload']['extraData'])) continue;
-					if ($data['payload']['extraData']['XUID']) {
-						$data['payload']['extraData']['XUID'] = "";
-						$this->isVerified = false;
-					}
+					$data['payload']['extraData']['XUID'] = "";
+					$this->isVerified = false;
 					$dataIndex = $index;
 				}
 				$this->chains['data'][$index] = $data['payload'];
