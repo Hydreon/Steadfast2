@@ -4946,4 +4946,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 	
+	public function setCompassDestination($x, $y, $z) {
+		$packet = new SetSpawnPositionPacket();
+		$packet->spawnType = SetSpawnPositionPacket::SPAWN_TYPE_WORLD_SPAWN;
+		$packet->x = $x;
+		$packet->y = $y;
+		$packet->z = $z;
+		$this->dataPacket($packet);
+	}
+	
 }
