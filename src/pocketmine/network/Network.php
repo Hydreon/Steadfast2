@@ -326,6 +326,7 @@ class Network {
 			case Info::PROTOCOL_120:
 			case Info::PROTOCOL_200:
 			case Info::PROTOCOL_220:
+			case Info::PROTOCOL_221:
 				$class = $this->packetPool120[$id];
 				break;
 			case Info::PROTOCOL_110:
