@@ -18,11 +18,15 @@ class SetTitlePacket extends PEPacket {
 	public $fadeInTime = 0;
 	public $stayTime = 10;
 	public $fadeOutTime = 0;
+	public $authorXUID = "";
 
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
 		$this->putSignedVarInt($this->type);
 		$this->putString($this->text);
+		if ($playerProtocol >= Info::PROTOCOL_221) {
+			$this->putString($this->authorXUID);
+		}
 		$this->putSignedVarInt($this->fadeInTime);
 		$this->putSignedVarInt($this->stayTime);
 		$this->putSignedVarInt($this->fadeOutTime);
