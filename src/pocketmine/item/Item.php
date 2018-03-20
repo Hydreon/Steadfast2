@@ -968,11 +968,11 @@ class Item{
             // update for 1.0
 			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;
 
-			for($i = 0; $i < 256; ++$i){
-				if(Block::$list[$i] !== null){
-					self::$list[$i] = Block::$list[$i];
-				}
-			}
+			// for($i = 0; $i < 256; ++$i){
+			// 	if(Block::$list[$i] !== null){
+			// 		self::$list[$i] = Block::$list[$i];
+			// 	}
+			// }
 		}
 
 		self::initCreativeItems();
@@ -1426,14 +1426,15 @@ class Item{
 
 	public static function get($id, $meta = 0, $count = 1, $tags = ""){
 		try{
-			$class = self::$list[$id];
-			if($class === null){
+			if (!isset(self::$list[$id])) {
+				if ($id < 256 && isset(Block::$list[$id]) && !is_null(Block::$list[$id])) {
+					$class = Block::$list[$id];
+					return (new ItemBlock(new $class($meta), $meta, $count))->setCompound($tags);
+				}
 				return (new Item($id, $meta, $count))->setCompound($tags);
-			}elseif($id < 256){
-				return (new ItemBlock(new $class($meta), $meta, $count))->setCompound($tags);
-			}else{
-				return (new $class($meta, $count))->setCompound($tags);
 			}
+			$class = self::$list[$id];
+			return (new $class($meta, $count))->setCompound($tags);
 		}catch(\RuntimeException $e){
 			return (new Item($id, $meta, $count))->setCompound($tags);
 		}
