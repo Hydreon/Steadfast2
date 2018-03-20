@@ -1668,7 +1668,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				if (!$packet->isVerified) {
 					$this->close("", "Invalid Identity Public Key");
-					error_log("Invalid Identity Public Key " . $packet->username);
+					// error_log("Invalid Identity Public Key " . $packet->username);
 					break;
 				}
 				
