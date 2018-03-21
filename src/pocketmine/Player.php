@@ -644,7 +644,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->spawnPosition = null;
 		$this->gamemode = $this->server->getGamemode();
 		$this->setLevel($this->server->getDefaultLevel(), true);
-		$this->newPosition = new Vector3(0, 0, 0);
+		$this->newPosition = null;
 		$this->checkMovement = (bool) $this->server->getAdvancedProperty("main.check-movement", true);
 		$this->boundingBox = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
 
@@ -809,15 +809,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 		}
 		
-		if((!$this->isFirstConnect || $this->chunkLoadCount >= $this->spawnThreshold) && $this->spawned === false){
-			$this->server->getPluginManager()->callEvent($ev = new PlayerLoginEvent($this, "Plugin reason"));
-			if ($ev->isCancelled()) {
-				$this->close(TextFormat::YELLOW . $this->username . " has left the game", $ev->getKickMessage());
-				return;
-			}
-			
+		if ((!$this->isFirstConnect || $this->chunkLoadCount >= $this->spawnThreshold) && $this->spawned === false) {
 			$this->spawned = true;
-
 			$this->sendSettings();
 			$this->sendPotionEffects($this);
 			$this->sendData($this);
@@ -833,43 +826,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->status = PlayStatusPacket::PLAYER_SPAWN;
 			$this->dataPacket($pk);
 
-			$pos = $this->level->getSafeSpawn($this);
-
-			$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $pos));
-
-			$pos = $ev->getRespawnPosition();
-//			$pk = new RespawnPacket();
-//			$pk->x = $pos->x;
-//			$pk->y = $pos->y;
-//			$pk->z = $pos->z;
-//			$this->dataPacket($pk);
-
 			$this->noDamageTicks = 60;
-			
 			$chunkX = $chunkZ = null;
-			foreach($this->usedChunks as $index => $c){
+			foreach ($this->usedChunks as $index => $c) {
 				Level::getXZ($index, $chunkX, $chunkZ);
-				foreach($this->level->getChunkEntities($chunkX, $chunkZ) as $entity){
-					if($entity !== $this && !$entity->closed && !$entity->dead && $this->canSeeEntity($entity)){
+				foreach ($this->level->getChunkEntities($chunkX, $chunkZ) as $entity) {
+					if ($entity !== $this && !$entity->closed && !$entity->dead && $this->canSeeEntity($entity)) {
 						$entity->spawnTo($this);
 					}
 				}
 			}
-
-			$this->teleport($pos);
-			
-//			if($this->getHealth() <= 0){
-//				$pk = new RespawnPacket();
-//				$pos = $this->getSpawn();
-//				$pk->x = $pos->x;
-//				$pk->y = $pos->y;
-//				$pk->z = $pos->z;
-//				$this->dataPacket($pk);
-//			}
-			
-			$this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));		
-			}
+			$this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));
 		}
+	}
 
 	protected function orderChunks() {
 		if ($this->connected === false) {
@@ -3112,7 +3081,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->spawnTo($player);
 		}
 	}
-
+	
 	public function teleport(Vector3 $pos, $yaw = null, $pitch = null){
 		if(!$this->isOnline()){
 			return;
@@ -3289,12 +3258,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 
-		$this->server->getPluginManager()->callEvent($ev = new PlayerPreLoginEvent($this, "Plugin reason"));
-		if ($ev->isCancelled()) {
-			$this->close("", $ev->getKickMessage());
-			return;
-		}
-
 		if (!$this->server->isWhitelisted(strtolower($this->getName()))) {
 			$this->close(TextFormat::YELLOW . $this->username . " has left the game", "Server is private.");
 			return;
@@ -3319,6 +3282,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					return;
 				}
 			}
+		}
+		
+		
+		$this->server->getPluginManager()->callEvent($ev = new PlayerPreLoginEvent($this, "Plugin reason"));
+		if ($ev->isCancelled()) {
+			$this->close("", $ev->getKickMessage());
+			return;
 		}
 
 		$nbt = $this->server->getOfflinePlayerData($this->username);
@@ -3372,38 +3342,33 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if ($this->spawnPosition === null and isset($this->namedtag->SpawnLevel) and ( $level = $this->server->getLevelByName($this->namedtag["SpawnLevel"])) instanceof Level) {
 			$this->spawnPosition = new Position($this->namedtag["SpawnX"], $this->namedtag["SpawnY"], $this->namedtag["SpawnZ"], $level);
 		}
-
-		$spawnPosition = $this->getSpawn();		
-
-		$compassPosition = $this->server->getGlobalCompassPosition();
-
+		
+		$this->server->getPluginManager()->callEvent($ev = new PlayerLoginEvent($this, "Plugin reason"));
+		if ($ev->isCancelled()) {
+			$this->close(TextFormat::YELLOW . $this->username . " has left the game", $ev->getKickMessage());
+			return;
+		}
+		$spawnPosition = $this->getSpawn();
+		$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $spawnPosition));
+		$this->setPosition($ev->getRespawnPosition());
+		
 		$pk = new StartGamePacket();
 		$pk->seed = -1;
 		$pk->dimension = 0;
 		$pk->x = $this->x;
-		$pk->y = $this->y;
+		$pk->y = $this->y + $this->getEyeHeight();
 		$pk->z = $this->z;
-//		$pk->spawnX = (int) $spawnPosition->x;
-//		$pk->spawnY = (int) $spawnPosition->y;
-//		$pk->spawnZ = (int) $spawnPosition->z;
-		/* hack for compass */
-		$pk->spawnX = $compassPosition['x'];
-		$pk->spawnY = $compassPosition['y'];
-		$pk->spawnZ = $compassPosition['z'];
+		$pk->spawnX = (int) $spawnPosition->x;
+		$pk->spawnY = (int) ($spawnPosition->y + $this->getEyeHeight());
+		$pk->spawnZ = (int) $spawnPosition->z;
 		$pk->generator = 1; //0 old, 1 infinite, 2 flat
 		$pk->gamemode = $this->gamemode & 0x01;
 		$pk->eid = $this->id;
 		$this->dataPacket($pk);
-		
+
 		$pk = new SetTimePacket();
 		$pk->time = $this->level->getTime();
 		$pk->started = true;
-		$this->dataPacket($pk);
-
-		$pk = new SetSpawnPositionPacket();
-		$pk->x = (int) $spawnPosition->x;
-		$pk->y = (int) $spawnPosition->y;
-		$pk->z = (int) $spawnPosition->z;
 		$this->dataPacket($pk);
 
 		if ($this->getHealth() <= 0) {
