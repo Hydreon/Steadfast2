@@ -290,7 +290,6 @@ class Server{
 	private $serverPrivateKey = '';
 	private $serverToken = 'hksdYI3has';
 	private $isUseEncrypt = false;
-	private $isNeedVerifyJWT = false;
 	
 	private $modsManager = null;
 
@@ -1538,8 +1537,7 @@ class Server{
 			"auto-generate" => false,
 			"save-player-data" => false,
 			"time-update" => true,
-			"use-encrypt" => false,
-			"validate-jwt" => false
+			"use-encrypt" => false
 		]);
 
 		ServerScheduler::$WORKERS = 4;
@@ -1576,7 +1574,6 @@ class Server{
 		$this->useMonster = $this->getConfigBoolean("spawn-mobs", false);
 		$this->monsterLimit = $this->getConfigInt("mobs-limit", 0);
 		$this->isUseEncrypt = $this->getConfigBoolean("use-encrypt", false);
-		$this->isNeedVerifyJWT = $this->getConfigBoolean("validate-jwt", false);
 
 		if(($memory = str_replace("B", "", strtoupper($this->getConfigString("memory-limit", "256M")))) !== false){
 			$value = ["M" => 1, "G" => 1024];
@@ -2596,10 +2593,6 @@ class Server{
 	
 	public function isUseEncrypt() {
 		return $this->isUseEncrypt;
-	}
-
-	public function isNeedVerifyJWT() {
-		return $this->isNeedVerifyJWT;
 	}
 		
 	public function getServerPublicKey() {

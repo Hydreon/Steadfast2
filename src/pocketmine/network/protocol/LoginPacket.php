@@ -102,8 +102,7 @@ class LoginPacket extends PEPacket {
 		$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));
 		$this->playerData = $this->getFromString($body, $this->playerDataLength);
 
-		$isNeedVerify = Server::getInstance()->isNeedVerifyJWT();
-		var_dump($isNeedVerify);
+		$isNeedVerify = Server::getInstance()->isUseEncrypt();
 		$dataIndex = $this->findDataIndex($isNeedVerify);
 		if (is_null($dataIndex)) {
 			$this->isValidProtocol = false;
