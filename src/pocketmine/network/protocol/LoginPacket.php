@@ -24,6 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 use pocketmine\network\protocol\Info;
+use pocketmine\Server;
 use pocketmine\utils\Binary;
 use pocketmine\utils\JWT;
 use pocketmine\utils\UUID;
@@ -101,81 +102,118 @@ class LoginPacket extends PEPacket {
 		$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));
 		$this->playerData = $this->getFromString($body, $this->playerDataLength);
 
-		$this->chains['data'] = array();
-		$index = 0;
-		$validationKey = null;
-		foreach ($this->chains['chain'] as $key => $jwt) {
-			$data = JWT::parseJwt($jwt);
-			if ($data) {
-				if (self::MOJANG_ROOT_KEY == $data['header']['x5u']) {
-					$validationKey = $data['payload']['identityPublicKey'];
-				} else if ($validationKey != null && $validationKey == $data['header']['x5u']) {
-					$dataIndex = $index;
-				} else {
-					if (!isset($data['payload']['extraData'])) continue;
-					$data['payload']['extraData']['XUID'] = "";
-					$this->isVerified = false;
-					$dataIndex = $index;
-				}
-				$this->chains['data'][$index] = $data['payload'];
-				$index++;
-			} else {
-				$this->isVerified = false;
-			}
-		}
-		if (!isset($dataIndex)) {
+		$isNeedVerify = Server::getInstance()->isNeedVerifyJWT();
+		var_dump($isNeedVerify);
+		$dataIndex = $this->findDataIndex($isNeedVerify);
+		if (is_null($dataIndex)) {
 			$this->isValidProtocol = false;
 			return;
 		}
-
-		$this->playerData = JWT::parseJwt($this->playerData);
-		if ($this->playerData) {
-			if (!$this->playerData['isVerified']) {
-				$this->isVerified = false;
-			}
-			$this->playerData = $this->playerData['payload'];
-			$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
-			$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
-			$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
-			$this->identityPublicKey = $this->chains['data'][$dataIndex]['identityPublicKey'];
-			if (isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
-				$this->xuid = $this->chains['data'][$dataIndex]['extraData']['XUID'];
-			}
-
-			$this->serverAddress = $this->playerData['ServerAddress'];
-			$this->skinName = $this->playerData['SkinId'];
-			$this->skin = base64_decode($this->playerData['SkinData']);
-			if (isset($this->playerData['SkinGeometryName'])) {
-				$this->skinGeometryName = $this->playerData['SkinGeometryName'];
-			}
-			if (isset($this->playerData['SkinGeometry'])) {
-				$this->skinGeometryData = base64_decode($this->playerData['SkinGeometry']);
-			}
-			$this->clientSecret = $this->playerData['ClientRandomId'];
-			if (isset($this->playerData['DeviceOS'])) {
-				$this->osType = $this->playerData['DeviceOS'];
-			}
-			if (isset($this->playerData['UIProfile'])) {
-				$this->inventoryType = $this->playerData['UIProfile'];
-			}
-			if (isset($this->playerData['LanguageCode'])) {
-				$this->languageCode = $this->playerData['LanguageCode'];
-			}
-			if (isset($this->playerData['GameVersion'])) {
-				$this->clientVersion = $this->playerData['GameVersion'];
-			}
-			if (isset($this->playerData['CapeData'])) {
-				$this->capeData = base64_decode($this->playerData['CapeData']);
-			}
-			$this->originalProtocol = $this->protocol1;
-			$this->protocol1 = self::convertProtocol($this->protocol1);
-		} else {
-			$this->isVerified = false;
-		}
+		$this->getPlayerData($dataIndex, $isNeedVerify);
 	}
 
 	public function encode($playerProtocol) {
 		
+	}
+
+	private function findDataindex($isNeedVerify) {
+		$dataIndex = null;
+		$validationKey = null;
+		$this->chains['data'] = array();
+		$index = 0;
+		if ($isNeedVerify) {
+			foreach ($this->chains['chain'] as $key => $jwt) {
+				$data = JWT::parseJwt($jwt);
+				if ($data) {
+					if (self::MOJANG_ROOT_KEY == $data['header']['x5u']) {
+						$validationKey = $data['payload']['identityPublicKey'];
+					} else if ($validationKey != null && $validationKey == $data['header']['x5u']) {
+						$dataIndex = $index;
+					} else {
+						if (!isset($data['payload']['extraData'])) continue;
+						$data['payload']['extraData']['XUID'] = "";
+						$this->isVerified = false;
+						$dataIndex = $index;
+					}
+					$this->chains['data'][$index] = $data['payload'];
+					$index++;
+				} else {
+					$this->isVerified = false;
+				}
+			}
+		} else {
+			foreach ($this->chains['chain'] as $key => $jwt) {
+				$data = self::load($jwt);
+				if (isset($data['extraData'])) {
+					$dataIndex = $index;
+				}
+				$this->chains['data'][$index] = $data;
+				$index++;
+			}
+		}
+		return $dataIndex;
+	}
+
+	private function getPlayerData($dataIndex, $isNeedVerify) {
+		if ($isNeedVerify) {
+			$this->playerData = JWT::parseJwt($this->playerData);
+			if ($this->playerData) {
+				if (!$this->playerData['isVerified']) {
+					$this->isVerified = false;
+				}
+				$this->playerData = $this->playerData['payload'];
+			} else {
+				$this->isVerified = false;
+				return;
+			}
+		} else {
+			$this->playerData = self::load($this->playerData);
+		}
+
+		$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
+		$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
+		$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
+		$this->identityPublicKey = $this->chains['data'][$dataIndex]['identityPublicKey'];
+		if (isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
+			$this->xuid = $this->chains['data'][$dataIndex]['extraData']['XUID'];
+		}
+
+		$this->serverAddress = $this->playerData['ServerAddress'];
+		$this->skinName = $this->playerData['SkinId'];
+		$this->skin = base64_decode($this->playerData['SkinData']);
+		if (isset($this->playerData['SkinGeometryName'])) {
+			$this->skinGeometryName = $this->playerData['SkinGeometryName'];
+		}
+		if (isset($this->playerData['SkinGeometry'])) {
+			$this->skinGeometryData = base64_decode($this->playerData['SkinGeometry']);
+		}
+		$this->clientSecret = $this->playerData['ClientRandomId'];
+		if (isset($this->playerData['DeviceOS'])) {
+			$this->osType = $this->playerData['DeviceOS'];
+		}
+		if (isset($this->playerData['UIProfile'])) {
+			$this->inventoryType = $this->playerData['UIProfile'];
+		}
+		if (isset($this->playerData['LanguageCode'])) {
+			$this->languageCode = $this->playerData['LanguageCode'];
+		}
+		if (isset($this->playerData['GameVersion'])) {
+			$this->clientVersion = $this->playerData['GameVersion'];
+		}
+		if (isset($this->playerData['CapeData'])) {
+			$this->capeData = base64_decode($this->playerData['CapeData']);
+		}
+		$this->originalProtocol = $this->protocol1;
+		$this->protocol1 = self::convertProtocol($this->protocol1);
+	}
+
+	public static function load($jwsTokenString) {
+		$parts = explode('.', $jwsTokenString);
+		if (isset($parts[1])) {
+			$payload = json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true);
+			return $payload;
+		}
+		return "";
 	}
 
 }
