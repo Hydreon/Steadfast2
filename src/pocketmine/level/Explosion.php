@@ -56,7 +56,7 @@ class Explosion{
 	public $affectedBlocks = [];
 	public $stepLen = 0.3;
 	/** @var Entity|Block */
-	private $what;
+	protected $what;
 
 	public function __construct(Position $center, $size, $what = null){
 		$this->level = $center->getLevel();
@@ -157,26 +157,7 @@ class Explosion{
 
 		$list = $this->level->getNearbyEntities($explosionBB, $this->what instanceof Entity ? $this->what : null);
 		foreach($list as $entity){
-			$distance = $entity->distance($this->source) / $explosionSize;
-
-			if($distance <= 1){
-				$motion = $entity->subtract($this->source)->normalize();
-
-				$impact = (1 - $distance) * ($exposure = 1);
-
-				$damage = (int) ((($impact * $impact + $impact) / 2) * 8 * $explosionSize + 1);
-
-				if($this->what instanceof Entity){
-					$ev = new EntityDamageByEntityEvent($this->what, $entity, EntityDamageEvent::CAUSE_ENTITY_EXPLOSION, $damage);
-				}elseif($this->what instanceof Block){
-					$ev = new EntityDamageByBlockEvent($this->what, $entity, EntityDamageEvent::CAUSE_BLOCK_EXPLOSION, $damage);
-				}else{
-					$ev = new EntityDamageEvent($entity, EntityDamageEvent::CAUSE_BLOCK_EXPLOSION, $damage);
-				}
-
-				$entity->attack($ev->getFinalDamage(), $ev);
-				$entity->setMotion($motion->multiply($impact));
-			}
+			$this->tryToDamageEntity($entity);
 		}
 
 
@@ -232,5 +213,26 @@ class Explosion{
 		Server::broadcastPacket($this->level->getUsingChunk($source->x >> 4, $source->z >> 4), $pk1);
 		
 		return true;
+	}
+
+	protected function tryToDamageEntity($entity) {
+		$explosionSize = $this->size * 2;
+		$distance = $entity->distance($this->source) / $explosionSize;
+		if ($distance <= 1) {
+			$motion = $entity->subtract($this->source)->normalize();
+			$impact = 1 - $distance;
+			$damage = (int) ((($impact * $impact + $impact) / 2) * 8 * $explosionSize + 1);
+
+			if ($this->what instanceof Entity) {
+				$ev = new EntityDamageByEntityEvent($this->what, $entity, EntityDamageEvent::CAUSE_ENTITY_EXPLOSION, $damage);
+			} else if ($this->what instanceof Block) {
+				$ev = new EntityDamageByBlockEvent($this->what, $entity, EntityDamageEvent::CAUSE_BLOCK_EXPLOSION, $damage);
+			} else {
+				$ev = new EntityDamageEvent($entity, EntityDamageEvent::CAUSE_BLOCK_EXPLOSION, $damage);
+			}
+
+			$entity->attack($ev->getFinalDamage(), $ev);
+			$entity->setMotion($motion->multiply($impact));
+		}
 	}
 }

@@ -971,19 +971,24 @@ class Item{
 			self::$list[self::REDSTONE_REPEATER] = Repeater::class;
             
             // update for 1.0
-			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;
-
-			for($i = 0; $i < 256; ++$i){
-				if(Block::$list[$i] !== null){
-					self::$list[$i] = Block::$list[$i];
-				}
-			}
-			
+			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;			
 			self::$list[self::REDSTONE_DUST] = Redstone::class;
 		}
 
 		self::initCreativeItems();
 		self::initFood();
+	}
+
+	public static function registerItem($id, $class) {
+		if (isset(self::$list[$id]) && self::$list[$id] == $class) {
+			return;
+		}
+		self::$list[$id] = $class;
+		foreach (self::$creative as $index => $item) {
+			if ($item->getId() == $id) {
+				self::$creative[$index] = Item::get($id, $item->getDamage());
+			}
+		}
 	}
 
 	private static $creative = [];
@@ -1433,14 +1438,15 @@ class Item{
 
 	public static function get($id, $meta = 0, $count = 1, $tags = ""){
 		try{
-			$class = self::$list[$id];
-			if($class === null){
+			if (!isset(self::$list[$id])) {
+				if ($id < 256 && isset(Block::$list[$id]) && !is_null(Block::$list[$id])) {
+					$class = Block::$list[$id];
+					return (new ItemBlock(new $class($meta), $meta, $count))->setCompound($tags);
+				}
 				return (new Item($id, $meta, $count))->setCompound($tags);
-			}elseif($id < 256){
-				return (new ItemBlock(new $class($meta), $meta, $count))->setCompound($tags);
-			}else{
-				return (new $class($meta, $count))->setCompound($tags);
 			}
+			$class = self::$list[$id];
+			return (new $class($meta, $count))->setCompound($tags);
 		}catch(\RuntimeException $e){
 			return (new Item($id, $meta, $count))->setCompound($tags);
 		}
@@ -1906,8 +1912,12 @@ class Item{
 		return false;
 	}
 
+	public function additionalChecks(Item $item) {
+		return true;
+	}
+
 	public final function equals(Item $item, $checkDamage = true, $checkCompound = true){
-		return $this->id === $item->getId() and ($checkDamage === false or $this->getDamage() === $item->getDamage()) and ($checkCompound === false or $this->getCompound() === $item->getCompound());
+		return $this->id === $item->getId() && ($checkDamage === false || $this->getDamage() === $item->getDamage()) && ($checkCompound === false or $this->getCompound() === $item->getCompound()) && $this->additionalChecks($item);
 	}
 
 	public final function deepEquals(Item $item, $checkDamage = true, $checkCompound = true){

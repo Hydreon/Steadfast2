@@ -274,14 +274,7 @@ class Server{
 	private $useMonster ;
 	private $monsterLimit;
 		
-
 	public $packetMaker = null;
-	
-	private $globalCompasPosition = array(
-		'x' => 15000,
-		'y' => 10,
-		'z' => -1000000
-	);
 	
 	private $jsonCommands = [];
 	private $spawnedEntity = [];
@@ -2580,15 +2573,6 @@ class Server{
 		}
 
 		$this->players = $random;
-	}
-		
-	public function setGlobalCompassPosition($x, $z) {
-		$this->globalCompasPosition['x'] = $x;
-		$this->globalCompasPosition['z'] = $z;
-	}
-
-	public function getGlobalCompassPosition() {
-		return $this->globalCompasPosition;
 	}	
 	
 	public function getJsonCommands() {

@@ -1,7 +1,17 @@
 .idea
+.vscode/
 nbproject/
 bin/
 worlds/
 plugins/
 logs/
 .history/
+banned-ips.txt
+banned-players.txt
+ops.txt
+pocketmine.yml
+pocketmine-soft.yml
+server.properties
+white-list.txt
+start.sh
+mods/

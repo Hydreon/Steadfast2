@@ -79,8 +79,9 @@ class MetadataConvertor {
 		'DATA_SCALE' => 38,
 		'DATA_BUTTON_TEXT' => 39,
 		'DATA_MAX_AIR' => 42,
-		'DATA_SEAT_RIDER_OFFSET' => 56,
+		'DATA_HEIGHT' => 54,
 		'DATA_EXPLODE_TIMER' => 55,
+		'DATA_SEAT_RIDER_OFFSET' => 56,
 	];
 	private static $diffEntityMetaIds221 = [
 		'DATA_PLAYER_FLAGS' => 26,
@@ -89,8 +90,9 @@ class MetadataConvertor {
 		'DATA_SCALE' => 38,
 		'DATA_BUTTON_TEXT' => 39,
 		'DATA_MAX_AIR' => 42,
-		'DATA_SEAT_RIDER_OFFSET' => 56,
+		'DATA_HEIGHT' => 54,
 		'DATA_EXPLODE_TIMER' => 55,
+		'DATA_SEAT_RIDER_OFFSET' => 56,
 	];
 	
 	private static $entityMetaIds110 = [];
