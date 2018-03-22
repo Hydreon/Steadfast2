@@ -46,6 +46,7 @@ class TextPacket extends PEPacket{
 	public $parameters = [];
 	public $isLocolize = false;
 	public $xuid = '';
+	public $authorXUID = "";
 
 	public function decode($playerProtocol){
 		$this->getHeader($playerProtocol);
@@ -76,6 +77,9 @@ class TextPacket extends PEPacket{
 				$paramCount = $this->getVarInt();
 				for ($i = 0; $i < $paramCount; $i++) {
 					$this->parameters[] = $this->getString();
+				}
+				if ($playerProtocol >= Info::PROTOCOL_221) {
+					$this->putString($this->authorXUID);
 				}
 				break;
 		}

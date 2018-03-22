@@ -37,7 +37,13 @@ class LevelSoundEventPacket extends PEPacket {
 		$this->x = $this->getLFloat();
 		$this->y = $this->getLFloat();
 		$this->z = $this->getLFloat();
-		$this->blockId = $this->getSignedVarInt();
+		if ($playerProtocol >= Info::PROTOCOL_220) {
+			$runtimeId = $this->getSignedVarInt();
+			$blockData = self::getBlockIDByRuntime($runtimeId);
+			$this->blockId = $blockData[0];
+		} else {
+			$this->blockId = $this->getSignedVarInt();
+		}		
 		$this->entityType = $this->getSignedVarInt();
 		$this->babyMob = $this->getByte();
 		$this->global = $this->getByte();
@@ -50,7 +56,12 @@ class LevelSoundEventPacket extends PEPacket {
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
-		$this->putSignedVarInt($this->blockId);
+		if ($playerProtocol >= Info::PROTOCOL_220) {
+			$runtimeId = self::getBlockRuntimeID($this->blockId, 0);
+			$this->putSignedVarInt($runtimeId);
+		} else {
+			$this->putSignedVarInt($this->blockId);
+		}
 		$this->putSignedVarInt($this->entityType);
 		$this->putByte($this->babyMob);
 		$this->putByte($this->global);

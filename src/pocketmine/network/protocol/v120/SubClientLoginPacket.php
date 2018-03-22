@@ -2,10 +2,12 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\utils\UUID;
-use pocketmine\utils\Binary;
-use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\Info120;
+use pocketmine\network\protocol\PEPacket;
+use pocketmine\Server;
+use pocketmine\utils\Binary;
+use pocketmine\utils\JWT;
+use pocketmine\utils\UUID;
 
 class SubClientLoginPacket extends PEPacket {
 
@@ -26,6 +28,7 @@ class SubClientLoginPacket extends PEPacket {
 	public $skinGeometryName = "";
 	public $skinGeometryData = "";
 	public $capeData = "";
+	public $isVerified = true;
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -42,18 +45,68 @@ class SubClientLoginPacket extends PEPacket {
 		$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));
 		$this->playerData = $this->getFromString($body, $this->playerDataLength);
 
+		$isNeedVerify = Server::getInstance()->isUseEncrypt();
+		$dataIndex = $this->findDataIndex($isNeedVerify);
+		if (is_null($dataIndex)) {
+			$this->isValidProtocol = false;
+			return;
+		}
+		$this->getPlayerData($dataIndex, $isNeedVerify);
+	}
+
+	public function encode($playerProtocol) {
+		
+	}
+
+	private function findDataindex($isNeedVerify) {
+		$dataIndex = null;
 		$this->chains['data'] = array();
 		$index = 0;
-		foreach ($this->chains['chain'] as $key => $jwt) {
-			$data = self::load($jwt);
-			if (isset($data['extraData'])) {
-				$dataIndex = $index;
+		if ($isNeedVerify) {
+			foreach ($this->chains['chain'] as $key => $jwt) {
+				$data = JWT::parseJwt($jwt);
+				if ($data) {
+					if (!$data['isVerified']) {
+						$this->isVerified = false;
+					}
+					if (isset($data['extraData'])) {
+						$dataIndex = $index;
+					}
+					$this->chains['data'][$index] = $data;
+					$index++;
+				} else {
+					$this->isVerified = false;
+				}
 			}
-			$this->chains['data'][$index] = $data;
-			$index++;
+		} else {
+			foreach ($this->chains['chain'] as $key => $jwt) {
+				$data = self::load($jwt);
+				if (isset($data['extraData'])) {
+					$dataIndex = $index;
+				}
+				$this->chains['data'][$index] = $data;
+				$index++;
+			}
+		}
+		return $dataIndex;
+	}
+
+	private function getPlayerData($dataIndex, $isNeedVerify) {
+		if ($isNeedVerify) {
+			$this->playerData = JWT::parseJwt($this->playerData);
+			if ($this->playerData) {
+				if (!$this->playerData['isVerified']) {
+					$this->isVerified = false;
+				}
+				$this->playerData = $this->playerData['payload'];
+			} else {
+				$this->isVerified = false;
+				return;
+			}
+		} else {
+			$this->playerData = self::load($this->playerData);
 		}
 
-		$this->playerData = self::load($this->playerData);
 		$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
 		$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
 		$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
@@ -77,10 +130,6 @@ class SubClientLoginPacket extends PEPacket {
 		if (isset($this->playerData['CapeData'])) {
 			$this->capeData = base64_decode($this->playerData['CapeData']);
 		}
-	}
-
-	public function encode($playerProtocol) {
-		
 	}
 
 	public static function load($jwsTokenString) {

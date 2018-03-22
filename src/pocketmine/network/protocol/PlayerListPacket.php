@@ -73,12 +73,12 @@ class PlayerListPacket extends PEPacket{
 					}
 					if ($playerProtocol >= Info::PROTOCOL_120) {
 						$this->putString($d[3]); // Skin ID
-						if ($playerProtocol >= Info::PROTOCOL_200) {
+						if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
 							$this->putLInt(1); // num skins, always 1
 						}
 						$this->putString($d[4]); // Skin Data
 						$capeData = isset($d[5]) ? $d[5] : '';
-						if ($playerProtocol >= Info::PROTOCOL_200) {
+						if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
 							if (!empty($capeData)) {
 								$this->putLInt(1); // isNotEmpty
 								$this->putString($capeData); // Cape Data

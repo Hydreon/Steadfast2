@@ -92,8 +92,8 @@ class CraftingDataPacket extends PEPacket{
 
 	private static function writeFurnaceRecipe(FurnaceRecipe $recipe, BinaryStream $stream, $playerProtocol){		
 		if($recipe->getInput()->getDamage() !== 0){ //Data recipe
-			$stream->putSignedVarInt($recipe->getInput()->getDamage());
-			$stream->putSignedVarInt($recipe->getInput()->getId());			
+			$stream->putSignedVarInt($recipe->getInput()->getId());		
+			$stream->putSignedVarInt($recipe->getInput()->getDamage());				
 			$stream->putSlot($recipe->getResult(), $playerProtocol);
 			return CraftingDataPacket::ENTRY_FURNACE_DATA;
 		}else{

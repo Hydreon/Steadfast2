@@ -112,6 +112,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_SCALE = 39; // type: float
 	const DATA_BUTTON_TEXT = 40; // type: string !IMPORTANT! Send to player
 	const DATA_MAX_AIR = 44; // type: short
+	const DATA_HEIGHT = 55; // type: float
 	const DATA_SEAT_RIDER_OFFSET = 57; // type: vector3
 	
 	const DATA_EXPLODE_TIMER = 56;
@@ -170,10 +171,9 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_IS_SWIMMER = 20; 
 	const DATA_FLAG_CAN_FLY = 21; 
 	const DATA_FLAG_IS_STAING = 37; 
-	const DATA_FLAG_IS_WASD_CONTROLLED = 43; 
-	const DATA_FLAG_CAN_POWER_JUMP = 44;
 	 */
-	
+	const DATA_FLAG_IS_WASD_CONTROLLED = 42; 
+	const DATA_FLAG_CAN_POWER_JUMP = 43;
 	const DATA_FLAG_HAS_COLLISION = 45;
 	const DATA_FLAG_AFFECTED_BY_GRAVITY = 46;
 	

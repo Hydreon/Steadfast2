@@ -53,8 +53,14 @@ class UpdateBlockPacket extends PEPacket{
 			$this->putSignedVarInt($r[0]);			
 			$this->putVarInt($r[2]);
 			$this->putSignedVarInt($r[1]);
-			$this->putVarInt($r[3]);
-			$this->putVarInt(($r[5] << 4) | $r[4]);
+			if ($playerProtocol >= Info::PROTOCOL_220) {
+				$runtimeId = self::getBlockRuntimeID($r[3], $r[4]);
+				$this->putVarInt($runtimeId);
+				$this->putVarInt($r[5]);
+			} else {
+				$this->putVarInt($r[3]);
+				$this->putVarInt(($r[5] << 4) | $r[4]);
+			}
 		}
 	}
 

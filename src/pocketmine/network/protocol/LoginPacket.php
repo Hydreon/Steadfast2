@@ -23,14 +23,17 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-use pocketmine\utils\UUID;
-use pocketmine\utils\Binary;
 use pocketmine\network\protocol\Info;
+use pocketmine\Server;
+use pocketmine\utils\Binary;
+use pocketmine\utils\JWT;
+use pocketmine\utils\UUID;
 
 class LoginPacket extends PEPacket {
 
 	const NETWORK_ID = Info::LOGIN_PACKET;
 	const PACKET_NAME = "LOGIN_PACKET";
+	const MOJANG_ROOT_KEY = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V";
 
 	public $username;
 	public $protocol1;
@@ -55,6 +58,7 @@ class LoginPacket extends PEPacket {
 	public $skinGeometryName = "";
 	public $skinGeometryData = "";
 	public $capeData = "";
+	public $isVerified = true;
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -70,7 +74,9 @@ class LoginPacket extends PEPacket {
 		}
 		$this->protocol1 = $this->getInt();
 		// dirty useless hack
-		if ($this->protocol1 > 201) {
+		if ($this->protocol1 >= 221) {
+			$this->protocol1 = 221;
+		} elseif ($this->protocol1 > 201) {
 			$this->protocol1 = 200;
 		}
 		if (!in_array($this->protocol1, $acceptedProtocols)) {
@@ -96,22 +102,73 @@ class LoginPacket extends PEPacket {
 		$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));
 		$this->playerData = $this->getFromString($body, $this->playerDataLength);
 
-		$this->chains['data'] = array();
-		$index = 0;
-		foreach ($this->chains['chain'] as $key => $jwt) {
-			$data = self::load($jwt);
-			if (isset($data['extraData'])) {
-				$dataIndex = $index;
-			}
-			$this->chains['data'][$index] = $data;
-			$index++;
-		}
-		if (!isset($dataIndex)) {
+		$isNeedVerify = Server::getInstance()->isUseEncrypt();
+		$dataIndex = $this->findDataIndex($isNeedVerify);
+		if (is_null($dataIndex)) {
 			$this->isValidProtocol = false;
 			return;
 		}
+		$this->getPlayerData($dataIndex, $isNeedVerify);
+	}
 
-		$this->playerData = self::load($this->playerData);
+	public function encode($playerProtocol) {
+		
+	}
+
+	private function findDataindex($isNeedVerify) {
+		$dataIndex = null;
+		$validationKey = null;
+		$this->chains['data'] = array();
+		$index = 0;
+		if ($isNeedVerify) {
+			foreach ($this->chains['chain'] as $key => $jwt) {
+				$data = JWT::parseJwt($jwt);
+				if ($data) {
+					if (self::MOJANG_ROOT_KEY == $data['header']['x5u']) {
+						$validationKey = $data['payload']['identityPublicKey'];
+					} else if ($validationKey != null && $validationKey == $data['header']['x5u']) {
+						$dataIndex = $index;
+					} else {
+						if (!isset($data['payload']['extraData'])) continue;
+						$data['payload']['extraData']['XUID'] = "";
+						$this->isVerified = false;
+						$dataIndex = $index;
+					}
+					$this->chains['data'][$index] = $data['payload'];
+					$index++;
+				} else {
+					$this->isVerified = false;
+				}
+			}
+		} else {
+			foreach ($this->chains['chain'] as $key => $jwt) {
+				$data = self::load($jwt);
+				if (isset($data['extraData'])) {
+					$dataIndex = $index;
+				}
+				$this->chains['data'][$index] = $data;
+				$index++;
+			}
+		}
+		return $dataIndex;
+	}
+
+	private function getPlayerData($dataIndex, $isNeedVerify) {
+		if ($isNeedVerify) {
+			$this->playerData = JWT::parseJwt($this->playerData);
+			if ($this->playerData) {
+				if (!$this->playerData['isVerified']) {
+					$this->isVerified = false;
+				}
+				$this->playerData = $this->playerData['payload'];
+			} else {
+				$this->isVerified = false;
+				return;
+			}
+		} else {
+			$this->playerData = self::load($this->playerData);
+		}
+
 		$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
 		$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
 		$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
@@ -147,10 +204,6 @@ class LoginPacket extends PEPacket {
 		}
 		$this->originalProtocol = $this->protocol1;
 		$this->protocol1 = self::convertProtocol($this->protocol1);
-	}
-
-	public function encode($playerProtocol) {
-		
 	}
 
 	public static function load($jwsTokenString) {

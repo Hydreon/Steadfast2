@@ -561,39 +561,46 @@ class Block extends Position implements Metadatable{
 			self::$list[self::REDSTONE_TORCH] = RedstoneTorch::class;
 			self::$list[self::REDSTONE_TORCH_ACTIVE] = RedstoneTorchActive::class;
             
-			foreach(self::$list as $id => $class){
-				if($class !== null){
-					/** @var Block $block */
-					$block = new $class();
+			foreach (self::$list as $id => $class) {
+				static::registerBlock($id, $class);
+			}
+		}
+	}
 
-					for($data = 0; $data < 16; ++$data){
-						self::$fullList[($id << 4) | $data] = new $class($data);
-					}
+	public static function registerBlock($id, $class) {
+		if (self::$list[$id] != $class) {
+			self::$list[$id] = $class;
+		}
+		if ($class !== null) {
+			/** @var Block $block */
+			$block = new $class();
 
-					self::$solid[$id] = $block->isSolid();
-					self::$transparent[$id] = $block->isTransparent();
-					self::$hardness[$id] = $block->getHardness();
-					self::$light[$id] = $block->getLightLevel();
+			for ($data = 0; $data < 16; ++$data) {
+				self::$fullList[($id << 4) | $data] = new $class($data);
+			}
 
-					if($block->isSolid()){
-						if($block->isTransparent()){
-							if($block instanceof Liquid or $block instanceof Ice){
-								self::$lightFilter[$id] = 2;
-							}else{
-								self::$lightFilter[$id] = 1;
-							}
-						}else{
-							self::$lightFilter[$id] = 15;
-						}
-					}else{
+			self::$solid[$id] = $block->isSolid();
+			self::$transparent[$id] = $block->isTransparent();
+			self::$hardness[$id] = $block->getHardness();
+			self::$light[$id] = $block->getLightLevel();
+
+			if ($block->isSolid()) {
+				if ($block->isTransparent()) {
+					if ($block instanceof Liquid or $block instanceof Ice) {
+						self::$lightFilter[$id] = 2;
+					} else {
 						self::$lightFilter[$id] = 1;
 					}
-				}else{
-					self::$lightFilter[$id] = 1;
-					for($data = 0; $data < 16; ++$data){
-						self::$fullList[($id << 4) | $data] = new Block($id, $data);
-					}
+				} else {
+					self::$lightFilter[$id] = 15;
 				}
+			} else {
+				self::$lightFilter[$id] = 1;
+			}
+		} else {
+			self::$lightFilter[$id] = 1;
+			for ($data = 0; $data < 16; ++$data) {
+				self::$fullList[($id << 4) | $data] = new Block($id, $data);
 			}
 		}
 	}
