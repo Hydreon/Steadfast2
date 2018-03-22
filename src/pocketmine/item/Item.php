@@ -979,6 +979,18 @@ class Item{
 		self::initFood();
 	}
 
+	public static function registerItem($id, $class) {
+		if (isset(self::$list[$id]) && self::$list[$id] == $class) {
+			return;
+		}
+		self::$list[$id] = $class;
+		foreach (self::$creative as $index => $item) {
+			if ($item->getId() == $id) {
+				self::$creative[$index] = Item::get($id, $item->getDamage());
+			}
+		}
+	}
+
 	private static $creative = [];
 
 	private static function initCreativeItems(){
@@ -1900,8 +1912,12 @@ class Item{
 		return false;
 	}
 
+	public function additionalChecks(Item $item) {
+		return true;
+	}
+
 	public final function equals(Item $item, $checkDamage = true, $checkCompound = true){
-		return $this->id === $item->getId() and ($checkDamage === false or $this->getDamage() === $item->getDamage()) and ($checkCompound === false or $this->getCompound() === $item->getCompound());
+		return $this->id === $item->getId() && ($checkDamage === false || $this->getDamage() === $item->getDamage()) && ($checkCompound === false or $this->getCompound() === $item->getCompound()) && $this->additionalChecks($item);
 	}
 
 	public final function deepEquals(Item $item, $checkDamage = true, $checkCompound = true){
