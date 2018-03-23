@@ -237,7 +237,17 @@ class PlayerInventoryData {
 					$trGroup->sendInventories();
 				}
 				$this->resetData();
+			} else {
+				$player = $this->inventory->getHolder();
+				foreach ($this->transactionDataList as $transactionData) {
+					$inventory = $transactionData->getInventory();
+					if ($inventory instanceof PlayerInventory) {
+						$inventory->sendArmorContents($player);
+					}
+					$inventory->sendContents($player);
+				}
 			}
+			$this->resetData();
 		} catch (\Exception $e) {
 //			var_dump('transactions rollback');
 			// resend inventories
