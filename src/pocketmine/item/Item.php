@@ -463,6 +463,7 @@ class Item{
 	const BOTTLE_ENCHANTING = 384;
 	const FIRE_CHARGE = 385;
 	const EMERALD = 388;
+	const WRITTEN_BOOK = 387;
 	const ITEM_FRAME = 389;
 	const FLOWER_POT = 390;
 	const CARROT = 391;
@@ -810,6 +811,7 @@ class Item{
 		377 => "Blaze powder",
 		378 => "Magma Cream",
 		383 => "Spawn Egg",
+		self::WRITTEN_BOOK => "Written Book",
 		388 => "Emerald",
 		390 => "Flower Pot",
 		391 => "Carrot",
