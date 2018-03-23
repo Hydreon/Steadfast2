@@ -73,7 +73,7 @@ class SimpleForm implements CustomUI {
 	 * @param Player $player
 	 * @throws \Exception
 	 */
-	public function handle($response, $player) {
+	final public function handle($response, $player) {
 		if (isset($this->buttons[$response])) {
 			$this->buttons[$response]->handle(true, $player);
 		} else {
