@@ -280,7 +280,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/** @var Vector3 */
 	public $newPosition;
 
-	protected $spawnThreshold = 16 * M_PI;
+	protected $spawnThreshold = 9 * M_PI;
 	/** @var null|Position */
 	private $spawnPosition = null;
 
@@ -344,7 +344,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     
     protected $xblName = '';
 	
-	protected $viewRadius = 4;
+	protected $viewRadius = 3;
 	
 	protected $identityPublicKey = '';
 
@@ -384,6 +384,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $fishingHook = null;
 	protected $interactButtonText= '';
 	protected $isFlying = false;
+	
+	protected $beforeSpawnViewRadius = null;
+	protected $beforeSpawnTeleportPosition = null;
 	
 	public function getLeaveMessage(){
 		return "";
@@ -673,7 +676,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function setViewRadius($radius) {
-		$this->viewRadius = $radius;
+		if (!$this->spawned) {
+			$this->beforeSpawnViewRadius = $radius;
+		} else {
+			$this->viewRadius = $radius;
+		}
 	}
 
 	/**
@@ -814,8 +821,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 		}
 		
-		if ((!$this->isFirstConnect || $this->chunkLoadCount >= $this->spawnThreshold) && $this->spawned === false) {
-			$this->spawned = true;
+		if ((!$this->isFirstConnect || $this->chunkLoadCount >= $this->spawnThreshold) && $this->spawned === false) {			
 			$this->sendSettings();
 			$this->sendPotionEffects($this);
 			$this->sendData($this);
@@ -842,6 +848,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 			}
 			$this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));
+			$this->spawned = true;
+			if (!is_null($this->beforeSpawnViewRadius)) {
+				$this->setViewRadius($this->beforeSpawnViewRadius);
+				$this->beforeSpawnViewRadius = null;
+			}
+			if (!is_null($this->beforeSpawnTeleportPosition)) {
+				$this->teleport($this->beforeSpawnTeleportPosition);
+				$this->beforeSpawnTeleportPosition = null;
+			} else {
+				$this->nextChunkOrderRun = 0;
+			}			
 		}
 	}
 
@@ -2409,8 +2426,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerChunkRudiusPacket->startTiming();
 				if ($packet->radius > 12) {
 					$packet->radius = 12;
-				} elseif ($packet->radius < 4) {
-					$packet->radius = 4;
+				} elseif ($packet->radius < 3) {
+					$packet->radius = 3;
 				}
 				$this->setViewRadius($packet->radius);
 				$pk = new ChunkRadiusUpdatePacket();
@@ -3137,8 +3154,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if(!$this->isOnline()){
 			return;
 		}
-
-		$oldPos = $this->getPosition();
+		if (!$this->spawned) {
+			$this->beforeSpawnTeleportPosition = $pos;
+			return;
+		}
 		if(parent::teleport($pos, $yaw, $pitch)){
 			if (!is_null($this->currentWindow)) {
 				$this->removeWindow($this->currentWindow);
