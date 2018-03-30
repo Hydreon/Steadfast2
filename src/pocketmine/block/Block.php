@@ -86,6 +86,7 @@ class Block extends Position implements Metadatable{
 	const PISTON = 33;
 	const PISTON_HEAD = 34;
 	const WOOL = 35;
+	// 36 doesn't exist in client (at least in 1.2.13)
 	const DANDELION = 37;
 	const ROSE = 38;
 	const POPPY = 38;
@@ -151,6 +152,7 @@ class Block extends Position implements Metadatable{
 	const CLAY_BLOCK = 82;
 	const REEDS = 83;
 	const SUGARCANE_BLOCK = 83;
+	const JUKEBOX = 84;
 	const FENCE = 85;
 	const PUMPKIN = 86;
 	const NETHERRACK = 87;
@@ -219,6 +221,8 @@ class Block extends Position implements Metadatable{
 	const BIRCH_WOODEN_STAIRS = 135;
 	const JUNGLE_WOOD_STAIRS = 136;
 	const JUNGLE_WOODEN_STAIRS = 136;
+	const COMMAND_BLOCK = 137;
+	const BEACON = 138;
 	const COBBLE_WALL = 139;
 	const STONE_WALL = 139;
 	const COBBLESTONE_WALL = 139;
@@ -260,13 +264,18 @@ class Block extends Position implements Metadatable{
 	const DARK_OAK_WOOD_STAIRS = 164;
 	const DARK_OAK_WOODEN_STAIRS = 164;
 	const SLIME_BLOCK = 165;
+	// 166 doesn't exist in client (at least in 1.2.13)
 	const IRON_TRAPDOOR = 167;
+	const PRISMARINE = 168;
+	const SEA_LANTERN = 169;
 	const HAY_BALE = 170;
 	const CARPET = 171;
 	const HARDENED_CLAY = 172;
 	const COAL_BLOCK = 173;
 	const PACKED_ICE = 174;
 	const DOUBLE_PLANT = 175;
+	const STANDING_BANNER = 176;
+	const WALL_BANNER = 177;
 	const INVERTED_DAYLIGHT_SENSOR = 178;
 	const RED_SANDSTONE = 179;
 	const RED_SANDSTONE_STAIRS = 180;
@@ -277,6 +286,9 @@ class Block extends Position implements Metadatable{
 	const FENCE_GATE_JUNGLE = 185;
 	const FENCE_GATE_DARK_OAK = 186;
 	const FENCE_GATE_ACACIA = 187;
+	const REPEATING_COMMAND_BLOCK = 188;
+	const CHAIN_COMMAND_BLOCK = 189;
+	// 190 - 192 doesn't exist in client (at least in 1.2.13)
 	const SPRUCE_DOOR_BLOCK = 193;
 	const BIRCH_DOOR_BLOCK = 194;
 	const JUNGLE_DOOR_BLOCK = 195;
@@ -285,17 +297,56 @@ class Block extends Position implements Metadatable{
 	const GRASS_PATH = 198;
 	const ITEM_FRAME_BLOCK = 199;
     const CHORUS_FLOWER = 200;
-    const PURPUR_BLOCK = 201;
-    const END_BRICKS = 206;
+	const PURPUR_BLOCK = 201;
+	const PUPPUR_STAIRS = 202;
+	// 203 - 204 doesn't exist in client (at least in 1.2.13)
+	const UNDYED_SHULKER_BOX = 205;
+	const END_BRICKS = 206;
+	const FROSTED_ICE = 207;
     const END_ROD = 208;
-    const END_GATEWAY = 209;
+	const END_GATEWAY = 209;
+	// 210 - 212 doesn't exist in client (at least in 1.2.13)
+	const MAGMA = 213;
+	const NETHER_WART_BLOCK_BLOCK = 214;
+	const RED_NETHER_BRICK = 215;
+	const BONE_BLOCK = 216;
+	// 217 doesn't exist in client (at least in 1.2.13)
+	const SHULKER_BOX = 218;
+	const PURPLE_GLAZED_TERRACOTTA = 219;
+	const WHITE_GLAZED_TERRACOTTA = 220;
+	const ORANGE_GLAZED_TERRACOTTA = 221;
+	const MAGENTA_GLAZED_TERRACOTTA = 222;
+	const LIGHT_BLUE_GLAZED_TERRACOTTA = 223;
+	const YELLOW_GLAZED_TERRACOTTA = 224;
+	const LIME_GLAZED_TERRACOTTA = 225;
+	const PINK_GLAZED_TERRACOTTA = 226;
+	const GRAY_GLAZED_TERRACOTTA = 227;
+	const SILVER_GLAZED_TERRACOTTA = 228;
+	const CYAN_GLAZED_TERRACOTTA = 229;
+	// 230 doesn't exist in client (at least in 1.2.13)
+	const BLUE_GLAZED_TERRACOTTA = 231;
+	const BROWN_GLAZED_TERRACOTTA = 232;
+	const GREEN_GLAZED_TERRACOTTA = 233;
+	const RED_GLAZED_TERRACOTTA = 234;
+	const BLACK_GLAZED_TERRACOTTA = 235;
+    const CONCRETE = 236;
+	const CONCRETE_POWDER = 237;
+	// 238 - 239 doesn't exist in client (at least in 1.2.13)
     const CHORUS_PLANT = 240;
-    const STAINED_GLASS = 241;
+	const STAINED_GLASS = 241;
+	// 242 doesn't exist in client (at least in 1.2.13)
 	const PODZOL = 243;
 	const BEETROOT_BLOCK = 244;
 	const STONECUTTER = 245;
 	const GLOWING_OBSIDIAN = 246;
 	const NETHER_REACTOR = 247;
+	const UPDATE_GAME_1 = 248;
+	const UPDATE_GAME_2 = 249;
+	const MOVING_BLOCK = 250;
+	const OBSERVER = 251;
+	const STRUCTURE_BLOCK = 252;
+	// 253 - 254 doesn't exist in client (at least in 1.2.13)
+	const RESERVER_6 = 255;
 
 	/** @var \SplFixedArray */
 	public static $list = null;
@@ -560,6 +611,9 @@ class Block extends Position implements Metadatable{
 			
 			self::$list[self::REDSTONE_TORCH] = RedstoneTorch::class;
 			self::$list[self::REDSTONE_TORCH_ACTIVE] = RedstoneTorchActive::class;
+
+			self::$list[self::CONCRETE] = Concrete::class;
+			self::$list[self::CONCRETE_POWDER] = ConcretePowder::class;
             
 			foreach (self::$list as $id => $class) {
 				static::registerBlock($id, $class);
@@ -1116,5 +1170,27 @@ class Block extends Position implements Metadatable{
 		if($this->getLevel() instanceof Level){
 			$this->getLevel()->getBlockMetadata()->removeMetadata($this, $metadataKey, $plugin);
 		}
+	}
+
+	protected function getColorNameByMeta($meta) {
+		static $colors = [
+			0 => "White",
+			1 => "Orange",
+			2 => "Magenta",
+			3 => "Light Blue",
+			4 => "Yellow",
+			5 => "Lime",
+			6 => "Pink",
+			7 => "Gray",
+			8 => "Light Gray",
+			9 => "Cyan",
+			10 => "Purple",
+			11 => "Blue",
+			12 => "Brown",
+			13 => "Green",
+			14 => "Red",
+			15 => "Black"
+		];
+		return $colors[$meta & 0x0f];
 	}
 }
