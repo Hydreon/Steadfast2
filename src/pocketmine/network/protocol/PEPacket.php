@@ -54,6 +54,8 @@ abstract class PEPacket extends DataPacket {
 	
 	public final static function convertProtocol($protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_240:
+				return Info::PROTOCOL_240;
 			case Info::PROTOCOL_221:
 				return Info::PROTOCOL_221;
 			case Info::PROTOCOL_220:
@@ -99,21 +101,55 @@ abstract class PEPacket extends DataPacket {
 		self::$blockPalletRevert = $revert;
 	}
 	
-	public static function getBlockIDByRuntime($runtimeID) {
-		if (isset(self::$blockPalletRevert[$runtimeID])) {
-			return self::$blockPalletRevert[$runtimeID];
+	public static function getBlockIDByRuntime($runtimeId, $playerProtocol) {
+		if ($playerProtocol >= Info::PROTOCOL_240) {
+			if ($runtimeId > 1978 + 99) {
+				$runtimeId -= 99;
+			} elseif ($runtimeId > 1760 + 77) {
+				$runtimeId -= 77;
+			} elseif ($runtimeId > 1642 + 47) {
+				$runtimeId -= 47;
+			} elseif ($runtimeId > 1467 + 45) {
+				$runtimeId -= 45;
+			} elseif ($runtimeId > 1370 + 32) {
+				$runtimeId -= 32;
+			} elseif ($runtimeId > 345 + 17) {
+				$runtimeId -= 17;
+			} elseif ($runtimeId > 275 + 15) {
+				$runtimeId -= 15;
+			}
+		}
+		if (isset(self::$blockPalletRevert[$runtimeId])) {
+			return self::$blockPalletRevert[$runtimeId];
 		}
 		return [0, 0];
 	}
 	
-	public static function getBlockRuntimeID($id, $meta) {
+	public static function getBlockRuntimeID($id, $meta, $playerProtocol) {
+		$runtimeId = 0;
 		if (isset(self::$blockPallet[$id][$meta])) {
-			return self::$blockPallet[$id][$meta];
+			$runtimeId = self::$blockPallet[$id][$meta];
+		} elseif (isset(self::$blockPallet[$id][0])) {
+			$runtimeId = self::$blockPallet[$id][0];
 		}
-		if (isset(self::$blockPallet[$id][0])) {
-			return self::$blockPallet[$id][0];
+		if ($playerProtocol >= Info::PROTOCOL_240) {
+			if ($runtimeId > 1978) {
+				$runtimeId += 99;
+			} elseif ($runtimeId > 1760) {
+				$runtimeId += 77;
+			} elseif ($runtimeId > 1642) {
+				$runtimeId += 47;
+			} elseif ($runtimeId > 1467) {
+				$runtimeId += 45;
+			} elseif ($runtimeId > 1370) {
+				$runtimeId += 32;
+			} elseif ($runtimeId > 345) {			
+				$runtimeId += 17;
+			} elseif ($runtimeId > 275) {
+				$runtimeId += 15;
+			}
 		}
-		return 0;
+		return $runtimeId;
 	}
 
 }

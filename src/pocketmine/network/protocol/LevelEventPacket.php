@@ -93,7 +93,7 @@ class LevelEventPacket extends PEPacket{
 				case self::EVENT_PARTICLE_CRACK_BLOCK:
 					$id = $this->data & 0xff;
 					$meta = ($this->data >> 8) & 0x0f;
-					$runtimeId = self::getBlockRuntimeID($id, $meta);
+					$runtimeId = self::getBlockRuntimeID($id, $meta, $playerProtocol);
 					$this->putSignedVarInt($runtimeId);
 					break;
 				default :
