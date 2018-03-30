@@ -25,8 +25,7 @@
 namespace pocketmine\block;
 
 use pocketmine\entity\Entity;
-
-
+use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 use pocketmine\level\Level;
@@ -973,7 +972,15 @@ class Block extends Position implements Metadatable{
 			case Tool::TYPE_PICKAXE:
 				$tier = $item->isPickaxe();
 				if ($tier !== false && isset($tierMultipliers[$tier])) {
-					return $secondsForBreak / $tierMultipliers[$tier];
+					$multiplier = $tierMultipliers[$tier];
+					$ench = $item->getEnchantment(Enchantment::TYPE_MINING_EFFICIENCY);
+					if (!is_null($ench)) {
+						$enchLevel = $ench->getLevel();
+						if ($enchLevel > 0) {
+							$multiplier += $enchLevel ** 2 + 1;
+						}
+					}
+					return $secondsForBreak / $multiplier;
 				}
 				break;
 			case Tool::TYPE_AXE:
