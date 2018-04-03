@@ -39,7 +39,7 @@ class LevelSoundEventPacket extends PEPacket {
 		$this->z = $this->getLFloat();
 		if ($playerProtocol >= Info::PROTOCOL_220) {
 			$runtimeId = $this->getSignedVarInt();
-			$blockData = self::getBlockIDByRuntime($runtimeId);
+			$blockData = self::getBlockIDByRuntime($runtimeId, $playerProtocol);
 			$this->blockId = $blockData[0];
 		} else {
 			$this->blockId = $this->getSignedVarInt();
@@ -57,7 +57,7 @@ class LevelSoundEventPacket extends PEPacket {
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
 		if ($playerProtocol >= Info::PROTOCOL_220) {
-			$runtimeId = self::getBlockRuntimeID($this->blockId, 0);
+			$runtimeId = self::getBlockRuntimeID($this->blockId, 0, $playerProtocol);
 			$this->putSignedVarInt($runtimeId);
 		} else {
 			$this->putSignedVarInt($this->blockId);
