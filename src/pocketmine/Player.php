@@ -833,6 +833,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->dataPacket($pk);
 
 			$this->noDamageTicks = 60;
+			$this->spawned = true;
 			$chunkX = $chunkZ = null;
 			foreach ($this->usedChunks as $index => $c) {
 				Level::getXZ($index, $chunkX, $chunkZ);
@@ -843,7 +844,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 			}
 			$this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));
-			$this->spawned = true;
 			if (!is_null($this->beforeSpawnViewRadius)) {
 				$this->setViewRadius($this->beforeSpawnViewRadius);
 				$this->beforeSpawnViewRadius = null;
