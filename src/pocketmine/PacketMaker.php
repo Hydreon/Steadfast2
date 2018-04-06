@@ -2,15 +2,12 @@
 
 namespace pocketmine;
 
-use raklib\protocol\EncapsulatedPacket;
-use raklib\RakLib;
-use pocketmine\network\CachedEncapsulatedPacket;
-use pocketmine\network\protocol\DataPacket;
-use pocketmine\utils\Binary;
 use pocketmine\network\protocol\BatchPacket;
+use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\MoveEntityPacket;
-use pocketmine\network\protocol\SetEntityMotionPacket;
 use pocketmine\network\protocol\MovePlayerPacket;
+use pocketmine\network\protocol\SetEntityMotionPacket;
+use pocketmine\utils\Binary;
 
 class PacketMaker extends Thread {
 

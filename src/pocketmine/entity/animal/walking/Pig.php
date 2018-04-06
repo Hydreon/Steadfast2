@@ -3,11 +3,11 @@
 namespace pocketmine\entity\animal\walking;
 
 use pocketmine\entity\animal\WalkingAnimal;
+use pocketmine\entity\Creature;
 use pocketmine\entity\Rideable;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\item\Item;
 use pocketmine\Player;
-use pocketmine\event\entity\EntityDamageByEntityEvent;
-use pocketmine\entity\Creature;
 
 class Pig extends WalkingAnimal implements Rideable{
 	const NETWORK_ID = 12;

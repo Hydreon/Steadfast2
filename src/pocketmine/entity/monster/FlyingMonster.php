@@ -2,11 +2,10 @@
 
 namespace pocketmine\entity\monster;
 
-use pocketmine\entity\FlyingEntity;
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
+use pocketmine\entity\FlyingEntity;
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\Timings;
 use pocketmine\math\Vector3;
 use pocketmine\Server;
 

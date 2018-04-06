@@ -8,7 +8,6 @@ use pocketmine\math\Math;
 use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
-use pocketmine\entity\Creature;
 
 abstract class FlyingEntity extends BaseEntity{
 

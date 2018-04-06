@@ -21,7 +21,6 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\network\protocol\Info;
 use pocketmine\utils\BinaryStream;
 
 class AvailableCommandsPacket extends PEPacket{

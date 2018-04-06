@@ -4,8 +4,6 @@ namespace pocketmine\inventory\win10;
 
 use pocketmine\inventory\BaseTransaction;
 use pocketmine\inventory\PlayerInventory;
-use pocketmine\inventory\win10\TransactionData;
-use pocketmine\inventory\win10\Win10SimpleTransactionGroup;
 use pocketmine\item\Item;
 use pocketmine\Player;
 

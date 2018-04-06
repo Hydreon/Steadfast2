@@ -8,8 +8,8 @@
 
 namespace pocketmine\entity\effects;
 
-use pocketmine\entity\InstantEffect;
 use pocketmine\entity\Entity;
+use pocketmine\entity\InstantEffect;
 use pocketmine\event\entity\EntityDamageEvent;
 
 class HarmingEffect extends InstantEffect {

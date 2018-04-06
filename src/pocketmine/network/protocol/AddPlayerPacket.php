@@ -24,8 +24,8 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 #ifndef COMPILE
-use pocketmine\utils\Binary;
 use pocketmine\entity\Entity;
+use pocketmine\utils\Binary;
 
 #endif
 

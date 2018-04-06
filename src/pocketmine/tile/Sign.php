@@ -23,8 +23,8 @@ namespace pocketmine\tile;
 
 use pocketmine\level\format\FullChunk;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\nbt\tag\IntTag;
 
 class Sign extends Spawnable{
 

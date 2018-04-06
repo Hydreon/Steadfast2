@@ -21,8 +21,8 @@
 
 namespace pocketmine\block;
 
-use pocketmine\item\Item;
 use pocketmine\item\Tool;
+use pocketmine\item\Item;
 
 class DiamondOre extends Solid{
 

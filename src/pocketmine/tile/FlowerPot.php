@@ -23,9 +23,9 @@ namespace pocketmine\tile;
 use pocketmine\item\Item;
 use pocketmine\level\format\FullChunk;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\nbt\tag\IntTag;
 
 class FlowerPot extends Spawnable{
 	

@@ -22,7 +22,6 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\item\Tool;
 
 class WeightedPressurePlateLight extends StonePressurePlate{
 

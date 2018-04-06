@@ -3,7 +3,6 @@
 namespace pocketmine\item;
 
 use pocketmine\block\Block;
-use pocketmine\item\Item;
 
 class Redstone extends Item {
 	

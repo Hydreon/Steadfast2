@@ -2,14 +2,13 @@
 
 namespace pocketmine\entity\monster\walking;
 
-use pocketmine\entity\monster\WalkingMonster;
 use pocketmine\entity\Entity;
+use pocketmine\entity\monster\WalkingMonster;
 use pocketmine\entity\Projectile;
 use pocketmine\entity\ProjectileSource;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\entity\ProjectileLaunchEvent;
-use pocketmine\event\Timings;
 use pocketmine\item\Bow;
 use pocketmine\item\Item;
 use pocketmine\level\Level;

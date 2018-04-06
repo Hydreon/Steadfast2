@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-use pocketmine\network\protocol\Info;
 use pocketmine\network\multiversion\MultiversionEnums;
 
 class TextPacket extends PEPacket{

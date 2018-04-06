@@ -2,13 +2,13 @@
 
 namespace pocketmine\entity;
 
-use pocketmine\math\Math;
-use pocketmine\math\Vector3;
 use pocketmine\block\Air;
 use pocketmine\block\Liquid;
-use pocketmine\Player;
-use pocketmine\entity\monster\Monster;
 use pocketmine\block\Water;
+use pocketmine\entity\monster\Monster;
+use pocketmine\math\Math;
+use pocketmine\math\Vector3;
+use pocketmine\Player;
 
 abstract class WalkingEntity extends BaseEntity {
 

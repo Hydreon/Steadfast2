@@ -21,15 +21,15 @@
 
 namespace pocketmine\entity\projectile;
 
+use pocketmine\entity\Entity;
+use pocketmine\entity\Projectile;
+use pocketmine\event\entity\ExplosionPrimeEvent;
+use pocketmine\level\Explosion;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\particle\CriticalParticle;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
-use pocketmine\entity\Projectile;
-use pocketmine\entity\Entity;
-use pocketmine\level\Explosion;
-use pocketmine\event\entity\ExplosionPrimeEvent;
 
 class FireBall extends Projectile{
 	const NETWORK_ID = 85;

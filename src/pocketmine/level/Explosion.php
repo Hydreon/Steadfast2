@@ -21,6 +21,7 @@
 
 namespace pocketmine\level;
 
+use pocketmine\block\Air;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityDamageByBlockEvent;
@@ -28,6 +29,7 @@ use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityExplodeEvent;
 use pocketmine\item\Item;
+use pocketmine\level\particle\HugeExplodeParticle;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Math;
 use pocketmine\math\Vector3;
@@ -36,13 +38,10 @@ use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\FloatTag;
-use pocketmine\network\Network;
 use pocketmine\network\protocol\ExplodePacket;
+use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\Server;
 use pocketmine\utils\Random;
-use pocketmine\block\Air;
-use pocketmine\level\particle\HugeExplodeParticle;
-use pocketmine\network\protocol\LevelSoundEventPacket;
 
 class Explosion{
 

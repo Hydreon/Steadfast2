@@ -2,14 +2,14 @@
 
 namespace pocketmine\entity\monster\walking;
 
-use pocketmine\entity\monster\WalkingMonster;
-use pocketmine\entity\Entity;
-use pocketmine\item\GoldSword;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\entity\EntityDamageByEntityEvent;
-use pocketmine\item\Item;
 use pocketmine\entity\Creature;
+use pocketmine\entity\Entity;
+use pocketmine\entity\monster\WalkingMonster;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\item\GoldSword;
+use pocketmine\item\Item;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\Player;
 

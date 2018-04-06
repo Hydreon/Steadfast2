@@ -4,6 +4,7 @@ namespace pocketmine\entity\effects;
 
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
+
 //use pocketmine\entity\Human;
 
 class HungerEffect extends Effect {

@@ -2,8 +2,6 @@
 
 namespace pocketmine\mods;
 
-use pocketmine\mods\Addon;
-use pocketmine\mods\ResourcePack;
 use pocketmine\Server;
 
 class ModsManager {

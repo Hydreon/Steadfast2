@@ -22,16 +22,15 @@
 namespace pocketmine\level\format\anvil;
 
 use pocketmine\level\format\FullChunk;
+use pocketmine\level\format\generic\EmptyChunkSection;
 use pocketmine\level\format\mcregion\McRegion;
 use pocketmine\level\Level;
-use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\ByteArray;
-use pocketmine\nbt\tag\Compound;
-use pocketmine\utils\ChunkException;
-use pocketmine\utils\Binary;
 use pocketmine\nbt\NBT;
+use pocketmine\nbt\tag\ByteArray;
+use pocketmine\nbt\tag\ByteTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\tile\Spawnable;
-use pocketmine\level\format\generic\EmptyChunkSection;
+use pocketmine\utils\ChunkException;
 
 class Anvil extends McRegion {
 	

@@ -2,12 +2,12 @@
 
 namespace pocketmine;
 
-use pocketmine\level\Level;
-use pocketmine\entity\monster\Monster;
-use pocketmine\entity\animal\Animal;
-use pocketmine\level\Position;
-use pocketmine\entity\BaseEntity;
 use pocketmine\block\Liquid;
+use pocketmine\entity\animal\Animal;
+use pocketmine\entity\BaseEntity;
+use pocketmine\entity\monster\Monster;
+use pocketmine\level\Level;
+use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 
 class SpawnerCreature {

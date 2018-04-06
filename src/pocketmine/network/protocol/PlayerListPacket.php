@@ -22,7 +22,6 @@
 namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
-use pocketmine\utils\TextFormat;
 
 
 class PlayerListPacket extends PEPacket{

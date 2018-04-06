@@ -3,8 +3,8 @@
 namespace pocketmine\tile;
 
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\nbt\tag\IntTag;
 
 class EnderChest extends Spawnable  {
     

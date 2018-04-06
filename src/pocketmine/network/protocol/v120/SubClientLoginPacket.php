@@ -2,8 +2,8 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
+use pocketmine\network\protocol\Info120;
 use pocketmine\Server;
 use pocketmine\utils\Binary;
 use pocketmine\utils\JWT;

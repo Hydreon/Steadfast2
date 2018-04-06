@@ -19,13 +19,12 @@
 */
 namespace pocketmine\entity;
 use pocketmine\level\format\FullChunk;
+use pocketmine\level\Level;
 use pocketmine\level\particle\CriticalParticle;
+use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\network\Network;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
-use pocketmine\level\Level;
-use pocketmine\math\Vector3;
 
 class Arrow extends Projectile{
 	const NETWORK_ID = 80;

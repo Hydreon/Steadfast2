@@ -2,9 +2,6 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\network\protocol\DataPacket;
-use pocketmine\network\protocol\Info;
-
 abstract class PEPacket extends DataPacket {
 	
 	const CLIENT_ID_MAIN_PLAYER = 0;

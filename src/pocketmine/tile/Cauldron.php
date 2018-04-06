@@ -4,10 +4,9 @@ namespace pocketmine\tile;
 
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\tile\Spawnable;
+use pocketmine\nbt\tag\IntTag;
 
 class Cauldron extends Spawnable {
 	

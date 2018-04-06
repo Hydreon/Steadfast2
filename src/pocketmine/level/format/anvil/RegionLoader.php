@@ -23,13 +23,13 @@ namespace pocketmine\level\format\anvil;
 
 use pocketmine\level\format\LevelProvider;
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\ByteArray;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Enum;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\IntArray;
 use pocketmine\nbt\tag\LongTag;
+use pocketmine\nbt\tag\IntArray;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\utils\Binary;
 use pocketmine\utils\MainLogger;
 

@@ -24,8 +24,8 @@ namespace pocketmine\event\entity;
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
 use pocketmine\event\Cancellable;
-use pocketmine\Player;
 use pocketmine\item\enchantment\Enchantment;
+use pocketmine\Player;
 
 class EntityDamageEvent extends EntityEvent implements Cancellable{
 	public static $handlerList = null;

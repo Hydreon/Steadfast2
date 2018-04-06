@@ -24,18 +24,16 @@ namespace pocketmine\tile;
 use pocketmine\block\Block;
 use pocketmine\event\inventory\FurnaceBurnEvent;
 use pocketmine\event\inventory\FurnaceSmeltEvent;
-use pocketmine\inventory\FurnaceInventory;
 use pocketmine\inventory\FurnaceRecipe;
+use pocketmine\inventory\FurnaceInventory;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\Item;
 use pocketmine\level\format\FullChunk;
 use pocketmine\nbt\NBT;
-
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\Network;
 use pocketmine\network\protocol\ContainerSetDataPacket;
 
 class Furnace extends Tile implements InventoryHolder, Container, Nameable{

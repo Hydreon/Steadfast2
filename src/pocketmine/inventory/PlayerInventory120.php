@@ -5,14 +5,13 @@ namespace pocketmine\inventory;
 use pocketmine\entity\Human;
 use pocketmine\event\entity\EntityArmorChangeEvent;
 use pocketmine\event\entity\EntityInventoryChangeEvent;
-use pocketmine\inventory\PlayerInventory;
 use pocketmine\item\Item;
-use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\protocol\MobEquipmentPacket;
+use pocketmine\network\protocol\v120\Protocol120;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventorySlotPacket;
-use pocketmine\network\protocol\v120\Protocol120;
+use pocketmine\network\protocol\Info;
 use pocketmine\Player;
 use pocketmine\Server;
 

@@ -2,12 +2,12 @@
 
 namespace pocketmine\entity\monster\walking;
 
-use pocketmine\entity\monster\WalkingMonster;
-use pocketmine\entity\Entity;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\entity\Creature;
+use pocketmine\entity\Entity;
+use pocketmine\entity\monster\WalkingMonster;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\nbt\tag\IntTag;
 
 class Wolf extends WalkingMonster{
 	const NETWORK_ID = 14;

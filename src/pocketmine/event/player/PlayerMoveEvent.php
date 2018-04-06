@@ -23,9 +23,8 @@ namespace pocketmine\event\player;
 
 use pocketmine\event\Cancellable;
 use pocketmine\level\Location;
-use pocketmine\Player;
-use pocketmine\network\protocol\AnimatePacket;
 use pocketmine\math\Vector3;
+use pocketmine\Player;
 
 class PlayerMoveEvent extends PlayerEvent implements Cancellable{
 	public static $handlerList = null;

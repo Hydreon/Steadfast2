@@ -26,8 +26,8 @@ namespace pocketmine\block;
 
 use pocketmine\entity\Entity;
 use pocketmine\item\enchantment\Enchantment;
-use pocketmine\item\Item;
 use pocketmine\item\Tool;
+use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\level\MovingObjectPosition;
 use pocketmine\level\Position;

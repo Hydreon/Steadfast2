@@ -4,14 +4,14 @@ namespace pocketmine\entity\monster\flying;
 
 use pocketmine\entity\animal\Animal;
 use pocketmine\entity\BaseEntity;
-use pocketmine\entity\monster\FlyingMonster;
-use pocketmine\entity\projectile\FireBall;
 use pocketmine\entity\Creature;
 use pocketmine\entity\Entity;
+use pocketmine\entity\monster\FlyingMonster;
+use pocketmine\entity\projectile\FireBall;
+use pocketmine\entity\ProjectileSource;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\ProjectileLaunchEvent;
 use pocketmine\item\Item;
-use pocketmine\entity\ProjectileSource;
 use pocketmine\level\Location;
 use pocketmine\level\sound\LaunchSound;
 use pocketmine\math\Math;

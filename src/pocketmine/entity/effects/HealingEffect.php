@@ -2,8 +2,8 @@
 
 namespace pocketmine\entity\effects;
 
-use pocketmine\entity\InstantEffect;
 use pocketmine\entity\Entity;
+use pocketmine\entity\InstantEffect;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 
 class HealingEffect extends InstantEffect {

@@ -23,7 +23,6 @@ namespace pocketmine\entity;
 
 use pocketmine\level\format\FullChunk;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\network\Network;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
 

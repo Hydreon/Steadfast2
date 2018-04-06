@@ -2,11 +2,10 @@
 
 namespace pocketmine\entity\animal;
 
-use pocketmine\entity\WalkingEntity;
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
+use pocketmine\entity\WalkingEntity;
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\Timings;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 

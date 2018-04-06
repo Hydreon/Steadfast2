@@ -21,11 +21,10 @@
 
 namespace pocketmine\inventory;
 
-use pocketmine\inventory\InventoryType;
+use pocketmine\block\Block;
 use pocketmine\item\Item;
 use pocketmine\level\Position;
 use pocketmine\Player;
-use pocketmine\block\Block;
 
 class EnchantInventory extends ContainerInventory {
 

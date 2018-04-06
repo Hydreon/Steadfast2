@@ -22,12 +22,12 @@
 namespace pocketmine\entity;
 
 use pocketmine\event\player\PlayerFishEvent;
+use pocketmine\item\Item as ItemItem;
 use pocketmine\level\format\FullChunk;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\Player;
-use pocketmine\item\Item as ItemItem;
-use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\network\protocol\AddEntityPacket;
+use pocketmine\network\protocol\EntityEventPacket;
+use pocketmine\Player;
 use pocketmine\Server;
 
 class FishingHook extends Projectile{
