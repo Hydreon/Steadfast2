@@ -127,7 +127,6 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		
 		if ($this instanceof Player){
 			$this->inventory = Multiversion::getPlayerInventory($this);
-			$this->addWindow($this->inventory, 0);
 		} else {
 			$this->inventory = new PlayerInventory($this);
 		}
