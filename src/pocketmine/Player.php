@@ -1579,7 +1579,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 			}
 		} else {
-			error_log("Try to eat " . get_class($slot) . "(" . $slot->getId() . ")");
+			// error_log("Try to eat " . get_class($slot) . "(" . $slot->getId() . ")");
 		}
 	}
 
