@@ -116,13 +116,12 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	}
 
 	protected function initEntity(){
-
 		$this->setDataFlag(self::DATA_PLAYER_FLAGS, self::DATA_PLAYER_FLAG_SLEEP, false);
 		$this->setDataProperty(self::DATA_PLAYER_BED_POSITION, self::DATA_TYPE_POS, [0, 0, 0]);
 		
-		if ($this instanceof Player){
+		if($this instanceof Player){
 			$this->inventory = Multiversion::getPlayerInventory($this);
-		} else {
+		}else{
 			$this->inventory = new PlayerInventory($this);
 		}
 
