@@ -157,6 +157,7 @@ use pocketmine\tile\Sign;
 use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
 use pocketmine\utils\TextFormat;
+use pocketmine\utils\UUID;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -929,14 +930,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @return bool|int
 	 */
 	public function directDataPacket(DataPacket $packet, $needACK = false){
-		if($this->connected === false){
+		if(!$this->connected){
 			return false;
 		}
 		
-		if ($this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
+		if($this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120){
 			$disallowedPackets = Protocol120::getDisallowedPackets();
 			if (in_array(get_class($packet), $disallowedPackets)) {
-				return;
+				return true;
 			}
 		}
 
@@ -987,12 +988,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param Vector3|Position $pos
 	 */
 	public function setSpawn(Vector3 $pos){
-		if(!($pos instanceof Position)){
-			$level = $this->level;
-		}else{
-			$level = $pos->getLevel();
-		}
-		$this->spawnPosition = new Position($pos->x, $pos->y, $pos->z, $level);
+	    $level = ($pos instanceof Position) ? $pos->getLevel() : $this->level;
+		$this->spawnPosition = Position::fromObject($pos, $level);
 		$pk = new SetSpawnPositionPacket();
 		$pk->x = (int) $this->spawnPosition->x;
 		$pk->y = (int) $this->spawnPosition->y;
@@ -1008,7 +1005,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->setDataFlag(self::DATA_PLAYER_FLAGS, self::DATA_PLAYER_FLAG_SLEEP, false);
 			$this->setDataProperty(self::DATA_PLAYER_BED_POSITION, self::DATA_TYPE_POS, [0, 0, 0]);
 
-			$this->level->sleepTicks = 0;
+			//$this->level->sleepTicks = 0; this property not use in steadfast2
 
 			$pk = new AnimatePacket();
 			$pk->eid = $this->id;
@@ -1047,7 +1044,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/**
 	 * @return int
 	 */
-	public function getGamemode(){
+	public function getGamemode() : int{
 		return $this->gamemode;
 	}
 
@@ -1058,7 +1055,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 *
 	 * @return bool
 	 */
-	public function setGamemode($gm){
+	public function setGamemode(int $gm){
 		if($gm < 0 or $gm > 3 or $this->gamemode === $gm){
 			return false;
 		}
@@ -1159,19 +1156,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->dataPacket($pk);
 	}
 
-	public function isSurvival(){
+	public function isSurvival() : bool{
 		return ($this->gamemode & 0x01) === 0;
 	}
 
-	public function isCreative(){
+	public function isCreative() : bool{
 		return ($this->gamemode & 0x01) > 0;
 	}
 
-	public function isSpectator(){
+	public function isSpectator() : bool{
 		return $this->gamemode === 3;
 	}
 
-	public function isAdventure(){
+	public function isAdventure() : bool{
 		return ($this->gamemode & 0x02) > 0;
 	}
 
@@ -1281,11 +1278,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	protected $moving = false;
 
-	public function setMoving($moving) {
+	public function setMoving(bool $moving){
 		$this->moving = $moving;
 	}
 
-	public function isMoving(){
+	public function isMoving() : bool{
 		return $this->moving;
 	}
 
@@ -1568,15 +1565,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
-	/**
-	 * Handles a Minecraft packet
-	 * TODO: Separate all of this in handlers
-	 *
-	 * WARNING: Do not use this, it's only for internal use.
-	 * Changes to this function won't be recorded on the version.
-	 *
-	 * @param DataPacket $packet
-	 */
+    /**
+     * Handles a Minecraft packet
+     * TODO: Separate all of this in handlers
+     *
+     * WARNING: Do not use this, it's only for internal use.
+     * Changes to this function won't be recorded on the version.
+     *
+     * @param DataPacket $packet
+     * @throws \Exception
+     */
 	public function handleDataPacket(DataPacket $packet){
 		if($this->connected === false){
 			return;
@@ -1652,7 +1650,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
 				$this->uuid = $packet->clientUUID;
 				$this->subClientId = $packet->targetSubClientID;
-				if (is_null($this->uuid)) {
+				if(!($this->uuid instanceof UUID)){
 					$this->close("", "Sorry, your client is broken.");
 					//Timings::$timerLoginPacket->stopTiming();
 					break;
@@ -1812,6 +1810,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerUseItemPacket->stopTiming();
 				break;
 			case 'PLAYER_ACTION_PACKET':
+			    /** @var PlayerActionPacket $packet */
 				//Timings::$timerActionPacket->startTiming();
 //				if($this->spawned === false or $this->blocked === true or ($this->dead === true and $packet->action !== 7)){
 				if($this->spawned === false || $this->blocked === true){
@@ -4237,7 +4236,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * 
 	 * @param PlayerActionPacket $packet
 	 */
-	protected function crackBlock($packet) {
+	protected function crackBlock(PlayerActionPacket $packet) {
 		if (!isset($this->actionsNum['CRACK_BLOCK'])) {
 			$this->actionsNum['CRACK_BLOCK'] = 0;
 		}
