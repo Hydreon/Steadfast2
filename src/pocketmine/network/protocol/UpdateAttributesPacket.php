@@ -30,13 +30,20 @@ class UpdateAttributesPacket extends PEPacket{
     const EXPERIENCE_LEVEL = "minecraft:player.level";
 	const SPEED = "minecraft:movement";
 
+	/** @var int */
     public $entityId;
 
+    /** @var float */
     public $minValue;
+    /** @var float */
     public $maxValue;
+    /** @var float */
     public $value;
+    /** @var float */
+    public $defaultValue;
+    /** @var string */
     public $name;
-	public $defaultValue;
+    /** @var array */
 	public $attributes = [];
 
 	public function decode($playerProtocol){
@@ -46,16 +53,16 @@ class UpdateAttributesPacket extends PEPacket{
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->entityId);
-		if (empty($this->attributes)) {
+		if(empty($this->attributes)){
 			$this->putVarInt(1);
 			$this->putLFloat($this->minValue);
 			$this->putLFloat($this->maxValue);
 			$this->putLFloat($this->value);
 			$this->putLFloat($this->defaultValue);
 			$this->putString($this->name);
-		} else {
+		}else{
 			$this->putVarInt(count($this->attributes));
-			foreach ($this->attributes as $attribute) {
+			foreach($this->attributes as $attribute){
 				$this->putLFloat($attribute['min']);
 				$this->putLFloat($attribute['max']);
 				$this->putLFloat($attribute['default']);

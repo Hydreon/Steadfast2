@@ -22,6 +22,7 @@
 namespace pocketmine\entity;
 
 use pocketmine\inventory\PlayerInventory;
+use pocketmine\inventory\PlayerInventory120;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\Item as ItemItem;
 use pocketmine\level\Level;
@@ -38,7 +39,7 @@ use pocketmine\utils\UUID;
 class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	protected $nameTag = "TESTIFICATE";
-	/** @var PlayerInventory */
+	/** @var PlayerInventory|PlayerInventory120 */
 	protected $inventory;
 
 

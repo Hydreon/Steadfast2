@@ -35,7 +35,7 @@ class InventoryTransactionPacket extends PEPacket {
     const ITEM_USE_ON_ENTITY_ACTION_ITEM_INTERACT = 2;
 
     public $transactionType;
-    /** @var SimpleTransactionData */
+    /** @var SimpleTransactionData[] */
     public $transactions;
     public $actionType;
     /** @var Vector3 */

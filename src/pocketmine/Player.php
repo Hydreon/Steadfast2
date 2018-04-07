@@ -320,6 +320,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
     private $elytraIsActivated = false;
 
+    /** @var null|mixed [mixed for IDE] */
     private $encrypter = null;
     private $encryptEnabled = false;
 
@@ -653,7 +654,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
         $this->creationTime = microtime(true);
 
-        if (empty(self::$availableCommands)) {
+        if(empty(self::$availableCommands)){
             self::$availableCommands = $this->server->getJsonCommands();
             $plugins = $this->server->getPluginManager()->getPlugins();
             foreach ($plugins as $pluginName => $plugin) {
@@ -662,7 +663,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             }
             AvailableCommandsPacket::prepareCommands(self::$availableCommands);
         }
-        $this->inventory = new PlayerInventory($this); // hack for not null getInventory
         $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_HAS_COLLISION, true, self::DATA_TYPE_LONG, false);
         $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_AFFECTED_BY_GRAVITY, true, self::DATA_TYPE_LONG, false);
     }
@@ -782,7 +782,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     }
 
     protected function sendNextChunk(){
-        if($this->connected === false){
+        if(!$this->connected){
             return;
         }
 
@@ -791,9 +791,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             if($count >= 10){
                 break;
             }
+
             $X = null;
             $Z = null;
             Level::getXZ($index, $X, $Z);
+            assert(is_int($X) and is_int($Z));
 
             ++$count;
 
@@ -813,7 +815,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             }
         }
 
-        if ((!$this->isFirstConnect || $this->chunkLoadCount >= $this->spawnThreshold) && $this->spawned === false) {
+        if((!$this->isFirstConnect || $this->chunkLoadCount >= $this->spawnThreshold) && $this->spawned === false){
             $this->sendSettings();
             $this->sendPotionEffects($this);
             $this->sendData($this);
@@ -832,16 +834,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             $this->noDamageTicks = 60;
             $this->spawned = true;
             $chunkX = $chunkZ = null;
-            foreach ($this->usedChunks as $index => $c) {
+            foreach($this->usedChunks as $index => $c){
                 Level::getXZ($index, $chunkX, $chunkZ);
-                foreach ($this->level->getChunkEntities($chunkX, $chunkZ) as $entity) {
-                    if ($entity !== $this && !$entity->closed && !$entity->dead && $this->canSeeEntity($entity)) {
+                foreach($this->level->getChunkEntities($chunkX, $chunkZ) as $entity){
+                    if($entity !== $this && !$entity->closed && !$entity->dead && $this->canSeeEntity($entity)){
                         $entity->spawnTo($this);
                     }
                 }
             }
             $this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));
-            if (!is_null($this->beforeSpawnViewRadius)) {
+            if(!is_null($this->beforeSpawnViewRadius)){
                 $this->setViewRadius($this->beforeSpawnViewRadius);
                 $this->beforeSpawnViewRadius = null;
             }
@@ -1691,6 +1693,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             Win10InvLogic::packetHandler($packet, $this);
             return true;
         }
+
         $item = $this->inventory->getItem($packet->slot);
         $slot = $packet->slot;
 
@@ -1701,14 +1704,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 $this->inventory->setHeldItemIndex($packet->selectedSlot, $isNeedSendToHolder);
                 $this->inventory->setHeldItemSlot($packet->slot);
                 $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
-                return true;
             }else{
                 $this->inventory->sendContents($this);
-                return true;
             }
         }elseif($item === null or $slot === -1 or !$item->deepEquals($packet->item)){ // packet error or not implemented
             $this->inventory->sendContents($this);
-            return true;
         }else{
             if($packet->selectedSlot >= 0 and $packet->selectedSlot < 9){
                 $hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);
@@ -1716,19 +1716,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 $this->inventory->setHeldItemIndex($packet->selectedSlot, $isNeedSendToHolder);
                 $this->inventory->setHeldItemSlot($slot);
                 $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
-                return true;
             }else{
                 $this->inventory->sendContents($this);
-                return true;
             }
         }
-
-        // Is this handle ? No??
-        var_dump("HANDLE TEST");
-
-        $this->inventory->sendHeldItem($this->hasSpawned);
-
-        $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 
         return true;
     }
@@ -1880,7 +1871,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     }
 
     public function handleRemoveBlock(RemoveBlockPacket $packet) : bool{
-        $this->breakBlock([ 'x' => $packet->x, 'y' => $packet->y, 'z' => $packet->z ]);
+        $this->breakBlock(new Vector3($packet->x, $packet->y, $packet->z));
         return true;
     }
 
@@ -3352,19 +3343,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             $nbt["Pos"][1] = $this->level->getSpawnLocation()->y + 5;
             $nbt["Pos"][2] = $this->level->getSpawnLocation()->z;
         }else{
-            $this->setLevel($level, true);
+            $this->setLevel($level);
         }
 
         if(!($nbt instanceof Compound)){
             $this->close(TextFormat::YELLOW . $this->username . " has left the game", "Corrupt joining data, check your connection.");
             return;
-        }
-
-        $this->achievements = [];
-
-        /** @var Byte $achievement */
-        foreach ($nbt->Achievements as $achievement) {
-            $this->achievements[$achievement->getName()] = $achievement->getValue() > 0 ? true : false;
         }
 
         $nbt->lastPlayed = new LongTag("lastPlayed", floor(microtime(true) * 1000));
@@ -3410,14 +3394,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         $pk->started = true;
         $this->dataPacket($pk);
 
-        if ($this->getHealth() <= 0) {
+        if($this->getHealth() <= 0){
             $this->dead = true;
         }
 
-        if (!empty(self::$availableCommands)) {
+        if(!empty(self::$availableCommands)){
             $pk = new AvailableCommandsPacket();
             $this->dataPacket($pk);
         }
+
         if($this->getHealth() <= 0){
             $this->dead = true;
         }
@@ -3458,82 +3443,79 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
      * Create new transaction pair for transaction or add it to suitable one
      *
      * @param BaseTransaction $transaction
-     * @return null
      */
-    protected function addTransaction($transaction) {
+    protected function addTransaction(BaseTransaction $transaction){
         $newItem = $transaction->getTargetItem();
         $oldItem = $transaction->getSourceItem();
         // if decreasing transaction drop down
-        if ($newItem->getId() === Item::AIR || ($oldItem->deepEquals($newItem) && $oldItem->count > $newItem->count)) {
-
+        if($newItem->getId() === Item::AIR || ($oldItem->deepEquals($newItem) && $oldItem->count > $newItem->count)){
             return;
         }
         // if increasing create pair manualy
 
         // trying to find inventory
         $inventory = $this->currentWindow;
-        if (is_null($this->currentWindow) || $this->currentWindow === $transaction->getInventory()) {
+        if($this->currentWindow === null || $this->currentWindow === $transaction->getInventory()) {
             $inventory = $this->inventory;
         }
         // get item difference
-        if ($oldItem->deepEquals($newItem)) {
+        if($oldItem->deepEquals($newItem)){
             $newItem->count -= $oldItem->count;
         }
 
         $items = $inventory->getContents();
         $targetSlot = -1;
-        foreach ($items as $slot => $item) {
-            if ($item->deepEquals($newItem) && $newItem->count <= $item->count) {
+        foreach($items as $slot => $item){
+            if($item->deepEquals($newItem) && $newItem->count <= $item->count){
                 $targetSlot = $slot;
                 break;
             }
         }
-        if ($targetSlot !== -1) {
+        if($targetSlot !== -1){
             $trGroup = new SimpleTransactionGroup($this);
             $trGroup->addTransaction($transaction);
             // create pair for the first transaction
-            if (!$oldItem->deepEquals($newItem) && $oldItem->getId() !== Item::AIR && $inventory === $transaction->getInventory()) { // for swap
+            if(!$oldItem->deepEquals($newItem) && $oldItem->getId() !== Item::AIR && $inventory === $transaction->getInventory()){ // for swap
                 $targetItem = clone $oldItem;
-            } else if ($newItem->count === $items[$targetSlot]->count) {
+            }elseif($newItem->count === $items[$targetSlot]->count){
                 $targetItem = Item::get(Item::AIR);
-            } else {
+            }else{
                 $targetItem = clone $items[$targetSlot];
                 $targetItem->count -= $newItem->count;
             }
             $pairTransaction = new BaseTransaction($inventory, $targetSlot, $items[$targetSlot], $targetItem);
             $trGroup->addTransaction($pairTransaction);
 
-            try {
+            try{
                 $isExecute = $trGroup->execute();
-                if (!$isExecute) {
-//					echo '[INFO] Transaction execute fail 1.'.PHP_EOL;
+                if(!$isExecute){
                     $trGroup->sendInventories();
                 }
-            } catch (\Exception $ex) {
-//				echo '[INFO] Transaction execute fail 2.'.PHP_EOL;
+            }catch(\Exception $ex){
                 $trGroup->sendInventories();
             }
-        } else {
-//			echo '[INFO] Suiteble item not found in the current inventory.'.PHP_EOL;
+        }else{
             $transaction->getInventory()->sendContents($this);
         }
     }
 
     protected function enchantTransaction(BaseTransaction $transaction) {
-        if ($this->craftingType !== self::CRAFTING_ENCHANT) {
+        if($this->craftingType !== self::CRAFTING_ENCHANT){
             $this->getInventory()->sendContents($this);
             return;
         }
+
         $oldItem = $transaction->getSourceItem();
         $newItem = $transaction->getTargetItem();
+        /** @var EnchantInventory $enchantInv */
         $enchantInv = $this->currentWindow;
 
-        if (($newItem instanceof Armor || $newItem instanceof Tool) && $transaction->getInventory() === $this->inventory) {
+        if(($newItem instanceof Armor || $newItem instanceof Tool) && $transaction->getInventory() === $this->inventory){
             // get enchanting data
             $source = $enchantInv->getItem(0);
             $enchantingLevel = $enchantInv->getEnchantingLevel();
 
-            if ($enchantInv->isItemWasEnchant() && $newItem->deepEquals($source, true, false)) {
+            if($enchantInv->isItemWasEnchant() && $newItem->deepEquals($source, true, false)){
                 // reset enchanting data
                 $enchantInv->setItem(0, Item::get(Item::AIR));
                 $enchantInv->setEnchantingLevel(0);
@@ -3541,23 +3523,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 $playerItems = $this->inventory->getContents();
                 $dyeSlot = -1;
                 $targetItemSlot = -1;
-                foreach ($playerItems as $slot => $item) {
-                    if ($item->getId() === Item::DYE && $item->getDamage() === 4 && $item->getCount() >= $enchantingLevel) {
+                foreach($playerItems as $slot => $item){
+                    if($item->getId() === Item::DYE && $item->getDamage() === 4 && $item->getCount() >= $enchantingLevel){
                         $dyeSlot = $slot;
-                    } else if ($item->deepEquals($source)) {
+                    }elseif($item->deepEquals($source)){
                         $targetItemSlot = $slot;
                     }
                 }
-                if ($dyeSlot !== -1 && $targetItemSlot !== -1) {
+                if($dyeSlot !== -1 && $targetItemSlot !== -1){
                     $this->inventory->setItem($targetItemSlot, $newItem);
-                    if ($playerItems[$dyeSlot]->getCount() > $enchantingLevel) {
+                    if($playerItems[$dyeSlot]->getCount() > $enchantingLevel){
                         $playerItems[$dyeSlot]->count -= $enchantingLevel;
                         $this->inventory->setItem($dyeSlot, $playerItems[$dyeSlot]);
-                    } else {
+                    }else{
                         $this->inventory->setItem($dyeSlot, Item::get(Item::AIR));
                     }
                 }
-            } else if (!$enchantInv->isItemWasEnchant()) {
+            }elseif(!$enchantInv->isItemWasEnchant()){
                 $enchantInv->setItem(0, Item::get(Item::AIR));
             }
             $enchantInv->sendContents($this);
@@ -3565,7 +3547,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             return;
         }
 
-        if (($oldItem instanceof Armor || $oldItem instanceof Tool) && $transaction->getInventory() === $this->inventory) {
+        if(($oldItem instanceof Armor || $oldItem instanceof Tool) && $transaction->getInventory() === $this->inventory){
             $enchantInv->setItem(0, $oldItem);
         }
     }
@@ -3581,21 +3563,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         $this->dataPacket($pk);
     }
 
-    public function updateSpeed($value) {
+    public function updateSpeed(float $value){
         $this->movementSpeed = $value;
         $this->updateAttribute(UpdateAttributesPacket::SPEED, $this->movementSpeed, 0, self::MAXIMUM_SPEED, $this->movementSpeed);
     }
 
     public function setSprinting($value = true, $setDefault = false) {
-        if(!$setDefault && $this->isSprinting() == $value) {
+        if(!$setDefault && $this->isSprinting() == $value){
             return;
         }
         parent::setSprinting($value);
-        if ($setDefault) {
+        if($setDefault){
             $this->movementSpeed = self::DEFAULT_SPEED;
-        } else {
+        }else{
             $sprintSpeedChange = self::DEFAULT_SPEED * 0.3;
-            if ($value === false) {
+            if($value === false){
                 $sprintSpeedChange *= -1;
             }
             $this->movementSpeed += $sprintSpeedChange;
@@ -3603,7 +3585,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         $this->updateSpeed($this->movementSpeed);
     }
 
-    public function getProtectionEnchantments() {
+    public function getProtectionEnchantments(){
         $result = [
             Enchantment::TYPE_ARMOR_PROTECTION => null,
             Enchantment::TYPE_ARMOR_FIRE_PROTECTION => null,
@@ -3612,13 +3594,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             Enchantment::TYPE_ARMOR_PROJECTILE_PROTECTION => null
         ];
         $armor = $this->getInventory()->getArmorContents();
-        foreach ($armor as $item) {
-            if ($item->getId() === Item::AIR) {
+        foreach($armor as $item){
+            if($item->getId() === Item::AIR){
                 continue;
             }
             $enchantments = $item->getEnchantments();
-            foreach ($result as $id => $enchantment) {
-                if (isset($enchantments[$id]) && (is_null($enchantment) || $enchantments[$id]->getLevel() > $enchantment->getLevel())) {
+            foreach($result as $id => $enchantment){
+                if(isset($enchantments[$id]) && (is_null($enchantment) || $enchantments[$id]->getLevel() > $enchantment->getLevel())){
                     $result[$id] = $enchantments[$id];
                 }
             }
@@ -3626,19 +3608,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         return $result;
     }
 
-
-    public function getExperience()
-    {
+    public function getExperience(){
         return $this->exp;
     }
 
-    public function getExperienceLevel()
-    {
+    public function getExperienceLevel(){
         return $this->expLevel;
     }
 
-    public function updateExperience($exp = 0, $level = 0, $checkNextLevel = true)
-    {
+    public function updateExperience($exp = 0, $level = 0, $checkNextLevel = true){
         $this->exp = $exp;
         $this->expLevel = $level;
 
@@ -3652,25 +3630,22 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         $this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, $level, 0, self::MAX_EXPERIENCE_LEVEL, 0);
     }
 
-    public function addExperience($exp = 0, $level = 0, $checkNextLevel = true)
-    {
+    public function addExperience($exp = 0, $level = 0, $checkNextLevel = true){
         $this->updateExperience($this->getExperience() + $exp, $this->getExperienceLevel() + $level, $checkNextLevel);
     }
 
-    public function removeExperience($exp = 0, $level = 0, $checkNextLevel = true)
-    {
+    public function removeExperience($exp = 0, $level = 0, $checkNextLevel = true){
         $this->updateExperience($this->getExperience() - $exp, $this->getExperienceLevel() - $level, $checkNextLevel);
     }
 
     // http://minecraft.gamepedia.com/Experience
-    public function getExperienceNeeded()
-    {
+    public function getExperienceNeeded(){
         $level = $this->getExperienceLevel();
-        if ($level <= 16) {
+        if($level <= 16){
             return (2 * $level) + 7;
-        } elseif ($level <= 31) {
+        }elseif($level <= 31){
             return (5 * $level) - 38;
-        } elseif ($level <= 21863) {
+        }elseif($level <= 21863){
             return (9 * $level) - 158;
         }
         return PHP_INT_MAX;
@@ -3685,10 +3660,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     }
 
     public function isHaveElytra() {
-        if ($this->getInventory()->getArmorItem(Elytra::SLOT_NUMBER) instanceof Elytra) {
-            return true;
-        }
-        return false;
+        return $this->getInventory()->getArmorItem(Elytra::SLOT_NUMBER) instanceof Elytra;
     }
 
     public function setElytraActivated($value) {
@@ -4111,35 +4083,34 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
      * @minProtocolSupport 120
      * @param InventoryTransactionPacket $packet
      */
-    private function normalTransactionLogic($packet) {
+    private function normalTransactionLogic(InventoryTransactionPacket $packet) {
         $trGroup = new SimpleTransactionGroup($this);
-        foreach ($packet->transactions as $trData) {
-//			echo $trData . PHP_EOL;
-            if ($trData->isDropItemTransaction()) {
+
+        /** @var SimpleTransactionData $trData */
+        foreach($packet->transactions as $trData){
+            if($trData->isDropItemTransaction()){
                 $this->tryDropItem($packet->transactions);
                 return;
             }
-            if ($trData->isCompleteEnchantTransaction()) {
+            if($trData->isCompleteEnchantTransaction()){
                 $this->tryEnchant($packet->transactions);
                 return;
             }
             $transaction = $trData->convertToTransaction($this);
-            if ($transaction == null) {
+            if($transaction == null){
                 // roolback
                 $trGroup->sendInventories();
                 return;
             }
             $trGroup->addTransaction($transaction);
         }
-        try {
-            if (!$trGroup->execute()) {
-//				echo '[INFO] Transaction execute fail.'.PHP_EOL;
+
+        try{
+            if(!$trGroup->execute()){
                 $trGroup->sendInventories();
-            } else {
-//				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
             }
-        } catch (\Exception $ex) {
-//			echo '[INFO] Transaction execute exception. ' . $ex->getMessage() .PHP_EOL;
+        }catch(\Exception $ex){
+
         }
     }
 
@@ -4694,8 +4665,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         return true;
     }
 
-    protected function sendServerSettingsModal($modalWindow) {
-        if ($this->protocol >= Info::PROTOCOL_120) {
+    protected function sendServerSettingsModal(CustomUI $modalWindow) {
+        if($this->protocol >= Info::PROTOCOL_120){
             $pk = new ServerSettingsResponsetPacket();
             $pk->formId = $this->lastModalId++;
             $pk->data = $modalWindow->toJSON();
