@@ -26,8 +26,7 @@ namespace pocketmine\network\protocol;
 
 class ExplodePacket extends PEPacket{
 	const NETWORK_ID = Info::EXPLODE_PACKET;
-	const PACKET_NAME = "EXPLODE_PACKET";
-	
+
 	public $x;
 	public $y;
 	public $z;

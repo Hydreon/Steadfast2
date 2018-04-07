@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class ContainerSetDataPacket extends PEPacket{
 	const NETWORK_ID = Info::CONTAINER_SET_DATA_PACKET;
-	const PACKET_NAME = "CONTAINER_SET_DATA_PACKET";
 
 	public $windowid;
 	public $property;

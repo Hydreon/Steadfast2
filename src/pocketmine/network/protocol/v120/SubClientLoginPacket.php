@@ -10,9 +10,7 @@ use pocketmine\utils\JWT;
 use pocketmine\utils\UUID;
 
 class SubClientLoginPacket extends PEPacket {
-
 	const NETWORK_ID = Info120::SUB_CLIENT_LOGIN_PACKET;
-	const PACKET_NAME = "SUB_CLIENT_LOGIN_PACKET";
 
 	public $username;
 	public $clientId;

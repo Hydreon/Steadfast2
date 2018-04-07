@@ -6,10 +6,8 @@ use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\Info120;
 
 class CommandRequestPacket extends PEPacket {
-	
 	const NETWORK_ID = Info120::COMMAND_REQUEST_PACKET;
-	const PACKET_NAME = "COMMAND_REQUEST_PACKET";
-	
+
 	const TYPE_PLAYER = 0;
 	const TYPE_COMMAND_BLOCK = 1;
 	const TYPE_MINECART_COMMAND_BLOCK = 2;
@@ -24,7 +22,7 @@ class CommandRequestPacket extends PEPacket {
 	
 	/** @var string */
 	public $command = '';
-	/** @var unsigned integer */
+	/** @var integer (unsigned) */
 	public $commandType = self::TYPE_PLAYER;
 	/** @var string */
 	public $requestId = '';

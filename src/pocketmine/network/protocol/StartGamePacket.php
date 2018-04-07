@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class StartGamePacket extends PEPacket{
 	const NETWORK_ID = Info::START_GAME_PACKET;
-	const PACKET_NAME = "START_GAME_PACKET";
 
 	public $seed;
 	public $dimension;

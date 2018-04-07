@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class PlayStatusPacket extends PEPacket{
 	const NETWORK_ID = Info::PLAY_STATUS_PACKET;
-	const PACKET_NAME = "PLAY_STATUS_PACKET";
 	
 	const LOGIN_SUCCESS = 0;
 	const LOGIN_FAILED_CLIENT = 1;

@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class CraftingEventPacket extends PEPacket{
 	const NETWORK_ID = Info::CRAFTING_EVENT_PACKET;
-	const PACKET_NAME = "CRAFTING_EVENT_PACKET";
 
 	public $windowId;
 	public $type;

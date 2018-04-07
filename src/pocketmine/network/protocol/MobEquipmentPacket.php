@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class MobEquipmentPacket extends PEPacket{
 	const NETWORK_ID = Info::MOB_EQUIPMENT_PACKET;
-	const PACKET_NAME = "MOB_EQUIPMENT_PACKET";
 
 	public $eid;
 	public $item;

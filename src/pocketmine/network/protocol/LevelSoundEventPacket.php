@@ -5,9 +5,7 @@ namespace pocketmine\network\protocol;
 use pocketmine\network\multiversion\MultiversionEnums;
 
 class LevelSoundEventPacket extends PEPacket {
-
 	const NETWORK_ID = Info::LEVEL_SOUND_EVENT_PACKET;
-	const PACKET_NAME = "LEVEL_SOUND_EVENT_PACKET";
 	
 	const SOUND_HIT = 'SOUND_HIT';
 	const SOUND_BREAK = 'SOUND_BREAK';

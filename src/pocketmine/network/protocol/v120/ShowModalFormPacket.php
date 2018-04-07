@@ -6,9 +6,7 @@ use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\Info120;
 
 class ShowModalFormPacket extends PEPacket {
-
 	const NETWORK_ID = Info120::MODAL_FORM_REQUEST_PACKET;
-	const PACKET_NAME = "MODAL_FORM_REQUEST_PACKET";
 
 	public $formId;
 	public $data;

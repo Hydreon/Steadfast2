@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class AddPaintingPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_PAINTING_PACKET;
-	const PACKET_NAME = "ADD_PAINTING_PACKET";
 
 	public $eid;
 	public $x;

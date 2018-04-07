@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class MovePlayerPacket extends PEPacket{
 	const NETWORK_ID = Info::MOVE_PLAYER_PACKET;
-	const PACKET_NAME = "MOVE_PLAYER_PACKET";
 
 	const MODE_NORMAL = 0;
 	const MODE_RESET = 1;

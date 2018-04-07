@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class SetPlayerGameTypePacket extends PEPacket{
 	const NETWORK_ID = Info::SET_PLAYER_GAMETYPE_PACKET;
-	const PACKET_NAME = "SET_PLAYER_GAMETYPE_PACKET";
 
 	public $gamemode;
 

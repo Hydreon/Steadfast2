@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class AnimatePacket extends PEPacket{
 	const NETWORK_ID = Info::ANIMATE_PACKET;
-	const PACKET_NAME = "ANIMATE_PACKET";
 
 	const ACTION_NO_ACTION = 0;
 	const ACTION_SWING = 1;

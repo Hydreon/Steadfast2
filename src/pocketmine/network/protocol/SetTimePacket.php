@@ -28,7 +28,6 @@ use pocketmine\level\Level;
 
 class SetTimePacket extends PEPacket{
 	const NETWORK_ID = Info::SET_TIME_PACKET;
-	const PACKET_NAME = "SET_TIME_PACKET";
 
 	public $time;
 	public $started = true;

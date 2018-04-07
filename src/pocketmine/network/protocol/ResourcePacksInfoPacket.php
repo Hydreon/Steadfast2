@@ -6,9 +6,7 @@ use pocketmine\mods\Addon;
 use pocketmine\mods\ResourcePack;
 
 class ResourcePacksInfoPacket extends PEPacket {
-
 	const NETWORK_ID = Info::RESOURCE_PACKS_INFO_PACKET;
-	const PACKET_NAME = "RESOURCE_PACKS_INFO_PACKET";
 
 	/** @var boolean */
 	public $isRequired = false;

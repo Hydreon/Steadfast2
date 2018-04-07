@@ -31,11 +31,8 @@ namespace pocketmine\network\protocol;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\Utils;
 
-
 abstract class DataPacket extends BinaryStream{
-
     const NETWORK_ID = 0;
-    const PACKET_NAME = "";
 
     public $isEncoded = false;
     private $channel = 0;
@@ -44,10 +41,6 @@ abstract class DataPacket extends BinaryStream{
 
     public function pid(){
         return $this::NETWORK_ID;
-    }
-
-    public function pname(){
-        return $this::PACKET_NAME;
     }
 
     public function getName() : string{

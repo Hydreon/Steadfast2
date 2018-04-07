@@ -2,10 +2,11 @@
 
 namespace pocketmine\network\protocol;
 
-class ResourcePackStackPacket extends PEPacket {
+use pocketmine\mods\Addon;
+use pocketmine\mods\ResourcePack;
 
+class ResourcePackStackPacket extends PEPacket {
 	const NETWORK_ID = Info::RESOURCE_PACKS_STACK_PACKET;
-	const PACKET_NAME = "RESOURCE_PACKS_STACK_PACKET";
 
 	/** @var boolean */
 	public $isRequired = false;

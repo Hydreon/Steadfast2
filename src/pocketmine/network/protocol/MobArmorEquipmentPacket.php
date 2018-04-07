@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class MobArmorEquipmentPacket extends PEPacket{
 	const NETWORK_ID = Info::MOB_ARMOR_EQUIPMENT_PACKET;
-	const PACKET_NAME = "MOB_ARMOR_EQUIPMENT_PACKET";
 
 	public $eid;
 	public $slots = [];

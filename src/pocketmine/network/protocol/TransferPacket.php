@@ -24,9 +24,7 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 class TransferPacket extends PEPacket {
-
 	const NETWORK_ID = Info::TRANSFER_PACKET;
-	const PACKET_NAME = "TRANSFER_PACKET";
 
 	public $ip;
 	public $port = 19132;

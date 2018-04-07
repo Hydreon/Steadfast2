@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class PlayerListPacket extends PEPacket{
 	const NETWORK_ID = Info::PLAYER_LIST_PACKET;
-	const PACKET_NAME = "PLAYER_LIST_PACKET";
 
 	const TYPE_ADD = 0;
 	const TYPE_REMOVE = 1;

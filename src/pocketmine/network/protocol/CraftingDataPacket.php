@@ -32,7 +32,6 @@ use pocketmine\utils\BinaryStream;
 
 class CraftingDataPacket extends PEPacket{
 	const NETWORK_ID = Info::CRAFTING_DATA_PACKET;
-	const PACKET_NAME = "CRAFTING_DATA_PACKET";
 
 	const ENTRY_SHAPELESS = 0;
 	const ENTRY_SHAPED = 1;

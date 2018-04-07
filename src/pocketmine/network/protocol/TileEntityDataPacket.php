@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class TileEntityDataPacket extends PEPacket{
 	const NETWORK_ID = Info::TILE_ENTITY_DATA_PACKET;
-	const PACKET_NAME = "TILE_ENTITY_DATA_PACKET";
 
 	public $x;
 	public $y;

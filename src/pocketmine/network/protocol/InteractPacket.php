@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class InteractPacket extends PEPacket{
 	const NETWORK_ID = Info::INTERACT_PACKET;
-	const PACKET_NAME = "INTERACT_PACKET";
 	
 	const ACTION_DAMAGE = 2;
 	const ACTION_SEE = 4;

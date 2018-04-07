@@ -28,7 +28,6 @@ use pocketmine\item\Item;
 
 class DropItemPacket extends PEPacket{
 	const NETWORK_ID = Info::DROP_ITEM_PACKET;
-	const PACKET_NAME = "DROP_ITEM_PACKET";
 
 	/** @var int */
 	public $type;

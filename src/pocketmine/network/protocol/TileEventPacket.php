@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class TileEventPacket extends PEPacket{
 	const NETWORK_ID = Info::TILE_EVENT_PACKET;
-	const PACKET_NAME = "TILE_EVENT_PACKET";
 
 	public $x;
 	public $y;

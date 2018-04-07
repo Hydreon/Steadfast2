@@ -29,9 +29,7 @@ use pocketmine\utils\JWT;
 use pocketmine\utils\UUID;
 
 class LoginPacket extends PEPacket {
-
     const NETWORK_ID = Info::LOGIN_PACKET;
-    const PACKET_NAME = "LOGIN_PACKET";
     const MOJANG_ROOT_KEY = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V";
 
     public $username;

@@ -22,9 +22,8 @@ declare(strict_types=1);
 namespace pocketmine\network\protocol;
 
 class ResourcePackClientResponsePacket extends PEPacket {
-
     const NETWORK_ID = Info::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET;
-    const PACKET_NAME = "RESOURCE_PACKS_CLIENT_RESPONSE_PACKET";
+
     const STATUS_REFUSED = 1;
     const STATUS_SEND_PACKS = 2;
     const STATUS_HAVE_ALL_PACKS = 3;

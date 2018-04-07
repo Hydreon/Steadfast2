@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class PlayerActionPacket extends PEPacket{
 	const NETWORK_ID = Info::PLAYER_ACTION_PACKET;
-	const PACKET_NAME = "PLAYER_ACTION_PACKET";
 
 	public $eid;
 	public $action;

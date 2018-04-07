@@ -7,10 +7,8 @@ use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\Info120;
 
 class PlayerHotbarPacket extends PEPacket {
-	
 	const NETWORK_ID = Info120::PLAYER_HOTBAR_PACKET;
-	const PACKET_NAME = "PLAYER_HOTBAR_PACKET";
-	
+
 	public $selectedSlot;
 	public $slotsLink;
 	

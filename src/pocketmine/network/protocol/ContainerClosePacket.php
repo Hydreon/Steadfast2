@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class ContainerClosePacket extends PEPacket{
 	const NETWORK_ID = Info::CONTAINER_CLOSE_PACKET;
-	const PACKET_NAME = "CONTAINER_CLOSE_PACKET";
 
 	public $windowid;
 

@@ -8,10 +8,8 @@ use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\Info120;
 
 class InventoryTransactionPacket extends PEPacket {
-
 	const NETWORK_ID = Info120::INVENTORY_TRANSACTION_PACKET;
-	const PACKET_NAME = "INVENTORY_TRANSACTION_PACKET";
-	
+
 	const TRANSACTION_TYPE_NORMAL = 0;
 	const TRANSACTION_TYPE_INVENTORY_MISMATCH = 1;
 	const TRANSACTION_TYPE_ITEM_USE = 2;
@@ -79,6 +77,7 @@ class InventoryTransactionPacket extends PEPacket {
 					break;
 				case self::INV_SOURCE_TYPE_CRAFT:
 					$tr->action = $this->getVarInt();
+					break;
 				default:
 					continue;
 			}

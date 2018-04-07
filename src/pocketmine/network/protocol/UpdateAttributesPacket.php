@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 class UpdateAttributesPacket extends PEPacket{
 	const NETWORK_ID = Info::UPDATE_ATTRIBUTES_PACKET;
-	const PACKET_NAME = "UPDATE_ATTRIBUTES_PACKET";
 
     const HEALTH = "minecraft:health";
     const HUNGER = "minecraft:player.hunger";

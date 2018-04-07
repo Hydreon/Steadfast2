@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class UpdateBlockPacket extends PEPacket{
 	const NETWORK_ID = Info::UPDATE_BLOCK_PACKET;
-	const PACKET_NAME = "UPDATE_BLOCK_PACKET";
 
 	const FLAG_NONE      = 0b0000;
 	const FLAG_NEIGHBORS = 0b0001;

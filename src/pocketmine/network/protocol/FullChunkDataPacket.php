@@ -26,8 +26,7 @@ namespace pocketmine\network\protocol;
 
 class FullChunkDataPacket extends PEPacket{
 	const NETWORK_ID = Info::FULL_CHUNK_DATA_PACKET;
-	const PACKET_NAME = "FULL_CHUNK_DATA_PACKET";
-	
+
 	const ORDER_COLUMNS = 0;
 	const ORDER_LAYERED = 1;
 

@@ -31,7 +31,6 @@ use pocketmine\utils\Binary;
 
 class AddPlayerPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_PLAYER_PACKET;
-	const PACKET_NAME = "ADD_PLAYER_PACKET";
 
 	public $uuid;
 	public $username;
