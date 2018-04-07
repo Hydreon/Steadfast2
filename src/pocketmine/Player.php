@@ -39,8 +39,6 @@ use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\entity\ProjectileLaunchEvent;
 use pocketmine\event\inventory\CraftItemEvent;
 use pocketmine\event\inventory\InventoryCloseEvent;
-use pocketmine\event\inventory\InventoryPickupArrowEvent;
-use pocketmine\event\inventory\InventoryPickupItemEvent;
 use pocketmine\event\player\PlayerAnimationEvent;
 use pocketmine\event\player\PlayerBedEnterEvent;
 use pocketmine\event\player\PlayerBedLeaveEvent;
@@ -149,7 +147,6 @@ use pocketmine\network\protocol\SetSpawnPositionPacket;
 use pocketmine\network\protocol\SetTimePacket;
 use pocketmine\network\protocol\SetTitlePacket;
 use pocketmine\network\protocol\StartGamePacket;
-use pocketmine\network\protocol\TakeItemEntityPacket;
 use pocketmine\network\protocol\TextPacket;
 use pocketmine\network\protocol\TileEntityDataPacket;
 use pocketmine\network\protocol\TransferPacket;
@@ -1254,52 +1251,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 continue;
             }
 
-            if($entity instanceof Arrow and $entity->hadCollision){
-                $item = Item::get(Item::ARROW, 0, 1);
-                if($this->isSurvival() and !$this->inventory->canAddItem($item)){
-                    continue;
-                }
-
-                $this->server->getPluginManager()->callEvent($ev = new InventoryPickupArrowEvent($this->inventory, $entity));
-                if($ev->isCancelled()){
-                    continue;
-                }
-
-                $pk = new TakeItemEntityPacket();
-                $pk->eid = $this->getId();
-                $pk->target = $entity->getId();
-                Server::broadcastPacket($entity->getViewers(), $pk);
-
-                $this->inventory->addItem(clone $item);
-                $entity->kill();
-            }elseif($entity instanceof DroppedItem){
-                if($entity->getPickupDelay() <= 0){
-                    $item = $entity->getItem();
-
-                    if($item instanceof Item){
-                        if($this->isSurvival() and !$this->inventory->canAddItem($item)){
-                            continue;
-                        }
-
-                        $this->server->getPluginManager()->callEvent($ev = new InventoryPickupItemEvent($this->inventory, $entity));
-                        if($ev->isCancelled()){
-                            continue;
-                        }
-
-                        $pk = new TakeItemEntityPacket();
-                        $pk->eid = $this->getId();
-                        $pk->target = $entity->getId();
-                        Server::broadcastPacket($entity->getViewers(), $pk);
-
-                        $this->inventory->addItem(clone $item);
-                        $entity->kill();
-
-                        if ($this->inventoryType == self::INVENTORY_CLASSIC && $this->protocol < ProtocolInfo::PROTOCOL_120) {
-                            Win10InvLogic::playerPickUpItem($this, $item);
-                        }
-                    }
-                }
-            }
+            $entity->onCollideWithPlayer($this);
         }
     }
 

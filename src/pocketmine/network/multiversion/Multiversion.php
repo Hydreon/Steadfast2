@@ -4,6 +4,7 @@ namespace pocketmine\network\multiversion;
 
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\PlayerInventory120;
+use pocketmine\item\Item;
 use pocketmine\network\protocol\ContainerSetContentPacket;
 use pocketmine\network\protocol\ContainerSetSlotPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
@@ -14,7 +15,6 @@ use pocketmine\Player;
 abstract class Multiversion {
 	
 	/**
-	 * 
 	 * Create player inventory object base on player protocol
 	 * 
 	 * @param Player $player
