@@ -66,18 +66,18 @@ class PigZombie extends WalkingMonster{
 		}
 	}
 
-	public function spawnTo(Player $player){
-		parent::spawnTo($player);
+	protected function sendSpawnPacket(Player $player) : void{
+        parent::sendSpawnPacket($player);
 
-		$pk = new MobEquipmentPacket();
-		$pk->eid = $this->getId();
-		$pk->item = new GoldSword();
-		$pk->slot = 10;
-		$pk->selectedSlot = 10;
-		$player->dataPacket($pk);
-	}
+        $pk = new MobEquipmentPacket();
+        $pk->eid = $this->getId();
+        $pk->item = new GoldSword();
+        $pk->slot = 10;
+        $pk->selectedSlot = 10;
+        $player->dataPacket($pk);
+    }
 
-	public function attackEntity(Entity $player){
+    public function attackEntity(Entity $player){
 		if($this->attackDelay > 10 && $this->distanceSquared($player) < 1.44){
 			$this->attackDelay = 0;
 

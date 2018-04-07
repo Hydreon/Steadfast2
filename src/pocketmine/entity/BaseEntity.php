@@ -99,29 +99,6 @@ abstract class BaseEntity extends Creature{
 		$this->namedtag->WallCheck = new ByteTag("WallCheck", $this->isWallCheck());
 	}
 
-	public function spawnTo(Player $player){
-		if(
-			!isset($this->hasSpawned[$player->getId()])
-			&& isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])
-		){
-			$pk = new AddEntityPacket();
-			$pk->eid = $this->getID();
-			$pk->type = static::NETWORK_ID;
-			$pk->x = $this->x;
-			$pk->y = $this->y;
-			$pk->z = $this->z;
-			$pk->speedX = 0;
-			$pk->speedY = 0;
-			$pk->speedZ = 0;
-			$pk->yaw = $this->yaw;
-			$pk->pitch = $this->pitch;
-			$pk->metadata = $this->dataProperties;
-			$player->dataPacket($pk);
-
-			$this->hasSpawned[$player->getId()] = $player;
-		}
-	}
-
 	public function updateMovement(){
 		if(
 			$this->lastX !== $this->x

@@ -54,6 +54,7 @@ use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\network\protocol\MobEffectPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\SetEntityDataPacket;
@@ -605,29 +606,48 @@ abstract class Entity extends Location implements Metadatable{
     /**
      * @return Player[]
      */
-    public function getViewers() {
+    public function getViewers(){
         return $this->hasSpawned;
     }
 
     /**
      * @param Player $player
      */
-    public function spawnTo(Player $player) {
-        if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
+    public function spawnTo(Player $player){
+        if(!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])){
             $this->hasSpawned[$player->getId()] = $player;
+
+            $this->sendSpawnPacket($player);
         }
     }
 
+    /**
+     * Called by spawnTo() to send whatever packets needed to spawn the entity to the client.
+     * @param Player $player
+     */
+    protected function sendSpawnPacket(Player $player) : void{
+        $pk = new AddEntityPacket();
+        $pk->eid = $this->getId();
+        $pk->type = static::NETWORK_ID;
+        $pk->x = $this->x;
+        $pk->y = $this->y;
+        $pk->z = $this->z;
+        $pk->speedX = $this->motionX;
+        $pk->speedY = $this->motionY;
+        $pk->speedZ = $this->motionZ;
+        $pk->yaw = $this->yaw;
+        $pk->pitch = $this->pitch;
+        $pk->metadata = $this->dataProperties;
 
-    public function isSpawned(Player $player) {
-        if (isset($this->hasSpawned[$player->getId()])) {
-            return true;
-        }
-        return false;
+        $player->dataPacket($pk);
+    }
+
+    public function isSpawned(Player $player) : bool{
+        return isset($this->hasSpawned[$player->getId()]);
     }
 
     public function sendPotionEffects(Player $player) {
-        foreach ($this->effects as $effect) {
+        foreach($this->effects as $effect){
             $pk = new MobEffectPacket();
             $pk->eid = $player->getId();
             $pk->effectId = $effect->getId();
@@ -641,23 +661,16 @@ abstract class Entity extends Location implements Metadatable{
     }
 
     /**
-     * @deprecated
-     */
-    public function sendMetadata($player) {
-        $this->sendData($player);
-    }
-
-    /**
      * @param Player[]|Player $player
      * @param array $data Properly formatted entity data, defaults to everything
      */
     public function sendData($player, array $data = null) {
-        if (!is_array($player)) {
+        if(!is_array($player)){
             $player = [$player];
         }
         $pk = new SetEntityDataPacket();
         $pk->eid = $this->id;
-        $pk->metadata = $data === null ? $this->dataProperties : $data;
+        $pk->metadata = $data ?? $this->dataProperties;
         Server::broadcastPacket($player, $pk);
     }
 

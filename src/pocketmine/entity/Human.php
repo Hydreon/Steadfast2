@@ -203,40 +203,36 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		}
 	}
 
-	public function spawnTo(Player $player){
-		if($player !== $this and !isset($this->hasSpawned[$player->getId()])  and isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])){
-			$this->hasSpawned[$player->getId()] = $player;
+	protected function sendSpawnPacket(Player $player) : void{
+        if(!($this instanceof Player)) {
+            $this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, "", [$player]);
+        }
 
-			if(!($this instanceof Player)) {
-				$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, "", [$player]);
-			}
+        $pk = new AddPlayerPacket();
+        $pk->uuid = $this->getUniqueId();
+        $pk->username = $this->getName();
+        $pk->eid = $this->getId();
+        $pk->x = $this->x;
+        $pk->y = $this->y;
+        $pk->z = $this->z;
+        $pk->speedX = $this->motionX;
+        $pk->speedY = $this->motionY;
+        $pk->speedZ = $this->motionZ;
+        $pk->yaw = $this->yaw;
+        $pk->pitch = $this->pitch;
+        $pk->item = $this->getInventory()->getItemInHand();
+        $pk->metadata = $this->dataProperties;
+        $player->dataPacket($pk);
 
-			$pk = new AddPlayerPacket();
-			$pk->uuid = $this->getUniqueId();
-			$pk->username = $this->getName();
-			$pk->eid = $this->getId();
-			$pk->x = $this->x;
-			$pk->y = $this->y;
-			$pk->z = $this->z;
-			$pk->speedX = $this->motionX;
-			$pk->speedY = $this->motionY;
-			$pk->speedZ = $this->motionZ;
-			$pk->yaw = $this->yaw;
-			$pk->pitch = $this->pitch;
-			$pk->item = $this->getInventory()->getItemInHand();
-			$pk->metadata = $this->dataProperties;
-			$player->dataPacket($pk);
+        $this->inventory->sendArmorContents($player);
+        $this->level->addPlayerHandItem($this, $player);
 
-			$this->inventory->sendArmorContents($player);
-			$this->level->addPlayerHandItem($this, $player);
+        if(!($this instanceof Player)) {
+            $this->server->removePlayerListData($this->getUniqueId(), [$player]);
+        }
+    }
 
-			if(!($this instanceof Player)) {
-				$this->server->removePlayerListData($this->getUniqueId(), [$player]);
-			}
-		}
-	}
-
-	public function despawnFrom(Player $player){
+    public function despawnFrom(Player $player){
 		if(isset($this->hasSpawned[$player->getId()])){
 			$pk = new RemoveEntityPacket();
 			$pk->eid = $this->getId();

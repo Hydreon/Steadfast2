@@ -230,23 +230,18 @@ class Item extends Entity{
         $this->thrower = $thrower;
     }
 
-    public function spawnTo(Player $player){
-        if(!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])){
-            $pk = new AddItemEntityPacket();
-            $pk->eid = $this->getId();
-            $pk->x = $this->x;
-            $pk->y = $this->y;
-            $pk->z = $this->z;
-            $pk->speedX = $this->motionX;
-            $pk->speedY = $this->motionY;
-            $pk->speedZ = $this->motionZ;
-            $pk->item = $this->getItem();
-            $player->dataPacket($pk);
-            //		$this->sendData($player);
-            $this->hasSpawned[$player->getId()] = $player;
-        }
+    protected function sendSpawnPacket(Player $player) : void{
+        $pk = new AddItemEntityPacket();
+        $pk->eid = $this->getId();
+        $pk->x = $this->x;
+        $pk->y = $this->y;
+        $pk->z = $this->z;
+        $pk->speedX = $this->motionX;
+        $pk->speedY = $this->motionY;
+        $pk->speedZ = $this->motionZ;
+        $pk->item = $this->getItem();
+        $player->dataPacket($pk);
     }
-
 
     protected function updateMovement(){
         $diffPositionX =  abs($this->x - $this->lastX);
