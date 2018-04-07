@@ -1312,7 +1312,7 @@ abstract class Entity extends Location implements Metadatable{
         $pos = $ev->getTo();
 
         $this->setMotion(new Vector3(0, 0, 0));
-        if($this->setPositionAndRotation($pos, $yaw === null ? $this->yaw : $yaw, $pitch === null ? $this->pitch : $pitch, true) !== false){
+        if($this->setPositionAndRotation($pos, $yaw ?? $this->yaw, $pitch ?? $this->pitch) !== false){
             $this->resetFallDistance();
             $this->onGround = true;
 
@@ -1346,8 +1346,9 @@ abstract class Entity extends Location implements Metadatable{
 
     public function spawnToAll(){
         if($this->chunk === null or $this->closed){
-            return false;
+            return;
         }
+
         foreach($this->level->getUsingChunk($this->chunk->getX(), $this->chunk->getZ()) as $player){
             if($player->loggedIn === true && $player->canSeeEntity($this)){
                 $this->spawnTo($player);
