@@ -635,7 +635,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         $this->clientID = $clientID;
         $this->spawnPosition = null;
         $this->gamemode = $this->server->getGamemode();
-        $this->setLevel($this->server->getDefaultLevel(), true);
+        $this->setLevel($this->server->getDefaultLevel());
         $this->newPosition = null;
         $this->checkMovement = (bool) $this->server->getAdvancedProperty("main.check-movement", true);
         $this->boundingBox = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
