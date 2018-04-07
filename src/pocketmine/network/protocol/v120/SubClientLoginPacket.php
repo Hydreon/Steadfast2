@@ -12,8 +12,10 @@ use pocketmine\utils\UUID;
 class SubClientLoginPacket extends PEPacket {
 	const NETWORK_ID = Info120::SUB_CLIENT_LOGIN_PACKET;
 
+	/** @var string */
 	public $username;
 	public $clientId;
+	/** @var UUID */
 	public $clientUUID;
 	public $clientSecret;
 	public $skinName;
@@ -22,6 +24,7 @@ class SubClientLoginPacket extends PEPacket {
 	public $playerDataLength;
 	public $playerData;
 	public $inventoryType = -1;
+	/** @var string */
 	public $xuid = '';
 	public $skinGeometryName = "";
 	public $skinGeometryData = "";
