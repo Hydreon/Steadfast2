@@ -2,8 +2,6 @@
 
 namespace pocketmine\event\server;
 
-use pocketmine\event\server\ServerEvent;
-
 class SendRecipiesList extends ServerEvent {
 	
 	public static $handlerList = null;

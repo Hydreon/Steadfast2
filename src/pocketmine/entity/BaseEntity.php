@@ -3,24 +3,21 @@
 namespace pocketmine\entity;
 
 use pocketmine\entity\monster\Monster;
-use pocketmine\entity\Creature;
-use pocketmine\entity\Entity;
+use pocketmine\entity\monster\walking\Wolf;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\Timings;
 use pocketmine\level\Level;
+use pocketmine\level\Location;
+use pocketmine\level\Position;
 use pocketmine\math\Math;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\network\protocol\AddEntityPacket;
-use pocketmine\Player;
-use pocketmine\level\Location;
-use pocketmine\level\Position;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\FloatTag;
-use pocketmine\entity\monster\walking\Wolf;
+use pocketmine\network\protocol\AddEntityPacket;
+use pocketmine\Player;
 
 abstract class BaseEntity extends Creature{
 
@@ -100,29 +97,6 @@ abstract class BaseEntity extends Creature{
 		parent::saveNBT();
 		$this->namedtag->Movement = new ByteTag("Movement", $this->isMovement());
 		$this->namedtag->WallCheck = new ByteTag("WallCheck", $this->isWallCheck());
-	}
-
-	public function spawnTo(Player $player){
-		if(
-			!isset($this->hasSpawned[$player->getId()])
-			&& isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])
-		){
-			$pk = new AddEntityPacket();
-			$pk->eid = $this->getID();
-			$pk->type = static::NETWORK_ID;
-			$pk->x = $this->x;
-			$pk->y = $this->y;
-			$pk->z = $this->z;
-			$pk->speedX = 0;
-			$pk->speedY = 0;
-			$pk->speedZ = 0;
-			$pk->yaw = $this->yaw;
-			$pk->pitch = $this->pitch;
-			$pk->metadata = $this->dataProperties;
-			$player->dataPacket($pk);
-
-			$this->hasSpawned[$player->getId()] = $player;
-		}
 	}
 
 	public function updateMovement(){

@@ -21,29 +21,25 @@
 
 namespace pocketmine\entity;
 
-use pocketmine\inventory\InventoryHolder;
 use pocketmine\inventory\PlayerInventory;
+use pocketmine\inventory\PlayerInventory120;
+use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\Item as ItemItem;
-use pocketmine\network\protocol\PlayerListPacket;
-use pocketmine\utils\UUID;
+use pocketmine\level\Level;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Enum;
-use pocketmine\nbt\tag\ShortTag;
-use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\Network;
+use pocketmine\network\multiversion\Multiversion;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\Player;
-use pocketmine\level\Level;
-
-use pocketmine\network\multiversion\Multiversion;
+use pocketmine\utils\UUID;
 
 class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	protected $nameTag = "TESTIFICATE";
-	/** @var PlayerInventory */
+	/** @var PlayerInventory|PlayerInventory120 */
 	protected $inventory;
 
 
@@ -121,13 +117,12 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	}
 
 	protected function initEntity(){
-
 		$this->setDataFlag(self::DATA_PLAYER_FLAGS, self::DATA_PLAYER_FLAG_SLEEP, false);
 		$this->setDataProperty(self::DATA_PLAYER_BED_POSITION, self::DATA_TYPE_POS, [0, 0, 0]);
 		
-		if ($this instanceof Player){
+		if($this instanceof Player){
 			$this->inventory = Multiversion::getPlayerInventory($this);
-		} else {
+		}else{
 			$this->inventory = new PlayerInventory($this);
 		}
 
@@ -209,40 +204,36 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		}
 	}
 
-	public function spawnTo(Player $player){
-		if($player !== $this and !isset($this->hasSpawned[$player->getId()])  and isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])){
-			$this->hasSpawned[$player->getId()] = $player;
+	protected function sendSpawnPacket(Player $player) : void{
+        if(!($this instanceof Player)) {
+            $this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, "", [$player]);
+        }
 
-			if(!($this instanceof Player)) {
-				$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, "", [$player]);
-			}
+        $pk = new AddPlayerPacket();
+        $pk->uuid = $this->getUniqueId();
+        $pk->username = $this->getName();
+        $pk->eid = $this->getId();
+        $pk->x = $this->x;
+        $pk->y = $this->y;
+        $pk->z = $this->z;
+        $pk->speedX = $this->motionX;
+        $pk->speedY = $this->motionY;
+        $pk->speedZ = $this->motionZ;
+        $pk->yaw = $this->yaw;
+        $pk->pitch = $this->pitch;
+        $pk->item = $this->getInventory()->getItemInHand();
+        $pk->metadata = $this->dataProperties;
+        $player->dataPacket($pk);
 
-			$pk = new AddPlayerPacket();
-			$pk->uuid = $this->getUniqueId();
-			$pk->username = $this->getName();
-			$pk->eid = $this->getId();
-			$pk->x = $this->x;
-			$pk->y = $this->y;
-			$pk->z = $this->z;
-			$pk->speedX = $this->motionX;
-			$pk->speedY = $this->motionY;
-			$pk->speedZ = $this->motionZ;
-			$pk->yaw = $this->yaw;
-			$pk->pitch = $this->pitch;
-			$pk->item = $this->getInventory()->getItemInHand();
-			$pk->metadata = $this->dataProperties;
-			$player->dataPacket($pk);
+        $this->inventory->sendArmorContents($player);
+        $this->level->addPlayerHandItem($this, $player);
 
-			$this->inventory->sendArmorContents($player);
-			$this->level->addPlayerHandItem($this, $player);
+        if(!($this instanceof Player)) {
+            $this->server->removePlayerListData($this->getUniqueId(), [$player]);
+        }
+    }
 
-			if(!($this instanceof Player)) {
-				$this->server->removePlayerListData($this->getUniqueId(), [$player]);
-			}
-		}
-	}
-
-	public function despawnFrom(Player $player){
+    public function despawnFrom(Player $player){
 		if(isset($this->hasSpawned[$player->getId()])){
 			$pk = new RemoveEntityPacket();
 			$pk->eid = $this->getId();

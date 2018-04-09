@@ -21,11 +21,8 @@
 
 namespace pocketmine\block;
 
-use pocketmine\block\Solid;
-use pocketmine\block\Transparent;
-use pocketmine\item\Item;
 use pocketmine\item\Tool;
-use pocketmine\level\Level;
+use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 

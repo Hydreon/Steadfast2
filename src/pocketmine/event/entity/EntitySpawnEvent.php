@@ -24,9 +24,9 @@ namespace pocketmine\event\entity;
 use pocketmine\entity\Creature;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Human;
-use pocketmine\entity\Item;
 use pocketmine\entity\Projectile;
 use pocketmine\entity\Vehicle;
+use pocketmine\entity\Item;
 
 /**
  * Called when a entity is spawned

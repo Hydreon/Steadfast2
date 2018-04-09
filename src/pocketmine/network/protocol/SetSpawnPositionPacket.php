@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class SetSpawnPositionPacket extends PEPacket{
 	const NETWORK_ID = Info::SET_SPAWN_POSITION_PACKET;
-	const PACKET_NAME = "SET_SPAWN_POSITION_PACKET";
 
 	const SPAWN_TYPE_PLAYER_RESPAWN = 0;
 	const SPAWN_TYPE_WORLD_SPAWN = 1;

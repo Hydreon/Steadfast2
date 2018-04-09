@@ -22,11 +22,11 @@
 namespace pocketmine\block;
 
 use pocketmine\inventory\EnchantInventory;
-use pocketmine\item\Item;
 use pocketmine\item\Tool;
+use pocketmine\item\Item;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\Player;
 use pocketmine\tile\Tile;
 

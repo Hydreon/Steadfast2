@@ -1,27 +1,26 @@
 <?php
 
-/**
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+/*
+ *       _____ _                 _ ______        _   ___
+ *      / ____| |               | |  ____|      | | |__ \
+ *     | (___ | |_ ___  __ _  __| | |__ __ _ ___| |_   ) |
+ *      \___ \| __/ _ \/ _` |/ _` |  __/ _` / __| __| / /
+ *      ____) | ||  __/ (_| | (_| | | | (_| \__ \ |_ / /_
+ *     |_____/ \__\___|\__,_|\__,_|_|  \__,_|___/\__|____|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link   http://www.pocketmine.net/
- *
- *
+ * @author Hydreon
+ * @link http://hydreon.com/
  */
+
+declare(strict_types=1);
 
 namespace pocketmine\event\server;
 
-use pocketmine\event;
 use pocketmine\event\Cancellable;
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\Player;
@@ -29,7 +28,9 @@ use pocketmine\Player;
 class DataPacketReceiveEvent extends ServerEvent implements Cancellable{
 	public static $handlerList = null;
 
+	/** @var DataPacket */
 	private $packet;
+	/** @var Player */
 	private $player;
 
 	public function __construct(Player $player, DataPacket $packet){
@@ -37,11 +38,11 @@ class DataPacketReceiveEvent extends ServerEvent implements Cancellable{
 		$this->player = $player;
 	}
 
-	public function getPacket(){
+	public function getPacket() : DataPacket{
 		return $this->packet;
 	}
 
-	public function getPlayer(){
+	public function getPlayer() : Player{
 		return $this->player;
 	}
 }

@@ -3,9 +3,7 @@
 namespace pocketmine\network\protocol;
 
 class PlayerInputPacket extends PEPacket {
-
 	const NETWORK_ID = Info::PLAYER_INPUT_PACKET;
-	const PACKET_NAME = "PLAYER_INPUT_PACKET";
 
 	public $forward;
 	public $sideway;

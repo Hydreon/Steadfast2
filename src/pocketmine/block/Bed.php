@@ -23,13 +23,13 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
-use pocketmine\Player;
-use pocketmine\utils\TextFormat;
-use pocketmine\tile\Tile;
-use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\Player;
+use pocketmine\tile\Tile;
+use pocketmine\utils\TextFormat;
 
 class Bed extends Transparent{
 	

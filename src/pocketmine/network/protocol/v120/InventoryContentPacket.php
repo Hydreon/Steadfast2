@@ -2,14 +2,12 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
+use pocketmine\network\protocol\Info120;
 
 class InventoryContentPacket extends PEPacket {
-	
 	const NETWORK_ID = Info120::INVENTORY_CONTENT_PACKET;
-	const PACKET_NAME = "INVENTORY_CONTENT_PACKET";
-	
+
 	public $inventoryID;
 	public $items = [];
 	

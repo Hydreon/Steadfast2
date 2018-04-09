@@ -22,8 +22,8 @@
 namespace pocketmine\block;
 
 use pocketmine\event\block\LeavesDecayEvent;
-use pocketmine\item\Item;
 use pocketmine\item\Tool;
+use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\Player;
 use pocketmine\Server;

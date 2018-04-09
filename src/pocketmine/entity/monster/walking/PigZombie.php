@@ -2,14 +2,14 @@
 
 namespace pocketmine\entity\monster\walking;
 
-use pocketmine\entity\monster\WalkingMonster;
-use pocketmine\entity\Entity;
-use pocketmine\item\GoldSword;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\entity\EntityDamageByEntityEvent;
-use pocketmine\item\Item;
 use pocketmine\entity\Creature;
+use pocketmine\entity\Entity;
+use pocketmine\entity\monster\WalkingMonster;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\item\GoldSword;
+use pocketmine\item\Item;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\Player;
 
@@ -66,18 +66,18 @@ class PigZombie extends WalkingMonster{
 		}
 	}
 
-	public function spawnTo(Player $player){
-		parent::spawnTo($player);
+	protected function sendSpawnPacket(Player $player) : void{
+        parent::sendSpawnPacket($player);
 
-		$pk = new MobEquipmentPacket();
-		$pk->eid = $this->getId();
-		$pk->item = new GoldSword();
-		$pk->slot = 10;
-		$pk->selectedSlot = 10;
-		$player->dataPacket($pk);
-	}
+        $pk = new MobEquipmentPacket();
+        $pk->eid = $this->getId();
+        $pk->item = new GoldSword();
+        $pk->slot = 10;
+        $pk->selectedSlot = 10;
+        $player->dataPacket($pk);
+    }
 
-	public function attackEntity(Entity $player){
+    public function attackEntity(Entity $player){
 		if($this->attackDelay > 10 && $this->distanceSquared($player) < 1.44){
 			$this->attackDelay = 0;
 

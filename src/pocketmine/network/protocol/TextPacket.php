@@ -23,12 +23,10 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-use pocketmine\network\protocol\Info;
 use pocketmine\network\multiversion\MultiversionEnums;
 
 class TextPacket extends PEPacket{
 	const NETWORK_ID = Info::TEXT_PACKET;
-	const PACKET_NAME = "TEXT_PACKET";
 
 	const TYPE_RAW = 'TYPE_RAW';
 	const TYPE_CHAT = 'TYPE_CHAT';

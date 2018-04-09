@@ -2,8 +2,9 @@
 
 namespace pocketmine\entity\monster\walking;
 
-use pocketmine\entity\monster\WalkingMonster;
+use pocketmine\entity\Creature;
 use pocketmine\entity\Entity;
+use pocketmine\entity\monster\WalkingMonster;
 use pocketmine\entity\Projectile;
 use pocketmine\entity\ProjectileSource;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -15,7 +16,6 @@ use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\Player;
-use pocketmine\entity\Creature;
 
 class SnowGolem extends WalkingMonster implements ProjectileSource{
 	const NETWORK_ID = 21;

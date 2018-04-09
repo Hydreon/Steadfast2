@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class SetEntityLinkPacket extends PEPacket{
 	const NETWORK_ID = Info::SET_ENTITY_LINK_PACKET;
-	const PACKET_NAME = "SET_ENTITY_LINK_PACKET";
 	
 	const TYPE_REMOVE = 0;
 	const TYPE_RIDE = 1;

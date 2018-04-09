@@ -23,11 +23,11 @@ namespace pocketmine\event\player;
 
 use pocketmine\block\Block;
 use pocketmine\event\Cancellable;
+use pocketmine\item\Armor;
 use pocketmine\item\Item;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
-use pocketmine\item\Armor;
 
 /**
  * Called when a player interacts or touches a block (including air?)

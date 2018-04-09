@@ -5,8 +5,8 @@ namespace pocketmine\inventory\transactions;
 use pocketmine\inventory\BaseTransaction;
 use pocketmine\inventory\PlayerInventory120;
 use pocketmine\item\Item;
-use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\Protocol120;
+use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\Player;
 
 class SimpleTransactionData {

@@ -2,14 +2,12 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
+use pocketmine\network\protocol\Info120;
 
 class PurchaseReceiptPacket extends PEPacket {
-	
 	const NETWORK_ID = Info120::PURCHASE_RECEIPT_PACKET;
-	const PACKET_NAME = "PURCHASE_RECEIPT_PACKET";
-	
+
 	/** @var string[] */
 	public $receipts = [];
 	

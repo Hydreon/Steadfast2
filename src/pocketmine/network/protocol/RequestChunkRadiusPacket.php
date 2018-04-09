@@ -1,23 +1,23 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ *       _____ _                 _ ______        _   ___
+ *      / ____| |               | |  ____|      | | |__ \
+ *     | (___ | |_ ___  __ _  __| | |__ __ _ ___| |_   ) |
+ *      \___ \| __/ _ \/ _` |/ _` |  __/ _` / __| __| / /
+ *      ____) | ||  __/ (_| | (_| | | | (_| \__ \ |_ / /_
+ *     |_____/ \__\___|\__,_|\__,_|_|  \__,_|___/\__|____|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
- * 
- *
-*/
+ * @author Hydreon
+ * @link http://hydreon.com/
+ */
+
+declare(strict_types=1);
 
 namespace pocketmine\network\protocol;
 
@@ -25,17 +25,20 @@ namespace pocketmine\network\protocol;
 
 
 class RequestChunkRadiusPacket extends PEPacket{
-	const NETWORK_ID = Info::REQUEST_CHUNK_RADIUS_PACKET;
-	const PACKET_NAME = "REQUEST_CHUNK_RADIUS_PACKET";
+    const NETWORK_ID = Info::REQUEST_CHUNK_RADIUS_PACKET;
 
-	public $radius;
+    public $radius;
 
-	public function decode($playerProtocol){
-		$this->getHeader($playerProtocol);
-		$this->radius = $this->getSignedVarInt();
-	}
+    public function isAvailableBeforeLogin() : bool{
+        return true;
+    }
 
-	public function encode($playerProtocol){
-	}
+    public function decode($playerProtocol){
+        $this->getHeader($playerProtocol);
+        $this->radius = $this->getSignedVarInt();
+    }
+
+    public function encode($playerProtocol){
+    }
 
 }

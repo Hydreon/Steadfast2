@@ -3,9 +3,7 @@
 namespace pocketmine\network\protocol;
 
 class ResourcePackChunkDataPacket extends PEPacket {
-
 	const NETWORK_ID = Info::RESOURCE_PACK_CHUNK_DATA_PACKET;
-	const PACKET_NAME = "RESOURCE_PACK_CHUNK_DATA_PACKET";
 
 	public $resourcePackId = "";
 	public $chunkIndex = 0;

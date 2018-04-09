@@ -21,15 +21,15 @@
 
 namespace pocketmine\entity\projectile;
 
+use pocketmine\entity\Entity;
+use pocketmine\entity\Projectile;
+use pocketmine\event\entity\ExplosionPrimeEvent;
+use pocketmine\level\Explosion;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\particle\CriticalParticle;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
-use pocketmine\entity\Projectile;
-use pocketmine\entity\Entity;
-use pocketmine\level\Explosion;
-use pocketmine\event\entity\ExplosionPrimeEvent;
 
 class FireBall extends Projectile{
 	const NETWORK_ID = 85;
@@ -94,22 +94,6 @@ class FireBall extends Projectile{
 
 		//$this->timings->stopTiming();
 		return $hasUpdate;
-	}
-
-	public function spawnTo(Player $player){
-		$pk = new AddEntityPacket();
-		$pk->type = self::NETWORK_ID;
-		$pk->eid = $this->getId();
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->speedX = $this->motionX;
-		$pk->speedY = $this->motionY;
-		$pk->speedZ = $this->motionZ;
-//		$pk->metadata = $this->dataProperties;
-		$player->dataPacket($pk);
-
-		parent::spawnTo($player);
 	}
 
 }

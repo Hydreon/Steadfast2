@@ -2,7 +2,6 @@
 
 namespace pocketmine\event\player;
 
-use pocketmine\event\player\PlayerEvent;
 use pocketmine\event\Cancellable;
 use pocketmine\Player;
 

@@ -2,7 +2,6 @@
 
 namespace pocketmine\event\player;
 
-use pocketmine\level\Position;
 use pocketmine\Player;
 
 class PlayerRespawnAfterEvent extends PlayerEvent {

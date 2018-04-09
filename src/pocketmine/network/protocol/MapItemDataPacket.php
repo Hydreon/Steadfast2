@@ -2,12 +2,8 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\network\protocol\Info;
-
 class MapItemDataPacket extends PEPacket {
-
 	const NETWORK_ID = Info::CLIENTBOUND_MAP_ITEM_DATA_PACKET;
-	const PACKET_NAME = "CLIENTBOUND_MAP_ITEM_DATA_PACKET";
 
 	public $mapId;
 	public $flags;

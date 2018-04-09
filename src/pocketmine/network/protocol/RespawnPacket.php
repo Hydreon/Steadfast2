@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class RespawnPacket extends PEPacket{
 	const NETWORK_ID = Info::RESPAWN_PACKET;
-	const PACKET_NAME = "RESPAWN_PACKET";
 
 	public $x;
 	public $y;

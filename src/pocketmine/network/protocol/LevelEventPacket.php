@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class LevelEventPacket extends PEPacket{
 	const NETWORK_ID = Info::LEVEL_EVENT_PACKET;
-	const PACKET_NAME = "LEVEL_EVENT_PACKET";
 
 	const EVENT_SOUND_CLICK = 1000;
 	const EVENT_SOUND_CLICK_FAIL = 1001;

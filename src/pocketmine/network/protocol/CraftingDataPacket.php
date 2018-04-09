@@ -27,13 +27,11 @@ namespace pocketmine\network\protocol;
 use pocketmine\inventory\FurnaceRecipe;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
-use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\EnchantmentList;
 use pocketmine\utils\BinaryStream;
 
 class CraftingDataPacket extends PEPacket{
 	const NETWORK_ID = Info::CRAFTING_DATA_PACKET;
-	const PACKET_NAME = "CRAFTING_DATA_PACKET";
 
 	const ENTRY_SHAPELESS = 0;
 	const ENTRY_SHAPED = 1;

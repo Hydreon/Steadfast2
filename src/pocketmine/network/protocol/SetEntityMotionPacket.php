@@ -26,8 +26,6 @@ namespace pocketmine\network\protocol;
 
 class SetEntityMotionPacket extends PEPacket{
 	const NETWORK_ID = Info::SET_ENTITY_MOTION_PACKET;
-	const PACKET_NAME = "SET_ENTITY_MOTION_PACKET";
-
 
 	// eid, motX, motY, motZ
 	/** @var array[] */

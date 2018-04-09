@@ -2,14 +2,12 @@
 
 namespace pocketmine\network\protocol\v120;
 
+use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\Info120;
-use pocketmine\network\protocol\PEPacket;
 
 class PlayerSkinPacket extends PEPacket {
-
 	const NETWORK_ID = Info120::PLAYER_SKIN_PACKET;
-	const PACKET_NAME = "PLAYER_SKIN_PACKET";
 
 	public $uuid;
 	public $newSkinId;

@@ -22,12 +22,10 @@
 namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
-use pocketmine\utils\TextFormat;
 
 
 class PlayerListPacket extends PEPacket{
 	const NETWORK_ID = Info::PLAYER_LIST_PACKET;
-	const PACKET_NAME = "PLAYER_LIST_PACKET";
 
 	const TYPE_ADD = 0;
 	const TYPE_REMOVE = 1;

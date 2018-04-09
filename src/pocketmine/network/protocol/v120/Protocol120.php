@@ -3,7 +3,6 @@
 namespace pocketmine\network\protocol\v120;
 
 abstract class Protocol120 {
-
 	const CONTAINER_ID_NONE = -1;
 	const CONTAINER_ID_INVENTORY = 0;
 	const CONTAINER_ID_FIRST = 1;

@@ -26,8 +26,6 @@ namespace pocketmine\network\protocol;
 
 class MoveEntityPacket extends PEPacket{
 	const NETWORK_ID = Info::MOVE_ENTITY_PACKET;
-	const PACKET_NAME = "MOVE_ENTITY_PACKET";
-
 
 	// eid, x, y, z, yaw, pitch
 	/** @var array[] */

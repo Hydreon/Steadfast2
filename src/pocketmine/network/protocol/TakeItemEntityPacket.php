@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class TakeItemEntityPacket extends PEPacket{
 	const NETWORK_ID = Info::TAKE_ITEM_ENTITY_PACKET;
-	const PACKET_NAME = "TAKE_ITEM_ENTITY_PACKET";
 
 	public $target;
 	public $eid;

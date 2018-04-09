@@ -21,16 +21,13 @@
 
 namespace pocketmine\entity;
 
-use pocketmine\entity\effects\InvisibilityEffect;
-use pocketmine\entity\effects\HarmingEffect;
 use pocketmine\entity\effects\HealingEffect;
-use pocketmine\entity\effects\HungerEffect;
 use pocketmine\entity\effects\PoisonEffect;
 use pocketmine\entity\effects\RegenerationEffect;
-use pocketmine\entity\effects\SaturationEffect;
 use pocketmine\entity\effects\SlownessEffect;
 use pocketmine\entity\effects\SpeedEffect;
 use pocketmine\entity\effects\WitherEffect;
+use pocketmine\entity\effects\InvisibilityEffect;
 use pocketmine\network\protocol\MobEffectPacket;
 use pocketmine\Player;
 

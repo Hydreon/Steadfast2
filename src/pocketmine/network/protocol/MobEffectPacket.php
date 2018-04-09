@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class MobEffectPacket extends PEPacket{
 	const NETWORK_ID = Info::MOB_EFFECT_PACKET;
-	const PACKET_NAME = "MOB_EFFECT_PACKET";
 
 	const EVENT_ADD = 1;
 	const EVENT_MODIFY = 2;

@@ -65,14 +65,15 @@ namespace {
 }
 
 namespace pocketmine {
-	use pocketmine\utils\Binary;
-	use pocketmine\utils\MainLogger;
-	use pocketmine\utils\ServerKiller;
-	use pocketmine\utils\Terminal;
-	use pocketmine\utils\Utils;
-	use pocketmine\wizard\Installer;
 
-	const VERSION = '1.5.1-hybrid';
+    use pocketmine\utils\Binary;
+    use pocketmine\utils\MainLogger;
+    use pocketmine\utils\ServerKiller;
+    use pocketmine\utils\Terminal;
+    use pocketmine\utils\Utils;
+    use pocketmine\wizard\Installer;
+
+    const VERSION = '1.5.1-hybrid';
 	const API_VERSION = "1.12.0";
 	const CODENAME = "刀 (Katana)";
 	const MINECRAFT_VERSION = "v1.x";

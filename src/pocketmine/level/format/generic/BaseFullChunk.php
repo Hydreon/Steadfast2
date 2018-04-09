@@ -21,14 +21,13 @@
 
 namespace pocketmine\level\format\generic;
 
+use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\level\format\FullChunk;
 use pocketmine\level\format\LevelProvider;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\Player;
 use pocketmine\tile\Tile;
-use pocketmine\utils\Binary;
-use pocketmine\block\Block;
 
 abstract class BaseFullChunk implements FullChunk{
 

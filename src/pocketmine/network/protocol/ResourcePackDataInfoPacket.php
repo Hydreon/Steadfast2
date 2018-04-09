@@ -3,9 +3,7 @@
 namespace pocketmine\network\protocol;
 
 class ResourcePackDataInfoPacket extends PEPacket {
-
 	const NETWORK_ID = Info::RESOURCE_PACK_DATA_INFO_PACKET;
-	const PACKET_NAME = "RESOURCE_PACK_DATA_INFO_PACKET";
 
 	const MAX_CHUNK_SIZE = 1048576; // 1MB
 	

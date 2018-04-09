@@ -23,8 +23,6 @@ namespace pocketmine\block;
 
 use pocketmine\entity\Entity;
 use pocketmine\event\block\BlockGrowEvent;
-use pocketmine\event\entity\EntityDamageByBlockEvent;
-use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\math\AxisAlignedBB;

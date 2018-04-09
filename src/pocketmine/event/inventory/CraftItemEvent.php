@@ -34,8 +34,9 @@ class CraftItemEvent extends Event implements Cancellable{
 	private $input = [];
 	/** @var Recipe */
 	private $recipe;
-		/** @var Player */
-		private $player;
+    /** @var Player */
+    private $player;
+
 	/**
 	 * @param Item[] $input
 	 * @param Recipe $recipe

@@ -3,9 +3,8 @@
 namespace pocketmine\network\protocol;
 
 class SetTitlePacket extends PEPacket {
-
 	const NETWORK_ID = Info105::SET_TITLE_PACKET;
-	const PACKET_NAME = "SET_TITLE_PACKET";
+
 	const TITLE_TYPE_CLEAR = 0;
 	const TITLE_TYPE_RESET = 1;
 	const TITLE_TYPE_TITLE = 2;

@@ -24,14 +24,13 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 #ifndef COMPILE
-use pocketmine\utils\Binary;
 use pocketmine\entity\Entity;
+use pocketmine\utils\Binary;
 
 #endif
 
 class AddPlayerPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_PLAYER_PACKET;
-	const PACKET_NAME = "ADD_PLAYER_PACKET";
 
 	public $uuid;
 	public $username;

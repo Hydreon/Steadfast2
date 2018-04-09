@@ -22,7 +22,6 @@
 namespace pocketmine\math;
 
 use pocketmine\level\MovingObjectPosition;
-use pocketmine\math\Vector3;
 
 class AxisAlignedBB{
 

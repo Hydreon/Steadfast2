@@ -2,10 +2,10 @@
 
 namespace pocketmine;
 
-use pocketmine\utils\Binary;
-use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\DataPacket;
+use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\Info;
+use pocketmine\utils\Binary;
 
 class ChunkMaker extends Thread {
 

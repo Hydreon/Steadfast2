@@ -3,8 +3,8 @@
 namespace pocketmine\inventory\win10;
 
 use pocketmine\inventory\SimpleTransactionGroup;
-use pocketmine\item\Item;
 use pocketmine\inventory\Transaction;
+use pocketmine\item\Item;
 
 class Win10SimpleTransactionGroup extends SimpleTransactionGroup {
 

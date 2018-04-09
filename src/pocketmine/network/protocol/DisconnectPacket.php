@@ -25,9 +25,7 @@ namespace pocketmine\network\protocol;
 
 
 class DisconnectPacket extends PEPacket {
-	
 	const NETWORK_ID = Info::DISCONNECT_PACKET;
-	const PACKET_NAME = "DISCONNECT_PACKET";
 
 	public $hideDisconnectReason = false;
 	public $message = '';

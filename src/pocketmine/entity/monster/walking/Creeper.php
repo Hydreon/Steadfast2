@@ -2,18 +2,18 @@
 
 namespace pocketmine\entity\monster\walking;
 
-use pocketmine\entity\monster\WalkingMonster;
 use pocketmine\entity\Creature;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Explosive;
+use pocketmine\entity\monster\WalkingMonster;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\ExplosionPrimeEvent;
+use pocketmine\item\Item;
 use pocketmine\level\Explosion;
 use pocketmine\math\Math;
 use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\IntTag;
-use pocketmine\event\entity\EntityDamageByEntityEvent;
-use pocketmine\item\Item;
 
 class Creeper extends WalkingMonster implements Explosive{
 	const NETWORK_ID = 33;

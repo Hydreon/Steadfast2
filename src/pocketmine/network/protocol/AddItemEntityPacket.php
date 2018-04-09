@@ -26,7 +26,6 @@ namespace pocketmine\network\protocol;
 
 class AddItemEntityPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_ITEM_ENTITY_PACKET;
-	const PACKET_NAME = "ADD_ITEM_ENTITY_PACKET";
 
 	public $eid;
 	public $item;

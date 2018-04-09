@@ -27,19 +27,18 @@ namespace pocketmine\item;
 use pocketmine\block\Block;
 use pocketmine\block\Flower;
 use pocketmine\entity\Entity;
-use pocketmine\entity\Squid;
-use pocketmine\entity\Villager;
-//use pocketmine\entity\Zombie;
 use pocketmine\inventory\Fuel;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\level\Level;
+use pocketmine\nbt\NBT;
+use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\Player;
-use pocketmine\nbt\tag\Compound;
-use pocketmine\nbt\NBT;
+
+//use pocketmine\entity\Zombie;
 
 class Item{
 

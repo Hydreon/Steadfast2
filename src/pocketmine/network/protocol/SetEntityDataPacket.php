@@ -30,7 +30,6 @@ use pocketmine\utils\Binary;
 
 class SetEntityDataPacket extends PEPacket{
 	const NETWORK_ID = Info::SET_ENTITY_DATA_PACKET;
-	const PACKET_NAME = "SET_ENTITY_DATA_PACKET";
 
 	public $eid;
 	public $metadata;

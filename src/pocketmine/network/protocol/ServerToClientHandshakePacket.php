@@ -5,9 +5,7 @@ namespace pocketmine\network\protocol;
 use pocketmine\utils\JWT;
 
 class ServerToClientHandshakePacket extends PEPacket {
-
 	const NETWORK_ID = Info::SERVER_TO_CLIENT_HANDSHAKE_PACKET;
-	const PACKET_NAME = "SERVER_TO_CLIENT_HANDSHAKE_PACKET";
 
 	public $publicKey;
 	public $serverToken;
