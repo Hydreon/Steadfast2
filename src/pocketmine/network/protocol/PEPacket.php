@@ -56,6 +56,7 @@ abstract class PEPacket extends DataPacket {
 		switch ($protocol) {
 			case Info::PROTOCOL_240:
 			case Info::PROTOCOL_250:
+			case Info::PROTOCOL_260:
 				return Info::PROTOCOL_240;
 			case Info::PROTOCOL_221:
 			case Info::PROTOCOL_223:
