@@ -4468,7 +4468,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @return boolean
 	 */
 	public function showModal($modalWindow) {
-		if ($this->protocol >= Info::PROTOCOL_120) {
+		if ($this->protocol >= Info::PROTOCOL_120 && $this->isNeedToSendModal($modalWindow)) {
 			$pk = new ShowModalFormPacket();
 			$pk->formId = $this->lastModalId++;
 			$pk->data = $modalWindow->toJSON();
@@ -4477,6 +4477,24 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * 
+	 * @param CustomUI $window
+	 * @return boolean
+	 */
+	protected function isNeedTosendModal($window) {
+		if (!empty($this->activeModalWindows)) {
+			$windowData = $window->toJSON();
+			foreach ($this->activeModalWindows as $formId => $form) {
+				if ($windowData === $form->toJSON()) {
+					return false;
+				}
+				unset($this->activeModalWindows[$formId]);
+			}
+		}
+		return true;
 	}
 
 	/**
