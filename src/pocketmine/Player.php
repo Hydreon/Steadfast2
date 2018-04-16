@@ -383,6 +383,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $beforeSpawnViewRadius = null;
 	protected $beforeSpawnTeleportPosition = null;
 	
+	public $hackForCraftLastIndex = 0;
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1466,6 +1468,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$noteId = array_shift($this->noteSoundQueue);
 			$this->sendNoteSound($noteId);
 		}
+		$this->hackForCraftLastIndex = 0;
 
 		//$this->timings->stopTiming();
 
@@ -2161,12 +2164,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if ($this->protocol >= ProtocolInfo::PROTOCOL_120) {
 					$craftSlots = $this->inventory->getCraftContents();
 					try {
-						self::tryApplyCraft($craftSlots, $recipe);
+						$this->tryApplyCraft($craftSlots, $recipe);
 						$this->inventory->setItem(PlayerInventory120::CRAFT_RESULT_INDEX, $recipe->getResult());
 						foreach ($craftSlots as $slot => $item) {
-//							if ($item == null || $item->getId() == Item::AIR) {
-//								continue;
-//							}
 							$this->inventory->setItem(PlayerInventory120::CRAFT_INDEX_0 - $slot, $item);
 						}
 					} catch (\Exception $e) {
@@ -4195,7 +4195,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param Recipe $recipe
 	 * @throws \Exception
 	 */
-	private static function tryApplyCraft(&$craftSlots, $recipe) {
+	private function tryApplyCraft(&$craftSlots, $recipe) {
 		if ($recipe instanceof ShapedRecipe) {
 			$ingredients = [];
 			$itemGrid = $recipe->getIngredientMap();
@@ -4238,6 +4238,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		if ($isAllCraftSlotsEmpty) {
 			throw new \Exception('All craft slots are empty');
+		}
+		$this->server->getPluginManager()->callEvent($ev = new CraftItemEvent($ingredients, $recipe, $this));
+		if ($ev->isCancelled()) {
+			throw new \Exception('Event was canceled');
 		}
 		foreach ($usedItemData as $itemKey => $itemCount) {
 			$craftSlots[$itemKey]->count -= $itemCount;
