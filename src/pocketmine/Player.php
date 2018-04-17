@@ -21,6 +21,7 @@
 
 namespace pocketmine;
 
+use pocketmine\block\Block;
 use pocketmine\command\CommandSender;
 use pocketmine\customUI\CustomUI;
 use pocketmine\entity\Arrow;
@@ -1898,22 +1899,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->respawn();
 						break;
 					case 'START_SPRINTING':
-						$ev = new PlayerToggleSprintEvent($this, true);
-						$this->server->getPluginManager()->callEvent($ev);
-						if($ev->isCancelled()){
-							$this->sendData($this);
-						}else{
-							$this->setSprinting(true);
-						}
+						$this->setSprinting(true);
 						break;
 					case 'STOP_STRINTING':
-						$ev = new PlayerToggleSprintEvent($this, false);
-						$this->server->getPluginManager()->callEvent($ev);
-						if($ev->isCancelled()){
-							$this->sendData($this);
-						}else{
-							$this->setSprinting(false);
-						}
+						$this->setSprinting(false);
 						break;
 					case 'START_SNEAKING':
 						$ev = new PlayerToggleSneakEvent($this, true);
@@ -3568,8 +3557,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function setSprinting($value = true, $setDefault = false) {
-		if(!$setDefault && $this->isSprinting() == $value) {
-			return;
+		if(!$setDefault) {
+			if ($this->isSprinting() == $value) {
+				return;
+			}
+			$ev = new PlayerToggleSprintEvent($this, $value);
+			$this->server->getPluginManager()->callEvent($ev);
+			if($ev->isCancelled()){
+				$this->sendData($this);
+				return;
+			}
 		}
 		parent::setSprinting($value);
 		if ($setDefault) {
@@ -4669,7 +4666,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->attack($ev->getFinalDamage(), $ev);
 		}
 
-		if (!$this->hasEffect(Effect::WATER_BREATHING) && $this->isInsideOfWater()) {
+		// stop sprinting if not solid block under feets
+		$isInsideWater = $this->isInsideOfWater();
+		$blockIDUnderFeets = $this->level->getBlockIdAt(floor($this->x), floor($this->y), floor($this->z));
+		if ($this->protocol <= ProtocolInfo::PROTOCOL_201 && $this->isSprinting() && ((isset(Block::$liquid[$blockIDUnderFeets]) && Block::$liquid[$blockIDUnderFeets]) || $isInsideWater)) {
+			$this->setSprinting(false);
+		}
+		$isShouldResetAir = true;
+		if ($isInsideWater && !$this->hasEffect(Effect::WATER_BREATHING)) {
 			$airTicks = $this->getDataProperty(self::DATA_AIR) - $tickDiff;
 			if ($airTicks <= -20) {
 				$airTicks = 0;
