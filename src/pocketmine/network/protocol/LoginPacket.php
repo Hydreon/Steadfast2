@@ -33,7 +33,10 @@ class LoginPacket extends PEPacket {
 
 	const NETWORK_ID = Info::LOGIN_PACKET;
 	const PACKET_NAME = "LOGIN_PACKET";
-	const MOJANG_ROOT_KEY = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V";
+	const MOJANG_ROOT_KEYS = [
+		"MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V",
+		"MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEXlIy8eIyo6xkscYKWWmonXzbxnv0UqEcp03hUhPZrjyGHP2na10VGD72TLU+06XcPSQL2t+wWkslSkCH0+Klyg+twZV+h4Bwp2pU8huvJbWx07SSJNM7uBzBxsMgEHrH",
+	];
 
 	public $username;
 	public $protocol1;
@@ -122,9 +125,10 @@ class LoginPacket extends PEPacket {
 			foreach ($this->chains['chain'] as $key => $jwt) {
 				$data = JWT::parseJwt($jwt);
 				if ($data) {
-					if (self::MOJANG_ROOT_KEY == $data['header']['x5u']) {
+					if (in_array($data['header']['x5u'], self::MOJANG_ROOT_KEYS)) {
 						$validationKey = $data['payload']['identityPublicKey'];
-					} else if ($validationKey != null && $validationKey == $data['header']['x5u']) {
+					}
+					if ($validationKey != null && $validationKey == $data['header']['x5u']) {
 						$dataIndex = $index;
 					} else {
 						if (!isset($data['payload']['extraData'])) continue;
