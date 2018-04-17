@@ -4003,7 +4003,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					//Timings::$timerUseItemPacket->stopTiming();
 					return;
 				}
-
+				
 				if($itemInHand->getId() === Item::SNOWBALL || $itemInHand->getId() === Item::EGG){
 					$yawRad = $this->yaw / 180 * M_PI;
 					$pitchRad = $this->pitch / 180 * M_PI;
