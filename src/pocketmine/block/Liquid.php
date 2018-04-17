@@ -457,5 +457,9 @@ abstract class Liquid extends Transparent {
 	public function getDrops(Item $item) {
 		return [];
 	}
-
+	
+	public function isLiquid() {
+		return true;
+	}
+	
 }

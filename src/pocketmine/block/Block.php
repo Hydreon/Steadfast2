@@ -383,6 +383,8 @@ class Block extends Position implements Metadatable{
 	/** @var \SplFixedArray */
 	public static $solid = null;
 	/** @var \SplFixedArray */
+	public static $liquid= null;
+	/** @var \SplFixedArray */
 	public static $hardness = null;
 	/** @var \SplFixedArray */
 	public static $transparent = null;
@@ -426,6 +428,7 @@ class Block extends Position implements Metadatable{
 			self::$light = new \SplFixedArray(256);
 			self::$lightFilter = new \SplFixedArray(256);
 			self::$solid = new \SplFixedArray(256);
+			self::$liquid = new \SplFixedArray(256);
 			self::$hardness = new \SplFixedArray(256);
 			self::$transparent = new \SplFixedArray(256);
 			self::$list[self::AIR] = Air::class;
@@ -673,6 +676,7 @@ class Block extends Position implements Metadatable{
 			self::$transparent[$id] = $block->isTransparent();
 			self::$hardness[$id] = $block->getHardness();
 			self::$light[$id] = $block->getLightLevel();
+			self::$liquid[$id] = $block->isLiquid();
 
 			if ($block->isSolid()) {
 				if ($block->isTransparent()) {
@@ -872,6 +876,10 @@ class Block extends Position implements Metadatable{
 	}
 	
 	public function isMayBeDestroyedByPiston() {
+		return false;
+	}
+	
+	public function isLiquid() {
 		return false;
 	}
 

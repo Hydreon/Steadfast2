@@ -24,9 +24,6 @@ namespace pocketmine\entity;
 
 use pocketmine\level\format\FullChunk;
 use pocketmine\nbt\tag\Compound;
-use pocketmine\network\Network;
-use pocketmine\network\protocol\AddEntityPacket;
-use pocketmine\Player;
 
 class Snowball extends Projectile{
 	const NETWORK_ID = 81;
@@ -60,20 +57,5 @@ class Snowball extends Projectile{
 
 		return $hasUpdate;
 	}
-
-	public function spawnTo(Player $player){
-		$pk = new AddEntityPacket();
-		$pk->type = Snowball::NETWORK_ID;
-		$pk->eid = $this->getId();
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->speedX = $this->motionX;
-		$pk->speedY = $this->motionY;
-		$pk->speedZ = $this->motionZ;
-//		$pk->metadata = $this->dataProperties;
-		$player->dataPacket($pk);
-
-		parent::spawnTo($player);
-	}
+	
 }

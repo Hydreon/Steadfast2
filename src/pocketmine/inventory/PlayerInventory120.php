@@ -107,6 +107,7 @@ class PlayerInventory120 extends PlayerInventory {
 				case self::CRAFT_RESULT_INDEX:
 					return $this->craftResult == null ? clone $this->air : clone $this->craftResult;
 			}
+			return clone $this->air;
 		} else {
 			return parent::getItem($index);
 		}
