@@ -490,7 +490,7 @@ class PlayerInventory extends BaseInventory{
 		$offhandSlotId = $this->getSize() + self::OFFHAND_ARMOR_SLOT_ID;
 		$item = $this->getItem($offhandSlotId);
 		if ($item->getId() !== Item::AIR && $item->getCount() > 0) {
-			if ($searchItem->equals($item, $searchItem->getDamage() === null ? false : true, $searchItem->getCompound() === null ? false : true)) {
+			if ($searchItem->equals($item, $searchItem->getDamage() === null ? false : true, $searchItem->getId() == Item::ARROW || $searchItem->getCompound() === null ? false : true)) {
 				$amount = min($item->getCount(), $searchItem->getCount());
 				$searchItem->setCount($searchItem->getCount() - $amount);
 				$item->setCount($item->getCount() - $amount);
