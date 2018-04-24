@@ -303,5 +303,13 @@ class PlayerInventory120 extends PlayerInventory {
 		}
 		$this->cursor = null;
 	}
+	
+	public function __toString() {
+		$result = "";
+		foreach ($this->getContents() as $index => $item) {
+			$result .= $index . " - " . $item . PHP_EOL;
+		}
+		return $result;
+	}
 
 }
