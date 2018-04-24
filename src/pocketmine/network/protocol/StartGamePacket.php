@@ -39,6 +39,7 @@ class StartGamePacket extends PEPacket{
 	public $x;
 	public $y;
 	public $z;	
+	public $stringClientVersion;
 	public static $defaultRules = [
 		['name' => 'naturalRegeneration', 'type' => 1, 'value' => 0],
 //		['name' => 'showcoordinates', 'type' => 1, 'value' => 1]
@@ -96,7 +97,9 @@ class StartGamePacket extends PEPacket{
 			$this->putByte(1); // Broadcast to LAN?
 			$this->putByte(1); // Broadcast to XBL?
 		}
-		
+		if ($playerProtocol >= INFO::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
+			$this->putByte(0); //unknown
+		}		
 		$this->putByte(1);	//commands enabled
 		
 		$this->putByte(0); // isTexturepacksRequired 1x Byte

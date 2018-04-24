@@ -173,6 +173,7 @@ use pocketmine\network\protocol\v120\PlayerSkinPacket;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\v120\SubClientLoginPacket;
+use pocketmine\tile\SignEntity;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -2494,6 +2495,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_USE_ON_ENTITY:
 						if ($packet->actionType == InventoryTransactionPacket::ITEM_USE_ON_ENTITY_ACTION_ATTACK) {
 							$this->attackByTargetId($packet->entityId);
+						} elseif($packet->actionType == InventoryTransactionPacket::ITEM_USE_ON_ENTITY_ACTION_INTERACT) {
+							$target = $this->level->getEntity($packet->entityId);
+							if ($target instanceof SignEntity) {
+								$this->attackByTargetId($packet->entityId);
+							}
 						}
 						break;
 					case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_USE:
@@ -3369,6 +3375,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->generator = 1; //0 old, 1 infinite, 2 flat
 		$pk->gamemode = $this->gamemode & 0x01;
 		$pk->eid = $this->id;
+		$pk->stringClientVersion = $this->clientVersion;
 		$this->dataPacket($pk);
 
 		$pk = new SetTimePacket();

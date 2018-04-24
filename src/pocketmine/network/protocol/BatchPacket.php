@@ -36,6 +36,7 @@ class BatchPacket extends PEPacket{
 			$playerProtocol = Info::PROTOCOL_110;
 		}
 		switch ($playerProtocol) {
+			case Info::PROTOCOL_260:
 			case Info::PROTOCOL_240:
 			case Info::PROTOCOL_221:
 			case Info::PROTOCOL_220:
@@ -52,6 +53,7 @@ class BatchPacket extends PEPacket{
 
 	public function encode($playerProtocol) {
 		switch ($playerProtocol) {
+			case Info::PROTOCOL_260:
 			case Info::PROTOCOL_240:
 			case Info::PROTOCOL_221:
 			case Info::PROTOCOL_220:
