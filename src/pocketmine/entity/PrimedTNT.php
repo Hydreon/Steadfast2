@@ -31,6 +31,7 @@ use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\network\protocol\SetEntityDataPacket;
 use pocketmine\Player;
 use pocketmine\Server;
+use pocketmine\level\Level;
 
 class PrimedTNT extends Entity implements Explosive {
 
@@ -143,19 +144,20 @@ class PrimedTNT extends Entity implements Explosive {
 	}
 
 	public function spawnTo(Player $player) {
-		$pk = new AddEntityPacket();
-		$pk->type = PrimedTNT::NETWORK_ID;
-		$pk->eid = $this->getId();
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->speedX = $this->motionX;
-		$pk->speedY = $this->motionY;
-		$pk->speedZ = $this->motionZ;
-		$pk->metadata = $this->dataProperties;
-		$player->dataPacket($pk);
-
-		parent::spawnTo($player);
+		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
+			$this->hasSpawned[$player->getId()] = $player;
+			$pk = new AddEntityPacket();
+			$pk->type = PrimedTNT::NETWORK_ID;
+			$pk->eid = $this->getId();
+			$pk->x = $this->x;
+			$pk->y = $this->y;
+			$pk->z = $this->z;
+			$pk->speedX = $this->motionX;
+			$pk->speedY = $this->motionY;
+			$pk->speedZ = $this->motionZ;
+			$pk->metadata = $this->dataProperties;
+			$player->dataPacket($pk);
+		}
 	}
 
 	public function setOwner($owner) {

@@ -75,16 +75,32 @@ class Skeleton extends WalkingMonster implements ProjectileSource{
 			}
 		}
 	}
+	
+	public function spawnTo(Player $player) {
+		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
+			$pk = new AddEntityPacket();
+			$pk->eid = $this->getID();
+			$pk->type = static::NETWORK_ID;
+			$pk->x = $this->x;
+			$pk->y = $this->y;
+			$pk->z = $this->z;
+			$pk->speedX = 0;
+			$pk->speedY = 0;
+			$pk->speedZ = 0;
+			$pk->yaw = $this->yaw;
+			$pk->pitch = $this->pitch;
+			$pk->metadata = $this->dataProperties;
+			$player->dataPacket($pk);
 
-	public function spawnTo(Player $player){
-		parent::spawnTo($player);
+			$this->hasSpawned[$player->getId()] = $player;
 
-		$pk = new MobEquipmentPacket();
-		$pk->eid = $this->getId();
-		$pk->item = new Bow();
-		$pk->slot = 10;
-		$pk->selectedSlot = 10;
-		$player->dataPacket($pk);
+			$pk = new MobEquipmentPacket();
+			$pk->eid = $this->getId();
+			$pk->item = new Bow();
+			$pk->slot = 0;
+			$pk->selectedSlot = 0;
+			$player->dataPacket($pk);
+		}
 	}
 
 	public function entityBaseTick($tickDiff = 1){

@@ -50,6 +50,12 @@ abstract class TextFormat{
 	const UNDERLINE = "§n";
 	const ITALIC = "§o";
 	const RESET = "§r";
+	
+	const MODE_BOTH = 0;
+	const MODE_LEFT = 1;
+	const MODE_RIGHT = 2;
+	
+	const MODAL_LINE_PIXEL_LENGTH = 203;
 
 	/**
 	 * Splits the string by Format tokens
@@ -525,6 +531,52 @@ abstract class TextFormat{
 			$lines[$index] = str_repeat(" ", $spaceNumOnOneSide) . $lines[$index];
 		}
 		return $lines;
+	}
+	
+	public static function createTable($data, $columsProportions) {
+		$portions = array_sum($columsProportions);
+		$portionPixelLength = floor(static::MODAL_LINE_PIXEL_LENGTH / $portions);
+		$result = "";
+		$residue = 0;
+		foreach ($data as $values) {
+			foreach ($values as $key => $value) {
+				$columnMaxPixelLength = $columsProportions[$key] * $portionPixelLength + $residue;
+				$column = static::addSpaces($value, $columnMaxPixelLength);
+				$residue = $columnMaxPixelLength - static::getStringPixelLength($column, true);
+				$result .= $column;
+			}
+			$result .= "\n";
+		}
+		return $result;
+	}
+	
+	public static function getStringPixelLength($string, $withLetterSpacing = false) {
+		$linePixelLength = 0;
+		$length = strlen($string);
+		for ($i = 0; $i < $length; $i++) {
+			$linePixelLength += isset(static::$charPixelLength[$string[$i]]) ? static::$charPixelLength[$string[$i]] : static::$charPixelLength['default'];
+		}
+		if ($withLetterSpacing) {
+			$linePixelLength += $length - 1;
+		}
+		return $linePixelLength;
+	}
+	
+	public static function addSpaces($string, $resPixelLength, $mode = self::MODE_BOTH) {
+		$stringLength = static::getStringPixelLength($string, true);
+		if ($resPixelLength < $stringLength) {
+			return $string;
+		}
+		$padNum = floor(($resPixelLength - $stringLength) / (static::$charPixelLength[' '] + 1)) + strlen($string);
+		switch ($mode) {
+			case static::MODE_BOTH:
+				return str_pad($string, $padNum, " ", STR_PAD_BOTH);
+			case static::MODE_LEFT:
+				return str_pad($string, $padNum, " ", STR_PAD_LEFT);
+			case static::MODE_RIGHT:
+				return str_pad($string, $padNum, " ", STR_PAD_RIGHT);
+		}
+		return $string;
 	}
 
 }
