@@ -1832,7 +1832,7 @@ class Item{
 		return $this->id;
 	}
 
-	final public function getDamage(){
+	public function getDamage(){
 		return $this->meta;
 	}
 
@@ -1914,12 +1914,8 @@ class Item{
 		return false;
 	}
 
-	public function additionalChecks(Item $item) {
-		return true;
-	}
-
-	public final function equals(Item $item, $checkDamage = true, $checkCompound = true){
-		return $this->id === $item->getId() && ($checkDamage === false || $this->getDamage() === $item->getDamage()) && ($checkCompound === false or $this->getCompound() === $item->getCompound()) && $this->additionalChecks($item);
+	final public function equals(Item $item, $checkDamage = true, $checkCompound = true) {
+		return $this->id === $item->getId() && ($checkDamage === false || $this->getDamage() === $item->getDamage()) && ($checkCompound === false || $this->getCompound() === $item->getCompound());
 	}
 
 	public final function deepEquals(Item $item, $checkDamage = true, $checkCompound = true){

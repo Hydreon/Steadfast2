@@ -12,6 +12,7 @@ use pocketmine\item\Item;
 use pocketmine\entity\Creature;
 use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\Player;
+use pocketmine\level\Level;
 
 class PigZombie extends WalkingMonster{
 	const NETWORK_ID = 36;
@@ -65,16 +66,32 @@ class PigZombie extends WalkingMonster{
 			$this->setAngry(1000);
 		}
 	}
+	
+	public function spawnTo(Player $player) {
+		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
+			$pk = new AddEntityPacket();
+			$pk->eid = $this->getID();
+			$pk->type = static::NETWORK_ID;
+			$pk->x = $this->x;
+			$pk->y = $this->y;
+			$pk->z = $this->z;
+			$pk->speedX = 0;
+			$pk->speedY = 0;
+			$pk->speedZ = 0;
+			$pk->yaw = $this->yaw;
+			$pk->pitch = $this->pitch;
+			$pk->metadata = $this->dataProperties;
+			$player->dataPacket($pk);
 
-	public function spawnTo(Player $player){
-		parent::spawnTo($player);
+			$this->hasSpawned[$player->getId()] = $player;
 
-		$pk = new MobEquipmentPacket();
-		$pk->eid = $this->getId();
-		$pk->item = new GoldSword();
-		$pk->slot = 10;
-		$pk->selectedSlot = 10;
-		$player->dataPacket($pk);
+			$pk = new MobEquipmentPacket();
+			$pk->eid = $this->getId();
+			$pk->item = new GoldSword();
+			$pk->slot = 0;
+			$pk->selectedSlot = 0;
+			$player->dataPacket($pk);
+		}
 	}
 
 	public function attackEntity(Entity $player){
