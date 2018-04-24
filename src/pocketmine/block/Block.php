@@ -616,6 +616,9 @@ class Block extends Position implements Metadatable{
 
 			self::$list[self::CONCRETE] = Concrete::class;
 			self::$list[self::CONCRETE_POWDER] = ConcretePowder::class;
+			
+			self::$list[self::SHULKER_BOX] = ShulkerBox::class;
+			self::$list[self::PRISMARINE] = Prismarine::class;
             
 			foreach (self::$list as $id => $class) {
 				static::registerBlock($id, $class);
