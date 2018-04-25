@@ -30,6 +30,7 @@ use pocketmine\entity\Projectile;
 use pocketmine\entity\Entity;
 use pocketmine\level\Explosion;
 use pocketmine\event\entity\ExplosionPrimeEvent;
+use pocketmine\level\Level;
 
 class FireBall extends Projectile{
 	const NETWORK_ID = 85;
@@ -96,20 +97,21 @@ class FireBall extends Projectile{
 		return $hasUpdate;
 	}
 
-	public function spawnTo(Player $player){
-		$pk = new AddEntityPacket();
-		$pk->type = self::NETWORK_ID;
-		$pk->eid = $this->getId();
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->speedX = $this->motionX;
-		$pk->speedY = $this->motionY;
-		$pk->speedZ = $this->motionZ;
-//		$pk->metadata = $this->dataProperties;
-		$player->dataPacket($pk);
-
-		parent::spawnTo($player);
+	public function spawnTo(Player $player) {
+		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
+			$this->hasSpawned[$player->getId()] = $player;
+			$pk = new AddEntityPacket();
+			$pk->type = self::NETWORK_ID;
+			$pk->eid = $this->getId();
+			$pk->x = $this->x;
+			$pk->y = $this->y;
+			$pk->z = $this->z;
+			$pk->speedX = $this->motionX;
+			$pk->speedY = $this->motionY;
+			$pk->speedZ = $this->motionZ;
+//			$pk->metadata = $this->dataProperties;
+			$player->dataPacket($pk);
+		}
 	}
 
 }

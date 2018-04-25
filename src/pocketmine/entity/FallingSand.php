@@ -35,6 +35,7 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
+use pocketmine\level\Level;
 
 class FallingSand extends Entity{
 	const NETWORK_ID = 66;
@@ -156,21 +157,23 @@ class FallingSand extends Entity{
 		$this->namedtag->Data = new ByteTag("Data", $this->damage);
 	}
 
-	public function spawnTo(Player $player){
-		$pk = new AddEntityPacket();
-		$pk->type = FallingSand::NETWORK_ID;
-		$pk->eid = $this->getId();
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->speedX = $this->motionX;
-		$pk->speedY = $this->motionY;
-		$pk->speedZ = $this->motionZ;
-		$pk->yaw = $this->yaw;
-		$pk->pitch = $this->pitch;
-//		$pk->metadata = $this->dataProperties;
-		$player->dataPacket($pk);
-
-		parent::spawnTo($player);
+	public function spawnTo(Player $player) {
+		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
+			$this->hasSpawned[$player->getId()] = $player;
+			$pk = new AddEntityPacket();
+			$pk->type = FallingSand::NETWORK_ID;
+			$pk->eid = $this->getId();
+			$pk->x = $this->x;
+			$pk->y = $this->y;
+			$pk->z = $this->z;
+			$pk->speedX = $this->motionX;
+			$pk->speedY = $this->motionY;
+			$pk->speedZ = $this->motionZ;
+			$pk->yaw = $this->yaw;
+			$pk->pitch = $this->pitch;
+//			$pk->metadata = $this->dataProperties;
+			$player->dataPacket($pk);
+		}
 	}
+
 }

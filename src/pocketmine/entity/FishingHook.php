@@ -34,16 +34,16 @@ class FishingHook extends Entity {
 			$this->hasSpawned[$player->getId()] = $player;
 			$pk = new AddEntityPacket();
 			$pk->eid = $this->getId();
-			$pk->type = static::NETWORK_ID;
+			$pk->type = FishingHook::NETWORK_ID;
 			$pk->x = $this->x;
 			$pk->y = $this->y;
 			$pk->z = $this->z;
-			$pk->speedX = 0;
-			$pk->speedY = 0;
-			$pk->speedZ = 0;
-			$pk->yaw = 0;
-			$pk->pitch = 0;
-			$pk->metadata = $this->dataProperties;
+			$pk->speedX = $this->motionX;
+			$pk->speedY = $this->motionY;
+			$pk->speedZ = $this->motionZ;
+			$pk->yaw = $this->yaw;
+			$pk->pitch = $this->pitch;
+//			$pk->metadata = $this->dataProperties;
 			$player->dataPacket($pk);
 		}
 	}

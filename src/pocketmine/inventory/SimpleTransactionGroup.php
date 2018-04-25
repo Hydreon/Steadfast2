@@ -107,6 +107,18 @@ class SimpleTransactionGroup implements TransactionGroup {
 				}
 			} else {
 				$checkSourceItem = $ts->getInventory()->getItem($ts->getSlot());
+				if (is_null($checkSourceItem)) {
+					$checkSourceItem = Item::get(Item::AIR, 0, 0);
+					error_log("--------------------------------------");
+					error_log("Get item return null for inventory " . get_class() . " and slot " . $ts->getSlot());
+					ob_start();
+					foreach ($this->transactions as $debugTransaction) {
+						echo PHP_EOL . $debugTransaction;
+					}
+					error_log(ob_get_contents());
+					ob_end_clean();
+					error_log("--------------------------------------");
+				}
 				if (!$checkSourceItem->deepEquals($sourceItem) || (!$sourceItemIsAir && $sourceItem->getCount() !== $checkSourceItem->getCount())) {
 					return false;
 				}
