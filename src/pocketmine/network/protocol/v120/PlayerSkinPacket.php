@@ -19,6 +19,7 @@ class PlayerSkinPacket extends PEPacket {
 	public $newCapeByteData;
 	public $newSkinGeometryName;
 	public $newSkinGeometryData;
+	public $isPremiumSkin = false;
 
 
 	public function decode($playerProtocol) {
@@ -41,7 +42,9 @@ class PlayerSkinPacket extends PEPacket {
 		}
 		$this->newSkinGeometryName = $this->getString();
 		$this->newSkinGeometryData = $this->getString();
-		file_put_contents("playerSkin.packet", bin2hex($this->buffer));
+		if ($playerProtocol > INFO::PROTOCOL_260) {
+			$this->isPremiumSkin = $this->getByte();
+		}
 	}
 
 	public function encode($playerProtocol) {
@@ -64,5 +67,8 @@ class PlayerSkinPacket extends PEPacket {
 		}
 		$this->putString($this->newSkinGeometryName);
 		$this->putString($this->newSkinGeometryData);
+		if ($playerProtocol > Info::PROTOCOL_260) {
+			$this->putByte($this->isPremiumSkin);
+		}
 	}
 }

@@ -87,6 +87,10 @@ class StartGamePacket extends PEPacket{
 		$this->putSignedVarInt(0); // DayCycleStopTyme 1x VarInt
 		
 		$this->putByte(0); //edu mode
+		
+		if ($playerProtocol >= INFO::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
+			$this->putByte(0); // Are education features enabled?
+		}
 
 		$this->putLFloat(0); //rain level
 
@@ -97,10 +101,8 @@ class StartGamePacket extends PEPacket{
 			$this->putByte(1); // Broadcast to LAN?
 			$this->putByte(1); // Broadcast to XBL?
 		}
-		if ($playerProtocol >= INFO::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
-			$this->putByte(0); //unknown
-		}		
-		$this->putByte(1);	//commands enabled
+				
+		$this->putByte(1);	// commands enabled
 		
 		$this->putByte(0); // isTexturepacksRequired 1x Byte
 		
@@ -127,10 +129,15 @@ class StartGamePacket extends PEPacket{
 			$this->putByte(0); // has trust players enabled
 			$this->putSignedVarInt(1); // permission level
 			$this->putSignedVarInt(4); // game publish setting
-			$this->putLInt(0);
-			$this->putByte(0);
-			$this->putSignedVarInt(0);
-			$this->putByte(0);
+			$this->putLInt(0); // server chunk tick range
+			$this->putByte(0); // can platform broadcast
+			$this->putSignedVarInt(0); // Broadcast mode
+			$this->putByte(0); // XBL Broadcast intent
+			if ($playerProtocol >= Info::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
+				$this->putByte(0); // Has locked behavior pack?
+				$this->putByte(0); // Has locked resource pack?
+				$this->putByte(0); // Is from locked template?
+			}
 			$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
 			$this->putString(''); // level name
 			$this->putString(''); // template pack id
