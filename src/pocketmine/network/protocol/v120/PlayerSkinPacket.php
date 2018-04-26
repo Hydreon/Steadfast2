@@ -42,7 +42,7 @@ class PlayerSkinPacket extends PEPacket {
 		}
 		$this->newSkinGeometryName = $this->getString();
 		$this->newSkinGeometryData = $this->getString();
-		if ($playerProtocol > INFO::PROTOCOL_260) {
+		if ($playerProtocol >= Info::PROTOCOL_260) {
 			$this->isPremiumSkin = $this->getByte();
 		}
 	}
@@ -67,7 +67,7 @@ class PlayerSkinPacket extends PEPacket {
 		}
 		$this->putString($this->newSkinGeometryName);
 		$this->putString($this->newSkinGeometryData);
-		if ($playerProtocol > Info::PROTOCOL_260) {
+		if ($playerProtocol >= Info::PROTOCOL_260) {
 			$this->putByte($this->isPremiumSkin);
 		}
 	}

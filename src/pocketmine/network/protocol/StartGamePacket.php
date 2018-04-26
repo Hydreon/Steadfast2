@@ -88,7 +88,7 @@ class StartGamePacket extends PEPacket{
 		
 		$this->putByte(0); //edu mode
 		
-		if ($playerProtocol >= INFO::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
+		if ($playerProtocol >= Info::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
 			$this->putByte(0); // Are education features enabled?
 		}
 

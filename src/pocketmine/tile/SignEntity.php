@@ -41,7 +41,7 @@ class SignEntity extends Entity {
 	public function spawnTo(Player $player) {
 		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
 			$this->hasSpawned[$player->getId()] = $player;
-			if ($player->getPlayerProtocol() < Info::PROTOCOL_260) {
+			if ($player->getOriginalProtocol() != Info::PROTOCOL_260) {
 				return;
 			}
 			$pk = new AddEntityPacket();
@@ -63,7 +63,7 @@ class SignEntity extends Entity {
 	public function despawnFrom(Player $player) {
 		if (isset($this->hasSpawned[$player->getId()])) {
 			unset($this->hasSpawned[$player->getId()]);
-			if ($player->getPlayerProtocol() < Info::PROTOCOL_260) {
+			if ($player->getPlayerProtocol() != Info::PROTOCOL_260) {
 				return;
 			}
 			$pk = new RemoveEntityPacket();
