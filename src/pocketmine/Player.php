@@ -2600,7 +2600,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
 
-		$this->teleport($ev->getRespawnPosition());
+		$this->teleport($ev->getRespawnPosition(), $ev->getPitch(), $ev->getYaw());
 
 		$this->setSprinting(false, true);
 		$this->setSneaking(false);
