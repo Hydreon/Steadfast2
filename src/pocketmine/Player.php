@@ -174,6 +174,7 @@ use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\v120\SubClientLoginPacket;
 use pocketmine\entity\Vehicle;
+use pocketmine\tile\SignEntity;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -2536,6 +2537,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								$target = $this->getLevel()->getEntity($packet->entityId);
 								if ($target instanceof Vehicle) {
 									$target->onPlayerInteract($this);
+								} elseif ($target instanceof SignEntity) {
+									$this->attackByTargetId($packet->entityId);
 								}
 								break;
 						}
@@ -2642,7 +2645,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
 
-		$this->teleport($ev->getRespawnPosition());
+		$this->teleport($ev->getRespawnPosition(), $ev->getPitch(), $ev->getYaw());
 
 		$this->setSprinting(false, true);
 		$this->setSneaking(false);
@@ -3420,6 +3423,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->generator = 1; //0 old, 1 infinite, 2 flat
 		$pk->gamemode = $this->gamemode & 0x01;
 		$pk->eid = $this->id;
+		$pk->stringClientVersion = $this->clientVersion;
 		$this->dataPacket($pk);
 
 		$pk = new SetTimePacket();

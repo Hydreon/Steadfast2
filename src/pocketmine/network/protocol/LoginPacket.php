@@ -59,6 +59,7 @@ class LoginPacket extends PEPacket {
 	public $skinGeometryData = "";
 	public $capeData = "";
 	public $isVerified = true;
+	public $premiunSkin = "";
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -74,8 +75,8 @@ class LoginPacket extends PEPacket {
 		}
 		$this->protocol1 = $this->getInt();
 		// dirty useless hack
-		if ($this->protocol1 > 260) {
-			$this->protocol1 = 260;
+		if ($this->protocol1 > 270) {
+			$this->protocol1 = 270;
 		}
 		if (!in_array($this->protocol1, $acceptedProtocols)) {
 			$this->isValidProtocol = false;
@@ -174,7 +175,7 @@ class LoginPacket extends PEPacket {
 		if (isset($this->chains['data'][$dataIndex]['extraData']['XUID'])) {
 			$this->xuid = $this->chains['data'][$dataIndex]['extraData']['XUID'];
 		}
-
+		
 		$this->serverAddress = $this->playerData['ServerAddress'];
 		$this->skinName = $this->playerData['SkinId'];
 		$this->skin = base64_decode($this->playerData['SkinData']);
@@ -199,6 +200,9 @@ class LoginPacket extends PEPacket {
 		}
 		if (isset($this->playerData['CapeData'])) {
 			$this->capeData = base64_decode($this->playerData['CapeData']);
+		}
+		if (isset($this->playerData["PremiumSkin"])) {
+			$this->premiunSkin = $this->playerData["PremiumSkin"];
 		}
 		$this->originalProtocol = $this->protocol1;
 		$this->protocol1 = self::convertProtocol($this->protocol1);

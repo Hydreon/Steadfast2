@@ -540,6 +540,9 @@ abstract class TextFormat{
 		$residue = 0;
 		foreach ($data as $values) {
 			foreach ($values as $key => $value) {
+				if (!isset($columsProportions[$key])) {
+					continue;
+				}
 				$columnMaxPixelLength = $columsProportions[$key] * $portionPixelLength + $residue;
 				$column = static::addSpaces($value, $columnMaxPixelLength);
 				$residue = $columnMaxPixelLength - static::getStringPixelLength($column, true);

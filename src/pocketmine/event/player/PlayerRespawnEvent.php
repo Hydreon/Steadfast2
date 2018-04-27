@@ -32,6 +32,8 @@ class PlayerRespawnEvent extends PlayerEvent{
 
 	/** @var Position */
 	protected $position;
+	protected $yaw;
+	protected $pitch;
 
 	/**
 	 * @param Player   $player
@@ -55,4 +57,21 @@ class PlayerRespawnEvent extends PlayerEvent{
 	public function setRespawnPosition(Position $position){
 		$this->position = $position;
 	}
+	
+	public function getYaw() {
+		return $this->yaw;
+	}
+	
+	public function setYaw($yaw) {
+		$this->yaw = $yaw;
+	}
+	
+	public function getPitch() {
+		return $this->pitch;
+	}
+	
+	public function setPitch($pitch) {
+		$this->pitch = $pitch;
+	}
+	
 }
