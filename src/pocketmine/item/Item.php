@@ -286,6 +286,7 @@ class Item{
 	const DARK_OAK_WOODEN_STAIRS = 164;
 	const SLIME_BLOCK = 165;
 	const IRON_TRAPDOOR = 167;
+	const PRISMARINE = 168;
 	const HAY_BALE = 170;
 	const CARPET = 171;
 	const HARDENED_CLAY = 172;
@@ -313,6 +314,7 @@ class Item{
 	const PURPUR_BLOCK = 201;
 	const END_BRICKS = 206;
 	const END_ROD = 208;
+	const SHULKER_BOX = 218;
 	const CHORUS_PLANT = 240;
 	const STAINED_GLASS = 241;
 	const PODZOL = 243;
