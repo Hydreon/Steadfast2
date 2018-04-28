@@ -689,6 +689,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         return $this->connected === true;
     }
 
+    public function setImmobile($value = true) {
+        $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE, $value);
+    }
+
     /**
      * Gets the "friendly" name to display of this player to use in the chat.
      *
