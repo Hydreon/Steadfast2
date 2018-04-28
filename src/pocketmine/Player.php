@@ -21,6 +21,7 @@
 
 namespace pocketmine;
 
+use pocketmine\block\Block;
 use pocketmine\command\CommandSender;
 use pocketmine\customUI\CustomUI;
 use pocketmine\entity\Arrow;
@@ -172,6 +173,7 @@ use pocketmine\network\protocol\v120\PlayerSkinPacket;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\v120\SubClientLoginPacket;
+use pocketmine\tile\SignEntity;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -279,7 +281,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     /** @var Vector3 */
     public $newPosition;
 
-    protected $spawnThreshold = 16 * M_PI;
+    protected $spawnThreshold = 9 * M_PI;
     /** @var null|Position */
     private $spawnPosition = null;
 
@@ -343,7 +345,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
     protected $xblName = '';
 
-    protected $viewRadius = 4;
+    protected $viewRadius = 3;
 
     protected $identityPublicKey = '';
 
@@ -379,6 +381,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     /** @var boolean */
     protected $hungerEnabled = true;
     protected $isFlying = false;
+
+    protected $beforeSpawnViewRadius = null;
+    protected $beforeSpawnTeleportPosition = null;
+
+    public $hackForCraftLastIndex = 0;
 
     public function getLeaveMessage(){
         return "";
@@ -668,7 +675,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     }
 
     public function setViewRadius($radius) {
-        $this->viewRadius = $radius;
+        if (!$this->spawned) {
+            $this->beforeSpawnViewRadius = $radius;
+        } else {
+            $this->viewRadius = $radius;
+        }
     }
 
     /**
@@ -810,7 +821,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         }
 
         if ((!$this->isFirstConnect || $this->chunkLoadCount >= $this->spawnThreshold) && $this->spawned === false) {
-            $this->spawned = true;
             $this->sendSettings();
             $this->sendPotionEffects($this);
             $this->sendData($this);
@@ -827,6 +837,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             $this->dataPacket($pk);
 
             $this->noDamageTicks = 60;
+            $this->spawned = true;
             $chunkX = $chunkZ = null;
             foreach ($this->usedChunks as $index => $c) {
                 Level::getXZ($index, $chunkX, $chunkZ);
@@ -837,6 +848,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 }
             }
             $this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));
+            if (!is_null($this->beforeSpawnViewRadius)) {
+                $this->setViewRadius($this->beforeSpawnViewRadius);
+                $this->beforeSpawnViewRadius = null;
+            }
+            if (!is_null($this->beforeSpawnTeleportPosition)) {
+                $this->teleport($this->beforeSpawnTeleportPosition);
+                $this->beforeSpawnTeleportPosition = null;
+            } else {
+                $this->nextChunkOrderRun = 0;
+            }
         }
     }
 
@@ -1449,6 +1470,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             $noteId = array_shift($this->noteSoundQueue);
             $this->sendNoteSound($noteId);
         }
+        $this->hackForCraftLastIndex = 0;
 
         //$this->timings->stopTiming();
 
@@ -1562,7 +1584,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                     break;
             }
         } else {
-            error_log("Try to eat " . get_class($slot) . "(" . $slot->getId() . ")");
+            // error_log("Try to eat " . get_class($slot) . "(" . $slot->getId() . ")");
         }
     }
 
@@ -1878,22 +1900,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                         $this->respawn();
                         break;
                     case 'START_SPRINTING':
-                        $ev = new PlayerToggleSprintEvent($this, true);
-                        $this->server->getPluginManager()->callEvent($ev);
-                        if($ev->isCancelled()){
-                            $this->sendData($this);
-                        }else{
-                            $this->setSprinting(true);
-                        }
+                        $this->setSprinting(true);
                         break;
                     case 'STOP_STRINTING':
-                        $ev = new PlayerToggleSprintEvent($this, false);
-                        $this->server->getPluginManager()->callEvent($ev);
-                        if($ev->isCancelled()){
-                            $this->sendData($this);
-                        }else{
-                            $this->setSprinting(false);
-                        }
+                        $this->setSprinting(false);
                         break;
                     case 'START_SNEAKING':
                         $ev = new PlayerToggleSneakEvent($this, true);
@@ -2144,12 +2154,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 if ($this->protocol >= ProtocolInfo::PROTOCOL_120) {
                     $craftSlots = $this->inventory->getCraftContents();
                     try {
-                        self::tryApplyCraft($craftSlots, $recipe);
+                        $this->tryApplyCraft($craftSlots, $recipe);
                         $this->inventory->setItem(PlayerInventory120::CRAFT_RESULT_INDEX, $recipe->getResult());
                         foreach ($craftSlots as $slot => $item) {
-//							if ($item == null || $item->getId() == Item::AIR) {
-//								continue;
-//							}
                             $this->inventory->setItem(PlayerInventory120::CRAFT_INDEX_0 - $slot, $item);
                         }
                     } catch (\Exception $e) {
@@ -2373,8 +2380,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 //Timings::$timerChunkRudiusPacket->startTiming();
                 if ($packet->radius > 12) {
                     $packet->radius = 12;
-                } elseif ($packet->radius < 4) {
-                    $packet->radius = 4;
+                } elseif ($packet->radius < 3) {
+                    $packet->radius = 3;
                 }
                 $this->setViewRadius($packet->radius);
                 $pk = new ChunkRadiusUpdatePacket();
@@ -2488,6 +2495,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                     case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_USE_ON_ENTITY:
                         if ($packet->actionType == InventoryTransactionPacket::ITEM_USE_ON_ENTITY_ACTION_ATTACK) {
                             $this->attackByTargetId($packet->entityId);
+                        } elseif($packet->actionType == InventoryTransactionPacket::ITEM_USE_ON_ENTITY_ACTION_INTERACT) {
+                            $target = $this->level->getEntity($packet->entityId);
+                            if ($target instanceof SignEntity) {
+                                $this->attackByTargetId($packet->entityId);
+                            }
                         }
                         break;
                     case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_USE:
@@ -2588,7 +2600,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
         $this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
 
-        $this->teleport($ev->getRespawnPosition());
+        $this->teleport($ev->getRespawnPosition(), $ev->getPitch(), $ev->getYaw());
 
         $this->setSprinting(false, true);
         $this->setSneaking(false);
@@ -3082,12 +3094,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         }
     }
 
-    public function teleport(Vector3 $pos, $yaw = null, $pitch = null){
-        if(!$this->isOnline()){
+    public function teleport(Vector3 $pos, $yaw = null, $pitch = null) {
+        if (!$this->spawned || !$this->isOnline()) {
+            $this->beforeSpawnTeleportPosition = $pos;
             return;
         }
-
-        $oldPos = $this->getPosition();
         if(parent::teleport($pos, $yaw, $pitch)){
             if (!is_null($this->currentWindow)) {
                 $this->removeWindow($this->currentWindow);
@@ -3256,6 +3267,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         if (count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers() and $this->kick("disconnectionScreen.serverFull")){
             return;
         }
+
         if (!$this->server->isWhitelisted(strtolower($this->getName()))) {
             $this->close(TextFormat::YELLOW . $this->username . " has left the game", "Server is private.");
             return;
@@ -3362,6 +3374,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         $pk->generator = 1; //0 old, 1 infinite, 2 flat
         $pk->gamemode = $this->gamemode & 0x01;
         $pk->eid = $this->id;
+        $pk->stringClientVersion = $this->clientVersion;
         $this->dataPacket($pk);
 
         $pk = new SetTimePacket();
@@ -3414,10 +3427,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         $pk->metadata = $this->dataProperties;
         $this->dataPacket($pk);
     }
-    public function setImmobile($value = true) {
-        $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE, $value);
-    }
-
     /**
      * Create new transaction pair for transaction or add it to suitable one
      *
@@ -3551,8 +3560,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     }
 
     public function setSprinting($value = true, $setDefault = false) {
-        if(!$setDefault && $this->isSprinting() == $value) {
-            return;
+        if(!$setDefault) {
+            if ($this->isSprinting() == $value) {
+                return;
+            }
+            $ev = new PlayerToggleSprintEvent($this, $value);
+            $this->server->getPluginManager()->callEvent($ev);
+            if($ev->isCancelled()){
+                $this->sendData($this);
+                return;
+            }
         }
         parent::setSprinting($value);
         if ($setDefault) {
@@ -4178,7 +4195,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
      * @param Recipe $recipe
      * @throws \Exception
      */
-    private static function tryApplyCraft(&$craftSlots, $recipe) {
+    private function tryApplyCraft(&$craftSlots, $recipe) {
         if ($recipe instanceof ShapedRecipe) {
             $ingredients = [];
             $itemGrid = $recipe->getIngredientMap();
@@ -4221,6 +4238,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         }
         if ($isAllCraftSlotsEmpty) {
             throw new \Exception('All craft slots are empty');
+        }
+        $this->server->getPluginManager()->callEvent($ev = new CraftItemEvent($ingredients, $recipe, $this));
+        if ($ev->isCancelled()) {
+            throw new \Exception('Event was canceled');
         }
         foreach ($usedItemData as $itemKey => $itemCount) {
             $craftSlots[$itemKey]->count -= $itemCount;
@@ -4451,7 +4472,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
      * @return boolean
      */
     public function showModal($modalWindow) {
-        if ($this->protocol >= Info::PROTOCOL_120) {
+        if ($this->protocol >= Info::PROTOCOL_120 && $this->isNeedToSendModal($modalWindow)) {
             $pk = new ShowModalFormPacket();
             $pk->formId = $this->lastModalId++;
             $pk->data = $modalWindow->toJSON();
@@ -4464,17 +4485,37 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
     /**
      *
+     * @param CustomUI $window
+     * @return boolean
+     */
+    protected function isNeedTosendModal($window) {
+        if (!empty($this->activeModalWindows)) {
+            $windowData = $window->toJSON();
+            foreach ($this->activeModalWindows as $formId => $form) {
+                if ($windowData === $form->toJSON()) {
+                    return false;
+                }
+                unset($this->activeModalWindows[$formId]);
+            }
+        }
+        return true;
+    }
+
+    /**
+     *
      * @param integer $formId
      * @param string|null $data Sting in JSON format or null
      */
     public function checkModal($formId, $data) {
         if (isset($this->activeModalWindows[$formId])) {
-            if ($data === null) { // The modal window was closed manually
-                $this->activeModalWindows[$formId]->close($this);
-            } else { // Player send some data
-                $this->activeModalWindows[$formId]->handle($data, $this);
-            }
+            $currentModel = $this->activeModalWindows[$formId];
             unset($this->activeModalWindows[$formId]);
+            if ($data === null) { // The modal window was closed manually
+                $currentModel->close($this);
+            } else { // Player send some data
+                $currentModel->handle($data, $this);
+            }
+
         }
     }
 
@@ -4630,7 +4671,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             $this->attack($ev->getFinalDamage(), $ev);
         }
 
-        if (!$this->hasEffect(Effect::WATER_BREATHING) && $this->isInsideOfWater()) {
+        // stop sprinting if not solid block under feets
+        $isInsideWater = $this->isInsideOfWater();
+        $blockIDUnderFeets = $this->level->getBlockIdAt(floor($this->x), floor($this->y), floor($this->z));
+        if ($this->protocol <= ProtocolInfo::PROTOCOL_201 && $this->isSprinting() && ((isset(Block::$liquid[$blockIDUnderFeets]) && Block::$liquid[$blockIDUnderFeets]) || $isInsideWater)) {
+            $this->setSprinting(false);
+        }
+        $isShouldResetAir = true;
+        if ($isInsideWater && !$this->hasEffect(Effect::WATER_BREATHING)) {
             $airTicks = $this->getDataProperty(self::DATA_AIR) - $tickDiff;
             if ($airTicks <= -20) {
                 $airTicks = 0;

@@ -31,6 +31,9 @@ use pocketmine\level\MovingObjectPosition;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\ShortTag;
+use pocketmine\network\protocol\AddEntityPacket;
+use pocketmine\Player;
+use pocketmine\level\Level;
 
 abstract class Projectile extends Entity {
 
@@ -189,5 +192,22 @@ abstract class Projectile extends Entity {
         }
         return $hasUpdate;
     }
+	
+	public function spawnTo(Player $player) {
+		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
+			$this->hasSpawned[$player->getId()] = $player;
+			$pk = new AddEntityPacket();
+			$pk->type = static::NETWORK_ID;
+			$pk->eid = $this->getId();
+			$pk->x = $this->x;
+			$pk->y = $this->y;
+			$pk->z = $this->z;
+			$pk->speedX = $this->motionX;
+			$pk->speedY = $this->motionY;
+			$pk->speedZ = $this->motionZ;
+//			$pk->metadata = $this->dataProperties;
+			$player->dataPacket($pk);
+		}
+	}
 
 }

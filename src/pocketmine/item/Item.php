@@ -286,6 +286,7 @@ class Item{
 	const DARK_OAK_WOODEN_STAIRS = 164;
 	const SLIME_BLOCK = 165;
 	const IRON_TRAPDOOR = 167;
+	const PRISMARINE = 168;
 	const HAY_BALE = 170;
 	const CARPET = 171;
 	const HARDENED_CLAY = 172;
@@ -313,6 +314,7 @@ class Item{
 	const PURPUR_BLOCK = 201;
 	const END_BRICKS = 206;
 	const END_ROD = 208;
+	const SHULKER_BOX = 218;
 	const CHORUS_PLANT = 240;
 	const STAINED_GLASS = 241;
 	const PODZOL = 243;
@@ -463,6 +465,7 @@ class Item{
 	const BOTTLE_ENCHANTING = 384;
 	const FIRE_CHARGE = 385;
 	const EMERALD = 388;
+	const WRITTEN_BOOK = 387;
 	const ITEM_FRAME = 389;
 	const FLOWER_POT = 390;
 	const CARROT = 391;
@@ -810,6 +813,7 @@ class Item{
 		377 => "Blaze powder",
 		378 => "Magma Cream",
 		383 => "Spawn Egg",
+		self::WRITTEN_BOOK => "Written Book",
 		388 => "Emerald",
 		390 => "Flower Pot",
 		391 => "Carrot",
@@ -1830,7 +1834,7 @@ class Item{
 		return $this->id;
 	}
 
-	final public function getDamage(){
+	public function getDamage(){
 		return $this->meta;
 	}
 
@@ -1912,12 +1916,8 @@ class Item{
 		return false;
 	}
 
-	public function additionalChecks(Item $item) {
-		return true;
-	}
-
-	public final function equals(Item $item, $checkDamage = true, $checkCompound = true){
-		return $this->id === $item->getId() && ($checkDamage === false || $this->getDamage() === $item->getDamage()) && ($checkCompound === false or $this->getCompound() === $item->getCompound()) && $this->additionalChecks($item);
+	final public function equals(Item $item, $checkDamage = true, $checkCompound = true) {
+		return $this->id === $item->getId() && ($checkDamage === false || $this->getDamage() === $item->getDamage()) && ($checkCompound === false || $this->getCompound() === $item->getCompound());
 	}
 
 	public final function deepEquals(Item $item, $checkDamage = true, $checkCompound = true){

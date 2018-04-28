@@ -148,6 +148,7 @@ class Item extends Entity{
 					}
 				}
 			}
+			$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_AFFECTED_BY_GRAVITY, true); // fix for 1.2.14.3
 		}
 
 		//$this->timings->stopTiming();

@@ -27,6 +27,8 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
 
 class Sign extends Spawnable{
+	
+	private $hackEntity;
 
 	public function __construct(FullChunk $chunk, Compound $nbt){
 		if(!isset($nbt->Text1)){
@@ -43,6 +45,12 @@ class Sign extends Spawnable{
 		}
 
 		parent::__construct($chunk, $nbt);
+		$this->hackEntity = new SignEntity($this, $this->level, $this->x, $this->y, $this->z);		
+	}
+	
+	public function __destruct() {
+		parent::__destruct();
+		$this->hackEntity->close();
 	}
 
 	public function saveNBT(){

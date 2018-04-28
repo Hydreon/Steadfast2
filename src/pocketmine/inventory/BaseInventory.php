@@ -327,7 +327,7 @@ abstract class BaseInventory implements Inventory{
 			}
 
 			foreach($itemSlots as $index => $slot){
-				if($slot->equals($item, $slot->getDamage() === null ? false : true, $slot->getCompound() === null ? false : true)){
+				if($slot->equals($item, $slot->getDamage() === null ? false : true, ($slot->getId() == Item::ARROW || $slot->getCompound() === null) ? false : true)){
 					$amount = min($item->getCount(), $slot->getCount());
 					$slot->setCount($slot->getCount() - $amount);
 					$item->setCount($item->getCount() - $amount);

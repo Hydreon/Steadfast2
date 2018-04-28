@@ -26,6 +26,7 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
+use pocketmine\level\Level;
 
 class Villager extends Creature implements NPC, Ageable{
 	const PROFESSION_FARMER = 0;
@@ -52,22 +53,23 @@ class Villager extends Creature implements NPC, Ageable{
 		}
 	}
 
-	public function spawnTo(Player $player){
-		$pk = new AddEntityPacket();
-		$pk->eid = $this->getId();
-		$pk->type = Villager::NETWORK_ID;
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->speedX = $this->motionX;
-		$pk->speedY = $this->motionY;
-		$pk->speedZ = $this->motionZ;
-		$pk->yaw = $this->yaw;
-		$pk->pitch = $this->pitch;
-		$pk->metadata = $this->dataProperties;
-		$player->dataPacket($pk);
-
-		parent::spawnTo($player);
+	public function spawnTo(Player $player) {
+		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
+			$this->hasSpawned[$player->getId()] = $player;
+			$pk = new AddEntityPacket();
+			$pk->eid = $this->getId();
+			$pk->type = Villager::NETWORK_ID;
+			$pk->x = $this->x;
+			$pk->y = $this->y;
+			$pk->z = $this->z;
+			$pk->speedX = $this->motionX;
+			$pk->speedY = $this->motionY;
+			$pk->speedZ = $this->motionZ;
+			$pk->yaw = $this->yaw;
+			$pk->pitch = $this->pitch;
+			$pk->metadata = $this->dataProperties;
+			$player->dataPacket($pk);
+		}
 	}
 
 	/**

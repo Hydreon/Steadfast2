@@ -69,14 +69,14 @@ class PlayerInventory120 extends PlayerInventory {
 			case self::CRAFT_INDEX_8:
 				$slot = self::CRAFT_INDEX_0 - $index;
 				$this->craftSlots[$slot] = $item;
-				if ($sendPacket) {
-					/** @todo add packet sending */
-					$pk = new InventorySlotPacket();
-					$pk->containerId = Protocol120::CONTAINER_ID_NONE;
-					$pk->slot = 0;
-					$pk->item = Item::get(Item::WOOL, 10);
-					$this->holder->dataPacket($pk);
-				}
+//				if ($sendPacket) {
+//					/** @todo add packet sending */
+//					$pk = new InventorySlotPacket();
+//					$pk->containerId = Protocol120::CONTAINER_ID_NONE;
+//					$pk->slot = 0;
+//					$pk->item = Item::get(Item::WOOL, 10);
+//					$this->holder->dataPacket($pk);
+//				}
 				break;
 			case self::CRAFT_RESULT_INDEX:
 				$this->craftResult = $item;
@@ -107,6 +107,7 @@ class PlayerInventory120 extends PlayerInventory {
 				case self::CRAFT_RESULT_INDEX:
 					return $this->craftResult == null ? clone $this->air : clone $this->craftResult;
 			}
+			return clone $this->air;
 		} else {
 			return parent::getItem($index);
 		}
@@ -297,7 +298,18 @@ class PlayerInventory120 extends PlayerInventory {
 	
 	public function clearAll() {
 		parent::clearAll();
+		for ($index = self::CRAFT_INDEX_0; $index >= self::CRAFT_INDEX_8; $index--) {
+			$this->setItem($index, clone $this->air);
+		}
 		$this->cursor = null;
+	}
+	
+	public function __toString() {
+		$result = "";
+		foreach ($this->getContents() as $index => $item) {
+			$result .= $index . " - " . $item . PHP_EOL;
+		}
+		return $result;
 	}
 
 }
