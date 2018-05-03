@@ -42,6 +42,9 @@ use pocketmine\entity\Snowball;
 use pocketmine\entity\Egg;
 use pocketmine\entity\Squid;
 use pocketmine\entity\Villager;
+use pocketmine\entity\Minecart;
+use pocketmine\entity\Boat;
+use pocketmine\entity\FishingHook;
 use pocketmine\event\HandlerList;
 use pocketmine\event\level\LevelInitEvent;
 use pocketmine\event\level\LevelLoadEvent;
@@ -2512,6 +2515,9 @@ class Server{
 	}
 
 	private function registerEntities(){
+		Entity::registerEntity(Minecart::class);
+		Entity::registerEntity(Boat::class);
+		Entity::registerEntity(FishingHook::class);
 		Entity::registerEntity(Arrow::class);
 		Entity::registerEntity(DroppedItem::class);
 		Entity::registerEntity(FallingSand::class);
