@@ -545,7 +545,7 @@ abstract class TextFormat{
 				}
 				$columnMaxPixelLength = $columsProportions[$key] * $portionPixelLength + $residue;
 				$column = static::addSpaces($value, $columnMaxPixelLength);
-				$residue = $columnMaxPixelLength - static::getStringPixelLength($column, true);
+//				$residue = $columnMaxPixelLength - static::getStringPixelLength($column, true);
 				$result .= $column;
 			}
 			$result .= "\n";
