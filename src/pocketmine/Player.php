@@ -4874,8 +4874,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	private function getNonValidProtocolMessage($protocol) {
 		if ($protocol > ProtocolInfo::PROTOCOL_160) {
+			$pk = new PlayStatusPacket();
+			$pk->status = PlayStatusPacket::LOGIN_FAILED_SERVER;
+			$this->dataPacket($pk);				
 			return TextFormat::WHITE . "We don't support this client version yet.\n" . TextFormat::WHITE ."        The update is coming soon.";
 		} else {
+			$pk = new PlayStatusPacket();
+			$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
+			$this->dataPacket($pk);	
 			return TextFormat::WHITE . "Please update your client version to join";
 		}
 	}
