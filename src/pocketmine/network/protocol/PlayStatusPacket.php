@@ -36,6 +36,20 @@ class PlayStatusPacket extends PEPacket{
 	const EDU_LEVEL_TYPE = 5;
 	
 	public $status;
+	
+	public function reset($playerProtocol = 0) {
+		if (isset(self::$packetsIds[$playerProtocol])) {
+			$this->buffer = chr(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);
+		} else {
+			$this->buffer = chr(Info::DISCONNECT_PACKET);
+		}
+		$this->offset = 0;
+		if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->putByte($this->senderSubClientID);
+			$this->putByte($this->targetSubClientID);
+			$this->offset = 2;
+		}
+	}
 
 	public function decode($playerProtocol){
 
