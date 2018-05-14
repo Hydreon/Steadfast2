@@ -95,6 +95,7 @@ class MetadataConvertor {
 		'DATA_HEIGHT' => 54,
 		'DATA_EXPLODE_TIMER' => 55,
 		'DATA_SEAT_RIDER_OFFSET' => 56,
+		'DATA_POSE_INDEX' => 78,
 	];
 	
 	private static $entityMetaIds110 = [];

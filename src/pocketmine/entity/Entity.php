@@ -117,6 +117,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_SEAT_RIDER_OFFSET = 57; // type: vector3
 	
 	const DATA_EXPLODE_TIMER = 56;
+	const DATA_POSE_INDEX = 79;
 	
 	const DATA_SILENT = 4;
 	const DATA_LEAD = 24; //remove
