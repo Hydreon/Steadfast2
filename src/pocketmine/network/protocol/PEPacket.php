@@ -20,7 +20,7 @@ abstract class PEPacket extends DataPacket {
 
     protected function checkLength(int $len) {
         if ($this->offset + $len > strlen($this->buffer)) {
-            throw new \Exception(get_class($this) . ": Try get {$len} bytes, offset = " . $this->offset . ", bufflen = " . strlen($this->buffer) . ", buffer = " . bin2hex(substr($string, 0, 250)));
+            throw new \Exception(get_class($this) . ": Try get {$len} bytes, offset = " . $this->offset . ", bufflen = " . strlen($this->buffer) . ", buffer = " . bin2hex(substr($this->buffer, 0, 250)));
         }
     }
 
@@ -55,7 +55,9 @@ abstract class PEPacket extends DataPacket {
     public final static function convertProtocol($protocol) {
         switch ($protocol) {
             case Info::PROTOCOL_260:
+            case Info::PROTOCOL_261:
             case Info::PROTOCOL_270:
+            case Info::PROTOCOL_271:
                 return Info::PROTOCOL_260;
             case Info::PROTOCOL_240:
             case Info::PROTOCOL_250:

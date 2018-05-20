@@ -689,10 +689,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         return $this->connected === true;
     }
 
-    public function setImmobile($value = true) {
-        $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE, $value);
-    }
-
     /**
      * Gets the "friendly" name to display of this player to use in the chat.
      *
@@ -3272,6 +3268,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             return;
         }
 
+
         if (!$this->server->isWhitelisted(strtolower($this->getName()))) {
             $this->close(TextFormat::YELLOW . $this->username . " has left the game", "Server is private.");
             return;
@@ -3768,6 +3765,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         }
     }
 
+
+    public function setImmobile($value = true) {
+        $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE, $value);
+    }
+
+
     public function sendNoteSound($noteId, $queue = false) {
         if ($queue) {
             $this->noteSoundQueue[] = $noteId;
@@ -3865,7 +3868,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
             EntityDamageEvent::MODIFIER_BASE => isset($damageTable[$item->getId()]) ? $damageTable[$item->getId()] : 1,
         ];
 
-        if ($this->distance($target) > 5) {
+        if ($this->distance($target) > 4) {
             return;
         } elseif ($target instanceof Player) {
             $armorValues = [
@@ -4877,8 +4880,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
     private function getNonValidProtocolMessage($protocol) {
         if ($protocol > ProtocolInfo::PROTOCOL_160) {
+            $pk = new PlayStatusPacket();
+            $pk->status = PlayStatusPacket::LOGIN_FAILED_SERVER;
+            $this->dataPacket($pk);
             return TextFormat::WHITE . "We don't support this client version yet.\n" . TextFormat::WHITE ."        The update is coming soon.";
         } else {
+            $pk = new PlayStatusPacket();
+            $pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
+            $this->dataPacket($pk);
             return TextFormat::WHITE . "Please update your client version to join";
         }
     }
