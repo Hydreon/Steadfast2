@@ -65,7 +65,7 @@ interface Info{
 	const PROTOCOL_260 = 260; // 1.2.20.1, 1.2.20.2
 	const PROTOCOL_261 = 261; // 1.4.0
 	const PROTOCOL_270 = 270; // 1.5.0.0
-	const PROTOCOL_271 = 271; // 1.5.0.0
+	const PROTOCOL_271 = 271; // 1.5.0.0, 1.5.0.4
 	/** OUTDATED (supporting will be removed with next release, may didn't work properly)*/
 	const PROTOCOL_120 = 120; // 1.2.0.xx (beta)
 //	const PROTOCOL_121 = 121; // 1.2.0.xx (beta)

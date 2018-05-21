@@ -153,6 +153,7 @@ class AvailableCommandsPacket extends PEPacket{
 		self::$commandsBuffer[Info::PROTOCOL_221] = $additionalDataStream->buffer;
 		self::$commandsBuffer[Info::PROTOCOL_240] = $additionalDataStream->buffer;
 		self::$commandsBuffer[Info::PROTOCOL_260] = $additionalDataStream->buffer;
+		self::$commandsBuffer[Info::PROTOCOL_271] = $additionalDataStream->buffer;
 	}
 	
 	/**

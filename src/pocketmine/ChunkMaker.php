@@ -16,7 +16,7 @@ class ChunkMaker extends Thread {
 	protected $externalQueue;
 	protected $internalQueue;
 	
-	const SUPPORTED_PROTOCOL = [Info::BASE_PROTOCOL, Info::PROTOCOL_105, Info::PROTOCOL_110, Info::PROTOCOL_120, Info::PROTOCOL_200, Info::PROTOCOL_220, Info::PROTOCOL_221, Info::PROTOCOL_240, Info::PROTOCOL_260];
+	const SUPPORTED_PROTOCOL = [Info::BASE_PROTOCOL, Info::PROTOCOL_105, Info::PROTOCOL_110, Info::PROTOCOL_120, Info::PROTOCOL_200, Info::PROTOCOL_220, Info::PROTOCOL_221, Info::PROTOCOL_240, Info::PROTOCOL_260, Info::PROTOCOL_271];
 
 	public function __construct(\ClassLoader $loader = null) {
 		$this->externalQueue = new \Threaded;
