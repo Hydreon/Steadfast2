@@ -8,6 +8,9 @@ class MapItemDataPacket extends PEPacket {
 
 	const NETWORK_ID = Info::CLIENTBOUND_MAP_ITEM_DATA_PACKET;
 	const PACKET_NAME = "CLIENTBOUND_MAP_ITEM_DATA_PACKET";
+	
+	const TRACKED_OBJECT_TYPE_ENTITY = 0;
+	const TRACKED_OBJECT_TYPE_BLOCK = 1;
 
 	public $mapId;
 	public $flags;
@@ -47,6 +50,9 @@ class MapItemDataPacket extends PEPacket {
 					if (!empty($this->entityIds)) {
 						$this->putVarInt(count($this->entityIds));
 						foreach ($this->entityIds as $entityId) {
+							if ($playerProtocol >= Info::PROTOCOL_271) {
+								$this->putLInt(self::TRACKED_OBJECT_TYPE_ENTITY);
+							}
 							$this->putSignedVarInt($entityId);
 						}
 					} else {
