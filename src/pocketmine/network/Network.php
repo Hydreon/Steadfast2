@@ -349,7 +349,26 @@ class Network {
 		return null;
 	}
 	
-
+	public static function getNetworkProtocol($playerProtocol){
+		switch ($playerProtocol) {
+			case Info::PROTOCOL_120:
+			case Info::PROTOCOL_200:
+			case Info::PROTOCOL_220:
+			case Info::PROTOCOL_221:
+			case Info::PROTOCOL_240:
+			case Info::PROTOCOL_260:
+			case Info::PROTOCOL_271:
+			case Info::PROTOCOL_273:
+				return Info::PROTOCOL_120;
+			case Info::PROTOCOL_110:
+				return Info::PROTOCOL_110;
+			case Info::PROTOCOL_105:
+				return Info::PROTOCOL_105;
+			default:
+				return Info::BASE_PROTOCOL;
+		}
+	}
+	
 	/**
 	 * @param string $address
 	 * @param int    $port

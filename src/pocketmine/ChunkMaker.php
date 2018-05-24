@@ -15,8 +15,6 @@ class ChunkMaker extends Thread {
 	
 	protected $externalQueue;
 	protected $internalQueue;
-	
-	const SUPPORTED_PROTOCOL = [Info::BASE_PROTOCOL, Info::PROTOCOL_105, Info::PROTOCOL_110, Info::PROTOCOL_120, Info::PROTOCOL_200, Info::PROTOCOL_220, Info::PROTOCOL_221, Info::PROTOCOL_240, Info::PROTOCOL_260, Info::PROTOCOL_271, Info::PROTOCOL_273];
 
 	public function __construct(\ClassLoader $loader = null) {
 		$this->externalQueue = new \Threaded;
@@ -153,7 +151,7 @@ class ChunkMaker extends Thread {
 		$result = array();
 		$result['chunkX'] = $data['chunkX'];
 		$result['chunkZ'] = $data['chunkZ'];
-		$protocols = isset($data['protocols']) ? $data['protocols'] : self::SUPPORTED_PROTOCOL;
+		$protocols = $data['protocols'];
 		$subClientsId = isset($data['subClientsId']) ? $data['subClientsId'] : [ 0 ];
 		foreach ($protocols as $protocol) {
 			$pk = new FullChunkDataPacket();
