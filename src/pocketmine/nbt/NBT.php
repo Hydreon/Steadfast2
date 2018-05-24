@@ -140,7 +140,7 @@ class NBT{
 					return false;
 				}
 			}else{
-				if($v->getValue() !== $tag2->{$k}->getValue()){
+				if($v->getValue() != $tag2->{$k}->getValue()){
 					return false;
 				}
 			}
@@ -173,7 +173,7 @@ class NBT{
 					return false;
 				}
 			}else{
-				if($v->getValue() !== $tag2->{$k}->getValue()){
+				if($v->getValue() != $tag2->{$k}->getValue()){
 					return false;
 				}
 			}

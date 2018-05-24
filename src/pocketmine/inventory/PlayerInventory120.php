@@ -207,6 +207,7 @@ class PlayerInventory120 extends PlayerInventory {
 				$player->dataPacket($pk);
 			}
 		}
+		$this->sendOffHandContents($target);
 	}
 	
 	/**
@@ -223,10 +224,9 @@ class PlayerInventory120 extends PlayerInventory {
 		foreach ($targets as $player) {
 			if ($player->getPlayerProtocol() >= Info::PROTOCOL_110) {
 				if ($player === $this->getHolder()) {
-					$pk2 = new InventorySlotPacket();
-					$pk2->containerId = Protocol120::CONTAINER_ID_OFFHAND;
-					$pk2->slot = 0;
-					$pk2->item = $this->getItem($this->getSize() + self::OFFHAND_ARMOR_SLOT_ID);
+					$pk2 = new InventoryContentPacket();
+					$pk2->inventoryID = Protocol120::CONTAINER_ID_OFFHAND;
+					$pk2->items = [$this->getItem($this->getSize() + self::OFFHAND_ARMOR_SLOT_ID)];
 					$player->dataPacket($pk2);
 				} else {
 					$player->dataPacket($pk);
