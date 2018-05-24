@@ -29,6 +29,7 @@ abstract class Multiversion {
 			case ProtocolInfo::PROTOCOL_240:
 			case ProtocolInfo::PROTOCOL_260:
 			case ProtocolInfo::PROTOCOL_271:
+			case ProtocolInfo::PROTOCOL_273:
 //				var_dump('Create 120 inv');
 				return new PlayerInventory120($player);
 			default:
