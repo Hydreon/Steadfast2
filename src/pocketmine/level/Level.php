@@ -2067,7 +2067,7 @@ class Level implements ChunkManager, Metadatable{
 				/** @var Player[] $players */
 				foreach ($players as $player) {
 					if ($player->isConnected() && isset($player->usedChunks[$index])) {
-						$protocol = $player->getPlayerProtocol();
+						$protocol = Network::getNetworkProtocol($player->getPlayerProtocol());
 						$subClientId = $player->getSubClientId();
 						if (ADVANCED_CACHE == true) {
 							$playerIndex = "{$protocol}:{$subClientId}";
@@ -2110,7 +2110,8 @@ class Level implements ChunkManager, Metadatable{
 			}
 			foreach ($this->chunkSendQueue[$index] as $player) {
 				/** @var Player $player */
-				$playerIndex = $player->getPlayerProtocol() . ":" . $player->getSubClientId();
+				$protocol = Network::getNetworkProtocol($player->getPlayerProtocol());
+				$playerIndex = $protocol . ":" . $player->getSubClientId();
 				if ($player->isConnected() && isset($player->usedChunks[$index]) && isset($payload[$playerIndex])) {
 					$player->sendChunk($x, $z, $payload[$playerIndex]);
 				}
@@ -2679,7 +2680,7 @@ class Level implements ChunkManager, Metadatable{
 		$subClientsId = [];
 		foreach ($players as $player) {
 			$this->chunkSendQueue[$index][spl_object_hash($player)] = $player;
-			$protocol = $player->getPlayerProtocol();
+			$protocol = Network::getNetworkProtocol($player->getPlayerProtocol());
 			if (!isset($protocols[$protocol])) {
 				$protocols[$protocol] = $protocol;
 			}
