@@ -3095,6 +3095,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function teleport(Vector3 $pos, $yaw = null, $pitch = null) {
+		$this->activeModalWindows = [];
 		if (!$this->spawned || !$this->isOnline()) {
 			$this->beforeSpawnTeleportPosition = $pos;
 			return;
