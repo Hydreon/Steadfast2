@@ -1493,5 +1493,9 @@ abstract class Entity extends Location implements Metadatable{
 	public function isNeedSaveOnChunkUnload() {
 		return true;
 	}
+	
+	public function isCanFreezeChunk() {
+		return false;
+	}
 
 }

@@ -73,6 +73,9 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public $allowUnload = true;
 	
+	protected $freezedEntityCount = 0;
+
+
 	public $incorrectHeightMap = false;
 	/**
 	 * @param LevelProvider $provider
@@ -247,6 +250,9 @@ abstract class BaseFullChunk implements FullChunk{
 		$this->entities[$entity->getId()] = $entity;
 		if(!($entity instanceof Player)){
 			$this->hasChanged = true;
+			if ($entity->isCanFreezeChunk()) {
+				$this->freezedEntityCount++;
+			}
 		}
 	}
 
@@ -254,6 +260,9 @@ abstract class BaseFullChunk implements FullChunk{
 		unset($this->entities[$entity->getId()]);
 		if(!($entity instanceof Player)){
 			$this->hasChanged = true;
+			if ($entity->isCanFreezeChunk()) {
+				$this->freezedEntityCount--;
+			}
 		}
 	}
 
@@ -412,6 +421,10 @@ abstract class BaseFullChunk implements FullChunk{
 	
 	public function setBlockDataArray($arr){
 		$this->data = $arr;
+	}
+	
+	public function isAllowUnload() {
+		return $this->freezedEntityCount <= 0 && $this->allowUnload;
 	}
 
 }
