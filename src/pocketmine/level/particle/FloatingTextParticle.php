@@ -25,7 +25,6 @@ use pocketmine\entity\Entity;
 use pocketmine\entity\Item as ItemEntity;
 use pocketmine\math\Vector3;
 use pocketmine\network\protocol\AddEntityPacket;
-use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\utils\UUID;
@@ -68,15 +67,7 @@ class FloatingTextParticle extends Particle{
 	public function encode(){
 		$p = [];
 
-		$uuid = UUID::fromRandom();
-        $pk1 = new PlayerListPacket();
-        $pk1->type = PlayerListPacket::TYPE_ADD;
-        $pk1->entries[] = [$uuid, $this->entityId, "", "", "", "", "", null,""];
-
-        $pk3 = new PlayerListPacket();
-        $pk3->type = PlayerListPacket::TYPE_REMOVE;
-        $pk3->entries[] = [$uuid];
-        if($this->entityId === null){
+		if($this->entityId === null){
 			$this->entityId = bcadd("1095216660480", mt_rand(0, 0x7fffffff)); //No conflict with other things
 		}else{
 			$pk0 = new RemoveEntityPacket();
@@ -88,7 +79,7 @@ class FloatingTextParticle extends Particle{
 		if(!$this->invisible){
 			
 			$pk = new AddPlayerPacket();
-			$pk->uuid = $uuid;
+			$pk->uuid = UUID::fromRandom();
 			$pk->eid = $this->entityId;
 			$pk->x = $this->x;
 			$pk->y = $this->y + 0.15;
@@ -106,10 +97,8 @@ class FloatingTextParticle extends Particle{
 			];
 
 			$p[] = $pk;
-
-            $p = [$pk1, $pk];
-
 		}
+		
 		return $p;
 	}
 }
