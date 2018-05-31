@@ -167,7 +167,7 @@ class Level implements ChunkManager, Metadatable{
 
 	/** @var Player[][] */
 	protected $usedChunks = [];
-
+	
 	/** @var FullChunk[]|Chunk[] */
 	protected $unloadQueue = [];
 
@@ -2272,7 +2272,7 @@ class Level implements ChunkManager, Metadatable{
 		
 		if($chunk !== null){
 			/* @var BaseFullChunk $chunk */
-			if(!$chunk->allowUnload) {
+			if(!$chunk->isAllowUnload()) {
 				//$this->timings->doChunkUnload->stopTiming();
 				return false;
 			}

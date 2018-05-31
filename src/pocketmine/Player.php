@@ -392,6 +392,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public $hackForCraftLastIndex = 0;
 	
+	protected $lastInteractTick = 0;
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -2547,7 +2549,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						switch ($packet->actionType) {
 							case InventoryTransactionPacket::ITEM_USE_ACTION_PLACE:
 							case InventoryTransactionPacket::ITEM_USE_ACTION_USE:
-								$this->useItem($packet->item, $packet->slot, $packet->face, $packet->position, $packet->clickPosition);
+								if ($this->lastInteractTick < $this->lastUpdate) {
+									$this->lastInteractTick = $this->lastUpdate + 2;
+									$this->useItem($packet->item, $packet->slot, $packet->face, $packet->position, $packet->clickPosition);
+								}
 								break;
 							case InventoryTransactionPacket::ITEM_USE_ACTION_DESTROY:
 								$this->breakBlock($packet->position);
@@ -3143,6 +3148,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function teleport(Vector3 $pos, $yaw = null, $pitch = null) {
+		$this->activeModalWindows = [];
 		if (!$this->spawned || !$this->isOnline()) {
 			$this->beforeSpawnTeleportPosition = $pos;
 			return;
