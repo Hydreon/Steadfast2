@@ -1945,5 +1945,62 @@ class Item{
 	public function isArmor(){
 		return false;
 	}
+	
+	public function hasLore(){
+		if(!$this->hasCompound()){
+			return false;
+		}
+
+		$tag = $this->getNamedTag();
+		if(isset($tag->display)){
+			$tag = $tag->display;
+			if($tag instanceof Compound and isset($tag->Lore) and $tag->Lore instanceof Enum){
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public function getLore(){
+		if(!$this->hasCompound()){
+			return "";
+		}
+
+		$tag = $this->getNamedTag();
+		if(isset($tag->display)){
+			$tag = $tag->display;
+			if($tag instanceof Compound and isset($tag->Lore) and $tag->Lore instanceof Enum){
+				return $tag->Lore->getValue();
+			}
+		}
+
+		return [];
+	}
+
+	public function setLore($lore){		
+		if(!$this->hasCompound()){
+			$tag = new Compound("", []);
+		}else{
+			$tag = $this->getNamedTag();
+		}
+
+		$loreArray = [];
+		foreach ($lore as $loreText) {
+			$loreArray[] = new StringTag("", $loreText);
+		}
+		
+		if(isset($tag->display) and $tag->display instanceof Compound){
+			$tag->display->Lore = new Compound("Lore", $loreArray);
+		}else{
+			$tag->display = new Compound("display", [
+				"Lore" => new Enum("Lore", $loreArray)
+			]);
+		}
+		
+		$this->setCompound($tag);
+
+		return $this;
+	}
 
 }
