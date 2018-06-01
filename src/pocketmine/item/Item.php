@@ -1984,14 +1984,14 @@ class Item{
 		}else{
 			$tag = $this->getNamedTag();
 		}
-
+		
 		$loreArray = [];
 		foreach ($lore as $loreText) {
 			$loreArray[] = new StringTag("", $loreText);
 		}
 		
 		if(isset($tag->display) and $tag->display instanceof Compound){
-			$tag->display->Lore = new Compound("Lore", $loreArray);
+			$tag->display->Lore = new Enum("Lore", $loreArray);
 		}else{
 			$tag->display = new Compound("display", [
 				"Lore" => new Enum("Lore", $loreArray)
@@ -1999,7 +1999,7 @@ class Item{
 		}
 		
 		$this->setCompound($tag);
-
+		
 		return $this;
 	}
 
