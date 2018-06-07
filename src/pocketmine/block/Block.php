@@ -1216,4 +1216,8 @@ class Block extends Position implements Metadatable{
 		return 64;
 	}
 	
+	public function getCustomName() {
+		return '';
+	}
+	
 }
