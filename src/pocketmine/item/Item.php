@@ -44,7 +44,8 @@ use pocketmine\nbt\NBT;
 class Item{
 
 	private static $cachedParser = null;
-
+	private static $itemBlockClass = ItemBlock::class;
+ 
 	/**
 	 * @param $tag
 	 * @return Compound
@@ -1445,7 +1446,7 @@ class Item{
 			if (!isset(self::$list[$id])) {
 				if ($id < 256 && isset(Block::$list[$id]) && !is_null(Block::$list[$id])) {
 					$class = Block::$list[$id];
-					return (new ItemBlock(new $class($meta), $meta, $count))->setCompound($tags);
+					return (new self::$itemBlockClass(new $class($meta), $meta, $count))->setCompound($tags);
 				}
 				return (new Item($id, $meta, $count))->setCompound($tags);
 			}
@@ -2001,6 +2002,12 @@ class Item{
 		$this->setCompound($tag);
 		
 		return $this;
+	}
+	
+	public static function registerItemBlock($className) {
+		if (is_a($className, ItemBlock::class, true)) {
+			self::$itemBlockClass = $className;
+		}
 	}
 
 }

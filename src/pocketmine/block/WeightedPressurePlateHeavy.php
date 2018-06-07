@@ -35,6 +35,10 @@ class WeightedPressurePlateHeavy extends StonePressurePlate{
 	public function getName(){
 		return "Weighted Pressure Plate Heavy";
 	}
+	
+	public function getHardness(){
+		return 0.5;
+	}
 
 	public function getDrops(Item $item){
 		return [

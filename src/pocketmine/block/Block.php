@@ -1348,4 +1348,13 @@ class Block extends Position implements Metadatable{
 		];
 		return $colors[$meta & 0x0f];
 	}
+	
+	public function getMaxStackSize() {
+		return 64;
+	}
+	
+	public function getCustomName() {
+		return '';
+	}
+	
 }

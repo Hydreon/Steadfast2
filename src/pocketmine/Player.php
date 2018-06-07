@@ -1787,16 +1787,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				
 				if($packet->slot === -1){ //Air
 					if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
-						$hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);
-						$isNeedSendToHolder = !($hotbarItem->deepEquals($packet->item));
-						$this->inventory->setHeldItemIndex($packet->selectedSlot, $isNeedSendToHolder);
-						$this->inventory->setHeldItemSlot($packet->slot);
-						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
-						if ($hotbarItem->getId() === Item::FISHING_ROD) {
-							$this->setInteractButtonText('Fish');
-						} else {
-							$this->setInteractButtonText('');
-						}
+						$this->changeHeldItem($packet->item, $packet->selectedSlot, $packet->slot);
 						break;
 					} else {
 						$this->inventory->sendContents($this);
@@ -1809,16 +1800,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					break;
 				}else{
 					if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
-						$hotbarItem = $this->inventory->getHotbatSlotItem($packet->selectedSlot);
-						$isNeedSendToHolder = !($hotbarItem->deepEquals($packet->item));
-						$this->inventory->setHeldItemIndex($packet->selectedSlot, $isNeedSendToHolder);
-						$this->inventory->setHeldItemSlot($slot);
-						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
-						if ($hotbarItem->getId() === Item::FISHING_ROD) {
-							$this->setInteractButtonText('Fish');
-						} else {
-							$this->setInteractButtonText('');
-						}
+						$this->changeHeldItem($packet->item, $packet->selectedSlot, $slot);
 						break;
 					} else {
 						$this->inventory->sendContents($this);
@@ -5122,4 +5104,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->dataPacket($packet);
 	}
 	
+	
+	protected function changeHeldItem($item, $selectedSlot, $slot) {
+		$hotbarItem = $this->inventory->getHotbatSlotItem($selectedSlot);
+		$isNeedSendToHolder = !($hotbarItem->deepEquals($item));
+		$this->inventory->setHeldItemIndex($selectedSlot, $isNeedSendToHolder);
+		$this->inventory->setHeldItemSlot($slot);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
+		if ($hotbarItem->getId() === Item::FISHING_ROD) {
+			$this->setInteractButtonText('Fish');
+		} else {
+			$this->setInteractButtonText('');
+		}
+	}
+
 }
