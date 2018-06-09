@@ -32,6 +32,10 @@ class WeightedPressurePlateLight extends StonePressurePlate{
 		$this->meta = $meta;
 	}
 
+	public function getHardness(){
+		return 0.5;
+	}
+	
 	public function getName(){
 		return "Weighted Pressure Plate Light";
 	}

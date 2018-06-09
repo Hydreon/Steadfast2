@@ -44,7 +44,8 @@ use pocketmine\nbt\NBT;
 class Item{
 
 	private static $cachedParser = null;
-
+	private static $itemBlockClass = ItemBlock::class;
+ 
 	/**
 	 * @param $tag
 	 * @return Compound
@@ -1445,7 +1446,7 @@ class Item{
 			if (!isset(self::$list[$id])) {
 				if ($id < 256 && isset(Block::$list[$id]) && !is_null(Block::$list[$id])) {
 					$class = Block::$list[$id];
-					return (new ItemBlock(new $class($meta), $meta, $count))->setCompound($tags);
+					return (new self::$itemBlockClass(new $class($meta), $meta, $count))->setCompound($tags);
 				}
 				return (new Item($id, $meta, $count))->setCompound($tags);
 			}
@@ -1944,6 +1945,69 @@ class Item{
 	
 	public function isArmor(){
 		return false;
+	}
+	
+	public function hasLore(){
+		if(!$this->hasCompound()){
+			return false;
+		}
+
+		$tag = $this->getNamedTag();
+		if(isset($tag->display)){
+			$tag = $tag->display;
+			if($tag instanceof Compound and isset($tag->Lore) and $tag->Lore instanceof Enum){
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public function getLore(){
+		if(!$this->hasCompound()){
+			return "";
+		}
+
+		$tag = $this->getNamedTag();
+		if(isset($tag->display)){
+			$tag = $tag->display;
+			if($tag instanceof Compound and isset($tag->Lore) and $tag->Lore instanceof Enum){
+				return $tag->Lore->getValue();
+			}
+		}
+
+		return [];
+	}
+
+	public function setLore($lore){		
+		if(!$this->hasCompound()){
+			$tag = new Compound("", []);
+		}else{
+			$tag = $this->getNamedTag();
+		}
+		
+		$loreArray = [];
+		foreach ($lore as $loreText) {
+			$loreArray[] = new StringTag("", $loreText);
+		}
+		
+		if(isset($tag->display) and $tag->display instanceof Compound){
+			$tag->display->Lore = new Enum("Lore", $loreArray);
+		}else{
+			$tag->display = new Compound("display", [
+				"Lore" => new Enum("Lore", $loreArray)
+			]);
+		}
+		
+		$this->setCompound($tag);
+		
+		return $this;
+	}
+	
+	public static function registerItemBlock($className) {
+		if (is_a($className, ItemBlock::class, true)) {
+			self::$itemBlockClass = $className;
+		}
 	}
 
 }
