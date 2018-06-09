@@ -23,6 +23,7 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
+use pocketmine\utils\Binary;
 
 class AddItemEntityPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_ITEM_ENTITY_PACKET;
@@ -36,6 +37,7 @@ class AddItemEntityPacket extends PEPacket{
 	public $speedX;
 	public $speedY;
 	public $speedZ;
+	public $metadata = [];
 
 	public function decode($playerProtocol){
 
@@ -52,7 +54,8 @@ class AddItemEntityPacket extends PEPacket{
 		$this->putLFloat($this->speedX);
 		$this->putLFloat($this->speedY);
 		$this->putLFloat($this->speedZ);
-		$this->putVarInt(0); // metadata counts
+		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
+		$this->put($meta);
 		if ($playerProtocol >= Info::PROTOCOL_200) {
 			$this->putByte(0); // isFromFishing
 		}
