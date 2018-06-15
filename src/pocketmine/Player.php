@@ -2081,7 +2081,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				if($packet->type === TextPacket::TYPE_CHAT){
 					$packet->message = TextFormat::clean($packet->message, $this->removeFormat);
 					foreach(explode("\n", $packet->message) as $message){
-						if(trim($message) != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){
+						$message = trim($message);
+						if($message != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){
 							$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $message));
 							if(!$ev->isCancelled()){
 								$this->server->broadcastMessage($ev->getPlayer()->getDisplayName() . ": " . $ev->getMessage(), $ev->getRecipients());
