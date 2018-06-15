@@ -37,162 +37,157 @@ use pocketmine\level\Level;
 
 abstract class Projectile extends Entity {
 
-    const DATA_SHOOTER_ID = 17;
+	const DATA_SHOOTER_ID = 17;
 
-    /** @var Entity */
-    public $shootingEntity = null;
-    protected $damage = 0;
-    public $hadCollision = false;
+	/** @var Entity */
+	public $shootingEntity = null;
+	protected $damage = 0;
+	public $hadCollision = false;
 
-    public function __construct(FullChunk $chunk, Compound $nbt, Entity $shootingEntity = null) {
-        $this->shootingEntity = $shootingEntity;
-        if ($shootingEntity !== null) {
-            $this->setDataProperty(self::DATA_SHOOTER_ID, self::DATA_TYPE_LONG, $shootingEntity->getId());
-        }
-        parent::__construct($chunk, $nbt);
-    }
+	public function __construct(FullChunk $chunk, Compound $nbt, Entity $shootingEntity = null) {
+		$this->shootingEntity = $shootingEntity;
+		if ($shootingEntity !== null) {
+			$this->setDataProperty(self::DATA_SHOOTER_ID, self::DATA_TYPE_LONG, $shootingEntity->getId());
+		}
+		parent::__construct($chunk, $nbt);
+	}
 
-    public function attack($damage, EntityDamageEvent $source) {
-        if ($source->getCause() === EntityDamageEvent::CAUSE_VOID) {
-            parent::attack($damage, $source);
-        }
-    }
+	public function attack($damage, EntityDamageEvent $source) {
+		if ($source->getCause() === EntityDamageEvent::CAUSE_VOID) {
+			parent::attack($damage, $source);
+		}
+	}
 
-    protected function initEntity() {
-        parent::initEntity();
-        $this->setMaxHealth(1);
-        $this->setHealth(1);
-        if (isset($this->namedtag->Age)) {
-            $this->age = $this->namedtag["Age"];
-        }
-    }
+	protected function initEntity() {
+		parent::initEntity();
+		$this->setMaxHealth(1);
+		$this->setHealth(1);
+		if (isset($this->namedtag->Age)) {
+			$this->age = $this->namedtag["Age"];
+		}
+	}
 
-    public function canCollideWith(Entity $entity) {
-        return $entity instanceof Living and ! $this->onGround;
-    }
+	public function canCollideWith(Entity $entity) {
+		return $entity instanceof Living and ! $this->onGround;
+	}
 
-    public function saveNBT() {
-        parent::saveNBT();
-        $this->namedtag->Age = new ShortTag("Age", $this->age);
-    }
+	public function saveNBT() {
+		parent::saveNBT();
+		$this->namedtag->Age = new ShortTag("Age", $this->age);
+	}
 
-    public function onUpdate($currentTick) {
-        if ($this->closed) {
-            return false;
-        }
-        $tickDiff = $currentTick - $this->lastUpdate;
-        if ($tickDiff <= 0 and ! $this->justCreated) {
-            return true;
-        }
-        $this->lastUpdate = $currentTick;
-        $hasUpdate = $this->entityBaseTick($tickDiff);
-        if ($this->isAlive()) {
-            $movingObjectPosition = null;
-            if (!$this->isCollided) {
-                $this->motionY -= $this->gravity;
-            }
-            $moveVector = new Vector3($this->x + $this->motionX, $this->y + $this->motionY, $this->z + $this->motionZ);
-            $list = $this->getLevel()->getCollidingEntities($this->getBoundingBox()->addCoord($this->motionX, $this->motionY, $this->motionZ), $this);
-            $nearDistance = PHP_INT_MAX;
-            $nearEntity = null;
-            foreach ($list as $entity) {
-                if (/* !$entity->canCollideWith($this) or */
-                        ($entity === $this->shootingEntity and $this->ticksLived < 5)
-                ) {
-                    continue;
-                }
-                $axisalignedbb = $entity->boundingBox->grow(0.3, 0.3, 0.3);
-                $itersectionPoint = new Vector3();
-                if (!$axisalignedbb->getIntersectionWithLine($this, $moveVector, $itersectionPoint)) {
-                    continue;
-                }
-                $distance = $this->distanceSquared($itersectionPoint);
-                if ($distance < $nearDistance) {
-                    $nearDistance = $distance;
-                    $nearEntity = $entity;
-                }
-            }
-            if ($nearEntity !== null) {
-                $movingObjectPosition = MovingObjectPosition::fromEntity($nearEntity);
-            }
-            if ($movingObjectPosition !== null) {
-                if ($movingObjectPosition->entityHit !== null) {
-                    $this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
-                    $motion = sqrt($this->motionX ** 2 + $this->motionY ** 2 + $this->motionZ ** 2);
-                    $damage = ceil($motion * $this->damage);
-                    if ($this instanceof Arrow and $this->isCritical) {
-                        $damage += mt_rand(0, (int) ($damage / 2) + 1);
-                    }
-                    if ($this->shootingEntity === null) {
-                        $ev = new EntityDamageByEntityEvent($this, $movingObjectPosition->entityHit, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
-                    } else {
-                        $ev = new EntityDamageByChildEntityEvent($this->shootingEntity, $this, $movingObjectPosition->entityHit, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
-                    }
-                    $movingObjectPosition->entityHit->attack($ev->getFinalDamage(), $ev);
-                    $this->hadCollision = true;
-                    if ($this->fireTicks > 0) {
-                        $ev = new EntityCombustByEntityEvent($this, $movingObjectPosition->entityHit, 5);
-                        $this->server->getPluginManager()->callEvent($ev);
-                        if (!$ev->isCancelled()) {
-                            $movingObjectPosition->entityHit->setOnFire($ev->getDuration());
-                        }
-                    }
-                    $this->kill();
-                    return true;
-                }
-            }
+	public function onUpdate($currentTick) {
+		if ($this->closed) {
+			return false;
+		}
+		$tickDiff = $currentTick - $this->lastUpdate;
+		if ($tickDiff <= 0 and ! $this->justCreated) {
+			return true;
+		}
+		$this->lastUpdate = $currentTick;
+		$hasUpdate = $this->entityBaseTick($tickDiff);
+		if ($this->isAlive()) {
+			if (!$this->isCollided) {
+				$this->motionY -= $this->gravity;
+			}
+			$moveVector = new Vector3($this->x + $this->motionX, $this->y + $this->motionY, $this->z + $this->motionZ);
+			$itersectionPoint = new Vector3();
+			// find nearest collided entity
+			$list = $this->getLevel()->getCollidingEntities($this->getBoundingBox()->addCoord($this->motionX, $this->motionY, $this->motionZ), $this);
+			$nearEntityDistance = PHP_INT_MAX;
+			$nearEntity = null;
+			foreach ($list as $entity) {
+				if (($entity === $this->shootingEntity && $this->ticksLived < 5)) {
+					continue;
+				}
+//                $axisalignedbb = $entity->boundingBox->grow(0.3, 0.3, 0.3); // ???
+				$axisalignedbb = $entity->boundingBox;
+				if (!$axisalignedbb->getIntersectionWithLine($this, $moveVector, $itersectionPoint)) {
+					continue;
+				}
+				$distance = $this->distanceSquared($itersectionPoint);
+				if ($distance < $nearEntityDistance) {
+					$nearEntityDistance = $distance;
+					$nearEntity = $entity;
+				}
+			}
+			// find nearest collided block
+			$blockList = $this->getLevel()->getCollisionBlocks($this->boundingBox->addCoord($this->motionX, $this->motionY, $this->motionZ), $this);
+			$nearBlockDistance = PHP_INT_MAX;
+			$nearBlock = null;
+			foreach ($blockList as $block) {
+				$axisalignedbb = $block->boundingBox;
+				if (is_null($axisalignedbb)) {
+					continue;
+				}
+//                $ob = $axisalignedbb->calculateIntercept($this, $moveVector);
+//                if ($ob === null) {
+//                    continue;
+//                }
+//                $distance = $this->distanceSquared($ob->hitVector);
+				if (!$axisalignedbb->getIntersectionWithLine($this, $moveVector, $itersectionPoint)) {
+					continue;
+				}
+				$distance = $this->distanceSquared($itersectionPoint);
+				if ($distance < $nearBlockDistance) {
+					$nearBlockDistance = $distance;
+					$nearBlock = $block;
+				}
+			}
+			// if entity near than block
+			if ($nearEntity !== null && $nearBlockDistance - $nearEntityDistance > 0.01) {
+				$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
+				$motion = sqrt($this->motionX ** 2 + $this->motionY ** 2 + $this->motionZ ** 2);
+				$damage = ceil($motion * $this->damage);
+				if ($this instanceof Arrow and $this->isCritical) {
+					$damage += mt_rand(0, (int) ($damage / 2) + 1);
+				}
+				if ($this->shootingEntity === null) {
+					$ev = new EntityDamageByEntityEvent($this, $nearEntity, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
+				} else {
+					$ev = new EntityDamageByChildEntityEvent($this->shootingEntity, $this, $nearEntity, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
+				}
+				$nearEntity->attack($ev->getFinalDamage(), $ev);
+				$this->hadCollision = true;
+				if ($this->fireTicks > 0) {
+					$ev = new EntityCombustByEntityEvent($this, $nearEntity, 5);
+					$this->server->getPluginManager()->callEvent($ev);
+					if (!$ev->isCancelled()) {
+						$nearEntity->setOnFire($ev->getDuration());
+					}
+				}
+				$this->kill();
+				return true;
+			}
+			if ($nearBlock !== null) {
+				$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
+				$this->kill();
+				return true;
+			}
+			// if doesnt hit neither entity nor block
+			$this->move($this->motionX, $this->motionY, $this->motionZ);
+			if ($this->isCollided and ! $this->hadCollision) {
+				$this->hadCollision = true;
+				$this->motionX = 0;
+				$this->motionY = 0;
+				$this->motionZ = 0;
+				$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
+				$this->kill();
+				return true;
+			} elseif (!$this->isCollided and $this->hadCollision) {
+				$this->hadCollision = false;
+			}
+			if (!$this->onGround or abs($this->motionX) > 0.00001 or abs($this->motionY) > 0.00001 or abs($this->motionZ) > 0.00001) {
+				$f = sqrt(($this->motionX ** 2) + ($this->motionZ ** 2));
+				$this->yaw = (atan2($this->motionX, $this->motionZ) * 180 / M_PI);
+				$this->pitch = (atan2($this->motionY, $f) * 180 / M_PI);
+				$hasUpdate = true;
+			}
+			$this->updateMovement();
+		}
+		return $hasUpdate;
+	}
 
-//			$blockList = $this->getLevel()->getCollisionBlocks($this->boundingBox->addCoord($this->motionX, $this->motionY, $this->motionZ)->expand(1, 1, 1), $this);
-            $blockList = $this->getLevel()->getCollisionBlocks($this->boundingBox->addCoord($this->motionX, $this->motionY, $this->motionZ), $this);
-            $nearBlockDistance = PHP_INT_MAX;
-            $nearBlock = null;
-            foreach ($blockList as $block) {
-                $axisalignedbb = $block->boundingBox;
-                if (is_null($axisalignedbb)) {
-                    continue;
-                }
-                $ob = $axisalignedbb->calculateIntercept($this, $moveVector);
-                if ($ob === null) {
-                    continue;
-                }
-                $distance = $this->distanceSquared($ob->hitVector);
-                if ($distance < $nearBlockDistance) {
-                    $nearDistance = $distance;
-                    $nearBlock = $block;
-                }
-            }
-
-            if ($nearBlock !== null) {
-                $this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
-                $this->kill();
-                return true;
-            }
-
-
-
-            $this->move($this->motionX, $this->motionY, $this->motionZ);
-            if ($this->isCollided and ! $this->hadCollision) {
-                $this->hadCollision = true;
-                $this->motionX = 0;
-                $this->motionY = 0;
-                $this->motionZ = 0;
-                $this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
-                $this->kill();
-                return true;
-            } elseif (!$this->isCollided and $this->hadCollision) {
-                $this->hadCollision = false;
-            }
-            if (!$this->onGround or abs($this->motionX) > 0.00001 or abs($this->motionY) > 0.00001 or abs($this->motionZ) > 0.00001) {
-                $f = sqrt(($this->motionX ** 2) + ($this->motionZ ** 2));
-                $this->yaw = (atan2($this->motionX, $this->motionZ) * 180 / M_PI);
-                $this->pitch = (atan2($this->motionY, $f) * 180 / M_PI);
-                $hasUpdate = true;
-            }
-            $this->updateMovement();
-        }
-        return $hasUpdate;
-    }
-	
 	public function spawnTo(Player $player) {
 		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
 			$this->hasSpawned[$player->getId()] = $player;
