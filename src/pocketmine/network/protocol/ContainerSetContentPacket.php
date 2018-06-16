@@ -61,21 +61,19 @@ class ContainerSetContentPacket extends PEPacket{
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		$this->putByte($this->windowid);
-		if ($playerProtocol >= Info::PROTOCOL_110) {
-			$this->putVarInt($this->eid);
-		}
-		$this->putVarInt(count($this->slots));
+		$this->putSignedVarInt($this->windowid);
+		$this->putVarInt($this->eid);
+		$this->putSignedVarInt(count($this->slots));
 		foreach($this->slots as $slot){
 			$this->putSlot($slot, $playerProtocol);	
 		}
 		if($this->windowid === self::SPECIAL_INVENTORY and count($this->hotbar) > 0){
-			$this->putVarInt(count($this->hotbar));
+			$this->putSignedVarInt(count($this->hotbar));
 			foreach($this->hotbar as $slot){
-				$this->putSignedVarInt($slot);
+				$this->putVarInt($slot);
 			}	
 		}else{
-			$this->putVarInt(0);
+			$this->putSignedVarInt(0);
 		}
 	}
 
