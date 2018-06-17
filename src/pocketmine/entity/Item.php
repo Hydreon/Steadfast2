@@ -36,6 +36,7 @@ use pocketmine\network\protocol\AddItemEntityPacket;
 use pocketmine\Player;
 use pocketmine\nbt\NBT;
 use pocketmine\level\Level;
+use pocketmine\level\format\FullChunk;
 
 class Item extends Entity{
 	const NETWORK_ID = 64;
@@ -54,6 +55,11 @@ class Item extends Entity{
 	protected $drag = 0.15;
 
 	public $canCollide = false;
+	
+	public function __construct(FullChunk $chunk, Compound $nbt) {
+		parent::__construct($chunk, $nbt);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NO_AI, true, self::DATA_TYPE_LONG, false);
+	}
 
 	protected function initEntity(){
 		parent::initEntity();
@@ -238,6 +244,7 @@ class Item extends Entity{
 			$pk->speedY = $this->motionY;
 			$pk->speedZ = $this->motionZ;
 			$pk->item = $this->getItem();
+			$pk->metadata = $this->dataProperties;
 			$player->dataPacket($pk);
 	//		$this->sendData($player);
 			$this->hasSpawned[$player->getId()] = $player;
