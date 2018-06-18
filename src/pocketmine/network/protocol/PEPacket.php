@@ -29,12 +29,20 @@ abstract class PEPacket extends DataPacket {
 	 * @param integer $playerProtocol
 	 */
 	protected function getHeader($playerProtocol = 0) {
-		if ($playerProtocol >= Info::PROTOCOL_120) {
+		if ($playerProtocol >= Info::PROTOCOL_280) {
+			$header = $this->getSignedVarInt();
+			$subclientIds = $header >> 10;
+			$this->senderSubClientID = $subclientIds & 0x03;
+			$this->targetSubClientID = ($subclientIds >> 2) & 0x03;
+		} else if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->getByte(); // packetID
 			$this->senderSubClientID = $this->getByte();
 			$this->targetSubClientID = $this->getByte();
 			if ($this->senderSubClientID > 4 || $this->targetSubClientID > 4) {
 				throw new \Exception(get_class($this) . ": Packet decode headers error");
 			}
+		} else {
+			$this->getByte(); // packetID
 		}
 	}
 
@@ -43,17 +51,25 @@ abstract class PEPacket extends DataPacket {
 	 * @param integer $playerProtocol
 	 */
 	public function reset($playerProtocol = 0) {
-		$this->buffer = chr(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);
-		$this->offset = 0;
-		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->putByte($this->senderSubClientID);
-			$this->putByte($this->targetSubClientID);
-			$this->offset = 2;
+		if ($playerProtocol < Info::PROTOCOL_280) {
+			$this->buffer = chr(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);
+			$this->offset = 0;
+			if ($playerProtocol >= Info::PROTOCOL_120) {
+				$this->putByte($this->senderSubClientID);
+				$this->putByte($this->targetSubClientID);
+				$this->offset = 2;
+			}
+		} else {
+			$packetID = self::$packetsIds[$playerProtocol][$this::PACKET_NAME];
+			$header = ($this->targetSubClientID << 12) | ($this->senderSubClientID << 10) | $packetID;
+			$this->putVarInt($header);
 		}
 	}
 	
 	public final static function convertProtocol($protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_280:
+				return Info::PROTOCOL_280;
 			case Info::PROTOCOL_274:
 				return Info::PROTOCOL_274;
 			case Info::PROTOCOL_273:

@@ -138,6 +138,7 @@ class StartGamePacket extends PEPacket{
 				$this->putByte(0); // Has locked resource pack?
 				$this->putByte(0); // Is from locked template?
 			}
+			// level settings end
 			$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
 			$this->putString(''); // level name
 			$this->putString(''); // template pack id

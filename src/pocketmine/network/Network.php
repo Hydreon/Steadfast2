@@ -282,12 +282,16 @@ class Network {
 				if(strlen($buf) === 0){
 					throw new \InvalidStateException("Empty or invalid BatchPacket received");
 				}
-//				var_dump("Recive: 0x" . (ord($buf{0}) < 16 ? '0' . dechex(ord($buf{0})) : dechex(ord($buf{0}))));
-				if (($pk = $this->getPacket(ord($buf{0}), $p->getPlayerProtocol())) !== null) {
+				// it will be works for old version too
+				$tmpStream = new BinaryStream($buf);
+				$header = $tmpStream->getVarInt();
+				$packetID = $header & 0x3FF;
+				echo "Rcv: 0x" . dechex($packetID) . PHP_EOL;
+				if (($pk = $this->getPacket($packetID, $p->getPlayerProtocol())) !== null) {
 					if ($pk::NETWORK_ID === Info::BATCH_PACKET) {
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
 					}
-					$pk->setBuffer($buf, 1);
+					$pk->setBuffer($buf);
 					try {
 						$pk->decode($p->getPlayerProtocol());
 					}catch(\Exception $e){
@@ -298,10 +302,6 @@ class Network {
 					if ($pk->getOffset() <= 0) {
 						return;
 					}
-				} else {
-//					echo "UNKNOWN PACKET: 0x" . (ord($buf{0}) < 16 ? '0' . dechex(ord($buf{0})) : dechex(ord($buf{0}))) . PHP_EOL;
-//					echo "Buffer DEC: ".$buf.PHP_EOL;
-//					echo "Buffer HEX: ".bin2hex($buf).PHP_EOL;
 				}
 			}
 		}catch(\Exception $e){
@@ -332,6 +332,7 @@ class Network {
 			case Info::PROTOCOL_271:
 			case Info::PROTOCOL_273:
 			case Info::PROTOCOL_274:
+			case Info::PROTOCOL_280:
 				$class = $this->packetPool120[$id];
 				break;
 			case Info::PROTOCOL_110:
@@ -361,6 +362,7 @@ class Network {
 			case Info::PROTOCOL_271:
 			case Info::PROTOCOL_273:
 			case Info::PROTOCOL_274:
+			case Info::PROTOCOL_280:
 				return Info::PROTOCOL_120;
 			case Info::PROTOCOL_110:
 				return Info::PROTOCOL_110;
