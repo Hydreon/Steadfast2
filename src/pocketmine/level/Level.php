@@ -832,7 +832,9 @@ class Level implements ChunkManager, Metadatable{
 			return false;
 		}
 
-		$this->server->getPluginManager()->callEvent(new LevelSaveEvent($this));
+		$this->server->getPluginManager()->callEvent($ev = new LevelSaveEvent($this));
+		if($ev->isCancelled())
+			return false;
 
 		$this->provider->setTime((int) $this->time);
 		$this->saveChunks();
@@ -2276,34 +2278,34 @@ class Level implements ChunkManager, Metadatable{
 				return false;
 			}
 			
-			$this->server->getPluginManager()->callEvent($ev = new ChunkUnloadEvent($chunk));
+			$this->server->getPluginManager()->callEvent($ev = new ChunkUnloadEvent($chunk, $safe));
 			if($ev->isCancelled()){
 				//$this->timings->doChunkUnload->stopTiming();
 				return false;
 			}
-		}
 
-		try{
-			if ($chunk !== null) {
-				foreach ($chunk->getEntities() as $entity) {
-					if ($entity instanceof Player) {
-						continue;
+			try{
+				if ($ev->shouldSave()) {
+					foreach ($chunk->getEntities() as $entity) {
+						if ($entity instanceof Player) {
+							continue;
+						}
+						if (!$entity->isNeedSaveOnChunkUnload()) {
+							$entity->close();
+						}
 					}
-					if (!$entity->isNeedSaveOnChunkUnload()) {
-						$entity->close();
+					if ($this->getAutoSave()) {
+						$this->provider->setChunk($x, $z, $chunk);
+						$this->provider->saveChunk($x, $z);
 					}
 				}
-				if ($this->getAutoSave()) {
-					$this->provider->setChunk($x, $z, $chunk);
-					$this->provider->saveChunk($x, $z);
+				$this->provider->unloadChunk($x, $z, $safe);
+			}catch(\Exception $e){
+				$logger = $this->server->getLogger();
+				$logger->error("Error when unloading a chunk: " . $e->getMessage());
+				if($logger instanceof MainLogger){
+					$logger->logException($e);
 				}
-			}
-			$this->provider->unloadChunk($x, $z, $safe);
-		}catch(\Exception $e){
-			$logger = $this->server->getLogger();
-			$logger->error("Error when unloading a chunk: " . $e->getMessage());
-			if($logger instanceof MainLogger){
-				$logger->logException($e);
 			}
 		}
 
