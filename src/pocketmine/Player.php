@@ -939,26 +939,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		$badPackets = [
-//			'pocketmine\network\protocol\BatchPacket',
-//			'pocketmine\network\protocol\v120\InventoryContentPacket',
-//			'pocketmine\network\protocol\v120\InventorySlotPacket',
-//			'pocketmine\network\protocol\v120\InventoryContentPacket',
-//			'pocketmine\network\protocol\v120\InventoryContentPacket',
-//			'pocketmine\network\protocol\AdventureSettingsPacket',
-//			'pocketmine\network\protocol\SetEntityDataPacket',
-//			'pocketmine\network\protocol\SetTimePacket',
 			'pocketmine\network\protocol\AvailableCommandsPacket',
-//			'pocketmine\network\protocol\UpdateAttributesPacket',
-//			'pocketmine\network\protocol\ChunkRadiusUpdatePacket',
-//			'pocketmine\network\protocol\StartGamePacket',
-//			'pocketmine\network\protocol\PlayStatusPacket',
-//			'pocketmine\network\protocol\ResourcePackStackPacket',
 		];
 		if (in_array(get_class($packet), $badPackets)) {
 			return false;
 		}
 		
-		echo "Snd: " . get_class($packet) . PHP_EOL;
+//		echo "Snd: " . get_class($packet) . PHP_EOL;
 		$this->interface->putPacket($this, $packet, $needACK, false);
 		$packet->senderSubClientID = 0;
 		return true;

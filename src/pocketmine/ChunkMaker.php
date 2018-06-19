@@ -116,6 +116,10 @@ class ChunkMaker extends Thread {
 					$data['chunk']['biomeColor'] .
 					Binary::writeLInt(0) .
 					$data['tiles'];
+			$chunkData280 .= $data['chunk']['heightMap'] .
+					$data['chunk']['biomeColor'] .
+					Binary::writeLInt(0) .
+					$data['tiles']; 
 		} else {
 			$blockIdArray = $data['blocks'];	
 			$blockDataArray = $data['data'];
@@ -145,13 +149,15 @@ class ChunkMaker extends Thread {
 				$chunkData120 .= chr(0) . $blockIdData . $blockDataData;
 				$chunkData280 .= $this->sortDataWithPallet(Info::PROTOCOL_280, $blockIdData, $blockDataData);
 			}
-
-
 			$chunkData .= $data['heightMap'] .
 					$data['biomeColor'] .
 					Binary::writeLInt(0) .
 					$data['tiles'];		
 			$chunkData120 .= $data['heightMap'] .
+					$data['biomeColor'] .
+					Binary::writeLInt(0) .
+					$data['tiles'];
+			$chunkData280 .= $data['heightMap'] .
 					$data['biomeColor'] .
 					Binary::writeLInt(0) .
 					$data['tiles'];

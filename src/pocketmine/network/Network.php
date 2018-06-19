@@ -286,7 +286,7 @@ class Network {
 				$tmpStream = new BinaryStream($buf);
 				$header = $tmpStream->getVarInt();
 				$packetID = $header & 0x3FF;
-				echo "Rcv: 0x" . dechex($packetID) . PHP_EOL;
+//				echo "Rcv: 0x" . dechex($packetID) . PHP_EOL;
 				if (($pk = $this->getPacket($packetID, $p->getPlayerProtocol())) !== null) {
 					if ($pk::NETWORK_ID === Info::BATCH_PACKET) {
 						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
