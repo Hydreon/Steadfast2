@@ -939,7 +939,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		$badPackets = [
-			'pocketmine\network\protocol\BatchPacket',
+//			'pocketmine\network\protocol\BatchPacket',
 //			'pocketmine\network\protocol\v120\InventoryContentPacket',
 //			'pocketmine\network\protocol\v120\InventorySlotPacket',
 //			'pocketmine\network\protocol\v120\InventoryContentPacket',

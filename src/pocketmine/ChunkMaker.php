@@ -6,6 +6,7 @@ use pocketmine\utils\Binary;
 use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\Info;
+use pocketmine\network\protocol\PEPacket;
 
 class ChunkMaker extends Thread {
 
@@ -45,6 +46,7 @@ class ChunkMaker extends Thread {
 
 		set_error_handler([$this, "errorHandler"], E_ALL);
 		DataPacket::initPackets();
+		PEPacket::initPallet();
 		$this->tickProcessor();
 	}
 
@@ -83,22 +85,27 @@ class ChunkMaker extends Thread {
 		if (isset($data['isAnvil']) && $data['isAnvil'] == true) {
 			$chunkData = chr(count($data['chunk']['sections']));
 			$chunkData120 = chr(count($data['chunk']['sections']));
+			$chunkData280 = chr(count($data['chunk']['sections']));
 			foreach ($data['chunk']['sections'] as $y => $sections) {
 				$chunkData .= chr(0);
 				$chunkData120 .= chr(0);
 				if ($sections['empty'] == true) {
 					$chunkData .= str_repeat("\x00", 10240);
 					$chunkData120 .= str_repeat("\x00", 6144);
+					$chunkData280 .= chr(0) . str_repeat("\x00", 6144);
 				} else {
 					if (isset($data['isSorted']) && $data['isSorted'] == true) {
-						$blockData = $sections['blocks'] . $sections['data'];
+						$blocksID = $sections['blocks'];
+						$blocksMeta = $sections['data'];
 						$lightData = $sections['skyLight'] . $sections['blockLight'];
 					} else {
-						$blockData = $this->sortData($sections['blocks']) . $this->sortHalfData($sections['data']);
+						$blocksID = $this->sortData($sections['blocks']);
+						$blocksMeta = $this->sortHalfData($sections['data']);
 						$lightData = $this->sortHalfData($sections['skyLight']) . $this->sortHalfData($sections['blockLight']);
 					}
-					$chunkData .= $blockData . $lightData;
-					$chunkData120 .= $blockData;
+					$chunkData .= $blocksID . $blocksMeta . $lightData;
+					$chunkData120 .= $blocksID . $blocksMeta;
+					$chunkData280 .= $this->sortDataWithPallet(Info::PROTOCOL_280, $blocksID, $blocksMeta);
 				}
 			}
 			$chunkData .= $data['chunk']['heightMap'] .
@@ -116,8 +123,9 @@ class ChunkMaker extends Thread {
 			$blockLightArray = $data['blockLight'];
 
 			$countBlocksInChunk = 8;
-			$chunkData = chr($countBlocksInChunk);		
-			$chunkData120 = chr($countBlocksInChunk);		
+			$chunkData = chr($countBlocksInChunk);
+			$chunkData120 = chr($countBlocksInChunk);
+			$chunkData280 = chr($countBlocksInChunk);
 			
 			for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
 				$blockIdData = '';
@@ -135,6 +143,7 @@ class ChunkMaker extends Thread {
 				
 				$chunkData .= chr(0) . $blockIdData . $blockDataData . $skyLightData . $blockLightData;
 				$chunkData120 .= chr(0) . $blockIdData . $blockDataData;
+				$chunkData280 .= $this->sortDataWithPallet(Info::PROTOCOL_280, $blockIdData, $blockDataData);
 			}
 
 
@@ -159,7 +168,11 @@ class ChunkMaker extends Thread {
 			$pk->chunkZ = $data['chunkZ'];
 			$pk->order = FullChunkDataPacket::ORDER_COLUMNS;
 			if ($protocol >= Info::PROTOCOL_120) {
-				$pk->data = $chunkData120;
+				if ($protocol >= Info::PROTOCOL_280) {
+					$pk->data = $chunkData280;
+				} else {
+					$pk->data = $chunkData120;
+				}
 				foreach ($subClientsId as $subClientId) {
 					$pk->senderSubClientID = $subClientId;
 					$pk->encode($protocol);
@@ -291,5 +304,61 @@ class ChunkMaker extends Thread {
 		}
 		return $result;
 	}
+	
+	private function sortDataWithPallet($protocol, $blockIds, $metaIds) {
+        $pallet = [];
+        $blocks = [];
+        $lastKey = 0;
+        for ($i = 0; $i < 4096; $i++) {
+            $id = ord($blockIds{$i});
+			$meta = ((($i & 1) == 0) ? ord($metaIds{$i >> 1}) : (ord($metaIds{$i >> 1}) >> 4)) & 0x0f;
+            $runtimeId = PEPacket::getBlockRuntimeID($id, $meta, $protocol);
+            if (!isset($pallet[$runtimeId])) {
+                $pallet[$runtimeId] = $lastKey;
+                $lastKey++;
+            }
+            $blocks[] = $pallet[$runtimeId];
+        }
+		
+		$paletteData = Binary::writeSignedVarInt(count($pallet));
+		foreach ($pallet as $runtimeId => $index) {
+			$paletteData .= Binary::writeSignedVarInt($runtimeId);
+		}
+		
+//		$palletType = ceil(log($lastKey, 2));
+//		if ($palletType < 1) {
+//			$palletType = 1;
+//		} else if ($palletType == 7) {
+//			$palletType = 8;
+//		} else if ($palletType > 8) {
+//			$palletType = 16;
+//		}
+		$palletType = 8;
+		$bitPerId = $palletType;
+        $blockPerWord = floor(32 / $bitPerId);
+		
+		$convertedData = "";
+		$word = 0;
+		$blocksWrited = 0;
+		$lastPadding = 0;
+		foreach ($blocks as $blockID) {
+			$word |= ($blockID << $lastPadding);
+			$lastPadding += $bitPerId;
+			$blocksWrited++;
+			if ($blocksWrited == $blockPerWord) {
+				$convertedData .= Binary::writeLInt($word);
+				$blocksWrited = 0;
+				$lastPadding = 0;
+				$word = 0;
+			}
+		}
+		if ($blocksWrited != 0) {
+			$convertedData .= Binary::writeLInt($word);
+		}
+		if (strlen($convertedData) != (ceil(4096/$blockPerWord) << 2)) {
+			var_dump("Bad data length: " . $convertedData);
+		}
+		return chr(1) . chr(($palletType << 1) | 1) . $convertedData . $paletteData;
+    }
 
 }

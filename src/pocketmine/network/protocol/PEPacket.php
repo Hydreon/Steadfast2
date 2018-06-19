@@ -144,7 +144,7 @@ abstract class PEPacket extends DataPacket {
 	 * @param type $playerProtocol
 	 * @return BlockPallet
 	 */
-	private static function getPallet($playerProtocol) {
+	public static function getPallet($playerProtocol) {
 		foreach (self::$blockPalletes as $protocol => $pallet) {
 			if ($playerProtocol >= $protocol) {
 				return $pallet;

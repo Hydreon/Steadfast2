@@ -353,6 +353,8 @@ class Network {
 	
 	public static function getNetworkProtocol($playerProtocol){
 		switch ($playerProtocol) {
+			case Info::PROTOCOL_280:
+				return Info::PROTOCOL_280;
 			case Info::PROTOCOL_120:
 			case Info::PROTOCOL_200:
 			case Info::PROTOCOL_220:
@@ -362,7 +364,6 @@ class Network {
 			case Info::PROTOCOL_271:
 			case Info::PROTOCOL_273:
 			case Info::PROTOCOL_274:
-			case Info::PROTOCOL_280:
 				return Info::PROTOCOL_120;
 			case Info::PROTOCOL_110:
 				return Info::PROTOCOL_110;
