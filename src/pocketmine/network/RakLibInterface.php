@@ -246,11 +246,6 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		if(isset($this->identifiers[$player])){			
 			$protocol = $player->getPlayerProtocol();
 			$packet->encode($protocol);
-//			var_dump("Send: 0x" . ($packet::NETWORK_ID < 16 ? '0' . dechex($packet::NETWORK_ID) : dechex($packet::NETWORK_ID)));
-			if(!($packet instanceof BatchPacket) && strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
-				$this->server->batchPackets([$player], [$packet], true);
-				return null;
-			}
 			$identifier = $this->identifiers[$player];	
 
 			$pk = new EncapsulatedPacket();				
@@ -311,7 +306,9 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		if ($protocol < Info::PROTOCOL_110 || ($packet instanceof BatchPacket)) {
 			return $packet->buffer;
 		}
-		
+		if (strlen($packet->buffer) >= Network::$BATCH_THRESHOLD) {
+			return zlib_encode(Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer, ZLIB_ENCODING_DEFLATE, 7);
+		}
 		return $this->fakeZlib(Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer);
 	}
 	
