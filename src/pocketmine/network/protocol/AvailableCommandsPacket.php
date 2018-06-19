@@ -67,6 +67,7 @@ class AvailableCommandsPacket extends PEPacket{
 		$commandsStream = new BinaryStream();
 		foreach ($commands as $commandName => &$commandData) { // Replace &$commandData with $commandData when alises fix for 1.2 won't be needed anymore
 			if ($commandName == 'help') { //temp fix for 1.2
+				unset($commands[$commandName]);
 				continue;
 			}
 			$commandsStream->putString($commandName);

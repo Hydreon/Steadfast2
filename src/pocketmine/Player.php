@@ -938,14 +938,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 		
-		$badPackets = [
-			'pocketmine\network\protocol\AvailableCommandsPacket',
-		];
-		if (in_array(get_class($packet), $badPackets)) {
-			return false;
-		}
-		
-//		echo "Snd: " . get_class($packet) . PHP_EOL;
 		$this->interface->putPacket($this, $packet, $needACK, false);
 		$packet->senderSubClientID = 0;
 		return true;
