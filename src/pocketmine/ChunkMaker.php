@@ -325,15 +325,16 @@ class ChunkMaker extends Thread {
 			$paletteData .= Binary::writeSignedVarInt($runtimeId);
 		}
 		
-//		$palletType = ceil(log($lastKey, 2));
-//		if ($palletType < 1) {
-//			$palletType = 1;
-//		} else if ($palletType == 7) {
-//			$palletType = 8;
-//		} else if ($palletType > 8) {
-//			$palletType = 16;
-//		}
-		$palletType = 8;
+		$palletType = ceil(log($lastKey, 2));
+		if ($palletType < 1) {
+			$palletType = 1;
+		} else if ($palletType == 3) {
+			$palletType = 4;
+		} else if ($palletType == 5 || $palletType == 6 || $palletType == 7) {
+			$palletType = 8;
+		} else if ($palletType > 8) {
+			$palletType = 16;
+		}
 		$bitPerId = $palletType;
         $blockPerWord = floor(32 / $bitPerId);
 		
