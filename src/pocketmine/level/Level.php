@@ -1496,7 +1496,7 @@ class Level implements ChunkManager, Metadatable{
 			$hand->position($block);
 		}elseif($block->getId() === Item::FIRE){
 			$this->setBlock($block, new Air(), true);
-
+			
 			return false;
 		}else{
 			return false;
@@ -1527,7 +1527,7 @@ class Level implements ChunkManager, Metadatable{
 						continue;
 					}
 				}
-
+				
 				++$realCount;
 			}
 
