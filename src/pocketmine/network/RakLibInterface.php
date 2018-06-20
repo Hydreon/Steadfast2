@@ -38,6 +38,7 @@ use raklib\server\ServerHandler;
 use raklib\server\ServerInstance;
 use pocketmine\network\protocol\BatchPacket;
 use pocketmine\utils\Binary;
+use pocketmine\utils\BinaryStream;
 
 class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	
@@ -281,12 +282,13 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$pk->is110 = true;
 			return $pk;
 		}
-		$pid = ord($buffer{0});
+		$tmpStream = new BinaryStream($buffer);
+		$header = $tmpStream->getVarInt();
+		$pid = $header & 0x3FF;		
 		if (($data = $this->network->getPacket($pid, $playerProtocol)) === null) {
 			return null;
 		}
-		$offset = 1;
-		$data->setBuffer($buffer, $offset);
+		$data->setBuffer($buffer);
 		return $data;
 	}
 
