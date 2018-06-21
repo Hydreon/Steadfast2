@@ -557,6 +557,7 @@ abstract class MultiversionEnums {
 			case Info::PROTOCOL_120:
 			case Info::PROTOCOL_200:
 				return self::GROUP_2;
+			case Info::PROTOCOL_280:
 			case Info::PROTOCOL_274:
 			case Info::PROTOCOL_273:
 			case Info::PROTOCOL_271:
@@ -618,6 +619,7 @@ abstract class MultiversionEnums {
 			case Info::PROTOCOL_105:
 			case Info::PROTOCOL_110:
 				return self::GROUP_1;
+			case Info::PROTOCOL_280:
 			case Info::PROTOCOL_274:
 			case Info::PROTOCOL_273:
 			case Info::PROTOCOL_271:
@@ -710,6 +712,7 @@ abstract class MultiversionEnums {
 			case Info::PROTOCOL_105:
 			case Info::PROTOCOL_110:
 				return self::GROUP_1;
+			case Info::PROTOCOL_280:
 			case Info::PROTOCOL_274:
 			case Info::PROTOCOL_273:
 			case Info::PROTOCOL_271:

@@ -39,15 +39,10 @@ class PlayStatusPacket extends PEPacket{
 	
 	public function reset($playerProtocol = 0) {
 		if (isset(self::$packetsIds[$playerProtocol])) {
-			$this->buffer = chr(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);
+			parent::reset($playerProtocol);
 		} else {
-			$this->buffer = chr(Info::DISCONNECT_PACKET);
-		}
-		$this->offset = 0;
-		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->putByte($this->senderSubClientID);
-			$this->putByte($this->targetSubClientID);
-			$this->offset = 2;
+			$this->buffer = chr(Info::PLAY_STATUS_PACKET);
+			$this->offset = 0;
 		}
 	}
 

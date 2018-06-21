@@ -33,7 +33,7 @@ interface Info{
 	const CURRENT_PROTOCOL = 101;
 //	const NEWEST_PROTOCOL = 82;
 //	const OLDEST_PROTOCOL = 81;
-	const ACCEPTED_PROTOCOLS = [101, 102, 105, 106, 107, 110, 111, 112, 113, 134, 135, 136, 137, 140, 141, 150, 160, 200, 201, 220, 221, 222, 224, 223, 240, 250, 260, 261, 270, 271, 273, 274];
+	const ACCEPTED_PROTOCOLS = [101, 102, 105, 106, 107, 110, 111, 112, 113, 134, 135, 136, 137, 140, 141, 150, 160, 200, 201, 220, 221, 222, 224, 223, 240, 250, 260, 261, 270, 271, 273, 274, 280];
 	
 	const BASE_PROTOCOL = 101;
 	/** RELEASE 1.0.x, 1.1.x */
@@ -68,6 +68,7 @@ interface Info{
 	const PROTOCOL_271 = 271; // 1.5.0.0, 1.5.0.4
 	const PROTOCOL_273 = 273; // 1.5.0.7
 	const PROTOCOL_274 = 274; // 1.5.0.10
+	const PROTOCOL_280 = 280; // 1.6.0.1
 	/** OUTDATED (supporting will be removed with next release, may didn't work properly)*/
 	const PROTOCOL_120 = 120; // 1.2.0.xx (beta)
 //	const PROTOCOL_121 = 121; // 1.2.0.xx (beta)

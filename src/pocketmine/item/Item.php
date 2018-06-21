@@ -900,7 +900,6 @@ class Item{
 			self::$list[self::FISHING_ROD] = FishingRod::class;
 			self::$list[self::BUCKET] = Bucket::class;
 			self::$list[self::IRON_DOOR] = IronDoor::class;
-			self::$list[self::SPRUCE_DOOR_BLOCK] = SpruceDoor::class;
 			self::$list[self::CAKE] = Cake::class;
 			self::$list[self::BED] = Bed::class;
 			self::$list[self::PAINTING] = Painting::class;
@@ -972,6 +971,12 @@ class Item{
 			self::$list[self::ELYTRA] = Elytra::class;
 			self::$list[self::PRISMARINE_CRYSTAL] = PrismarineCrystal::class;
 			self::$list[self::POTION] = Potion::class;
+			
+			self::$list[self::SPRUCE_DOOR] = SpruceDoor::class;
+			self::$list[self::BIRCH_DOOR] = BirchDoor::class;
+			self::$list[self::JUNGLE_DOOR] = JungleDoor::class;
+			self::$list[self::ACACIA_DOOR] = AcaciaDoor::class;
+			self::$list[self::DARK_OAK_DOOR] = DarkOakDoor::class;
             
             // update for 1.0
 			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;			
