@@ -4,6 +4,7 @@ namespace pocketmine\network\protocol;
 
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\Info;
+use pocketmine\network\multiversion\BlockPallet;
 
 abstract class PEPacket extends DataPacket {
 	
@@ -29,12 +30,20 @@ abstract class PEPacket extends DataPacket {
 	 * @param integer $playerProtocol
 	 */
 	protected function getHeader($playerProtocol = 0) {
-		if ($playerProtocol >= Info::PROTOCOL_120) {
+		if ($playerProtocol >= Info::PROTOCOL_280) {
+			$header = $this->getSignedVarInt();
+			$subclientIds = $header >> 10;
+			$this->senderSubClientID = $subclientIds & 0x03;
+			$this->targetSubClientID = ($subclientIds >> 2) & 0x03;
+		} else if ($playerProtocol >= Info::PROTOCOL_120) {
+			$this->getByte(); // packetID
 			$this->senderSubClientID = $this->getByte();
 			$this->targetSubClientID = $this->getByte();
 			if ($this->senderSubClientID > 4 || $this->targetSubClientID > 4) {
 				throw new \Exception(get_class($this) . ": Packet decode headers error");
 			}
+		} else {
+			$this->getByte(); // packetID
 		}
 	}
 
@@ -43,17 +52,25 @@ abstract class PEPacket extends DataPacket {
 	 * @param integer $playerProtocol
 	 */
 	public function reset($playerProtocol = 0) {
-		$this->buffer = chr(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);
-		$this->offset = 0;
-		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->putByte($this->senderSubClientID);
-			$this->putByte($this->targetSubClientID);
-			$this->offset = 2;
+		if ($playerProtocol < Info::PROTOCOL_280) {
+			$this->buffer = chr(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);
+			$this->offset = 0;
+			if ($playerProtocol >= Info::PROTOCOL_120) {
+				$this->putByte($this->senderSubClientID);
+				$this->putByte($this->targetSubClientID);
+				$this->offset = 2;
+			}
+		} else {
+			$packetID = self::$packetsIds[$playerProtocol][$this::PACKET_NAME];
+			$header = ($this->targetSubClientID << 12) | ($this->senderSubClientID << 10) | $packetID;
+			$this->putVarInt($header);
 		}
 	}
 	
 	public final static function convertProtocol($protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_280:
+				return Info::PROTOCOL_280;
 			case Info::PROTOCOL_274:
 				return Info::PROTOCOL_274;
 			case Info::PROTOCOL_273:
@@ -100,70 +117,40 @@ abstract class PEPacket extends DataPacket {
 		}
 	}
 	
-	private static $blockPallet = [];
-	private static $blockPalletRevert = [];
+	/** @var BlockPallet[] */
+	private static $blockPalletes = [];
 	
 	public static function initPallet() {
-		$data = json_decode(file_get_contents(__DIR__ . "/../../BlockPallet.json"), true);
-		$result = [];
-		$revert = [];
-		foreach ($data as $blockInfo) {
-			$result[$blockInfo['id']][$blockInfo['data']] = $blockInfo['runtimeID'];
-			$revert[$blockInfo['runtimeID']] = [$blockInfo['id'], $blockInfo['data']];
-		}
-		self::$blockPallet = $result;
-		self::$blockPalletRevert = $revert;
+		self::$blockPalletes = BlockPallet::initAll();
 	}
 	
 	public static function getBlockIDByRuntime($runtimeId, $playerProtocol) {
-		if ($playerProtocol >= Info::PROTOCOL_240) {
-			if ($runtimeId > 1978 + 99) {
-				$runtimeId -= 99;
-			} elseif ($runtimeId > 1760 + 77) {
-				$runtimeId -= 77;
-			} elseif ($runtimeId > 1642 + 47) {
-				$runtimeId -= 47;
-			} elseif ($runtimeId > 1467 + 45) {
-				$runtimeId -= 45;
-			} elseif ($runtimeId > 1370 + 32) {
-				$runtimeId -= 32;
-			} elseif ($runtimeId > 345 + 17) {
-				$runtimeId -= 17;
-			} elseif ($runtimeId > 275 + 15) {
-				$runtimeId -= 15;
-			}
-		}
-		if (isset(self::$blockPalletRevert[$runtimeId])) {
-			return self::$blockPalletRevert[$runtimeId];
-		}
-		return [0, 0];
+		$pallet = self::getPallet($playerProtocol);
+		return is_null($pallet) ? [ 0, 0, "" ] : $pallet->getBlockDataByRuntimeID($runtimeId);
 	}
 	
 	public static function getBlockRuntimeID($id, $meta, $playerProtocol) {
-		$runtimeId = 0;
-		if (isset(self::$blockPallet[$id][$meta])) {
-			$runtimeId = self::$blockPallet[$id][$meta];
-		} elseif (isset(self::$blockPallet[$id][0])) {
-			$runtimeId = self::$blockPallet[$id][0];
-		}
-		if ($playerProtocol >= Info::PROTOCOL_240) {
-			if ($runtimeId > 1978) {
-				$runtimeId += 99;
-			} elseif ($runtimeId > 1760) {
-				$runtimeId += 77;
-			} elseif ($runtimeId > 1642) {
-				$runtimeId += 47;
-			} elseif ($runtimeId > 1467) {
-				$runtimeId += 45;
-			} elseif ($runtimeId > 1370) {
-				$runtimeId += 32;
-			} elseif ($runtimeId > 345) {			
-				$runtimeId += 17;
-			} elseif ($runtimeId > 275) {
-				$runtimeId += 15;
+		$pallet = self::getPallet($playerProtocol);
+		return is_null($pallet) ? 0 : $pallet->getBlockRuntimeIDByData($id, $meta);
+	}
+	
+	public static function getBlockPalletData($playerProtocol) {
+		$pallet = self::getPallet($playerProtocol);
+		return is_null($pallet) ? "" : $pallet->getDataForPackets();
+	}
+	
+	/**
+	 * 
+	 * @param type $playerProtocol
+	 * @return BlockPallet
+	 */
+	public static function getPallet($playerProtocol) {
+		foreach (self::$blockPalletes as $protocol => $pallet) {
+			if ($playerProtocol >= $protocol) {
+				return $pallet;
 			}
 		}
-		return $runtimeId;
+		return null;
 	}
 
 }

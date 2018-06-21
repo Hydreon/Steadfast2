@@ -38,6 +38,7 @@ use raklib\server\ServerHandler;
 use raklib\server\ServerInstance;
 use pocketmine\network\protocol\BatchPacket;
 use pocketmine\utils\Binary;
+use pocketmine\utils\BinaryStream;
 
 class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	
@@ -246,11 +247,6 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		if(isset($this->identifiers[$player])){			
 			$protocol = $player->getPlayerProtocol();
 			$packet->encode($protocol);
-//			var_dump("Send: 0x" . ($packet::NETWORK_ID < 16 ? '0' . dechex($packet::NETWORK_ID) : dechex($packet::NETWORK_ID)));
-			if(!($packet instanceof BatchPacket) && strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
-				$this->server->batchPackets([$player], [$packet], true);
-				return null;
-			}
 			$identifier = $this->identifiers[$player];	
 
 			$pk = new EncapsulatedPacket();				
@@ -286,12 +282,13 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$pk->is110 = true;
 			return $pk;
 		}
-		$pid = ord($buffer{0});
+		$tmpStream = new BinaryStream($buffer);
+		$header = $tmpStream->getVarInt();
+		$pid = $header & 0x3FF;		
 		if (($data = $this->network->getPacket($pid, $playerProtocol)) === null) {
 			return null;
 		}
-		$offset = 1;
-		$data->setBuffer($buffer, $offset);
+		$data->setBuffer($buffer);
 		return $data;
 	}
 
@@ -311,7 +308,9 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		if ($protocol < Info::PROTOCOL_110 || ($packet instanceof BatchPacket)) {
 			return $packet->buffer;
 		}
-		
+		if (strlen($packet->buffer) >= Network::$BATCH_THRESHOLD) {
+			return zlib_encode(Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer, ZLIB_ENCODING_DEFLATE, 7);
+		}
 		return $this->fakeZlib(Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer);
 	}
 	
