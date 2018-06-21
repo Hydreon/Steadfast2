@@ -832,7 +832,9 @@ class Level implements ChunkManager, Metadatable{
 			return false;
 		}
 
-		$this->server->getPluginManager()->callEvent(new LevelSaveEvent($this));
+		$this->server->getPluginManager()->callEvent($ev = new LevelSaveEvent($this));
+		if($ev->isCancelled())
+			return false;
 
 		$this->provider->setTime((int) $this->time);
 		$this->saveChunks();
@@ -1494,7 +1496,7 @@ class Level implements ChunkManager, Metadatable{
 			$hand->position($block);
 		}elseif($block->getId() === Item::FIRE){
 			$this->setBlock($block, new Air(), true);
-
+			
 			return false;
 		}else{
 			return false;
@@ -1525,7 +1527,7 @@ class Level implements ChunkManager, Metadatable{
 						continue;
 					}
 				}
-
+				
 				++$realCount;
 			}
 
@@ -2066,7 +2068,7 @@ class Level implements ChunkManager, Metadatable{
 				/** @var Player[] $players */
 				foreach ($players as $player) {
 					if ($player->isConnected() && isset($player->usedChunks[$index])) {
-						$protocol = Network::getNetworkProtocol($player->getPlayerProtocol());
+						$protocol = Network::getChunkPacketProtocol($player->getPlayerProtocol());
 						$subClientId = $player->getSubClientId();
 						if (ADVANCED_CACHE == true) {
 							$playerIndex = "{$protocol}:{$subClientId}";
@@ -2109,7 +2111,7 @@ class Level implements ChunkManager, Metadatable{
 			}
 			foreach ($this->chunkSendQueue[$index] as $player) {
 				/** @var Player $player */
-				$protocol = Network::getNetworkProtocol($player->getPlayerProtocol());
+				$protocol = Network::getChunkPacketProtocol($player->getPlayerProtocol());
 				$playerIndex = $protocol . ":" . $player->getSubClientId();
 				if ($player->isConnected() && isset($player->usedChunks[$index]) && isset($payload[$playerIndex])) {
 					$player->sendChunk($x, $z, $payload[$playerIndex]);
@@ -2276,34 +2278,34 @@ class Level implements ChunkManager, Metadatable{
 				return false;
 			}
 			
-			$this->server->getPluginManager()->callEvent($ev = new ChunkUnloadEvent($chunk));
+			$this->server->getPluginManager()->callEvent($ev = new ChunkUnloadEvent($chunk, $safe));
 			if($ev->isCancelled()){
 				//$this->timings->doChunkUnload->stopTiming();
 				return false;
 			}
-		}
 
-		try{
-			if ($chunk !== null) {
-				foreach ($chunk->getEntities() as $entity) {
-					if ($entity instanceof Player) {
-						continue;
+			try{
+				if ($ev->shouldSave()) {
+					foreach ($chunk->getEntities() as $entity) {
+						if ($entity instanceof Player) {
+							continue;
+						}
+						if (!$entity->isNeedSaveOnChunkUnload()) {
+							$entity->close();
+						}
 					}
-					if (!$entity->isNeedSaveOnChunkUnload()) {
-						$entity->close();
+					if ($this->getAutoSave()) {
+						$this->provider->setChunk($x, $z, $chunk);
+						$this->provider->saveChunk($x, $z);
 					}
 				}
-				if ($this->getAutoSave()) {
-					$this->provider->setChunk($x, $z, $chunk);
-					$this->provider->saveChunk($x, $z);
+				$this->provider->unloadChunk($x, $z, $safe);
+			}catch(\Exception $e){
+				$logger = $this->server->getLogger();
+				$logger->error("Error when unloading a chunk: " . $e->getMessage());
+				if($logger instanceof MainLogger){
+					$logger->logException($e);
 				}
-			}
-			$this->provider->unloadChunk($x, $z, $safe);
-		}catch(\Exception $e){
-			$logger = $this->server->getLogger();
-			$logger->error("Error when unloading a chunk: " . $e->getMessage());
-			if($logger instanceof MainLogger){
-				$logger->logException($e);
 			}
 		}
 
@@ -2679,7 +2681,7 @@ class Level implements ChunkManager, Metadatable{
 		$subClientsId = [];
 		foreach ($players as $player) {
 			$this->chunkSendQueue[$index][spl_object_hash($player)] = $player;
-			$protocol = Network::getNetworkProtocol($player->getPlayerProtocol());
+			$protocol = Network::getChunkPacketProtocol($player->getPlayerProtocol());
 			if (!isset($protocols[$protocol])) {
 				$protocols[$protocol] = $protocol;
 			}
