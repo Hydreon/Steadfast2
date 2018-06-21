@@ -136,8 +136,6 @@ class ChunkMaker extends Thread {
 				$chunkData .= chr(0) . $blockIdData . $blockDataData . $skyLightData . $blockLightData;
 				$chunkData120 .= chr(0) . $blockIdData . $blockDataData;
 			}
-
-
 			$chunkData .= $data['heightMap'] .
 					$data['biomeColor'] .
 					Binary::writeLInt(0) .

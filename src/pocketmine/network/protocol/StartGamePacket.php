@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-
 class StartGamePacket extends PEPacket{
 	const NETWORK_ID = Info::START_GAME_PACKET;
 	const PACKET_NAME = "START_GAME_PACKET";
@@ -138,12 +137,17 @@ class StartGamePacket extends PEPacket{
 				$this->putByte(0); // Has locked resource pack?
 				$this->putByte(0); // Is from locked template?
 			}
+			// level settings end
 			$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
 			$this->putString(''); // level name
 			$this->putString(''); // template pack id
 			$this->putByte(0); // is trial?
 			$this->putLong(0); // current level time
 			$this->putSignedVarInt(0); // enchantment seed
+			
+			if ($playerProtocol >= Info::PROTOCOL_280) {
+				$this->put(self::getBlockPalletData($playerProtocol));
+			}
 		}
 	}
 
