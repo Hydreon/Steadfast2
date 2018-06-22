@@ -4265,8 +4265,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if (!isset($this->actionsNum['CRACK_BLOCK'])) {
 			$this->actionsNum['CRACK_BLOCK'] = 0;
 		}
-		$blockId = $this->level->getBlockIdAt($packet->x, $packet->y, $packet->z);
-		$blockData = $this->level->getBlockDataAt($packet->x, $packet->y, $packet->z);
+		$block = $this->level->getBlock(new Vector3($packet->x, $packet->y, $packet->z));
 		$blockPos = [
 			'x' => $packet->x,
 			'y' => $packet->y,
@@ -4275,7 +4274,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		
 		$isNeedSendPackets = $this->actionsNum['CRACK_BLOCK'] % 4 == 0;
 		$this->actionsNum['CRACK_BLOCK']++;
-
+		
+		$breakTime = ceil($block->getBreakTime($this->inventory->getItemInHand()) * 20);
+		if ($this->actionsNum['CRACK_BLOCK'] >= $breakTime) {
+			$this->breakBlock($blockPos);
+		}
+		
 		if ($isNeedSendPackets) {
 			$recipients = $this->getViewers();
 			$recipients[] = $this;
@@ -4285,11 +4289,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->x = $packet->x;
 			$pk->y = $packet->y + 1;
 			$pk->z = $packet->z;
-			$pk->data = $blockId | ($blockData << 8);
+			$pk->data = $block->getId() | ($block->getDamage() << 8);
 
 			foreach ($recipients as $recipient) {
 				$recipient->dataPacket($pk);
-				$recipient->sendSound(LevelSoundEventPacket::SOUND_HIT, $blockPos, 1, $blockId);
+				$recipient->sendSound(LevelSoundEventPacket::SOUND_HIT, $blockPos, 1, $block->getId());
 			}
 		}
 	}
