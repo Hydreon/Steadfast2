@@ -1848,49 +1848,11 @@ class Server{
 	 * @param DataPacket[]|string $packets
 	 */
 	public function batchPackets(array $players, array $packets){
-		$targets = [];
-		$neededProtocol = [];
-		$neededSubClientsId = [];
 		foreach ($players as $p) {
-			$protocol = $p->getPlayerProtocol();
-			$subClientId = $p->getSubClientId();
-			$playerIdentifier = $p->getIdentifier();
-			if ($subClientId > 0 && ($parent = $p->getParent()) !== null) {
-				$playerIdentifier = $parent->getIdentifier();
-			}
-			$targets[$playerIdentifier] = [ $playerIdentifier, $protocol ];
-			$neededProtocol[$protocol] = $protocol;
-			$neededSubClientsId[$subClientId] = $subClientId;
-		}
-		$protocolsCount = count($neededProtocol);
-		$newPackets = [];
-		foreach ($packets as $p) {
-			foreach ($neededProtocol as $protocol) {
-				if ($p instanceof DataPacket) {
-					if ($protocol >= Info::PROTOCOL_120) {
-						foreach ($neededSubClientsId as $subClientId) {
-							$p->senderSubClientID = $subClientId;
-							$p->encode($protocol);
-							$newPackets[$protocol][] = $p->buffer;
-						}
-					} else {
-						if (!$p->isEncoded || $protocolsCount > 1) {
-							$p->senderSubClientID = 0;
-							$p->encode($protocol);
-						}
-						$newPackets[$protocol][] = $p->buffer;
-					}
-				} elseif ($protocolsCount == 1) {
-					$newPackets[$protocol][] = $p;
-				}
+			foreach ($packets as $pk) {
+				$p->dataPacket($pk);
 			}
 		}
-		$data = [];
-		$data['packets'] = $newPackets;
-		$data['targets'] = $targets;
-		$data['networkCompressionLevel'] = $this->networkCompressionLevel;
-		$data['isBatch'] = true;
-		$this->packetMaker->pushMainToThreadPacket(serialize($data));
 	}
 
 	/**
@@ -2264,8 +2226,7 @@ class Server{
 		}
 	}
 
-	public function addOnlinePlayer(Player $player){	
-		$player->sendFullPlayerList();
+	public function addOnlinePlayer(Player $player){
 		$this->playerList[$player->getRawUniqueId()] = $player;		
 	}
 
@@ -2458,7 +2419,7 @@ class Server{
 		//Timings::$schedulerTimer->stopTiming();
 
 		$this->checkTickUpdates($this->tickCounter);
-
+		
 		if(($this->tickCounter & 0b1111) === 0){
 			$this->titleTick();
 			if($this->queryHandler !== null and ($this->tickCounter & 0b111111111) === 0){

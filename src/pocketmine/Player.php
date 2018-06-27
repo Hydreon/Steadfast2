@@ -151,7 +151,6 @@ use pocketmine\network\protocol\AvailableCommandsPacket;
 use pocketmine\network\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
 use pocketmine\network\protocol\ResourcePackStackPacket;
-use raklib\Binary;
 use pocketmine\network\protocol\ServerToClientHandshakePacket;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Elytra;
@@ -174,6 +173,7 @@ use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\v120\SubClientLoginPacket;
 use pocketmine\tile\SignEntity;
+use pocketmine\utils\Binary;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -390,6 +390,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastInteractTick = 0;
 	
 	private $lastInteractCoordsHash = -1;
+	
+	protected $entitiesUUIDEids = [];
+	protected $lastEntityRemove = [];
+	protected $entitiesPacketsQueue = [];
 	
 	public function getLeaveMessage(){
 		return "";
@@ -940,9 +944,80 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 		
+		switch($packet->pname()){
+			case 'BATCH_PACKET':
+				$packet->encode($this->protocol);
+				$this->interface->putReadyPacket($this, $packet->buffer);
+				$packet->senderSubClientID = 0;
+				return;
+			case 'ADD_PLAYER_PACKET':
+			case 'ADD_ENTITY_PACKET':
+			case 'ADD_ITEM_ENTITY_PACKET':
+			case 'SET_ENTITY_DATA_PACKET':
+			case 'MOB_EQUIPMENT_PACKET':
+			case 'MOB_ARMOR_EQUIPMENT_PACKET':
+			case 'ENTITY_EVENT_PACKET':
+			case 'MOB_EFFECT_PACKET':
+				if (isset($this->lastEntityRemove[$packet->eid])) {
+					$this->addEntityPacket($packet->eid, $packet);
+					return;
+				}
+				break;
+			case 'REMOVE_ENTITY_PACKET':
+				if (isset($this->entitiesPacketsQueue[$packet->eid])) {
+					unset($this->entitiesPacketsQueue[$packet->eid]);
+					return;
+				}
+				$this->lastEntityRemove[$packet->eid] = $this->lastUpdate;
+				unset($this->entitiesUUIDEids[$packet->eid]);
+				break;
+			case 'PLAYER_LIST_PACKET':
+				if (count($packet->entries) == 1) {
+					$entryData = $packet->entries[0];
+					if ($packet->type == PlayerListPacket::TYPE_ADD) {						
+						if (isset($this->lastEntityRemove[$entryData[1]])) {
+							$this->addEntityPacket($entryData[1], $packet);
+							$this->entitiesUUIDEids[$entryData[1]] = $entryData[0];
+							return;
+						}
+					} elseif ($packet->type == PlayerListPacket::TYPE_REMOVE) {	
+						foreach ($this->entitiesUUIDEids as $eid => $uuid) {
+							if ($entryData[0] === $uuid) {
+								if (isset($this->lastEntityRemove[$eid])) {
+									unset($this->entitiesUUIDEids[$eid]);
+									$this->addEntityPacket($eid, $packet);
+									return;
+								}
+							}
+						}
+					}
+				}
+				break;
+			case 'UPDATE_ATTRIBUTES_PACKET':
+				if (isset($this->lastEntityRemove[$packet->entityId])) {
+					$this->addEntityPacket($packet->entityId, $packet);
+					return;
+				}
+				break;
+			case 'SET_ENTITY_LINK_PACKET':
+				if (isset($this->lastEntityRemove[$packet->from])) {
+					$this->addEntityPacket($packet->from, $packet);
+					return;
+				} elseif (isset($this->lastEntityRemove[$packet->to])) {
+					$this->addEntityPacket($packet->to, $packet);
+					return;
+				}
+				break;
+		}
 		$this->interface->putPacket($this, $packet, $needACK, false);
 		$packet->senderSubClientID = 0;
 		return true;
+	}
+	
+	protected function addEntityPacket($eid, $pk) {
+		$pk->encode($this->protocol);
+		$this->entitiesPacketsQueue[$eid][] = $pk->buffer;
+		$pk->senderSubClientID = 0;
 	}
 
 	/**
@@ -1475,10 +1550,32 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->sendNoteSound($noteId);
 		}
 		$this->hackForCraftLastIndex = 0;
+		
+		
+		foreach ($this->lastEntityRemove as $eid => $tick) {
+			if ($tick + 20 < $this->lastUpdate) {
+				unset($this->lastEntityRemove[$eid]);
+				if (isset($this->entitiesPacketsQueue[$eid])) {
+					$this->sendEntityPackets($this->entitiesPacketsQueue[$eid]);
+					unset($this->entitiesPacketsQueue[$eid]);
+				}
+			}
+		}
 
 		//$this->timings->stopTiming();
 
 		return true;
+	}
+	
+	protected function sendEntityPackets($packets) {
+		$buffer = '';
+		foreach ($packets as $pk) {
+			$buffer .= Binary::writeVarInt(strlen($pk)) . $pk;
+		}
+		$pk = new BatchPacket();
+		$pk->payload = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
+		$pk->encode($this->protocol);
+		$this->interface->putReadyPacket($this, $pk->buffer);
 	}
 
 	public function eatFoodInHand() {
@@ -3411,6 +3508,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->sendSelfData();				
 		$this->updateSpeed(self::DEFAULT_SPEED);
+		$this->sendFullPlayerList();
 //		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
 	}
 
