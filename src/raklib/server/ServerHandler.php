@@ -146,4 +146,13 @@ class ServerHandler{
 
         return false;
     }
+	
+	public function enableEncrypt($identifier, $token, $privateKey, $publicKey) {
+		$buffer = chr(RakLib::PACKET_ENABLE_ENCRYPT) . chr(strlen($identifier)) . $identifier;
+		$buffer .= Binary::writeShort(strlen($token)) . $token;
+		$buffer .= Binary::writeShort(strlen($privateKey)) . $privateKey;
+		$buffer .= Binary::writeShort(strlen($publicKey)) . $publicKey;
+		$this->server->pushMainToThreadPacket($buffer);
+	}
+
 }

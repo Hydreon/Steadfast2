@@ -324,9 +324,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	private $expLevel = 0;
 
 	private $elytraIsActivated = false;
-	
-	private $encrypter = null;
-	private $encryptEnabled = false;
     
     /** @IMPORTANT don't change the scope */
     private $inventoryType = self::INVENTORY_CLASSIC;
@@ -394,6 +391,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $entitiesUUIDEids = [];
 	protected $lastEntityRemove = [];
 	protected $entitiesPacketsQueue = [];
+	protected $packetQueue = [];
 	
 	public function getLeaveMessage(){
 		return "";
@@ -930,19 +928,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return $this->parent->dataPacket($packet);
 		}
 		
-		if ($this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
-			$disallowedPackets = Protocol120::getDisallowedPackets();
-			if (in_array(get_class($packet), $disallowedPackets)) {
-				$packet->senderSubClientID = 0;
-				return true;
-			}
-		}
-		
-		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
-		if($ev->isCancelled()){
-			return false;
-		}
-		
 		switch($packet->pname()){
 			case 'BATCH_PACKET':
 				$packet->encode($this->protocol);
@@ -1008,9 +993,22 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				break;
 		}
-		$this->interface->putPacket($this, $packet);
+		$packet->encode($this->protocol);
+		$this->packetQueue[] = $packet->buffer;
 		$packet->senderSubClientID = 0;
 		return true;
+	}
+	
+	public function sendPacketQueue() {
+		if (count($this->packetQueue) <= 0) {
+			return;
+		}
+		$buffer = '';
+		foreach ($this->packetQueue as $pkBuf) {
+			$buffer .= Binary::writeVarInt(strlen($pkBuf)) . $pkBuf;
+		}
+		$this->packetQueue = [];
+		$this->interface->putPacket($this, $buffer);
 	}
 	
 	protected function addEntityPacket($eid, $pk) {
@@ -1029,20 +1027,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 		
-		if ($this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
-			$disallowedPackets = Protocol120::getDisallowedPackets();
-			if (in_array(get_class($packet), $disallowedPackets)) {
-				return;
-			}
+		if ($this->subClientId > 0 && $this->parent != null) {
+			$packet->senderSubClientID = $this->subClientId;
+			return $this->parent->dataPacket($packet);
 		}
-
-		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
-		if($ev->isCancelled()){
-			return false;
-		}
-
-		$this->interface->putPacket($this, $packet, true);
-
+		
+		$packet->encode($this->protocol);
+		$packet->senderSubClientID = 0;
+		$this->interface->putPacket($this, Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer, true);
 		return true;
 	}
 
@@ -1566,14 +1558,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	protected function sendEntityPackets($packets) {
-		$buffer = '';
-		foreach ($packets as $pk) {
-			$buffer .= Binary::writeVarInt(strlen($pk)) . $pk;
-		}
-		$pk = new BatchPacket();
-		$pk->payload = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
-		$pk->encode($this->protocol);
-		$this->interface->putReadyPacket($this, $pk->buffer);
+		$this->packetQueue = array_merge($this->packetQueue, $packets);
 	}
 
 	public function eatFoodInHand() {
@@ -3317,8 +3302,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->publicKey = $this->server->getServerPublicKey();
 			$pk->serverToken = $token;
 			$pk->privateKey = $privateKey;
-			$this->dataPacket($pk);
-			$this->enableEncrypt($token, $privateKey, $this->identityPublicKey);
+			$this->directDataPacket($pk);
+			$this->interface->enableEncryptForPlayer($this, $token, $privateKey, $this->identityPublicKey);
 		} else {
 			$this->continueLoginProcess();
 		}
@@ -3475,7 +3460,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->gamemode = $this->gamemode & 0x01;
 		$pk->eid = $this->id;
 		$pk->stringClientVersion = $this->clientVersion;
-		$this->dataPacket($pk);
+		$this->directDataPacket($pk);
 
 		$pk = new SetTimePacket();
 		$pk->time = $this->level->getTime();
@@ -3781,23 +3766,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->elytraIsActivated;
 	}
 	
-	public function isEncryptEnable() {
-		return $this->encryptEnabled;
-	}
-
-	public function getEncrypt($sStr) {		
-		return $this->encrypter->encrypt($sStr);
-	}	
-
-	public function getDecrypt($sStr) {
-		return $this->encrypter->decrypt($sStr);
-	}
-
-	private function enableEncrypt($token, $privateKey, $publicKey) {
-		$this->encrypter = new \McpeEncrypter($token, $privateKey, $publicKey);
-		$this->encryptEnabled = true;
-	}
-
 	public function getPlayerProtocol() {
 		return $this->protocol;
 	}

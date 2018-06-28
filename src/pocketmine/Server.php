@@ -2293,10 +2293,12 @@ class Server{
 			}		
 			
 			$pk->encode($p->getPlayerProtocol(), $p->getSubClientId());
-			$pk->isEncoded = true;
-			$this->craftList[$p->getPlayerProtocol()] = $pk;
+			$bpk = new BatchPacket();
+			$bpk->payload = zlib_encode(Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer, ZLIB_ENCODING_DEFLATE, 7);
+			$bpk->encode($p->getPlayerProtocol());
+			$this->craftList[$p->getPlayerProtocol()] = $bpk->buffer;
 		}
-		$this->batchPackets([$p], [$this->craftList[$p->getPlayerProtocol()]]);
+		$p->getInterface()->putReadyPacket($p, $this->craftList[$p->getPlayerProtocol()]);
 	}
 
 	public function addPlayer($identifier, Player $player){
@@ -2316,6 +2318,9 @@ class Server{
 					$this->logger->logException($e);
 				}
 			}
+		}
+		foreach ($this->players as $player) {
+			$player->sendPacketQueue();
 		}
 	}
 
