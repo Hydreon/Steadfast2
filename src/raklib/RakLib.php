@@ -56,8 +56,6 @@ abstract class RakLib{
     const PRIORITY_NORMAL = 0;
     const PRIORITY_IMMEDIATE = 1;
 
-    const FLAG_NEED_ACK = 0b00001000;
-
     /*
      * Internal Packet:
      * int32 (length without this field)
@@ -106,14 +104,6 @@ abstract class RakLib{
      * byte[] (identifier)
      */
     const PACKET_SEND_QUEUE = 0x05;
-
-    /*
-     * ACK_NOTIFICATION payload:
-     * byte (identifier length)
-     * byte[] (identifier)
-     * int (identifierACK)
-     */
-    const PACKET_ACK_NOTIFICATION = 0x06;
 
     /*
      * SET_OPTION payload:

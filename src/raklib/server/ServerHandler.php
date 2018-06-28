@@ -139,13 +139,7 @@ class ServerHandler{
                 $len = ord($packet{$offset++});
                 $identifier = substr($packet, $offset, $len);
                 $this->instance->closeSession($identifier, "Invalid session");
-            }elseif($id === RakLib::PACKET_ACK_NOTIFICATION){
-                $len = ord($packet{$offset++});
-                $identifier = substr($packet, $offset, $len);
-                $offset += $len;
-                $identifierACK = Binary::readInt(substr($packet, $offset, 4));
-                $this->instance->notifyACK($identifier, $identifierACK);
-            } 
+            }
 
             return true;
         }

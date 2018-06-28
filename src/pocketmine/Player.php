@@ -917,18 +917,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * Sends an ordered DataPacket to the send buffer
 	 *
 	 * @param DataPacket $packet
-	 * @param bool       $needACK
 	 *
 	 * @return int|bool
 	 */
-	public function dataPacket(DataPacket $packet, $needACK = false){		
+	public function dataPacket(DataPacket $packet){		
 		if($this->connected === false){
 			return false;
 		}
 		
 		if ($this->subClientId > 0 && $this->parent != null) {
 			$packet->senderSubClientID = $this->subClientId;
-			return $this->parent->dataPacket($packet, $needACK);
+			return $this->parent->dataPacket($packet);
 		}
 		
 		if ($this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
@@ -1009,7 +1008,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				break;
 		}
-		$this->interface->putPacket($this, $packet, $needACK, false);
+		$this->interface->putPacket($this, $packet);
 		$packet->senderSubClientID = 0;
 		return true;
 	}
@@ -1022,11 +1021,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	/**
 	 * @param DataPacket $packet
-	 * @param bool       $needACK
 	 *
 	 * @return bool|int
 	 */
-	public function directDataPacket(DataPacket $packet, $needACK = false){
+	public function directDataPacket(DataPacket $packet){
 		if($this->connected === false){
 			return false;
 		}
@@ -1043,7 +1041,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return false;
 		}
 
-		$this->interface->putPacket($this, $packet, $needACK, true);
+		$this->interface->putPacket($this, $packet, true);
 
 		return true;
 	}

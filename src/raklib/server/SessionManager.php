@@ -243,11 +243,6 @@ class SessionManager{
         $this->server->pushThreadToMainPacket($buffer);
     }
 
-    protected function streamACK($identifier, $identifierACK){
-        $buffer = chr(RakLib::PACKET_ACK_NOTIFICATION) . chr(strlen($identifier)) . $identifier . Binary::writeInt($identifierACK);
-        $this->server->pushThreadToMainPacket($buffer);
-    }
-
     protected function streamOption($name, $value){
         $buffer = chr(RakLib::PACKET_SET_OPTION) . chr(strlen($name)) . $name . $value;
         $this->server->pushThreadToMainPacket($buffer);
@@ -385,10 +380,6 @@ class SessionManager{
 
     public function openSession(Session $session){
         $this->streamOpen($session);
-    }
-
-    public function notifyACK(Session $session, $identifierACK){
-        $this->streamACK($session->getAddress() . ":" . $session->getPort(), $identifierACK);
     }
 
     public function getName(){

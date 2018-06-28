@@ -84,9 +84,6 @@ class Session{
 	/** @var DataPacket[][] */
 	private $splitPackets = [];
 
-    /** @var int[][] */
-    private $needACK = [];
-
     /** @var DataPacket */
     private $sendQueue;
 
@@ -173,16 +170,6 @@ class Session{
 			}
         }
 
-        if(count($this->needACK) > 0){
-            foreach($this->needACK as $identifierACK => $indexes){
-                if(count($indexes) === 0){
-                    unset($this->needACK[$identifierACK]);
-                    $this->sessionManager->notifyACK($this, $identifierACK);
-                }
-            }
-        }
-
-
 		foreach($this->recoveryQueue as $seq => $pk){
 			if($pk->sendTime < (time() - 8)){
 				$this->packetToSend[] = $pk;
@@ -228,18 +215,10 @@ class Session{
      */
     private function addToQueue(EncapsulatedPacket $pk, $flags = RakLib::PRIORITY_NORMAL){
         $priority = $flags & 0b0000111;
-        if($pk->needACK and $pk->messageIndex !== null){
-            $this->needACK[$pk->identifierACK][$pk->messageIndex] = $pk->messageIndex;
-        }
         if($priority === RakLib::PRIORITY_IMMEDIATE){ //Skip queues
             $packet = new DATA_PACKET_0();
             $packet->seqNumber = $this->sendSeqNumber++;
-	        if($pk->needACK){
-		        $packet->packets[] = clone $pk;
-		        $pk->needACK = false;
-	        }else{
-		        $packet->packets[] = $pk->toBinary();
-	        }
+			$packet->packets[] = $pk->toBinary();
 
             $this->sendPacket($packet);
             $packet->sendTime = microtime(true);
@@ -252,12 +231,7 @@ class Session{
             $this->sendQueue();
         }
 
-	    if($pk->needACK){
-		    $this->sendQueue->packets[] = clone $pk;
-		    $pk->needACK = false;
-	    }else{
-		    $this->sendQueue->packets[] = $pk->toBinary();
-	    }
+		$this->sendQueue->packets[] = $pk->toBinary();
     }
 
     /**
@@ -265,11 +239,6 @@ class Session{
      * @param int                $flags
      */
     public function addEncapsulatedToQueue(EncapsulatedPacket $packet, $flags = RakLib::PRIORITY_NORMAL){
-
-        if(($packet->needACK = ($flags & RakLib::FLAG_NEED_ACK) > 0) === true){
-	        $this->needACK[$packet->identifierACK] = [];
-        }
-
 		if(
 			$packet->reliability === 2 or
 			$packet->reliability === 3 or
@@ -488,11 +457,6 @@ class Session{
                     $packet->decode();
                     foreach($packet->packets as $seq){
                         if(isset($this->recoveryQueue[$seq])){
-                            foreach($this->recoveryQueue[$seq]->packets as $pk){
-                                if($pk instanceof EncapsulatedPacket and $pk->needACK and $pk->messageIndex !== null){
-                                    unset($this->needACK[$pk->identifierACK][$pk->messageIndex]);
-                                }
-                            }
 							$this->pingAverage[] = microtime(true) - $this->recoveryQueue[$seq]->sendTime;
 							if (count($this->pingAverage) > 20) {
 								array_shift($this->pingAverage);
