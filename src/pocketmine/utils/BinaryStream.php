@@ -224,10 +224,7 @@ class BinaryStream extends \stdClass{
 		if($nbtLen > 0){
 			$nbt = $this->get($nbtLen);
 		}
-		
-		if ($playerProtocol >= Info::PROTOCOL_110) {
-			$this->offset += 2;
-		}
+		$this->offset += 2;
 		
 		return Item::get(
 			$id,
@@ -247,10 +244,8 @@ class BinaryStream extends \stdClass{
 		$nbt = $item->getCompound();	
 		$this->putLShort(strlen($nbt));
 		$this->put($nbt);
-		if ($playerProtocol >= Info::PROTOCOL_110) {
-			$this->putByte(0);
-			$this->putByte(0);
-		}
+		$this->putByte(0);
+		$this->putByte(0);
 	}
 
 	public function feof(){

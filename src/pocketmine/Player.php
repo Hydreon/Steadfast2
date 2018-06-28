@@ -264,7 +264,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $iusername = '';
 	protected $displayName = '';
 	protected $startAction = -1;
-	public $protocol = ProtocolInfo::BASE_PROTOCOL;
+	public $protocol = ProtocolInfo::PROTOCOL_110;
 	/** @var Vector3 */
 	protected $sleeping = null;
 	protected $clientID = null;
@@ -3800,37 +3800,33 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         return $this->xuid;
     }
 	
-	public function setTitle($text, $subtext = '', $time = 36000) {
-		if ($this->protocol >= Info::PROTOCOL_105) {		
+	public function setTitle($text, $subtext = '', $time = 36000) {		
+		$pk = new SetTitlePacket();
+		$pk->type = SetTitlePacket::TITLE_TYPE_TIMES;
+		$pk->text = "";
+		$pk->fadeInTime = 5;
+		$pk->fadeOutTime = 5;
+		$pk->stayTime = 20 * $time;
+		$this->dataPacket($pk);
+
+		if (!empty($subtext)) {
 			$pk = new SetTitlePacket();
-			$pk->type = SetTitlePacket::TITLE_TYPE_TIMES;
-			$pk->text = "";
-			$pk->fadeInTime = 5;
-			$pk->fadeOutTime = 5;
-			$pk->stayTime = 20 * $time;
+			$pk->type = SetTitlePacket::TITLE_TYPE_SUBTITLE;
+			$pk->text = $subtext;
 			$this->dataPacket($pk);
-			
-			if (!empty($subtext)) {
-				$pk = new SetTitlePacket();
-				$pk->type = SetTitlePacket::TITLE_TYPE_SUBTITLE;
-				$pk->text = $subtext;
-				$this->dataPacket($pk);
-			}
-			
-			$pk = new SetTitlePacket();
-			$pk->type = SetTitlePacket::TITLE_TYPE_TITLE;
-			$pk->text = $text;
-			$this->dataPacket($pk);	
 		}
+
+		$pk = new SetTitlePacket();
+		$pk->type = SetTitlePacket::TITLE_TYPE_TITLE;
+		$pk->text = $text;
+		$this->dataPacket($pk);	
 	}
 
 	public function clearTitle() {
-		if ($this->protocol >= Info::PROTOCOL_105) {
-			$pk = new SetTitlePacket();
-			$pk->type = SetTitlePacket::TITLE_TYPE_CLEAR;
-			$pk->text = "";
-			$this->dataPacket($pk);
-		}
+		$pk = new SetTitlePacket();
+		$pk->type = SetTitlePacket::TITLE_TYPE_CLEAR;
+		$pk->text = "";
+		$this->dataPacket($pk);
 	}
 		
 	public function sendNoteSound($noteId, $queue = false) {
