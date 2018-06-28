@@ -30,7 +30,6 @@ use pocketmine\network\protocol\AddPaintingPacket;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\AdventureSettingsPacket;
 use pocketmine\network\protocol\AnimatePacket;
-use pocketmine\network\protocol\BatchPacket;
 use pocketmine\network\protocol\ContainerClosePacket;
 use pocketmine\network\protocol\ContainerOpenPacket;
 use pocketmine\network\protocol\ContainerSetContentPacket;
@@ -82,7 +81,6 @@ use pocketmine\Server;
 use pocketmine\utils\MainLogger;
 use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
 use pocketmine\network\protocol\RequestChunkRadiusPacket;
-use pocketmine\utils\BinaryStream;
 use pocketmine\network\protocol\SetCommandsEnabledPacket;
 use pocketmine\network\protocol\AvailableCommandsPacket;
 use pocketmine\network\protocol\CommandStepPacket;
@@ -238,52 +236,6 @@ class Network {
 	
 	public function getServer(){
 		return $this->server;
-	}
-			
-	public function processBatch(BatchPacket $packet, Player $p){
-		$str = @\zlib_decode($packet->payload, 1024 * 1024 * 64); //Max 64MB
-		if ($str === false) {
-			return;
-		}
-		try{
-			$stream = new BinaryStream($str);
-			$length = strlen($str);
-			while ($stream->getOffset() < $length) {
-				$buf = $stream->getString();
-				if(strlen($buf) === 0){
-					throw new \InvalidStateException("Empty or invalid BatchPacket received");
-				}
-				// it will be works for old version too
-				$tmpStream = new BinaryStream($buf);
-				$header = $tmpStream->getVarInt();
-				$packetID = $header & 0x3FF;
-//				echo "Rcv: 0x" . dechex($packetID) . PHP_EOL;
-				if (($pk = $this->getPacket($packetID, $p->getPlayerProtocol())) !== null) {
-					if ($pk::NETWORK_ID === Info::BATCH_PACKET) {
-						throw new \InvalidStateException("Invalid BatchPacket inside BatchPacket");
-					}
-					$pk->setBuffer($buf);
-					try {
-						$pk->decode($p->getPlayerProtocol());
-					}catch(\Exception $e){
-						file_put_contents("logs/" . date('Y.m.d') . "_decode_error.log", $e->getMessage() . "\n", FILE_APPEND | LOCK_EX);
-						return;
-					}
-					$p->handleDataPacket($pk);
-					if ($pk->getOffset() <= 0) {
-						return;
-					}
-				}
-			}
-		}catch(\Exception $e){
-			if(\pocketmine\DEBUG > 1){
-				$logger = $this->server->getLogger();
-				if($logger instanceof MainLogger){
-					$logger->debug("BatchPacket " . " 0x" . bin2hex($packet->payload));
-					$logger->logException($e);
-				}
-			}
-		}
 	}
 
 	/**

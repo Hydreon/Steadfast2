@@ -36,7 +36,6 @@ use raklib\RakLib;
 use raklib\server\RakLibServer;
 use raklib\server\ServerHandler;
 use raklib\server\ServerInstance;
-use pocketmine\network\protocol\BatchPacket;
 use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryStream;
 
@@ -234,8 +233,15 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		}
 	}
 
-	private function getPacket($buffer, $player){
-		return new BatchPacket($buffer);
+	private function getPacket($buffer, $player){	
+		$tmpStream = new BinaryStream($buffer);
+		$header = $tmpStream->getVarInt();
+		$pid = $header & 0x3FF;		
+		if (($data = $this->network->getPacket($pid, $player->getPlayerProtocol())) === null) {
+			return null;
+		}
+		$data->setBuffer($buffer);
+		return $data;
 	}
 
 	public function putReadyPacket($player, $buffer) {
@@ -259,13 +265,6 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	public function enableEncryptForPlayer(Player $player, $token, $privateKey, $publicKey){
 		$identifier = $this->identifiers[$player];	
 		$this->interface->enableEncrypt($identifier, $token, $privateKey, $publicKey);
-	}
-	
-	private function isZlib($buffer) {
-		if (ord($buffer{0}) == 120) {
-			return true;
-		}
-		return false;
 	}
 
 }
