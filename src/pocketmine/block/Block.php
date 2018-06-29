@@ -787,9 +787,20 @@ class Block extends Position implements Metadatable{
 	 *
 	 * @return void
 	 */
-	public function onUpdate($type){
-
+	
+	public function onUpdate($type, $deep){
+		if ($deep > 0 && ($this->needScheduleOnUpdate())) {
+			$this->level->scheduleUpdate($this, 4, $type);
+			return false;
+		}
+		return true;
 	}
+	
+	public function needScheduleOnUpdate() {
+		return false;
+	}
+	
+
 
 	/**
 	 * Do actions when activated by Item. Returns if it has done anything

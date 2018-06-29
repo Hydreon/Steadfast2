@@ -41,7 +41,10 @@ abstract class Fallable extends Solid {
 		return $ret;
 	}
 
-	public function onUpdate($type) {
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
 		if ($type === Level::BLOCK_UPDATE_NORMAL) {
 			$down = $this->getSide(Vector3::SIDE_DOWN);
 			if ($down->getId() === self::AIR or ( $down instanceof Liquid)) {
@@ -66,10 +69,10 @@ abstract class Fallable extends Solid {
 
 				$fall->spawnToAll();
 			} else {
-				parent::onUpdate($type);
+				parent::onUpdate($type, $deep);
 			}
 		} else {
-			parent::onUpdate($type);
+			parent::onUpdate($type, $deep);
 		}
 	}
 

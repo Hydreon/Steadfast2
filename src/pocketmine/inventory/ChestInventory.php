@@ -84,7 +84,7 @@ class ChestInventory extends ContainerInventory {
 		if (parent::setItem($index, $item)) {
 			if (!is_null($this->holder->level)) {
 				if ($isShouldUpdateBlock) {
-					$this->holder->getBlock()->onUpdate(Level::BLOCK_UPDATE_WEAK);
+					$this->holder->getBlock()->onUpdate(Level::BLOCK_UPDATE_WEAK, 0);
 				}			
 				static $offsets = [
 					[1, 0, 0],
@@ -97,7 +97,7 @@ class ChestInventory extends ContainerInventory {
 					$tmpVector->setComponents($this->holder->x + $offset[0], $this->holder->y, $this->holder->z + $offset[2]);
 					if ($this->holder->level->getBlockIdAt($tmpVector->x, $tmpVector->y, $tmpVector->z) == Block::REDSTONE_COMPARATOR_BLOCK) {
 						$comparator = $this->holder->level->getBlock($tmpVector);
-						$comparator->onUpdate(Level::BLOCK_UPDATE_NORMAL);
+						$comparator->onUpdate(Level::BLOCK_UPDATE_NORMAL,  0);
 					}
 				}
 			}

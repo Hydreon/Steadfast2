@@ -34,7 +34,14 @@ class Dropper extends Solid {
 		return parent::place($item, $block, $target, $face, $fx, $fy, $fz, $player);
 	}
 	
-	public function onUpdate($type) {
+	public function needScheduleOnUpdate() {
+		return true;
+	}
+	
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
 		// undone
 	}
 }

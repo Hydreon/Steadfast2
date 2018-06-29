@@ -106,7 +106,15 @@ class RedstoneComparator extends Transparent {
 		return $this->meta >> 3;
 	}
 	
-	public function onUpdate($type) {
+	public function needScheduleOnUpdate() {
+		return true;
+	}
+	
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		if ($type == Level::BLOCK_UPDATE_NORMAL) {
 			$backPosition = $this->getBackBlockCoords();
 			$backBlockID = $this->level->getBlockIdAt($backPosition->x, $backPosition->y, $backPosition->z);
@@ -114,10 +122,10 @@ class RedstoneComparator extends Transparent {
 				$chestInventory = $this->level->getTile($backPosition)->getInventory();
 				if ($this->isActive() && $chestInventory->firstNotEmpty() == -1) {
 					$this->meta &= 0x07;
-					$this->level->setBlock($this, $this, true, true);
+					$this->level->setBlock($this, $this, true, true, $deep);
 				} else if (!$this->isActive() && $chestInventory->firstNotEmpty() != -1) {
 					$this->meta |= 0x08;
-					$this->level->setBlock($this, $this, true, true);
+					$this->level->setBlock($this, $this, true, true, $deep);
 				}
 			}
 		}

@@ -108,11 +108,15 @@ class Leaves2 extends Leaves{
 		return false;
 	}
 
-	public function onUpdate($type){
+	public function onUpdate($type, $deep){
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			if(($this->meta & 0b00001100) === 0){
 				$this->meta |= 0x08;
-				$this->getLevel()->setBlock($this, $this, false, false, true);
+				$this->getLevel()->setBlock($this, $this, false, false, $deep);
 			}
 		}elseif($type === Level::BLOCK_UPDATE_RANDOM){
 			if(($this->meta & 0b00001100) === 0x08){
@@ -123,7 +127,7 @@ class Leaves2 extends Leaves{
 				Server::getInstance()->getPluginManager()->callEvent($ev = new LeavesDecayEvent($this));
 
 				if($ev->isCancelled() or $this->findLog($this, $visited, 0, $check) === true){
-					$this->getLevel()->setBlock($this, $this, false, false);
+					$this->getLevel()->setBlock($this, $this, false, false, $deep);
 				}else{
 					$this->getLevel()->useBreakOn($this);
 

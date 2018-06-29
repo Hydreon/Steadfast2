@@ -185,7 +185,10 @@ class Chest extends Transparent{
 		];
 	}
 	
-	public function onUpdate($type) {
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
 		if ($type == Level::BLOCK_UPDATE_WEAK) {
 			$blockBelowId = $this->level->getBlockIdAt($this->x, $this->y - 1, $this->z);
 			if ($blockBelowId == self::HOPPER_BLOCK) {

@@ -124,13 +124,17 @@ abstract class Door extends Transparent {
 		return $bb;
 	}
 
-	public function onUpdate($type) {
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		switch ($type) {
 			case Level::BLOCK_UPDATE_NORMAL:
 				if ($this->getSide(Vector3::SIDE_DOWN)->getId() === self::AIR) { //Replace with common break method
-					$this->getLevel()->setBlock($this, new Air(), false);
+					$this->getLevel()->setBlock($this, new Air(), false, true, $deep);
 					if ($this->getSide(Vector3::SIDE_UP) instanceof Door) {
-						$this->getLevel()->setBlock($this->getSide(1), new Air(), false);
+						$this->getLevel()->setBlock($this->getSide(1), new Air(), false, true, $deep);
 					}
 					return Level::BLOCK_UPDATE_NORMAL;
 				}

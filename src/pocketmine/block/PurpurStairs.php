@@ -21,34 +21,27 @@
 
 namespace pocketmine\block;
 
-use pocketmine\level\Level;
 
-class DeadBush extends Flowable{
+use pocketmine\item\Tool;
 
-	protected $id = self::DEAD_BUSH;
+class CobblestoneStairs extends Stair{
+
+	protected $id = self::COBBLESTONE_STAIRS;
 
 	public function __construct($meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function getName(){
-		return "Dead Bush";
+	public function getHardness(){
+		return 2;
 	}
 
+	public function getToolType(){
+		return Tool::TYPE_PICKAXE;
+	}
 
-	public function onUpdate($type, $deep){
-		if (!Block::onUpdate($type, $deep)) {
-			return false;
-		}
-		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if($this->getSide(0)->isTransparent() === true){
-				$this->getLevel()->useBreakOn($this);
-
-				return Level::BLOCK_UPDATE_NORMAL;
-			}
-		}
-
-		return false;
+	public function getName(){
+		return "Cobblestone Stairs";
 	}
 
 }

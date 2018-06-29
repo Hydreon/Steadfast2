@@ -59,7 +59,14 @@ class Dispenser extends Solid {
 		return false;
 	}
 	
-	public function onUpdate($type) {
+	public function needScheduleOnUpdate() {
+		return true;
+	}
+	
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
 		static $offsets = [
 			self::SIDE_UP => [0, 1, 0],
 			self::SIDE_DOWN => [0, -1, 0],

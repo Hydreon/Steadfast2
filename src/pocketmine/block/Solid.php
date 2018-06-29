@@ -36,8 +36,11 @@ abstract class Solid extends Block{
 		return true;
 	}
 	
-	public function onUpdate($type) {
-		parent::onUpdate($type);
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		static $offsets = [
 			[0, 1, 0],
 			[0, -1, 0],
@@ -69,7 +72,7 @@ abstract class Solid extends Block{
 				$ev = new BlockUpdateEvent($block);
 				$pluginManager->callEvent($ev);
 				if(!$ev->isCancelled()){
-					$ev->getBlock()->onUpdate(Level::BLOCK_UPDATE_NORMAL);
+					$ev->getBlock()->onUpdate(Level::BLOCK_UPDATE_NORMAL, $deep);
 				}
 			}
 		}

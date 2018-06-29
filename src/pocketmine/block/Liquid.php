@@ -191,9 +191,13 @@ abstract class Liquid extends Transparent {
 		return 0;
 	}
 
-	public function onUpdate($type) {
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		if ($type === Level::BLOCK_UPDATE_NORMAL) {
-			$this->checkForHarden();
+			$this->checkForHarden($deep);
 			$this->getLevel()->scheduleUpdate($this, $this->tickRate());
 		} elseif ($type === Level::BLOCK_UPDATE_SCHEDULED) {
 			if ($this->temporalVector === null) {
@@ -207,10 +211,10 @@ abstract class Liquid extends Transparent {
 
 			if ($bottomBlock->canBeFlowedInto() || $bottomBlock instanceof Liquid) {
 				if (($this instanceof Lava && $bottomBlock instanceof Water) || ($this instanceof Water && $bottomBlock instanceof Lava)) {
-					$this->getLevel()->setBlock($bottomBlock, Block::get(Item::STONE), true);
+					$this->getLevel()->setBlock($bottomBlock, Block::get(Item::STONE), true, true, $deep);
 					return;
 				}
-				$this->getLevel()->setBlock($bottomBlock, Block::get($this->id, $decay >= 8 ? $decay : $decay + 8), true);
+				$this->getLevel()->setBlock($bottomBlock, Block::get($this->id, $decay >= 8 ? $decay : $decay + 8), true, true, $deep);
 				$this->getLevel()->scheduleUpdate($bottomBlock, $this->tickRate());
 			} elseif ($decay === 0 || $decay > 0 && !$bottomBlock->canBeFlowedInto()) {
 				$flags = $this->getOptimalFlowDirections();
@@ -222,38 +226,38 @@ abstract class Liquid extends Transparent {
 				}
 
 				if ($l >= 8) {
-					$this->checkForHarden();
+					$this->checkForHarden($deep);
 					return;
 				}
 
 				if ($flags[0]) {
-					$this->flowIntoBlock($this->level->getBlock($this->temporalVector->setComponents($this->x - 1, $this->y, $this->z)), $l);
+					$this->flowIntoBlock($this->level->getBlock($this->temporalVector->setComponents($this->x - 1, $this->y, $this->z)), $l, $deep);
 				}
 
 				if ($flags[1]) {
-					$this->flowIntoBlock($this->level->getBlock($this->temporalVector->setComponents($this->x + 1, $this->y, $this->z)), $l);
+					$this->flowIntoBlock($this->level->getBlock($this->temporalVector->setComponents($this->x + 1, $this->y, $this->z)), $l, $deep);
 				}
 
 				if ($flags[2]) {
-					$this->flowIntoBlock($this->level->getBlock($this->temporalVector->setComponents($this->x, $this->y, $this->z - 1)), $l);
+					$this->flowIntoBlock($this->level->getBlock($this->temporalVector->setComponents($this->x, $this->y, $this->z - 1)), $l, $deep);
 				}
 
 				if ($flags[3]) {
-					$this->flowIntoBlock($this->level->getBlock($this->temporalVector->setComponents($this->x, $this->y, $this->z + 1)), $l);
+					$this->flowIntoBlock($this->level->getBlock($this->temporalVector->setComponents($this->x, $this->y, $this->z + 1)), $l, $deep);
 				}
 //				sleep(5);
 			}
-			$this->checkForHarden();
+			$this->checkForHarden($deep);
 		}
 	}
 
-	private function flowIntoBlock(Block $block, $newFlowDecay) {
+	private function flowIntoBlock(Block $block, $newFlowDecay, $deep) {
 		if ($block->canBeFlowedInto()) {
 			if ($block->getId() > 0) {
 				$this->getLevel()->useBreakOn($block);
 			}
 
-			$this->getLevel()->setBlock($block, Block::get($this->getId(), $newFlowDecay), true, false);
+			$this->getLevel()->setBlock($block, Block::get($this->getId(), $newFlowDecay), true, false, $deep);
 			$this->getLevel()->scheduleUpdate($block, $this->tickRate());
 		}
 	}
@@ -432,7 +436,7 @@ abstract class Liquid extends Transparent {
 		return $this->isOptimalFlowDirection;
 	}
 
-	private function checkForHarden() {
+	private function checkForHarden($deep) {
 		if ($this instanceof Lava) {
 			$colliding = false;
 			for ($side = 0; $side <= 5 and ! $colliding; ++$side) {
@@ -441,9 +445,9 @@ abstract class Liquid extends Transparent {
 
 			if ($colliding) {
 				if ($this->getDamage() === 0) {
-					$this->getLevel()->setBlock($this, Block::get(Item::OBSIDIAN), true);
+					$this->getLevel()->setBlock($this, Block::get(Item::OBSIDIAN), true, true, $deep);
 				} elseif ($this->getDamage() <= 4) {
-					$this->getLevel()->setBlock($this, Block::get(Item::COBBLESTONE), true);
+					$this->getLevel()->setBlock($this, Block::get(Item::COBBLESTONE), true, true, $deep);
 				}
 			}
 		}
