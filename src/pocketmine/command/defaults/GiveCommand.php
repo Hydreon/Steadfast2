@@ -59,11 +59,11 @@ class GiveCommand extends VanillaCommand{
 		}
 
 		if($player instanceof Player){
-			if(($player->getGamemode() & 0x01) === 0x01){
-				$sender->sendMessage(TextFormat::RED . "Player is in creative mode");
-
-				return true;
-			}
+//			if(($player->getGamemode() & 0x01) === 0x01){
+//				$sender->sendMessage(TextFormat::RED . "Player is in creative mode");
+//
+//				return true;
+//			}
 			if($item->getId() == 0){
 				$sender->sendMessage(TextFormat::RED . "There is no item called " . $args[1] . ".");
 

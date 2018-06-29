@@ -150,6 +150,7 @@ class NBT{
 	}
 
 	public static function matchTree(Compound $tag1, Compound $tag2){
+//		if($tag1->getName() !== $tag2->getName() or $tag1->getCount() !== $tag2->getCount()){
 		if($tag1->getCount() !== $tag2->getCount()){
 			return false;
 		}

@@ -47,6 +47,8 @@ abstract class Tile extends Position{
 	const ENDER_CHEST = "EnderChest";
 	const BED = "Bed";
 	const CAULDRON = "Cauldron";
+	const PISTON_ARM = "PistonArm";
+	const DISPENSER = "Dispenser";
 
 	public static $tileCount = 1;
 

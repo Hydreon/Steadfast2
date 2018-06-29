@@ -54,7 +54,11 @@ class Mycelium extends Solid{
 		];
 	}
 
-	public function onUpdate($type){
+	public function onUpdate($type, $deep){
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		if($type === Level::BLOCK_UPDATE_RANDOM){
 			//TODO: light levels
 			$x = mt_rand($this->x - 1, $this->x + 1);
@@ -65,7 +69,7 @@ class Mycelium extends Solid{
 				if($block->getSide(1) instanceof Transparent){
 					Server::getInstance()->getPluginManager()->callEvent($ev = new BlockSpreadEvent($block, $this, new Mycelium()));
 					if(!$ev->isCancelled()){
-						$this->getLevel()->setBlock($block, $ev->getNewState());
+						$this->getLevel()->setBlock($block, $ev->getNewState(), false, true, $deep);
 					}
 				}
 			}

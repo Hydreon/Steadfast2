@@ -85,7 +85,7 @@ class Arrow extends Projectile{
 		$bb = clone parent::getBoundingBox();
 		return $bb;
 	}
-	
+		
 	public function move($dx, $dy, $dz) {
 		$this->blocksAround = null;
 		if ($dx == 0 && $dz == 0 && $dy == 0) {

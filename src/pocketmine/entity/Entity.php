@@ -93,11 +93,14 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_TYPE_POS = 6;
 	const DATA_TYPE_LONG = 7;
 	const DATA_TYPE_VECTOR3 = 8;
+	const DATA_TYPE_UNSIGNED_LONG = -7;
 
 	const DATA_FLAGS = 0; //is entity burning or not
 	const DATA_ANIMAL_VARIANT = 2; // type: int
 	const DATA_COLOR = 3; // type: byte
 	const DATA_NAMETAG = 4; // type: string
+	const DATA_OWNER_EID = 5; //long
+	const DATA_TARGET_EID = 6; //long
 	const DATA_AIR = 7; //air under water type: short
 	const DATA_POTION_COLOR = 8; // type: int data: rgb
 	const DATA_POTION_AMBIENT = 9; //is potion ambient or not
@@ -286,7 +289,8 @@ abstract class Entity extends Location implements Metadatable{
 	protected $timings;
 	
 	protected $fireDamage = 1;
-
+	
+	protected $blocksAround = [];
 
 	public function __construct(FullChunk $chunk, Compound $nbt){
 		if($chunk === null or $chunk->getProvider() === null){
@@ -1148,6 +1152,7 @@ abstract class Entity extends Location implements Metadatable{
 		$blocksAround[] = $this->level->getBlock(new Vector3($x, floor($this->y + $this->eyeHeight), $z));
 		return $blocksAround;
 	}
+
 	
 	protected function checkBlockCollision(){
 		foreach($this->getBlocksAround() as $block){
@@ -1166,7 +1171,8 @@ abstract class Entity extends Location implements Metadatable{
 		return false;
 	}
 
-	public function move($dx, $dy, $dz){	
+	public function move($dx, $dy, $dz){
+		$this->blocksAround = null;
 		if($dx == 0 and $dz == 0 and $dy == 0){
 			return true;
 		}

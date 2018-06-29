@@ -59,7 +59,7 @@ abstract class BaseInventory implements Inventory{
 	 */
 	public function __construct(InventoryHolder $holder, InventoryType $type, array $items = [], $overrideSize = null, $overrideTitle = null){
 		$this->holder = $holder;
-
+		
 		$this->type = $type;		
 		if($overrideSize !== null){
 			$this->size = (int) $overrideSize;
@@ -219,6 +219,15 @@ abstract class BaseInventory implements Inventory{
 			}
 		}
 
+		return -1;
+	}
+	
+	public function firstNotEmpty() {
+		for ($i = 0; $i < $this->size; $i++) {
+			if ($this->getItem($i)->getId() !== Item::AIR) {
+				return $i;
+			}
+		}
 		return -1;
 	}
 

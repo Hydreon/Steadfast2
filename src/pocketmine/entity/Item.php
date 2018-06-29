@@ -22,20 +22,20 @@
 namespace pocketmine\entity;
 
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\ItemDespawnEvent;
 use pocketmine\event\entity\ItemSpawnEvent;
 use pocketmine\item\Item as ItemItem;
+use pocketmine\level\Level;
 use pocketmine\math\Vector3;
+use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\Network;
 use pocketmine\network\protocol\AddItemEntityPacket;
 use pocketmine\Player;
-use pocketmine\nbt\NBT;
-use pocketmine\level\Level;
+use pocketmine\block\Block;
+use pocketmine\block\Water;
 use pocketmine\level\format\FullChunk;
 
 class Item extends Entity{
@@ -102,6 +102,8 @@ class Item extends Entity{
 		if($this->closed){
 			return false;
 		}
+		
+		
 
 		$tickDiff = $currentTick - $this->lastUpdate;
 		if ($tickDiff < 1) {
@@ -142,6 +144,17 @@ class Item extends Entity{
 			} else {
 				if ($this->onGround) {
 					$this->motionY *= -0.5;
+				}
+				
+				$blockId = $this->level->getBlockIdAt(floor($this->x), floor($this->y), floor($this->z));
+				if ($blockId == Block::WATER || $blockId == Block::STILL_WATER) {			
+					$water = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y), floor($this->z)));
+					if ($water instanceof Water) {
+						$flowVector = $water->getFlowVector();
+						$this->motionX = $flowVector->x * 0.1;
+	//					$this->motionY = -0.05;
+						$this->motionZ = $flowVector->z * 0.1;
+					}
 				}
 
 				if ($this->age > 1200) {

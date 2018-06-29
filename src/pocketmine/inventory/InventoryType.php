@@ -35,6 +35,30 @@ class InventoryType{
 	const BREWING_STAND = 7;
 	const ANVIL = 8;
 	const ENCHANT_TABLE = 9;
+	const DISPENSER = 10;
+	
+	const TYPE_NONE = -9;
+	const TYPE_INVENTORY = -1;
+	const TYPE_CONTAINER = 0;
+	const TYPE_WORKBENCH = 1;
+	const TYPE_FURNACE = 2;
+	const TYPE_ENCHANTMENT = 3;
+	const TYPE_BREWING_STAND = 4;
+	const TYPE_ANVIL = 5;
+	const TYPE_DISPENSER = 6;
+	const TYPE_DROPPER = 7;
+	const TYPE_HOPPER = 8;
+	const TYPE_CAULDRON = 9;
+	const TYPE_MINECART_CHEST = 10;
+	const TYPE_MINECART_HOPPER = 11;
+	const TYPE_HORSE = 12;
+	const TYPE_BEACON = 13;
+	const TYPE_STRUCTURE_EDITOR = 14;
+	const TYPE_TRADE = 15;
+	const TYPE_COMMAND_BLOCK = 16;
+	const TYPE_JUKEBOX = 17;
+	const TYPE_ARMOR = 18;
+	const TYPE_HAND = 19;
 
 	private static $default = [];
 
@@ -60,16 +84,17 @@ class InventoryType{
 		// 4 - BREWING_STAND
 		// 3 - ENCHANT_TABLE
 		// 2 - FURNACE
-		static::$default[static::CHEST] = new InventoryType(27, "Chest", 0);
-		static::$default[static::DOUBLE_CHEST] = new InventoryType(27 + 27, "Double Chest", 0);
-		static::$default[static::PLAYER] = new InventoryType(41, "Player", 0); //27 CONTAINER, 4 ARMOR (9 reference HOTBAR slots), 1 OFFHAND
-		static::$default[static::FURNACE] = new InventoryType(3, "Furnace", 2);
-		static::$default[static::CRAFTING] = new InventoryType(5, "Crafting", 1); //4 CRAFTING slots, 1 RESULT
-		static::$default[static::WORKBENCH] = new InventoryType(10, "Crafting", 1); //9 CRAFTING slots, 1 RESULT
-		static::$default[static::STONECUTTER] = new InventoryType(10, "Crafting", 1); //9 CRAFTING slots, 1 RESULT
-		static::$default[static::ENCHANT_TABLE] = new InventoryType(2, "Enchant", 3); //1 INPUT/OUTPUT, 1 LAPIS
- 		static::$default[static::BREWING_STAND] = new InventoryType(4, "Brewing", 4); //1 INPUT, 3 POTION
- 		static::$default[static::ANVIL] = new InventoryType(3, "Anvil", 5); //2 INPUT, 1 OUTPUT
+		static::$default[static::CHEST] = new InventoryType(27, "Chest", self::TYPE_CONTAINER);
+		static::$default[static::DOUBLE_CHEST] = new InventoryType(27 + 27, "Double Chest", self::TYPE_CONTAINER);
+		static::$default[static::PLAYER] = new InventoryType(41, "Player", self::TYPE_CONTAINER); //27 CONTAINER, 4 ARMOR (9 reference HOTBAR slots), 1 OFFHAND
+		static::$default[static::FURNACE] = new InventoryType(3, "Furnace", self::TYPE_FURNACE);
+		static::$default[static::CRAFTING] = new InventoryType(5, "Crafting", self::TYPE_WORKBENCH); //4 CRAFTING slots, 1 RESULT
+		static::$default[static::WORKBENCH] = new InventoryType(10, "Crafting", self::TYPE_WORKBENCH); //9 CRAFTING slots, 1 RESULT
+		static::$default[static::STONECUTTER] = new InventoryType(10, "Crafting", self::TYPE_WORKBENCH); //9 CRAFTING slots, 1 RESULT
+		static::$default[static::ENCHANT_TABLE] = new InventoryType(2, "Enchant", self::TYPE_ENCHANTMENT); //1 INPUT/OUTPUT, 1 LAPIS
+ 		static::$default[static::BREWING_STAND] = new InventoryType(4, "Brewing", self::TYPE_BREWING_STAND); //1 INPUT, 3 POTION
+ 		static::$default[static::ANVIL] = new InventoryType(3, "Anvil", self::TYPE_ANVIL); //2 INPUT, 1 OUTPUT
+ 		static::$default[static::DISPENSER] = new InventoryType(9, "Dispenser", self::TYPE_DISPENSER); //9 INPUT
 	}
 
 	/**

@@ -346,7 +346,7 @@ class CraftingManager{
 			" P ",
 			"   "
 		))->setIngredient("P", Item::get(Item::WOODEN_PLANKS, -1)));
-
+		
 		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::MINECART, 0, 1),
 			"I I",
 			"III",
@@ -388,6 +388,83 @@ class CraftingManager{
 			"III",
 			"III"
 		))->setIngredient("I", Item::get(Item::IRON_INGOT, 0)));
+		
+		// redstone
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::REDSTONE_TORCH_ACTIVE, 0, 1),
+			"   ",
+			" R ",
+			" S "
+		))->setIngredient("S", Item::get(Item::STICK))->setIngredient("R", Item::get(Item::REDSTONE)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::REDSTONE_REPEATER, 0, 1),
+			"   ",
+			"TRT",
+			"SSS"
+		))->setIngredient("S", Item::get(Item::STONE, -1))->setIngredient("R", Item::get(Item::REDSTONE))->setIngredient("T", Item::get(Item::REDSTONE_TORCH_ACTIVE)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::WOODEN_BUTTON, 0, 1),
+			"   ",
+			" W ",
+			"   "
+		))->setIngredient("W", Item::get(Item::WOODEN_PLANKS, -1)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::STONE_BUTTON, 0, 1),
+			"   ",
+			" S ",
+			"   "
+		))->setIngredient("S", Item::get(Item::STONE, -1)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::LEVER, 0, 1),
+			"   ",
+			" S ",
+			" C "
+		))->setIngredient("S", Item::get(Item::STICK))->setIngredient("C", Item::get(Item::COBBLESTONE)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::PISTON, 0, 1),
+			"WWW",
+			"CIC",
+			"CRC"
+		))->setIngredient("W", Item::get(Item::WOODEN_PLANKS, -1))->setIngredient("R", Item::get(Item::REDSTONE))->setIngredient("C", Item::get(Item::COBBLESTONE))->setIngredient("I", Item::get(Item::IRON_INGOT)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::STICKY_PISTON, 0, 1),
+			"   ",
+			" S ",
+			" P "
+		))->setIngredient("S", Item::get(Item::SLIMEBALL))->setIngredient("P", Item::get(Item::PISTON)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::DISPENSER, 0, 1),
+			"CCC",
+			"CBC",
+			"CRC"
+		))->setIngredient("C", Item::get(Item::COBBLESTONE))->setIngredient("R", Item::get(Item::REDSTONE))->setIngredient("B", Item::get(Item::BOW)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::IRON_DOOR, 0, 3),
+			"II ",
+			"II ",
+			"II "
+		))->setIngredient("I", Item::get(Item::IRON_INGOT)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::IRON_TRAPDOOR, 0, 3),
+			"   ",
+			"II ",
+			"II "
+		))->setIngredient("I", Item::get(Item::IRON_INGOT)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::STONE_PRESSURE_PLATE),
+			"   ",
+			"SS ",
+			"   "
+		))->setIngredient("S", Item::get(Item::STONE)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::WOODEN_PRESSURE_PLATE),
+			"   ",
+			"WW ",
+			"   "
+		))->setIngredient("W", Item::get(Item::WOODEN_PLANKS)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::WEIGHTED_PRESSURE_PLATE_HEAVY),
+			"   ",
+			"II ",
+			"   "
+		))->setIngredient("I", Item::get(Item::IRON_INGOT)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::WEIGHTED_PRESSURE_PLATE_LIGHT),
+			"   ",
+			"GG ",
+			"   "
+		))->setIngredient("G", Item::get(Item::GOLD_INGOT)));
+		$this->registerRecipe((new BigShapedRecipe(Item::get(Item::RAIL, 0, 16),
+			"I I",
+			"ISI",
+			"I I"
+		))->setIngredient("S", Item::get(Item::STICK))->setIngredient("I", Item::get(Item::IRON_INGOT)));
 	}
 
 	protected function registerFurnace(){
