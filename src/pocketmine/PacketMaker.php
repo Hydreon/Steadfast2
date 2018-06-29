@@ -110,7 +110,7 @@ class PacketMaker extends Thread {
 				$pkBatch->payload = $buffer;
 				$pkBatch->encode($moveData['playerProtocol']);
 				$pkBatch->isEncoded = true;
-				$this->externalQueue[] = $this->makeBuffer($identifier, $pkBatch, false, false);
+				$this->externalQueue[] = $this->makeBuffer($identifier, $pkBatch);
 			}	
 			foreach ($data['motionData'] as $identifier => $motionData) {
 				$motionStr = "";
@@ -126,7 +126,7 @@ class PacketMaker extends Thread {
 				$pkBatch->payload = $buffer;
 				$pkBatch->encode($motionData['playerProtocol']);
 				$pkBatch->isEncoded = true;
-				$this->externalQueue[] = $this->makeBuffer($identifier, $pkBatch, false, false);
+				$this->externalQueue[] = $this->makeBuffer($identifier, $pkBatch);
 			}
 		} elseif($data['isBatch']) {
 			$packetsStr = [];
@@ -151,7 +151,7 @@ class PacketMaker extends Thread {
 			
 			foreach($data['targets'] as $target){
 				if (isset($packs[$target[1]])) {
-					$this->externalQueue[] = $this->makeBuffer($target[0], $packs[$target[1]], false, false);
+					$this->externalQueue[] = $this->makeBuffer($target[0], $packs[$target[1]]);
 				}
 			}
 		}
@@ -159,7 +159,7 @@ class PacketMaker extends Thread {
 	}
 
 
-	protected function makeBuffer($identifier, $fullPacket, $needACK, $identifierACK) {		
+	protected function makeBuffer($identifier, $fullPacket) {		
 		$data = array(
 			'identifier' => $identifier,
 			'buffer' => $fullPacket->buffer

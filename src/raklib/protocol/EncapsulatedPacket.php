@@ -39,7 +39,6 @@ class EncapsulatedPacket{
     public $splitID = null;
     public $splitIndex = null;
     public $buffer;
-    public $needACK = false;
     public $identifierACK = null;
 
     /**

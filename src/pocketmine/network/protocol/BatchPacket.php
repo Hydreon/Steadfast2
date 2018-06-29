@@ -29,52 +29,13 @@ class BatchPacket extends PEPacket{
 	const PACKET_NAME = "BATCH_PACKET";
 
 	public $payload;
-	public $is110 = false;
 
 	public function decode($playerProtocol) {
-		if ($this->is110) {
-			$playerProtocol = Info::PROTOCOL_110;
-		}
-		switch ($playerProtocol) {
-			case Info::PROTOCOL_280:
-			case Info::PROTOCOL_274:
-			case Info::PROTOCOL_273:
-			case Info::PROTOCOL_271:
-			case Info::PROTOCOL_260:
-			case Info::PROTOCOL_240:
-			case Info::PROTOCOL_221:
-			case Info::PROTOCOL_220:
-			case Info::PROTOCOL_200:
-			case Info::PROTOCOL_120:
-			case Info::PROTOCOL_110:
-				$this->payload = $this->get(true);
-				break;
-			default:
-				$this->payload = $this->getString();
-				break;
-		}
+		$this->payload = $this->get(true);
 	}
 
 	public function encode($playerProtocol) {
-		switch ($playerProtocol) {
-			case Info::PROTOCOL_280:
-			case Info::PROTOCOL_274:
-			case Info::PROTOCOL_273:
-			case Info::PROTOCOL_271:
-			case Info::PROTOCOL_260:
-			case Info::PROTOCOL_240:
-			case Info::PROTOCOL_221:
-			case Info::PROTOCOL_220:
-			case Info::PROTOCOL_200:
-			case Info::PROTOCOL_120:
-			case Info::PROTOCOL_110:
-				$this->buffer = $this->payload;
-				break;
-			default:
-				$this->reset($playerProtocol);
-				$this->putString($this->payload);
-				break;
-		}
+		$this->buffer = $this->payload;
 	}
 
 }
