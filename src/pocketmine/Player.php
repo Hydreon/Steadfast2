@@ -1737,7 +1737,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					// error_log("Invalid Identity Public Key " . $packet->username);
 					break;
 				}
-				
+				$this->inventory = Multiversion::getPlayerInventory($this);				
 				$this->username = TextFormat::clean($packet->username);
                 $this->xblName = $this->username;
 				$this->displayName = $this->username;
@@ -4908,6 +4908,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->rawUUID = $this->uuid->toBinary();
 		$this->clientSecret = $packet->clientSecret;
 		$this->protocol = $parent->getPlayerProtocol();
+		$this->inventory = Multiversion::getPlayerInventory($this);
 		$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData);
 		$this->subClientId = $packet->targetSubClientID;
 		

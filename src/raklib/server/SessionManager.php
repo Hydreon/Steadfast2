@@ -216,9 +216,10 @@ class SessionManager{
 			$decoded = zlib_decode($buff);
 			$stream = new BinaryStream($decoded);
 			$length = strlen($decoded);
+			static $spamPacket = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 			while ($stream->getOffset() < $length) {
 				$buf = $stream->getString();
-				if (empty($buf)) {
+				if (empty($buf) || $buf == $spamPacket) {
 					continue;
 				}
 				$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buf;
