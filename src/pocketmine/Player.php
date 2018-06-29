@@ -1874,7 +1874,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							}
 							
 							$topBlockId = $this->level->getBlockIdAt($packet->x, $packet->y + 1, $packet->z);
-							if ($topBlockId == block\Block::FIRE) {
+							if ($topBlockId == Block::FIRE) {
 								$fireBlock = $this->level->getBlock(new Vector3($packet->x, $packet->y + 1, $packet->z));
 								$this->level->sendBlocks([$this], [$fireBlock], UpdateBlockPacket::FLAG_ALL_PRIORITY);
 							}
@@ -4377,12 +4377,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	protected function onJump() {
-//		$this->inventory->addItem(Item::get(Item::REDSTONE_TORCH_ACTIVE, 0, 10));
-//		$this->inventory->addItem(Item::get(Item::REDSTONE, 0, 10));
-//		$this->inventory->addItem(Item::get(Item::WOOL, 0, 4));
-//		$this->inventory->addItem(Item::get(Item::STONE_BUTTON, 0, 10));
-////		$this->inventory->addItem(Item::get(Item::IRON_DOOR, 0, 1));
-//		$this->inventory->addItem(Item::get(block\Block::PISTON, 0, 1));
+
  	}
 	
 	protected function releaseUseItem() {
