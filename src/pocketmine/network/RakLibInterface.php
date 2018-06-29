@@ -191,8 +191,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 					}
 				}
 			}catch(\Exception $e){
-				var_dump($e->getMessage());
-				$this->interface->blockAddress($player->getAddress(), 5);
+				error_log($e->getMessage());
 			}
 		}
 	}
