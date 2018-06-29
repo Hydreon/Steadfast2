@@ -151,7 +151,6 @@ use pocketmine\network\protocol\AvailableCommandsPacket;
 use pocketmine\network\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
 use pocketmine\network\protocol\ResourcePackStackPacket;
-use raklib\Binary;
 use pocketmine\network\protocol\ServerToClientHandshakePacket;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Elytra;
@@ -174,6 +173,7 @@ use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\v120\SubClientLoginPacket;
 use pocketmine\tile\SignEntity;
+use pocketmine\utils\Binary;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -264,7 +264,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $iusername = '';
 	protected $displayName = '';
 	protected $startAction = -1;
-	public $protocol = ProtocolInfo::BASE_PROTOCOL;
+	public $protocol = ProtocolInfo::PROTOCOL_110;
 	/** @var Vector3 */
 	protected $sleeping = null;
 	protected $clientID = null;
@@ -324,9 +324,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	private $expLevel = 0;
 
 	private $elytraIsActivated = false;
-	
-	private $encrypter = null;
-	private $encryptEnabled = false;
     
     /** @IMPORTANT don't change the scope */
     private $inventoryType = self::INVENTORY_CLASSIC;
@@ -390,6 +387,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastInteractTick = 0;
 	
 	private $lastInteractCoordsHash = -1;
+	
+	protected $entitiesUUIDEids = [];
+	protected $lastEntityRemove = [];
+	protected $entitiesPacketsQueue = [];
+	protected $packetQueue = [];
 	
 	public function getLeaveMessage(){
 		return "";
@@ -913,63 +915,126 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * Sends an ordered DataPacket to the send buffer
 	 *
 	 * @param DataPacket $packet
-	 * @param bool       $needACK
 	 *
 	 * @return int|bool
 	 */
-	public function dataPacket(DataPacket $packet, $needACK = false){		
+	public function dataPacket(DataPacket $packet){		
 		if($this->connected === false){
 			return false;
 		}
 		
 		if ($this->subClientId > 0 && $this->parent != null) {
 			$packet->senderSubClientID = $this->subClientId;
-			return $this->parent->dataPacket($packet, $needACK);
+			return $this->parent->dataPacket($packet);
 		}
 		
-		if ($this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
-			$disallowedPackets = Protocol120::getDisallowedPackets();
-			if (in_array(get_class($packet), $disallowedPackets)) {
+		switch($packet->pname()){
+			case 'BATCH_PACKET':
+				$packet->encode($this->protocol);
+				$this->interface->putReadyPacket($this, $packet->buffer);
 				$packet->senderSubClientID = 0;
-				return true;
-			}
+				return;
+			case 'ADD_PLAYER_PACKET':
+			case 'ADD_ENTITY_PACKET':
+			case 'ADD_ITEM_ENTITY_PACKET':
+			case 'SET_ENTITY_DATA_PACKET':
+			case 'MOB_EQUIPMENT_PACKET':
+			case 'MOB_ARMOR_EQUIPMENT_PACKET':
+			case 'ENTITY_EVENT_PACKET':
+			case 'MOB_EFFECT_PACKET':
+				if (isset($this->lastEntityRemove[$packet->eid])) {
+					$this->addEntityPacket($packet->eid, $packet);
+					return;
+				}
+				break;
+			case 'REMOVE_ENTITY_PACKET':
+				if (isset($this->entitiesPacketsQueue[$packet->eid])) {
+					unset($this->entitiesPacketsQueue[$packet->eid]);
+					return;
+				}
+				$this->lastEntityRemove[$packet->eid] = $this->lastUpdate;
+				unset($this->entitiesUUIDEids[$packet->eid]);
+				break;
+			case 'PLAYER_LIST_PACKET':
+				if (count($packet->entries) == 1) {
+					$entryData = $packet->entries[0];
+					if ($packet->type == PlayerListPacket::TYPE_ADD) {						
+						if (isset($this->lastEntityRemove[$entryData[1]])) {
+							$this->addEntityPacket($entryData[1], $packet);
+							$this->entitiesUUIDEids[$entryData[1]] = $entryData[0];
+							return;
+						}
+					} elseif ($packet->type == PlayerListPacket::TYPE_REMOVE) {	
+						foreach ($this->entitiesUUIDEids as $eid => $uuid) {
+							if ($entryData[0] === $uuid) {
+								if (isset($this->lastEntityRemove[$eid])) {
+									unset($this->entitiesUUIDEids[$eid]);
+									$this->addEntityPacket($eid, $packet);
+									return;
+								}
+							}
+						}
+					}
+				}
+				break;
+			case 'UPDATE_ATTRIBUTES_PACKET':
+				if (isset($this->lastEntityRemove[$packet->entityId])) {
+					$this->addEntityPacket($packet->entityId, $packet);
+					return;
+				}
+				break;
+			case 'SET_ENTITY_LINK_PACKET':
+				if (isset($this->lastEntityRemove[$packet->from])) {
+					$this->addEntityPacket($packet->from, $packet);
+					return;
+				} elseif (isset($this->lastEntityRemove[$packet->to])) {
+					$this->addEntityPacket($packet->to, $packet);
+					return;
+				}
+				break;
 		}
-		
-		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
-		if($ev->isCancelled()){
-			return false;
-		}
-		
-		$this->interface->putPacket($this, $packet, $needACK, false);
+		$packet->encode($this->protocol);
+		$this->packetQueue[] = $packet->buffer;
 		$packet->senderSubClientID = 0;
 		return true;
+	}
+	
+	public function sendPacketQueue() {
+		if (count($this->packetQueue) <= 0) {
+			return;
+		}
+		$buffer = '';
+		foreach ($this->packetQueue as $pkBuf) {
+			$buffer .= Binary::writeVarInt(strlen($pkBuf)) . $pkBuf;
+		}
+		$this->packetQueue = [];
+		$this->interface->putPacket($this, $buffer);
+	}
+	
+	protected function addEntityPacket($eid, $pk) {
+		$pk->encode($this->protocol);
+		$this->entitiesPacketsQueue[$eid][] = $pk->buffer;
+		$pk->senderSubClientID = 0;
 	}
 
 	/**
 	 * @param DataPacket $packet
-	 * @param bool       $needACK
 	 *
 	 * @return bool|int
 	 */
-	public function directDataPacket(DataPacket $packet, $needACK = false){
+	public function directDataPacket(DataPacket $packet){
 		if($this->connected === false){
 			return false;
 		}
 		
-		if ($this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
-			$disallowedPackets = Protocol120::getDisallowedPackets();
-			if (in_array(get_class($packet), $disallowedPackets)) {
-				return;
-			}
+		if ($this->subClientId > 0 && $this->parent != null) {
+			$packet->senderSubClientID = $this->subClientId;
+			return $this->parent->dataPacket($packet);
 		}
-
-		$this->server->getPluginManager()->callEvent($ev = new DataPacketSendEvent($this, $packet));
-		if($ev->isCancelled()){
-			return false;
-		}
-
-		$this->interface->putPacket($this, $packet, $needACK, true);
-
+		
+		$packet->encode($this->protocol);
+		$packet->senderSubClientID = 0;
+		$this->interface->putPacket($this, Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer, true);
 		return true;
 	}
 
@@ -1475,10 +1540,25 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->sendNoteSound($noteId);
 		}
 		$this->hackForCraftLastIndex = 0;
+		
+		
+		foreach ($this->lastEntityRemove as $eid => $tick) {
+			if ($tick + 20 < $this->lastUpdate) {
+				unset($this->lastEntityRemove[$eid]);
+				if (isset($this->entitiesPacketsQueue[$eid])) {
+					$this->sendEntityPackets($this->entitiesPacketsQueue[$eid]);
+					unset($this->entitiesPacketsQueue[$eid]);
+				}
+			}
+		}
 
 		//$this->timings->stopTiming();
 
 		return true;
+	}
+	
+	protected function sendEntityPackets($packets) {
+		$this->packetQueue = array_merge($this->packetQueue, $packets);
 	}
 
 	public function eatFoodInHand() {
@@ -1605,15 +1685,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($this->connected === false){
 			return;
 		}
-
-		if($packet->pname() === 'BATCH_PACKET'){
-			/** @var BatchPacket $packet */
-			//Timings::$timerBatchPacket->startTiming();
-			$this->server->getNetwork()->processBatch($packet, $this);
-			//Timings::$timerBatchPacket->stopTiming();
-			return;
-		}
-		
 		$beforeLoginAvailablePackets = ['LOGIN_PACKET', 'REQUEST_CHUNK_RADIUS_PACKET', 'RESOURCE_PACKS_CLIENT_RESPONSE_PACKET', 'CLIENT_TO_SERVER_HANDSHAKE_PACKET', 'RESOURCE_PACK_CHUNK_REQUEST_PACKET'];
 		if (!$this->isOnline() && !in_array($packet->pname(), $beforeLoginAvailablePackets)) {
 			return;
@@ -3222,8 +3293,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->publicKey = $this->server->getServerPublicKey();
 			$pk->serverToken = $token;
 			$pk->privateKey = $privateKey;
-			$this->dataPacket($pk);
-			$this->enableEncrypt($token, $privateKey, $this->identityPublicKey);
+			$this->directDataPacket($pk);
+			$this->interface->enableEncryptForPlayer($this, $token, $privateKey, $this->identityPublicKey);
 		} else {
 			$this->continueLoginProcess();
 		}
@@ -3380,7 +3451,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->gamemode = $this->gamemode & 0x01;
 		$pk->eid = $this->id;
 		$pk->stringClientVersion = $this->clientVersion;
-		$this->dataPacket($pk);
+		$this->directDataPacket($pk);
 
 		$pk = new SetTimePacket();
 		$pk->time = $this->level->getTime();
@@ -3411,6 +3482,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->sendSelfData();				
 		$this->updateSpeed(self::DEFAULT_SPEED);
+		$this->sendFullPlayerList();
 //		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
 	}
 
@@ -3685,23 +3757,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->elytraIsActivated;
 	}
 	
-	public function isEncryptEnable() {
-		return $this->encryptEnabled;
-	}
-
-	public function getEncrypt($sStr) {		
-		return $this->encrypter->encrypt($sStr);
-	}	
-
-	public function getDecrypt($sStr) {
-		return $this->encrypter->decrypt($sStr);
-	}
-
-	private function enableEncrypt($token, $privateKey, $publicKey) {
-		$this->encrypter = new \McpeEncrypter($token, $privateKey, $publicKey);
-		$this->encryptEnabled = true;
-	}
-
 	public function getPlayerProtocol() {
 		return $this->protocol;
 	}
@@ -3736,37 +3791,33 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
         return $this->xuid;
     }
 	
-	public function setTitle($text, $subtext = '', $time = 36000) {
-		if ($this->protocol >= Info::PROTOCOL_105) {		
+	public function setTitle($text, $subtext = '', $time = 36000) {		
+		$pk = new SetTitlePacket();
+		$pk->type = SetTitlePacket::TITLE_TYPE_TIMES;
+		$pk->text = "";
+		$pk->fadeInTime = 5;
+		$pk->fadeOutTime = 5;
+		$pk->stayTime = 20 * $time;
+		$this->dataPacket($pk);
+
+		if (!empty($subtext)) {
 			$pk = new SetTitlePacket();
-			$pk->type = SetTitlePacket::TITLE_TYPE_TIMES;
-			$pk->text = "";
-			$pk->fadeInTime = 5;
-			$pk->fadeOutTime = 5;
-			$pk->stayTime = 20 * $time;
+			$pk->type = SetTitlePacket::TITLE_TYPE_SUBTITLE;
+			$pk->text = $subtext;
 			$this->dataPacket($pk);
-			
-			if (!empty($subtext)) {
-				$pk = new SetTitlePacket();
-				$pk->type = SetTitlePacket::TITLE_TYPE_SUBTITLE;
-				$pk->text = $subtext;
-				$this->dataPacket($pk);
-			}
-			
-			$pk = new SetTitlePacket();
-			$pk->type = SetTitlePacket::TITLE_TYPE_TITLE;
-			$pk->text = $text;
-			$this->dataPacket($pk);	
 		}
+
+		$pk = new SetTitlePacket();
+		$pk->type = SetTitlePacket::TITLE_TYPE_TITLE;
+		$pk->text = $text;
+		$this->dataPacket($pk);	
 	}
 
 	public function clearTitle() {
-		if ($this->protocol >= Info::PROTOCOL_105) {
-			$pk = new SetTitlePacket();
-			$pk->type = SetTitlePacket::TITLE_TYPE_CLEAR;
-			$pk->text = "";
-			$this->dataPacket($pk);
-		}
+		$pk = new SetTitlePacket();
+		$pk->type = SetTitlePacket::TITLE_TYPE_CLEAR;
+		$pk->text = "";
+		$this->dataPacket($pk);
 	}
 		
 	public function sendNoteSound($noteId, $queue = false) {

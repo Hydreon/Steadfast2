@@ -210,8 +210,20 @@ class SessionManager{
 		$id = $session->getAddress() . ":" . $session->getPort();
 		if (ord($packet->buffer{0}) == 0xfe) {
 			$buff = substr($packet->buffer, 1);
-			$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buff;
-			$this->server->pushThreadToMainPacket($buffer);
+			if ($session->isEncryptEnable()) {
+				$buff = $session->getDecrypt($buff);
+			}
+			$decoded = zlib_decode($buff);
+			$stream = new BinaryStream($decoded);
+			$length = strlen($decoded);
+			while ($stream->getOffset() < $length) {
+				$buf = $stream->getString();
+				if (empty($buf)) {
+					continue;
+				}
+				$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buf;
+				$this->server->pushThreadToMainPacket($buffer);
+			}
 		}
     }
 	
@@ -240,11 +252,6 @@ class SessionManager{
     protected function streamOpen(Session $session){
         $identifier = $session->getAddress() . ":" . $session->getPort();
         $buffer = chr(RakLib::PACKET_OPEN_SESSION) . chr(strlen($identifier)) . $identifier . chr(strlen($session->getAddress())) . $session->getAddress() . Binary::writeShort($session->getPort()) . Binary::writeLong($session->getID());
-        $this->server->pushThreadToMainPacket($buffer);
-    }
-
-    protected function streamACK($identifier, $identifierACK){
-        $buffer = chr(RakLib::PACKET_ACK_NOTIFICATION) . chr(strlen($identifier)) . $identifier . Binary::writeInt($identifierACK);
         $this->server->pushThreadToMainPacket($buffer);
     }
 
@@ -280,8 +287,28 @@ class SessionManager{
                     $this->sessions[$identifier]->addEncapsulatedToQueue(EncapsulatedPacket::fromBinary($buffer, true), $flags);
                 }else{
                     $this->streamInvalid($identifier);
-                }
-            }elseif($id === RakLib::PACKET_RAW){
+				}
+			} elseif ($id === RakLib::PACKET_ENABLE_ENCRYPT) {
+				$len = ord($packet{$offset++});
+				$identifier = substr($packet, $offset, $len);
+				$offset += $len;
+				if (isset($this->sessions[$identifier])) {
+					$len = Binary::readShort(substr($packet, $offset, 2));
+					$offset += 2;
+					$token = substr($packet, $offset, $len);
+					$offset += $len;
+					$len = Binary::readShort(substr($packet, $offset, 2));
+					$offset += 2;
+					$privateKey = substr($packet, $offset, $len);
+					$offset += $len;
+					$len = Binary::readShort(substr($packet, $offset, 2));
+					$offset += 2;
+					$publicKey = substr($packet, $offset, $len);
+					$this->sessions[$identifier]->enableEncrypt($token, $privateKey, $publicKey);
+				} else {
+					$this->streamInvalid($identifier);
+				}
+			}elseif($id === RakLib::PACKET_RAW){
                 $len = ord($packet{$offset++});
                 $address = substr($packet, $offset, $len);
                 $offset += $len;
@@ -385,10 +412,6 @@ class SessionManager{
 
     public function openSession(Session $session){
         $this->streamOpen($session);
-    }
-
-    public function notifyACK(Session $session, $identifierACK){
-        $this->streamACK($session->getAddress() . ":" . $session->getPort(), $identifierACK);
     }
 
     public function getName(){

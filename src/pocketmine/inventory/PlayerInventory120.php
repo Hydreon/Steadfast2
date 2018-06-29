@@ -222,15 +222,13 @@ class PlayerInventory120 extends PlayerInventory {
 		$pk->selectedSlot = $this->getHeldItemIndex();
 		$pk->windowId = MobEquipmentPacket::WINDOW_ID_PLAYER_OFFHAND;
 		foreach ($targets as $player) {
-			if ($player->getPlayerProtocol() >= Info::PROTOCOL_110) {
-				if ($player === $this->getHolder()) {
-					$pk2 = new InventoryContentPacket();
-					$pk2->inventoryID = Protocol120::CONTAINER_ID_OFFHAND;
-					$pk2->items = [$this->getItem($this->getSize() + self::OFFHAND_ARMOR_SLOT_ID)];
-					$player->dataPacket($pk2);
-				} else {
-					$player->dataPacket($pk);
-				}
+			if ($player === $this->getHolder()) {
+				$pk2 = new InventoryContentPacket();
+				$pk2->inventoryID = Protocol120::CONTAINER_ID_OFFHAND;
+				$pk2->items = [$this->getItem($this->getSize() + self::OFFHAND_ARMOR_SLOT_ID)];
+				$player->dataPacket($pk2);
+			} else {
+				$player->dataPacket($pk);
 			}
 		}
 	}

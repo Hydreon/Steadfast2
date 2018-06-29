@@ -36,7 +36,6 @@ use raklib\RakLib;
 use raklib\server\RakLibServer;
 use raklib\server\ServerHandler;
 use raklib\server\ServerInstance;
-use pocketmine\network\protocol\BatchPacket;
 use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryStream;
 
@@ -192,8 +191,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 					}
 				}
 			}catch(\Exception $e){
-				var_dump($e->getMessage());
-				$this->interface->blockAddress($player->getAddress(), 5);
+				error_log($e->getMessage());
 			}
 		}
 	}
@@ -217,12 +215,6 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->interface->sendRaw($address, $port, $payload);
 	}
 
-	public function notifyACK($identifier, $identifierACK){
-		if(isset($this->players[$identifier])){
-			$this->players[$identifier]->handleACK($identifierACK);
-		}
-	}
-
 	public function setName($name){
 		if(strlen($name) > 1) {
 			$this->name = $name;
@@ -240,52 +232,11 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		}
 	}
 
-	/*
-	 * $player - packet recipient
-	 */
-	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false){
-		if(isset($this->identifiers[$player])){			
-			$protocol = $player->getPlayerProtocol();
-			$packet->encode($protocol);
-			$identifier = $this->identifiers[$player];	
-
-			$pk = new EncapsulatedPacket();				
-			$pk->buffer = chr(0xfe) . $this->getPacketBuffer($packet, $protocol);
-			$pk->reliability = 3;
-
-			if($needACK === true){
-				$pk->identifierACK = $this->identifiersACK[$identifier]++;
-			}
-			
-			if($player->isEncryptEnable()) {
-				$pk->buffer = chr(0xfe) . $player->getEncrypt(substr($pk->buffer,1));
-			}
-
-			if ($immediate) {
-				$pk->reliability = 0;
-			}
-
-			$this->interface->sendEncapsulated($identifier, $pk, ($needACK === true ? RakLib::FLAG_NEED_ACK : 0) | ($immediate === true ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL));
-		}
-
-		return null;
-	}
-	
-
-	private function getPacket($buffer, $player){
-		$playerProtocol = $player->getPlayerProtocol();
-		if ($player->isEncryptEnable()) {
-			$buffer = $player->getDecrypt($buffer);			
-		}		
-		if ($playerProtocol >= Info::PROTOCOL_110 || $player->getOriginalProtocol() == 0 && $this->isZlib($buffer)) {
-			$pk = new BatchPacket($buffer);
-			$pk->is110 = true;
-			return $pk;
-		}
+	private function getPacket($buffer, $player){	
 		$tmpStream = new BinaryStream($buffer);
 		$header = $tmpStream->getVarInt();
 		$pid = $header & 0x3FF;		
-		if (($data = $this->network->getPacket($pid, $playerProtocol)) === null) {
+		if (($data = $this->network->getPacket($pid, $player->getPlayerProtocol())) === null) {
 			return null;
 		}
 		$data->setBuffer($buffer);
@@ -295,36 +246,24 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	public function putReadyPacket($player, $buffer) {
 		if (isset($this->identifiers[$player])) {	
 			$pk = new EncapsulatedPacket();
-			$pk->buffer = chr(0xfe) . $buffer;
+			$pk->buffer = $buffer;
 			$pk->reliability = 3;	
-			if($player->isEncryptEnable()) {
-				$pk->buffer = chr(0xfe) . $player->getEncrypt(substr($pk->buffer,1));
-			}
 			$this->interface->sendEncapsulated($player->getIdentifier(), $pk, RakLib::PRIORITY_NORMAL);			
 		}
 	}
 	
-	private function getPacketBuffer($packet, $protocol) {
-		if ($protocol < Info::PROTOCOL_110 || ($packet instanceof BatchPacket)) {
-			return $packet->buffer;
+	public function putPacket($player, $buffer, $immediate = false) {
+		if (isset($this->identifiers[$player])) {
+			$pk = new EncapsulatedPacket();
+			$pk->buffer = $buffer;
+			$pk->reliability = 3;
+			$this->interface->sendEncapsulated($player->getIdentifier(), $pk, ($immediate === true ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL) | RakLib::FLAG_NEED_ZLIB);
 		}
-		if (strlen($packet->buffer) >= Network::$BATCH_THRESHOLD) {
-			return zlib_encode(Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer, ZLIB_ENCODING_DEFLATE, 7);
-		}
-		return $this->fakeZlib(Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer);
 	}
 	
-	private function fakeZlib($buffer) {
-		static $startBytes = "\x78\x01\x01";
-		$len = strlen($buffer);
-		return $startBytes . Binary::writeLShort($len) . Binary::writeLShort($len ^ 0xffff) . $buffer . hex2bin(hash('adler32', $buffer, false));
-	}
-	
-	private function isZlib($buffer) {
-		if (ord($buffer{0}) == 120) {
-			return true;
-		}
-		return false;
+	public function enableEncryptForPlayer(Player $player, $token, $privateKey, $publicKey){
+		$identifier = $this->identifiers[$player];	
+		$this->interface->enableEncrypt($identifier, $token, $privateKey, $publicKey);
 	}
 
 }

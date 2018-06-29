@@ -139,17 +139,20 @@ class ServerHandler{
                 $len = ord($packet{$offset++});
                 $identifier = substr($packet, $offset, $len);
                 $this->instance->closeSession($identifier, "Invalid session");
-            }elseif($id === RakLib::PACKET_ACK_NOTIFICATION){
-                $len = ord($packet{$offset++});
-                $identifier = substr($packet, $offset, $len);
-                $offset += $len;
-                $identifierACK = Binary::readInt(substr($packet, $offset, 4));
-                $this->instance->notifyACK($identifier, $identifierACK);
-            } 
+            }
 
             return true;
         }
 
         return false;
     }
+	
+	public function enableEncrypt($identifier, $token, $privateKey, $publicKey) {
+		$buffer = chr(RakLib::PACKET_ENABLE_ENCRYPT) . chr(strlen($identifier)) . $identifier;
+		$buffer .= Binary::writeShort(strlen($token)) . $token;
+		$buffer .= Binary::writeShort(strlen($privateKey)) . $privateKey;
+		$buffer .= Binary::writeShort(strlen($publicKey)) . $publicKey;
+		$this->server->pushMainToThreadPacket($buffer);
+	}
+
 }

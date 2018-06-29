@@ -370,16 +370,14 @@ class PlayerInventory extends BaseInventory{
 		$pk->selectedSlot = $this->getHeldItemIndex();
 		$pk->windowId = MobEquipmentPacket::WINDOW_ID_PLAYER_OFFHAND;
 		foreach ($target as $player) {
-			if ($player->getPlayerProtocol() >= Info::PROTOCOL_110) {
-				if ($player === $this->getHolder()) {
-					$pk2 = new ContainerSetSlotPacket();
-					$pk2->windowid = ContainerSetContentPacket::SPECIAL_OFFHAND;
-					$pk2->slot = 0;
-					$pk2->item = $this->getItem($this->getSize() + self::OFFHAND_ARMOR_SLOT_ID);
-					$player->dataPacket($pk2);
-				} else {
-					$player->dataPacket($pk);
-				}
+			if ($player === $this->getHolder()) {
+				$pk2 = new ContainerSetSlotPacket();
+				$pk2->windowid = ContainerSetContentPacket::SPECIAL_OFFHAND;
+				$pk2->slot = 0;
+				$pk2->item = $this->getItem($this->getSize() + self::OFFHAND_ARMOR_SLOT_ID);
+				$player->dataPacket($pk2);
+			} else {
+				$player->dataPacket($pk);
 			}
 		}
 	}
