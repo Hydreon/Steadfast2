@@ -2079,7 +2079,7 @@ class Server{
 
 		$this->logger->info("Done (" . round(microtime(true) - \pocketmine\START_TIME, 3) . 's)! For help, type "help" or "?"');
 
-		$this->packetMaker = new PacketMaker($this->getLoader());
+		$this->packetMaker = new PacketMaker($this->getLoader(), $this->mainInterface->getRakLib());
 		
 		$this->tickAverage = array();
 		$this->useAverage = array();
@@ -2406,14 +2406,6 @@ class Server{
 			$this->unloadLevel($levelForUnload['level'], $levelForUnload['force'], true);
 		}
 		$this->unloadLevelQueue = [];
-
-		while(strlen($str = $this->packetMaker->readThreadToMainPacket()) > 0){
-			$data = unserialize($str);
-			if (isset($this->players[$data['identifier']])) {
-				$player = $this->players[$data['identifier']];
-				$player->getInterface()->putReadyPacket($player, $data['buffer']);
-			}
-		}
 	
 		//Timings::$connectionTimer->startTiming();
 		$this->network->processInterfaces();
