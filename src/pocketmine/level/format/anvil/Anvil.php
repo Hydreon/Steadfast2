@@ -55,32 +55,24 @@ class Anvil extends McRegion {
 		return true;
 	}
 	
-	public function requestChunkTask($x, $z, $protocols, $subClientsId) {
+	public function requestChunkTask($x, $z) {
 		$chunk = $this->getChunk($x, $z, false);
 		if(!($chunk instanceof $this->chunkClass)){
 			throw new ChunkException("Invalid Chunk sent");
 		}
-		
 		$tiles = "";
-		$nbt = new NBT(NBT::LITTLE_ENDIAN);		
-		foreach($chunk->getTiles() as $tile){
-			if($tile instanceof Spawnable){
+		$nbt = new NBT(NBT::LITTLE_ENDIAN);
+		foreach ($chunk->getTiles() as $tile) {
+			if ($tile instanceof Spawnable) {
 				$nbt->setData($tile->getSpawnCompound());
 				$tiles .= $nbt->write();
 			}
-		}
-		
-		$data = array();
-		$data['chunkX'] = $x;
-		$data['chunkZ'] = $z;
-		$data['protocols'] = $protocols;
-		$data['subClientsId'] = $subClientsId;
+		}		
+		$data = [];
 		$data['tiles'] = $tiles;
 		$data['isAnvil'] = true;
-		$data['chunk'] = $this->getChunkData($chunk);
-		
-		$this->getLevel()->chunkMaker->pushMainToThreadPacket(serialize($data));
-		return null;
+		$data['chunk'] = $this->getChunkData($chunk);		
+		return $data;
 	}
 	
 	protected function getChunkData($chunk) {

@@ -769,22 +769,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
-	public function sendChunk($x, $z, $data){
-		if($this->connected === false){
-			return;
-		}
-
+	public function useChunk($x, $z){
 		$this->usedChunks[Level::chunkHash($x, $z)] = true;
 		$this->chunkLoadCount++;
-
-		$pk = new BatchPacket();
-		$pk->payload = $data;
-//		$pk->encode();
-//		$pk->isEncoded = true;
-		$this->dataPacket($pk);
-
-		$this->getServer()->getDefaultLevel()->useChunk($x, $z, $this);
-
 		if($this->spawned){
 			foreach($this->level->getChunkEntities($x, $z) as $entity){
 				if($entity !== $this and !$entity->closed and !$entity->dead and $this->canSeeEntity($entity)){
@@ -815,6 +802,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->level->useChunk($X, $Z, $this);
 			$this->level->requestChunk($X, $Z, $this);
+			$this->useChunk($X, $Z);
 			if($this->server->getAutoGenerate()){
 				if(!$this->level->populateChunk($X, $Z, true)){
 					if($this->spawned){

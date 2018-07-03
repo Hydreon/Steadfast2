@@ -1590,10 +1590,6 @@ class Server{
 		if($this->logger instanceof MainLogger){
 			$this->logger->setLogDebug(\pocketmine\DEBUG > 1);
 		}
-		define("ADVANCED_CACHE", $this->getProperty("settings.advanced-cache", false));
-		if(ADVANCED_CACHE == true){
-			$this->logger->info("Advanced cache enabled");
-		}
 
 		Level::$COMPRESSION_LEVEL = $this->getProperty("chunk-sending.compression-level", 8);
 
@@ -1729,6 +1725,10 @@ class Server{
 		$this->modsManager = new ModsManager();
 		
 		$this->start();
+	}
+	
+	public function getMainInterface() {
+		return $this->mainInterface;
 	}
 
 	/**
