@@ -68,11 +68,11 @@ class LoginPacket extends PEPacket {
 	}
 
 	public function decode($playerProtocol) {
-//		file_put_contents("login.packet", bin2hex($this->buffer));
 		$acceptedProtocols = Info::ACCEPTED_PROTOCOLS;
 		// header: protocolID, Subclient Sender, Subclient Receiver
 		$this->getVarInt(); // header: 1 byte for protocol < 280, 1-2 for 280
-		$tmpData = Binary::readInt(substr($this->buffer, $this->offset, 4)); // ???
+		$buffer = $this->getBuffer();
+		$tmpData = Binary::readInt(substr($buffer, $this->getOffset(), 4)); // ???
 		if ($tmpData == 0) {
 			$this->getShort();
 		}
@@ -91,6 +91,7 @@ class LoginPacket extends PEPacket {
 			$body = $decodedData;
 		}
 		$this->chainsDataLength = Binary::readLInt($this->getFromString($body, 4));
+		var_dump($this->chainsDataLength);
 		$this->chains = json_decode($this->getFromString($body, $this->chainsDataLength), true);
 
 		$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));

@@ -39,10 +39,6 @@ class UpdateBlockPacket extends PEPacket{
 
 	public $records = []; //x, z, y, blockId, blockData, flags
 	
-	public function __construct() {
-		parent::__construct("", 0);
-	}
-	
 	public function decode($playerProtocol){
 
 	}

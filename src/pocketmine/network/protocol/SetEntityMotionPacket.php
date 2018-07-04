@@ -32,10 +32,6 @@ class SetEntityMotionPacket extends PEPacket{
 	// eid, motX, motY, motZ
 	/** @var array[] */
 	public $entities = [];
-	
-	public function __construct() {
-		parent::__construct("", 0);
-	}
 
 	public function clean(){
 		$this->entities = [];

@@ -219,10 +219,12 @@ class SessionManager{
 			static $spamPacket = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 			static $spamPacket2 = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 			while ($stream->getOffset() < $length) {
-				$buf = $stream->getString();
+                $packetLen = $stream->getVarInt();
+                $buf = $stream->get($packetLen);
+				// $buf = $stream->getString();
 				if (empty($buf) || $buf == $spamPacket || $buf == $spamPacket2) {
 					continue;
-				}
+                }
 				$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buf;
 				$this->server->pushThreadToMainPacket($buffer);
 			}
