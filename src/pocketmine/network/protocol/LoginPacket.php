@@ -91,7 +91,6 @@ class LoginPacket extends PEPacket {
 			$body = $decodedData;
 		}
 		$this->chainsDataLength = Binary::readLInt($this->getFromString($body, 4));
-		var_dump($this->chainsDataLength);
 		$this->chains = json_decode($this->getFromString($body, $this->chainsDataLength), true);
 
 		$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));
