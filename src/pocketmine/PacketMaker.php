@@ -18,7 +18,7 @@ class PacketMaker extends Thread {
 	protected $internalQueue;
 	protected $raklib;
 
-	public function __construct(\ClassLoader $loader = null, $raklib) {
+	public function __construct(\ClassLoader $loader, $raklib) {
 		$this->internalQueue = new \Threaded;
 		$this->shutdown = false;
 		$this->classLoader = $loader;
@@ -26,15 +26,17 @@ class PacketMaker extends Thread {
 		$this->start(PTHREADS_INHERIT_CONSTANTS);
 	}
 
-	public function registerClassLoader() {
-		if (!interface_exists("ClassLoader", false)) {
-			require(\pocketmine\PATH . "src/spl/ClassLoader.php");
-			require(\pocketmine\PATH . "src/spl/BaseClassLoader.php");
-			require(\pocketmine\PATH . "src/pocketmine/CompatibleClassLoader.php");
-		}
-		if ($this->classLoader !== null) {
-			$this->classLoader->register(true);
-		}
+	public function join() {
+		$this->shutdown = true;
+		parent::join();
+	}
+
+	public function pushMainToThreadPacket($data) {
+		$this->internalQueue[] = $data;
+	}
+
+	public function readMainToThreadPacket() {
+		return $this->internalQueue->shift();
 	}
 
 	public function run() {
@@ -45,17 +47,8 @@ class PacketMaker extends Thread {
 		ini_set("display_startup_errors", 1);
 
 		set_error_handler([$this, "errorHandler"], E_ALL);
-		register_shutdown_function([$this, "shutdownHandler"]);
 		DataPacket::initPackets();
 		$this->tickProcessor();
-	}
-
-	public function pushMainToThreadPacket($data) {
-		$this->internalQueue[] = $data;
-	}
-
-	public function readMainToThreadPacket() {
-		return $this->internalQueue->shift();
 	}
 
 	protected function tickProcessor() {
@@ -128,81 +121,6 @@ class PacketMaker extends Thread {
 		$pk->reliability = 3;
 		$enBuffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($identifier)) . $identifier . chr(RakLib::PRIORITY_NORMAL) . $pk->toBinary(true);
 		$this->raklib->pushMainToThreadPacket($enBuffer);
-	}
-
-	public function join() {
-		$this->shutdown = true;
-		parent::join();
-	}
-
-	public function errorHandler($errno, $errstr, $errfile, $errline, $context, $trace = null) {
-		$errorConversion = [
-			E_ERROR => "E_ERROR",
-			E_WARNING => "E_WARNING",
-			E_PARSE => "E_PARSE",
-			E_NOTICE => "E_NOTICE",
-			E_CORE_ERROR => "E_CORE_ERROR",
-			E_CORE_WARNING => "E_CORE_WARNING",
-			E_COMPILE_ERROR => "E_COMPILE_ERROR",
-			E_COMPILE_WARNING => "E_COMPILE_WARNING",
-			E_USER_ERROR => "E_USER_ERROR",
-			E_USER_WARNING => "E_USER_WARNING",
-			E_USER_NOTICE => "E_USER_NOTICE",
-			E_STRICT => "E_STRICT",
-			E_RECOVERABLE_ERROR => "E_RECOVERABLE_ERROR",
-			E_DEPRECATED => "E_DEPRECATED",
-			E_USER_DEPRECATED => "E_USER_DEPRECATED",
-		];
-		$errno = isset($errorConversion[$errno]) ? $errorConversion[$errno] : $errno;
-		if (($pos = strpos($errstr, "\n")) !== false) {
-			$errstr = substr($errstr, 0, $pos);
-		}
-
-		//var_dump("An $errno error happened: \"$errstr\" in \"$errfile\" at line $errline");	
-		@file_put_contents('logs/' . date('Y.m.d') . '_debug.log', "An $errno error happened: \"$errstr\" in \"$errfile\" at line $errline\n", FILE_APPEND | LOCK_EX);
-
-		foreach (($trace = $this->getTrace($trace === null ? 3 : 0, $trace)) as $i => $line) {
-			//var_dump($line);			
-			@file_put_contents('logs/' . date('Y.m.d') . '_debug.log', $line . "\n", FILE_APPEND | LOCK_EX);
-		}
-
-		return true;
-	}
-
-	public function getTrace($start = 1, $trace = null) {
-		if ($trace === null) {
-			if (function_exists("xdebug_get_function_stack")) {
-				$trace = array_reverse(xdebug_get_function_stack());
-			} else {
-				$e = new \Exception();
-				$trace = $e->getTrace();
-			}
-		}
-
-		$messages = [];
-		$j = 0;
-		for ($i = (int) $start; isset($trace[$i]); ++$i, ++$j) {
-			$params = "";
-			if (isset($trace[$i]["args"]) or isset($trace[$i]["params"])) {
-				if (isset($trace[$i]["args"])) {
-					$args = $trace[$i]["args"];
-				} else {
-					$args = $trace[$i]["params"];
-				}
-				foreach ($args as $name => $value) {
-					$params .= (is_object($value) ? get_class($value) . " " . (method_exists($value, "__toString") ? $value->__toString() : "object") : gettype($value) . " " . @strval($value)) . ", ";
-				}
-			}
-			$messages[] = "#$j " . (isset($trace[$i]["file"]) ? ($trace[$i]["file"]) : "") . "(" . (isset($trace[$i]["line"]) ? $trace[$i]["line"] : "") . "): " . (isset($trace[$i]["class"]) ? $trace[$i]["class"] . (($trace[$i]["type"] === "dynamic" or $trace[$i]["type"] === "->") ? "->" : "::") : "") . $trace[$i]["function"] . "(" . substr($params, 0, -2) . ")";
-		}
-
-		return $messages;
-	}
-
-	public function shutdownHandler() {
-		if ($this->shutdown !== true) {
-			var_dump("Packet thread crashed!");
-		}
 	}
 
 }

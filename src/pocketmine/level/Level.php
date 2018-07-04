@@ -186,11 +186,6 @@ class Level implements ChunkManager, Metadatable{
 	/** @var ReversePriorityQueue */
 	private $updateQueue;
 	private $updateQueueIndex = [];
-
-	/** @var Player[][] */
-	private $chunkSendQueue = [];
-	private $chunkSendTasks = [];
-
 	private $autoSave = true;
 
 	/** @var BlockMetadataStore */
@@ -255,6 +250,7 @@ class Level implements ChunkManager, Metadatable{
 	
 	protected $yMask;
 	protected $maxY;
+	protected $chunkCache = [];
 
 		/**
 	 * Returns the chunk unique hash/key
@@ -339,7 +335,7 @@ class Level implements ChunkManager, Metadatable{
 		$this->timings = new LevelTimings($this);
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
-		$this->chunkMaker = new ChunkMaker($this->server->getLoader());
+		$this->chunkMaker = new ChunkMaker($this->server->getLoader(), $this->server->getMainInterface()->getRakLib());
 		$this->generator = Generator::getGenerator($this->provider->getGenerator());
 	}
 
@@ -401,8 +397,6 @@ class Level implements ChunkManager, Metadatable{
 		$this->blockMetadata = null;
 		$this->blockCache = [];
 		$this->temporalPosition = null;
-		$this->chunkSendQueue = [];
-		$this->chunkSendTasks = [];
 	}
 
 	public function addSound(Sound $sound, array $players = null){
@@ -659,8 +653,6 @@ class Level implements ChunkManager, Metadatable{
 
 		}
 
-		$this->processChunkRequest();
-
 		$data = array();
 		$data['moveData'] = $this->moveToSend;
 		$data['motionData'] = $this->motionToSend;
@@ -680,10 +672,6 @@ class Level implements ChunkManager, Metadatable{
 					}
 				}
 			}
-		}
-		
-		while(($data = unserialize($this->chunkMaker->readThreadToMainPacket()))){
-			$this->chunkRequestCallback($data['chunkX'], $data['chunkZ'], $data);
 		}
 		//$this->timings->doTick->stopTiming();
 	}
@@ -1212,12 +1200,6 @@ class Level implements ChunkManager, Metadatable{
 			}
 		}
 	}
-	
-	public function chunkCacheClear($x, $z){
-		if(ADVANCED_CACHE == true){
-			Cache::remove("world:" . $this->getId() . ":" . self::chunkHash($x, $z));
-		}
-	}
 
 	/**
 	 * Sets on Vector3 the data from a Block object,
@@ -1248,10 +1230,10 @@ class Level implements ChunkManager, Metadatable{
 				$pos = $this->temporalPosition->setComponents($pos->x, $pos->y, $pos->z);
 			}
 			$block->position($pos);
-			$index = self::chunkHash($pos->x >> 4, $pos->z >> 4);
-			if(ADVANCED_CACHE == true){
-				Cache::remove("world:" . $this->getId() . ":" . $index);
-			}
+			$chX = $pos->x >> 4;
+			$chZ = $pos->z >> 4;
+			$index = self::chunkHash($chX, $chZ);
+			$this->chunkCacheClear($chX, $chZ);
 
 			if($direct === true){
 								$this->sendBlocks($this->getUsingChunk($block->x >> 4, $block->z >> 4), [$block]);
@@ -1975,9 +1957,7 @@ class Level implements ChunkManager, Metadatable{
 			$this->provider->setChunk($x, $z, $chunk);
 			$this->chunks[$index] = $chunk;
 		}
-		if(ADVANCED_CACHE == true){
-			Cache::remove("world:" . $this->getId() . ":" . self::chunkHash($x, $z));
-		}
+		$this->chunkCacheClear($x, $z);
 		$chunk->setChanged();
 	}
 
@@ -2044,81 +2024,42 @@ class Level implements ChunkManager, Metadatable{
 		$this->provider->setSpawn($pos);
 		$this->server->getPluginManager()->callEvent(new SpawnChangeEvent($this, $previousSpawn));
 	}
-
-	public function requestChunk($x, $z, Player $player){
-		$index = self::chunkHash($x, $z);
-		if(!isset($this->chunkSendQueue[$index])){
-			$this->chunkSendQueue[$index] = [];
+	
+	public function requestChunk($x, $z, $player) {
+		$protocol = Network::getChunkPacketProtocol($player->getPlayerProtocol());
+		$subClientId = $player->getSubClientId();
+		$chunkIndex = Level::chunkHash($x, $z);
+		$playerIndex = ($protocol << 4) | $subClientId;
+		if ($subClientId > 0 && ($parent = $player->getParent()) !== null) {
+			$playerIdentifier = $parent->getIdentifier();
+		} else {
+			$playerIdentifier = $player->getIdentifier();
 		}
-
-		$this->chunkSendQueue[$index][spl_object_hash($player)] = $player;
-	}
-
-	protected function processChunkRequest(){
-		if (count($this->chunkSendQueue) > 0) {
-			$protocols = [];
-			$subClientsId = [];
-			$x = null;
-			$z = null;
-			foreach ($this->chunkSendQueue as $index => $players) {
-				if (isset($this->chunkSendTasks[$index])) {
-					continue;
-				}
-				self::getXZ($index, $x, $z);
-				/** @var Player[] $players */
-				foreach ($players as $player) {
-					if ($player->isConnected() && isset($player->usedChunks[$index])) {
-						$protocol = Network::getChunkPacketProtocol($player->getPlayerProtocol());
-						$subClientId = $player->getSubClientId();
-						if (ADVANCED_CACHE == true) {
-							$playerIndex = "{$protocol}:{$subClientId}";
-							$cache = Cache::get("world:" . $this->getId() . ":{$index}");
-							if ($cache !== false && isset($cache[$playerIndex])) {
-								$player->sendChunk($x, $z, $cache[$playerIndex]);
-								continue;
-							}
-						}
-						$protocols[$protocol] = $protocol;
-						$subClientsId[$subClientId] = $subClientId;
-						
-					}
-				}
-				if ($protocols !== []) {
-					$this->chunkSendTasks[$index] = true;
-					$task = $this->provider->requestChunkTask($x, $z, $protocols, $subClientsId);
-					if($task instanceof AsyncTask){
-						$this->server->getScheduler()->scheduleAsyncTask($task);
-					}
-				} else {
-					unset($this->chunkSendQueue[$index]);
-				}
-			}
+		if (!isset($this->chunkCache[$chunkIndex][$playerIndex])) {
+			$this->chunkCache[$chunkIndex][$playerIndex] = true;
+			$data = $this->provider->requestChunkTask($x, $z);
+			$data['event'] = 'doChunk';
+		} else {
+			$data = [];
+			$data['event'] = 'sendFromCache';
 		}
+		$data['chunkX'] = $x;
+		$data['chunkZ'] = $z;
+		$data['subClientId'] = $subClientId;
+		$data['protocol'] = $protocol;
+		$data['identifier'] = $playerIdentifier;
+		$this->chunkMaker->pushMainToThreadPacket(serialize($data));
 	}
-
-	public function chunkRequestCallback($x, $z, $payload){
-		if ($this->closed) {
-			return;
-		} 
-		$index = self::chunkHash($x, $z);
-		if (isset($this->chunkSendTasks[$index])) {
-			if (ADVANCED_CACHE == true) {
-				$cacheId = "world:" . $this->getId() . ":{$index}";
-				if (($cache = Cache::get($cacheId)) !== false) {
-					$payload = array_merge($cache, $payload);
-				}
-				Cache::add($cacheId, $payload, 60);
-			}
-			foreach ($this->chunkSendQueue[$index] as $player) {
-				/** @var Player $player */
-				$protocol = Network::getChunkPacketProtocol($player->getPlayerProtocol());
-				$playerIndex = $protocol . ":" . $player->getSubClientId();
-				if ($player->isConnected() && isset($player->usedChunks[$index]) && isset($payload[$playerIndex])) {
-					$player->sendChunk($x, $z, $payload[$playerIndex]);
-				}
-			}
-			unset($this->chunkSendQueue[$index]);
-			unset($this->chunkSendTasks[$index]);
+	
+	public function chunkCacheClear($x, $z){
+		$chunkIndex = Level::chunkHash($x, $z);
+		if (isset($this->chunkCache[$chunkIndex])) {
+			unset($this->chunkCache[$chunkIndex]);
+			$data = [];
+			$data['event'] = 'clearCache';
+			$data['chunkX'] = $x;
+			$data['chunkZ'] = $z;
+			$this->chunkMaker->pushMainToThreadPacket(serialize($data));
 		}
 	}
 
@@ -2266,7 +2207,7 @@ class Level implements ChunkManager, Metadatable{
 			unset($this->chunks[$index]);
 			unset($this->usedChunks[$index]);
 			unset($this->chunkTickList[$index]);
-			Cache::remove("world:" . $this->getId() . ":$index");
+			$this->chunkCacheClear($x, $z);
 			//$this->timings->doChunkUnload->stopTiming();
 			return true;
 		}
@@ -2312,7 +2253,7 @@ class Level implements ChunkManager, Metadatable{
 		unset($this->chunks[$index]);
 		unset($this->usedChunks[$index]);
 		unset($this->chunkTickList[$index]);
-		Cache::remove("world:" . $this->getId() . ":$index");
+		$this->chunkCacheClear($x, $z);
 
 		//$this->timings->doChunkUnload->stopTiming();
 
@@ -2628,9 +2569,7 @@ class Level implements ChunkManager, Metadatable{
 			return false;
 		}
 		return true;
-	}
-		
-	
+	}	
 
 	
 	public function populateChunk(int $x, int $z, bool $force = false){
@@ -2669,30 +2608,13 @@ class Level implements ChunkManager, Metadatable{
 	}
 	
 	public function updateChunk($x, $z) {
+		$this->chunkCacheClear($x, $z);
 		$players = $this->getUsingChunk($x, $z);
-		if (empty($players)) {
-			return;
-		}
-		$index = self::chunkHash($x, $z);
-		$this->chunkSendTasks[$index] = true;		
-		$this->chunkSendQueue[$index] = [];
-		
-		$protocols = [];
-		$subClientsId = [];
 		foreach ($players as $player) {
-			$this->chunkSendQueue[$index][spl_object_hash($player)] = $player;
-			$protocol = Network::getChunkPacketProtocol($player->getPlayerProtocol());
-			if (!isset($protocols[$protocol])) {
-				$protocols[$protocol] = $protocol;
-			}
-			$subClientId = $player->getSubClientId();
-			if (!isset($subClientsId[$subClientId])) {
-				$subClientsId[$subClientId] = $subClientId;
-			}
+			$this->requestChunk($x, $z, $player);
 		}
-		$this->provider->requestChunkTask($x, $z, $protocols, $subClientsId);
 	}
-	
+
 	public function getYMask() {
 		return $this->yMask;
 	}
