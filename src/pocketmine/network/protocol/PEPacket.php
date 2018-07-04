@@ -61,6 +61,8 @@ abstract class PEPacket extends DataPacket {
 				$this->offset = 2;
 			}
 		} else {
+			$this->offset = 0;
+			$this->buffer = '';
 			$packetID = self::$packetsIds[$playerProtocol][$this::PACKET_NAME];
 			$header = ($this->targetSubClientID << 12) | ($this->senderSubClientID << 10) | $packetID;
 			$this->putVarInt($header);
