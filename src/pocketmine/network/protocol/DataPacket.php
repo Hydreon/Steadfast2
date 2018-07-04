@@ -85,10 +85,6 @@ abstract class DataPacket extends BinaryStream{
 	}
 	
 	public static function initPackets() {
-		$oClass = new \ReflectionClass ('pocketmine\network\protocol\Info');
-		self::$packetsIds[Info::BASE_PROTOCOL] = $oClass->getConstants();
-		$oClass = new \ReflectionClass ('pocketmine\network\protocol\Info105');
-		self::$packetsIds[Info::PROTOCOL_105] = $oClass->getConstants();
 		$oClass = new \ReflectionClass ('pocketmine\network\protocol\Info110');
 		self::$packetsIds[Info::PROTOCOL_110] = $oClass->getConstants();
 		$oClass = new \ReflectionClass ('pocketmine\network\protocol\Info120');

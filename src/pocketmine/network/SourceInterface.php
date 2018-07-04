@@ -32,17 +32,6 @@ use pocketmine\Player;
  */
 interface SourceInterface{
 
-	/**
-	 * Sends a DataPacket to the interface, returns an unique identifier for the packet if $needACK is true
-	 *
-	 * @param Player     $player
-	 * @param DataPacket $packet
-	 * @param bool       $needACK
-	 * @param bool       $immediate
-	 *
-	 * @return int
-	 */
-	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = true);
 
 	/**
 	 * Terminates the connection
