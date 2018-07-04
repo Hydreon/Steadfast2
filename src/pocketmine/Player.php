@@ -774,22 +774,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
-	public function sendChunk($x, $z, $data){
-		if($this->connected === false){
-			return;
-		}
-
+	public function useChunk($x, $z){
 		$this->usedChunks[Level::chunkHash($x, $z)] = true;
 		$this->chunkLoadCount++;
-
-		$pk = new BatchPacket();
-		$pk->payload = $data;
-//		$pk->encode();
-//		$pk->isEncoded = true;
-		$this->dataPacket($pk);
-
-		$this->getServer()->getDefaultLevel()->useChunk($x, $z, $this);
-
 		if($this->spawned){
 			foreach($this->level->getChunkEntities($x, $z) as $entity){
 				if($entity !== $this and !$entity->closed and !$entity->dead and $this->canSeeEntity($entity)){
@@ -820,6 +807,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->level->useChunk($X, $Z, $this);
 			$this->level->requestChunk($X, $Z, $this);
+			$this->useChunk($X, $Z);
 			if($this->server->getAutoGenerate()){
 				if(!$this->level->populateChunk($X, $Z, true)){
 					if($this->spawned){
@@ -934,6 +922,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		switch($packet->pname()){
+			case 'SHOW_STORE_OFFER_PACKET':
+				if ($this->protocol < ProtocolInfo::PROTOCOL_120) {
+					return;
+				}
+				break;
 			case 'BATCH_PACKET':
 				$packet->encode($this->protocol);
 				$this->interface->putReadyPacket($this, $packet->buffer);
@@ -1742,7 +1735,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					// error_log("Invalid Identity Public Key " . $packet->username);
 					break;
 				}
-				
+				$this->inventory = Multiversion::getPlayerInventory($this);				
 				$this->username = TextFormat::clean($packet->username);
                 $this->xblName = $this->username;
 				$this->displayName = $this->username;
@@ -3210,6 +3203,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->activeModalWindows = [];
 		if (!$this->spawned || !$this->isOnline()) {
 			$this->beforeSpawnTeleportPosition = $pos;
+			if(($pos instanceof Position) && $pos->level !== $this->level){
+				$this->switchLevel($pos->getLevel());
+			}
 			return;
 		}
 		if(parent::teleport($pos, $yaw, $pitch)){
@@ -4955,6 +4951,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->rawUUID = $this->uuid->toBinary();
 		$this->clientSecret = $packet->clientSecret;
 		$this->protocol = $parent->getPlayerProtocol();
+		$this->inventory = Multiversion::getPlayerInventory($this);
 		$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData);
 		$this->subClientId = $packet->targetSubClientID;
 		
@@ -5172,6 +5169,30 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		} else {
 			$this->setInteractButtonText('');
 		}
+	}
+
+	protected function switchLevel(Level $targetLevel) {
+		$this->despawnFromAll();
+		$this->level->removeEntity($this);
+		if ($this->chunk !== null) {
+			$this->chunk->removeEntity($this);
+		}
+		$this->chunk = null;
+		$this->usedChunks = [];
+		$X = $Z = null;
+		foreach ($this->usedChunks as $index => $d) {
+			Level::getXZ($index, $X, $Z);
+			$this->unloadChunk($X, $Z);
+		}
+		$this->setLevel($targetLevel);
+		$this->level->addEntity($this);
+		if ($this->spawned) {
+			$pk = new SetTimePacket();
+			$pk->time = $this->level->getTime();
+			$pk->started = $this->level->stopTime == false;
+			$this->dataPacket($pk);
+		}
+		return true;
 	}
 
 }

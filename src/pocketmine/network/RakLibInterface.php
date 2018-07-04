@@ -265,5 +265,9 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$identifier = $this->identifiers[$player];	
 		$this->interface->enableEncrypt($identifier, $token, $privateKey, $publicKey);
 	}
+	
+	public function getRakLib() {
+		return $this->rakLib;
+	}
 
 }

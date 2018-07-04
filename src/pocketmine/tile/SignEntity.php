@@ -63,7 +63,7 @@ class SignEntity extends Entity {
 	public function despawnFrom(Player $player) {
 		if (isset($this->hasSpawned[$player->getId()])) {
 			unset($this->hasSpawned[$player->getId()]);
-			if ($player->getPlayerProtocol() != Info::PROTOCOL_260) {
+			if ($player->getOriginalProtocol() != Info::PROTOCOL_260) {
 				return;
 			}
 			$pk = new RemoveEntityPacket();
