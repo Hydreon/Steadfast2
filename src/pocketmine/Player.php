@@ -917,6 +917,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		switch($packet->pname()){
+			case 'SHOW_STORE_OFFER_PACKET':
+				if ($this->protocol < ProtocolInfo::PROTOCOL_120) {
+					return;
+				}
+				break;
 			case 'BATCH_PACKET':
 				$packet->encode($this->protocol);
 				$this->interface->putReadyPacket($this, $packet->buffer);
@@ -3160,6 +3165,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->activeModalWindows = [];
 		if (!$this->spawned || !$this->isOnline()) {
 			$this->beforeSpawnTeleportPosition = $pos;
+			if(($pos instanceof Position) && $pos->level !== $this->level){
+				$this->switchLevel($pos->getLevel());
+			}
 			return;
 		}
 		if(parent::teleport($pos, $yaw, $pitch)){
@@ -5032,6 +5040,30 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->inventory->setHeldItemIndex($selectedSlot, $isNeedSendToHolder);
 		$this->inventory->setHeldItemSlot($slot);
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
+	}
+
+	protected function switchLevel(Level $targetLevel) {
+		$this->despawnFromAll();
+		$this->level->removeEntity($this);
+		if ($this->chunk !== null) {
+			$this->chunk->removeEntity($this);
+		}
+		$this->chunk = null;
+		$this->usedChunks = [];
+		$X = $Z = null;
+		foreach ($this->usedChunks as $index => $d) {
+			Level::getXZ($index, $X, $Z);
+			$this->unloadChunk($X, $Z);
+		}
+		$this->setLevel($targetLevel);
+		$this->level->addEntity($this);
+		if ($this->spawned) {
+			$pk = new SetTimePacket();
+			$pk->time = $this->level->getTime();
+			$pk->started = $this->level->stopTime == false;
+			$this->dataPacket($pk);
+		}
+		return true;
 	}
 
 }
