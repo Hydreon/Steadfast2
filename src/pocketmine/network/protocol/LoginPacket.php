@@ -61,6 +61,7 @@ class LoginPacket extends PEPacket {
 	public $capeData = "";
 	public $isVerified = true;
 	public $premiunSkin = "";
+	public $identityPublicKey = "";
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
