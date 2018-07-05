@@ -219,9 +219,7 @@ class SessionManager{
 			static $spamPacket = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 			static $spamPacket2 = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 			while ($stream->getOffset() < $length) {
-                $packetLen = $stream->getVarInt();
-                $buf = $stream->get($packetLen);
-				// $buf = $stream->getString();
+				$buf = $stream->getString();
 				if (empty($buf) || $buf == $spamPacket || $buf == $spamPacket2) {
 					continue;
                 }
