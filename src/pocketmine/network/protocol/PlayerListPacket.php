@@ -66,7 +66,7 @@ class PlayerListPacket extends PEPacket{
 				foreach ($this->entries as $d) {
 					$this->putUUID($d[0]);
 					$this->putVarInt($d[1]); // Player ID
-					$this->putString($d[2]); // Player Name
+					$this->putString(isset($d[2]) ? $d[2] : ""); // Player Name
 					if ($playerProtocol >= Info::PROTOCOL_200) {
 						$this->putString(""); // third party name
 						$this->putSignedVarInt(0); // platform id
@@ -76,7 +76,7 @@ class PlayerListPacket extends PEPacket{
 						if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
 							$this->putLInt(1); // num skins, always 1
 						}
-						$this->putString($d[4]); // Skin Data
+						$this->putString(isset($d[4]) ? $d[4] : ""); // Skin Data
 						$capeData = isset($d[5]) ? $d[5] : '';
 						if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
 							if (!empty($capeData)) {

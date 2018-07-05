@@ -147,17 +147,17 @@ class AvailableCommandsPacket extends PEPacket{
 		}
 		
 		$additionalDataStream->putVarInt(count($commands));
-		$additionalDataStream->put($commandsStream->buffer);
-		self::$commandsBuffer[Info::PROTOCOL_120] = $additionalDataStream->buffer;
-		self::$commandsBuffer[Info::PROTOCOL_200] = $additionalDataStream->buffer;
-		self::$commandsBuffer[Info::PROTOCOL_220] = $additionalDataStream->buffer;
-		self::$commandsBuffer[Info::PROTOCOL_221] = $additionalDataStream->buffer;
-		self::$commandsBuffer[Info::PROTOCOL_240] = $additionalDataStream->buffer;
-		self::$commandsBuffer[Info::PROTOCOL_260] = $additionalDataStream->buffer;
-		self::$commandsBuffer[Info::PROTOCOL_271] = $additionalDataStream->buffer;
-		self::$commandsBuffer[Info::PROTOCOL_273] = $additionalDataStream->buffer;
-		self::$commandsBuffer[Info::PROTOCOL_274] = $additionalDataStream->buffer;
-		self::$commandsBuffer[Info::PROTOCOL_280] = $additionalDataStream->buffer;
+		$additionalDataStream->put($commandsStream->getBuffer());
+		self::$commandsBuffer[Info::PROTOCOL_120] = $additionalDataStream->getBuffer();
+		self::$commandsBuffer[Info::PROTOCOL_200] = self::$commandsBuffer[Info::PROTOCOL_120];
+		self::$commandsBuffer[Info::PROTOCOL_220] = self::$commandsBuffer[Info::PROTOCOL_120];
+		self::$commandsBuffer[Info::PROTOCOL_221] = self::$commandsBuffer[Info::PROTOCOL_120];
+		self::$commandsBuffer[Info::PROTOCOL_240] = self::$commandsBuffer[Info::PROTOCOL_120];
+		self::$commandsBuffer[Info::PROTOCOL_260] = self::$commandsBuffer[Info::PROTOCOL_120];
+		self::$commandsBuffer[Info::PROTOCOL_271] = self::$commandsBuffer[Info::PROTOCOL_120];
+		self::$commandsBuffer[Info::PROTOCOL_273] = self::$commandsBuffer[Info::PROTOCOL_120];
+		self::$commandsBuffer[Info::PROTOCOL_274] = self::$commandsBuffer[Info::PROTOCOL_120];
+		self::$commandsBuffer[Info::PROTOCOL_280] = self::$commandsBuffer[Info::PROTOCOL_120];
 	}
 	
 	/**

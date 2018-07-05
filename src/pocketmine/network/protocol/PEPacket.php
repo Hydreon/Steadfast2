@@ -18,12 +18,6 @@ abstract class PEPacket extends DataPacket {
 	abstract public function encode($playerProtocol);
 
 	abstract public function decode($playerProtocol);
-	
-	protected function checkLength(int $len) {
-		if ($this->offset + $len > strlen($this->buffer)) {
-			throw new \Exception(get_class($this) . ": Try get {$len} bytes, offset = " . $this->offset . ", bufflen = " . strlen($this->buffer) . ", buffer = " . bin2hex(substr($this->buffer, 0, 250)));
-		}
-	}
 
 	/**
 	 * !IMPORTANT! Should be called at first line in decode
@@ -53,16 +47,14 @@ abstract class PEPacket extends DataPacket {
 	 */
 	public function reset($playerProtocol = 0) {
 		if ($playerProtocol < Info::PROTOCOL_280) {
-			$this->buffer = chr(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);
-			$this->offset = 0;
+			parent::reset();
+			$this->putByte(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);
 			if ($playerProtocol >= Info::PROTOCOL_120) {
 				$this->putByte($this->senderSubClientID);
 				$this->putByte($this->targetSubClientID);
-				$this->offset = 2;
 			}
 		} else {
-			$this->offset = 0;
-			$this->buffer = '';
+			parent::reset();
 			$packetID = self::$packetsIds[$playerProtocol][$this::PACKET_NAME];
 			$header = ($this->targetSubClientID << 12) | ($this->senderSubClientID << 10) | $packetID;
 			$this->putVarInt($header);

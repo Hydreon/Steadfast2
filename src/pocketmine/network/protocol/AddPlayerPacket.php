@@ -34,16 +34,16 @@ class AddPlayerPacket extends PEPacket{
 	const PACKET_NAME = "ADD_PLAYER_PACKET";
 
 	public $uuid;
-	public $username;
-	public $eid;
-	public $x;
-	public $y;
-	public $z;
-	public $speedX;
-	public $speedY;
-	public $speedZ;
-	public $pitch;
-	public $yaw;
+	public $username = "";
+	public $eid = 0;
+	public $x = 0;
+	public $y = 0;
+	public $z = 0;
+	public $speedX = 0;
+	public $speedY = 0;
+	public $speedZ = 0;
+	public $pitch = 0;
+	public $yaw = 0;
 	public $item;
 	public $metadata;
 	public $links = [];

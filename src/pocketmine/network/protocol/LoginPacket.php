@@ -43,6 +43,7 @@ class LoginPacket extends PEPacket {
 	public $serverAddress;
 	public $clientSecret;
 	public $slim = false;
+	public $skin = "";
 	public $skinName;
 	public $chainsDataLength;
 	public $chains;
@@ -68,11 +69,10 @@ class LoginPacket extends PEPacket {
 	}
 
 	public function decode($playerProtocol) {
-//		file_put_contents("login.packet", bin2hex($this->buffer));
 		$acceptedProtocols = Info::ACCEPTED_PROTOCOLS;
 		// header: protocolID, Subclient Sender, Subclient Receiver
 		$this->getVarInt(); // header: 1 byte for protocol < 280, 1-2 for 280
-		$tmpData = Binary::readInt(substr($this->buffer, $this->offset, 4)); // ???
+		$tmpData = Binary::readInt(substr($this->getBuffer(), $this->getOffset(), 4)); // ???
 		if ($tmpData == 0) {
 			$this->getShort();
 		}
@@ -173,7 +173,7 @@ class LoginPacket extends PEPacket {
 		
 		$this->serverAddress = $this->playerData['ServerAddress'];
 		$this->skinName = $this->playerData['SkinId'];
-		$this->skin = base64_decode($this->playerData['SkinData']);
+		$this->skin = base64_decode($this->playerData['SkinData']);		
 		if (isset($this->playerData['SkinGeometryName'])) {
 			$this->skinGeometryName = $this->playerData['SkinGeometryName'];
 		}
