@@ -1028,7 +1028,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$packet->encode($this->protocol);
 		$packet->senderSubClientID = 0;
 		$buffer = $packet->getBuffer();
-		$this->interface->putPacket($this, Binary::writeVarInt(strlen($buffer)) . $buffer, true);
+		$this->interface->putPacket($this, Binary::writeVarInt(strlen($buffer)) . $buffer);
 		return true;
 	}
 

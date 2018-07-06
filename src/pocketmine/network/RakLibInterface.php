@@ -252,12 +252,12 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		}
 	}
 	
-	public function putPacket($player, $buffer, $immediate = false) {
+	public function putPacket($player, $buffer) {
 		if (isset($this->identifiers[$player])) {
 			$pk = new EncapsulatedPacket();
 			$pk->buffer = $buffer;
 			$pk->reliability = 3;
-			$this->interface->sendEncapsulated($player->getIdentifier(), $pk, ($immediate === true ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL) | RakLib::FLAG_NEED_ZLIB);
+			$this->interface->sendEncapsulated($player->getIdentifier(), $pk,  RakLib::PRIORITY_NORMAL | RakLib::FLAG_NEED_ZLIB);
 		}
 	}
 	
