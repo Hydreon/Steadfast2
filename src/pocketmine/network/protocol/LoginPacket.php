@@ -73,7 +73,7 @@ class LoginPacket extends PEPacket {
 		$acceptedProtocols = Info::ACCEPTED_PROTOCOLS;
 		// header: protocolID, Subclient Sender, Subclient Receiver
 		$this->getVarInt(); // header: 1 byte for protocol < 280, 1-2 for 280
-		$tmpData = Binary::readInt(substr($this->getBuffer(), $this->getOffset(), 4)); // ???
+		$tmpData = Binary::readInt(substr($this->getBuffer(), $this->getOffset(), 4));
 		if ($tmpData == 0) {
 			$this->getShort();
 		}
