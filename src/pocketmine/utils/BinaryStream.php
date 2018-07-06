@@ -21,7 +21,7 @@ class BinaryStream extends \MCBinaryStream {
 		$this->writeErrorLog();
 		switch ($name) {
 			case "buffer":
-				return $this->gettBuffer();
+				return $this->getBuffer();
 			case "offset":
 				return $this->getOffset();
 		}
