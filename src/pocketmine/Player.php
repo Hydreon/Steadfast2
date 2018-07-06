@@ -929,7 +929,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case 'BATCH_PACKET':
 				$packet->encode($this->protocol);
-				$this->interface->putReadyPacket($this, $packet->buffer);
+				$this->interface->putReadyPacket($this, $packet->getBuffer());
 				$packet->senderSubClientID = 0;
 				return;
 			case 'ADD_PLAYER_PACKET':
@@ -992,7 +992,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 		}
 		$packet->encode($this->protocol);
-		$this->packetQueue[] = $packet->buffer;
+		$this->packetQueue[] = $packet->getBuffer();
 		$packet->senderSubClientID = 0;
 		return true;
 	}
@@ -1011,7 +1011,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected function addEntityPacket($eid, $pk) {
 		$pk->encode($this->protocol);
-		$this->entitiesPacketsQueue[$eid][] = $pk->buffer;
+		$this->entitiesPacketsQueue[$eid][] = $pk->getBuffer();
 		$pk->senderSubClientID = 0;
 	}
 
@@ -1032,7 +1032,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		
 		$packet->encode($this->protocol);
 		$packet->senderSubClientID = 0;
-		$this->interface->putPacket($this, Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer, true);
+		$buffer = $packet->getBuffer();
+		$this->interface->putPacket($this, Binary::writeVarInt(strlen($buffer)) . $buffer);
 		return true;
 	}
 

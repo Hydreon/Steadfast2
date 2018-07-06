@@ -40,10 +40,6 @@ class MoveEntityPacket extends PEPacket{
 	public $yaw;
 	public $headYaw;
 	
-	public function __construct() {
-		parent::__construct("", 0);
-	}
-
 	public function clean(){
 		$this->entities = [];
 		return parent::clean();
