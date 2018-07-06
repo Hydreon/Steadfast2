@@ -2,10 +2,8 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
-use pocketmine\utils\UUID;
 
 class CommandRequestPacket extends PEPacket {
 	

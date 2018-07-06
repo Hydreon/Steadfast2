@@ -222,7 +222,7 @@ class SessionManager{
 				$buf = $stream->getString();
 				if (empty($buf) || $buf == $spamPacket || $buf == $spamPacket2) {
 					continue;
-                }
+				}
 				$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buf;
 				$this->server->pushThreadToMainPacket($buffer);
 			}
