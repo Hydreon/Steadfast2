@@ -3331,7 +3331,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 
-		if (strlen($this->skin) !== 64 * 32 * 4 && strlen($this->skin) !== 64 * 64 * 4) {
+		if (strlen($this->skin) !== 64 * 32 * 4 && strlen($this->skin) !== 64 * 64 * 4 && strlen($this->skin) !== 128 * 128 * 4) {
 			$this->close("", "Invalid skin.", false);
 			return;
 		}
