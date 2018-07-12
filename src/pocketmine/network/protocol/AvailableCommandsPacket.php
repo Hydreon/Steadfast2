@@ -157,7 +157,8 @@ class AvailableCommandsPacket extends PEPacket{
 		self::$commandsBuffer[Info::PROTOCOL_271] = self::$commandsBuffer[Info::PROTOCOL_120];
 		self::$commandsBuffer[Info::PROTOCOL_273] = self::$commandsBuffer[Info::PROTOCOL_120];
 		self::$commandsBuffer[Info::PROTOCOL_274] = self::$commandsBuffer[Info::PROTOCOL_120];
-		self::$commandsBuffer[Info::PROTOCOL_280] = self::$commandsBuffer[Info::PROTOCOL_120];
+		$additionalDataStream->putVarInt(0); //soft enums
+		self::$commandsBuffer[Info::PROTOCOL_280] = $additionalDataStream->getBuffer();
 	}
 	
 	/**

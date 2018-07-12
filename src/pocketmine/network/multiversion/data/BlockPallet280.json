@@ -22458,5 +22458,10 @@
 		"data": 1,
 		"id": 415,
 		"name": "minecraft:bubble_column"
+	},
+	{
+		"data": 0,
+		"id": 416,
+		"name": "minecraft:barrier"
 	}
 ]
