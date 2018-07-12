@@ -769,22 +769,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 
-	public function sendChunk($x, $z, $data){
-		if($this->connected === false){
-			return;
-		}
-
+	public function useChunk($x, $z){
 		$this->usedChunks[Level::chunkHash($x, $z)] = true;
 		$this->chunkLoadCount++;
-
-		$pk = new BatchPacket();
-		$pk->payload = $data;
-//		$pk->encode();
-//		$pk->isEncoded = true;
-		$this->dataPacket($pk);
-
-		$this->getServer()->getDefaultLevel()->useChunk($x, $z, $this);
-
 		if($this->spawned){
 			foreach($this->level->getChunkEntities($x, $z) as $entity){
 				if($entity !== $this and !$entity->closed and !$entity->dead and $this->canSeeEntity($entity)){
@@ -815,6 +802,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			$this->level->useChunk($X, $Z, $this);
 			$this->level->requestChunk($X, $Z, $this);
+			$this->useChunk($X, $Z);
 			if($this->server->getAutoGenerate()){
 				if(!$this->level->populateChunk($X, $Z, true)){
 					if($this->spawned){
@@ -929,9 +917,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		switch($packet->pname()){
+			case 'SHOW_STORE_OFFER_PACKET':
+				if ($this->protocol < ProtocolInfo::PROTOCOL_120) {
+					return;
+				}
+				break;
 			case 'BATCH_PACKET':
 				$packet->encode($this->protocol);
-				$this->interface->putReadyPacket($this, $packet->buffer);
+				$this->interface->putReadyPacket($this, $packet->getBuffer());
 				$packet->senderSubClientID = 0;
 				return;
 			case 'ADD_PLAYER_PACKET':
@@ -994,7 +987,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 		}
 		$packet->encode($this->protocol);
-		$this->packetQueue[] = $packet->buffer;
+		$this->packetQueue[] = $packet->getBuffer();
 		$packet->senderSubClientID = 0;
 		return true;
 	}
@@ -1013,7 +1006,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected function addEntityPacket($eid, $pk) {
 		$pk->encode($this->protocol);
-		$this->entitiesPacketsQueue[$eid][] = $pk->buffer;
+		$this->entitiesPacketsQueue[$eid][] = $pk->getBuffer();
 		$pk->senderSubClientID = 0;
 	}
 
@@ -1034,7 +1027,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		
 		$packet->encode($this->protocol);
 		$packet->senderSubClientID = 0;
-		$this->interface->putPacket($this, Binary::writeVarInt(strlen($packet->buffer)) . $packet->buffer, true);
+		$buffer = $packet->getBuffer();
+		$this->interface->putPacket($this, Binary::writeVarInt(strlen($buffer)) . $buffer);
 		return true;
 	}
 
@@ -2565,8 +2559,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$this->attackByTargetId($packet->entityId);
 						} elseif($packet->actionType == InventoryTransactionPacket::ITEM_USE_ON_ENTITY_ACTION_INTERACT) {
 							$target = $this->level->getEntity($packet->entityId);
-							if ($target instanceof SignEntity) {
-								$this->attackByTargetId($packet->entityId);
+							if (!is_null($target)) {
+								$target->interact($this);
 							}
 						}
 						break;
@@ -3172,6 +3166,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->activeModalWindows = [];
 		if (!$this->spawned || !$this->isOnline()) {
 			$this->beforeSpawnTeleportPosition = $pos;
+			if(($pos instanceof Position) && $pos->level !== $this->level){
+				$this->switchLevel($pos->getLevel());
+			}
 			return;
 		}
 		if(parent::teleport($pos, $yaw, $pitch)){
@@ -5047,6 +5044,30 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->inventory->setHeldItemIndex($selectedSlot, $isNeedSendToHolder);
 		$this->inventory->setHeldItemSlot($slot);
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
+	}
+
+	protected function switchLevel(Level $targetLevel) {
+		$this->despawnFromAll();
+		$this->level->removeEntity($this);
+		if ($this->chunk !== null) {
+			$this->chunk->removeEntity($this);
+		}
+		$this->chunk = null;
+		$this->usedChunks = [];
+		$X = $Z = null;
+		foreach ($this->usedChunks as $index => $d) {
+			Level::getXZ($index, $X, $Z);
+			$this->unloadChunk($X, $Z);
+		}
+		$this->setLevel($targetLevel);
+		$this->level->addEntity($this);
+		if ($this->spawned) {
+			$pk = new SetTimePacket();
+			$pk->time = $this->level->getTime();
+			$pk->started = $this->level->stopTime == false;
+			$this->dataPacket($pk);
+		}
+		return true;
 	}
 
 }

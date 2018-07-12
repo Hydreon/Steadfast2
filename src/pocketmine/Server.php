@@ -1590,10 +1590,6 @@ class Server{
 		if($this->logger instanceof MainLogger){
 			$this->logger->setLogDebug(\pocketmine\DEBUG > 1);
 		}
-		define("ADVANCED_CACHE", $this->getProperty("settings.advanced-cache", false));
-		if(ADVANCED_CACHE == true){
-			$this->logger->info("Advanced cache enabled");
-		}
 
 		Level::$COMPRESSION_LEVEL = $this->getProperty("chunk-sending.compression-level", 8);
 
@@ -1729,6 +1725,10 @@ class Server{
 		$this->modsManager = new ModsManager();
 		
 		$this->start();
+	}
+	
+	public function getMainInterface() {
+		return $this->mainInterface;
 	}
 
 	/**
@@ -2294,9 +2294,10 @@ class Server{
 			
 			$pk->encode($p->getPlayerProtocol(), $p->getSubClientId());
 			$bpk = new BatchPacket();
-			$bpk->payload = zlib_encode(Binary::writeVarInt(strlen($pk->buffer)) . $pk->buffer, ZLIB_ENCODING_DEFLATE, 7);
+			$buffer = $pk->getBuffer();
+			$bpk->payload = zlib_encode(Binary::writeVarInt(strlen($buffer)) . $buffer, ZLIB_ENCODING_DEFLATE, 7);
 			$bpk->encode($p->getPlayerProtocol());
-			$this->craftList[$p->getPlayerProtocol()] = $bpk->buffer;
+			$this->craftList[$p->getPlayerProtocol()] = $bpk->getBuffer();
 		}
 		$p->getInterface()->putReadyPacket($p, $this->craftList[$p->getPlayerProtocol()]);
 	}

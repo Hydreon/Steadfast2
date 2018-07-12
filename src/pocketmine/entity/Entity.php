@@ -1497,5 +1497,9 @@ abstract class Entity extends Location implements Metadatable{
 	public function isCanFreezeChunk() {
 		return false;
 	}
+	
+	public function interact($player) {
+		
+	}
 
 }

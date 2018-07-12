@@ -63,9 +63,8 @@ abstract class DataPacket extends BinaryStream{
 	}
 
 	public function clean(){
-		$this->buffer = null;
+		$this->reset();
 		$this->isEncoded = false;
-		$this->offset = 0;
 		return $this;
 	}
 

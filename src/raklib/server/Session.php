@@ -214,7 +214,7 @@ class Session{
      * @param int                $flags
      */
     private function addToQueue(EncapsulatedPacket $pk, $flags = RakLib::PRIORITY_NORMAL){
-        $priority = $flags & 0b0000111;
+        $priority = $flags & 0b1;
         if($priority === RakLib::PRIORITY_IMMEDIATE){ //Skip queues
             $packet = new DATA_PACKET_0();
             $packet->seqNumber = $this->sendSeqNumber++;
@@ -521,8 +521,14 @@ class Session{
     }
 
     public function close(){
-        $this->addEncapsulatedToQueue(EncapsulatedPacket::fromBinary("\x60\x00\x08\x00\x00\x00\x00\x00\x00\x00\x15")); //CLIENT_DISCONNECT packet 0x15 Credits to Genisys for this fix
-        $this->sessionManager = null;
+		$pk = new CLIENT_DISCONNECT_DataPacket();
+		$pk->encode();
+		$sendPacket = new EncapsulatedPacket();
+		$sendPacket->reliability = 3;
+		$sendPacket->buffer = $pk->buffer;
+		$this->addToQueue($sendPacket);
+		$this->sendQueue();
+		$this->sessionManager = null;
     }
 	
 	public function getPing(){

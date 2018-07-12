@@ -108,26 +108,20 @@ class McRegion extends BaseLevelProvider{
 		$z = $chunkZ >> 5;
 	}	
 	
-	public function requestChunkTask($x, $z, $protocols, $subClientsId) {
+	public function requestChunkTask($x, $z) {
 		$chunk = $this->getChunk($x, $z, false);
 		if(!($chunk instanceof Chunk)){
 			throw new ChunkException("Invalid Chunk sent");
 		}
-		
 		$tiles = "";
-		$nbt = new NBT(NBT::LITTLE_ENDIAN);		
-		foreach($chunk->getTiles() as $tile){
-			if($tile instanceof Spawnable){
+		$nbt = new NBT(NBT::LITTLE_ENDIAN);
+		foreach ($chunk->getTiles() as $tile) {
+			if ($tile instanceof Spawnable) {
 				$nbt->setData($tile->getSpawnCompound());
 				$tiles .= $nbt->write();
 			}
 		}
-		
-		$data = array();
-		$data['chunkX'] = $x;
-		$data['chunkZ'] = $z;
-		$data['protocols'] = $protocols;
-		$data['subClientsId'] = $subClientsId;
+		$data = [];
 		$data['tiles'] = $tiles;
 		$data['blocks'] = $chunk->getBlockIdArray();
 		$data['data'] = $chunk->getBlockDataArray();
@@ -135,8 +129,7 @@ class McRegion extends BaseLevelProvider{
 		$data['skyLight'] = $chunk->getBlockSkyLightArray();
 		$data['heightMap'] = pack("v*", ...$chunk->getHeightMapArray());
 		$data['biomeColor'] = $this->convertBiomeColors($chunk->getBiomeColorArray());
-		$this->getLevel()->chunkMaker->pushMainToThreadPacket(serialize($data));
-		return null;
+		return $data;
 	}
 
 	public function unloadChunks(){
