@@ -73,7 +73,13 @@ class AvailableCommandsPacket extends PEPacket{
 			$commandsStream->putString($commandName);
 			$commandsStream->putString($commandData['versions'][0]['description']);
 			$commandsStream->putByte(0); // flags
-			$commandsStream->putByte(0); // permission level
+			$permission = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
+			switch ($commandData['versions'][0]['permission']) {
+				case "staff":
+					$permission = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_GAME_MASTERS;
+					default;
+			}
+			$commandsStream->putByte($permission); // permission level
 //			if (isset($commandData['versions'][0]['aliases']) && !empty($commandData['versions'][0]['aliases'])) {
 //				$aliases = [];
 //				foreach ($commandData['versions'][0]['aliases'] as $alias) {
@@ -157,7 +163,8 @@ class AvailableCommandsPacket extends PEPacket{
 		self::$commandsBuffer[Info::PROTOCOL_271] = self::$commandsBuffer[Info::PROTOCOL_120];
 		self::$commandsBuffer[Info::PROTOCOL_273] = self::$commandsBuffer[Info::PROTOCOL_120];
 		self::$commandsBuffer[Info::PROTOCOL_274] = self::$commandsBuffer[Info::PROTOCOL_120];
-		self::$commandsBuffer[Info::PROTOCOL_280] = self::$commandsBuffer[Info::PROTOCOL_120];
+		$additionalDataStream->putVarInt(0); //soft enums
+		self::$commandsBuffer[Info::PROTOCOL_280] = $additionalDataStream->getBuffer();
 	}
 	
 	/**

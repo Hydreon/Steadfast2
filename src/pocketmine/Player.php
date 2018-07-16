@@ -398,6 +398,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $entitiesPacketsQueue = [];
 	protected $packetQueue = [];
 	
+	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1243,6 +1245,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk = new AdventureSettingsPacket();
 		$pk->flags = $flags;
 		$pk->userId = $this->getId();
+		$pk->commandPermissions = $this->commandPermissions;
 		$this->dataPacket($pk);
 	}
 
@@ -2589,8 +2592,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								$target = $this->getLevel()->getEntity($packet->entityId);
 								if ($target instanceof Vehicle) {
 									$target->onPlayerInteract($this);
-								} elseif ($target instanceof SignEntity) {
-									$this->attackByTargetId($packet->entityId);
+								} elseif (!is_null($target)) {
+									$target->interact($this);
 								}
 								break;
 						}
@@ -3374,7 +3377,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 
-		if (count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers() && $this->kickOnFullServer()) {
+		static $allowedSkinSize = [
+			8192, // argb 64x32
+			16384, // argb 64x64
+			32768, // argb 128x64
+			65536, // argb 128x128
+		];
+		
+		if (!in_array(strlen($this->skin), $allowedSkinSize)) {
 			$this->close("", "Server is Full", false);
 			return;
 		}
