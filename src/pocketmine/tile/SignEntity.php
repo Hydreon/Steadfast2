@@ -90,4 +90,9 @@ class SignEntity extends Entity {
 		return false;
 	}
 
+	public function interact($player) {
+		$item = Item::get(Item::AIR);
+		$this->level->useItemOn($this->sign, $item, 0, 0, 0, 0, $player);
+	}
+	
 }
