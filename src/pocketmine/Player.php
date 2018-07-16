@@ -393,6 +393,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $entitiesPacketsQueue = [];
 	protected $packetQueue = [];
 	
+	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1238,6 +1240,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk = new AdventureSettingsPacket();
 		$pk->flags = $flags;
 		$pk->userId = $this->getId();
+		$pk->commandPermissions = $this->commandPermissions;
 		$this->dataPacket($pk);
 	}
 

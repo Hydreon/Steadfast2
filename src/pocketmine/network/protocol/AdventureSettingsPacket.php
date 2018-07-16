@@ -41,11 +41,19 @@ class AdventureSettingsPacket extends PEPacket{
 	const PERMISSION_LEVEL_OPERATOR = 2;
 	const PERMISSION_LEVEL_CUSTOM = 3;
 	
+	const COMMAND_PERMISSION_LEVEL_ANY = 0;
+	const COMMAND_PERMISSION_LEVEL_GAME_MASTERS = 1;
+	const COMMAND_PERMISSION_LEVEL_ADMIN = 2;
+	const COMMAND_PERMISSION_LEVEL_HOST = 3;
+	const COMMAND_PERMISSION_LEVEL_OWNER = 4;
+	const COMMAND_PERMISSION_LEVEL_INTERNAL = 5;
+	
 	public $flags = 0;
 	public $actionPermissions = self::ACTION_FLAG_DEFAULT_LEVEL_PERMISSIONS;
 	public $permissionLevel = self::PERMISSION_LEVEL_MEMBER;
 	public $customStoredPermissions = 0;
 	public $userId = 0;
+	public $commandPermissions = self::COMMAND_PERMISSION_LEVEL_ANY;
 	
 	public function decode($playerProtocol){
 		$this->getHeader($playerProtocol);
@@ -55,7 +63,7 @@ class AdventureSettingsPacket extends PEPacket{
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->flags);
-		$this->putVarInt(0);
+		$this->putVarInt($this->commandPermissions);
 		switch ($playerProtocol) {
 			case Info::PROTOCOL_120:
 			case Info::PROTOCOL_200:
