@@ -509,5 +509,9 @@ class PlayerInventory extends BaseInventory{
 		$pk->z = $this->getHolder()->getZ();
 		$this->getHolder()->dataPacket($pk);
 	}
+	
+	public function forceSetSlot($index, Item $item) {
+		$this->slots[$index] = clone $item;
+	}
 
 }
