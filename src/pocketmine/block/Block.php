@@ -1042,7 +1042,7 @@ class Block extends Position implements Metadatable{
 	public function collidesWithBB(AxisAlignedBB $bb){
 		$bb2 = $this->getBoundingBox();
 
-		return $bb2 !== null and $bb->intersectsWith($bb2);
+		return $bb2 !== null && $bb->intersectsWith($bb2);
 	}
 
 	/**

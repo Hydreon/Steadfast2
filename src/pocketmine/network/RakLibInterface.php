@@ -236,6 +236,10 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$tmpStream = new BinaryStream($buffer);
 		$header = $tmpStream->getVarInt();
 		$pid = $header & 0x3FF;		
+		if ($pid == 0x13) { //speed hack
+			$player->setLastMovePacket($buffer);
+			return null;
+		}
 		if (($data = $this->network->getPacket($pid, $player->getPlayerProtocol())) === null) {
 			return null;
 		}

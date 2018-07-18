@@ -392,6 +392,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastEntityRemove = [];
 	protected $entitiesPacketsQueue = [];
 	protected $packetQueue = [];
+	protected $inventoryPacketQueue = [];
+	protected $lastMoveBuffer = '';
 	
 	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
 	
@@ -919,6 +921,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		switch($packet->pname()){
+			case 'CONTAINER_SET_CONTENT_PACKET':
+				$winId = $packet->windowid;
+				$this->inventoryPacketQueue[$winId] = $packet;
+				return;
+			case 'INVENTORY_CONTENT_PACKET':
+				$winId = $packet->inventoryID;
+				$this->inventoryPacketQueue[$winId] = $packet;
+				return;
 			case 'SHOW_STORE_OFFER_PACKET':
 				if ($this->protocol < ProtocolInfo::PROTOCOL_120) {
 					return;
@@ -1002,6 +1012,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		foreach ($this->packetQueue as $pkBuf) {
 			$buffer .= Binary::writeVarInt(strlen($pkBuf)) . $pkBuf;
 		}
+		foreach ($this->inventoryPacketQueue as $pk) {
+			$pk->encode($this->protocol);
+			$pkBuf = $pk->getBuffer();
+			$buffer .= Binary::writeVarInt(strlen($pkBuf)) . $pkBuf;
+		}
+		$this->inventoryPacketQueue= [];
 		$this->packetQueue = [];
 		$this->interface->putPacket($this, $buffer);
 	}
@@ -4592,6 +4608,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	protected function processMovement($tickDiff) {
+		if (empty($this->lastMoveBuffer)) {
+			return;
+		}
+		$pk = $this->server->getNetwork()->getPacket(0x13, $this->getPlayerProtocol());
+		if (is_null($pk)) {
+			$this->lastMoveBuffer = '';
+			return;
+		}
+		$pk->setBuffer($this->lastMoveBuffer);
+		$this->lastMoveBuffer = '';
+		$pk->decode($this->getPlayerProtocol());
+		$this->handleDataPacket($pk);
+		
 		if (!$this->isAlive() || !$this->spawned || $this->newPosition === null) {
 			$this->setMoving(false);
 			return;
@@ -5075,6 +5104,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->dataPacket($pk);
 		}
 		return true;
+	}
+
+	public function setLastMovePacket($buffer) {
+		$this->lastMoveBuffer = $buffer;
 	}
 
 }
