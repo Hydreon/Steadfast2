@@ -286,11 +286,16 @@ class PlayerInventory120 extends PlayerInventory {
 	
 	public function close(Player $who) {
 		parent::close($who);
+		$isChanged = false;
 		foreach ($this->craftSlots as $index => $slot) {
 			if ($slot->getId() != Item::AIR) {
 				$this->addItem($slot);
 				$this->craftSlots[$index] = Item::get(Item::AIR, 0, 0);
+				$isChanged = true;
 			}
+		}
+		if ($isChanged) {
+			$this->sendContents($this->holder);
 		}
 	}
 	
@@ -309,5 +314,5 @@ class PlayerInventory120 extends PlayerInventory {
 		}
 		return $result;
 	}
-
+	
 }
