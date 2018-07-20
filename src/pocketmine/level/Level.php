@@ -1348,7 +1348,8 @@ class Level implements ChunkManager, Metadatable{
 			}
 			
 			$this->server->getPluginManager()->callEvent($ev);
-			if($ev->isCancelled()){
+			if ($ev->isCancelled()) {
+				$player->lastBreak = microtime(true);
 				return false;
 			}
 			
