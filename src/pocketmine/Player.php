@@ -392,6 +392,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastEntityRemove = [];
 	protected $entitiesPacketsQueue = [];
 	protected $packetQueue = [];
+	protected $inventoryPacketQueue = [];
+	protected $lastMoveBuffer = '';
+	
+	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
 	
 	public function getLeaveMessage(){
 		return "";
@@ -917,6 +921,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		switch($packet->pname()){
+			case 'CONTAINER_SET_CONTENT_PACKET':
+				$winId = $packet->windowid;
+				$this->inventoryPacketQueue[$winId] = $packet;
+				return;
+			case 'INVENTORY_CONTENT_PACKET':
+				$winId = $packet->inventoryID;
+				$this->inventoryPacketQueue[$winId] = $packet;
+				return;
 			case 'SHOW_STORE_OFFER_PACKET':
 				if ($this->protocol < ProtocolInfo::PROTOCOL_120) {
 					return;
@@ -1000,6 +1012,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		foreach ($this->packetQueue as $pkBuf) {
 			$buffer .= Binary::writeVarInt(strlen($pkBuf)) . $pkBuf;
 		}
+		foreach ($this->inventoryPacketQueue as $pk) {
+			$pk->encode($this->protocol);
+			$pkBuf = $pk->getBuffer();
+			$buffer .= Binary::writeVarInt(strlen($pkBuf)) . $pkBuf;
+		}
+		$this->inventoryPacketQueue= [];
 		$this->packetQueue = [];
 		$this->interface->putPacket($this, $buffer);
 	}
@@ -1238,6 +1256,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk = new AdventureSettingsPacket();
 		$pk->flags = $flags;
 		$pk->userId = $this->getId();
+		$pk->commandPermissions = $this->commandPermissions;
 		$this->dataPacket($pk);
 	}
 
@@ -3336,6 +3355,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 
+		static $allowedSkinSize = [
+			8192, // argb 64x32
+			16384, // argb 64x64
+			32768, // argb 128x64
+			65536, // argb 128x128
+		];
+
+
         if (count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers() and $this->kick("disconnectionScreen.serverFull")){
             return;
         }
@@ -3481,6 +3508,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->sendFullPlayerList();
 //		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
 	}
+
+    public function setImmobile($value = true) {
+        $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE, $value);
+    }
 
 	
 	public function getInterface() {
@@ -3786,10 +3817,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     public function getXUID() {
         return $this->xuid;
     }
-
-    public function setImmobile($value = true) {
-        $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE, $value);
-    }
 	
 	public function setTitle($text, $subtext = '', $time = 36000) {		
 		$pk = new SetTitlePacket();
@@ -3797,7 +3824,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->text = "";
 		$pk->fadeInTime = 5;
 		$pk->fadeOutTime = 5;
-		$pk->stayTime = $time;
+		$pk->stayTime =  $time;
 		$this->dataPacket($pk);
 
 		if (!empty($subtext)) {
@@ -4585,6 +4612,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	protected function processMovement($tickDiff) {
+		if (empty($this->lastMoveBuffer)) {
+			return;
+		}
+		$pk = $this->server->getNetwork()->getPacket(0x13, $this->getPlayerProtocol());
+		if (is_null($pk)) {
+			$this->lastMoveBuffer = '';
+			return;
+		}
+		$pk->setBuffer($this->lastMoveBuffer);
+		$this->lastMoveBuffer = '';
+		$pk->decode($this->getPlayerProtocol());
+		$this->handleDataPacket($pk);
+		
 		if (!$this->isAlive() || !$this->spawned || $this->newPosition === null) {
 			$this->setMoving(false);
 			return;
@@ -5068,6 +5108,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->dataPacket($pk);
 		}
 		return true;
+	}
+
+	public function setLastMovePacket($buffer) {
+		$this->lastMoveBuffer = $buffer;
 	}
 
 }
