@@ -115,21 +115,15 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		}
 	}
 
-	public function process(){
-		$work = false;
-		if($this->interface->handlePacket()){
-			$work = true;
-			while($this->interface->handlePacket()){
-			}
+	public function process() {
+		$max = $this->interface->getPacketQueueSize();
+		while ($max && $this->interface->handlePacket()) {
+			$max--;
 		}
-
-		if($this->rakLib->isTerminated()){
+		if ($this->rakLib->isTerminated()) {
 			$this->network->unregisterInterface($this);
-
 			throw new \Exception("RakLib Thread crashed");
 		}
-
-		return $work;
 	}
 
 	public function closeSession($identifier, $reason){

@@ -17,10 +17,11 @@
  * @link http://www.pocketmine.net/
  * 
  *
-*/
+ */
 
 namespace pocketmine\network\protocol;
 
+use pocketmine\network\multiversion\MultiversionEnums;
 use pocketmine\network\protocol\Info;
 use pocketmine\utils\BinaryStream;
 
@@ -29,6 +30,7 @@ class AvailableCommandsPacket extends PEPacket{
 	const PACKET_NAME = "AVAILABLE_COMMANDS_PACKET";
 	
 	static private $commandsBuffer = [];
+	static private $commandsBufferDefault = "";
 	
 	public $commands;
 	
@@ -37,35 +39,44 @@ class AvailableCommandsPacket extends PEPacket{
 	
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		if (isset(self::$commandsBuffer[$playerProtocol])) {
-			$this->put(self::$commandsBuffer[$playerProtocol]);
-		} else {
-			$this->putString(self::$commandsBuffer['default']);
+		foreach (self::$commandsBuffer as $protocol => $data) {
+			if ($playerProtocol >= $protocol) {
+				$this->put($data);
+				return;
+			}
 		}
+		$this->putString(self::$commandsBufferDefault);
 	}
 	
 	const ARG_FLAG_VALID = 0x100000;
 	const ARG_FLAG_ENUM = 0x200000;
-	const ARG_TYPE_INT      = 0x01;
-	const ARG_TYPE_FLOAT    = 0x02;
-	const ARG_TYPE_VALUE    = 0x03;
-	const ARG_TYPE_TARGET   = 0x04;
-	const ARG_TYPE_STRING   = 0x0c;
-	const ARG_TYPE_POSITION = 0x0d;
-	const ARG_TYPE_RAWTEXT  = 0x10;
-	const ARG_TYPE_TEXT     = 0x12;
-	const ARG_TYPE_JSON     = 0x15;
-	const ARG_TYPE_COMMAND  = 0x1c;
+	
+	const ARG_TYPE_INT = "ARG_TYPE_INT";
+	const ARG_TYPE_FLOAT = "ARG_TYPE_FLOAT";
+	const ARG_TYPE_VALUE = "ARG_TYPE_VALUE";
+	const ARG_TYPE_TARGET = "ARG_TYPE_TARGET";
+	const ARG_TYPE_STRING = "ARG_TYPE_STRING";
+	const ARG_TYPE_POSITION = "ARG_TYPE_POSITION";
+	const ARG_TYPE_RAWTEXT = "ARG_TYPE_RAWTEXT";
+	const ARG_TYPE_TEXT = "ARG_TYPE_TEXT";
+	const ARG_TYPE_JSON = "ARG_TYPE_JSON";
+	const ARG_TYPE_COMMAND = "ARG_TYPE_COMMAND";
 	
 	public static function prepareCommands($commands) {
-		self::$commandsBuffer['default'] = json_encode($commands);
+		self::$commandsBufferDefault = json_encode($commands);
 		
 		$enumValues = [];
 		$enumValuesCount = 0;
 		$enumAdditional = [];
 		$enums = [];
-		$commandsStream = new BinaryStream();
+		$commandsStreams = [
+			Info::PROTOCOL_120 => new BinaryStream(),
+			Info::PROTOCOL_271 => new BinaryStream(),
+			Info::PROTOCOL_280 => new BinaryStream(),
+		];
+		
 		foreach ($commands as $commandName => &$commandData) { // Replace &$commandData with $commandData when alises fix for 1.2 won't be needed anymore
+			$commandsStream = new BinaryStream();
 			if ($commandName == 'help') { //temp fix for 1.2
 				unset($commands[$commandName]);
 				continue;
@@ -80,27 +91,6 @@ class AvailableCommandsPacket extends PEPacket{
 					default;
 			}
 			$commandsStream->putByte($permission); // permission level
-//			if (isset($commandData['versions'][0]['aliases']) && !empty($commandData['versions'][0]['aliases'])) {
-//				$aliases = [];
-//				foreach ($commandData['versions'][0]['aliases'] as $alias) {
-//					if (!isset($enumAdditional[$alias])) {
-//						$enumValues[$enumValuesCount] = $alias;
-//						$enumAdditional[$alias] = $enumValuesCount;
-//						$targetIndex = $enumValuesCount;
-//						$enumValuesCount++;
-//					} else {
-//						$targetIndex = $enumAdditional[$alias];
-//					}
-//					$aliases[] = $targetIndex;
-//				}
-//				$enums[] = [
-//					'name' => $commandName . 'CommandAliases',
-//					'data' => $aliases,
-//				];
-//				$aliasesEnumId = count($enums) - 1;
-//			} else {
-//				$aliasesEnumId = -1;
-//			}
 			if (isset($commandData['versions'][0]['aliases']) && !empty($commandData['versions'][0]['aliases'])) {
 				foreach ($commandData['versions'][0]['aliases'] as $alias) {
 					$aliasAsCommand = $commandData;
@@ -112,19 +102,26 @@ class AvailableCommandsPacket extends PEPacket{
 			$aliasesEnumId = -1; // temp aliases fix for 1.2
 			$commandsStream->putLInt($aliasesEnumId);
 			$commandsStream->putVarInt(count($commandData['versions'][0]['overloads'])); // overloads
+			/** @IMPORTANT $commandsStream doesn't should use after this line */
+			foreach ($commandsStreams as $protocol => $unused) {
+				$commandsStreams[$protocol]->put($commandsStream->getBuffer());
+			}
 			foreach ($commandData['versions'][0]['overloads'] as $overloadData) {
-				$commandsStream->putVarInt(count($overloadData['input']['parameters']));
 				$paramNum = count($overloadData['input']['parameters']);
+				foreach ($commandsStreams as $protocol => $unused) {
+					$commandsStreams[$protocol]->putVarInt($paramNum);
+				}
 				foreach ($overloadData['input']['parameters'] as $paramData) {
-					$commandsStream->putString($paramData['name']);
 					// rawtext type cause problems on some types of clients
 					$isParamOneAndOptional = ($paramNum == 1 && isset($paramData['optional']) && $paramData['optional']);
 					if ($paramData['type'] == "rawtext" && ($paramNum > 1 || $isParamOneAndOptional)) {
-						$commandsStream->putLInt(self::ARG_FLAG_VALID | self::getFlag('string'));
-					} else {
-						$commandsStream->putLInt(self::ARG_FLAG_VALID | self::getFlag($paramData['type']));
+						$paramData['type'] = "string";
 					}
-					$commandsStream->putByte(isset($paramData['optional']) && $paramData['optional']);
+					foreach ($commandsStreams as $protocol => $unused) {
+						$commandsStreams[$protocol]->putString($paramData['name']);
+						$commandsStreams[$protocol]->putLInt(self::ARG_FLAG_VALID | self::getFlag($paramData['type'], $protocol));
+						$commandsStreams[$protocol]->putByte(isset($paramData['optional']) && $paramData['optional']);
+					}
 				}
 			}
 		}
@@ -151,49 +148,63 @@ class AvailableCommandsPacket extends PEPacket{
 				}	
 			}
 		}
-		
 		$additionalDataStream->putVarInt(count($commands));
-		$additionalDataStream->put($commandsStream->getBuffer());
-		self::$commandsBuffer[Info::PROTOCOL_120] = $additionalDataStream->getBuffer();
-		self::$commandsBuffer[Info::PROTOCOL_200] = self::$commandsBuffer[Info::PROTOCOL_120];
-		self::$commandsBuffer[Info::PROTOCOL_220] = self::$commandsBuffer[Info::PROTOCOL_120];
-		self::$commandsBuffer[Info::PROTOCOL_221] = self::$commandsBuffer[Info::PROTOCOL_120];
-		self::$commandsBuffer[Info::PROTOCOL_240] = self::$commandsBuffer[Info::PROTOCOL_120];
-		self::$commandsBuffer[Info::PROTOCOL_260] = self::$commandsBuffer[Info::PROTOCOL_120];
-		self::$commandsBuffer[Info::PROTOCOL_271] = self::$commandsBuffer[Info::PROTOCOL_120];
-		self::$commandsBuffer[Info::PROTOCOL_273] = self::$commandsBuffer[Info::PROTOCOL_120];
-		self::$commandsBuffer[Info::PROTOCOL_274] = self::$commandsBuffer[Info::PROTOCOL_120];
-		$additionalDataStream->putVarInt(0); //soft enums
-		self::$commandsBuffer[Info::PROTOCOL_280] = $additionalDataStream->getBuffer();
+		
+		foreach ($commandsStreams as $protocol => $commandsStream) {
+			if ($protocol >= Info::PROTOCOL_280) {
+				$commandsStream->putVarInt(0);
+			}
+			self::$commandsBuffer[$protocol] = $additionalDataStream->getBuffer() . $commandsStream->getBuffer();
+		}
+		
+		krsort(self::$commandsBuffer);
 	}
 	
 	/**
-     	 * @param string $paramName
-     	 * @return int
-     	 */
-    	private static function getFlag($paramName){
-            switch ($paramName){
-            	case "int":
-			    return self::ARG_TYPE_INT;
-            	case "float":
-                	return self::ARG_TYPE_FLOAT;
-            	case "mixed":
-                	return self::ARG_TYPE_VALUE;
-            	case "target":
-               		return self::ARG_TYPE_TARGET;
-            	case "string":
-                	return self::ARG_TYPE_STRING;
-            	case "xyz":
-                	return self::ARG_TYPE_POSITION;
-            	case "rawtext":
-                	return self::ARG_TYPE_RAWTEXT;
-            	case "text":
-                	return self::ARG_TYPE_TEXT;
-            	case "json":
-                	return self::ARG_TYPE_JSON;
-            	case "command":
-                	return self::ARG_TYPE_COMMAND;
-            }
-            return 0;
+	 * @param string $paramName
+	 * @return int
+	 */
+    private static function getFlag($paramName, $protocol){
+		// new in 1.6
+		// 05 - operator
+	    $typeName = "";
+	    switch ($paramName){
+		    case "int":
+				$typeName = self::ARG_TYPE_INT;
+			    break;
+		    case "float":
+			    $typeName = self::ARG_TYPE_FLOAT;
+			    break;
+		    case "mixed":
+		    case "value":
+			    $typeName = self::ARG_TYPE_VALUE;
+			    break;
+		    case "target":
+			    $typeName = self::ARG_TYPE_TARGET;
+			    break;
+		    case "string":
+			    $typeName = self::ARG_TYPE_STRING;
+			    break;
+		    case "xyz":
+		    case "x y z":
+			    $typeName = self::ARG_TYPE_POSITION;
+			    break;
+		    case "rawtext":
+		    case "message":
+			    $typeName = self::ARG_TYPE_RAWTEXT;
+			    break;
+		    case "text":
+			    $typeName = self::ARG_TYPE_TEXT;
+			    break;
+		    case "json":
+			    $typeName = self::ARG_TYPE_JSON;
+			    break;
+		    case "command":
+			    $typeName = self::ARG_TYPE_COMMAND;
+			    break;
+		    default:
+			    return 0;
+	    }
+	    return MultiversionEnums::getCommandArgType($typeName, $protocol);
     }
 }
