@@ -234,5 +234,9 @@ class RakLibServer extends \Thread{
         $socket = new UDPServerSocket($this->getLogger(), $this->port, $this->interface);
         new SessionManager($this, $socket);
     }
+	
+	public function getExternalQueueSize() {
+		return count($this->externalQueue);
+	}
 
 }

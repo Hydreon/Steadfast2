@@ -1833,11 +1833,17 @@ class Server{
 	 * @param DataPacket $packet
 	 */
 	public static function broadcastPacket(array $players, DataPacket $packet) {
+		$readyPackets = [];
 		foreach($players as $player){
-			$player->dataPacket($packet);
-		}
-		if(isset($packet->__encapsulatedPacket)){
-			unset($packet->__encapsulatedPacket);
+			$protocol = $player->getPlayerProtocol();
+			$subClientId = $player->getSubClientId();
+			$playerIndex = ($protocol << 4) | $subClientId;
+			if (!isset($readyPackets[$playerIndex])) {
+				$packet->senderSubClientID = $subClientId;
+				$packet->encode($protocol);
+				$readyPackets[$playerIndex] = $packet->getBuffer();
+			}
+			$player->addBufferToPacketQueue($readyPackets[$playerIndex]);
 		}
 	}
 
@@ -1848,9 +1854,14 @@ class Server{
 	 * @param DataPacket[]|string $packets
 	 */
 	public function batchPackets(array $players, array $packets){
-		foreach ($players as $p) {
-			foreach ($packets as $pk) {
-				$p->dataPacket($pk);
+		$playersCount = count($players);
+		foreach ($packets as $pk) {
+			if ($playersCount < 2) {
+				foreach ($players as $p) {
+					$p->dataPacket($pk);
+				}
+			} else {
+				Server::broadcastPacket($players, $pk);
 			}
 		}
 	}
@@ -2259,9 +2270,7 @@ class Server{
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_REMOVE;
 		$pk->entries[] = [$uuid];
-		foreach ($players as $p){
-			$p->dataPacket($pk);
-		}
+		Server::broadcastPacket($players, $pk);
 	}
 
 	private $craftList = [];
