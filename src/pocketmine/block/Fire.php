@@ -92,6 +92,9 @@ class Fire extends Flowable{
 
 				return Level::BLOCK_UPDATE_NORMAL;
 			}
+		}elseif($type === Level::BLOCK_UPDATE_TOUCH) {
+			$this->getLevel()->setBlock($this, new Air(), true);
+			return Level::BLOCK_UPDATE_NORMAL;
 		}
 
 		return false;
