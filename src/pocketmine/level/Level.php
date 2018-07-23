@@ -634,13 +634,10 @@ class Level implements ChunkManager, Metadatable{
 					foreach($this->changedBlocks as $index => $mini){
 						foreach($mini as $blocks){
 							/** @var Block $b */
-							foreach($blocks as $b){
-								foreach ($this->getUsingChunk($b->x >> 4, $b->z >> 4) as $player) {								
-									$pk = new UpdateBlockPacket();
-									$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
-									$player->dataPacket($pk);
-								}
-//								Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
+							foreach($blocks as $b){							
+								$pk = new UpdateBlockPacket();
+								$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
+								Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
 							}
 						}
 					}
@@ -686,18 +683,15 @@ class Level implements ChunkManager, Metadatable{
 			if ($b === null) {
 				continue;
 			}
-			foreach ($target as $player) {
-				$pk = new UpdateBlockPacket();
-				if ($b instanceof Block) {
-					$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), $flags];
-				} else {
-					$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
-					$pk->records[] = [$b->x, $b->z, $b->y, $fullBlock >> 4, $fullBlock & 0xf, $flags];
-				}
-				$player->dataPacket($pk);
+			$pk = new UpdateBlockPacket();
+			if ($b instanceof Block) {
+				$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), $flags];
+			} else {
+				$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
+				$pk->records[] = [$b->x, $b->z, $b->y, $fullBlock >> 4, $fullBlock & 0xf, $flags];
 			}
-		}
-//		Server::broadcastPacket($target, $pk);
+			Server::broadcastPacket($target, $pk);
+		}	
 	}
 
 	public function clearCache(){
@@ -1534,10 +1528,8 @@ class Level implements ChunkManager, Metadatable{
 		$position = [ 'x' => $target->x, 'y' => $target->y, 'z' => $target->z ];
 		$blockId = $hand->getId();
 		$viewers = $player->getViewers();
-		foreach ($viewers as $viewer) {
-			$viewer->sendSound(LevelSoundEventPacket::SOUND_PLACE, $position, 1, $blockId);
-		}
-		$player->sendSound(LevelSoundEventPacket::SOUND_PLACE, $position, 1, $blockId);
+		$viewers[] = $player;
+		$player->sendSound(LevelSoundEventPacket::SOUND_PLACE, $position, 1, $blockId, $viewers);
 
 		if($hand->getId() === Item::SIGN_POST or $hand->getId() === Item::WALL_SIGN){
 			$tile = Tile::createTile("Sign", $this->getChunk($block->x >> 4, $block->z >> 4), new Compound(false, [
