@@ -396,7 +396,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastMoveBuffer = '';
 	
 	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
-	
+	protected $isTransfered = false;
+
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -2791,6 +2792,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param string $reason  Reason showed in console
 	 */
 	public function close($message = "", $reason = "generic reason"){
+		if ($this->isTransfered) {
+			$reason = 'transfered';
+		}
 		if ($this->parent !== null) {
 			$this->parent->removeSubClient($this->subClientId);
 		} else {
@@ -3518,6 +3522,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->ip = $address;
 		$pk->port = ($port === false ? 19132 : $port);
 		$this->dataPacket($pk);
+		$this->isTransfered = true;
 	}
 	
 	public function sendSelfData() {
