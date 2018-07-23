@@ -2648,7 +2648,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			/** @minProtocol 120 */
 			case 'PLAYER_SKIN_PACKET':
-				if($this->setSkin($packet->newSkinByteData, $packet->newSkinId, $packet->newSkinGeometryName, $packet->newSkinGeometryData, $packet->newCapeByteData))
+				if($this->setSkin($packet->newSkinByteData, $packet->newSkinId, $packet->newSkinGeometryName, $packet->newSkinGeometryData, $packet->newCapeByteData, $packet->isPremiumSkin))
 					// Send new skin to viewers and to self
 					$this->updatePlayerSkin($packet->oldSkinName, $packet->newSkinName);
 				break;
