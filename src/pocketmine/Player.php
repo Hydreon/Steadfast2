@@ -3349,20 +3349,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->close("", "Please choose a valid username.");
 			return;
 		}
-
-		if (strlen($this->skin) !== 64 * 32 * 4 && strlen($this->skin) !== 64 * 64 * 4) {
-			$this->close("", "Invalid skin.", false);
-			return;
-		}
-
+		
 		static $allowedSkinSize = [
 			8192, // argb 64x32
 			16384, // argb 64x64
 			32768, // argb 128x64
 			65536, // argb 128x128
 		];
-		
+
 		if (!in_array(strlen($this->skin), $allowedSkinSize)) {
+			$this->close("", "Invalid skin.", false);
+			return;
+		}
+
+		if (count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers() && $this->kickOnFullServer()) {
 			$this->close("", "Server is Full", false);
 			return;
 		}
