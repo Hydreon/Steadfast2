@@ -1773,7 +1773,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
-				$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData);
+				$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData, $packet->premiunSkin);
                 if ($packet->osType > 0) {
                     $this->deviceType = $packet->osType;
                 }
@@ -2648,9 +2648,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 			/** @minProtocol 120 */
 			case 'PLAYER_SKIN_PACKET':
-				$this->setSkin($packet->newSkinByteData, $packet->newSkinId, $packet->newSkinGeometryName, $packet->newSkinGeometryData, $packet->newCapeByteData);
-				// Send new skin to viewers and to self
-				$this->updatePlayerSkin($packet->oldSkinName, $packet->newSkinName);				
+				if($this->setSkin($packet->newSkinByteData, $packet->newSkinId, $packet->newSkinGeometryName, $packet->newSkinGeometryData, $packet->newCapeByteData))
+					// Send new skin to viewers and to self
+					$this->updatePlayerSkin($packet->oldSkinName, $packet->newSkinName);
 				break;
 
 			/** @minProtocol 120 */
@@ -4957,7 +4957,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->clientSecret = $packet->clientSecret;
 		$this->protocol = $parent->getPlayerProtocol();
 		$this->inventory = Multiversion::getPlayerInventory($this);
-		$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData);
+		$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData, $packet->premiumSkin);
 		$this->subClientId = $packet->targetSubClientID;
 		
 		// some statistics information
