@@ -137,9 +137,7 @@ class PrimedTNT extends Entity implements Explosive {
 			$pk->z = $this->z;
 			$pk->blockId = -1;
 			$pk->entityType = 1;
-			foreach ($this->getViewers() as $player) {
-				$player->dataPacket($pk);
-			}
+			Server::broadcastPacket($this->getViewers(), $pk);
 		}
 	}
 
