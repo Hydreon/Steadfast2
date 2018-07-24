@@ -1507,5 +1507,9 @@ abstract class Entity extends Location implements Metadatable{
 	public function interact($player) {
 		
 	}
+	
+	public function removeClosedViewer($player) {
+		unset($this->hasSpawned[$player->getId()]);
+	}
 
 }
