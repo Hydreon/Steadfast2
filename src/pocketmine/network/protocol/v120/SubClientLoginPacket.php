@@ -29,6 +29,7 @@ class SubClientLoginPacket extends PEPacket {
 	public $skinGeometryData = "";
 	public $capeData = "";
 	public $isVerified = true;
+	public $premiumSkin = "";
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -129,6 +130,9 @@ class SubClientLoginPacket extends PEPacket {
 		}
 		if (isset($this->playerData['CapeData'])) {
 			$this->capeData = base64_decode($this->playerData['CapeData']);
+		}
+		if (isset($this->playerData["PremiumSkin"])) {
+			$this->premiumSkin = $this->playerData["PremiumSkin"];
 		}
 	}
 
