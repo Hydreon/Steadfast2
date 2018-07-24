@@ -236,7 +236,7 @@ class RakLibServer extends \Thread{
     }
 	
 	public function getExternalQueueSize() {
-		return count($this->externalQueue);
+		return $this->externalQueue->count();
 	}
 
 }

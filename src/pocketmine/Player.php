@@ -1006,6 +1006,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function addBufferToPacketQueue($buffer) {
+		if($this->connected === false){
+			return false;
+		}
 		$this->packetQueue[] = $buffer;
 	}
 
@@ -2845,6 +2848,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				Level::getXZ($index, $chunkX, $chunkZ);
 				$this->level->freeChunk($chunkX, $chunkZ, $this);
 				unset($this->usedChunks[$index]);
+				foreach($this->level->getChunkEntities($chunkX, $chunkZ) as $entity){
+					$entity->removeClosedViewer($this);
+				}
 			}
 
 			parent::close();
@@ -2864,6 +2870,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->loadQueue = [];
 			$this->hasSpawned = [];
 			$this->spawnPosition = null;
+			$this->packetQueue = [];
+			$this->entitiesPacketsQueue = [];
+			$this->inventoryPacketQueue = [];
+			$this->lastEntityRemove = [];
+			$this->entitiesUUIDEids = [];
+			$this->lastMoveBuffer = '';
 			unset($this->buffer);
 		}
 			
