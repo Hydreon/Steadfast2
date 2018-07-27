@@ -394,6 +394,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $packetQueue = [];
 	protected $inventoryPacketQueue = [];
 	protected $lastMoveBuffer = '';
+	protected $countMovePacketInLastTick = 0;
 	
 	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
 	protected $isTransfered = false;
@@ -1805,7 +1806,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						} else {
 							$distanceSquared = ($newPos->x - $this->x) ** 2 + ($newPos->z - $this->z) ** 2;
 						}
-						if ($distanceSquared > $this->movementSpeed * 200) {							
+						if ($distanceSquared > $this->movementSpeed * 200 * ($this->countMovePacketInLastTick > 0 ? $this->countMovePacketInLastTick : 1)) {							
 							$this->revertMovement($this, $this->yaw, $this->pitch);
 							$this->isTeleporting = true;
 							return;
@@ -4637,14 +4638,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		$pk = $this->server->getNetwork()->getPacket(0x13, $this->getPlayerProtocol());
 		if (is_null($pk)) {
-			$this->lastMoveBuffer = '';
+			$this->lastMoveBuffer = '';		
 			return;
 		}
 		$pk->setBuffer($this->lastMoveBuffer);
 		$this->lastMoveBuffer = '';
 		$pk->decode($this->getPlayerProtocol());
 		$this->handleDataPacket($pk);
-		
+		$this->countMovePacketInLastTick = 0;
 		if (!$this->isAlive() || !$this->spawned || $this->newPosition === null) {
 			$this->setMoving(false);
 			return;
@@ -5132,6 +5133,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	public function setLastMovePacket($buffer) {
 		$this->lastMoveBuffer = $buffer;
+		$this->countMovePacketInLastTick++;
 	}
 
 }

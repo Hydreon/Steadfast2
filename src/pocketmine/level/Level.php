@@ -251,8 +251,9 @@ class Level implements ChunkManager, Metadatable{
 	protected $yMask;
 	protected $maxY;
 	protected $chunkCache = [];
+	protected $generator = null;
 
-		/**
+	/**
 	 * Returns the chunk unique hash/key
 	 *
 	 * @param int $x
@@ -336,14 +337,18 @@ class Level implements ChunkManager, Metadatable{
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
 		$this->chunkMaker = new ChunkMaker($this->server->getLoader(), $this->server->getMainInterface()->getRakLib());
-		$this->generator = Generator::getGenerator($this->provider->getGenerator());
+		if ($this->server->getAutoGenerate()) {
+			$this->generator = Generator::getGenerator($this->provider->getGenerator());
+		}
 	}
 
 	public function initLevel(){
-		$generator = $this->generator;
-		$this->generatorInstance = new $generator($this->provider->getGeneratorOptions());
-		$this->generatorInstance->init($this, new Random($this->getSeed()));
-		$this->registerGenerator();
+		if (!is_null($this->generator)) {
+			$generator = $this->generator;
+			$this->generatorInstance = new $generator($this->provider->getGeneratorOptions());
+			$this->generatorInstance->init($this, new Random($this->getSeed()));
+			$this->registerGenerator();
+		}
 	}
 
 	/**
@@ -1907,7 +1912,7 @@ class Level implements ChunkManager, Metadatable{
 	
 	
 	public function generateChunkCallback($x, $z, FullChunk $chunk){
-		if ($this->closed) {
+		if ($this->closed || is_null($this->generator)) {
 			return;
 		} 
 		$oldChunk = $this->getChunk($x, $z, false);
@@ -2392,6 +2397,9 @@ class Level implements ChunkManager, Metadatable{
 	
 
 	public function generateChunk(int $x, int $z, bool $force = false){
+		if (is_null($this->generator)) {
+			return;
+		}
 		if(count($this->chunkGenerationQueue) >= $this->chunkGenerationQueueSize and !$force){
 			return;
 		}
@@ -2405,26 +2413,21 @@ class Level implements ChunkManager, Metadatable{
 	}
 	
 	public function registerGenerator(){
-		$size = $this->server->getScheduler()->getAsyncTaskPoolSize();
-		for($i = 0; $i < $size; ++$i){
-			$this->server->getScheduler()->scheduleAsyncTaskToWorker(new GeneratorRegisterTask($this,  $this->generatorInstance), $i);
+		if (!is_null($this->generator)) {
+			$size = $this->server->getScheduler()->getAsyncTaskPoolSize();
+			for($i = 0; $i < $size; ++$i){
+				$this->server->getScheduler()->scheduleAsyncTaskToWorker(new GeneratorRegisterTask($this,  $this->generatorInstance), $i);
+			}
 		}
 	}
 
 	public function unregisterGenerator(){
-		$size = $this->server->getScheduler()->getAsyncTaskPoolSize();
-		for($i = 0; $i < $size; ++$i){
-			$this->server->getScheduler()->scheduleAsyncTaskToWorker(new GeneratorUnregisterTask($this,  $this->generatorInstance), $i);
+		if (!is_null($this->generator)) {
+			$size = $this->server->getScheduler()->getAsyncTaskPoolSize();
+			for($i = 0; $i < $size; ++$i){
+				$this->server->getScheduler()->scheduleAsyncTaskToWorker(new GeneratorUnregisterTask($this,  $this->generatorInstance), $i);
+			}
 		}
-	}
-
-	public function regenerateChunk($x, $z){
-		$this->unloadChunk($x, $z, false);
-
-		$this->cancelUnloadChunkRequest($x, $z);
-
-		$this->generateChunk($x, $z);
-		//TODO: generate & refresh chunk from the generator object
 	}
 
 	public function doChunkGarbageCollection(){
