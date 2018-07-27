@@ -67,8 +67,8 @@ class AvailableCommandsPacket extends PEPacket{
 		
 		$enumValues = [];
 		$enumValuesCount = 0;
-		$enumAdditional = [];
 		$enums = [];
+		$enumsCount = 0;
 		$commandsStreams = [
 			Info::PROTOCOL_120 => new BinaryStream(),
 			Info::PROTOCOL_271 => new BinaryStream(),
@@ -117,9 +117,23 @@ class AvailableCommandsPacket extends PEPacket{
 					if ($paramData['type'] == "rawtext" && ($paramNum > 1 || $isParamOneAndOptional)) {
 						$paramData['type'] = "string";
 					}
+					if ($paramData['type'] == "stringenum") {
+						 $enums[$enumsCount]['name'] = $paramData['name'];
+						 $enums[$enumsCount]['data'] = [];
+						 foreach ($paramData['enum_values'] as $enumElem) {
+							 $enumValues[$enumValuesCount] = $enumElem;
+							 $enums[$enumsCount]['data'][] = $enumValuesCount;
+							 $enumValuesCount++;
+						 }
+						 $enumsCount++;
+                    }
 					foreach ($commandsStreams as $protocol => $unused) {
 						$commandsStreams[$protocol]->putString($paramData['name']);
-						$commandsStreams[$protocol]->putLInt(self::ARG_FLAG_VALID | self::getFlag($paramData['type'], $protocol));
+						 if ($paramData['type'] == "stringenum") {
+                            $commandsStreams[$protocol]->putLInt(self::ARG_FLAG_VALID | self::ARG_FLAG_ENUM | ($enumsCount - 1));
+                        } else {
+							$commandsStreams[$protocol]->putLInt(self::ARG_FLAG_VALID | self::getFlag($paramData['type'], $protocol));
+                        }
 						$commandsStreams[$protocol]->putByte(isset($paramData['optional']) && $paramData['optional']);
 					}
 				}
@@ -132,7 +146,6 @@ class AvailableCommandsPacket extends PEPacket{
 			$additionalDataStream->putString($enumValues[$i]);
 		}
 		$additionalDataStream->putVarInt(0);
-		$enumsCount = count($enums);
 		$additionalDataStream->putVarInt($enumsCount);
 		for ($i = 0; $i < $enumsCount; $i++) {
 			$additionalDataStream->putString($enums[$i]['name']);
