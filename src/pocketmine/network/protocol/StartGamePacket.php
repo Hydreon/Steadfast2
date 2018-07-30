@@ -43,6 +43,7 @@ class StartGamePacket extends PEPacket{
 		['name' => 'naturalRegeneration', 'type' => 1, 'value' => 0],
 //		['name' => 'showcoordinates', 'type' => 1, 'value' => 1]
 	];
+	public $multiplayerCorrelationId;
 
 	public function decode($playerProtocol){
 
@@ -143,6 +144,9 @@ class StartGamePacket extends PEPacket{
 			
 			if ($playerProtocol >= Info::PROTOCOL_280) {
 				$this->put(self::getBlockPalletData($playerProtocol));
+			}
+			if ($playerProtocol >= Info::PROTOCOL_282) {
+				$this->putString($this->multiplayerCorrelationId);
 			}
 		}
 	}
