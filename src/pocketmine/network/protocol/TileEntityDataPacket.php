@@ -38,7 +38,7 @@ class TileEntityDataPacket extends PEPacket{
 		$this->x = $this->getSignedVarInt();
 		$this->y = $this->getVarInt();
 		$this->z = $this->getSignedVarInt();
-		$this->namedtag = $this->get(true);
+		$this->namedtag = $this->get(strlen($this->getBuffer()) - $this->getOffset());
 	}
 
 	public function encode($playerProtocol){
