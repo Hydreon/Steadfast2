@@ -233,9 +233,25 @@ class Chunk extends BaseFullChunk{
 	public function getBlockIdColumn($x, $z){
 		return substr($this->blocks, ($x << 11) + ($z << 7), 128);
 	}
+	
+	public function setBlockIdColumn($x, $z, $column){
+		if (strlen($column) != 128) {
+			return false;
+		}
+		$this->blocks = substr_replace($this->blocks, $column, ($x << 11) + ($z << 7), 128);
+		return true;
+	}
 
 	public function getBlockDataColumn($x, $z){
 		return substr($this->data, ($x << 10) + ($z << 6), 64);
+	}
+	
+	public function setBlockDataColumn($x, $z, $column){
+		if (strlen($column) != 64) {
+			return false;
+		}
+		$this->data = substr_replace($this->data, $column, ($x << 10) + ($z << 6), 64);
+		return true;
 	}
 
 	public function getBlockSkyLightColumn($x, $z){
