@@ -3496,6 +3496,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->gamemode = $this->gamemode & 0x01;
 		$pk->eid = $this->id;
 		$pk->stringClientVersion = $this->clientVersion;
+		$pk->multiplayerCorrelationId = $this->uuid->toString();
 		$this->directDataPacket($pk);
 
 		$pk = new SetTimePacket();
