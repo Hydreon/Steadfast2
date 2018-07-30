@@ -110,6 +110,9 @@ class AddPlayerPacket extends PEPacket{
 				$this->putByte(0);
 			}
 		}
+		if ($playerProtocol >= Info::PROTOCOL_282) {
+			$this->putString($this->uuid->toString());
+		}
 	}
 
 }
