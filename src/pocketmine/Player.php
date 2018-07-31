@@ -2606,7 +2606,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 								$this->useItem($packet->item, $packet->slot, $packet->face, $packet->position, $packet->clickPosition);
 								break;
 							case InventoryTransactionPacket::ITEM_USE_ACTION_DESTROY:
-								$this->breakBlock($packet->position);
+//								$this->breakBlock($packet->position);
 								break;
 							default:
 								error_log('[TRANSACTION_TYPE_ITEM_USE] Wrong actionType ' . $packet->actionType);
@@ -4180,7 +4180,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$item = $this->inventory->getItemInHand();
 
 		$oldItem = clone $item;
-
+		
 		if($this->level->useBreakOn($vector, $item, $this) === true){
 			if($this->isSurvival()){
 				if(!$item->equals($oldItem, true) or $item->getCount() !== $oldItem->getCount()){
