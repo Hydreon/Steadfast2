@@ -776,7 +776,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function useChunk($x, $z){
-		$this->usedChunks[Level::chunkHash($x, $z)] = true;
 		$this->chunkLoadCount++;
 		if($this->spawned){
 			foreach($this->level->getChunkEntities($x, $z) as $entity){
@@ -800,21 +799,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$X = null;
 			$Z = null;
 			Level::getXZ($index, $X, $Z);
-
 			++$count;
-
 			unset($this->loadQueue[$index]);
-			$this->usedChunks[$index] = false;
-
-			$this->level->useChunk($X, $Z, $this);
-			$this->level->requestChunk($X, $Z, $this);
-			$this->useChunk($X, $Z);
-			if($this->server->getAutoGenerate()){
-				if(!$this->level->populateChunk($X, $Z, true)){
-					if($this->spawned){
-						continue;
-					}else{
-						break;
+			if (isset($this->usedChunks[$index])) {
+				$this->usedChunks[$index] = true;
+				$this->level->requestChunk($X, $Z, $this);
+			} else {
+				$this->usedChunks[$index] = true;
+				$this->level->useChunk($X, $Z, $this);
+				$this->level->requestChunk($X, $Z, $this);
+				$this->useChunk($X, $Z);
+				if($this->server->getAutoGenerate()){
+					if(!$this->level->populateChunk($X, $Z, true)){
+						if($this->spawned){
+							continue;
+						}else{
+							break;
+						}
 					}
 				}
 			}
@@ -884,7 +885,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$chunkX = $centerX + $ddx;
 						$chunkZ = $centerZ + $ddz;
 						$index = Level::chunkHash($chunkX, $chunkZ);
-						if (isset($lastChunk[$index])) {
+						if (isset($lastChunk[$index])) {							
+							if (!$lastChunk[$index]) {
+								$newOrder[$index] = abs($dx) + abs($dz);
+							}
 							unset($lastChunk[$index]);
 						} else {
 							$newOrder[$index] = abs($dx) + abs($dz);
@@ -3182,6 +3186,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->chunk->removeEntity($this);
 			}
 			$this->chunk = $this->level->getChunk($chunkX, $chunkZ);
+			$this->onChunkChanged();
 			if ($this->chunk !== null) {
 				$this->chunk->addEntity($this);
 			}
@@ -3203,6 +3208,31 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 	
+	protected function onChunkChanged() {
+		$lastChunks = $this->usedChunks;
+		$radiusSquared = $this->viewRadius * $this->viewRadius;
+		$centerX = $this->x >> 4;
+		$centerZ = $this->z >> 4;
+		for ($dx = 0; $dx < $this->viewRadius; $dx++) {
+			for ($dz = 0; $dz < $this->viewRadius; $dz++) {
+				if ($dx * $dx + $dz * $dz > $radiusSquared) {
+					continue;
+				}
+				foreach ([$dx, (-$dx - 1)] as $ddx) {
+					foreach ([$dz, (-$dz - 1)] as $ddz) {
+						$chunkX = $centerX + $ddx;
+						$chunkZ = $centerZ + $ddz;
+						$index = Level::chunkHash($chunkX, $chunkZ);
+						unset($lastChunks[$index]);
+					}
+				}
+			}
+		}
+		foreach ($lastChunks as $index => $val) {
+			$this->usedChunks[$index] = false;
+		}
+	}
+
 	public function teleport(Vector3 $pos, $yaw = null, $pitch = null) {
 		$this->activeModalWindows = [];
 		if (!$this->spawned || !$this->isOnline()) {
