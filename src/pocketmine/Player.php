@@ -854,7 +854,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->beforeSpawnViewRadius = null;
 			}
 			if (!is_null($this->beforeSpawnTeleportPosition)) {
-				$this->teleport($this->beforeSpawnTeleportPosition);
+				$this->teleport($this->beforeSpawnTeleportPosition[0], $this->beforeSpawnTeleportPosition[1], $this->beforeSpawnTeleportPosition[2]);
 				$this->beforeSpawnTeleportPosition = null;
 			} else {
 				$this->nextChunkOrderRun = 0;
@@ -3236,7 +3236,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function teleport(Vector3 $pos, $yaw = null, $pitch = null) {
 		$this->activeModalWindows = [];
 		if (!$this->spawned || !$this->isOnline()) {
-			$this->beforeSpawnTeleportPosition = $pos;
+			$this->beforeSpawnTeleportPosition = [$pos, $yaw, $pitch];
 			if(($pos instanceof Position) && $pos->level !== $this->level){
 				$this->switchLevel($pos->getLevel());
 			}
