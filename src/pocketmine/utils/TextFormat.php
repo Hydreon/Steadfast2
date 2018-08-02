@@ -83,6 +83,10 @@ abstract class TextFormat{
 		return str_replace("\x1b", "", preg_replace("/\x1b[\\(\\][[0-9;\\[\\(]+[Bm]/", "", $string));
 	}
 
+	public static function colorize(string $string, string $placeholder = "&") : string{
+		return preg_replace('/' . preg_quote($placeholder, "/") . '([0-9a-fk-or])/u', TextFormat::ESCAPE . '$1', $string);
+	}
+
 	/**
 	 * Returns an JSON-formatted string with colors/markup
 	 *
