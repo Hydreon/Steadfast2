@@ -108,6 +108,8 @@ use pocketmine\tile\Tile;
 use pocketmine\utils\Binary;
 use pocketmine\utils\Cache;
 use pocketmine\utils\Config;
+use pocketmine\lang\Language;
+use pocketmine\lang\LanguageNotFoundException;
 use pocketmine\utils\LevelException;
 use pocketmine\utils\MainLogger;
 use pocketmine\utils\ServerException;
@@ -260,6 +262,11 @@ class Server{
 	private $playerList = [];
 
 	private $identifiers = [];
+
+	/** @var Language */
+	private $language;
+	/** @var bool */
+	private $forceLanguage = false;
 
 	/** @var Level[] */
 	private $levels = [];
@@ -808,10 +815,10 @@ class Server{
 				return $nbt->getData();
 			}catch(\Exception $e){ //zlib decode error / corrupt data
 				rename($path . "$name.dat", $path . "$name.dat.bak");
-				$this->logger->warning("Corrupted data found for \"" . $name . "\", creating new profile");
-			}
-		}else{
-			$this->logger->notice("Player data not found for \"" . $name . "\", creating new profile");
+$this->logger->notice($this->getLanguage()->translateString("pocketmine.data.playerCorrupted", [$name]));
+				}
+			}else{
+				$this->logger->notice($this->getLanguage()->translateString("pocketmine.data.playerNotFound", [$name]));
 		}
 		$spawn = $this->getDefaultLevel()->getSafeSpawn();
 		$nbt = new Compound("", [
@@ -872,9 +879,7 @@ class Server{
 			}else{
 				file_put_contents($this->getDataPath() . "players/" . strtolower($name) . ".dat", $nbt->writeCompressed());
 			}
-		}catch(\Exception $e){
-			$this->logger->critical("Could not save player " . $name . ": " . $e->getMessage());
-			if(\pocketmine\DEBUG > 1 and $this->logger instanceof MainLogger){
+				$this->logger->critical($this->getLanguage()->translateString("pocketmine.data.saveError", [$name, $e->getMessage()]));
 				$this->logger->logException($e);
 			}
 		}
@@ -1062,7 +1067,7 @@ class Server{
 		if($this->isLevelLoaded($name)){
 			return true;
 		}elseif(!$this->isLevelGenerated($name)){
-			$this->logger->notice("Level \"" . $name . "\" not found");
+			$this->logger->notice($this->getLanguage()->translateString("pocketmine.level.notFound", [$name]));
 
 			return false;
 		}
@@ -1072,7 +1077,8 @@ class Server{
 		$provider = LevelProviderManager::getProvider($path);
 
 		if($provider === null){
-			$this->logger->error("Could not load level \"" . $name . "\": Unknown provider");
+			$this->logger->error($this->getLanguage()->translateString("pocketmine.level.loadError", [$name, "Cannot identify format of world"]));
+
 
 			return false;
 		}
@@ -1140,6 +1146,8 @@ class Server{
 		$this->getPluginManager()->callEvent(new LevelInitEvent($level));
 
 		$this->getPluginManager()->callEvent(new LevelLoadEvent($level));
+
+		$this->getLogger()->notice($this->getLanguage()->translateString("pocketmine.level.backgroundGeneration", [$name]));
 		
 		if ($this->getAutoGenerate()) {
 			$centerX = $level->getSpawnLocation()->getX() >> 4;
@@ -1581,15 +1589,37 @@ class Server{
 		}
 		$this->network = new Network($this);
 		$this->network->setName($this->getMotd());
+			$this->logger->info($this->getLanguage()->translateString("pocketmine.server.info", [
+				$this->getName(),
+				(\pocketmine\IS_DEVELOPMENT_BUILD ? TextFormat::YELLOW : "") . $this->getPocketMineVersion() . TextFormat::RESET
+			]));
+			$this->logger->info($this->getLanguage()->translateString("pocketmine.server.license", [$this->getName()]));
 
 		if($this->getConfigBoolean("hardcore", false) === true and $this->getDifficulty() < 3){
 			$this->setConfigInt("difficulty", 3);
 		}
 
+			$this->logger->info($this->getLanguage()->translateString("pocketmine.server.start", [TextFormat::AQUA . $this->getVersion() . TextFormat::RESET]));
+
 		define("pocketmine\\DEBUG", (int) $this->getProperty("debug.level", 1));
+			$this->forceLanguage = (bool) $this->getProperty("settings.force-language", false);
+			$selectedLang = $this->getProperty("settings.language", Language::FALLBACK_LANGUAGE);
+			try{
+				$this->language = new Language($selectedLang);
+			}catch(LanguageNotFoundException $e){
+				$this->logger->error($e->getMessage());
+				try{
+					$this->language = new Language(Language::FALLBACK_LANGUAGE);
+				}catch(LanguageNotFoundException $e){
+					$this->logger->emergency("Fallback language \"" . Language::FALLBACK_LANGUAGE . "\" not found");
+					return;
+}
 		if($this->logger instanceof MainLogger){
 			$this->logger->setLogDebug(\pocketmine\DEBUG > 1);
 		}
+
+			$this->logger->info($this->getLanguage()->translateString("language.selected", [$this->getLanguage()->getName(), $this->getLanguage()->getLang()]));
+}
 
 		Level::$COMPRESSION_LEVEL = $this->getProperty("chunk-sending.compression-level", 8);
 
@@ -1597,7 +1627,9 @@ class Server{
 			@\cli_set_process_title($this->getName() . " " . $this->getPocketMineVersion());
 		}
 
-		$this->logger->info("Starting Minecraft PE server on " . ($this->getIp() === "" ? "*" : $this->getIp()) . ":" . $this->getPort());
+			$this->logger->info($this->getLanguage()->translateString("pocketmine.server.networkStart", [$this->getIp(), $this->getPort()]));
+
+				$this->logger->debug($this->getLanguage()->translateString("pocketmine.debug.enable"));
 		define("BOOTUP_RANDOM", @Utils::getRandomBytes(16));
 		$this->serverID = Utils::getMachineUniqueId($this->getIp() . $this->getPort());
 	
@@ -1683,7 +1715,7 @@ class Server{
 		if($this->getDefaultLevel() === null){
 			$default = $this->getConfigString("level-name", "world");
 			if(trim($default) == ""){
-				$this->getLogger()->warning("level-name cannot be null, using default");
+				$this->getLogger()->emergency($this->getLanguage()->translateString("pocketmine.level.defaultError"));
 				$default = "world";
 				$this->setConfigString("level-name", "world");
 			}
@@ -1926,7 +1958,19 @@ class Server{
 	public function dispatchCommand(CommandSender $sender, $commandLine){
 		if(!($sender instanceof CommandSender)){
 			throw new ServerException("CommandSender is not valid");
-		}
+
+		$sender->sendMessage($this->getLanguage()->translateString(TextFormat::RED . "%commands.generic.notFound"));
+
+		return false;
+	}
+
+		$this->logger->info($this->getLanguage()->translateString("pocketmine.server.defaultGameMode", [self::getGamemodeString($this->getGamemode())]));
+
+		$this->logger->info($this->getLanguage()->translateString("pocketmine.server.startFinished", [round(microtime(true) - \pocketmine\START_TIME, 3)]));
+
+		$this->tickProcessor();
+		$this->forceShutdown();
+}
 
 		if($this->commandMap->dispatch($sender, $commandLine)){
 			return true;
@@ -2167,15 +2211,16 @@ class Server{
 
 		ini_set("error_reporting", 0);
 		ini_set("memory_limit", -1); //Fix error dump not dumped on memory problems
-		$this->logger->emergency("An unrecoverable error has occurred and the server has crashed. Creating a crash dump");
 		try{
+
+			$this->logger->emergency($this->getLanguage()->translateString("pocketmine.crash.create"));
 			$dump = new CrashDump($this);
 		}catch(\Exception $e){
 			$this->logger->critical("Could not create Crash Dump: " . $e->getMessage());
 			return;
 		}
 
-		$this->logger->emergency("Please submit the \"" . $dump->getPath() . "\" file to the Bug Reporting page. Give as much info as you can.");
+			$this->logger->emergency($this->getLanguage()->translateString("pocketmine.crash.submit", [$dump->getPath()]));
 
 
 		if($this->getProperty("auto-report.enabled", true) !== false){
@@ -2204,7 +2249,8 @@ class Server{
 				if(($data = json_decode($reply)) !== false and isset($data->crashId)){
 					$reportId = $data->crashId;
 					$reportUrl = $data->crashUrl;
-					$this->logger->emergency("The crash dump has been automatically submitted to the Crash Archive. You can view it on $reportUrl or use the ID #$reportId.");
+
+	$this->logger->emergency($this->getLanguage()->translateString("pocketmine.crash.archive", [$reportUrl, $reportId]));
 				}
 			}
 		}
@@ -2229,8 +2275,17 @@ class Server{
 			$next = $this->nextTick - 0.0001;
 			if($next > microtime(true)){
 				try{
+
+				$this->logger->critical($this->getLanguage()->translateString("pocketmine.crash.error", [$e->getMessage()]));
 					@time_sleep_until($next);
 				}catch(\Throwable $e){
+
+					$this->logger->critical($this->getLanguage()->translateString("pocketmine.level.tickError", [$level->getName(), $e->getMessage()]));
+				}else{
+					$this->logger->critical($this->getLanguage()->translateString("pocketmine.level.tickUnloadError", [$level->getName()]));
+				}
+				$this->logger->logException($e);
+
 					//Sometimes $next is less than the current time. High load?
 				}
 			}
@@ -2358,6 +2413,20 @@ class Server{
 	}
 
 	/**
+	 * @return Language
+	 */
+	public function getLanguage(){
+		return $this->language;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isLanguageForced() : bool{
+		return $this->forceLanguage;
+	}
+
+	/**
 	 * @return Network
 	 */
 	public function getNetwork(){
@@ -2369,6 +2438,11 @@ class Server{
 			echo "\x1b]0;" . $this->getName() . " " . $this->getPocketMineVersion() . " | Online " . count($this->players) . "/" . $this->getMaxPlayers() . " | RAM " . round((memory_get_usage() / 1024) / 1024, 2) . "/" . round((memory_get_usage(true) / 1024) / 1024, 2) . " MB | U " . round($this->network->getUpload() / 1024, 2) . " D " . round($this->network->getDownload() / 1024, 2) . " kB/s | TPS " . $this->getTicksPerSecond() . " | Load " . $this->getTickUsage() . "%\x07";
 		}
 	}
+
+			if($this->getTicksPerSecondAverage() < 12){
+				$this->logger->warning($this->getLanguage()->translateString("pocketmine.server.tickOverload"));
+			}
+		}
 	
 	/**
 	 * @param string $address
