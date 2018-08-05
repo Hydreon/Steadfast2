@@ -251,8 +251,9 @@ class Level implements ChunkManager, Metadatable{
 	protected $yMask;
 	protected $maxY;
 	protected $chunkCache = [];
+	protected $generator = null;
 
-		/**
+	/**
 	 * Returns the chunk unique hash/key
 	 *
 	 * @param int $x
@@ -336,14 +337,18 @@ class Level implements ChunkManager, Metadatable{
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
 		$this->chunkMaker = new ChunkMaker($this->server->getLoader(), $this->server->getMainInterface()->getRakLib());
-		$this->generator = Generator::getGenerator($this->provider->getGenerator());
+		if ($this->server->getAutoGenerate()) {
+			$this->generator = Generator::getGenerator($this->provider->getGenerator());
+		}
 	}
 
 	public function initLevel(){
-		$generator = $this->generator;
-		$this->generatorInstance = new $generator($this->provider->getGeneratorOptions());
-		$this->generatorInstance->init($this, new Random($this->getSeed()));
-		$this->registerGenerator();
+		if (!is_null($this->generator)) {
+			$generator = $this->generator;
+			$this->generatorInstance = new $generator($this->provider->getGeneratorOptions());
+			$this->generatorInstance->init($this, new Random($this->getSeed()));
+			$this->registerGenerator();
+		}
 	}
 
 	/**
@@ -634,13 +639,10 @@ class Level implements ChunkManager, Metadatable{
 					foreach($this->changedBlocks as $index => $mini){
 						foreach($mini as $blocks){
 							/** @var Block $b */
-							foreach($blocks as $b){
-								foreach ($this->getUsingChunk($b->x >> 4, $b->z >> 4) as $player) {								
-									$pk = new UpdateBlockPacket();
-									$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
-									$player->dataPacket($pk);
-								}
-//								Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
+							foreach($blocks as $b){							
+								$pk = new UpdateBlockPacket();
+								$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), UpdateBlockPacket::FLAG_ALL];
+								Server::broadcastPacket($this->getUsingChunk($b->x >> 4, $b->z >> 4), $pk);
 							}
 						}
 					}
@@ -686,18 +688,15 @@ class Level implements ChunkManager, Metadatable{
 			if ($b === null) {
 				continue;
 			}
-			foreach ($target as $player) {
-				$pk = new UpdateBlockPacket();
-				if ($b instanceof Block) {
-					$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), $flags];
-				} else {
-					$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
-					$pk->records[] = [$b->x, $b->z, $b->y, $fullBlock >> 4, $fullBlock & 0xf, $flags];
-				}
-				$player->dataPacket($pk);
+			$pk = new UpdateBlockPacket();
+			if ($b instanceof Block) {
+				$pk->records[] = [$b->x, $b->z, $b->y, $b->getId(), $b->getDamage(), $flags];
+			} else {
+				$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
+				$pk->records[] = [$b->x, $b->z, $b->y, $fullBlock >> 4, $fullBlock & 0xf, $flags];
 			}
-		}
-//		Server::broadcastPacket($target, $pk);
+			Server::broadcastPacket($target, $pk);
+		}	
 	}
 
 	public function clearCache(){
@@ -1342,8 +1341,7 @@ class Level implements ChunkManager, Metadatable{
 			
 			$breakTime = $player->isCreative() ? 0.15 : $target->getBreakTime($item);
 			$delta = 0.1;
-
-			if (!$ev->getInstaBreak() && ($player->lastBreak + $breakTime) >= microtime(true) - $delta) {
+			if (!$ev->getInstaBreak() && ($player->lastBreak + $breakTime) >= microtime(true)) {
 				return false;
 			}
 			
@@ -1470,8 +1468,7 @@ class Level implements ChunkManager, Metadatable{
 			$hand = $item->getBlock();
 			$hand->position($block);
 		}elseif($block->getId() === Item::FIRE){
-			$this->setBlock($block, new Air(), true);
-			
+			$block->onUpdate(self::BLOCK_UPDATE_TOUCH);
 			return false;
 		}else{
 			return false;
@@ -1535,10 +1532,8 @@ class Level implements ChunkManager, Metadatable{
 		$position = [ 'x' => $target->x, 'y' => $target->y, 'z' => $target->z ];
 		$blockId = $hand->getId();
 		$viewers = $player->getViewers();
-		foreach ($viewers as $viewer) {
-			$viewer->sendSound(LevelSoundEventPacket::SOUND_PLACE, $position, 1, $blockId);
-		}
-		$player->sendSound(LevelSoundEventPacket::SOUND_PLACE, $position, 1, $blockId);
+		$viewers[] = $player;
+		$player->sendSound(LevelSoundEventPacket::SOUND_PLACE, $position, 1, $blockId, $viewers);
 
 		if($hand->getId() === Item::SIGN_POST or $hand->getId() === Item::WALL_SIGN){
 			$tile = Tile::createTile("Sign", $this->getChunk($block->x >> 4, $block->z >> 4), new Compound(false, [
@@ -1916,7 +1911,7 @@ class Level implements ChunkManager, Metadatable{
 	
 	
 	public function generateChunkCallback($x, $z, FullChunk $chunk){
-		if ($this->closed) {
+		if ($this->closed || is_null($this->generator)) {
 			return;
 		} 
 		$oldChunk = $this->getChunk($x, $z, false);
@@ -2401,6 +2396,9 @@ class Level implements ChunkManager, Metadatable{
 	
 
 	public function generateChunk(int $x, int $z, bool $force = false){
+		if (is_null($this->generator)) {
+			return;
+		}
 		if(count($this->chunkGenerationQueue) >= $this->chunkGenerationQueueSize and !$force){
 			return;
 		}
@@ -2414,26 +2412,21 @@ class Level implements ChunkManager, Metadatable{
 	}
 	
 	public function registerGenerator(){
-		$size = $this->server->getScheduler()->getAsyncTaskPoolSize();
-		for($i = 0; $i < $size; ++$i){
-			$this->server->getScheduler()->scheduleAsyncTaskToWorker(new GeneratorRegisterTask($this,  $this->generatorInstance), $i);
+		if (!is_null($this->generator)) {
+			$size = $this->server->getScheduler()->getAsyncTaskPoolSize();
+			for($i = 0; $i < $size; ++$i){
+				$this->server->getScheduler()->scheduleAsyncTaskToWorker(new GeneratorRegisterTask($this,  $this->generatorInstance), $i);
+			}
 		}
 	}
 
 	public function unregisterGenerator(){
-		$size = $this->server->getScheduler()->getAsyncTaskPoolSize();
-		for($i = 0; $i < $size; ++$i){
-			$this->server->getScheduler()->scheduleAsyncTaskToWorker(new GeneratorUnregisterTask($this,  $this->generatorInstance), $i);
+		if (!is_null($this->generator)) {
+			$size = $this->server->getScheduler()->getAsyncTaskPoolSize();
+			for($i = 0; $i < $size; ++$i){
+				$this->server->getScheduler()->scheduleAsyncTaskToWorker(new GeneratorUnregisterTask($this,  $this->generatorInstance), $i);
+			}
 		}
-	}
-
-	public function regenerateChunk($x, $z){
-		$this->unloadChunk($x, $z, false);
-
-		$this->cancelUnloadChunkRequest($x, $z);
-
-		$this->generateChunk($x, $z);
-		//TODO: generate & refresh chunk from the generator object
 	}
 
 	public function doChunkGarbageCollection(){

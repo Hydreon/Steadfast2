@@ -154,5 +154,9 @@ class ServerHandler{
 		$buffer .= Binary::writeShort(strlen($publicKey)) . $publicKey;
 		$this->server->pushMainToThreadPacket($buffer);
 	}
+	
+	public function getPacketQueueSize() {
+		return $this->server->getExternalQueueSize();
+	}
 
 }

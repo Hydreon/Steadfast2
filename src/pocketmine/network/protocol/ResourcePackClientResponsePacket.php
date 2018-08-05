@@ -19,7 +19,7 @@ class ResourcePackClientResponsePacket extends PEPacket {
 		$this->status = $this->getByte();
 		$entryCount = $this->getLShort();
 		while ($entryCount-- > 0) {
-			$this->packIds[] = $this->getString();
+			$this->packIds[] = substr($this->getString(), 0, 36);
 		}
 	}
 
