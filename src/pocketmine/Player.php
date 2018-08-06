@@ -858,7 +858,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->beforeSpawnViewRadius = null;
 			}
 			if (!is_null($this->beforeSpawnTeleportPosition)) {
-				$this->teleport($this->beforeSpawnTeleportPosition);
+				$this->teleport($this->beforeSpawnTeleportPosition[0], $this->beforeSpawnTeleportPosition[1], $this->beforeSpawnTeleportPosition[2]);
 				$this->beforeSpawnTeleportPosition = null;
 			} else {
 				$this->nextChunkOrderRun = 0;
@@ -2049,7 +2049,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case 'REMOVE_BLOCK_PACKET':
 				//Timings::$timerRemoveBlockPacket->startTiming();
-				$this->breakBlock([ 'x' => $packet->x, 'y' => $packet->y, 'z' => $packet->z ]);
+//				$this->breakBlock([ 'x' => $packet->x, 'y' => $packet->y, 'z' => $packet->z ]);
 				//Timings::$timerRemoveBlockPacket->stopTiming();
 				break;
 			case 'MOB_ARMOR_EQUIPMENT_PACKET':
@@ -3244,7 +3244,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function teleport(Vector3 $pos, $yaw = null, $pitch = null) {
 		$this->activeModalWindows = [];
 		if (!$this->spawned || !$this->isOnline()) {
-			$this->beforeSpawnTeleportPosition = $pos;
+			$this->beforeSpawnTeleportPosition = [$pos, $yaw, $pitch];
 			if(($pos instanceof Position) && $pos->level !== $this->level){
 				$this->switchLevel($pos->getLevel());
 			}
@@ -4221,7 +4221,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$item = $this->inventory->getItemInHand();
 
 		$oldItem = clone $item;
-
+		
 		if($this->level->useBreakOn($vector, $item, $this) === true){
 			if($this->isSurvival()){
 				if(!$item->equals($oldItem, true) or $item->getCount() !== $oldItem->getCount()){
