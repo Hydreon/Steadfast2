@@ -1342,8 +1342,7 @@ class Level implements ChunkManager, Metadatable{
 			
 			$breakTime = $player->isCreative() ? 0.15 : $target->getBreakTime($item);
 			$delta = 0.1;
-
-			if (!$ev->getInstaBreak() && ($player->lastBreak + $breakTime) >= microtime(true) - $delta) {
+			if (!$ev->getInstaBreak() && ($player->lastBreak + $breakTime) >= microtime(true)) {
 				return false;
 			}
 			
