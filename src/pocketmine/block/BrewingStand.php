@@ -17,47 +17,41 @@
  * @link http://www.pocketmine.net/
  * 
  *
-*/
+ */
 
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\level\Level;
-use pocketmine\Player;
+use pocketmine\item\Tool;
 
-class RedMushroom extends Flowable{
+class BrewingStand extends Transparent {
 
-	protected $id = self::RED_MUSHROOM;
+	protected $id = self::BREWING_STAND;
 
-	public function __construct(){
-
+	public function __construct() {
+		
 	}
 
-	public function getName(){
-		return "Red Mushroom";
-	}
-	
-
-	public function onUpdate($type){
-		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if($this->getSide(0)->isTransparent() === true){
-				$this->getLevel()->useBreakOn($this);
-
-				return Level::BLOCK_UPDATE_NORMAL;
-			}
-		}
-
-		return false;
+	public function canBeActivated() {
+		return true;
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
-		$down = $this->getSide(0);
-		if($down->isTransparent() === false){
-			$this->getLevel()->setBlock($block, $this, true, true);
-
-			return true;
-		}
-
-		return false;
+	public function getHardness() {
+		return 0.5;
 	}
+
+	public function getName() {
+		return "Brewing Stand";
+	}
+
+	public function getToolType() {
+		return Tool::TYPE_PICKAXE;
+	}
+
+	public function getDrops(Item $item) {
+		return [
+			[Item::BREWING_STAND, 0, 1],
+		];
+	}
+
 }

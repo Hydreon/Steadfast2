@@ -22,42 +22,23 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\level\Level;
-use pocketmine\Player;
 
-class RedMushroom extends Flowable{
+class ItemFrame extends Transparent {
 
-	protected $id = self::RED_MUSHROOM;
+	protected $id = self::ITEM_FRAME;
 
-	public function __construct(){
-
-	}
-
-	public function getName(){
-		return "Red Mushroom";
+	public function __construct() {
+		
 	}
 	
-
-	public function onUpdate($type){
-		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if($this->getSide(0)->isTransparent() === true){
-				$this->getLevel()->useBreakOn($this);
-
-				return Level::BLOCK_UPDATE_NORMAL;
-			}
-		}
-
-		return false;
+	public function getName(){
+		return "Item Frame";
+	}
+	
+	public function getDrops(Item $item) {
+		return [
+			[Item::ITEM_FRAME, 0, 1]
+		];
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
-		$down = $this->getSide(0);
-		if($down->isTransparent() === false){
-			$this->getLevel()->setBlock($block, $this, true, true);
-
-			return true;
-		}
-
-		return false;
-	}
 }
