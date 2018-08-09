@@ -180,6 +180,7 @@ class Item{
 	const CLAY_BLOCK = 82;
 	const REEDS = 83;
 	const SUGARCANE_BLOCK = 83;
+	const JUKEBOX = 84;
 	const FENCE = 85;
 	const PUMPKIN = 86;
 	const NETHERRACK = 87;
@@ -288,12 +289,15 @@ class Item{
 	const SLIME_BLOCK = 165;
 	const IRON_TRAPDOOR = 167;
 	const PRISMARINE = 168;
+	const SEA_LANTERN = 169;
 	const HAY_BALE = 170;
 	const CARPET = 171;
 	const HARDENED_CLAY = 172;
 	const COAL_BLOCK = 173;
 	const PACKED_ICE = 174;
 	const DOUBLE_PLANT = 175;
+	const STANDING_BANNER = 176;
+	const WALL_BANNER = 177;
 	const INVERTED_DAYLIGHT_SENSOR = 178;
 	const RED_SANDSTONE = 179;
 	const RED_SANDSTONE_STAIRS = 180;
@@ -315,6 +319,8 @@ class Item{
 	const PURPUR_BLOCK = 201;
 	const END_BRICKS = 206;
 	const END_ROD = 208;
+	const RED_NETHER_BRICK = 215;
+	const BONE_BLOCK = 216;
 	const SHULKER_BOX = 218;
 	const CHORUS_PLANT = 240;
 	const STAINED_GLASS = 241;

@@ -22,42 +22,32 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\level\Level;
-use pocketmine\Player;
+use pocketmine\item\Tool;
 
-class RedMushroom extends Flowable{
+class BoneBlock extends Solid {
 
-	protected $id = self::RED_MUSHROOM;
+	protected $id = self::BONE_BLOCK;
 
-	public function __construct(){
-
+	public function __construct($meta = 0){
+		$this->meta = $meta;
 	}
 
 	public function getName(){
-		return "Red Mushroom";
+		return "Bone Block";
+	}
+
+	public function getHardness(){
+		return 2;
 	}
 	
-
-	public function onUpdate($type){
-		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if($this->getSide(0)->isTransparent() === true){
-				$this->getLevel()->useBreakOn($this);
-
-				return Level::BLOCK_UPDATE_NORMAL;
-			}
-		}
-
-		return false;
+	public function getToolType() {
+		return Tool::TYPE_PICKAXE;
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
-		$down = $this->getSide(0);
-		if($down->isTransparent() === false){
-			$this->getLevel()->setBlock($block, $this, true, true);
-
-			return true;
-		}
-
-		return false;
+	public function getDrops(Item $item) {
+		return [
+			[Item::BONE_BLOCK, 0, 1]
+		];
 	}
+
 }
