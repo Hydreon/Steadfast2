@@ -5114,13 +5114,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if ($this->chunk !== null) {
 			$this->chunk->removeEntity($this);
 		}
-		$this->chunk = null;
-		$this->usedChunks = [];
+		$this->chunk = null;		
 		$X = $Z = null;
 		foreach ($this->usedChunks as $index => $d) {
 			Level::getXZ($index, $X, $Z);
 			$this->unloadChunk($X, $Z);
 		}
+		$this->usedChunks = [];
 		$this->setLevel($targetLevel);
 		$this->level->addEntity($this);
 		if ($this->spawned) {
