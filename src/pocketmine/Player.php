@@ -2687,6 +2687,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			case 'PLAYER_INPUT_PACKET':
 				$this->onPlayerInput($packet->forward, $packet->sideway, $packet->jump, $packet->sneak);
 				break;
+			case 'MAP_INFO_REQUEST_PACKET':
+				$this->onPlayerRequestMap($packet->mapId);
 			default:
 				break;
 		}
@@ -5059,6 +5061,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected function onPlayerInput($forward, $sideway, $isJump, $isSneak) {
 		
+	}
+
+	protected function onPlayerRequestMap($mapId) {
+
 	}
 	
 	//hack for display name 200+ protocol
