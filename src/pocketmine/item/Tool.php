@@ -59,7 +59,7 @@ abstract class Tool extends Item {
 		if (is_null($isUnbreakable)) {
 			$isUnbreakable = Server::getInstance()->getConfigBoolean("unbreakable-tools", false);
 		}
-		if ($isUnbreakable) {
+		if (!$isUnbreakable) {
 			if ($this->isHoe()) {
 				if (($object instanceof Block) and ( $object->getId() === self::GRASS or $object->getId() === self::DIRT)) {
 					$this->meta++;
