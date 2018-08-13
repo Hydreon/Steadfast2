@@ -21,27 +21,12 @@
 
 namespace pocketmine\block;
 
+class UndyedShulkerBox extends ShulkerBox {
 
-use pocketmine\item\Tool;
-
-class Wool extends Solid{
-
-	protected $id = self::WOOL;
-
-	public function __construct($meta = 0){
-		$this->meta = $meta;
-	}
-
-	public function getHardness(){
-		return 0.8;
-	}
-
-	public function getToolType(){
-		return Tool::TYPE_SHEARS;
-	}
+	protected $id = self::UNDYED_SHULKER_BOX;
 
 	public function getName(){
-		return $this->getColorNameByMeta($this->meta) . " Wool";
+		return "Undyed Shulker Box";
 	}
 
-}
+} 

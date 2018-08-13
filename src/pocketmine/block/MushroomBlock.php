@@ -21,27 +21,26 @@
 
 namespace pocketmine\block;
 
+use pocketmine\item\Item;
 
-use pocketmine\item\Tool;
+class MushroomBlock extends Solid {
 
-class Wool extends Solid{
+	protected $id = self::BROWN_MUSHROOM_BLOCK;
 
-	protected $id = self::WOOL;
+	public function __construct(){
 
-	public function __construct($meta = 0){
-		$this->meta = $meta;
 	}
 
 	public function getHardness(){
-		return 0.8;
+		return 0.2;
 	}
-
-	public function getToolType(){
-		return Tool::TYPE_SHEARS;
-	}
-
+	
 	public function getName(){
-		return $this->getColorNameByMeta($this->meta) . " Wool";
+		return "Mushroom Block";
 	}
 
+	public function getDrops(Item $item){
+		return [];
+	}
+	
 }

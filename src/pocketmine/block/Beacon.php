@@ -21,27 +21,28 @@
 
 namespace pocketmine\block;
 
+use pocketmine\item\Item;
 
-use pocketmine\item\Tool;
+class Beacon extends Solid {
 
-class Wool extends Solid{
+	protected $id = self::BEACON;
 
-	protected $id = self::WOOL;
+	public function __construct(){
 
-	public function __construct($meta = 0){
-		$this->meta = $meta;
-	}
-
-	public function getHardness(){
-		return 0.8;
-	}
-
-	public function getToolType(){
-		return Tool::TYPE_SHEARS;
 	}
 
 	public function getName(){
-		return $this->getColorNameByMeta($this->meta) . " Wool";
+		return "Beacon";
+	}
+
+	public function getHardness(){
+		return 3;
+	}
+	
+	public function getDrops(Item $item) {
+		return [
+			[Item::BEACON, 0, 1]
+		];
 	}
 
 }

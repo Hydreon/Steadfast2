@@ -17,31 +17,41 @@
  * @link http://www.pocketmine.net/
  * 
  *
-*/
+ */
 
 namespace pocketmine\block;
 
-
+use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class Wool extends Solid{
+class BrewingStand extends Transparent {
 
-	protected $id = self::WOOL;
+	protected $id = self::BREWING_STAND;
 
-	public function __construct($meta = 0){
-		$this->meta = $meta;
+	public function __construct() {
+		
 	}
 
-	public function getHardness(){
-		return 0.8;
+	public function canBeActivated() {
+		return true;
 	}
 
-	public function getToolType(){
-		return Tool::TYPE_SHEARS;
+	public function getHardness() {
+		return 0.5;
 	}
 
-	public function getName(){
-		return $this->getColorNameByMeta($this->meta) . " Wool";
+	public function getName() {
+		return "Brewing Stand";
+	}
+
+	public function getToolType() {
+		return Tool::TYPE_PICKAXE;
+	}
+
+	public function getDrops(Item $item) {
+		return [
+			[Item::BREWING_STAND, 0, 1],
+		];
 	}
 
 }

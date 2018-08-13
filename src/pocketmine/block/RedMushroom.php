@@ -36,7 +36,7 @@ class RedMushroom extends Flowable{
 	public function getName(){
 		return "Red Mushroom";
 	}
-
+	
 
 	public function onUpdate($type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){

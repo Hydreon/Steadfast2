@@ -23,13 +23,18 @@ namespace pocketmine\block;
 
 
 use pocketmine\item\Tool;
+use pocketmine\item\Item;
 
-class Wool extends Solid{
+class NoteBlock extends Solid{
 
-	protected $id = self::WOOL;
+	protected $id = self::NOTE_BLOCK;
 
-	public function __construct($meta = 0){
-		$this->meta = $meta;
+	public function __construct(){
+
+	}
+
+	public function getName(){
+		return "Note Block";
 	}
 
 	public function getHardness(){
@@ -37,11 +42,11 @@ class Wool extends Solid{
 	}
 
 	public function getToolType(){
-		return Tool::TYPE_SHEARS;
+		return Tool::TYPE_AXE;
 	}
-
-	public function getName(){
-		return $this->getColorNameByMeta($this->meta) . " Wool";
+	
+	public function getDrops(Item $item) {
+		return [Item::NOTE_BLOCK, 0, 1];
 	}
 
 }

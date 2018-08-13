@@ -21,27 +21,24 @@
 
 namespace pocketmine\block;
 
+use pocketmine\item\Item;
 
-use pocketmine\item\Tool;
+class ItemFrame extends Transparent {
 
-class Wool extends Solid{
+	protected $id = self::ITEM_FRAME;
 
-	protected $id = self::WOOL;
-
-	public function __construct($meta = 0){
-		$this->meta = $meta;
+	public function __construct() {
+		
 	}
-
-	public function getHardness(){
-		return 0.8;
-	}
-
-	public function getToolType(){
-		return Tool::TYPE_SHEARS;
-	}
-
+	
 	public function getName(){
-		return $this->getColorNameByMeta($this->meta) . " Wool";
+		return "Item Frame";
+	}
+	
+	public function getDrops(Item $item) {
+		return [
+			[Item::ITEM_FRAME, 0, 1]
+		];
 	}
 
 }

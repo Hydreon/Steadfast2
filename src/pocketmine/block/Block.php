@@ -193,11 +193,14 @@ class Block extends Position implements Metadatable{
 	const NETHER_BRICK_BLOCK = 112;
 	const NETHER_BRICK_FENCE = 113;
 	const NETHER_BRICKS_STAIRS = 114;
+	const NETHER_WART = 115;
 	const NETHER_WART_BLOCK = 115;
 	const ENCHANTING_TABLE = 116;
 	const ENCHANT_TABLE = 116;
 	const ENCHANTMENT_TABLE = 116;
+	const BREWING_STAND = 117;
 	const BREWING_STAND_BLOCK = 117;
+	const CAULDRON = 118;
 	const CAULDRON_BLOCK = 118;
 	const END_PORTAL = 119;
 	const END_PORTAL_FRAME = 120;
@@ -294,11 +297,12 @@ class Block extends Position implements Metadatable{
 	const ACACIA_DOOR_BLOCK = 196;
 	const DARK_OAK_DOOR_BLOCK = 197;
 	const GRASS_PATH = 198;
+	const ITEM_FRAME = 199;
 	const ITEM_FRAME_BLOCK = 199;
     const CHORUS_FLOWER = 200;
 	const PURPUR_BLOCK = 201;
-	const PUPPUR_STAIRS = 202;
-	// 203 - 204 doesn't exist in client (at least in 1.2.13)
+	// 202, 204 doesn't exist in client (at least in 1.2.13)
+	const PURPUR_STAIRS = 203;
 	const UNDYED_SHULKER_BOX = 205;
 	const END_BRICKS = 206;
 	const FROSTED_ICE = 207;
@@ -619,7 +623,48 @@ class Block extends Position implements Metadatable{
 			
 			self::$list[self::SHULKER_BOX] = ShulkerBox::class;
 			self::$list[self::PRISMARINE] = Prismarine::class;
+			
+			self::$list[self::NOTE_BLOCK] = NoteBlock::class;
+			self::$list[self::JUKEBOX] = Jukebox::class;
+			self::$list[self::PORTAL] = Portal::class;
+			
+			self::$list[self::BROWN_MUSHROOM_BLOCK] = MushroomBlock::class;
+			self::$list[self::RED_MUSHROOM_BLOCK] = MushroomBlock::class;
+			
+			self::$list[self::NETHER_WART] = NetherWart::class;
+			self::$list[self::BREWING_STAND] = BrewingStand::class;
+			self::$list[self::CAULDRON] = Cauldron::class;
+			self::$list[self::COCOA] = Cocoa::class;
+			self::$list[self::BEACON] = Beacon::class;
+			self::$list[self::PACKED_ICE] = PackedIce::class;
+			self::$list[self::STANDING_BANNER] = StandingBanner::class;
+			self::$list[self::WALL_BANNER] = WallBanner::class;
+			self::$list[self::RED_SANDSTONE] = RedSandstone::class;
+			self::$list[self::RED_SANDSTONE_STAIRS] = RedSandstoneStairs::class;
+			self::$list[self::ITEM_FRAME] = ItemFrame::class;
+			self::$list[self::PURPUR_STAIRS] = PurpurStairs::class;
+			self::$list[self::UNDYED_SHULKER_BOX] = UndyedShulkerBox::class;
+			self::$list[self::FROSTED_ICE] = FrostedIce::class;
+			self::$list[self::RED_NETHER_BRICK] = RedNetherBrick::class;
+			self::$list[self::BONE_BLOCK] = BoneBlock::class;
             
+			self::$list[self::PURPLE_GLAZED_TERRACOTTA] = PurpleGlazedTerracotta::class;
+			self::$list[self::WHITE_GLAZED_TERRACOTTA] = WhiteGlazedTerracotta::class;
+			self::$list[self::ORANGE_GLAZED_TERRACOTTA] = OrangeGlazedTerracotta::class;
+			self::$list[self::MAGENTA_GLAZED_TERRACOTTA] = MagentaGlazedTerracotta::class;
+			self::$list[self::LIGHT_BLUE_GLAZED_TERRACOTTA] = LightBlueGlazedTerracotta::class;
+			self::$list[self::YELLOW_GLAZED_TERRACOTTA] = YellowGlazedTerracotta::class;
+			self::$list[self::LIME_GLAZED_TERRACOTTA] = LimeGlazedTerracotta::class;
+			self::$list[self::PINK_GLAZED_TERRACOTTA] = PinkGlazedTerracotta::class;
+			self::$list[self::GRAY_GLAZED_TERRACOTTA] = GrayGlazedTerracotta::class;
+			self::$list[self::SILVER_GLAZED_TERRACOTTA] = LightGrayGlazedTerracotta::class;
+			self::$list[self::CYAN_GLAZED_TERRACOTTA] = CyanGlazedTerracotta::class;
+			self::$list[self::BLUE_GLAZED_TERRACOTTA] = BlueGlazedTerracotta::class;
+			self::$list[self::BROWN_GLAZED_TERRACOTTA] = BrownGlazedTerracotta::class;
+			self::$list[self::GREEN_GLAZED_TERRACOTTA] = GreenGlazedTerracotta::class;
+			self::$list[self::RED_GLAZED_TERRACOTTA] = RedGlazedTerracotta::class;
+			self::$list[self::BLACK_GLAZED_TERRACOTTA] = BlackGlazedTerracotta::class;
+			
 			foreach (self::$list as $id => $class) {
 				static::registerBlock($id, $class);
 			}

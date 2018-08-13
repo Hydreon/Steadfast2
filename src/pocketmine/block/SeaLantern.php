@@ -21,27 +21,28 @@
 
 namespace pocketmine\block;
 
+use pocketmine\item\Item;
 
-use pocketmine\item\Tool;
+class SeaLantern extends Solid {
 
-class Wool extends Solid{
+	protected $id = self::SEA_LANTERN;
 
-	protected $id = self::WOOL;
+	public function __construct(){
 
-	public function __construct($meta = 0){
-		$this->meta = $meta;
-	}
-
-	public function getHardness(){
-		return 0.8;
-	}
-
-	public function getToolType(){
-		return Tool::TYPE_SHEARS;
 	}
 
 	public function getName(){
-		return $this->getColorNameByMeta($this->meta) . " Wool";
+		return "Sea Lantern";
+	}
+
+	public function getHardness(){
+		return 0.3;
+	}
+	
+	public function getDrops(Item $item) {
+		return [
+			[Item::SEA_LANTERN, 0, 1]
+		];
 	}
 
 }

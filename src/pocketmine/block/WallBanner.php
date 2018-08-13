@@ -21,27 +21,20 @@
 
 namespace pocketmine\block;
 
+use pocketmine\item\Item;
 
-use pocketmine\item\Tool;
+class WallBanner extends StandingBanner {
 
-class Wool extends Solid{
-
-	protected $id = self::WOOL;
-
-	public function __construct($meta = 0){
-		$this->meta = $meta;
-	}
-
-	public function getHardness(){
-		return 0.8;
-	}
-
-	public function getToolType(){
-		return Tool::TYPE_SHEARS;
-	}
+	protected $id = self::WALL_BANNER;
 
 	public function getName(){
-		return $this->getColorNameByMeta($this->meta) . " Wool";
+		return "Wall Banner";
+	}
+	
+	public function getDrops(Item $item) {
+		return [
+			[Item::WALL_BANNER, 0, 1]
+		];
 	}
 
 }

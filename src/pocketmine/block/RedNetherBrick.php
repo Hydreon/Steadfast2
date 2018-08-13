@@ -17,31 +17,24 @@
  * @link http://www.pocketmine.net/
  * 
  *
-*/
+ */
 
 namespace pocketmine\block;
 
+use pocketmine\item\Item;
 
-use pocketmine\item\Tool;
+class RedNetherBrick extends NetherBrick {
 
-class Wool extends Solid{
-
-	protected $id = self::WOOL;
-
-	public function __construct($meta = 0){
-		$this->meta = $meta;
+	protected $id = self::RED_NETHER_BRICK;
+	
+	public function getName() {
+		return "Red Nether Brick";
 	}
 
-	public function getHardness(){
-		return 0.8;
-	}
-
-	public function getToolType(){
-		return Tool::TYPE_SHEARS;
-	}
-
-	public function getName(){
-		return $this->getColorNameByMeta($this->meta) . " Wool";
+	public function getDrops(Item $item) {
+		return [
+			[Item::RED_NETHER_BRICK, 0, 1],
+		];
 	}
 
 }
