@@ -382,7 +382,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $beforeSpawnViewRadius = null;
 	protected $beforeSpawnTeleportPosition = null;
 	
-	public $hackForCraftLastIndex = 0;
+//	public $hackForCraftLastIndex = 0;
 	
 	protected $lastInteractTick = 0;
 	
@@ -398,7 +398,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
 	protected $isTransfered = false;
-
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1561,7 +1561,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$noteId = array_shift($this->noteSoundQueue);
 			$this->sendNoteSound($noteId);
 		}
-		$this->hackForCraftLastIndex = 0;
+//		$this->hackForCraftLastIndex = 0;
 		
 		
 		foreach ($this->lastEntityRemove as $eid => $tick) {
@@ -2257,7 +2257,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 					return;
 				}
-
+				
 				// переделать эту проверку
 				if ($recipe === null || (($recipe instanceof BigShapelessRecipe || $recipe instanceof BigShapedRecipe) && $this->craftingType === self::CRAFTING_DEFAULT)) {
 					$this->inventory->sendContents($this);
