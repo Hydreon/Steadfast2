@@ -387,7 +387,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $beforeSpawnViewRadius = null;
 	protected $beforeSpawnTeleportPosition = null;
 	
-	public $hackForCraftLastIndex = 0;
+//	public $hackForCraftLastIndex = 0;
 	
 	protected $lastInteractTick = 0;
 	
@@ -403,7 +403,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
 	protected $isTransfered = false;
-
+	
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1566,7 +1566,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$noteId = array_shift($this->noteSoundQueue);
 			$this->sendNoteSound($noteId);
 		}
-		$this->hackForCraftLastIndex = 0;
+//		$this->hackForCraftLastIndex = 0;
 		
 		
 		foreach ($this->lastEntityRemove as $eid => $tick) {
@@ -2283,7 +2283,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 					return;
 				}
-
+				
 				// переделать эту проверку
 				if ($recipe === null || (($recipe instanceof BigShapelessRecipe || $recipe instanceof BigShapedRecipe) && $this->craftingType === self::CRAFTING_DEFAULT)) {
 					$this->inventory->sendContents($this);
@@ -2722,6 +2722,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->onPlayerInput($packet->forward, $packet->sideway, $packet->jump, $packet->sneak);
 				}			
 				break;
+			case 'MAP_INFO_REQUEST_PACKET':
+				$this->onPlayerRequestMap($packet->mapId);
 			default:
 				break;
 		}
@@ -5184,6 +5186,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected function onPlayerInput($forward, $sideway, $isJump, $isSneak) {
 		
 	}
+
+	protected function onPlayerRequestMap($mapId) {
+
+	}
 	
 	//hack for display name 200+ protocol
 	public function setNameTag($name){
@@ -5243,13 +5249,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if ($this->chunk !== null) {
 			$this->chunk->removeEntity($this);
 		}
-		$this->chunk = null;
-		$this->usedChunks = [];
+		$this->chunk = null;		
 		$X = $Z = null;
 		foreach ($this->usedChunks as $index => $d) {
 			Level::getXZ($index, $X, $Z);
 			$this->unloadChunk($X, $Z);
 		}
+		$this->usedChunks = [];
 		$this->setLevel($targetLevel);
 		$this->level->addEntity($this);
 		if ($this->spawned) {

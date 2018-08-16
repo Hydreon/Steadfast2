@@ -19,35 +19,34 @@
  *
 */
 
-namespace pocketmine\network\protocol;
+namespace pocketmine\block;
 
-#include <rules/DataPacket.h>
+use pocketmine\item\Item;
+use pocketmine\item\Tool;
 
+class Jukebox extends Solid {
 
-class ContainerOpenPacket extends PEPacket{
-	const NETWORK_ID = Info::CONTAINER_OPEN_PACKET;
-	const PACKET_NAME = "CONTAINER_OPEN_PACKET";
+	protected $id = self::JUKEBOX;
 
-	public $entityId;
-	public $windowid;
-	public $type;
-	public $slots;
-	public $x;
-	public $y;
-	public $z;
+	public function __construct(){
 
-	public function decode($playerProtocol){
-		
 	}
 
-	public function encode($playerProtocol) {
-		$this->reset($playerProtocol);
-		$this->putByte($this->windowid);
-		$this->putByte($this->type);
-		$this->putSignedVarInt($this->x);
-		$this->putVarInt($this->y);
-		$this->putSignedVarInt($this->z);
-		$this->putSignedVarInt(-1);
+	public function getName(){
+		return "Jukebox";
 	}
 
+	public function getHardness(){
+		return 2;
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_AXE;
+	}
+
+	public function getDrops(Item $item){
+		return [
+			[Item::JUKEBOX, 0, 1]
+		];
+	}
 }
