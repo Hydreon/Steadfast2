@@ -27,8 +27,8 @@ class ItemFrame extends Transparent {
 
 	protected $id = self::ITEM_FRAME;
 
-	public function __construct() {
-		
+	public function __construct($meta = 0) {
+		$this->meta = $meta;
 	}
 	
 	public function getName(){

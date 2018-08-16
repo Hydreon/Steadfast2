@@ -115,10 +115,10 @@ class SimpleTransactionData {
 					case self::ACTION_CRAFT_GET_RESULT:
 						$slot = PlayerInventory120::CRAFT_RESULT_INDEX;
 						break;
-					case self::ACTION_CRAFT_USE:
-						if ($this->slot == 0) {
-							$this->slot = $player->hackForCraftLastIndex++;
-						}
+//					case self::ACTION_CRAFT_USE:
+//						if ($this->slot == 0) {
+//							$this->slot = $player->hackForCraftLastIndex++;
+//						}
 					default:						
 						$slot = PlayerInventory120::CRAFT_INDEX_0 - $this->slot;
 						break;

@@ -37,7 +37,7 @@ class ContainerOpenPacket extends PEPacket{
 	public $z;
 
 	public function decode($playerProtocol){
-
+		
 	}
 
 	public function encode($playerProtocol) {

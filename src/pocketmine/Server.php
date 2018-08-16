@@ -101,6 +101,7 @@ use pocketmine\tile\Chest;
 use pocketmine\tile\EnchantTable;
 use pocketmine\tile\EnderChest;
 use pocketmine\tile\Furnace;
+use pocketmine\tile\ItemFrame;
 use pocketmine\tile\Sign;
 use pocketmine\tile\Skull;
 use pocketmine\tile\FlowerPot;
@@ -2523,6 +2524,7 @@ class Server{
         Tile::registerTile(EnderChest::class);
 		Tile::registerTile(Bed::class);
 		Tile::registerTile(Cauldron::class);
+		Tile::registerTile(ItemFrame::class);
 	}
 
 	public function shufflePlayers(){
