@@ -19,35 +19,34 @@
  *
 */
 
-namespace pocketmine\network\protocol;
-
-#include <rules/DataPacket.h>
+namespace pocketmine\block;
 
 
-class ContainerOpenPacket extends PEPacket{
-	const NETWORK_ID = Info::CONTAINER_OPEN_PACKET;
-	const PACKET_NAME = "CONTAINER_OPEN_PACKET";
+use pocketmine\item\Tool;
+use pocketmine\item\Item;
 
-	public $entityId;
-	public $windowid;
-	public $type;
-	public $slots;
-	public $x;
-	public $y;
-	public $z;
+class NoteBlock extends Solid{
 
-	public function decode($playerProtocol){
-		
+	protected $id = self::NOTE_BLOCK;
+
+	public function __construct(){
+
 	}
 
-	public function encode($playerProtocol) {
-		$this->reset($playerProtocol);
-		$this->putByte($this->windowid);
-		$this->putByte($this->type);
-		$this->putSignedVarInt($this->x);
-		$this->putVarInt($this->y);
-		$this->putSignedVarInt($this->z);
-		$this->putSignedVarInt(-1);
+	public function getName(){
+		return "Note Block";
+	}
+
+	public function getHardness(){
+		return 0.8;
+	}
+
+	public function getToolType(){
+		return Tool::TYPE_AXE;
+	}
+	
+	public function getDrops(Item $item) {
+		return [Item::NOTE_BLOCK, 0, 1];
 	}
 
 }

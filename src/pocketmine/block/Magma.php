@@ -17,37 +17,35 @@
  * @link http://www.pocketmine.net/
  * 
  *
-*/
+ */
 
-namespace pocketmine\network\protocol;
+namespace pocketmine\block;
 
-#include <rules/DataPacket.h>
+use pocketmine\item\Item;
+use pocketmine\item\Tool;
 
+class Magma extends Solid {
 
-class ContainerOpenPacket extends PEPacket{
-	const NETWORK_ID = Info::CONTAINER_OPEN_PACKET;
-	const PACKET_NAME = "CONTAINER_OPEN_PACKET";
+	protected $id = self::MAGMA;
 
-	public $entityId;
-	public $windowid;
-	public $type;
-	public $slots;
-	public $x;
-	public $y;
-	public $z;
-
-	public function decode($playerProtocol){
+	public function __construct() {
 		
 	}
 
-	public function encode($playerProtocol) {
-		$this->reset($playerProtocol);
-		$this->putByte($this->windowid);
-		$this->putByte($this->type);
-		$this->putSignedVarInt($this->x);
-		$this->putVarInt($this->y);
-		$this->putSignedVarInt($this->z);
-		$this->putSignedVarInt(-1);
+	public function getHardness() {
+		return 0.5;
+	}
+
+	public function getName() {
+		return "Magma";
+	}
+
+	public function getToolType() {
+		return Tool::TYPE_PICKAXE;
+	}
+	
+	public function getDrops(Item $item) {
+		return [];
 	}
 
 }

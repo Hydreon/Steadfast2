@@ -158,4 +158,15 @@ class ShapedRecipe implements Recipe{
 	public function registerToCraftingManager(){
 		Server::getInstance()->getCraftingManager()->registerShapedRecipe($this);
 	}
+	
+	public function __toString() {
+		$result = "";
+		foreach ($this->ingredients as $index => $items) {
+			$result .= $index . PHP_EOL;
+			foreach ($items as $i => $item) {
+				$result .= "\t" . $i . " => " . $item . PHP_EOL;
+			}
+		}
+		return $result;
+	}
 }

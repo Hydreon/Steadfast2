@@ -36,7 +36,7 @@ class RedMushroom extends Flowable{
 	public function getName(){
 		return "Red Mushroom";
 	}
-
+	
 
 	public function onUpdate($type, $deep){
 		if (!Block::onUpdate($type, $deep)) {
