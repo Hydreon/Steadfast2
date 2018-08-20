@@ -3719,16 +3719,24 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			Enchantment::TYPE_ARMOR_PROJECTILE_PROTECTION => null
 		];
 		$armor = $this->getInventory()->getArmorContents();
+		$armorProtection = 0;
 		foreach ($armor as $item) {
 			if ($item->getId() === Item::AIR) {
 				continue;
 			}
 			$enchantments = $item->getEnchantments();
 			foreach ($result as $id => $enchantment) {
-				if (isset($enchantments[$id]) && (is_null($enchantment) || $enchantments[$id]->getLevel() > $enchantment->getLevel())) {
-					$result[$id] = $enchantments[$id];
+				if (isset($enchantments[$id])) {
+					if ($id == Enchantment::TYPE_ARMOR_PROTECTION) {
+						$armorProtection += 0.05 * $enchantments[$id]->getLevel();
+					} elseif ((is_null($enchantment) || $enchantments[$id]->getLevel() > $enchantment->getLevel())) {
+						$result[$id] = $enchantments[$id];
+					}
 				}
 			}
+		}
+		if ($armorProtection > 0) {
+			$result[Enchantment::TYPE_ARMOR_PROTECTION] = $armorProtection;
 		}
 		return $result;
 	}
@@ -5086,7 +5094,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$pk->eid = $this->id;
 				$pk->metadata = [self::DATA_NAMETAG => self::DATA_TYPE_STRING, $name];
 				Server::broadcastPacket($viewers, $pk);
-			}
+			} 
 			if (!empty($viewers200)) {
 				foreach ($viewers200 as $viewer) {
 					$this->despawnFrom($viewer);
