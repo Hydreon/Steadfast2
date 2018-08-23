@@ -61,9 +61,30 @@ class MetadataConvertor {
 		'DATA_FLAG_HAS_COLLISION' => 46,
 		'DATA_FLAG_AFFECTED_BY_GRAVITY' => 47,
 	];
+	private static $diffEntityFlags290 = [
+		'DATA_FLAG_RESTING_BAT' => 23,
+		'DATA_FLAG_ANIMAL_SIT' => 24,
+		'DATA_FLAG_ANGRY_WOLF' => 25,
+		'DATA_FLAG_INTERESTED' => 26,
+		'DATA_FLAG_ANGRY_BLAZE' => 27,
+		'DATA_FLAG_TAME_WOLF' => 28,
+		'DATA_FLAG_LEASHED' => 29,
+		'DATA_FLAG_SHAVED_SHIP' => 30,
+		'DATA_FLAG_FALL_FLYING' => 31,
+		'DATA_FLAG_ELDER_GUARDIAN' => 32,
+		'DATA_FLAG_MOVING' => 33,
+		'DATA_FLAG_NOT_IN_WATER' => 35,
+		'DATA_FLAG_CHESTED_MOUNT' => 36,
+		'DATA_FLAG_STACKABLE' => 37,
+		'DATA_FLAG_IS_WASD_CONTROLLED' => 44,
+		'DATA_FLAG_CAN_POWER_JUMP' => 45,
+		'DATA_FLAG_HAS_COLLISION' => 47,
+		'DATA_FLAG_AFFECTED_BY_GRAVITY' => 48,
+	];
 	private static $entityFlags110 = [];
 	private static $entityFlags120 = [];
 	private static $entityFlags221 = [];
+	private static $entityFlags290 = [];
 	
 	private static $diffEntityMetaIds110 = [
 		'DATA_MAX_AIR' => 43,
@@ -125,6 +146,12 @@ class MetadataConvertor {
 			}
 		}
 		
+		foreach (self::$diffEntityFlags290 as $key => $value) {
+			if (isset(self::$initialMeta[$key])) {
+				self::$entityFlags290[self::$initialMeta[$key]] = $value;
+			}
+		}
+		
 		foreach (self::$diffEntityMetaIds110 as $key => $value) {
 			if (isset(self::$initialMeta[$key])) {
 				self::$entityMetaIds110[self::$initialMeta[$key]] = $value;
@@ -158,6 +185,7 @@ class MetadataConvertor {
 
 	private static function updateMetaIds($meta, $protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_290:
 			case Info::PROTOCOL_282:
 			case Info::PROTOCOL_280:
 			case Info::PROTOCOL_274:
@@ -197,6 +225,10 @@ class MetadataConvertor {
 			return $meta;
 		}
 		switch ($protocol) {
+			case Info::PROTOCOL_290:
+				$newflags = 1 << 19; //DATA_FLAG_CAN_CLIMBING
+				$protocolFlags = self::$entityFlags290;
+				break;
 			case Info::PROTOCOL_282:
 			case Info::PROTOCOL_280:
 			case Info::PROTOCOL_274:
