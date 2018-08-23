@@ -66,7 +66,7 @@ class AddPlayerPacket extends PEPacket{
 		} else {
 			$this->putString($this->username);
 		}
-		if ($playerProtocol >= Info::PROTOCOL_200) {
+		if ($playerProtocol >= Info::PROTOCOL_200  && $playerProtocol < Info::PROTOCOL_290) {
 			$this->putString(""); // third party name
 			$this->putSignedVarInt(0); // platform id
 		}
