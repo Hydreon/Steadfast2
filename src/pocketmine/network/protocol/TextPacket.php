@@ -60,7 +60,7 @@ class TextPacket extends PEPacket{
 			case self::TYPE_WHISPER:
 			case self::TYPE_ANNOUNCEMENT:
 				$this->source = $this->getString();
-				if ($playerProtocol >= Info::PROTOCOL_200) {
+				if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_290) {
 					$this->getString(); // third party name
 					$this->getSignedVarInt(); // platform id
 				}
@@ -103,7 +103,7 @@ class TextPacket extends PEPacket{
 			case self::TYPE_WHISPER:
 			case self::TYPE_ANNOUNCEMENT:
 				$this->putString($this->source);
-				if ($playerProtocol >= Info::PROTOCOL_200) {
+				if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_290) {
 					$this->putString(""); // third party name
 					$this->putSignedVarInt(0); // platform id
 				}
@@ -122,7 +122,7 @@ class TextPacket extends PEPacket{
 				foreach ($this->parameters as $p) {
 					$this->putString($p);
 				}
-				if ($playerProtocol >= Info::PROTOCOL_200) { // it's not should be here, but it prevent client crushing
+				if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_290) { // it's not should be here, but it prevent client crushing
 					$this->putString(""); // third party name
 					$this->putSignedVarInt(0); // platform id
 				}
