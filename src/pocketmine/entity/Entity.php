@@ -25,7 +25,6 @@
 namespace pocketmine\entity;
 
 use pocketmine\block\Block;
-use pocketmine\block\Water;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDespawnEvent;
@@ -55,11 +54,7 @@ use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\Network;
-use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\MobEffectPacket;
-use pocketmine\network\protocol\MoveEntityPacket;
-use pocketmine\network\protocol\MovePlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\SetEntityDataPacket;
 use pocketmine\network\protocol\SetTimePacket;
@@ -67,12 +62,6 @@ use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
 use pocketmine\utils\ChunkException;
-use pocketmine\block\Liquid;
-
-use pocketmine\block\Cobweb;
-use pocketmine\block\Fire;
-use pocketmine\block\Ladder;
-use pocketmine\block\Vine;
 
 abstract class Entity extends Location implements Metadatable{
 

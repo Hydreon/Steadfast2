@@ -33,6 +33,10 @@ class ResourcePackStackPacket extends PEPacket {
 			$this->putString($resourcePack->version);
 			$this->putString($resourcePack->subPackName);
 		}
+		if ($playerProtocol >= Info::PROTOCOL_290) {
+			$this->putVarInt(0); // ???
+			$this->putVarInt(0); // ???
+		}
 	}
 
 }
