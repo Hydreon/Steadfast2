@@ -1931,7 +1931,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$action = MultiversionEnums::getPlayerAction($this->protocol, $packet->action);
 				switch ($action) {
 					case 'START_JUMP':
-						if ($this->foodLevel > 0) {
+						if ($this->foodLevel > 0 && $this->getFoodEnabled()) {
 							$this->exhaustion += $this->isSprinting() ? 0.2 : 0.05;
 						}
 						$this->onJump();
@@ -4752,7 +4752,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 			}
 			// Exhaustion logic
-			if ($this->foodLevel > 0) {
+			if ($this->foodLevel > 0 && $this->getFoodEnabled()) {
 				$distance = sqrt($dx ** 2 + $dz** 2);
 				if ($distance > 0) {
 					if ($this->isSprinting()) {
