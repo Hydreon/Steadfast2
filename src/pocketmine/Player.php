@@ -403,7 +403,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
 	protected $isTransfered = false;
-	
+	protected $loginCompleted = false;
+
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1941,7 +1942,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$action = MultiversionEnums::getPlayerAction($this->protocol, $packet->action);
 				switch ($action) {
 					case 'START_JUMP':
-						if ($this->foodLevel > 0) {
+						if ($this->foodLevel > 0 && $this->getFoodEnabled()) {
 							$this->exhaustion += $this->isSprinting() ? 0.2 : 0.05;
 						}
 						$this->onJump();
@@ -2049,7 +2050,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				break;
 			case 'REMOVE_BLOCK_PACKET':
 				//Timings::$timerRemoveBlockPacket->startTiming();
-//				$this->breakBlock([ 'x' => $packet->x, 'y' => $packet->y, 'z' => $packet->z ]);
+				$this->breakBlock([ 'x' => $packet->x, 'y' => $packet->y, 'z' => $packet->z ]);
 				//Timings::$timerRemoveBlockPacket->stopTiming();
 				break;
 			case 'MOB_ARMOR_EQUIPMENT_PACKET':
@@ -3393,6 +3394,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function completeLogin() {
+		if ($this->loginCompleted) {
+			return;
+		}
+		$this->loginCompleted = true;
 		$valid = true;
 		$len = strlen($this->username);
 		if ($len > 16 or $len < 3) {
@@ -3567,7 +3572,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->server->sendRecipeList($this);
 
 		$this->sendSelfData();				
-		$this->updateSpeed(self::DEFAULT_SPEED);
+		$this->updateSpeed($this->movementSpeed);
 		$this->sendFullPlayerList();
 //		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
 	}
@@ -4799,7 +4804,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 			}
 			// Exhaustion logic
-			if ($this->foodLevel > 0) {
+			if ($this->foodLevel > 0 && $this->getFoodEnabled()) {
 				$distance = sqrt($dx ** 2 + $dz** 2);
 				if ($distance > 0) {
 					if ($this->isSprinting()) {

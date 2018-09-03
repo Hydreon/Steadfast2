@@ -15,3 +15,5 @@ server.properties
 white-list.txt
 start.sh
 mods/
+launcher.sh
+checker.sh
