@@ -398,7 +398,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
 	protected $isTransfered = false;
-	
+	protected $loginCompleted = false;
+
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -3355,6 +3356,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function completeLogin() {
+		if ($this->loginCompleted) {
+			return;
+		}
+		$this->loginCompleted = true;
 		$valid = true;
 		$len = strlen($this->username);
 		if ($len > 16 or $len < 3) {
