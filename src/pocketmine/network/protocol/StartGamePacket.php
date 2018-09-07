@@ -134,7 +134,7 @@ class StartGamePacket extends PEPacket{
 				$this->putByte(0); // Has locked resource pack?
 				$this->putByte(0); // Is from locked template?
 				if ($playerProtocol >= Info::PROTOCOL_290) {
-					$this->putByte(0); // ???
+					$this->putByte(0); // Use Msa Gamertags Only?
 				}
 			}
 			// level settings end
