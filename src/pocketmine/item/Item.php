@@ -1253,34 +1253,60 @@ class Item{
 		self::addCreativeItem(Item::get(Item::CLOCK, 0));
 		self::addCreativeItem(Item::get(Item::COMPASS, 0));
 		self::addCreativeItem(Item::get(Item::MINECART, 0));
+		
 		self::addCreativeItem(Item::get(Item::WOODEN_SWORD, 0));
-		self::addCreativeItem(Item::get(Item::WOODEN_HOE, 0));
-		self::addCreativeItem(Item::get(Item::WOODEN_SHOVEL, 0));
-		self::addCreativeItem(Item::get(Item::WOODEN_PICKAXE, 0));
-		self::addCreativeItem(Item::get(Item::WOODEN_AXE, 0));
 		self::addCreativeItem(Item::get(Item::STONE_SWORD, 0));
-		self::addCreativeItem(Item::get(Item::STONE_HOE, 0));
-		self::addCreativeItem(Item::get(Item::STONE_SHOVEL, 0));
-		self::addCreativeItem(Item::get(Item::STONE_PICKAXE, 0));
-		self::addCreativeItem(Item::get(Item::STONE_AXE, 0));
 		self::addCreativeItem(Item::get(Item::IRON_SWORD, 0));
-		self::addCreativeItem(Item::get(Item::IRON_HOE, 0));
-		self::addCreativeItem(Item::get(Item::IRON_SHOVEL, 0));
-		self::addCreativeItem(Item::get(Item::IRON_PICKAXE, 0));
-		self::addCreativeItem(Item::get(Item::IRON_AXE, 0));
 		self::addCreativeItem(Item::get(Item::DIAMOND_SWORD, 0));
-		self::addCreativeItem(Item::get(Item::DIAMOND_HOE, 0));
-		self::addCreativeItem(Item::get(Item::DIAMOND_SHOVEL, 0));
-		self::addCreativeItem(Item::get(Item::DIAMOND_PICKAXE, 0));
-		self::addCreativeItem(Item::get(Item::DIAMOND_AXE, 0));
 		self::addCreativeItem(Item::get(Item::GOLD_SWORD, 0));
+		
+		self::addCreativeItem(Item::get(Item::WOODEN_HOE, 0));
+		self::addCreativeItem(Item::get(Item::STONE_HOE, 0));
+		self::addCreativeItem(Item::get(Item::IRON_HOE, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_HOE, 0));
 		self::addCreativeItem(Item::get(Item::GOLD_HOE, 0));
+		
+		self::addCreativeItem(Item::get(Item::WOODEN_SHOVEL, 0));
+		self::addCreativeItem(Item::get(Item::STONE_SHOVEL, 0));
+		self::addCreativeItem(Item::get(Item::IRON_SHOVEL, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_SHOVEL, 0));
 		self::addCreativeItem(Item::get(Item::GOLD_SHOVEL, 0));
+		
+		self::addCreativeItem(Item::get(Item::WOODEN_PICKAXE, 0));
+		self::addCreativeItem(Item::get(Item::STONE_PICKAXE, 0));
+		self::addCreativeItem(Item::get(Item::IRON_PICKAXE, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_PICKAXE, 0));
 		self::addCreativeItem(Item::get(Item::GOLD_PICKAXE, 0));
+		
+		self::addCreativeItem(Item::get(Item::WOODEN_AXE, 0));
+		self::addCreativeItem(Item::get(Item::STONE_AXE, 0));
+		self::addCreativeItem(Item::get(Item::IRON_AXE, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_AXE, 0));
 		self::addCreativeItem(Item::get(Item::GOLD_AXE, 0));
-		for($i = 298; $i < 318; $i++){ //All armor
-			self::addCreativeItem(Item::get($i, 0));
-		}
+		
+		self::addCreativeItem(Item::get(Item::LEATHER_CAP, 0));
+		self::addCreativeItem(Item::get(Item::CHAIN_HELMET, 0));
+		self::addCreativeItem(Item::get(Item::IRON_HELMET, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_HELMET, 0));
+		self::addCreativeItem(Item::get(Item::GOLD_HELMET, 0));
+		
+		self::addCreativeItem(Item::get(Item::LEATHER_TUNIC, 0));
+		self::addCreativeItem(Item::get(Item::CHAIN_CHESTPLATE, 0));
+		self::addCreativeItem(Item::get(Item::IRON_CHESTPLATE, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_CHESTPLATE, 0));
+		self::addCreativeItem(Item::get(Item::GOLD_CHESTPLATE, 0));
+		
+		self::addCreativeItem(Item::get(Item::LEATHER_PANTS, 0));
+		self::addCreativeItem(Item::get(Item::CHAIN_LEGGINGS, 0));
+		self::addCreativeItem(Item::get(Item::IRON_LEGGINGS, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_LEGGINGS, 0));
+		self::addCreativeItem(Item::get(Item::GOLD_LEGGINGS, 0));
+		
+		self::addCreativeItem(Item::get(Item::LEATHER_BOOTS, 0));
+		self::addCreativeItem(Item::get(Item::CHAIN_BOOTS, 0));
+		self::addCreativeItem(Item::get(Item::IRON_BOOTS, 0));
+		self::addCreativeItem(Item::get(Item::DIAMOND_BOOTS, 0));
+		self::addCreativeItem(Item::get(Item::GOLD_BOOTS, 0));
 			
 		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 15));
 		self::addCreativeItem(Item::get(Item::SPAWN_EGG, 10));
