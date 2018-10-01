@@ -17,13 +17,13 @@
  * @link http://www.pocketmine.net/
  *
  *
-*/
+ */
 
 namespace pocketmine\inventory;
 
 use pocketmine\utils\UUID;
 
-interface Recipe{
+interface Recipe {
 
 	/**
 	 * @return \pocketmine\item\Item
@@ -36,4 +36,7 @@ interface Recipe{
 	 * @return UUID
 	 */
 	public function getId();
+	
+	public function scale($scale);
+	
 }
