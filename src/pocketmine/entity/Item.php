@@ -51,7 +51,6 @@ class Item extends Entity{
 	public $length = 0.25;
 	public $height = 0.25;
 	protected $gravity = 0.04;
-//	protected $drag = 0.02;
 	protected $drag = 0.15;
 
 	public $canCollide = false;
@@ -59,6 +58,7 @@ class Item extends Entity{
 	public function __construct(FullChunk $chunk, Compound $nbt) {
 		parent::__construct($chunk, $nbt);
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NO_AI, true, self::DATA_TYPE_LONG, false);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_AFFECTED_BY_GRAVITY, true, self::DATA_TYPE_LONG, false); // fix for 1.2.14.3
 	}
 
 	protected function initEntity(){
@@ -108,7 +108,7 @@ class Item extends Entity{
 			$tickDiff = 1;
 		}
 		$this->lastUpdate = $currentTick;
-
+		
 		//$this->timings->startTiming();
 
 		$hasUpdate = $this->entityBaseTick($tickDiff);
@@ -119,31 +119,29 @@ class Item extends Entity{
 				$this->pickupDelay -= $tickDiff;
 			}
 
-			$this->motionY -= $this->gravity;
-
-			$this->keepMovement = $this->checkObstruction($this->x, ($this->boundingBox->minY + $this->boundingBox->maxY) / 2, $this->z);
-			$this->move($this->motionX, $this->motionY, $this->motionZ);
-
-			$friction = 1 - $this->drag;
-
+			
+			if ($this->onGround && $this->motionY <= 0) {
+				$this->motionY = 0;				
+			} else {
+				$this->motionY -= $this->gravity;
+				$this->motionY *= 0.96;	
+			}
+			$friction = 1 - $this->drag;	
 			if ($this->onGround && ($this->motionX != 0 || $this->motionZ != 0)) {
-				$friction = $this->level->getBlock(new Vector3($this->getFloorX(), $this->getFloorY() - 1, $this->getFloorZ()))->getFrictionFactor() * $friction;
+				$friction *= $this->level->getBlock(new Vector3($this->getFloorX(), $this->getFloorY() - 1, $this->getFloorZ()))->getFrictionFactor();
+			}			
+			$this->motionX *= $friction;
+			$this->motionZ *= $friction;
+			if ($this->motionX != 0 || $this->motionY != 0 || $this->motionZ != 0) {
+				$this->move($this->motionX, $this->motionY, $this->motionZ);
+				$this->updateMovement();
+				$hasUpdate = true;
 			}
 
-			$this->motionX *= $friction;
-			$this->motionY *= 1 - $this->drag;
-			$this->motionZ *= $friction;
-
-			$this->updateMovement();
-			
 			if ($this->y < 1) {
 				$this->kill();
 				$hasUpdate = true;
 			} else {
-				if ($this->onGround) {
-					$this->motionY *= -0.5;
-				}
-
 				if ($this->age > 1200) {
 					$this->server->getPluginManager()->callEvent($ev = new ItemDespawnEvent($this));
 					if ($ev->isCancelled()) {
@@ -153,13 +151,12 @@ class Item extends Entity{
 						$hasUpdate = true;
 					}
 				}
-			}
-			$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_AFFECTED_BY_GRAVITY, true); // fix for 1.2.14.3
+			}			
 		}
 
 		//$this->timings->stopTiming();
 		
-		return $hasUpdate || !$this->onGround || $this->motionX != 0 || $this->motionY != 0 || $this->motionZ != 0;
+		return $hasUpdate || !$this->onGround;
 	}
 
 	public function saveNBT(){
@@ -246,39 +243,19 @@ class Item extends Entity{
 			$pk->item = $this->getItem();
 			$pk->metadata = $this->dataProperties;
 			$player->dataPacket($pk);
-	//		$this->sendData($player);
 			$this->hasSpawned[$player->getId()] = $player;
 		}
 	}
 
 	
-	protected function updateMovement(){	
-		$diffPositionX =  abs($this->x - $this->lastX);
-		$diffPositionY =  abs($this->y - $this->lastY);
-		$diffPositionZ =  abs($this->z - $this->lastZ);		
-		
-		$diffMotionX = abs($this->motionX - $this->lastMotionX);
-		$diffMotionY = abs($this->motionY - $this->lastMotionY);
-		$diffMotionZ = abs($this->motionZ - $this->lastMotionZ);
-		
-
-		if($diffPositionX > 0.2 || $diffPositionZ > 0.2 || ($diffPositionX > 0.01 && $diffPositionZ > 0.01 && $diffPositionY > 0.2)){
+	protected function updateMovement() {
+		$diffPosition = ($this->x - $this->lastX) ** 2 + ($this->y - $this->lastY) ** 2 + ($this->z - $this->lastZ) ** 2;
+		if ($diffPosition > 0.04) {
 			$this->lastX = $this->x;
 			$this->lastY = $this->y;
 			$this->lastZ = $this->z;
-			$this->lastYaw = $this->yaw;
-			$this->lastPitch = $this->pitch;
-			
 			$this->level->addEntityMovement($this->getViewers(), $this->id, $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
 		}
-
-		if($diffMotionX > 0.05 || $diffMotionZ > 0.05 || ($diffMotionX > 0.001 && $diffMotionZ > 0.001 && $diffMotionY > 0.05 )){ 
-			$this->lastMotionX = $this->motionX;
-			$this->lastMotionY = $this->motionY;
-			$this->lastMotionZ = $this->motionZ;
-			
-			$this->level->addEntityMotion($this->getViewers(), $this->id, $this->motionX, $this->motionY, $this->motionZ);
-		}
 	}
-	
+
 }
