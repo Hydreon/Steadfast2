@@ -77,7 +77,7 @@ use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\inventory\SimpleTransactionGroup;
-
+use pocketmine\inventory\transactions\SimpleTransactionData;
 use pocketmine\item\Item;
 use pocketmine\item\Armor;
 use pocketmine\item\Tool;
@@ -381,8 +381,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	protected $beforeSpawnViewRadius = null;
 	protected $beforeSpawnTeleportPosition = null;
-	
-//	public $hackForCraftLastIndex = 0;
 	
 	protected $lastInteractTick = 0;
 	
@@ -1562,8 +1560,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$noteId = array_shift($this->noteSoundQueue);
 			$this->sendNoteSound($noteId);
 		}
-//		$this->hackForCraftLastIndex = 0;
-		
 		
 		foreach ($this->lastEntityRemove as $eid => $tick) {
 			if ($tick + 20 < $this->lastUpdate) {
@@ -2237,8 +2233,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				
 				if ($this->protocol >= ProtocolInfo::PROTOCOL_120) {
-					$craftSlots = $this->inventory->getCraftContents();
 					try {
+						$scale = floor($packet->output[0]->getCount() / $recipe->getResult()->getCount());
+						if ($scale > 1) {
+							$recipe = clone $recipe;
+							$recipe->scale($scale);
+						}
+						$craftSlots = $this->inventory->getCraftContents();
 						$this->tryApplyCraft($craftSlots, $recipe);
 						$this->inventory->setItem(PlayerInventory120::CRAFT_RESULT_INDEX, $recipe->getResult());
 						foreach ($craftSlots as $slot => $item) {
@@ -4235,6 +4236,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$trGroup->sendInventories();
 				return;
 			}
+//			echo " ---------- " . $transaction . PHP_EOL;
 			$trGroup->addTransaction($transaction);
 		}
 		try {
