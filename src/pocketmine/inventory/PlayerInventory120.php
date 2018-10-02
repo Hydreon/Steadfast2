@@ -7,7 +7,6 @@ use pocketmine\event\entity\EntityArmorChangeEvent;
 use pocketmine\event\entity\EntityInventoryChangeEvent;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\item\Item;
-use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
@@ -69,14 +68,6 @@ class PlayerInventory120 extends PlayerInventory {
 			case self::CRAFT_INDEX_8:
 				$slot = self::CRAFT_INDEX_0 - $index;
 				$this->craftSlots[$slot] = $item;
-//				if ($sendPacket) {
-//					/** @todo add packet sending */
-//					$pk = new InventorySlotPacket();
-//					$pk->containerId = Protocol120::CONTAINER_ID_NONE;
-//					$pk->slot = 0;
-//					$pk->item = Item::get(Item::WOOL, 10);
-//					$this->holder->dataPacket($pk);
-//				}
 				break;
 			case self::CRAFT_RESULT_INDEX:
 				$this->craftResult = $item;
@@ -313,6 +304,20 @@ class PlayerInventory120 extends PlayerInventory {
 			$result .= $index . " - " . $item . PHP_EOL;
 		}
 		return $result;
+	}
+	
+	/**
+	 * 
+	 * @param Item $item
+	 */
+	public function getCraftSlotByItem($item, $isSmallCraft = true) {
+		$slotsCount = $isSmallCraft ? 4 : 9;
+		for ($i = 0; $i < $slotsCount; $i++) {
+			if ($this->craftSlots[$i]->equals($item)) {
+				return self::CRAFT_INDEX_0 - $i;
+			}
+		}
+		return false;
 	}
 	
 }
