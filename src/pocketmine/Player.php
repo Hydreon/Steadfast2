@@ -3902,6 +3902,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->text = "";
 		$this->dataPacket($pk);
 	}
+
+	public function setActionBar($text, $time = 36000){
+		$pk = new SetTitlePacket();
+		$pk->type = SetTitlePacket::TITLE_TYPE_ACTION_BAR;
+		$pk->text = $text;
+		$pk->stayTime = $time;
+		$pk->fadeInTime = 1;
+		$pk->fadeOutTime = 1;
+		$this->dataPacket($pk);
+	}
 		
 	public function sendNoteSound($noteId, $queue = false) {
 		if ($queue) {
