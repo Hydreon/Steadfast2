@@ -22415,5 +22415,21 @@
 	{"data":12,"id":418,"name":"minecraft:bamboo_sapling"},
 	{"data":13,"id":418,"name":"minecraft:bamboo_sapling"},
 	{"data":14,"id":418,"name":"minecraft:bamboo_sapling"},
-	{"data":15,"id":418,"name":"minecraft:bamboo_sapling"}
+	{"data":15,"id":418,"name":"minecraft:bamboo_sapling"},
+	{"data":0,"id":419,"name":"minecraft:scaffolding"},
+	{"data":1,"id":419,"name":"minecraft:scaffolding"},
+	{"data":2,"id":419,"name":"minecraft:scaffolding"},
+	{"data":3,"id":419,"name":"minecraft:scaffolding"},
+	{"data":4,"id":419,"name":"minecraft:scaffolding"},
+	{"data":5,"id":419,"name":"minecraft:scaffolding"},
+	{"data":6,"id":419,"name":"minecraft:scaffolding"},
+	{"data":7,"id":419,"name":"minecraft:scaffolding"},
+	{"data":8,"id":419,"name":"minecraft:scaffolding"},
+	{"data":9,"id":419,"name":"minecraft:scaffolding"},
+	{"data":10,"id":419,"name":"minecraft:scaffolding"},
+	{"data":11,"id":419,"name":"minecraft:scaffolding"},
+	{"data":12,"id":419,"name":"minecraft:scaffolding"},
+	{"data":13,"id":419,"name":"minecraft:scaffolding"},
+	{"data":14,"id":419,"name":"minecraft:scaffolding"},
+	{"data":15,"id":419,"name":"minecraft:scaffolding"}
 ]
