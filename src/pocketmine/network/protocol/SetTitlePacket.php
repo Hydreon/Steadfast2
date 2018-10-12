@@ -16,7 +16,7 @@ class SetTitlePacket extends PEPacket {
 	public $type;
 	public $text;
 	public $fadeInTime = 0;
-	public $stayTime = 10;
+	public $stayTime = 0;
 	public $fadeOutTime = 0;
 	public $authorXUID = "";
 
@@ -24,7 +24,7 @@ class SetTitlePacket extends PEPacket {
 		$this->reset($playerProtocol);
 		$this->putSignedVarInt($this->type);
 		$this->putString($this->text);
-		if ($playerProtocol >= Info::PROTOCOL_221) {
+		if ($playerProtocol == Info::PROTOCOL_221) {
 			$this->putString($this->authorXUID);
 		}
 		$this->putSignedVarInt($this->fadeInTime);
