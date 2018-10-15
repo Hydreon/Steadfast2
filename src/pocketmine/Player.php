@@ -175,6 +175,7 @@ use pocketmine\network\protocol\v120\SubClientLoginPacket;
 use pocketmine\entity\Vehicle;
 use pocketmine\tile\SignEntity;
 use pocketmine\utils\Binary;
+use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -402,6 +403,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
 	protected $isTransfered = false;
 	protected $loginCompleted = false;
+	protected $titleData = [];
 
 	public function getLeaveMessage(){
 		return "";
@@ -906,6 +908,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->unloadChunk($X, $Z);
 		}
 		$this->loadQueue = $newOrder;
+		
+		if($this->protocol >= ProtocolInfo::PROTOCOL_310 && $this->spawned && !empty($newOrder)){
+			$pk = new NetworkChunkPublisherUpdatePacket();
+			$pk->x = $this->getFloorX();
+			$pk->y = $this->getFloorY();
+			$pk->z = $this->getFloorZ();
+			$pk->radius = $this->viewRadius << 4; 
+			$this->dataPacket($pk);
+		}
 		return true;
 	}
 
@@ -1575,6 +1586,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 			}
 		}
+		
+		if (!empty($this->titleData)) {
+			$this->titleData['holdTickCount']--;
+			if ($this->titleData['holdTickCount'] <= 0) {
+				$this->sendTitle($this->titleData['text'], $this->titleData['subtext'], $this->titleData['time']);
+				$this->titleData = [];
+			}
+		}
 
 		//$this->timings->stopTiming();
 
@@ -1880,7 +1899,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						//Timings::$timerMobEqipmentPacket->stopTiming();
 						break;
 					}								
-				}elseif($item === null or $slot === -1 or !$item->deepEquals($packet->item)){ // packet error or not implemented
+				}elseif($item === null || $slot === -1 || ($item->getId() != Item::FILLED_MAP && !$item->deepEquals($packet->item) || !$item->deepEquals($packet->item, true, false))){ // packet error or not implemented
+					// hack for map was added because type of map_uuid is different in various versions
 					$this->inventory->sendContents($this);
 					//Timings::$timerMobEqipmentPacket->stopTiming();
 					break;
@@ -3886,6 +3906,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     }
 	
 	public function setTitle($text, $subtext = '', $time = 36000) {		
+		if ($this->protocol >= Info::PROTOCOL_290) { //hack for 1.7.x
+			$this->clearTitle();
+			$this->titleData = ['text' => $text, 'subtext' => $subtext, 'time' => $time, 'holdTickCount' => 5];
+		} else {
+			$this->sendTitle($text, $subtext, $time);
+		}
+		
+	}
+	
+	protected function sendTitle($text, $subtext = '', $time = 36000) {		
 		$pk = new SetTitlePacket();
 		$pk->type = SetTitlePacket::TITLE_TYPE_TIMES;
 		$pk->text = "";
@@ -3893,14 +3923,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->fadeOutTime = 5;
 		$pk->stayTime = 20 * $time;
 		$this->dataPacket($pk);
-
-		if (!empty($subtext)) {
+		
+		if (!empty($subtext)) {			
 			$pk = new SetTitlePacket();
 			$pk->type = SetTitlePacket::TITLE_TYPE_SUBTITLE;
 			$pk->text = $subtext;
-			$this->dataPacket($pk);
+			$this->dataPacket($pk);	
 		}
-
+		
 		$pk = new SetTitlePacket();
 		$pk->type = SetTitlePacket::TITLE_TYPE_TITLE;
 		$pk->text = $text;
@@ -3908,6 +3938,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function clearTitle() {
+		$pk = new SetTitlePacket();
+		$pk->type = SetTitlePacket::TITLE_TYPE_TIMES;
+		$pk->text = "";
+		$pk->fadeInTime = 0;
+		$pk->fadeOutTime = 0;
+		$pk->stayTime = 0;
+		$this->dataPacket($pk);
+		
 		$pk = new SetTitlePacket();
 		$pk->type = SetTitlePacket::TITLE_TYPE_CLEAR;
 		$pk->text = "";
