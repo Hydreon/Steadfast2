@@ -223,5 +223,13 @@ abstract class Entity {
 		}
 		throw new \Exception("Unknown entity ID " . $id);
 	}
+	
+	public function getIDByName($name) {
+		$entityID = array_search($name, self::$idToName);
+		if ($entityID !== false) {
+			return $entityID;
+		}
+		return self::ID_PLAYER;
+	}
 }
 

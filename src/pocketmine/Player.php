@@ -175,6 +175,8 @@ use pocketmine\network\protocol\v120\SubClientLoginPacket;
 use pocketmine\tile\SignEntity;
 use pocketmine\utils\Binary;
 
+use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
+
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
  */
