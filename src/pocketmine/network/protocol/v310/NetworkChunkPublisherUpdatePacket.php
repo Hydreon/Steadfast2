@@ -24,7 +24,7 @@ class NetworkChunkPublisherUpdatePacket extends PEPacket {
 	}
 
 	public function encode($playerProtocol) {
-		$this->reset();
+		$this->reset($playerProtocol);
 		$this->putSignedVarInt($this->x);
 		$this->putSignedVarInt($this->y);
 		$this->putSignedVarInt($this->z);

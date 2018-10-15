@@ -3,6 +3,7 @@
 namespace pocketmine\network\protocol;
 
 use pocketmine\network\multiversion\MultiversionEnums;
+use pocketmine\network\multiversion\Entity;
 
 class LevelSoundEventPacket extends PEPacket {
 
@@ -47,8 +48,13 @@ class LevelSoundEventPacket extends PEPacket {
 			}
 		} else {
 			$this->blockId = $this->getSignedVarInt();
-		}		
-		$this->entityType = $this->getSignedVarInt();
+		}	
+		if ($playerProtocol >= Info::PROTOCOL_310) {
+			$entityName = $this->getString();
+			$this->entityType = Entity::getIDByName($entityName);
+		} else {
+			$this->entityType = $this->getSignedVarInt();
+		}
 		$this->babyMob = $this->getByte();
 		$this->global = $this->getByte();
 	}
@@ -70,7 +76,11 @@ class LevelSoundEventPacket extends PEPacket {
 		} else {
 			$this->putSignedVarInt($this->blockId);
 		}
-		$this->putSignedVarInt($this->entityType);
+		if ($playerProtocol >= Info::PROTOCOL_310) {
+			$this->putString(Entity::getNameByID($this->entityType));
+		} else {
+			$this->putSignedVarInt($this->entityType);
+		}
 		$this->putByte($this->babyMob);
 		$this->putByte($this->global);
 	}

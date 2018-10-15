@@ -21,7 +21,7 @@
 
 namespace pocketmine\network\protocol;
 
-USE pocketmine\network\multiversion\Entity;
+use pocketmine\network\multiversion\Entity;
 use pocketmine\utils\Binary;
 
 class AddEntityPacket extends PEPacket{

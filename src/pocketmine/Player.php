@@ -174,7 +174,6 @@ use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\v120\SubClientLoginPacket;
 use pocketmine\tile\SignEntity;
 use pocketmine\utils\Binary;
-
 use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
 
 /**
@@ -904,6 +903,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->unloadChunk($X, $Z);
 		}
 		$this->loadQueue = $newOrder;
+		
+		if($this->protocol >= ProtocolInfo::PROTOCOL_310 && $this->spawned && !empty($newOrder)){
+			$pk = new NetworkChunkPublisherUpdatePacket();
+			$pk->x = $this->getFloorX();
+			$pk->y = $this->getFloorY();
+			$pk->z = $this->getFloorZ();
+			$pk->radius = $this->viewRadius << 4; 
+			$this->dataPacket($pk);
+		}
 		return true;
 	}
 

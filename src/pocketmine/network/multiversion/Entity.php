@@ -100,10 +100,12 @@ abstract class Entity {
 	const ID_PARROT = 30; //parrot
 	const ID_DOLPHIN = 31; //dolphin
 	const ID_TURTLE = 74; //turtle
+	const ID_CAT = 75; //cat
 	const ID_PUFFERFISH = 108; //pufferfish
 	const ID_SALMON = 109; //salmon
 	const ID_TROPICAL_FISH = 111; //tropicalfish
 	const ID_COD = 112; //cod
+	const ID_PANDA = 113; //panda
 
 	/** Other */
 	const ID_PLAYER = 63; //player
@@ -204,10 +206,12 @@ abstract class Entity {
 		self::ID_PARROT => "minecraft:parrot",
 		self::ID_DOLPHIN => "minecraft:dolphin",
 		self::ID_TURTLE => "minecraft:turtle",
+		self::ID_CAT => "minecraft:cat",
 		self::ID_PUFFERFISH => "minecraft:pufferfish",
 		self::ID_SALMON => "minecraft:salmon",
 		self::ID_TROPICAL_FISH => "minecraft:tropicalfish",
 		self::ID_COD => "minecraft:cod",
+		self::ID_PANDA => "minecraft:panda",
 		self::ID_PLAYER => "minecraft:player",
 		self::ID_NPC => "minecraft:npc",
 		self::ID_AGENT => "minecraft:learn_to_code_mascot",
@@ -216,15 +220,15 @@ abstract class Entity {
 		self::ID_ICE_BOMB => "minecraft:ice_bomb",
 		self::ID_BALOON => "minecraft:balloon",
 	];
-	
+
 	public static function getNameByID($id) {
 		if (isset(self::$idToName[$id])) {
 			return self::$idToName[$id];
 		}
-		throw new \Exception("Unknown entity ID " . $id);
+		return self::$idToName[self::ID_PLAYER];
 	}
 	
-	public function getIDByName($name) {
+	public static function getIDByName($name) {
 		$entityID = array_search($name, self::$idToName);
 		if ($entityID !== false) {
 			return $entityID;
