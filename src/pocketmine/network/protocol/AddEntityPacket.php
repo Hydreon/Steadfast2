@@ -21,12 +21,8 @@
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
-
-#ifndef COMPILE
+use pocketmine\network\multiversion\Entity;
 use pocketmine\utils\Binary;
-
-#endif
 
 class AddEntityPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_ENTITY_PACKET;
@@ -47,14 +43,17 @@ class AddEntityPacket extends PEPacket{
 	public $attributes = [];
 
 	public function decode($playerProtocol){
-
 	}
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);		
 		$this->putVarInt($this->eid);
 		$this->putVarInt($this->eid);
-		$this->putVarInt($this->type);
+		if ($playerProtocol >= Info::PROTOCOL_310) {
+			$this->putString(Entity::getNameByID($this->type));
+		} else {
+			$this->putVarInt($this->type);
+		}
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
