@@ -89,6 +89,21 @@ class PlayerListPacket extends PEPacket{
 						} else {
 							$this->putString($capeData); // Cape Data
 						}
+						if ($playerProtocol >= Info::PROTOCOL_310) { //temp hack for prevent client bug
+							if (isset($d[6])) {
+								$d[6] = strtolower($d[6]);
+							}
+							if (isset($d[7])) {
+								$tempData = json_decode($d[7], true);
+								if (is_array($tempData)) {
+									foreach ($tempData as $key => $value) {
+										unset($tempData[$key]);
+										$tempData[strtolower($key)] = $value;
+									}
+									$d[7] = json_encode($tempData);
+								}
+							}
+						}
 						$this->putString(isset($d[6]) ? $d[6] : ''); // Skin Geometry Name
 						$this->putString(isset($d[7]) ? $d[7] : ''); // Skin Geometry Data
 //						$this->putString(''); //temp hack for prevent xbox and chat lags
