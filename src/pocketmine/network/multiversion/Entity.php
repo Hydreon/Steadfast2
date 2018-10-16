@@ -224,6 +224,7 @@ abstract class Entity {
 	];
 
 	public static function getNameByID($id) {
+		$id &= 0xff;
 		if (isset(self::$idToName[$id])) {
 			return self::$idToName[$id];
 		}
@@ -236,7 +237,6 @@ abstract class Entity {
 		if ($entityID !== false) {
 			return $entityID;
 		}
-		Server::getInstance()->getLogger()->warning("Unknown name {$name}");
 		return self::ID_PLAYER;
 	}
 }

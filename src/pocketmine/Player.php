@@ -175,6 +175,7 @@ use pocketmine\network\protocol\v120\SubClientLoginPacket;
 use pocketmine\tile\SignEntity;
 use pocketmine\utils\Binary;
 use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
+use pocketmine\network\multiversion\Entity as MultiversionEntity;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -2125,7 +2126,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						break;
 					case EntityEventPacket::FEED:
 						$position = [ 'x' => $this->x, 'y' => $this->y, 'z' => $this->z ];
-						$this->sendSound(LevelSoundEventPacket::SOUND_EAT, $position, 63);
+						$this->sendSound(LevelSoundEventPacket::SOUND_EAT, $position);
 						break;
 				}
 				//Timings::$timerEntityEventPacket->stopTiming();
@@ -4447,7 +4448,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->z = $packet->z;
 			$pk->data = $block->getId() | ($block->getDamage() << 8);
 			Server::broadcastPacket($recipients, $pk);
-			$this->sendSound(LevelSoundEventPacket::SOUND_HIT, $blockPos, 1, $block->getId(), $recipients);
+			$this->sendSound(LevelSoundEventPacket::SOUND_HIT, $blockPos, MultiversionEntity::ID_PLAYER, $block->getId(), $recipients);
 		}
 	}
 	
@@ -4471,7 +4472,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param integer $soundId
 	 * @param float[] $position
 	 */
-	public function sendSound($soundId, $position, $entityType = 1, $blockId = -1, $targets = []) {
+	public function sendSound($soundId, $position, $entityType = MultiversionEntity::ID_PLAYER, $blockId = -1, $targets = []) {
 		$pk = new LevelSoundEventPacket();
 		$pk->eventId = $soundId;
 		$pk->x = $position['x'];
