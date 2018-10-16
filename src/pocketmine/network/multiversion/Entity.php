@@ -2,6 +2,8 @@
 
 namespace pocketmine\network\multiversion;
 
+use pocketmine\Server;
+
 abstract class Entity {
 	
 	/** Drop */
@@ -222,9 +224,11 @@ abstract class Entity {
 	];
 
 	public static function getNameByID($id) {
+		$id &= 0xff;
 		if (isset(self::$idToName[$id])) {
 			return self::$idToName[$id];
 		}
+		Server::getInstance()->getLogger()->warning("Unknown id {$id}");
 		return self::$idToName[self::ID_PLAYER];
 	}
 	
