@@ -1534,7 +1534,7 @@ class Level implements ChunkManager, Metadatable{
 		$blockId = $hand->getId();
 		$viewers = $player->getViewers();
 		$viewers[] = $player;
-		$player->sendSound(LevelSoundEventPacket::SOUND_PLACE, $position, MultiversionEntity::ID_PLAYER, $blockId, $viewers);
+		$player->sendSound(LevelSoundEventPacket::SOUND_PLACE, $position, MultiversionEntity::ID_NONE, $blockId, $viewers);
 
 		if($hand->getId() === Item::SIGN_POST or $hand->getId() === Item::WALL_SIGN){
 			$tile = Tile::createTile("Sign", $this->getChunk($block->x >> 4, $block->z >> 4), new Compound(false, [

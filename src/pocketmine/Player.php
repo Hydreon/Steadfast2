@@ -2610,15 +2610,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}
 						break;
 					case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_USE:
-						switch ($packet->actionType) {
-							case InventoryTransactionPacket::ITEM_USE_ACTION_PLACE:
-							case InventoryTransactionPacket::ITEM_USE_ACTION_USE:
-								$blockHash = $this->level->blockHash($packet->position['x'], $packet->position['y'], $packet->position['z']);
+						switch ($packet->actionType) {		
+							case InventoryTransactionPacket::ITEM_USE_ACTION_PLACE:												
+								$blockHash = $packet->position['x'] . ':' . $packet->position['y'] . ':' . $packet->position['z']. ':' . $packet->face;
 								if ($this->lastUpdate - $this->lastInteractTick < 3 && $this->lastInteractCoordsHash == $blockHash) {
 									break;
 								}
 								$this->lastInteractTick = $this->lastUpdate;
 								$this->lastInteractCoordsHash = $blockHash;
+							case InventoryTransactionPacket::ITEM_USE_ACTION_USE:
 								$this->useItem($packet->item, $packet->slot, $packet->face, $packet->position, $packet->clickPosition);
 								break;
 							case InventoryTransactionPacket::ITEM_USE_ACTION_DESTROY:
@@ -4448,7 +4448,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->z = $packet->z;
 			$pk->data = $block->getId() | ($block->getDamage() << 8);
 			Server::broadcastPacket($recipients, $pk);
-			$this->sendSound(LevelSoundEventPacket::SOUND_HIT, $blockPos, MultiversionEntity::ID_PLAYER, $block->getId(), $recipients);
+			$this->sendSound(LevelSoundEventPacket::SOUND_HIT, $blockPos, MultiversionEntity::ID_NONE, $block->getId(), $recipients);
 		}
 	}
 	
@@ -4472,7 +4472,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param integer $soundId
 	 * @param float[] $position
 	 */
-	public function sendSound($soundId, $position, $entityType = MultiversionEntity::ID_PLAYER, $blockId = -1, $targets = []) {
+	public function sendSound($soundId, $position, $entityType = MultiversionEntity::ID_NONE, $blockId = -1, $targets = []) {
 		$pk = new LevelSoundEventPacket();
 		$pk->eventId = $soundId;
 		$pk->x = $position['x'];
