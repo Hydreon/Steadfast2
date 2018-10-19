@@ -6,6 +6,8 @@ use pocketmine\Server;
 
 abstract class Entity {
 	
+	const ID_NONE = 1;
+	
 	/** Drop */
 	const ID_ITEM = 64; //minecraft:item
 	const ID_EXP_ORB = 69; //minecraft:xp_orb
@@ -121,6 +123,7 @@ abstract class Entity {
 	const ID_BALOON = 107; //balloon
 	
 	private static $idToName = [
+		self::ID_NONE => ":",
 		self::ID_ITEM => "minecraft:item",
 		self::ID_EXP_ORB => "minecraft:xp_orb",
 		self::ID_TNT => "minecraft:tnt",
@@ -229,7 +232,7 @@ abstract class Entity {
 			return self::$idToName[$id];
 		}
 		Server::getInstance()->getLogger()->warning("Unknown id {$id}");
-		return self::$idToName[self::ID_PLAYER];
+		return self::$idToName[self::ID_NONE];
 	}
 	
 	public static function getIDByName($name) {
@@ -237,7 +240,7 @@ abstract class Entity {
 		if ($entityID !== false) {
 			return $entityID;
 		}
-		return self::ID_PLAYER;
+		return self::ID_NONE;
 	}
 }
 
