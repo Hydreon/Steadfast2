@@ -136,6 +136,10 @@ class StartGamePacket extends PEPacket{
 				if ($playerProtocol >= Info::PROTOCOL_290) {
 					$this->putByte(0); // Use Msa Gamertags Only?
 				}
+				if ($playerProtocol >= Info::PROTOCOL_311) {
+					$this->putByte(0); // Is From World Template?
+					$this->putByte(0); // Is World Template Option Locked?
+				}
 			}
 			// level settings end
 			$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
