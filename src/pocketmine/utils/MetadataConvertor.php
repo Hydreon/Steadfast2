@@ -185,6 +185,7 @@ class MetadataConvertor {
 
 	private static function updateMetaIds($meta, $protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_311:
 			case Info::PROTOCOL_310:
 			case Info::PROTOCOL_290:
 			case Info::PROTOCOL_282:
@@ -226,6 +227,7 @@ class MetadataConvertor {
 			return $meta;
 		}
 		switch ($protocol) {
+			case Info::PROTOCOL_311:
 			case Info::PROTOCOL_310:
 			case Info::PROTOCOL_290:
 				$newflags = 1 << 19; //DATA_FLAG_CAN_CLIMBING
