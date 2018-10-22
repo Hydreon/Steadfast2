@@ -22,7 +22,8 @@ class InventoryTransactionPacket extends PEPacket {
 	const INV_SOURCE_TYPE_GLOBAL = 1;
 	const INV_SOURCE_TYPE_WORLD_INTERACTION = 2;
 	const INV_SOURCE_TYPE_CREATIVE = 3;
-	const INV_SOURCE_TYPE_CRAFT = 99999;
+	const INV_SOURCE_TYPE_CRAFT_SLOT = 100;
+	const INV_SOURCE_TYPE_CRAFT = 99999;	
 	
 	const ITEM_RELEASE_ACTION_RELEASE = 0;
 	const ITEM_RELEASE_ACTION_USE = 1;
@@ -78,9 +79,9 @@ class InventoryTransactionPacket extends PEPacket {
 					$tr->inventoryId = ContainerSetContentPacket::SPECIAL_CREATIVE;
 					break;
 				case self::INV_SOURCE_TYPE_CRAFT:
+				case self::INV_SOURCE_TYPE_CRAFT_SLOT:
 					$tr->action = $this->getVarInt();
-				default:
-					continue;
+					break;
 			}
 			$tr->slot = $this->getVarInt();
 			$tr->oldItem = $this->getSlot($playerProtocol);
