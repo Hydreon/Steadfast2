@@ -59,7 +59,7 @@ class UpdateAttributesPacket extends PEPacket{
 			foreach ($this->attributes as $attribute) {
 				$this->putLFloat($attribute['min']);
 				$this->putLFloat($attribute['max']);
-				$this->putLFloat($attribute['default']);
+				$this->putLFloat($attribute['value']);
 				$this->putLFloat($attribute['default']);
 				$this->putString($attribute['name']);
 			}
