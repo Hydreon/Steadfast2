@@ -19,7 +19,7 @@ class BossEventPacket extends PEPacket {
 	const EVENT_TYPE_UPDATE_PROPERTIES = 6;
 	const EVENT_TYPE_UPDATE_STYLE = 7;
 	
-	public $entityID = -1;
+	public $eid = -1;
 	public $eventType = self::EVENT_TYPE_ADD;
 	public $bossName = "";
 	public $darkenScreen = 12;
@@ -34,7 +34,7 @@ class BossEventPacket extends PEPacket {
 
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
-		$this->putVarInt($this->entityID);
+		$this->putVarInt($this->eid);
 		$this->putVarInt($this->eventType);
 		switch ($this->eventType) {
 			case self::EVENT_TYPE_ADD:
