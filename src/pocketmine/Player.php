@@ -192,9 +192,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
     const OS_WIN10 = 7;
     const OS_WIN32 = 8;
     const OS_DEDICATED = 9;
-    const OS_ORBIS = 10;
-    const OS_NX = 11;
-    
+    const OS_TVOS = 10;
+    const OS_ORBIS = 11;
+    const OS_NX = 12;
+    const OS_UNKNOWN = -1;
+	
     const INVENTORY_CLASSIC = 0;
     const INVENTORY_POCKET = 1;
     
@@ -333,7 +335,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	private $languageCode = false;
     
     /** @IMPORTANT don't change the scope */
-    private $deviceType = self::OS_DEDICATED;
+    private $deviceType = self::OS_UNKNOWN;
 	
 	private $messageQueue = [];
 	
