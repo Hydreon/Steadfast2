@@ -67,6 +67,7 @@ To build the Steadfast2 server phar file please follow the instructions below.
 
 4) Then run makeserver in the server terminal, then it will drop the phar file in its plugin directory.
 
-
+.phar download link here
+pigggit :- coming soon
 
 
