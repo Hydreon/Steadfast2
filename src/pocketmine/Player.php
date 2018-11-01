@@ -2263,11 +2263,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							$recipe = clone $recipe;
 							$recipe->scale($scale);
 						}
-						$craftSlots = $this->inventory->getCraftContents();
-						$this->tryApplyCraft($craftSlots, $recipe);
-						$this->inventory->setItem(PlayerInventory120::CRAFT_RESULT_INDEX, $recipe->getResult());
-						foreach ($craftSlots as $slot => $item) {
-							$this->inventory->setItem(PlayerInventory120::CRAFT_INDEX_0 - $slot, $item);
+						if ($this->inventory->isQuickCraftEnabled()) {
+							$craftSlots = $this->inventory->getQuckCraftContents();
+							$this->tryApplyQuickCraft($craftSlots, $recipe);
+							$this->inventory->setItem(PlayerInventory120::CRAFT_RESULT_INDEX, $recipe->getResult());
+							foreach ($craftSlots as $slot => $item) {
+								$this->inventory->setItem(PlayerInventory120::QUICK_CRAFT_INDEX_OFFSET - $slot, $item);
+							}
+						} else {
+							$craftSlots = $this->inventory->getCraftContents();
+							$this->tryApplyCraft($craftSlots, $recipe);
+							$this->inventory->setItem(PlayerInventory120::CRAFT_RESULT_INDEX, $recipe->getResult());
+							foreach ($craftSlots as $slot => $item) {
+								$this->inventory->setItem(PlayerInventory120::CRAFT_INDEX_0 - $slot, $item);
+							}
 						}
 					} catch (\Exception $e) {
 						$pk = new ContainerClosePacket();
@@ -4414,6 +4423,65 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				/** @important count = 0 is important */
 				$craftSlots[$itemKey] = Item::get(Item::AIR, 0, 0);
 			}
+		}
+	}
+	
+	/**
+	 * @minprotocol 120
+	 * @param Item[] $craftSlots
+	 * @param Recipe $recipe
+	 * @throws \Exception
+	 */
+	private function tryApplyQuickCraft(&$craftSlots, $recipe) {
+		$ingredients = [];
+		if ($recipe instanceof ShapedRecipe) {
+			$itemGrid = $recipe->getIngredientMap();
+			foreach ($itemGrid as $line) {
+				$ingredients = array_merge($ingredients, $line);
+			}
+		} else if ($recipe instanceof ShapelessRecipe) {
+			$ingredients = $recipe->getIngredientList();
+		}
+		foreach ($ingredients as $ingKey => $ingredient) {
+			if ($ingredient == null || $ingredient->getId() == Item::AIR) {
+				unset($ingredients[$ingKey]);
+			}
+		}
+		$isAllCraftSlotsEmpty = true;
+		foreach ($ingredients as $ingKey => $ingredient) {
+			foreach ($craftSlots as $itemKey => &$item) {
+				if ($item == null || $item->getId() == Item::AIR) {
+					continue;
+				}
+				$isItemsEquals = $item->getId() == $ingredient->getId() && ($item->getDamage() == $ingredient->getDamage() || $ingredient->getDamage() == 32767);
+				if ($isItemsEquals) {
+					$isAllCraftSlotsEmpty = false;
+					$itemCount = $item->getCount();
+					$ingredientCount = $ingredient->getCount();
+					if ($itemCount >= $ingredientCount) {
+						if ($itemCount == $ingredientCount) {
+							$item = Item::get(Item::AIR, 0, 0);
+						} else {
+							$item->setCount($itemCount - $ingredientCount);
+						}
+						unset($ingredients[$ingKey]);
+						break;
+					} else {
+						$ingredient->setCount($ingredientCount - $itemCount);
+						$item = Item::get(Item::AIR, 0, 0);
+					}
+				}
+			}
+		}
+		if (!empty($ingredients)) {
+			throw new \Exception('Recive bad recipe');
+		}
+		if ($isAllCraftSlotsEmpty) {
+			throw new \Exception('All craft slots are empty');
+		}
+		$this->server->getPluginManager()->callEvent($ev = new CraftItemEvent($ingredients, $recipe, $this));
+		if ($ev->isCancelled()) {
+			throw new \Exception('Event was canceled');
 		}
 	}
 
