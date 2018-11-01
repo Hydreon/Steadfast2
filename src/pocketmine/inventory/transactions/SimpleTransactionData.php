@@ -111,15 +111,21 @@ class SimpleTransactionData {
 				switch ($this->action) {
 					case self::ACTION_CRAFT_GET_RESULT:
 						$slot = PlayerInventory120::CRAFT_RESULT_INDEX;
+						if ($inventory->isQuickCraftEnabled()) {
+							$inventory->setQuickCraftMode(false);
+						}
 						break;
 					// client send slot 0 for all craft transactions by quick craft, so we need manage it manually
 					case self::ACTION_CRAFT_USE:
 						if ($this->slot == 0) {
-							$slot = $inventory->getCraftSlotByItem($this->oldItem, $player->craftingType == Player::CRAFTING_DEFAULT);
-							if ($slot === false) {
-								return null;
+							$item = $inventory->getItem(PlayerInventory120::CRAFT_INDEX_0);
+							if (!$this->newItem->equals($item) || $item->getCount() < $this->newItem->getCount()) {
+								if (!$inventory->isQuickCraftEnabled()) {
+									$inventory->setQuickCraftMode(true);
+								}
+								$slot = $inventory->getNextFreeQuickCraftSlot();
+								break;
 							}
-							break;
 						}
 					default:						
 						$slot = PlayerInventory120::CRAFT_INDEX_0 - $this->slot;
