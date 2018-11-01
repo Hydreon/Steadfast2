@@ -29,6 +29,7 @@ class PlayerInventory120 extends PlayerInventory {
 	const CRAFT_INDEX_7 = -10;
 	const CRAFT_INDEX_8 = -11;
 	const CRAFT_RESULT_INDEX = -12;
+	const QUICK_CRAFT_INDEX_OFFSET = -100;
 	
 	/** @var Item */
 	protected $cursor;
@@ -36,6 +37,10 @@ class PlayerInventory120 extends PlayerInventory {
 	protected $craftSlots = [];
 	/** @var Item */
 	protected $craftResult = null;
+	/** @var Item[] */
+	protected $quickCraftSlots = []; // reason: bug with quick craft
+	/** @var boolean */
+	protected $isQuickCraftEnabled = false;
 	
 	public function __construct(Human $player) {
 		parent::__construct($player);
@@ -67,12 +72,15 @@ class PlayerInventory120 extends PlayerInventory {
 			case self::CRAFT_INDEX_7:
 			case self::CRAFT_INDEX_8:
 				$slot = self::CRAFT_INDEX_0 - $index;
-				$this->craftSlots[$slot] = $item;
+				$this->craftSlots[$slot] = clone $item;
 				break;
 			case self::CRAFT_RESULT_INDEX:
-				$this->craftResult = $item;
-				if ($sendPacket) {
-					/** @todo add packet sending */
+				$this->craftResult = clone $item;
+				break;
+			default:
+				if ($index <= self::QUICK_CRAFT_INDEX_OFFSET) {
+					$slot = self::QUICK_CRAFT_INDEX_OFFSET - $index;
+					$this->quickCraftSlots[$slot] = clone $item;
 				}
 				break;
 		}
@@ -97,6 +105,12 @@ class PlayerInventory120 extends PlayerInventory {
 					return $this->craftSlots[$slot] == null ? clone $this->air : clone $this->craftSlots[$slot];
 				case self::CRAFT_RESULT_INDEX:
 					return $this->craftResult == null ? clone $this->air : clone $this->craftResult;
+				default:
+					if ($index <= self::QUICK_CRAFT_INDEX_OFFSET) {
+						$slot = self::QUICK_CRAFT_INDEX_OFFSET - $index;
+						return !isset($this->quickCraftSlots[$slot]) || $this->quickCraftSlots[$slot] == null ? clone $this->air : clone $this->quickCraftSlots[$slot];
+					}
+					break;
 			}
 			return clone $this->air;
 		} else {
@@ -306,18 +320,21 @@ class PlayerInventory120 extends PlayerInventory {
 		return $result;
 	}
 	
-	/**
-	 * 
-	 * @param Item $item
-	 */
-	public function getCraftSlotByItem($item, $isSmallCraft = true) {
-		$slotsCount = $isSmallCraft ? 4 : 9;
-		for ($i = 0; $i < $slotsCount; $i++) {
-			if ($this->craftSlots[$i]->equals($item)) {
-				return self::CRAFT_INDEX_0 - $i;
-			}
-		}
-		return false;
+	public function setQuickCraftMode($value) {
+		$this->isQuickCraftEnabled = $value;
+		$this->quickCraftSlots = [];
+	}
+	
+	public function isQuickCraftEnabled() {
+		return $this->isQuickCraftEnabled;
+	}
+	
+	public function getNextFreeQuickCraftSlot() {
+		return self::QUICK_CRAFT_INDEX_OFFSET - count($this->quickCraftSlots);
+	}
+	
+	public function getQuckCraftContents() {
+		return $this->quickCraftSlots;
 	}
 	
 }
