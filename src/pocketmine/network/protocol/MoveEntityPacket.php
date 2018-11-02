@@ -48,6 +48,13 @@ class MoveEntityPacket extends PEPacket{
 	public function decode($playerProtocol){
 		$this->getHeader($playerProtocol);
 		$this->eid = $this->getVarInt();
+		if ($playerProtocol >= Info::PROTOCOL_273) {
+			if ($playerProtocol >= Info::PROTOCOL_274) {
+				$this->getByte();
+			} else {
+				$this->getLShort();
+			}
+		} 		
 		$this->x = $this->getLFloat();
 		$this->y = $this->getLFloat();
 		$this->z = $this->getLFloat();
