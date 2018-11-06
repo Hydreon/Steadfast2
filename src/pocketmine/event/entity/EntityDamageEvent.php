@@ -103,7 +103,7 @@ class EntityDamageEvent extends EntityEvent implements Cancellable{
 			$enchantments = $entity->getProtectionEnchantments();
 			if (!is_null($enchantments[Enchantment::TYPE_ARMOR_PROTECTION])) {			
 				$armorProtection = $enchantments[Enchantment::TYPE_ARMOR_PROTECTION];
-				$dmg = max(0, (isset($this->modifiers[self::MODIFIER_BASE]) ? $this->modifiers[self::MODIFIER_BASE] : 0) + (isset($this->modifiers[self::MODIFIER_BASE]) ? $this->modifiers[self::MODIFIER_ARMOR] : 0));
+				$dmg = max(0, (isset($this->modifiers[self::MODIFIER_BASE]) ? $this->modifiers[self::MODIFIER_BASE] : 0) + (isset($this->modifiers[self::MODIFIER_ARMOR]) ? $this->modifiers[self::MODIFIER_ARMOR] : 0));
 				$this->setDamage(-1 * $dmg * $armorProtection, self::MODIFIER_EFFECT_PROTECTION);
 			}
 			
