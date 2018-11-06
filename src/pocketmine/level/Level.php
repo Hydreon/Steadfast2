@@ -1470,7 +1470,7 @@ class Level implements ChunkManager, Metadatable{
 			$hand = $item->getBlock();
 			$hand->position($block);
 		}elseif($block->getId() === Item::FIRE){
-			$block->onUpdate(self::BLOCK_UPDATE_TOUCH);
+			$block->onUpdate(self::BLOCK_UPDATE_TOUCH, 0);
 			return false;
 		}else{
 			return false;
