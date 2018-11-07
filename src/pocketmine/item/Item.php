@@ -1094,6 +1094,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::SLIME_BLOCK, 0));
 		
 		self::addCreativeItem(Item::get(Item::HAY_BALE, 0));
+		self::addCreativeItem(Item::get(Item::BONE_BLOCK, 0));
 		self::addCreativeItem(Item::get(Item::NETHER_BRICKS, 0));
 		
 		self::addCreativeItem(Item::get(Item::WOOL, 0));
