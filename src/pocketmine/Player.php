@@ -3985,7 +3985,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->x = $this->x;
 		$pk->y = $this->y;
 		$pk->z = $this->z;
-		$pk->entityType = $noteId;
+		$pk->customData = $noteId;
 		$this->directDataPacket($pk);
 	}
 		
