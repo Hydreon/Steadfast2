@@ -740,7 +740,9 @@ class CraftingManager{
 			$this->registerRecipe((new BigShapelessRecipe(Item::get($block, 0, 1)))->addIngredient(Item::get($ingot, 0, 9)));
 			$this->registerRecipe((new ShapelessRecipe(Item::get($ingot, 0, 9)))->addIngredient(Item::get($block, 0, 1)));
 		}
-
+		
+		$this->registerRecipe((new BigShapelessRecipe(Item::get(Item::BONE_BLOCK, 0, 1)))->addIngredient(Item::get(Item::DYE, 15, 9)));
+		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 15, 9)))->addIngredient(Item::get(Item::BONE_BLOCK, 0, 1)));
 
 		$this->registerRecipe((new BigShapelessRecipe(Item::get(Item::LAPIS_BLOCK, 0, 1)))->addIngredient(Item::get(Item::DYE, 4, 9)));
 		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 4, 9)))->addIngredient(Item::get(Item::LAPIS_BLOCK, 0, 1)));
