@@ -79,25 +79,27 @@ class ChestInventory extends ContainerInventory {
  		$who->sendSound(LevelSoundEventPacket::SOUND_CHEST_CLOSED, $position);
 	}
 	
-	public function setItem($index, Item $item) {
-		$isShouldUpdateBlock = $item->getId() != Item::AIR && !$item->equals($this->getItem($index));
-		if (parent::setItem($index, $item)) {
-			if (!is_null($this->holder->level)) {
-				if ($isShouldUpdateBlock) {
-					$this->holder->getBlock()->onUpdate(Level::BLOCK_UPDATE_WEAK, 0);
-				}			
-				static $offsets = [
-					[1, 0, 0],
-					[-1, 0, 0],
-					[0, 0, -1],
-					[0, 0, 1],
-				];
-				$tmpVector = new Vector3(0, 0, 0);
-				foreach ($offsets as $offset) {
-					$tmpVector->setComponents($this->holder->x + $offset[0], $this->holder->y, $this->holder->z + $offset[2]);
-					if ($this->holder->level->getBlockIdAt($tmpVector->x, $tmpVector->y, $tmpVector->z) == Block::REDSTONE_COMPARATOR_BLOCK) {
-						$comparator = $this->holder->level->getBlock($tmpVector);
-						$comparator->onUpdate(Level::BLOCK_UPDATE_NORMAL,  0);
+	public function setItem($index, Item $item, $needCheckComporator = true) {		
+		if (parent::setItem($index, $item)) {	
+			if ($needCheckComporator) {
+				if (!is_null($this->holder->level)) {
+					$isShouldUpdateBlock = $item->getId() != Item::AIR && !$item->equals($this->getItem($index));
+					if ($isShouldUpdateBlock) {
+						$this->holder->getBlock()->onUpdate(Level::BLOCK_UPDATE_WEAK, 0);
+					}			
+					static $offsets = [
+						[1, 0, 0],
+						[-1, 0, 0],
+						[0, 0, -1],
+						[0, 0, 1],
+					];
+					$tmpVector = new Vector3(0, 0, 0);
+					foreach ($offsets as $offset) {
+						$tmpVector->setComponents($this->holder->x + $offset[0], $this->holder->y, $this->holder->z + $offset[2]);
+						if ($this->holder->level->getBlockIdAt($tmpVector->x, $tmpVector->y, $tmpVector->z) == Block::REDSTONE_COMPARATOR_BLOCK) {
+							$comparator = $this->holder->level->getBlock($tmpVector);
+							$comparator->onUpdate(Level::BLOCK_UPDATE_NORMAL,  0);
+						}
 					}
 				}
 			}
