@@ -159,9 +159,9 @@ abstract class Projectile extends Entity {
 				$this->kill();
 				return true;
 			}
-			if ($nearBlock !== null) {
+			if ($nearBlock !== null && $nearBlockDistance < 0.3) {
 				$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
-				$this->kill();
+				$this->onShootBlock();
 				return true;
 			}
 			// if doesnt hit neither entity nor block
@@ -186,6 +186,10 @@ abstract class Projectile extends Entity {
 			$this->updateMovement();
 		}
 		return $hasUpdate;
+	}
+	
+	protected function onShootBlock() {
+		$this->kill();
 	}
 
 	public function spawnTo(Player $player) {
