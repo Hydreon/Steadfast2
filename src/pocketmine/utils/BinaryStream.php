@@ -3,7 +3,7 @@
 namespace pocketmine\utils;
 
 use pocketmine\item\Item;
-use pocketmine\network\protocol\Info;
+use pocketmine\nbt\NBT;
 
 class BinaryStream extends \MCBinaryStream {
 
@@ -68,6 +68,14 @@ class BinaryStream extends \MCBinaryStream {
 		$nbt = "";		
 		if ($nbtLen > 0) {
 			$nbt = $this->get($nbtLen);
+		} elseif($nbtLen == -1) {
+			$nbtCount = $this->getVarInt();
+			for ($i = 0; $i < $nbtCount; $i++) {
+				$nbtTag = new NBT(NBT::LITTLE_ENDIAN);
+				$nbtTag->read(substr($this->buffer, $this->offset), false, true);
+				$nbt = $nbtTag->getData();
+				$this->offset += $nbtTag->getOffset();
+			}
 		}
 		// $this->offset += 2;
 		$this->get(2);

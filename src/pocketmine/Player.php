@@ -362,6 +362,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	/** @var CustomUI[] */
 	protected $activeModalWindows = [];
+	/** @var integer */
+	protected $lastShowModalTick = 0;
 	
 	protected $isTeleporting = false;
 	/** @var Player[] */
@@ -4648,7 +4650,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->formId = $this->lastModalId++;
 			$pk->data = $modalWindow->toJSON();
 			$this->dataPacket($pk);
-			$this->activeModalWindows[$pk->formId] = $modalWindow; 
+			$this->activeModalWindows[$pk->formId] = $modalWindow;
 			return true;
 		}
 		return false;
@@ -4660,6 +4662,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @return boolean
 	 */
 	protected function isNeedTosendModal($window) {
+		if ($this->lastUpdate - $this->lastShowModalTick > 60) {
+			$this->activeModalWindows = [];
+			$this->lastShowModalTick = $this->lastUpdate;
+			return true;
+		}
 		if (!empty($this->activeModalWindows)) {
 			$windowData = $window->toJSON();
 			foreach ($this->activeModalWindows as $formId => $form) {
