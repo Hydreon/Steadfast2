@@ -31,13 +31,19 @@ class LongTag extends NamedTag{
 		return NBT::TAG_Long;
 	}
 
-	public function read(NBT $nbt){
-//		$this->value = $nbt->endianness === 1 ? Binary::readLong($nbt->get(8)) : Binary::readLLong($nbt->get(8));
-		$this->value = $nbt->getLong();
+	public function read(NBT $nbt, $new = false){
+		if ($new) {
+			$this->value = $nbt->getNewInt();
+		} else {
+			$this->value = $nbt->getLong();
+		}
 	}
 
-	public function write(NBT $nbt){
-//		$nbt->buffer .= $nbt->endianness === 1 ? Binary::writeLong($this->value) : Binary::writeLLong($this->value);
-		$nbt->putLong($this->value);
+	public function write(NBT $nbt, $old = false){
+		if ($old) {
+			$nbt->putLong($this->value);
+		} else {
+			$nbt->putInt($this->value);
+		}
 	}
 }
