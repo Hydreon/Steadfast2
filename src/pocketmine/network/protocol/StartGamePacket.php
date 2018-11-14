@@ -77,7 +77,7 @@ class StartGamePacket extends PEPacket{
 		$this->putSignedVarInt($this->spawnX);
 		$this->putVarInt($this->spawnY);
 		$this->putSignedVarInt($this->spawnZ);
-		
+
 		$this->putByte(1); // hasAchievementsDisabled
 		
 		$this->putSignedVarInt(0); // DayCycleStopTyme 1x VarInt
@@ -91,11 +91,15 @@ class StartGamePacket extends PEPacket{
 		$this->putLFloat(0); //rain level
 
 		$this->putLFloat(0); //lightning level
-		
+
 		if ($playerProtocol >= Info::PROTOCOL_120) {
 			$this->putByte(1); // is multiplayer game
 			$this->putByte(1); // Broadcast to LAN?
 			$this->putByte(1); // Broadcast to XBL?
+			if ($playerProtocol >= Info::PROTOCOL_330) {
+				$this->putByte(1); // unknown
+			}
+			
 		}
 				
 		$this->putByte(1);	// commands enabled
@@ -120,7 +124,10 @@ class StartGamePacket extends PEPacket{
 				}
 				
 			}
-			$this->putByte(0); // is bonus chest enabled
+
+			if ($playerProtocol < Info::PROTOCOL_330) {
+				$this->putByte(0); // is bonus chest enabled
+			}
 			$this->putByte(0); // is start with map enabled
 			$this->putByte(0); // has trust players enabled
 			$this->putSignedVarInt(1); // permission level
@@ -132,15 +139,17 @@ class StartGamePacket extends PEPacket{
 			if ($playerProtocol >= Info::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
 				$this->putByte(0); // Has locked behavior pack?
 				$this->putByte(0); // Has locked resource pack?
-				$this->putByte(0); // Is from locked template?
-				if ($playerProtocol >= Info::PROTOCOL_290) {
-					$this->putByte(0); // Use Msa Gamertags Only?
+				if ($playerProtocol < Info::PROTOCOL_330) {
+					$this->putByte(0); // Is from locked template?
+					if ($playerProtocol >= Info::PROTOCOL_290) {
+						$this->putByte(0); // Use Msa Gamertags Only?
+					}
+					if ($playerProtocol >= Info::PROTOCOL_311) {
+						$this->putByte(0); // Is From World Template?
+						$this->putByte(0); // Is World Template Option Locked?
+					}
 				}
-				if ($playerProtocol >= Info::PROTOCOL_311) {
-					$this->putByte(0); // Is From World Template?
-					$this->putByte(0); // Is World Template Option Locked?
-				}
-			}
+			}						
 			// level settings end
 			$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
 			$this->putString(''); // level name

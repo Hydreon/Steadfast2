@@ -528,7 +528,7 @@ class NBT{
 				break;
 			case NBT::TAG_Long:
 				$tag = new LongTag($this->checkGetString($new));
-				$tag->read($this);
+				$tag->read($this, $new);
 				break;
 			case NBT::TAG_Float:
 				$tag = new FloatTag($this->checkGetString($new));
@@ -755,6 +755,10 @@ class NBT{
 	 */
 	public function setData($data){
 		$this->data = $data;
+	}
+	
+	public function getOffset() {
+		return $this->offset;
 	}
 
 }
