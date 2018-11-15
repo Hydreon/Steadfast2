@@ -32,6 +32,8 @@ abstract class Solid extends Block{
 	const POWERED_WEAKLY = 1;
 	const POWERED_STRONGLY = 2;
 	
+	protected $poweredStateDefined = false;
+
 	public function isSolid() {
 		return true;
 	}
@@ -59,7 +61,6 @@ abstract class Solid extends Block{
 			self::DISPENSER,
 			self::PISTON,
 			self::STICKY_PISTON,
-			self::IRON_TRAPDOOR,
 			self::REDSTONE_REPEATER_BLOCK,
 			self::REDSTONE_REPEATER_BLOCK_ACTIVE,
 		];
@@ -68,7 +69,7 @@ abstract class Solid extends Block{
 		foreach ($offsets as $offset) {
 			$tmpVector->setComponents($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
 			$block = $this->level->getBlock($tmpVector);
-			if (in_array($block->getId(), $shouldUpdateBlocks)) {
+			if (in_array($block->getId(), $shouldUpdateBlocks) || ($block->getId() == self::IRON_TRAPDOOR && $this->poweredStateDefined)) {
 				$ev = new BlockUpdateEvent($block);
 				$pluginManager->callEvent($ev);
 				if(!$ev->isCancelled()){
@@ -89,6 +90,7 @@ abstract class Solid extends Block{
 			Vector3::SIDE_SOUTH => [0, 0, 1],
 			Vector3::SIDE_NORTH => [0, 0, -1],
 		];
+		$this->poweredStateDefined = true;
 		$poweredState = self::POWERED_NONE;
 		foreach ($offsets as $side => $offset) {
 			$blockId = $this->level->getBlockIdAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
