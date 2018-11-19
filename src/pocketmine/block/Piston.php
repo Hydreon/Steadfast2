@@ -154,7 +154,7 @@ class Piston extends Solid {
 				}
 			}
 		} else {
-			echo "Class: " . get_class($this) . " X: " . $this->x . " Z: " . $this->z . " Meta: " . $this->meta . PHP_EOL;
+//			echo "Class: " . get_class($this) . " X: " . $this->x . " Z: " . $this->z . " Meta: " . $this->meta . PHP_EOL;
 		}
 //		$pistonTile = $this->level->getTile($this);
 //		echo "X: " . $this->x . " Z: " . $this->z . " Charge: " . ($pistonTile->namedtag['HaveCharge'] ? "true" : "false") . PHP_EOL;

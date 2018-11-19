@@ -2,6 +2,8 @@
 
 namespace pocketmine\block;
 
+use pocketmine\item\Item;
+
 class PistonHead extends Transparent {
 
 	protected $id = self::PISTON_HEAD;
@@ -14,4 +16,7 @@ class PistonHead extends Transparent {
 		return false;
 	}
 	
+	public function getDrops(Item $item){
+		return [];
+	}
 }
