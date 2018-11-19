@@ -72,14 +72,13 @@ class BinaryStream extends \MCBinaryStream {
 			$nbtCount = $this->getVarInt();
 			for ($i = 0; $i < $nbtCount; $i++) {
 				$nbtTag = new NBT(NBT::LITTLE_ENDIAN);
-				$nbtTag->read(substr($this->buffer, $this->offset), false, true);
+				$offset = $this->getOffset();
+				$nbtTag->read(substr($this->getBuffer(), $offset), false, true);
 				$nbt = $nbtTag->getData();
-				$this->offset += $nbtTag->getOffset();
+				$this->setOffset($offset + $nbtTag->getOffset());
 			}
 		}
-		// $this->offset += 2;
 		$this->get(2);
-		
 		return Item::get($id, $meta, $count, $nbt);
 	}
 
