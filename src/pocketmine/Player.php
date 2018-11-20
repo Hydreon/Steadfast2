@@ -858,6 +858,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 				}
 			}
+			$this->setInteractButtonText('', true);
 			$this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));
 			if (!is_null($this->beforeSpawnViewRadius)) {
 				$this->setViewRadius($this->beforeSpawnViewRadius);
@@ -5228,8 +5229,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 	}
 	
-	public function setInteractButtonText($text) {
-		if ($this->interactButtonText != $text) {
+	public function setInteractButtonText($text, $force = false) {
+		if ($force || $this->interactButtonText != $text) {
 			$this->interactButtonText = $text;
 			$pk = new SetEntityDataPacket();
 			$pk->eid = $this->id;
