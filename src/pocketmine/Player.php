@@ -383,6 +383,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $foodTick = 0;
 	/** @var boolean */ 
 	protected $hungerEnabled = true;
+	protected $interactButtonText= '';
 	protected $isFlying = false;
 	
 	protected $beforeSpawnViewRadius = null;
@@ -853,6 +854,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					}
 				}
 			}
+			$this->setInteractButtonText('', true);
 			$this->server->getPluginManager()->callEvent($ev = new PlayerJoinEvent($this, ""));
 			if (!is_null($this->beforeSpawnViewRadius)) {
 				$this->setViewRadius($this->beforeSpawnViewRadius);
@@ -5111,6 +5113,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->type = PlayerListPacket::TYPE_ADD;
 			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->getSkinName(), $this->getSkinData(), $this->getCapeData(), $this->getSkinGeometryName(), $this->getSkinGeometryData()];
 			$this->server->batchPackets($otherPlayers, [$pk]);
+		}
+	}
+	
+	public function setInteractButtonText($text, $force = false) {
+		if ($force || $this->interactButtonText != $text) {
+			$this->interactButtonText = $text;
+			$pk = new SetEntityDataPacket();
+			$pk->eid = $this->id;
+			$pk->metadata = [self::DATA_BUTTON_TEXT => [self::DATA_TYPE_STRING, $this->interactButtonText]];
+			$this->dataPacket($pk);
 		}
 	}
 	
