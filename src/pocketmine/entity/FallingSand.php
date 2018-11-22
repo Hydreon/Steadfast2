@@ -157,8 +157,6 @@ class FallingSand extends Entity{
 	public function spawnTo(Player $player) {
 		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
 			$this->hasSpawned[$player->getId()] = $player;
-			$pallet = PEPacket::getPallet($player->getPlayerProtocol());
-			$meta = [ self::DATA_ANIMAL_VARIANT => [self::DATA_TYPE_INT, $pallet->getBlockRuntimeIDByData($this->blockId, $this->damage)]];
 			$pk = new AddEntityPacket();
 			$pk->type = FallingSand::NETWORK_ID;
 			$pk->eid = $this->getId();
@@ -170,7 +168,10 @@ class FallingSand extends Entity{
 			$pk->speedZ = $this->motionZ;
 			$pk->yaw = $this->yaw;
 			$pk->pitch = $this->pitch;
-			$pk->metadata = $meta;
+			$pallet = PEPacket::getPallet($player->getPlayerProtocol());
+			if (!is_null($pallet)) { // for version higher than 1.1
+				$pk->metadata = [ self::DATA_ANIMAL_VARIANT => [self::DATA_TYPE_INT, $pallet->getBlockRuntimeIDByData($this->blockId, $this->damage)]];
+			}
 			$player->dataPacket($pk);
 		}
 	}
