@@ -26,6 +26,12 @@ namespace pocketmine\network\protocol;
 class StartGamePacket extends PEPacket{
 	const NETWORK_ID = Info::START_GAME_PACKET;
 	const PACKET_NAME = "START_GAME_PACKET";
+	
+	const BROADCAST_SETTINGS_NO_MULTI_PLAY = 0;
+	const BROADCAST_SETTINGS_INVITE_ONLY = 1;
+	const BROADCAST_SETTINGS_FRIENDS_ONLY = 2;
+	const BROADCAST_SETTINGS_FRIENDS_OF_FRIENDS = 3;
+	const BROADCAST_SETTINGS_PUBLIC = 4;
 
 	public $seed;
 	public $dimension;
@@ -95,9 +101,11 @@ class StartGamePacket extends PEPacket{
 		if ($playerProtocol >= Info::PROTOCOL_120) {
 			$this->putByte(1); // is multiplayer game
 			$this->putByte(1); // Broadcast to LAN?
-			$this->putByte(1); // Broadcast to XBL?
 			if ($playerProtocol >= Info::PROTOCOL_330) {
-				$this->putByte(1); // unknown
+				$this->putSignedVarInt(self::BROADCAST_SETTINGS_FRIENDS_OF_FRIENDS); // XBox Live Broadcast setting
+				$this->putSignedVarInt(self::BROADCAST_SETTINGS_FRIENDS_OF_FRIENDS); // Platform Broadcast setting
+			} else {
+				$this->putByte(1); // Broadcast to XBL?
 			}
 			
 		}
@@ -125,31 +133,33 @@ class StartGamePacket extends PEPacket{
 				
 			}
 
-			if ($playerProtocol < Info::PROTOCOL_330) {
-				$this->putByte(0); // is bonus chest enabled
-			}
+			$this->putByte(0); // is bonus chest enabled
 			$this->putByte(0); // is start with map enabled
-			$this->putByte(0); // has trust players enabled
+			if ($playerProtocol < Info::PROTOCOL_330) {
+				$this->putByte(0); // has trust players enabled
+			}
 			$this->putSignedVarInt(1); // permission level
-			$this->putSignedVarInt(4); // game publish setting
+			if ($playerProtocol < Info::PROTOCOL_330) {
+				$this->putSignedVarInt(4); // game publish setting
+			}
 			$this->putLInt(0); // server chunk tick range
-			$this->putByte(0); // can platform broadcast
-			$this->putSignedVarInt(0); // Broadcast mode
-			$this->putByte(0); // XBL Broadcast intent
+			if ($playerProtocol < Info::PROTOCOL_330) {
+				$this->putByte(0); // can platform broadcast
+				$this->putSignedVarInt(0); // Broadcast mode
+				$this->putByte(0); // XBL Broadcast intent
+			}
 			if ($playerProtocol >= Info::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
 				$this->putByte(0); // Has locked behavior pack?
 				$this->putByte(0); // Has locked resource pack?
-				if ($playerProtocol < Info::PROTOCOL_330) {
-					$this->putByte(0); // Is from locked template?
-					if ($playerProtocol >= Info::PROTOCOL_290) {
-						$this->putByte(0); // Use Msa Gamertags Only?
-					}
-					if ($playerProtocol >= Info::PROTOCOL_311) {
-						$this->putByte(0); // Is From World Template?
-						$this->putByte(0); // Is World Template Option Locked?
-					}
+				$this->putByte(0); // Is from locked template?
+				if ($playerProtocol >= Info::PROTOCOL_290) {
+					$this->putByte(0); // Use Msa Gamertags Only?
 				}
-			}						
+				if ($playerProtocol >= Info::PROTOCOL_311) {
+					$this->putByte(0); // Is From World Template?
+					$this->putByte(0); // Is World Template Option Locked?
+				}
+			}
 			// level settings end
 			$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
 			$this->putString(''); // level name
