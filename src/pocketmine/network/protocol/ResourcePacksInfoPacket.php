@@ -48,6 +48,7 @@ class ResourcePacksInfoPacket extends PEPacket {
 				$this->putString('');
 			}
 		}
+		$this->putByte(0); // ???
 	}
 
 }
