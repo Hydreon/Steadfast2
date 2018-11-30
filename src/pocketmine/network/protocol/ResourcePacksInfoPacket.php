@@ -37,6 +37,9 @@ class ResourcePacksInfoPacket extends PEPacket {
 				$this->putString('');
 			}
 		}
+		if ($playerProtocol >= Info::PROTOCOL_331) {
+			$this->putByte(0); // ???
+		}
 		$this->putLShort(count($this->resourcePacks));
 		foreach ($this->resourcePacks as $resourcePack) {
 			$this->putString($resourcePack->id);
@@ -48,7 +51,9 @@ class ResourcePacksInfoPacket extends PEPacket {
 				$this->putString('');
 			}
 		}
-		$this->putByte(0); // ???
+		if ($playerProtocol >= Info::PROTOCOL_331) {
+			$this->putByte(0); // ???
+		}
 	}
 
 }
