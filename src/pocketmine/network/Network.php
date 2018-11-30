@@ -50,6 +50,7 @@ use pocketmine\network\protocol\HurtArmorPacket;
 use pocketmine\network\protocol\Info110 as ProtocolInfo110;
 use pocketmine\network\protocol\Info120 as ProtocolInfo120;
 use pocketmine\network\protocol\Info310 as ProtocolInfo310;
+use pocketmine\network\protocol\Info331 as ProtocolInfo331;
 use pocketmine\network\protocol\InteractPacket;
 use pocketmine\network\protocol\LevelEventPacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
@@ -114,6 +115,8 @@ class Network {
 	private $packetPool120;
 	/** @var \SplFixedArray */
 	private $packetPool310;
+	/** @var \SplFixedArray */
+	private $packetPool331;
 
 	/** @var Server */
 	private $server;
@@ -133,6 +136,7 @@ class Network {
 		$this->registerPackets110();
 		$this->registerPackets120();
 		$this->registerPackets310();
+		$this->registerPackets331();
 		$this->server = $server;
 	}
 
@@ -249,6 +253,14 @@ class Network {
 		$this->packetPool310[$id] = new $class;
 	}
 	
+	/**
+	 * @param int        $id 0-255
+	 * @param DataPacket $class
+	 */
+	public function registerPacket331($id, $class){
+		$this->packetPool331[$id] = new $class;
+	}
+	
 	public function getServer(){
 		return $this->server;
 	}
@@ -261,6 +273,9 @@ class Network {
 	public function getPacket($id, $playerProtocol){
 		/** @var DataPacket $class */
 		switch ($playerProtocol) {
+			case Info::PROTOCOL_331:
+				$class = $this->packetPool331[$id];
+				break;
 			case Info::PROTOCOL_310:
 			case Info::PROTOCOL_311:
 			case Info::PROTOCOL_330:
@@ -292,6 +307,7 @@ class Network {
 	
 	public static function getChunkPacketProtocol($playerProtocol){
 		switch ($playerProtocol) {
+			case Info::PROTOCOL_331:
 			case Info::PROTOCOL_330:
 			case Info::PROTOCOL_311:
 			case Info::PROTOCOL_310:
@@ -533,5 +549,73 @@ class Network {
 		$this->registerPacket310(ProtocolInfo310::LEVEL_SOUND_EVENT_PACKET, LevelSoundEventPacket::class);	
 		$this->registerPacket310(ProtocolInfo310::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET, NetworkChunkPublisherUpdatePacket::class);	
 		$this->registerPacket310(ProtocolInfo310::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
+	}
+	
+	private function registerPackets331() {
+		$this->packetPool331 = new \SplFixedArray(256);
+		$this->registerPacket331(ProtocolInfo331::PLAY_STATUS_PACKET, PlayStatusPacket::class);
+		$this->registerPacket331(ProtocolInfo331::DISCONNECT_PACKET, DisconnectPacket::class);
+		$this->registerPacket331(ProtocolInfo331::TEXT_PACKET, TextPacket::class);
+		$this->registerPacket331(ProtocolInfo331::SET_TIME_PACKET, SetTimePacket::class);
+		$this->registerPacket331(ProtocolInfo331::START_GAME_PACKET, StartGamePacket::class);
+		$this->registerPacket331(ProtocolInfo331::ADD_PLAYER_PACKET, AddPlayerPacket::class);
+		$this->registerPacket331(ProtocolInfo331::ADD_ENTITY_PACKET, AddEntityPacket::class);
+		$this->registerPacket331(ProtocolInfo331::REMOVE_ENTITY_PACKET, RemoveEntityPacket::class);
+		$this->registerPacket331(ProtocolInfo331::ADD_ITEM_ENTITY_PACKET, AddItemEntityPacket::class);
+		$this->registerPacket331(ProtocolInfo331::TAKE_ITEM_ENTITY_PACKET, TakeItemEntityPacket::class);
+		$this->registerPacket331(ProtocolInfo331::MOVE_ENTITY_PACKET, MoveEntityPacket::class);
+		$this->registerPacket331(ProtocolInfo331::MOVE_PLAYER_PACKET, MovePlayerPacket::class);
+		$this->registerPacket331(ProtocolInfo331::UPDATE_BLOCK_PACKET, UpdateBlockPacket::class);
+		$this->registerPacket331(ProtocolInfo331::ADD_PAINTING_PACKET, AddPaintingPacket::class);
+		$this->registerPacket331(ProtocolInfo331::EXPLODE_PACKET, ExplodePacket::class);
+		$this->registerPacket331(ProtocolInfo331::LEVEL_EVENT_PACKET, LevelEventPacket::class);
+		$this->registerPacket331(ProtocolInfo331::TILE_EVENT_PACKET, TileEventPacket::class);
+		$this->registerPacket331(ProtocolInfo331::ENTITY_EVENT_PACKET, EntityEventPacket::class);
+		$this->registerPacket331(ProtocolInfo331::MOB_EQUIPMENT_PACKET, MobEquipmentPacket::class);
+		$this->registerPacket331(ProtocolInfo331::MOB_ARMOR_EQUIPMENT_PACKET, MobArmorEquipmentPacket::class);
+		$this->registerPacket331(ProtocolInfo331::INTERACT_PACKET, InteractPacket::class);
+		$this->registerPacket331(ProtocolInfo331::PLAYER_ACTION_PACKET, PlayerActionPacket::class);
+		$this->registerPacket331(ProtocolInfo331::HURT_ARMOR_PACKET, HurtArmorPacket::class);
+		$this->registerPacket331(ProtocolInfo331::SET_ENTITY_DATA_PACKET, SetEntityDataPacket::class);
+		$this->registerPacket331(ProtocolInfo331::SET_ENTITY_MOTION_PACKET, SetEntityMotionPacket::class);
+		$this->registerPacket331(ProtocolInfo331::SET_ENTITY_LINK_PACKET, SetEntityLinkPacket::class);
+		$this->registerPacket331(ProtocolInfo331::SET_SPAWN_POSITION_PACKET, SetSpawnPositionPacket::class);
+		$this->registerPacket331(ProtocolInfo331::ANIMATE_PACKET, AnimatePacket::class);
+		$this->registerPacket331(ProtocolInfo331::RESPAWN_PACKET, RespawnPacket::class);
+		$this->registerPacket331(ProtocolInfo331::CONTAINER_OPEN_PACKET, ContainerOpenPacket::class);
+		$this->registerPacket331(ProtocolInfo331::CONTAINER_CLOSE_PACKET, ContainerClosePacket::class);
+		$this->registerPacket331(ProtocolInfo331::CONTAINER_SET_DATA_PACKET, ContainerSetDataPacket::class);
+		$this->registerPacket331(ProtocolInfo331::CRAFTING_DATA_PACKET, CraftingDataPacket::class);
+		$this->registerPacket331(ProtocolInfo331::CRAFTING_EVENT_PACKET, CraftingEventPacket::class);
+		$this->registerPacket331(ProtocolInfo331::ADVENTURE_SETTINGS_PACKET, AdventureSettingsPacket::class);
+		$this->registerPacket331(ProtocolInfo331::TILE_ENTITY_DATA_PACKET, TileEntityDataPacket::class);
+		$this->registerPacket331(ProtocolInfo331::FULL_CHUNK_DATA_PACKET, FullChunkDataPacket::class);
+		$this->registerPacket331(ProtocolInfo331::SET_COMMANDS_ENABLED_PACKET, SetCommandsEnabledPacket::class);
+		$this->registerPacket331(ProtocolInfo331::SET_DIFFICULTY_PACKET, SetDifficultyPacket::class);
+		$this->registerPacket331(ProtocolInfo331::PLAYER_LIST_PACKET, PlayerListPacket::class);
+		$this->registerPacket331(ProtocolInfo331::REQUEST_CHUNK_RADIUS_PACKET, RequestChunkRadiusPacket::class);
+		$this->registerPacket331(ProtocolInfo331::CHUNK_RADIUS_UPDATE_PACKET, ChunkRadiusUpdatePacket::class);
+		$this->registerPacket331(ProtocolInfo331::AVAILABLE_COMMANDS_PACKET, AvailableCommandsPacket::class);
+		$this->registerPacket331(ProtocolInfo331::TRANSFER_PACKET, TransferPacket::class);
+		$this->registerPacket331(ProtocolInfo331::CLIENT_TO_SERVER_HANDSHAKE_PACKET, ClientToServerHandshakePacket::class);
+		$this->registerPacket331(ProtocolInfo331::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
+		$this->registerPacket331(ProtocolInfo331::RESOURCE_PACKS_INFO_PACKET, ResourcePackDataInfoPacket::class);
+		$this->registerPacket331(ProtocolInfo331::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
+		$this->registerPacket331(ProtocolInfo331::RESOURCE_PACK_CHUNK_REQUEST_PACKET, ResourcePackChunkRequestPacket::class);
+		$this->registerPacket331(ProtocolInfo331::PLAYER_INPUT_PACKET, PlayerInputPacket::class);
+		$this->registerPacket331(ProtocolInfo331::MAP_INFO_REQUEST_PACKET, MapInfoRequestPacket::class);
+		$this->registerPacket331(ProtocolInfo331::INVENTORY_TRANSACTION_PACKET, InventoryTransactionPacket::class);
+		$this->registerPacket331(ProtocolInfo331::INVENTORY_CONTENT_PACKET, InventoryContentPacket::class);
+		$this->registerPacket331(ProtocolInfo331::PLAYER_HOTBAR_PACKET, PlayerHotbarPacket::class);
+		$this->registerPacket331(ProtocolInfo331::COMMAND_REQUEST_PACKET, CommandRequestPacket::class);
+		$this->registerPacket331(ProtocolInfo331::PLAYER_SKIN_PACKET, PlayerSkinPacket::class);
+		$this->registerPacket331(ProtocolInfo331::MODAL_FORM_RESPONSE_PACKET, ModalFormResponsePacket::class);
+		$this->registerPacket331(ProtocolInfo331::SERVER_SETTINGS_REQUEST_PACKET, ServerSettingsRequestPacket::class);
+		$this->registerPacket331(ProtocolInfo331::PURCHASE_RECEIPT_PACKET, PurchaseReceiptPacket::class);
+		$this->registerPacket331(ProtocolInfo331::SUB_CLIENT_LOGIN_PACKET, SubClientLoginPacket::class);			
+		$this->registerPacket331(ProtocolInfo331::AVAILABLE_ENTITY_IDENTIFIERS_PACKET, AvailableEntityIdentifiersPacket::class);	
+		$this->registerPacket331(ProtocolInfo331::LEVEL_SOUND_EVENT_PACKET, LevelSoundEventPacket::class);	
+		$this->registerPacket331(ProtocolInfo331::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET, NetworkChunkPublisherUpdatePacket::class);	
+		$this->registerPacket331(ProtocolInfo331::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
 	}
 }
