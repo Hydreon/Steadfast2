@@ -80,6 +80,7 @@ class AdventureSettingsPacket extends PEPacket{
 			case Info::PROTOCOL_310:
 			case Info::PROTOCOL_311:
 			case Info::PROTOCOL_330:
+			case Info::PROTOCOL_331:
 				$this->putVarInt($this->actionPermissions);
 				$this->putVarInt($this->permissionLevel);
 				$this->putVarInt($this->customStoredPermissions);
