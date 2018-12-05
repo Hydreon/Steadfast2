@@ -1646,6 +1646,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				2 => [ 'food' => 1, 'saturation' => 0.2 ], // clownfish
 				3 => [ 'food' => 1, 'saturation' => 0.2 ], // pufferfish
 			],
+			Item::COOKED_FISH => [ 'food' => 5, 'saturation' => 6 ],
 			Item::RAW_MUTTON => [ 'food' => 2, 'saturation' => 1.2 ],
 			Item::RAW_PORKCHOP => [ 'food' => 3, 'saturation' => 1.8 ],
 			Item::RAW_RABBIT => [ 'food' => 3, 'saturation' => 1.8 ],
@@ -1743,13 +1744,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
                 file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " UPDATE_ATTRIBUTES_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
                 break;
             case 'ADVENTURE_SETTINGS_PACKET':
-				$isFlying = ($packet->flags >> 9) & 0x01 === 1;
-                $isHacker = ($this->allowFlight === false && $isFlying) || 
-                    (!$this->isSpectator() && ($packet->flags >> 7) & 0x01 === 1);
-                if ($isHacker) {
-                    file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " ADVENTURE_SETTINGS_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
+				if ($this->allowFlight === false && (($packet->flags >> 9) & 0x01 === 1)) { // flying hack
+                    file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " ADVENTURE_SETTINGS_PACKET FLY" . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
+//                    $this->kick("Sorry, hack mods are not permitted on Steadfast... at all.");
+					// it may be not safe
+					$this->setAllowFlight(false);
+                }
+				if (!$this->isSpectator() && (($packet->flags >> 7) & 0x01 === 1)) { // spectator hack
+                    file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " ADVENTURE_SETTINGS_PACKET SPC" . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
                     $this->kick("Sorry, hack mods are not permitted on Steadfast... at all.");
                 }
+				$isFlying = ($packet->flags >> 9) & 0x01 === 1;
 				if ($this->isFlying != $isFlying) {
 					if ($isFlying) {
 						$this->onStartFly();
@@ -3951,7 +3956,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->x = $this->x;
 		$pk->y = $this->y;
 		$pk->z = $this->z;
-		$pk->entityType = $noteId;
+		if ($this->getPlayerProtocol() >= Info::PROTOCOL_311) {
+			// for 1.9.x gap between instruments 256 (1-256 - piano, 257-512 - another one, etc)
+			$pk->customData = $noteId;
+			$pk->entityType = MultiversionEntity::ID_NONE;
+		} else {
+			$pk->entityType = $noteId;
+		}
 		$this->directDataPacket($pk);
 	}
 		
