@@ -3956,7 +3956,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->x = $this->x;
 		$pk->y = $this->y;
 		$pk->z = $this->z;
-		$pk->entityType = $noteId;
+		if ($this->getPlayerProtocol() >= Info::PROTOCOL_311) {
+			// for 1.9.x gap between instruments 256 (1-256 - piano, 257-512 - another one, etc)
+			$pk->customData = $noteId;
+			$pk->entityType = MultiversionEntity::ID_NONE;
+		} else {
+			$pk->entityType = $noteId;
+		}
 		$this->directDataPacket($pk);
 	}
 		
