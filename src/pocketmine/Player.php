@@ -1646,6 +1646,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				2 => [ 'food' => 1, 'saturation' => 0.2 ], // clownfish
 				3 => [ 'food' => 1, 'saturation' => 0.2 ], // pufferfish
 			],
+			Item::COOKED_FISH => [ 'food' => 5, 'saturation' => 6 ],
 			Item::RAW_MUTTON => [ 'food' => 2, 'saturation' => 1.2 ],
 			Item::RAW_PORKCHOP => [ 'food' => 3, 'saturation' => 1.8 ],
 			Item::RAW_RABBIT => [ 'food' => 3, 'saturation' => 1.8 ],
