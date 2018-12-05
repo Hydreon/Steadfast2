@@ -98,6 +98,10 @@ class StartGamePacket extends PEPacket{
 
 		$this->putLFloat(0); //lightning level
 
+		if ($playerProtocol >= Info::PROTOCOL_332) {
+			$this->putByte(0); // ???
+		}
+		
 		if ($playerProtocol >= Info::PROTOCOL_120) {
 			$this->putByte(1); // is multiplayer game
 			$this->putByte(1); // Broadcast to LAN?
@@ -107,7 +111,6 @@ class StartGamePacket extends PEPacket{
 			} else {
 				$this->putByte(1); // Broadcast to XBL?
 			}
-			
 		}
 				
 		$this->putByte(1);	// commands enabled

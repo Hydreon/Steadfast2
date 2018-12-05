@@ -38,6 +38,7 @@ abstract class Multiversion {
 			case ProtocolInfo::PROTOCOL_311:
 			case ProtocolInfo::PROTOCOL_330:
 			case ProtocolInfo::PROTOCOL_331:
+			case ProtocolInfo::PROTOCOL_332:
 				return new PlayerInventory120($player);
 			default:
 				return new PlayerInventory($player);
