@@ -63,7 +63,11 @@ class LevelSoundEventPacket extends PEPacket {
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
 		$eventId = MultiversionEnums::getLevelSoundEventId($playerProtocol, $this->eventId);
-		$this->putByte($eventId);
+		if ($playerProtocol >= Info::PROTOCOL_332) {
+			$this->putVarInt($eventId);
+		} else {
+			$this->putByte($eventId);
+		}
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);

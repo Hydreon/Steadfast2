@@ -413,7 +413,6 @@ class Block extends Position implements Metadatable{
 		static $map = [
 			"hardness" => "getHardness",
 			"lightLevel" => "getLightLevel",
-			"frictionFactor" => "getFrictionFactor",
 			"name" => "getName",
 			"isPlaceable" => "canBePlaced",
 			"isReplaceable" => "canBeReplaced",
@@ -885,7 +884,7 @@ class Block extends Position implements Metadatable{
 	/**
 	 * @return float
 	 */
-	public function getFrictionFactor(){
+	public static function getFrictionFactor(){
 		return 0.6;
 	}
 
