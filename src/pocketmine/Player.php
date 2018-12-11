@@ -5049,8 +5049,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		
 		$viewers120 = [];
 		$oldViewers = [];
-		$recipients = $this->getViewers();
-		$recipients[] = $this;
+		$recipients = $this->server->getOnlinePlayers();
+		// $recipients[] = $this; // current player is already in the array
 		foreach ($recipients as $viewer) {
 			if ($viewer->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_120) {
 				$viewers120[] = $viewer;
