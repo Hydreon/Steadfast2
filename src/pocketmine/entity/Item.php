@@ -22,7 +22,6 @@
 namespace pocketmine\entity;
 
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\ItemDespawnEvent;
 use pocketmine\event\entity\ItemSpawnEvent;
 use pocketmine\item\Item as ItemItem;
@@ -31,12 +30,12 @@ use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\Network;
 use pocketmine\network\protocol\AddItemEntityPacket;
 use pocketmine\Player;
 use pocketmine\nbt\NBT;
 use pocketmine\level\Level;
 use pocketmine\level\format\FullChunk;
+use pocketmine\block\Block;
 
 class Item extends Entity{
 	const NETWORK_ID = 64;
@@ -51,7 +50,7 @@ class Item extends Entity{
 	public $length = 0.25;
 	public $height = 0.25;
 	protected $gravity = 0.04;
-	protected $drag = 0.15;
+	protected $drag = 0.02;
 
 	public $canCollide = false;
 	
@@ -102,61 +101,58 @@ class Item extends Entity{
 		if($this->closed){
 			return false;
 		}
-
+		if ($this->dead) {
+			$this->despawnFromAll();
+			$this->close();
+			return false;
+		}
 		$tickDiff = $currentTick - $this->lastUpdate;
 		if ($tickDiff < 1) {
 			$tickDiff = 1;
 		}
 		$this->lastUpdate = $currentTick;
-		
-		//$this->timings->startTiming();
-
-		$hasUpdate = $this->entityBaseTick($tickDiff);
-
-		if (!$this->dead) {
-
-			if ($this->pickupDelay > 0 && $this->pickupDelay < 32767) { //Infinite delay
-				$this->pickupDelay -= $tickDiff;
-			}
-
-			
-			if ($this->onGround && $this->motionY <= 0) {
-				$this->motionY = 0;				
+		$this->age += $tickDiff;
+		if ($this->pickupDelay > 0 && $this->pickupDelay < 32767) { //Infinite delay
+			$this->pickupDelay -= $tickDiff;
+		}
+		if ($this->y < 1) {
+			$this->kill();
+			return true;
+		} elseif ($this->age > 1200) {
+			$this->server->getPluginManager()->callEvent($ev = new ItemDespawnEvent($this));
+			if ($ev->isCancelled()) {
+				$this->age = 0;
 			} else {
-				$this->motionY -= $this->gravity;
-				$this->motionY *= 0.96;	
+				$this->kill();
+				return true;
 			}
-			$friction = 1 - $this->drag;	
-			if ($this->onGround && ($this->motionX != 0 || $this->motionZ != 0)) {
-				$friction *= $this->level->getBlock(new Vector3($this->getFloorX(), $this->getFloorY() - 1, $this->getFloorZ()))->getFrictionFactor();
-			}			
+		}
+		if ($this->onGround && $this->motionY <= 0) {
+			$this->motionY = 0;
+		} else {
+			$this->motionY -= $this->gravity;
+			$this->motionY *= 0.96;
+		}
+		if (abs($this->motionX) < 0.001) {
+			$this->motionX = 0;
+		}
+		if (abs($this->motionZ) < 0.001) {
+			$this->motionZ = 0;
+		}
+		if ($this->motionX != 0 || $this->motionZ != 0) {
+			$friction = 1 - $this->drag;
+			if ($this->onGround) {
+				$friction *= Block::getFrictionFactor();
+			}
 			$this->motionX *= $friction;
 			$this->motionZ *= $friction;
-			if ($this->motionX != 0 || $this->motionY != 0 || $this->motionZ != 0) {
-				$this->move($this->motionX, $this->motionY, $this->motionZ);
-				$this->updateMovement();
-				$hasUpdate = true;
-			}
-
-			if ($this->y < 1) {
-				$this->kill();
-				$hasUpdate = true;
-			} else {
-				if ($this->age > 1200) {
-					$this->server->getPluginManager()->callEvent($ev = new ItemDespawnEvent($this));
-					if ($ev->isCancelled()) {
-						$this->age = 0;
-					} else {
-						$this->kill();
-						$hasUpdate = true;
-					}
-				}
-			}			
 		}
-
-		//$this->timings->stopTiming();
-		
-		return $hasUpdate || !$this->onGround;
+		if ($this->motionX != 0 || $this->motionY != 0 || $this->motionZ != 0) {
+			$this->move($this->motionX, $this->motionY, $this->motionZ);
+			$this->updateMovement();
+			return true;
+		}		
+		return !$this->onGround;
 	}
 
 	public function saveNBT(){
@@ -256,6 +252,23 @@ class Item extends Entity{
 			$this->lastZ = $this->z;
 			$this->level->addEntityMovement($this->getViewers(), $this->id, $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
 		}
+	}
+
+	public function move($dx, $dy, $dz) {
+		$this->boundingBox->offset($dx, $dy, $dz);
+		$this->setComponents($this->x + $dx, $this->y + $dy, $this->z + $dz);
+		$this->checkChunks();
+		$blockY = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y - 0.5), floor($this->z)));
+		$this->onGround = !$blockY->isTransparent();
+		$blockX = $this->level->getBlock(new Vector3(floor($this->x + $this->motionX), floor($this->y), floor($this->z)));
+		if (!$blockX->isTransparent()) {
+			$this->motionX = 0;
+		}
+		$blockZ = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y), floor($this->z + $this->motionZ)));
+		if (!$blockZ->isTransparent()) {
+			$this->motionZ = 0;
+		}
+		return true;
 	}
 
 }
