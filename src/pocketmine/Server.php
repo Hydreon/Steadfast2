@@ -1849,6 +1849,28 @@ class Server{
 	}
 
 	/**
+	 * Broadcasts a Minecraft packet to a list of players with delay
+	 *
+	 * @param Player[]   $players
+	 * @param DataPacket $packet
+	 * @param integer $delay
+	 */
+	public static function broadcastDelayedPacket(array $players, DataPacket $packet, $delay = 1) {
+		$readyPackets = [];
+		foreach($players as $player){
+			$protocol = $player->getPlayerProtocol();
+			$subClientId = $player->getSubClientId();
+			$playerIndex = ($protocol << 4) | $subClientId;
+			if (!isset($readyPackets[$playerIndex])) {
+				$packet->senderSubClientID = $subClientId;
+				$packet->encode($protocol);
+				$readyPackets[$playerIndex] = $packet->getBuffer();
+			}
+			$player->addDelayedPacket($readyPackets[$playerIndex], $delay);
+		}
+	}
+
+	/**
 	 * Broadcasts a list of packets in a batch to a list of players
 	 *
 	 * @param Player[]            $players

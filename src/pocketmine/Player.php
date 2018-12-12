@@ -114,6 +114,7 @@ use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\Info as ProtocolInfo;
 use pocketmine\network\protocol\Info;
+use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\PlayerActionPacket;
 use pocketmine\network\protocol\PlayStatusPacket;
 use pocketmine\network\protocol\PlayerListPacket;
@@ -404,7 +405,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
 	protected $isTransfered = false;
 	protected $loginCompleted = false;
-	protected $titleData = [];
+	protected $titleData = []; 
+
+	/** @var string[][] - key - tick, value - packet's buffers array */
+	protected $delayedPackets = [];
 
 	public function getLeaveMessage(){
 		return "";
@@ -1220,65 +1224,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/**
 	 * Sends all the option flags
 	 */
-	public function sendSettings(){
-		/*
-		 bit mask | flag name
-		0x00000001 world_inmutable
-		0x00000002 no_pvp
-		0x00000004 no_pvm
-		0x00000008 no_mvp
-		0x00000010 static_time
-		0x00000020 nametags_visible
-		0x00000040 auto_jump
-		0x00000080 allow_fly
-		0x00000100 noclip
-		0x00000200 ?
-		0x00000400 ?
-		0x00000800 ?
-		0x00001000 ?
-		0x00002000 ?
-		0x00004000 ?
-		0x00008000 ?
-		0x00010000 ?
-		0x00020000 ?
-		0x00040000 ?
-		0x00080000 ?
-		0x00100000 ?
-		0x00200000 ?
-		0x00400000 ?
-		0x00800000 ?
-		0x01000000 ?
-		0x02000000 ?
-		0x04000000 ?
-		0x08000000 ?
-		0x10000000 ?
-		0x20000000 ?
-		0x40000000 ?
-		0x80000000 ?
-		*/
-		$flags = 0;
-		if($this->isAdventure()){
-			$flags |= 0x01; //Do not allow placing/breaking blocks, adventure mode
+	public function sendSettings() {
+		$flags = AdventureSettingsPacket::FLAG_NO_PVM | AdventureSettingsPacket::FLAG_NO_MVP;
+		if ($this->isAdventure()) {
+			$flags |= AdventureSettingsPacket::FLAG_WORLD_IMMUTABLE; //Do not allow placing/breaking blocks, adventure mode
 		}
-
-		/*if($nametags !== false){
-			$flags |= 0x20; //Show Nametags
-		}*/
-
-		if($this->autoJump){
-			$flags |= 0x20;
+		if ($this->autoJump) {
+			$flags |= AdventureSettingsPacket::FLAG_AUTO_JUMP;
 		}
-
-		if($this->allowFlight){
-			$flags |= 0x40;
+		if ($this->allowFlight) {
+			$flags |= AdventureSettingsPacket::FLAG_PLAYER_MAY_FLY;
 		}
-
-		if($this->isSpectator()){
-			$flags |= 0x80;
+		if ($this->isSpectator()) {
+			$flags |= AdventureSettingsPacket::FLAG_PLAYER_NO_CLIP;
 		}
-		
-		$flags |= 0x02;
-		$flags |= 0x04;
 		
 		$pk = new AdventureSettingsPacket();
 		$pk->flags = $flags;
@@ -1447,12 +1406,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 
 		$this->messageCounter = 2;
-
 		$this->lastUpdate = $currentTick;
-
-
-
 		//$this->timings->startTiming();
+
+		// add to queue delayed packets
+		foreach ($this->delayedPackets as $sendTick => $buffers) {
+			if ($currentTick >= $sendTick) {
+				foreach ($buffers as $buffer) {
+					$this->addBufferToPacketQueue($buffer);
+				}
+				unset($this->delayedPackets[$sendTick]);
+			}
+		}
 		
 		if($this->nextChunkOrderRun-- <= 0 or $this->chunk === null){
 			$this->orderChunks();
@@ -1469,7 +1434,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 			//$this->timings->stopTiming();
 			return $this->deadTicks < 10;
-//			return true;
 		}
 		
 		if($this->spawned){
@@ -1488,7 +1452,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->elytraIsActivated = false;
 					}
 				}else{
-					if(!$this->isUseElytra() && !$this->allowFlight && !$this->isSleeping() && !$this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE)){
+					if($this->needAntihackCheck() && !$this->isUseElytra() && !$this->allowFlight && !$this->isSleeping() && !$this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE)){
 						$expectedVelocity = (-$this->gravity) / $this->drag - ((-$this->gravity) / $this->drag) * exp(-$this->drag * ($this->inAirTicks - $this->startAirTicks));
 						$diff = ($this->speed->y - $expectedVelocity) ** 2;
 
@@ -5299,6 +5263,42 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setLastMovePacket($buffer) {
 		$this->lastMoveBuffer = $buffer;
 		$this->countMovePacketInLastTick++;
+	}
+
+	/**
+	 * @param PEPacket[] $packets
+	 */
+	public function sentBatch($packets) {
+		$buffer = '';
+		$protocol = $this->getPlayerProtocol();
+		foreach ($packets as $pk) {
+			$pk->encode($protocol);
+			$pkBuf = $pk->getBuffer();
+			$buffer .= Binary::writeVarInt(strlen($pkBuf)) . $pkBuf;
+		}
+		$pk = new BatchPacket();
+		$pk->payload = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
+		$this->dataPacket($pk);
+	}
+	
+	public function needAntihackCheck() {
+		return true;
+	}
+
+	/**
+	 * @param string $packetBuffer
+	 * @param integer $delay
+	 * @throws Extension
+	 */
+	public function addDelayedPacket($packetBuffer, $delay = 1) {
+		if ($delay < 1) {
+			throw new \Exception("Delay should be positive");
+		}
+		$delayedTick = $this->server->getTick() + $delay;
+		if (!isset($this->delayedPackets[$delayedTick])) {
+			$this->delayedPackets[$delayedTick] = [];
+		}
+		$this->delayedPackets[$delayedTick][] = $packetBuffer;
 	}
 
 }
