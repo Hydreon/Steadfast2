@@ -1452,7 +1452,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$this->elytraIsActivated = false;
 					}
 				}else{
-					if(!$this->isUseElytra() && !$this->allowFlight && !$this->isSleeping() && !$this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE)){
+					if($this->needAntihackCheck() && !$this->isUseElytra() && !$this->allowFlight && !$this->isSleeping() && !$this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE)){
 						$expectedVelocity = (-$this->gravity) / $this->drag - ((-$this->gravity) / $this->drag) * exp(-$this->drag * ($this->inAirTicks - $this->startAirTicks));
 						$diff = ($this->speed->y - $expectedVelocity) ** 2;
 
@@ -5279,6 +5279,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk = new BatchPacket();
 		$pk->payload = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
 		$this->dataPacket($pk);
+	}
+	
+	public function needAntihackCheck() {
+		return true;
 	}
 
 	/**
