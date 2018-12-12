@@ -114,6 +114,7 @@ use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\Info as ProtocolInfo;
 use pocketmine\network\protocol\Info;
+use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\PlayerActionPacket;
 use pocketmine\network\protocol\PlayStatusPacket;
 use pocketmine\network\protocol\PlayerListPacket;
@@ -5299,6 +5300,22 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function setLastMovePacket($buffer) {
 		$this->lastMoveBuffer = $buffer;
 		$this->countMovePacketInLastTick++;
+	}
+
+	/**
+	 * @param PEPacket[] $packets
+	 */
+	public function sentBatch($packets) {
+		$buffer = '';
+		$protocol = $this->getPlayerProtocol();
+		foreach ($packets as $pk) {
+			$pk->encode($protocol);
+			$pkBuf = $pk->getBuffer();
+			$buffer .= Binary::writeVarInt(strlen($pkBuf)) . $pkBuf;
+		}
+		$pk = new BatchPacket();
+		$pk->payload = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
+		$this->dataPacket($pk);
 	}
 
 }
