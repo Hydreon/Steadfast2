@@ -407,6 +407,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $loginCompleted = false;
 	protected $titleData = []; 
 
+	/** @var string[][] - key - tick, value - packet's buffers array */
+	protected $delayedPackets = [];
+
 	public function getLeaveMessage(){
 		return "";
 	}
@@ -1403,12 +1406,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 
 		$this->messageCounter = 2;
-
 		$this->lastUpdate = $currentTick;
-
-
-
 		//$this->timings->startTiming();
+
+		// add to queue delayed packets
+		foreach ($this->delayedPackets as $sendTick => $buffers) {
+			if ($currentTick >= $sendTick) {
+				foreach ($buffers as $buffer) {
+					$this->addBufferToPacketQueue($buffer);
+				}
+				unset($this->delayedPackets[$sendTick]);
+			}
+		}
 		
 		if($this->nextChunkOrderRun-- <= 0 or $this->chunk === null){
 			$this->orderChunks();
@@ -1425,7 +1434,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			}
 			//$this->timings->stopTiming();
 			return $this->deadTicks < 10;
-//			return true;
 		}
 		
 		if($this->spawned){
@@ -5271,6 +5279,22 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk = new BatchPacket();
 		$pk->payload = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
 		$this->dataPacket($pk);
+	}
+
+	/**
+	 * @param string $packetBuffer
+	 * @param integer $delay
+	 * @throws Extension
+	 */
+	public function addDelayedPacket($packetBuffer, $delay = 1) {
+		if ($delay < 1) {
+			throw new \Exception("Delay should be positive");
+		}
+		$delayedTick = $this->server->getTick() + $delay;
+		if (!isset($this->delayedPackets[$delayedTick])) {
+			$this->delayedPackets[$delayedTick] = [];
+		}
+		$this->delayedPackets[$delayedTick][] = $packetBuffer;
 	}
 
 }
