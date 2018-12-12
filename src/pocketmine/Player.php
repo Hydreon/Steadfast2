@@ -405,7 +405,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $commandPermissions = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
 	protected $isTransfered = false;
 	protected $loginCompleted = false;
-	protected $titleData = [];
+	protected $titleData = []; 
 
 	public function getLeaveMessage(){
 		return "";
@@ -1221,65 +1221,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/**
 	 * Sends all the option flags
 	 */
-	public function sendSettings(){
-		/*
-		 bit mask | flag name
-		0x00000001 world_inmutable
-		0x00000002 no_pvp
-		0x00000004 no_pvm
-		0x00000008 no_mvp
-		0x00000010 static_time
-		0x00000020 nametags_visible
-		0x00000040 auto_jump
-		0x00000080 allow_fly
-		0x00000100 noclip
-		0x00000200 ?
-		0x00000400 ?
-		0x00000800 ?
-		0x00001000 ?
-		0x00002000 ?
-		0x00004000 ?
-		0x00008000 ?
-		0x00010000 ?
-		0x00020000 ?
-		0x00040000 ?
-		0x00080000 ?
-		0x00100000 ?
-		0x00200000 ?
-		0x00400000 ?
-		0x00800000 ?
-		0x01000000 ?
-		0x02000000 ?
-		0x04000000 ?
-		0x08000000 ?
-		0x10000000 ?
-		0x20000000 ?
-		0x40000000 ?
-		0x80000000 ?
-		*/
-		$flags = 0;
-		if($this->isAdventure()){
-			$flags |= 0x01; //Do not allow placing/breaking blocks, adventure mode
+	public function sendSettings() {
+		$flags = AdventureSettingsPacket::FLAG_NO_PVM | AdventureSettingsPacket::FLAG_NO_MVP;
+		if ($this->isAdventure()) {
+			$flags |= AdventureSettingsPacket::FLAG_WORLD_IMMUTABLE; //Do not allow placing/breaking blocks, adventure mode
 		}
-
-		/*if($nametags !== false){
-			$flags |= 0x20; //Show Nametags
-		}*/
-
-		if($this->autoJump){
-			$flags |= 0x20;
+		if ($this->autoJump) {
+			$flags |= AdventureSettingsPacket::FLAG_AUTO_JUMP;
 		}
-
-		if($this->allowFlight){
-			$flags |= 0x40;
+		if ($this->allowFlight) {
+			$flags |= AdventureSettingsPacket::FLAG_PLAYER_MAY_FLY;
 		}
-
-		if($this->isSpectator()){
-			$flags |= 0x80;
+		if ($this->isSpectator()) {
+			$flags |= AdventureSettingsPacket::FLAG_PLAYER_NO_CLIP;
 		}
-		
-		$flags |= 0x02;
-		$flags |= 0x04;
 		
 		$pk = new AdventureSettingsPacket();
 		$pk->flags = $flags;
