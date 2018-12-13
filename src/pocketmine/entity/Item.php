@@ -115,6 +115,7 @@ class Item extends Entity{
 		if ($this->pickupDelay > 0 && $this->pickupDelay < 32767) { //Infinite delay
 			$this->pickupDelay -= $tickDiff;
 		}
+		$this->checkBlockCollision();
 		if ($this->y < 1) {
 			$this->kill();
 			return true;
