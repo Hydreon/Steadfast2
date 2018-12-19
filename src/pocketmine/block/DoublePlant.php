@@ -23,20 +23,21 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\level\Level;
+use pocketmine\Player;
 
-class DoublePlant extends Flowable{
+class DoublePlant extends Flowable {
 
 	protected $id = self::DOUBLE_PLANT;
 
-	public function __construct($meta = 0){
+	public function __construct($meta = 0) {
 		$this->meta = $meta;
 	}
 
-	public function canBeReplaced(){
+	public function canBeReplaced() {
 		return true;
 	}
 
-	public function getName(){
+	public function getName() {
 		static $names = [
 			0 => "Sunflower",
 			1 => "Lilac",
@@ -49,22 +50,64 @@ class DoublePlant extends Flowable{
 	}
 
 
-	public function onUpdate($type){
-		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if($this->getSide(0)->isTransparent() === true){ //Replace with common break method
+	public function onUpdate($type) {
+		if ($type === Level::BLOCK_UPDATE_NORMAL) {
+			$blockUnder = $this->getSide(0);
+			if ($blockUnder->isTransparent() === true && $blockUnder->getId() != $this->id) { //Replace with common break method
 				$this->getLevel()->setBlock($this, new Air(), false, false, true);
-
 				return Level::BLOCK_UPDATE_NORMAL;
 			}
 		}
-
 		return false;
 	}
 
-	public function getDrops(Item $item){
-		//TODO
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
+		if ($this->getDamage() < 0x08) {
+			$blockAbove = $this->level->getBlockIdAt($this->x, $this->y + 1, $this->z);
+			if ($blockAbove == Block::AIR) {
+				if ($this->level->setBlock($this, $this, true, true)) {
+					$upperPart = clone $this;
+					$upperPart->y++;
+					$upperPart->setDamage($this->getDamage() | 0x08);
+					if ($this->level->setBlock($upperPart, $upperPart, true, true)) {
+						return true;
+					}
+					$this->level->setBlock($this, Block::get(Block::AIR), true, true);
+				}
+			}
+		}
+		return false;
+	}
 
-		return [];
+	public function onBreak(Item $item){
+		if (!$this->getLevel()->setBlock($this, new Air(), true, true)) {
+			return false;
+		}
+		$meta = $this->getDamage();
+		if ($meta < 0x08 && $this->level->getBlockIdAt($this->x, $this->y + 1, $this->z) == $this->id) {
+			$this->y++;
+			if ($this->level->setBlock($this, Block::get(Block::AIR), true, true)) {
+				return true;
+			}
+			$this->y--;
+			$this->level->setBlock($this, $this, true, true);
+			return false;
+		} else if ($meta >= 0x08 && $this->level->getBlockIdAt($this->x, $this->y - 1, $this->z) == $this->id) {
+			$this->y--;
+			if ($this->level->setBlock($this, Block::get(Block::AIR), true, true)) {
+				return true;
+			}
+			$this->y++;
+			$this->level->setBlock($this, $this, true, true);
+			return false;
+		}
+		return true;
+	}
+
+	public function getDrops(Item $item) {
+		return [
+			[$this->id, $this->getDamage() & 0x07, 1]
+		];
 	}
 
 }

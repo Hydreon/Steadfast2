@@ -128,32 +128,32 @@ class Item extends Entity{
 				return true;
 			}
 		}
-		if ($this->onGround && $this->motionY <= 0) {
-			$this->motionY = 0;
-		} else {
-			$this->motionY -= $this->gravity;
-			$this->motionY *= 0.96;
-		}
-		if (abs($this->motionX) < 0.001) {
-			$this->motionX = 0;
-		}
-		if (abs($this->motionZ) < 0.001) {
-			$this->motionZ = 0;
-		}
-		if ($this->motionX != 0 || $this->motionZ != 0) {
-			$friction = 1 - $this->drag;
-			if ($this->onGround) {
-				$friction *= Block::getFrictionFactor();
+		if (!$this->onGround || $this->motionX != 0 || $this->motionY != 0 || $this->motionZ != 0) {
+			if ($this->onGround && $this->motionY <= 0) {
+				$this->motionY = 0;
+			} else {
+				$this->motionY -= $this->gravity;
+				$this->motionY *= 0.96;
 			}
-			$this->motionX *= $friction;
-			$this->motionZ *= $friction;
-		}
-		if ($this->motionX != 0 || $this->motionY != 0 || $this->motionZ != 0) {
+			if (abs($this->motionX) < 0.001) {
+				$this->motionX = 0;
+			}
+			if (abs($this->motionZ) < 0.001) {
+				$this->motionZ = 0;
+			}
+			if ($this->motionX != 0 || $this->motionZ != 0) {
+				$friction = 1 - $this->drag;
+				if ($this->onGround) {
+					$friction *= Block::getFrictionFactor();
+				}
+				$this->motionX *= $friction;
+				$this->motionZ *= $friction;
+			}
+		
 			$this->move($this->motionX, $this->motionY, $this->motionZ);
 			$this->updateMovement();
-			return true;
 		}		
-		return !$this->onGround;
+		return true;
 	}
 
 	public function saveNBT(){
