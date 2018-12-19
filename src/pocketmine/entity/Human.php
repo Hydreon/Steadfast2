@@ -135,6 +135,9 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		return true;
 	}
 
+	/**
+	 * @return PlayerInventory
+	 */
 	public function getInventory(){
 		return $this->inventory;
 	}
