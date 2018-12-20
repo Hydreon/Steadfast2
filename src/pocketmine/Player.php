@@ -4219,7 +4219,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * 
 	 * @param integer[] $blockPosition
 	 */
-	private function breakBlock($blockPosition) {
+	protected function breakBlock($blockPosition) {
 		if($this->spawned === false or $this->blocked === true or $this->dead === true){
 			//Timings::$timerRemoveBlockPacket->stopTiming();
 			return;
