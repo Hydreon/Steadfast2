@@ -409,6 +409,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	/** @var string[][] - key - tick, value - packet's buffers array */
 	protected $delayedPackets = [];
+	protected $editingSignData = [];
 
 	public function getLeaveMessage(){
 		return "";
@@ -1781,6 +1782,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
 			case 'MOVE_PLAYER_PACKET':
+				foreach ($this->editingSignData as $hash => $data) {
+					$x = $y = $z = null;
+					Level::getBlockXYZ($hash, $x, $y, $z);
+					$sign = $this->level->getTile(new Vector3($x, $y, $z));
+					if ($sign instanceof Sign) {
+						$this->checkSignChange($sign, $data);					
+					}					
+					unset($this->editingSignData[$hash]);
+				}
 				if ($this->dead !== true && $this->spawned === true) {
 					$newPos = new Vector3($packet->x, $packet->y - $this->getEyeHeight(), $packet->z);
 					if ($this->isTeleporting && $newPos->distanceSquared($this) > 2) {
@@ -2434,37 +2444,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				$t = $this->level->getTile($pos);
 				if ($t instanceof Sign) {
-					// prepare NBT data
-					$nbt = new NBT(NBT::LITTLE_ENDIAN);
-					$nbt->read($packet->namedtag, false, true);
-					$nbtData = $nbt->getData();
-					$isNotCreator = !isset($t->namedtag->Creator) || $t->namedtag["Creator"] !== $this->username;
-					// check tile id
-					if ($nbtData["id"] !== Tile::SIGN || $isNotCreator) {
-						$t->spawnTo($this);
-						break;
-					}
-					// collect sign text lines
-					$signText = [];
-					if ($this->protocol >= Info::PROTOCOL_120) {
-						$signText = explode("\n", $nbtData['Text']);
-						for ($i = 0; $i < 4; $i++) {
-							$signText[$i] = isset($signText[$i]) ? TextFormat::clean($signText[$i], $this->removeFormat) : '';
-						}
-						unset($nbtData['Text']);
-					} else {
-						for ($i = 0; $i < 4; $i++) {
-							$signText[$i] = TextFormat::clean($nbtData["Text" . ($i + 1)], $this->removeFormat);
-						}
-					}
-					// event part
-					$ev = new SignChangeEvent($t->getBlock(), $this, $signText);
-					$this->server->getPluginManager()->callEvent($ev);
-					if ($ev->isCancelled()) {
-						$t->spawnTo($this);
-					} else {
-						$t->setText($ev->getLine(0), $ev->getLine(1), $ev->getLine(2), $ev->getLine(3));
-					}
+					$this->editingSignData[Level::blockHash($packet->x, $packet->y, $packet->z)] = $packet->namedtag;					
 				}
 				//Timings::$timerTileEntityPacket->stopTiming();
 				break;
@@ -5299,6 +5279,39 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->delayedPackets[$delayedTick] = [];
 		}
 		$this->delayedPackets[$delayedTick][] = $packetBuffer;
+	}
+	
+	protected function checkSignChange($sign, $namedtag) {
+		$nbt = new NBT(NBT::LITTLE_ENDIAN);
+		$nbt->read($namedtag, false, true);
+		$nbtData = $nbt->getData();
+		$isNotCreator = !isset($sign->namedtag->Creator) || $sign->namedtag["Creator"] !== $this->username;
+		// check tile id
+		if ($nbtData["id"] !== Tile::SIGN || $isNotCreator) {
+			$sign->spawnTo($this);
+			return;
+		}
+		// collect sign text lines
+		$signText = [];
+		if ($this->protocol >= Info::PROTOCOL_120) {
+			$signText = explode("\n", $nbtData['Text']);
+			for ($i = 0; $i < 4; $i++) {
+				$signText[$i] = isset($signText[$i]) ? TextFormat::clean($signText[$i], $this->removeFormat) : '';
+			}
+			unset($nbtData['Text']);
+		} else {
+			for ($i = 0; $i < 4; $i++) {
+				$signText[$i] = TextFormat::clean($nbtData["Text" . ($i + 1)], $this->removeFormat);
+			}
+		}
+		// event part
+		$ev = new SignChangeEvent($sign->getBlock(), $this, $signText);
+		$this->server->getPluginManager()->callEvent($ev);
+		if ($ev->isCancelled()) {
+			$sign->spawnTo($this);
+		} else {
+			$sign->setText($ev->getLine(0), $ev->getLine(1), $ev->getLine(2), $ev->getLine(3));
+		}
 	}
 
 }
