@@ -4765,7 +4765,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if (($distanceSquared > 0.0625 || $deltaAngle > 10)) {
 			$isFirst = ($this->lastX === null || $this->lastY === null || $this->lastZ === null);
 			if (!$isFirst) {
-				if (!$this->isSpectator()) {
+				if (!$this->isSpectator() && $this->needCheckMovementInBlock()) {
 					$toX = floor($to->x);
 					$toZ = floor($to->z);
 					$toY = ceil($to->y);
@@ -5312,6 +5312,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		} else {
 			$sign->setText($ev->getLine(0), $ev->getLine(1), $ev->getLine(2), $ev->getLine(3));
 		}
+	}
+	
+	public function needCheckMovementInBlock() {
+		return true;
 	}
 
 }
