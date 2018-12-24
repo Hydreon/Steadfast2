@@ -1518,7 +1518,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					if ($this->getHealth() > 0) {
 						$ticksNumForDamage = 80;
 						if ($this->foodTick >= $ticksNumForDamage) {
-							$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_CUSTOM, 1);
+							$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_HUNGER, 1);
 							$this->attack(1, $ev);
 							$this->foodTick = 0;
 						} else {
