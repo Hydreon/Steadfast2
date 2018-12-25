@@ -103,6 +103,7 @@ use pocketmine\tile\Cauldron;
 use pocketmine\tile\Chest;
 use pocketmine\tile\Dispenser;
 use pocketmine\tile\Dropper;
+use pocketmine\tile\Hopper;
 use pocketmine\tile\EnchantTable;
 use pocketmine\tile\EnderChest;
 use pocketmine\tile\FlowerPot;
@@ -2558,6 +2559,7 @@ class Server{
 		Tile::registerTile(PistonArm::class);
 		Tile::registerTile(ItemFrame::class);
 		Tile::registerTile(Dropper::class);
+		Tile::registerTile(Hopper::class);
 	}
 
 	public function shufflePlayers(){

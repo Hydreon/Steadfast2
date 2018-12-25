@@ -37,6 +37,7 @@ class InventoryType{
 	const ENCHANT_TABLE = 9;
 	const DISPENSER = 10;
 	const DROPPER = 11;
+	const HOPPER = 12;
 	
 	const TYPE_NONE = -9;
 	const TYPE_INVENTORY = -1;
@@ -97,6 +98,7 @@ class InventoryType{
  		static::$default[static::ANVIL] = new InventoryType(3, "Anvil", self::TYPE_ANVIL); //2 INPUT, 1 OUTPUT
  		static::$default[static::DISPENSER] = new InventoryType(9, "Dispenser", self::TYPE_DISPENSER); //9 INPUT
 		static::$default[static::DROPPER] = new InventoryType(9, "Dropper", self::TYPE_DROPPER); //9 INPUT
+		static::$default[static::HOPPER] = new InventoryType(5, "Hopper", self::TYPE_HOPPER); //5 INPUT
 	}
 
 	/**
