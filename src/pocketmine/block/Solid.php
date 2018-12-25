@@ -59,6 +59,7 @@ abstract class Solid extends Block{
 			self::STONE_BUTTON,
 			self::IRON_DOOR_BLOCK,
 			self::DISPENSER,
+			self::DROPPER,
 			self::PISTON,
 			self::STICKY_PISTON,
 			self::REDSTONE_REPEATER_BLOCK,

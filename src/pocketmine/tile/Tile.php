@@ -50,6 +50,7 @@ abstract class Tile extends Position{
 	const PISTON_ARM = "PistonArm";
 	const DISPENSER = "Dispenser";
 	const ITEM_FRAME = "ItemFrame";
+	const DROPPER = "Dropper";
 
 	public static $tileCount = 1;
 
