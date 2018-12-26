@@ -986,11 +986,13 @@ abstract class Entity extends Location implements Metadatable{
 	}
 
 	public function setOnFire($seconds, $damage = 1){
-		$ticks = $seconds * 20;
-		if($ticks > $this->fireTicks){
-			$this->fireTicks = $ticks;
+		if (!$this->hasEffect(Effect::FIRE_RESISTANCE)) {
+			$ticks = $seconds * 20;
+			if($ticks > $this->fireTicks){
+				$this->fireTicks = $ticks;
+			}
+			$this->fireDamage = $damage;
 		}
-		$this->fireDamage = $damage;
 	}
 
 	public function getDirection(){
