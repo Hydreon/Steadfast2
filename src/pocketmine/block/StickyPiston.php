@@ -18,6 +18,9 @@ class StickyPiston extends Piston {
 		$extendBlock = $this->getSide($extendSide);
 		$movingBlock = $extendBlock->getSide($extendSide);
 //		echo $extendBlock . PHP_EOL;
+		if (!is_null($oldTile  = $this->level->getTile($movingBlock))) {
+			$oldTile->updatePosition($extendBlock->x, $extendBlock->y, $extendBlock->z);
+		}	
 		if ($movingBlock instanceof Solid) {
 			$this->getLevel()->setBlock($movingBlock, Block::get(self::AIR), true, true, $deep);
 			$this->getLevel()->setBlock($extendBlock, $movingBlock, true, true, $deep);
