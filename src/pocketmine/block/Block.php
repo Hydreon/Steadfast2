@@ -522,6 +522,7 @@ class Block extends Position implements Metadatable{
 			self::$list[self::TRAPDOOR] = Trapdoor::class;
 			self::$list[self::IRON_TRAPDOOR] = IronTrapdoor::class;
 
+			self::$list[self::MONSTER_EGG]  = MonsterEgg::class;
 			self::$list[self::STONE_BRICKS] = StoneBricks::class;
 
 			self::$list[self::IRON_BARS] = IronBars::class;
@@ -650,6 +651,7 @@ class Block extends Position implements Metadatable{
 			
 			self::$list[self::DROPPER] = Dropper::class;
 			self::$list[self::DISPENSER] = Dispenser::class;
+			self::$list[self::HOPPER_BLOCK] = Hopper::class;
 			
 			self::$list[self::REDSTONE_COMPARATOR_BLOCK] = RedstoneComparator::class;
 			self::$list[self::TRAPPED_CHEST] = TrappedChest::class;

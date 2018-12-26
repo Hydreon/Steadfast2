@@ -50,6 +50,8 @@ abstract class Tile extends Position{
 	const PISTON_ARM = "PistonArm";
 	const DISPENSER = "Dispenser";
 	const ITEM_FRAME = "ItemFrame";
+	const DROPPER = "Dropper";
+	const HOPPER = "Hopper";
 
 	public static $tileCount = 1;
 
@@ -185,6 +187,18 @@ abstract class Tile extends Position{
 
 	public function getName(){
 		return $this->name;
+	}
+	
+	public function updatePosition($x, $y, $z) {
+		if ($this->closed) {
+			return;
+		}
+		$this->x = (int) $x;
+		$this->y = (int) $y;
+		$this->z = (int) $z;
+		$this->chunk->removeTile($this);
+		$this->chunk = $this->level->getChunk(($x >> 4), ($z >> 4));
+		$this->chunk->addTile($this);
 	}
 
 }
