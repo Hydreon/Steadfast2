@@ -89,7 +89,7 @@ class WoodenPressurePlate extends Transparent{
 		$deep++;
 		if ($type == Level::BLOCK_UPDATE_SCHEDULED) {
 			$now = microtime(true);
-			if ($this->meta > 0 && ($this->lastInteractWithEntity < 0 || $now - $this->lastInteractWithEntity >= 1)) {
+			if ($this->meta > 0 && ($this->lastInteractWithEntity < 0 || $now - $this->lastInteractWithEntity >= 1) && count($this->level->getCollidingEntities($this->getBoundingBox())) <= 0) {
 				$this->lastInteractWithEntity = -1;
 				$this->meta = 0;
 				$this->level->setBlock($this, $this, true, true, $deep);

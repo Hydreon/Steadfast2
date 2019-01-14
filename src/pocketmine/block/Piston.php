@@ -97,7 +97,7 @@ class Piston extends Solid {
 				self::SIDE_DOWN => [0, -1, 0],
 			];
 			$sideToExtend = $this->getExtendSide();
-			if ($sideToExtend == null) {
+			if ($sideToExtend === null) {
 				return;
 			}
 			$isShouldBeExpanded = false;
@@ -114,6 +114,13 @@ class Piston extends Solid {
 					case self::REDSTONE_WIRE:
 						$wirePower = $this->level->getBlockDataAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
 						if ($wirePower > 0) {
+							$isShouldBeExpanded = true;
+							break 2;
+						}
+						break;
+					case self::LEVER:
+						$leverMeta =  $this->level->getBlockDataAt($this->x + $offset[0], $this->y + $offset[1], $this->z + $offset[2]);
+						if ((($leverMeta >> 3) & 0x01)) {
 							$isShouldBeExpanded = true;
 							break 2;
 						}
@@ -153,11 +160,7 @@ class Piston extends Solid {
 					}
 				}
 			}
-		} else {
-//			echo "Class: " . get_class($this) . " X: " . $this->x . " Z: " . $this->z . " Meta: " . $this->meta . PHP_EOL;
 		}
-//		$pistonTile = $this->level->getTile($this);
-//		echo "X: " . $this->x . " Z: " . $this->z . " Charge: " . ($pistonTile->namedtag['HaveCharge'] ? "true" : "false") . PHP_EOL;
 	}
 	
 	protected function extend($tile, $extendSide, $deep) {
@@ -165,16 +168,28 @@ class Piston extends Solid {
 		$tile->namedtag['Progress'] = 1;
 		$tile->namedtag['State'] = 2;
 //		$tile->namedtag['HaveCharge'] = 0;
-		$extendBlock = $this->getSide($extendSide);
+		$extendBlock = $this->moveNextBlocks($extendSide, $deep);
 		$this->getLevel()->setBlock($extendBlock, Block::get(self::PISTON_HEAD), true, true, $deep);
 //		var_dump("Piston remove charge 2 " . $this->x . " " . $this->z);
 		$tile->spawnToAll();
-		if ($extendBlock->getId() !== self::AIR && !$extendBlock->isMayBeDestroyedByPiston()) {
-			$anotherBlock = $extendBlock->getSide($extendSide);
-			$this->getLevel()->setBlock($anotherBlock, $extendBlock, true, true, $deep);
-		}
 	}
 	
+	protected function moveNextBlocks($extendSide, $deep) {
+		$extendBlock = $this->getSide($extendSide);
+		$resultBlock = clone $extendBlock;
+		if ($extendBlock->getId() !== self::AIR && $extendBlock->getId() != self::PISTON_HEAD && !$extendBlock->isMayBeDestroyedByPiston()) {	
+			$anotherBlock = clone $extendBlock->getSide($extendSide);
+			if ($extendBlock instanceof Piston) {
+				$extendBlock->moveNextBlocks($extendSide, $deep);
+			}
+			if (!is_null($oldTile  = $this->level->getTile($extendBlock))) {
+				$oldTile->updatePosition($anotherBlock->x, $anotherBlock->y, $anotherBlock->z);
+			}	
+			$this->getLevel()->setBlock($anotherBlock, $extendBlock, true, true, $deep);
+		}
+		return $resultBlock;
+	}
+
 	protected function retract($tile, $extendSide, $deep) {
 //		echo "X: " . $this->x . " Z: " . $this->z . " Retract piston" . PHP_EOL;
 		$tile->namedtag['Progress'] = 0;
@@ -188,15 +203,18 @@ class Piston extends Solid {
 
 	public function isMayBeExtended() {
 		$sideToExtend = $this->getExtendSide();
-		if ($sideToExtend == null) {
+		if ($sideToExtend === null) {
 			return false;
 		}
 		$firstBlock = $this->getSide($sideToExtend);
-		if ($firstBlock->getId() == self::AIR || $firstBlock->isMayBeDestroyedByPiston()) {
+		if ($firstBlock->getId() == self::AIR || $firstBlock->getId() == self::PISTON_HEAD || $firstBlock->isMayBeDestroyedByPiston()) {
 			return true;
-		} else if (self::$solid[$firstBlock->getId()]) {
+		} else if (self::$solid[$firstBlock->getId()]) {	
 			$secondBlock = $firstBlock->getSide($sideToExtend);
-			if ($secondBlock->getId() == self::AIR || $secondBlock->isMayBeDestroyedByPiston()) {
+			if ($secondBlock->getId() == self::AIR || $secondBlock->getId() == self::PISTON_HEAD || $secondBlock->isMayBeDestroyedByPiston()) {
+				return true;
+			}
+			if (($firstBlock instanceof Piston) && ($this->getFace() == $firstBlock->getFace()) && $firstBlock->isMayBeExtended()) {
 				return true;
 			}
 		}
