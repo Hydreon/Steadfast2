@@ -1587,13 +1587,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			Item::CARROT => [ 'food' => 3, 'saturation' => 3.6 ],
 			Item::CHORUS_FRUIT => [ 'food' => 4, 'saturation' => 2.4 ],
 			Item::COOKED_CHICKEN => [ 'food' => 6, 'saturation' => 7.2 ],
-			Item::COOKED_FISH => [
-				0 => [ 'food' => 5, 'saturation' => 6 ], // cooked fish
-				1 => [ 'food' => 6, 'saturation' => 9.6 ], // cooked salmon
-			],
+			Item::COOKED_FISH => [ 'food' => 5, 'saturation' => 6 ],
 			Item::COOKED_MUTTON => [ 'food' => 6, 'saturation' => 9.6 ],
 			Item::COOKED_PORKCHOP => [ 'food' => 8, 'saturation' => 12.8 ],
 			Item::COOKED_RABBIT => [ 'food' => 5, 'saturation' => 6 ],
+			Item::COOKED_SALMON => [ 'food' => 6, 'saturation' => 9.6 ],
 			Item::COOKIE => [ 'food' => 2, 'saturation' => 0.4 ],
 			Item::GOLDEN_APPLE => [ 'food' => 4, 'saturation' => 9.6 ],
 			Item::GOLDEN_CARROT => [ 'food' => 6, 'saturation' => 14.4 ],
@@ -1611,7 +1609,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				2 => [ 'food' => 1, 'saturation' => 0.2 ], // clownfish
 				3 => [ 'food' => 1, 'saturation' => 0.2 ], // pufferfish
 			],
-			Item::COOKED_FISH => [ 'food' => 5, 'saturation' => 6 ],
 			Item::RAW_MUTTON => [ 'food' => 2, 'saturation' => 1.2 ],
 			Item::RAW_PORKCHOP => [ 'food' => 3, 'saturation' => 1.8 ],
 			Item::RAW_RABBIT => [ 'food' => 3, 'saturation' => 1.8 ],
