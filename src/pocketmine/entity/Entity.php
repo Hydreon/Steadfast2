@@ -1029,7 +1029,7 @@ abstract class Entity extends Location implements Metadatable{
 	protected function updateFallState($distanceThisTick, $onGround) {
 		if ($onGround === true) {
 			if($this->fallDistance > 0) {
-				if (!$this->isCollideWithWater()) {
+				if (!$this->isCollideWithWater() && !$this->isFallOnSlimeBlock()) {
 					$this->fall($this->fallDistance);
 				}
 				$this->resetFallDistance();
@@ -1131,6 +1131,20 @@ abstract class Entity extends Location implements Metadatable{
 		$bottomBlockId = $this->level->getBlockIdAt($x, floor($this->y - 1),$z);
 		if ($bottomBlockId == Block::WATER || $bottomBlockId == Block::STILL_WATER) {			
 			return true;
+		}
+		return false;
+	}
+
+	public function isFallOnSlimeBlock() {
+		$bb = clone $this->boundingBox;
+		$bb->maxY = $bb->minY + 0.5;
+		$bb->minY -= 1;
+		$blocks = $this->level->getCollisionBlocks($bb);
+		foreach ($blocks as $block) {
+			if ($block->getId() === Block::SLIME_BLOCK) {
+				echo $block . PHP_EOL;
+				return true;
+			}
 		}
 		return false;
 	}
