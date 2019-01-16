@@ -462,4 +462,8 @@ abstract class Liquid extends Transparent {
 		return true;
 	}
 	
+	public function isMayBeDestroyedByPiston() {
+        return true;
+    }
+	
 }
