@@ -704,6 +704,8 @@ class Block extends Position implements Metadatable{
 			self::$list[self::GREEN_GLAZED_TERRACOTTA] = GreenGlazedTerracotta::class;
 			self::$list[self::RED_GLAZED_TERRACOTTA] = RedGlazedTerracotta::class;
 			self::$list[self::BLACK_GLAZED_TERRACOTTA] = BlackGlazedTerracotta::class;
+
+			self::$list[self::MAGMA] = Magma::class;
 			
 			foreach (self::$list as $id => $class) {
 				static::registerBlock($id, $class);
