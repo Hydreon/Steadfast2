@@ -35,7 +35,7 @@ class Arrow extends Projectile{
 	protected $gravity = 0.03;
 	protected $drag = 0.01;
 	protected $damage = 2;
-	protected $isCritical;
+	public $isCritical;
 	public function __construct(FullChunk $chunk, Compound $nbt, Entity $shootingEntity = null, $critical = false){
 		$this->isCritical = (bool) $critical;
 		parent::__construct($chunk, $nbt, $shootingEntity);
