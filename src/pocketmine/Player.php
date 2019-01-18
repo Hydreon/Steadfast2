@@ -4978,6 +4978,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		return true;
 	}
+
+	protected function checkBlockCollision() {
+		parent::checkBlockCollision();
+		$blockAbove = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y - 1), floor($this->z)));
+		if ($blockAbove !== null && $blockAbove->hasEntityCollision()) {
+			$blockAbove->onEntityCollide($this);
+		}
+	}
 	
 	protected function sendServerSettingsModal($modalWindow) {
 		if ($this->protocol >= Info::PROTOCOL_120) {
