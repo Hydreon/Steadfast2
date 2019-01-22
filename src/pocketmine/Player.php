@@ -5238,6 +5238,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->started = $this->level->stopTime == false;
 			$this->dataPacket($pk);
 		}
+		$this->scheduleUpdate();
 		return true;
 	}
 
