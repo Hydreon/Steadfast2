@@ -21,47 +21,34 @@
 
 namespace pocketmine\entity\projectile;
 
-use pocketmine\entity\Human;
-use pocketmine\level\format\FullChunk;
-
-use pocketmine\level\particle\RainSplashParticle;
+use pocketmine\entity\Entity;
+use pocketmine\level\particle\SplashParticle;
 use pocketmine\level\sound\GenericSound;
+use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\DoubleTag;
+use pocketmine\nbt\tag\Enum;
+use pocketmine\nbt\tag\FloatTag;
+use pocketmine\nbt\tag\ShortTag;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\network\protocol\SpawnExperienceOrbPacket;
 use pocketmine\Player;
 use pocketmine\entity\Projectile;
-use pocketmine\entity\Entity;
-use pocketmine\level\Level;
+use pocketmine\network\multiversion\Entity as EntityIds;
 use pocketmine\Server;
 
 
 class BottleOEnchanting extends Projectile{
-	const NETWORK_ID = 68;
-
-	public $width = 0.25;
-	public $length = 0.25;
-	public $height = 0.25;
-
-	protected $gravity = 0.03;
+	const NETWORK_ID = EntityIds::ID_EXP_BOTTLE;
+	protected $gravity = 0.05;
 	protected $drag = 0.01;
 
-	protected $canExplode = false;
 	protected $givenOutXp = false;
-
-	public function __construct(FullChunk $chunk, Compound $nbt, Entity $shootingEntity = null)
-	{
-		parent::__construct($chunk, $nbt, $shootingEntity);
-
-	}
-
 
 	public function onUpdate($currentTick){
 		if($this->closed){
 			return false;
 		}
-
-		//$this->timings->startTiming();
 
 		$hasUpdate = parent::onUpdate($currentTick);
 
@@ -70,17 +57,25 @@ class BottleOEnchanting extends Projectile{
 		if($this->age > 1200 || $this->isCollided || $this->hadCollision){
 			// Add Splash particles
 			for($i = 0; $i <= 14; $i++) {
-				$this->level->addParticle(new RainSplashParticle($this->add(
+				$particle = new SplashParticle($this->add(
 					$this->width / 2 + mt_rand(-100, 100) / 500,
 					$this->height / 2 + mt_rand(-100, 100) / 500,
-					$this->width / 2 + mt_rand(-100, 100) / 500)));
-			}
+					$this->width / 2 + mt_rand(-100, 100) / 500));
 
+
+				$this->level->addParticle($particle);
+			}
 			$playerToUpdate = $this->shootingEntity;
 
+			// Until the orbs spawn on the ground dont send glass breaking sound
+//			if($this->shootingEntity instanceof Player) {
+//				$this->shootingEntity->sendSound("SOUND_GLASS", ['x' => $this->getX(), 'y' => $this->getY(), 'z' => $this->getZ()],EntityIds::ID_NONE, -1 ,$this->getViewers());
+//			}
+
+			//TODO: Spawn XB orbs (pocketmine/entity/ExperienceOrb) here, for now just give a player xp
+			// 6-33 xp per bottle break. Spawn 2 - 3 orbs containing 3 - 11 xp
 			foreach ($this->shootingEntity->getViewers() as $player) {
 				if ($player instanceof Player) {
-					$player->sendSound("SOUND_GLASS", ['x' => $this->getX(), 'y' => $this->getY(), 'z' => $this->getZ()]);
 
 					// For now if the bottle breaks on another player then the other player gets the xp, if it breaks anywhere else then the thrower gets the xp
 					$xRange = range($this->getFloorX() - 1,$this->getFloorX() + 1 );
@@ -90,23 +85,16 @@ class BottleOEnchanting extends Projectile{
 					if(in_array($player->getFloorX(), $xRange) && in_array($player->getFloorZ(), $zRange) && in_array($player->getFloorY(), $yRange)) {
 						$playerToUpdate = $player;
 					}
-					//TODO: Spawn XB orbs, but for now just give the player xp
-//					$pk = new SpawnExperienceOrbPacket();
-//					$pk->x = $this->x;
-//					$pk->y = $this->y;
-//					$pk->z = $this->z;
-//					$player->dataPacket($pk);
 				}
 			}
 
-			// Spawn XB orbs, but for now just give the player xp
 			if($playerToUpdate instanceof Player) {
-				//$this->shootingEntity->sendSound("SOUND_GLASS", ['x' => $this->shootingEntity->getX(), 'y' => $this->shootingEntity->getY(), 'z' => $this->shootingEntity->getZ()]);
-				//TODO: 6-33 xp per bottle break:  2 - 3 orbs containing 3 - 11 xp
 				if(!$this->givenOutXp) {
-					$playerToUpdate->addExperience(rand(6, 22));
+					$playerToUpdate->addExperience(rand(6, 33));
 					$this->givenOutXp = true;
-					Server::getInstance()->getDefaultLevel()->addSound(new GenericSound($this->getPosition(), 1051), [$playerToUpdate]);
+					$players = $playerToUpdate->getViewers();
+					array_push($players, $playerToUpdate);
+					$this->level->addSound(new GenericSound($this->getPosition(), 1051), $players);
 				}
 
 			}
@@ -118,23 +106,5 @@ class BottleOEnchanting extends Projectile{
 		return $hasUpdate;
 	}
 
-
-
-	public function spawnTo(Player $player) {
-		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
-			$this->hasSpawned[$player->getId()] = $player;
-			$pk = new AddEntityPacket();
-			$pk->type = self::NETWORK_ID;
-			$pk->eid = $this->getId();
-			$pk->x = $this->x;
-			$pk->y = $this->y;
-			$pk->z = $this->z;
-			$pk->speedX = $this->motionX;
-			$pk->speedY = $this->motionY;
-			$pk->speedZ = $this->motionZ;
-//			$pk->metadata = $this->dataProperties;
-			$player->dataPacket($pk);
-		}
-	}
 
 }
