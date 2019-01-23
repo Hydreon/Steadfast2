@@ -3513,7 +3513,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->sendSelfData();				
 		$this->updateSpeed($this->movementSpeed);
 		$this->sendFullPlayerList();
-//		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
+//		$this->updateExperience(0, 100);
+//		$this->getInventory()->addItem(Item::get(Item::ENCHANTMENT_TABLE), Item::get(Item::DYE, 4, 64), Item::get(Item::IRON_AXE), Item::get(Item::IRON_SWORD));
 	}
 
 	
