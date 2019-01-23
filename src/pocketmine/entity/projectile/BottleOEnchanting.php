@@ -21,21 +21,14 @@
 
 namespace pocketmine\entity\projectile;
 
-use pocketmine\entity\Entity;
 use pocketmine\level\particle\SplashParticle;
-use pocketmine\level\sound\GenericSound;
-use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\Enum;
 use pocketmine\nbt\tag\FloatTag;
-use pocketmine\nbt\tag\ShortTag;
-use pocketmine\network\protocol\AddEntityPacket;
-use pocketmine\network\protocol\SpawnExperienceOrbPacket;
 use pocketmine\Player;
 use pocketmine\entity\Projectile;
 use pocketmine\network\multiversion\Entity as EntityIds;
-use pocketmine\Server;
 use pocketmine\entity\ExperienceOrb;
 
 
@@ -63,6 +56,9 @@ class BottleOEnchanting extends Projectile{
 
 				$this->level->addParticle($particle);
 			}
+			if($this->shootingEntity instanceof Player) {
+				$this->shootingEntity->sendSound("SOUND_GLASS", ['x' => $this->getX(), 'y' => $this->getY(), 'z' => $this->getZ()],EntityIds::ID_NONE, -1 ,$this->getViewers());
+			}
 			$orbCount = mt_rand(2,3);
 			$chunk = $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4);
 			for ($i = 0; $i < $orbCount; $i++) {
@@ -84,40 +80,7 @@ class BottleOEnchanting extends Projectile{
 				]);
 				new ExperienceOrb($chunk, $nbt);
 			}
-			
-//			$playerToUpdate = $this->shootingEntity;
 
-			// Until the orbs spawn on the ground dont send glass breaking sound
-//			if($this->shootingEntity instanceof Player) {
-//				$this->shootingEntity->sendSound("SOUND_GLASS", ['x' => $this->getX(), 'y' => $this->getY(), 'z' => $this->getZ()],EntityIds::ID_NONE, -1 ,$this->getViewers());
-//			}
-
-			//TODO: Spawn XB orbs (pocketmine/entity/ExperienceOrb) here, for now just give a player xp
-			// 6-33 xp per bottle break. Spawn 2 - 3 orbs containing 3 - 11 xp
-//			foreach ($this->shootingEntity->getViewers() as $player) {
-//				if ($player instanceof Player) {
-//
-//					// For now if the bottle breaks on another player then the other player gets the xp, if it breaks anywhere else then the thrower gets the xp
-//					$xRange = range($this->getFloorX() - 1,$this->getFloorX() + 1 );
-//					$zRange = range($this->getFloorZ() - 1,$this->getFloorZ() + 1 );
-//					$yRange = range($this->getFloorY() - 3,$this->getFloorY() + 3 );
-//
-//					if(in_array($player->getFloorX(), $xRange) && in_array($player->getFloorZ(), $zRange) && in_array($player->getFloorY(), $yRange)) {
-//						$playerToUpdate = $player;
-//					}
-//				}
-//			}
-//
-//			if($playerToUpdate instanceof Player) {
-//				if(!$this->givenOutXp) {
-//					$playerToUpdate->addExperience(rand(6, 33));
-//					$this->givenOutXp = true;
-//					$players = $playerToUpdate->getViewers();
-//					array_push($players, $playerToUpdate);
-//					$this->level->addSound(new GenericSound($this->getPosition(), 1051), $players);
-//				}
-//
-//			}
 			$this->close();
 			$hasUpdate = true;
 		}
