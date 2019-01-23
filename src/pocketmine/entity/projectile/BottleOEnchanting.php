@@ -36,6 +36,7 @@ use pocketmine\Player;
 use pocketmine\entity\Projectile;
 use pocketmine\network\multiversion\Entity as EntityIds;
 use pocketmine\Server;
+use pocketmine\entity\ExperienceOrb;
 
 
 class BottleOEnchanting extends Projectile{
@@ -49,10 +50,7 @@ class BottleOEnchanting extends Projectile{
 		if($this->closed){
 			return false;
 		}
-
 		$hasUpdate = parent::onUpdate($currentTick);
-
-
 		// If bottle has collided with the ground or with an entity
 		if($this->age > 1200 || $this->isCollided || $this->hadCollision){
 			// Add Splash particles
@@ -65,7 +63,29 @@ class BottleOEnchanting extends Projectile{
 
 				$this->level->addParticle($particle);
 			}
-			$playerToUpdate = $this->shootingEntity;
+			$orbCount = mt_rand(2,3);
+			$chunk = $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4);
+			for ($i = 0; $i < $orbCount; $i++) {
+				$nbt = new Compound("", [
+					"Pos" => new Enum("Pos", [
+						new DoubleTag("", $this->x),
+						new DoubleTag("", $this->y),
+						new DoubleTag("", $this->z)
+					]),
+					"Motion" => new Enum("Motion", [
+						new DoubleTag("", 0),
+						new DoubleTag("", 0),
+						new DoubleTag("", 0)
+					]),
+					"Rotation" => new Enum("Rotation", [
+						new FloatTag("", 0),
+						new FloatTag("", 0)
+					])
+				]);
+				new ExperienceOrb($chunk, $nbt);
+			}
+			
+//			$playerToUpdate = $this->shootingEntity;
 
 			// Until the orbs spawn on the ground dont send glass breaking sound
 //			if($this->shootingEntity instanceof Player) {
@@ -74,35 +94,33 @@ class BottleOEnchanting extends Projectile{
 
 			//TODO: Spawn XB orbs (pocketmine/entity/ExperienceOrb) here, for now just give a player xp
 			// 6-33 xp per bottle break. Spawn 2 - 3 orbs containing 3 - 11 xp
-			foreach ($this->shootingEntity->getViewers() as $player) {
-				if ($player instanceof Player) {
-
-					// For now if the bottle breaks on another player then the other player gets the xp, if it breaks anywhere else then the thrower gets the xp
-					$xRange = range($this->getFloorX() - 1,$this->getFloorX() + 1 );
-					$zRange = range($this->getFloorZ() - 1,$this->getFloorZ() + 1 );
-					$yRange = range($this->getFloorY() - 3,$this->getFloorY() + 3 );
-
-					if(in_array($player->getFloorX(), $xRange) && in_array($player->getFloorZ(), $zRange) && in_array($player->getFloorY(), $yRange)) {
-						$playerToUpdate = $player;
-					}
-				}
-			}
-
-			if($playerToUpdate instanceof Player) {
-				if(!$this->givenOutXp) {
-					$playerToUpdate->addExperience(rand(6, 33));
-					$this->givenOutXp = true;
-					$players = $playerToUpdate->getViewers();
-					array_push($players, $playerToUpdate);
-					$this->level->addSound(new GenericSound($this->getPosition(), 1051), $players);
-				}
-
-			}
-			$this->kill();
+//			foreach ($this->shootingEntity->getViewers() as $player) {
+//				if ($player instanceof Player) {
+//
+//					// For now if the bottle breaks on another player then the other player gets the xp, if it breaks anywhere else then the thrower gets the xp
+//					$xRange = range($this->getFloorX() - 1,$this->getFloorX() + 1 );
+//					$zRange = range($this->getFloorZ() - 1,$this->getFloorZ() + 1 );
+//					$yRange = range($this->getFloorY() - 3,$this->getFloorY() + 3 );
+//
+//					if(in_array($player->getFloorX(), $xRange) && in_array($player->getFloorZ(), $zRange) && in_array($player->getFloorY(), $yRange)) {
+//						$playerToUpdate = $player;
+//					}
+//				}
+//			}
+//
+//			if($playerToUpdate instanceof Player) {
+//				if(!$this->givenOutXp) {
+//					$playerToUpdate->addExperience(rand(6, 33));
+//					$this->givenOutXp = true;
+//					$players = $playerToUpdate->getViewers();
+//					array_push($players, $playerToUpdate);
+//					$this->level->addSound(new GenericSound($this->getPosition(), 1051), $players);
+//				}
+//
+//			}
+			$this->close();
 			$hasUpdate = true;
 		}
-
-		//$this->timings->stopTiming();
 		return $hasUpdate;
 	}
 
