@@ -207,11 +207,11 @@ class Piston extends Solid {
 			return false;
 		}
 		$firstBlock = $this->getSide($sideToExtend);
-		if ($firstBlock->getId() == self::AIR || $firstBlock->getId() == self::PISTON_HEAD || $firstBlock->isMayBeDestroyedByPiston()) {
+		if ($firstBlock->getId() == self::AIR || $firstBlock->isMayBeDestroyedByPiston()) {
 			return true;
 		} else if (self::$solid[$firstBlock->getId()]) {	
 			$secondBlock = $firstBlock->getSide($sideToExtend);
-			if ($secondBlock->getId() == self::AIR || $secondBlock->getId() == self::PISTON_HEAD || $secondBlock->isMayBeDestroyedByPiston()) {
+			if ($secondBlock->getId() == self::AIR || $secondBlock->isMayBeDestroyedByPiston()) {
 				return true;
 			}
 			if (($firstBlock instanceof Piston) && ($this->getFace() == $firstBlock->getFace()) && $firstBlock->isMayBeExtended()) {

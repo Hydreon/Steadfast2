@@ -34,10 +34,12 @@ use pocketmine\command\SimpleCommandMap;
 use pocketmine\entity\Arrow;
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
+use pocketmine\entity\ExperienceOrb;
 use pocketmine\entity\FallingSand;
 use pocketmine\entity\Human;
 use pocketmine\entity\Item as DroppedItem;
 use pocketmine\entity\PrimedTNT;
+use pocketmine\entity\projectile\BottleOEnchanting;
 use pocketmine\entity\Snowball;
 use pocketmine\entity\Egg;
 use pocketmine\entity\Squid;
@@ -2543,6 +2545,8 @@ class Server{
 		Entity::registerEntity(Zombie::class);
 		Entity::registerEntity(ZombieVillager::class);
 		Entity::registerEntity(FireBall::class);
+		Entity::registerEntity(BottleOEnchanting::class);
+		Entity::registerEntity(ExperienceOrb::class);
 	}
 
 	private function registerTiles(){
