@@ -943,7 +943,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$packet->senderSubClientID = $this->subClientId;
 			return $this->parent->dataPacket($packet);
 		}
-		
+
 		switch($packet->pname()){
 			case 'CONTAINER_SET_CONTENT_PACKET':
 				$winId = $packet->windowid;
@@ -2572,7 +2572,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						}
 						break;
 					case InventoryTransactionPacket::TRANSACTION_TYPE_ITEM_USE:
-						switch ($packet->actionType) {		
+						switch ($packet->actionType) {
 							case InventoryTransactionPacket::ITEM_USE_ACTION_PLACE:												
 								$blockHash = $packet->position['x'] . ':' . $packet->position['y'] . ':' . $packet->position['z']. ':' . $packet->face;
 								if ($this->lastUpdate - $this->lastInteractTick < 3 && $this->lastInteractCoordsHash == $blockHash) {
@@ -3513,7 +3513,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->sendSelfData();				
 		$this->updateSpeed($this->movementSpeed);
 		$this->sendFullPlayerList();
-//		$this->updateAttribute(UpdateAttributesPacket::EXPERIENCE_LEVEL, 100, 0, 1024, 100);
+//		$this->updateExperience(0, 100);
+//		$this->getInventory()->addItem(Item::get(Item::ENCHANTMENT_TABLE), Item::get(Item::DYE, 4, 64), Item::get(Item::IRON_AXE), Item::get(Item::IRON_SWORD));
 	}
 
 	
@@ -4139,7 +4140,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					return;
 				}
 				
-				if($itemInHand->getId() === Item::SNOWBALL || $itemInHand->getId() === Item::EGG){
+				if($itemInHand->getId() === Item::SNOWBALL || $itemInHand->getId() === Item::EGG || $itemInHand->getId() === Item::BOTTLE_ENCHANTING){
 					$yawRad = $this->yaw / 180 * M_PI;
 					$pitchRad = $this->pitch / 180 * M_PI;
 					$nbt = new Compound("", [
@@ -4166,6 +4167,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 							break;
 						case Item::EGG:
 							$projectile = Entity::createEntity("Egg", $this->chunk, $nbt, $this);
+							break;
+						case Item::BOTTLE_ENCHANTING:
+							$f = .3;
+							$projectile = Entity::createEntity("BottleOEnchanting", $this->chunk, $nbt, $this);
 							break;
 					}
 					$projectile->setMotion($projectile->getMotion()->multiply($f));
@@ -4485,7 +4490,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 */
 	private function tryEnchant($transactionsData) {
 		foreach ($transactionsData as $trData) {
-			if (!$trData->isUpdateEnchantSlotTransaction() || $trData->oldItem->getId() != Item::AIR) {
+			if (!$trData->isUpdateEnchantSlotTransaction() || $trData->oldItem->getId() == Item::AIR) {
 				continue;
 			}
 			$transaction = $trData->convertToTransaction($this);
@@ -5234,6 +5239,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->started = $this->level->stopTime == false;
 			$this->dataPacket($pk);
 		}
+		$this->scheduleUpdate();
 		return true;
 	}
 

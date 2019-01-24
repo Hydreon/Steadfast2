@@ -43,6 +43,7 @@ use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\MapInfoRequestPacket;
 use pocketmine\network\protocol\SetEntityLinkPacket;
+use pocketmine\network\protocol\SpawnExperienceOrbPacket;
 use pocketmine\network\protocol\TileEntityDataPacket;
 use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\network\protocol\ExplodePacket;
@@ -418,7 +419,6 @@ class Network {
 		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
 		$this->registerPacket110(ProtocolInfo110::RESOURCE_PACK_CHUNK_REQUEST_PACKET, ResourcePackChunkRequestPacket::class);
 		$this->registerPacket110(ProtocolInfo110::PLAYER_INPUT_PACKET, PlayerInputPacket::class);
-	
 	}
 	
 	private function registerPackets120() {
@@ -485,6 +485,7 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::SERVER_SETTINGS_REQUEST_PACKET, ServerSettingsRequestPacket::class);
 		$this->registerPacket120(ProtocolInfo120::PURCHASE_RECEIPT_PACKET, PurchaseReceiptPacket::class);
 		$this->registerPacket120(ProtocolInfo120::SUB_CLIENT_LOGIN_PACKET, SubClientLoginPacket::class);		
+		$this->registerPacket120(ProtocolInfo120::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
 	}
 	
 	private function registerPackets310() {
@@ -553,6 +554,8 @@ class Network {
 		$this->registerPacket310(ProtocolInfo310::LEVEL_SOUND_EVENT_PACKET, LevelSoundEventPacket::class);	
 		$this->registerPacket310(ProtocolInfo310::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET, NetworkChunkPublisherUpdatePacket::class);	
 		$this->registerPacket310(ProtocolInfo310::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
+		$this->registerPacket310(ProtocolInfo310::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
+
 	}
 	
 	private function registerPackets331() {
@@ -621,5 +624,6 @@ class Network {
 		$this->registerPacket331(ProtocolInfo331::LEVEL_SOUND_EVENT_PACKET, LevelSoundEventPacket::class);	
 		$this->registerPacket331(ProtocolInfo331::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET, NetworkChunkPublisherUpdatePacket::class);	
 		$this->registerPacket331(ProtocolInfo331::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
+		$this->registerPacket331(ProtocolInfo331::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
 	}
 }
