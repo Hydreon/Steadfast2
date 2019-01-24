@@ -111,7 +111,7 @@ class EnchantingTable extends Transparent {
 				$enchantTable = Tile::createTile(Tile::ENCHANT_TABLE, $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
 			}
 			$player->craftingType = Player::CRAFTING_ENCHANT;
-			$player->addWindow(new EnchantInventory($this));
+			$player->addWindow(new EnchantInventory($this, $player));
 		}
 		return true;
 	}

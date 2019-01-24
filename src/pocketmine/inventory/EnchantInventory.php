@@ -32,8 +32,10 @@ class EnchantInventory extends ContainerInventory {
 	private $bookshelfAmount = 0;
 	private $levels = [];
 	protected $enchantingLevel = 0;
+	private $owner;
 
-	public function __construct(Position $pos) {
+	public function __construct(Position $pos, Player $owner) {
+		$this->owner = $owner;
 		parent::__construct(new FakeBlockMenu($this, $pos), InventoryType::get(InventoryType::ENCHANT_TABLE));
 	}
 
@@ -59,11 +61,19 @@ class EnchantInventory extends ContainerInventory {
 
 	public function onClose(Player $who) {
 		parent::onClose($who);
+		$ownerInventory = $this->owner->getInventory();
+		$needSend = false;
+		for ($i = 0; $i < 2; $i++) {
+			$item = $this->getItem($i);			
+			if ($item->getId() != Item::AIR) {
+				$ownerInventory->addItem($item);
+				$needSend = true;
+			}
+		}
+		if ($needSend) {
+			$ownerInventory->sendContents($this->owner);
+		}
 		$this->clearAll();
-//		for ($i = 0; $i < 2; $i++) {
-//			$this->getHolder()->getLevel()->dropItem($this->getHolder()->add(0.5, 0.5, 0.5), $this->getItem($i));
-//			$this->clear($i);
-//		}
 	}
 
 	public function countBookshelf() {
