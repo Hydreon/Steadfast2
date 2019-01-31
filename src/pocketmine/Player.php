@@ -3187,7 +3187,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($targets !== null) {
 			Server::broadcastPacket($targets, $pk);
 		} else {
-			$this->dataPacket($pk);
+			$this->directDataPacket($pk);
 		}
 	}
 
@@ -4986,8 +4986,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 	protected function checkBlockCollision() {
 		parent::checkBlockCollision();
-		$blockAbove = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y - 1), floor($this->z)));
-		if ($blockAbove !== null && $blockAbove->hasEntityCollision()) {
+		$blockAbove = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y - 1), floor($this->z)));		
+		if ($blockAbove !== null && !($blockAbove instanceof Liquid) && $blockAbove->hasEntityCollision()) {
 			$blockAbove->onEntityCollide($this);
 		}
 	}

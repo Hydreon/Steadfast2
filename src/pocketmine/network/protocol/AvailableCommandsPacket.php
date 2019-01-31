@@ -73,6 +73,8 @@ class AvailableCommandsPacket extends PEPacket{
 			Info::PROTOCOL_120 => new BinaryStream(),
 			Info::PROTOCOL_271 => new BinaryStream(),
 			Info::PROTOCOL_280 => new BinaryStream(),
+			Info::PROTOCOL_340 => new BinaryStream(),
+			Info::PROTOCOL_342 => new BinaryStream()
 		];
 		
 		foreach ($commands as $commandName => &$commandData) { // Replace &$commandData with $commandData when alises fix for 1.2 won't be needed anymore
@@ -135,6 +137,9 @@ class AvailableCommandsPacket extends PEPacket{
 							$commandsStreams[$protocol]->putLInt(self::ARG_FLAG_VALID | self::getFlag($paramData['type'], $protocol));
                         }
 						$commandsStreams[$protocol]->putByte(isset($paramData['optional']) && $paramData['optional']);
+						if ($protocol == Info::PROTOCOL_340) {
+							$commandsStreams[$protocol]->putByte(0);
+						}
 					}
 				}
 			}
