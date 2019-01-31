@@ -172,4 +172,19 @@ class Leaves extends Transparent{
 
 		return $drops;
 	}
+	
+	public function getBreakTime(Item $item) {
+		if (!$this->canBeBrokenWith($item)) {
+			return -1;
+		}
+		$toolType = $this->getToolType();
+		switch ($toolType) {
+			case Tool::TYPE_SWORD:
+				return 0.2;
+			case Tool::TYPE_SHEARS:
+				return 0.05;
+			default:
+				return 0.35;
+		}
+	}
 }

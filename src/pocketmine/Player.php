@@ -3150,7 +3150,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($targets !== null) {
 			Server::broadcastPacket($targets, $pk);
 		} else {
-			$this->dataPacket($pk);
+			$this->directDataPacket($pk);
 		}
 	}
 
