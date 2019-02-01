@@ -414,6 +414,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/** @var string[][] - key - tick, value - packet's buffers array */
 	protected $delayedPackets = [];
 	protected $editingSignData = [];
+	protected $scoreboard = null;
 
 	public function getLeaveMessage(){
 		return "";
@@ -2893,10 +2894,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->entitiesUUIDEids = [];
 			$this->lastMoveBuffer = '';
 			unset($this->buffer);
-		}
-			
-			$this->perm->clearPermissions();
-			$this->server->removePlayer($this);
+			if (!is_null($this->scoreboard)) {
+				$this->scoreboard->removePlayer($this);
+			}
+		}			
+		$this->perm->clearPermissions();
+		$this->server->removePlayer($this);
 	}
 
 	public function __debugInfo(){
@@ -5446,5 +5449,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function needCheckMovementInBlock() {
 		return true;
 	}
-
+	
+	public function getScoreboard() {
+		return $this->scoreboard;
+	}
+	
+	public function setScoreboard($scoreboard) {
+		$this->scoreboard = $scoreboard;
+	}
 }
