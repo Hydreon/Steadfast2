@@ -267,14 +267,14 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public static function blockHash($x, $y, $z){
-		return PHP_INT_SIZE === 8 ? (($x & 0x7FFFFFF) << 36) | (($y & 0xff) << 28) | ($z & 0x7FFFFFF) : $x . ":" . $y .":". $z;
+		return PHP_INT_SIZE === 8 ? (($x & 0xFFFFFFF) << 36) | (($y & 0xFF) << 28) | ($z & 0xFFFFFFF) : $x . ":" . $y .":". $z;
 	}
 
 	public static function getBlockXYZ($hash, &$x, &$y, &$z){
 		if(PHP_INT_SIZE === 8){
-			$x = ($hash >> 36) & 0x7FFFFFF;
-			$y = (($hash >> 28) & 0xff);// << 57 >> 57; //it's always positive
-			$z = ($hash & 0x7FFFFFF);
+			$x = ($hash >> 36);
+			$y = (($hash >> 28) & 0xFF);// << 57 >> 57; //it's always positive
+			$z = ($hash & 0xFFFFFFF) << 36 >> 36;
 		}else{
 			$hash = explode(":", $hash);
 			$x = (int) $hash[0];
