@@ -97,6 +97,7 @@ class Furnace extends Tile implements InventoryHolder, Container, Nameable{
 	}
 
 	public function saveNBT(){
+		parent::saveNBT();
 		$this->namedtag->Items = new Enum("Items", []);
 		$this->namedtag->Items->setTagType(NBT::TAG_Compound);
 		for($index = 0; $index < $this->getSize(); ++$index){
