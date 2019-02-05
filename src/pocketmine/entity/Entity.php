@@ -62,6 +62,7 @@ use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
 use pocketmine\utils\ChunkException;
+use pocketmine\network\multiversion\Entity as Multiversion;
 
 abstract class Entity extends Location implements Metadatable{
 
@@ -495,12 +496,14 @@ abstract class Entity extends Location implements Metadatable{
 	 *
 	 * @return Entity
 	 */
-	public static function createEntity($type, FullChunk $chunk, Compound $nbt, ...$args){
+	public static function createEntity($type, FullChunk $chunk, Compound $nbt, ...$args) {
+		if (!is_numeric($type)) {
+			$type = Multiversion::getIDByName($type);
+		}
 		if(isset(self::$knownEntities[$type])){
 			$class = self::$knownEntities[$type];
 			return new $class($chunk, $nbt, ...$args);
 		}
-
 		return null;
 	}
 

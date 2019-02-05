@@ -1786,7 +1786,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$sign = $this->level->getTile(new Vector3($x, $y, $z));
 					if ($sign instanceof Sign) {
 						$this->checkSignChange($sign, $data);					
-					}					
+					}
 					unset($this->editingSignData[$hash]);
 				}
 				if ($this->dead !== true && $this->spawned === true) {
@@ -2442,7 +2442,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 				$t = $this->level->getTile($pos);
 				if ($t instanceof Sign) {
-					$this->editingSignData[Level::blockHash($packet->x, $packet->y, $packet->z)] = $packet->namedtag;					
+					$this->editingSignData[Level::blockHash($packet->x, $packet->y, $packet->z)] = $packet->namedtag;
 				}
 				//Timings::$timerTileEntityPacket->stopTiming();
 				break;
