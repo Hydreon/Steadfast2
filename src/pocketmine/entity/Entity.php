@@ -497,7 +497,7 @@ abstract class Entity extends Location implements Metadatable{
 	 * @return Entity
 	 */
 	public static function createEntity($type, FullChunk $chunk, Compound $nbt, ...$args) {
-		if (!is_numeric($type)) {
+		if (!is_numeric($type) && !isset(self::$knownEntities[$type])) {
 			$type = Multiversion::getIDByName($type);
 		}
 		if(isset(self::$knownEntities[$type])){
