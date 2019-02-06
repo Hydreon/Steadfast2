@@ -80,10 +80,7 @@ class Sign extends Spawnable{
 	public function getSpawnCompound(){
 		return new Compound("", [
 			new StringTag("id", Tile::SIGN),
-			$this->namedtag->Text1,
-			$this->namedtag->Text2,
-			$this->namedtag->Text3,
-			$this->namedtag->Text4,
+			new StringTag("Text", $this->namedtag->Text1 . "\n" . $this->namedtag->Text2 . "\n" . $this->namedtag->Text3 . "\n" . $this->namedtag->Text4),
 			new IntTag("x", (int) $this->x),
 			new IntTag("y", (int) $this->y),
 			new IntTag("z", (int) $this->z)
