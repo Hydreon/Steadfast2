@@ -38,6 +38,7 @@ use pocketmine\entity\ExperienceOrb;
 use pocketmine\entity\FallingSand;
 use pocketmine\entity\Human;
 use pocketmine\entity\Item as DroppedItem;
+use pocketmine\entity\Painting;
 use pocketmine\entity\PrimedTNT;
 use pocketmine\entity\projectile\BottleOEnchanting;
 use pocketmine\entity\Snowball;
@@ -2538,6 +2539,8 @@ class Server{
 		Entity::registerEntity(FireBall::class);
 		Entity::registerEntity(BottleOEnchanting::class);
 		Entity::registerEntity(ExperienceOrb::class);
+
+		Entity::registerEntity(Painting::class);
 	}
 
 	private function registerTiles(){
