@@ -412,6 +412,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $editingSignData = [];
 	protected $scoreboard = null;
 	protected $commandsData = [];
+	protected $joinCompleted = false;
 
 	public function getLeaveMessage(){
 		return "";
@@ -870,9 +871,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if (!is_null($this->beforeSpawnTeleportPosition)) {
 				$this->teleport($this->beforeSpawnTeleportPosition[0], $this->beforeSpawnTeleportPosition[1], $this->beforeSpawnTeleportPosition[2]);
 				$this->beforeSpawnTeleportPosition = null;
-			} else {
-				$this->nextChunkOrderRun = 0;
 			}			
+			$this->nextChunkOrderRun = 1;	
+			$this->joinCompleted = true;
 		}
 	}
 
@@ -3146,7 +3147,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if($targets !== null) {
 			Server::broadcastPacket($targets, $pk);
 		} else {
-			$this->directDataPacket($pk);
+			if ($this->joinCompleted) {
+				$this->directDataPacket($pk);
+			} else {
+				$this->dataPacket($pk);
+			}		
 		}
 	}
 
