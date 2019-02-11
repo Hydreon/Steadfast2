@@ -43,6 +43,20 @@ class Painting extends Entity {
 		}
 		parent::__construct($chunk, $nbt);
 		$this->fireTicks = 0;
+		switch($this->direction) {
+			case 0:
+				$this->tileZ -= 1;
+				break;
+			case 1:
+				$this->tileX += 1;
+				break;
+			case 2:
+				$this->tileZ += 1;
+				break;
+			case 3:
+				$this->tileX -= 1;
+				break;
+		}
 	}
 
 	public function spawnTo(Player $player) {
@@ -60,6 +74,10 @@ class Painting extends Entity {
 	}
 
 	public function setHealth($amount) {
+	}
+	
+	public function onUpdate($currentTick) {
+		return false;
 	}
 
 }
