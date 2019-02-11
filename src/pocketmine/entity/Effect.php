@@ -25,6 +25,7 @@ use pocketmine\entity\effects\InvisibilityEffect;
 use pocketmine\entity\effects\HarmingEffect;
 use pocketmine\entity\effects\HealingEffect;
 use pocketmine\entity\effects\HungerEffect;
+use pocketmine\entity\effects\LevitationEffect;
 use pocketmine\entity\effects\PoisonEffect;
 use pocketmine\entity\effects\RegenerationEffect;
 use pocketmine\entity\effects\SaturationEffect;
@@ -62,6 +63,7 @@ class Effect{
 	const HEALTH_BOOST = 21;
 	const ABSORPTION = 22;
 	const SATURATION = 23;
+	const LEVITATION = 23;
 
 	/** @var Effect[] */
 	protected static $effects;
@@ -92,6 +94,7 @@ class Effect{
 		self::$effects[Effect::HEALTH_BOOST] = new Effect(Effect::HEALTH_BOOST, "%potion.healthBoost", 248, 125, 35);
 		//Absorption
 		//Saturation
+		self::$effects[Effect::LEVITATION] = new LevitationEffect(Effect::LEVITATION, "%potion.levitation", 206, 255, 255);
 	}
 
 	/**

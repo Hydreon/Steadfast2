@@ -3,12 +3,13 @@
 namespace pocketmine\item;
 
 use pocketmine\block\Block;
-use pocketmine\entity\Minecart as MinecartEntity;
+use pocketmine\entity\Entity;
 use pocketmine\level\Level;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\Enum;
+use pocketmine\network\multiversion\Entity as Multiversion;
 use pocketmine\Player;
 
 class Minecart extends Item {
@@ -22,41 +23,47 @@ class Minecart extends Item {
 	}
 
 	public function onActivate(Level $level, Player $player, Block $block, Block $target, $face, $fx, $fy, $fz) {
-		$chunk = $player->getLevel()->getChunk($block->getX() >> 4,  $block->getZ() >> 4, true);
-		$minecart = new MinecartEntity($chunk, new Compound("", [
-			"Pos" => new Enum("Pos", [
-				new DoubleTag("", $block->getX()),
-				new DoubleTag("", $block->getY()),
-				new DoubleTag("", $block->getZ())
-					]),
-			"Motion" => new Enum("Motion", [
-				new DoubleTag("", 0),
-				new DoubleTag("", 0),
-				new DoubleTag("", 0)
-					]),
-			"Rotation" => new Enum("Rotation", [
-				new FloatTag("", 0),
-				new FloatTag("", 0)
-					]),
-		]));
-		$minecart->spawnToAll();
-		if ($player->isSurvival()) {
-			$item = $player->getInventory()->getItemInHand();
-			$count = $item->getCount();
-			if (--$count <= 0) {
-				$player->getInventory()->setItemInHand(Item::get(Item::AIR));
-				return true;
+		if (self::isRail($target->getId())) {
+			$chunk = $player->getLevel()->getChunk($block->getX() >> 4,  $block->getZ() >> 4, true);
+			$nbt = new Compound("", [
+				"Pos" => new Enum("Pos", [
+					new DoubleTag("", $target->getX() + 0.5),
+					new DoubleTag("", $target->getY()),
+					new DoubleTag("", $target->getZ() + 0.5)
+				]),
+				"Motion" => new Enum("Motion", [
+					new DoubleTag("", 0),
+					new DoubleTag("", 0),
+					new DoubleTag("", 0)
+				]),
+				"Rotation" => new Enum("Rotation", [
+					new FloatTag("", 0),
+					new FloatTag("", 0)
+				]),
+			]);
+			$minecart = Entity::createEntity(Multiversion::ID_MINECART, $chunk, $nbt);
+			$minecart->spawnToAll();
+			if ($player->isSurvival()) {
+				$item = $player->getInventory()->getItemInHand();
+				$count = $item->getCount();
+				if (--$count <= 0) {
+					$player->getInventory()->setItemInHand(Item::get(Item::AIR));
+					return true;
+				}
+
+				$item->setCount($count);
+				$player->getInventory()->setItemInHand($item);
 			}
-
-			$item->setCount($count);
-			$player->getInventory()->setItemInHand($item);
 		}
-
 		return true;
 	}
 	
 	public function getMaxStackSize() {
 		return 1;
+	}
+
+	private static function isRail($blockId) {
+		return in_array($blockId, [Block::RAIL, Block::ACTIVATOR_RAIL, Block::DETECTOR_RAIL, Block::POWERED_RAIL]);
 	}
 
 }
