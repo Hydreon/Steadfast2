@@ -39,7 +39,25 @@ use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 
 
-class Block extends Position implements Metadatable{
+class Block extends Position implements Metadatable {
+
+	const COLOR_WHITE = 0;
+	const COLOR_ORANGE = 1;
+	const COLOR_MAGENTA = 2;
+	const COLOR_LIGHT_BLUE = 3;
+	const COLOR_YELLOW = 4;
+	const COLOR_LIME = 5;
+	const COLOR_PINK = 6;
+	const COLOR_GRAY = 7;
+	const COLOR_LIGHT_GRAY = 8;
+	const COLOR_CYAN = 9;
+	const COLOR_PURPLE = 10;
+	const COLOR_BLUE = 11;
+	const COLOR_BROWN = 12;
+	const COLOR_GREEN = 13;
+	const COLOR_RED = 14;
+	const COLOR_BLACK = 15;
+
 	const AIR = 0;
 	const STONE = 1;
 	const GRASS = 2;
@@ -1237,22 +1255,22 @@ class Block extends Position implements Metadatable{
 
 	protected function getColorNameByMeta($meta) {
 		static $colors = [
-			0 => "White",
-			1 => "Orange",
-			2 => "Magenta",
-			3 => "Light Blue",
-			4 => "Yellow",
-			5 => "Lime",
-			6 => "Pink",
-			7 => "Gray",
-			8 => "Light Gray",
-			9 => "Cyan",
-			10 => "Purple",
-			11 => "Blue",
-			12 => "Brown",
-			13 => "Green",
-			14 => "Red",
-			15 => "Black"
+			self::COLOR_WHITE => "White",
+			self::COLOR_ORANGE => "Orange",
+			self::COLOR_MAGENTA => "Magenta",
+			self::COLOR_LIGHT_BLUE => "Light Blue",
+			self::COLOR_YELLOW => "Yellow",
+			self::COLOR_LIME => "Lime",
+			self::COLOR_PINK => "Pink",
+			self::COLOR_GRAY => "Gray",
+			self::COLOR_LIGHT_GRAY => "Light Gray",
+			self::COLOR_CYAN => "Cyan",
+			self::COLOR_PURPLE => "Purple",
+			self::COLOR_BLUE => "Blue",
+			self::COLOR_BROWN => "Brown",
+			self::COLOR_GREEN => "Green",
+			self::COLOR_RED => "Red",
+			self::COLOR_BLACK => "Black"
 		];
 		return $colors[$meta & 0x0f];
 	}

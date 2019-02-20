@@ -1054,7 +1054,9 @@ class Item{
 		self::addCreativeItem(Item::get(Item::TRAPDOOR, 0));
 		self::addCreativeItem(Item::get(Item::IRON_BARS, 0));	
 		self::addCreativeItem(Item::get(Item::GLASS, 0));
+		self::addColoredCreativeItem(self::STAINED_GLASS);
 		self::addCreativeItem(Item::get(Item::GLASS_PANE, 0));
+		self::addColoredCreativeItem(self::STAINED_GLASS_PANE);
 		self::addCreativeItem(Item::get(Item::LADDER, 0));		
 		
 		self::addCreativeItem(Item::get(Item::SLAB, 0));
@@ -1098,58 +1100,12 @@ class Item{
 		self::addCreativeItem(Item::get(Item::BONE_BLOCK, 0));
 		self::addCreativeItem(Item::get(Item::NETHER_BRICKS, 0));
 		
-		self::addCreativeItem(Item::get(Item::WOOL, 0));
-		self::addCreativeItem(Item::get(Item::WOOL, 7));
-		self::addCreativeItem(Item::get(Item::WOOL, 6));
-		self::addCreativeItem(Item::get(Item::WOOL, 5));
-		self::addCreativeItem(Item::get(Item::WOOL, 4));
-		self::addCreativeItem(Item::get(Item::WOOL, 3));
-		self::addCreativeItem(Item::get(Item::WOOL, 2));
-		self::addCreativeItem(Item::get(Item::WOOL, 1));
-		self::addCreativeItem(Item::get(Item::WOOL, 15));
-		self::addCreativeItem(Item::get(Item::WOOL, 14));
-		self::addCreativeItem(Item::get(Item::WOOL, 13));
-		self::addCreativeItem(Item::get(Item::WOOL, 12));
-		self::addCreativeItem(Item::get(Item::WOOL, 11));
-		self::addCreativeItem(Item::get(Item::WOOL, 10));
-		self::addCreativeItem(Item::get(Item::WOOL, 9));
-		self::addCreativeItem(Item::get(Item::WOOL, 8));
-		
-		self::addCreativeItem(Item::get(Item::CARPET, 0));
-		self::addCreativeItem(Item::get(Item::CARPET, 7));
-		self::addCreativeItem(Item::get(Item::CARPET, 6));
-		self::addCreativeItem(Item::get(Item::CARPET, 5));
-		self::addCreativeItem(Item::get(Item::CARPET, 4));
-		self::addCreativeItem(Item::get(Item::CARPET, 3));
-		self::addCreativeItem(Item::get(Item::CARPET, 2));
-		self::addCreativeItem(Item::get(Item::CARPET, 1));
-		self::addCreativeItem(Item::get(Item::CARPET, 15));
-		self::addCreativeItem(Item::get(Item::CARPET, 14));
-		self::addCreativeItem(Item::get(Item::CARPET, 13));
-		self::addCreativeItem(Item::get(Item::CARPET, 12));
-		self::addCreativeItem(Item::get(Item::CARPET, 11));
-		self::addCreativeItem(Item::get(Item::CARPET, 10));
-		self::addCreativeItem(Item::get(Item::CARPET, 9));
-		self::addCreativeItem(Item::get(Item::CARPET, 8));
+		self::addColoredCreativeItem(Item::WOOL);
+		self::addColoredCreativeItem(Item::CARPET);
 		
 		self::addCreativeItem(Item::get(Item::CLAY_BLOCK, 0));
 		self::addCreativeItem(Item::get(Item::HARDENED_CLAY, 0));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 0));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 7));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 6));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 5));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 4));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 3));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 2));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 1));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 15));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 14));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 13));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 12));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 11));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 10));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 9));
-		self::addCreativeItem(Item::get(Item::STAINED_CLAY, 8));
+		self::addColoredCreativeItem(Item::STAINED_CLAY);
 		
 		self::addCreativeItem(Item::get(Item::PURPUR_BLOCK, 0));
 		self::addCreativeItem(Item::get(Item::DIRT, 0));
@@ -1226,22 +1182,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::RED_FLOWER, Flower::TYPE_PINK_TULIP));
 		self::addCreativeItem(Item::get(Item::RED_FLOWER, Flower::TYPE_OXEYE_DAISY));
 
-		self::addCreativeItem(Item::get(Item::DYE, 7));
-		self::addCreativeItem(Item::get(Item::DYE, 8));
-		self::addCreativeItem(Item::get(Item::DYE, 0));
-		self::addCreativeItem(Item::get(Item::DYE, 1));
-		self::addCreativeItem(Item::get(Item::DYE, 14));
-		self::addCreativeItem(Item::get(Item::DYE, 11));
-		self::addCreativeItem(Item::get(Item::DYE, 10));
-		self::addCreativeItem(Item::get(Item::DYE, 2));
-		self::addCreativeItem(Item::get(Item::DYE, 6));
-		self::addCreativeItem(Item::get(Item::DYE, 12));
-		self::addCreativeItem(Item::get(Item::DYE, 4));
-		self::addCreativeItem(Item::get(Item::DYE, 5));
-		self::addCreativeItem(Item::get(Item::DYE, 13));
-		self::addCreativeItem(Item::get(Item::DYE, 9));
-		self::addCreativeItem(Item::get(Item::DYE, 15));
-		self::addCreativeItem(Item::get(Item::DYE, 3));
+		self::addColoredCreativeItem(Item::DYE);
 		
 		self::addCreativeItem(Item::get(Item::VINES, 0));
 		self::addCreativeItem(Item::get(Item::WATER_LILY, 0));
@@ -1406,8 +1347,27 @@ class Item{
 		
 		self::addCreativeItem(Item::get(Item::REDSTONE, 0));
 		self::addCreativeItem(Item::get(Item::REDSTONE_BLOCK, 0));
-		self::addCreativeItem(Item::get(Item::TNT, 0));	
+		self::addCreativeItem(Item::get(Item::TNT, 0));
 		
+	}
+
+	private static function addColoredCreativeItem($itemId) {
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_WHITE));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_ORANGE));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_MAGENTA));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_LIGHT_BLUE));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_YELLOW));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_LIME));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_PINK));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_GRAY));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_LIGHT_GRAY));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_CYAN));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_PURPLE));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_BLUE));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_BROWN));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_GREEN));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_RED));
+		self::addCreativeItem(Item::get($itemId, Block::COLOR_BLACK));
 	}
 	
 	private static function initFood(){

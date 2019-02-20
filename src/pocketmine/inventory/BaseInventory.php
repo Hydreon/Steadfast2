@@ -466,4 +466,16 @@ abstract class BaseInventory implements Inventory{
 		return $this->type;
 	}
 
+	public function isEmpty() {
+		if (!empty($this->slots)) {
+			$size = $this->getSize();
+			for ($i = 0; $i < $size; $i++) {
+				if (isset($this->slots[$i]) && $this->slots[$i] instanceof Item && $this->slots[$i]->getId() !== Item::AIR) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 }
