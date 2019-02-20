@@ -41,7 +41,7 @@ class Minecart extends Item {
 					new FloatTag("", 0)
 				]),
 			]);
-			$minecart = Entity::createEntity(Multiversion::ID_MINECART, $chunk, $nbt);
+			$minecart = Entity::createEntity("Minecart", $chunk, $nbt);
 			$minecart->spawnToAll();
 			if ($player->isSurvival()) {
 				$item = $player->getInventory()->getItemInHand();
