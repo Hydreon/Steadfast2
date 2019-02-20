@@ -155,6 +155,7 @@ use pocketmine\entity\projectile\FireBall;
 use pocketmine\utils\MetadataConvertor;
 use pocketmine\event\server\SendRecipiesList;
 use pocketmine\network\protocol\PEPacket;
+use pocketmine\tile\Beacon;
 
 /**
  * The class that manages everything
@@ -2567,6 +2568,7 @@ class Server{
 		Tile::registerTile(ItemFrame::class);
 		Tile::registerTile(Dropper::class);
 		Tile::registerTile(Hopper::class);
+		Tile::registerTile(Beacon::class);
 	}
 
 	public function shufflePlayers(){
