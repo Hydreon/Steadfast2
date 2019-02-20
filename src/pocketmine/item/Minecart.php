@@ -54,8 +54,9 @@ class Minecart extends Item {
 				$item->setCount($count);
 				$player->getInventory()->setItemInHand($item);
 			}
+			return true;
 		}
-		return true;
+		return false;
 	}
 	
 	public function getMaxStackSize() {
