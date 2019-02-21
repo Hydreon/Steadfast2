@@ -413,6 +413,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $scoreboard = null;
 	protected $commandsData = [];
 	protected $joinCompleted = false;
+	protected $platformChatId = "";
 
 	public function getLeaveMessage(){
 		return "";
@@ -1786,6 +1787,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->originalProtocol = $packet->originalProtocol;
 					
 				$this->identityPublicKey = $packet->identityPublicKey;
+				$this->platformChatId = $packet->platformChatId;
 				$this->processLogin();
 				//Timings::$timerLoginPacket->stopTiming();
 				break;
@@ -5083,6 +5085,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->serverAddress = $parent->serverAddress;
 		$this->clientVersion = $parent->clientVersion;
 		$this->originalProtocol = $parent->originalProtocol;
+		$this->platformChatId = $parent->platformChatId;
 
 		$this->identityPublicKey = $packet->identityPublicKey;
 		
@@ -5215,7 +5218,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->dataPacket($packet);
 	}
 	
-	
+	 
 	protected function changeHeldItem($item, $selectedSlot, $slot) {
 		$hotbarItem = $this->inventory->getHotbatSlotItem($selectedSlot);
 		$isNeedSendToHolder = !($hotbarItem->deepEquals($item));
