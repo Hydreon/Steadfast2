@@ -47,6 +47,7 @@ class TextPacket extends PEPacket{
 	public $isLocolize = false;
 	public $xuid = '';
 	public $authorXUID = "";
+	public $platformChatId = "";
 
 	public function decode($playerProtocol){
 		$this->getHeader($playerProtocol);
@@ -86,7 +87,7 @@ class TextPacket extends PEPacket{
 		if ($playerProtocol >= Info::PROTOCOL_120) {
 			$this->xuid = $this->getString();
 			if ($playerProtocol >= Info::PROTOCOL_200) {
-				$this->getString(); // platform id
+				$this->platformChatId = $this->getString(); // platform id
 			}
 		}
 	}
@@ -129,10 +130,9 @@ class TextPacket extends PEPacket{
 				break;
 		}
 		if ($playerProtocol >= Info::PROTOCOL_120) {
-//			$this->putString('');//temp hack for prevent xbox and chat lags
 			$this->putString($this->xuid);
 			if ($playerProtocol >= Info::PROTOCOL_200) {
-				$this->putString(""); // platform id
+				$this->putString($this->platformChatId); // platform id
 			}
 		}
 	}
