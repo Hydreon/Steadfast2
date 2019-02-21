@@ -86,6 +86,7 @@ use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\network\query\QueryHandler;
 use pocketmine\network\RakLibInterface;
+use pocketmine\network\ProxyInterface;
 use pocketmine\network\rcon\RCON;
 use pocketmine\network\SourceInterface;
 use pocketmine\network\upnp\UPnP;
@@ -302,6 +303,18 @@ class Server{
 	public function removeSpawnedEntity($entity) {
 		unset($this->spawnedEntity[$entity->getId()]);
 	}
+	public function despawnEntitiesForPlayer($player) {
+		foreach ($this->spawnedEntity as $entity) {
+			if ($entity->isSpawned($player)) {
+				$entity->despawnFrom($player);
+			}
+		}
+		foreach ($this->playerList as $p) {
+			if ($p->isSpawned($player)) {
+				$p->despawnFrom($player);
+			}
+		}
+	}
 
 	public function isUseAnimal() {
 		return $this->useAnimal;
@@ -395,7 +408,14 @@ class Server{
 	public function getPort(){
 		return $this->getConfigInt("server-port", 19132);
 	}
-	
+
+	/**
+	 * @return int
+	 */
+	public function getProxyPort(){
+		return $this->getConfigInt("proxy-port", 10305);
+	}
+
 	/**
 	 * @return int
 	 */
@@ -1511,6 +1531,7 @@ class Server{
 		$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, [
 			"motd" => "Minecraft: PE Server",
 			"server-port" => 19132,
+			"proxy-port" => 10305,
 			"memory-limit" => "256M",
 			"white-list" => false,
 			"spawn-protection" => 16,
@@ -1535,6 +1556,8 @@ class Server{
 			"auto-save" => true,
 			"auto-generate" => false,
 			"save-player-data" => false,
+			"use-proxy" => false,
+			"use-raklib" => true,
 			"time-update" => true,
 			"use-encrypt" => false
 		]);
@@ -1605,8 +1628,20 @@ class Server{
 		$this->logger->info("Starting Minecraft PE server on " . ($this->getIp() === "" ? "*" : $this->getIp()) . ":" . $this->getPort());
 		define("BOOTUP_RANDOM", @Utils::getRandomBytes(16));
 		$this->serverID = Utils::getMachineUniqueId($this->getIp() . $this->getPort());
-	
-		$this->addInterface($this->mainInterface = new RakLibInterface($this));
+
+
+
+		$useRaklib = $this->getConfigBoolean("use-raklib", true);
+		$useProxy = $this->getConfigBoolean("use-proxy", false);
+		if ($useRaklib) {
+			$this->addInterface($this->mainInterface = new RakLibInterface($this));
+		}
+		if ($useProxy) {
+			$this->addInterface($proxyInterface= new ProxyInterface($this));
+			if (!$useRaklib) {
+				$this->mainInterface = $proxyInterface;
+			}
+		}
 
 		$this->logger->info("This server is running " . $this->getName() . " version " . ($version->isDev() ? TextFormat::YELLOW : "") . $version->get(true) . TextFormat::WHITE . " \"" . $this->getCodename() . "\" (API " . $this->getApiVersion() . ")");
 		$this->logger->info($this->getName() . " is distributed under the LGPL License");

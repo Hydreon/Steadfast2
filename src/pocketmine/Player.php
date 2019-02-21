@@ -159,6 +159,13 @@ use pocketmine\network\protocol\SetTitlePacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
 
+use pocketmine\network\proxy\Info as ProtocolProxyInfo;
+use pocketmine\network\proxy\DisconnectPacket as ProxyDisconnectPacket;
+use pocketmine\network\ProxyInterface;
+use pocketmine\network\proxy\RedirectPacket;
+use pocketmine\network\proxy\ProxyPacket;
+
+
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\Protocol120;
 use pocketmine\inventory\PlayerInventory120;
@@ -310,7 +317,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $lastMessageReceivedFrom = "";
 	
 	protected $identifier;
-	
+
+	public $proxyId = '';
+	public $proxySessionId = '';
+
+	protected $closeFromProxy = false;
+
 	protected static $availableCommands = [];
 	
 	protected $movementSpeed = self::DEFAULT_SPEED;
@@ -938,7 +950,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 *
 	 * @return int|bool
 	 */
-	public function dataPacket(DataPacket $packet){		
+	public function dataPacket(DataPacket $packet){
+		if (!($this->interface instanceof ProxyInterface) && ($packet instanceof ProxyPacket)) {
+			return;
+		}
 		if($this->connected === false){
 			return false;
 		}
@@ -2795,10 +2810,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		$this->tasks = [];
 		if($this->connected and !$this->closed){
-			$pk = new DisconnectPacket;
-			$pk->message = $reason;
-			$this->directDataPacket($pk);
-			$this->connected = false;
+			if (!$this->closeFromProxy) {
+				if ($this->interface instanceof ProxyInterface) {
+					$pk = new ProxyDisconnectPacket();
+					$this->dataPacket($pk);
+					$this->connected = false;
+				} else {
+					$pk = new DisconnectPacket;
+					$pk->message = $reason;
+					$this->directDataPacket($pk);
+					$this->connected = false;
+				}
+			}
 			if($this->username != ""){
 				$this->server->getPluginManager()->callEvent($ev = new PlayerQuitEvent($this, $message, $reason));
 				if($this->server->getSavePlayerData() and $this->loggedIn === true){
@@ -2806,6 +2829,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 			}
 
+			//$this->server->despawnEntitiesForPlayer($this);
 			foreach($this->server->getOnlinePlayers() as $player){
 				if(!$player->canSee($this)){
 					$player->showPlayer($this);
@@ -3294,9 +3318,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	public function getLastMessageFrom() {
 		return $this->lastMessageReceivedFrom;
 	}
-	
-	public function setIdentifier($identifier){
+
+	public function setIdentifier($identifier, $id = '', $sessionId = ''){
 		$this->identifier = $identifier;
+		$this->proxyId = $id;
+		$this->proxySessionId = $sessionId;
 	}
 	
 	public function getIdentifier(){
@@ -3328,9 +3354,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function continueLoginProcess() {
-		$pk = new PlayStatusPacket();
-		$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
-		$this->dataPacket($pk);			
+		if (!($this->interface instanceof ProxyInterface)) {
+			$pk = new PlayStatusPacket();
+			$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
+			$this->dataPacket($pk);
+		}
 		
 		$modsManager = $this->server->getModsManager();
 		$pk = new ResourcePacksInfoPacket();
@@ -3525,17 +3553,70 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 //		$this->getInventory()->addItem(Item::get(Item::ENCHANTMENT_TABLE), Item::get(Item::DYE, 4, 64), Item::get(Item::IRON_AXE), Item::get(Item::IRON_SWORD));
 	}
 
-	
+	public function handleProxyDataPacket($packet) {
+		var_dump("in proxyPacket...PID = ".$packet->pid());
+		if ($packet->pid() === ProtocolProxyInfo::CONNECT_PACKET) {
+			if ($this->loggedIn === true) {
+				return;
+			}
+			if ($packet->isValidProtocol === false) {
+				$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
+				return;
+			}
+
+			$this->username = TextFormat::clean($packet->username);
+			$this->displayName = $this->username;
+			$this->setNameTag($this->username);
+			$this->iusername = strtolower($this->username);
+
+			$this->randomClientId = $packet->clientId;
+			$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
+			$this->uuid = $packet->clientUUID;
+			$this->rawUUID = $this->uuid->toBinary();
+			$this->clientSecret = $packet->clientSecret;
+			$this->protocol = $packet->protocol;
+			$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $pakcet->skinGeometryData);
+			$this->setViewRadius((int) ($packet->viewDistance / 2));
+			$this->ip = $packet->ip;
+			$this->port = $packet->port;
+			$this->isFirstConnect = $packet->isFirst;
+			$this->deviceType = $packet->deviceOSType;
+			$this->inventoryType = $packet->inventoryType;
+			$this->xuid = $packet->XUID;
+			$this->processLogin();
+			$this->completeLogin();
+		} elseif ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
+			$this->removeAllEffects();
+//			$this->server->clearPlayerList($this);
+			$this->closeFromProxy = true;
+			$this->close('', $packet->reason);
+		} elseif ($packet->pid() === ProtocolProxyInfo::PING_PACKET) {
+			$this->setPing($packet->ping);
+		}
+	}
+
+
+
 	public function getInterface() {
 		return $this->interface;
 	}
 	
 	public function transfer($address, $port = false) {
-		$pk = new TransferPacket();
-		$pk->ip = $address;
-		$pk->port = ($port === false ? 19132 : $port);
-		$this->dataPacket($pk);
-		$this->isTransfered = true;
+		if ($this->isAvailableTansferPacket()) {
+			$pk = new TransferPacket();
+			$pk->ip = $address;
+			$pk->port = ($port === false ? 19132 : $port);
+			$this->dataPacket($pk);
+		} else {
+			$pk = new RedirectPacket();
+			$pk->ip = $address;
+			$pk->port = ($port === false ? 10305 : $port);
+			$this->dataPacket($pk);
+		}
+	}
+
+	public function isAvailableTansferPacket() {
+		return ($this->protocol >= 101);
 	}
 	
 	public function sendSelfData() {
