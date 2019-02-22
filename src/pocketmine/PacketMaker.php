@@ -10,6 +10,8 @@ use pocketmine\network\protocol\BatchPacket;
 use pocketmine\network\protocol\MoveEntityPacket;
 use pocketmine\network\protocol\SetEntityMotionPacket;
 use pocketmine\network\protocol\MovePlayerPacket;
+use pocketmine\network\proxylib\ProxyServer;
+use pocketmine\network\ProxyInterface;
 
 class PacketMaker extends Thread {
 
@@ -96,7 +98,7 @@ class PacketMaker extends Thread {
 			$pkBatch->payload = $buffer;
 			$pkBatch->encode($moveData['playerProtocol']);
 			$pkBatch->isEncoded = true;
-			$this->sendData($identifier, $pkBatch->getBuffer());
+			$this->sendData($identifier, $pkBatch->getBuffer(), $moveData);
 		}
 		foreach ($data['motionData'] as $identifier => $motionData) {
 			$motionStr = "";
@@ -113,16 +115,22 @@ class PacketMaker extends Thread {
 			$pkBatch->payload = $buffer;
 			$pkBatch->encode($motionData['playerProtocol']);
 			$pkBatch->isEncoded = true;
-			$this->sendData($identifier, $pkBatch->getBuffer());
+			$this->sendData($identifier, $pkBatch->getBuffer(), $motionData);
 		}
 	}
 
-	protected function sendData($identifier, $buffer) {
-		$pk = new EncapsulatedPacket();
-		$pk->buffer = $buffer;
-		$pk->reliability = 3;
-		$enBuffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($identifier)) . $identifier . chr(RakLib::PRIORITY_NORMAL) . $pk->toBinary(true);
-		$this->raklib->pushMainToThreadPacket($enBuffer);
+	protected function sendData($identifier, $buffer, $data) {
+		if ($this->raklib instanceof ProxyServer) {
+			$infoData = chr(ProxyInterface::PLAYER_PACKET_ID) . pack('N', $data['proxySessionId']) . chr(ProxyInterface::STANDART_PACKET_ID) . $buffer;
+			$info = chr(strlen($data['proxyId'])) . $data['proxyId'] . $infoData;
+			$this->raklib->writeToProxyServer($info);
+		} else {
+			$pk = new EncapsulatedPacket();
+			$pk->buffer = $buffer;
+			$pk->reliability = 3;
+			$enBuffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($identifier)) . $identifier . chr(RakLib::PRIORITY_NORMAL) . $pk->toBinary(true);
+			$this->raklib->pushMainToThreadPacket($enBuffer);
+		}
 	}
 
 }

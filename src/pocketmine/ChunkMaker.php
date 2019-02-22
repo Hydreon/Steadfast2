@@ -5,6 +5,8 @@ namespace pocketmine;
 use raklib\protocol\EncapsulatedPacket;
 use raklib\RakLib;
 use pocketmine\network\protocol\DataPacket;
+use pocketmine\network\proxylib\ProxyServer;
+use pocketmine\network\ProxyInterface;
 
 class ChunkMaker extends Thread {
 
@@ -38,12 +40,19 @@ class ChunkMaker extends Thread {
 		new ChunkStorage($this);
 	}
 
-	public function sendData($identifier, $buffer) {
-		$pk = new EncapsulatedPacket();
-		$pk->buffer = $buffer;
-		$pk->reliability = 3;
-		$enBuffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($identifier)) . $identifier . chr(RakLib::PRIORITY_NORMAL) . $pk->toBinary(true);
-		$this->raklib->pushMainToThreadPacket($enBuffer);
+	public function sendData($data, $buffer) {
+		if ($this->raklib instanceof ProxyServer) {
+			$infoData = chr(ProxyInterface::PLAYER_PACKET_ID) . pack('N', $data['proxySessionId']) . chr(ProxyInterface::STANDART_PACKET_ID) . $buffer;
+			$info = chr(strlen($data['proxyId'])) . $data['proxyId'] . $infoData;
+			$this->raklib->writeToProxyServer($info);
+		} else {
+			$identifier = $data['identifier'];
+			$pk = new EncapsulatedPacket();
+			$pk->buffer = $buffer;
+			$pk->reliability = 3;
+			$enBuffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($identifier)) . $identifier . chr(RakLib::PRIORITY_NORMAL) . $pk->toBinary(true);
+			$this->raklib->pushMainToThreadPacket($enBuffer);
+		}
 	}
 
 	public function pushMainToThreadPacket($data) {

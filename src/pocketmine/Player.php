@@ -962,7 +962,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$packet->senderSubClientID = $this->subClientId;
 			return $this->parent->dataPacket($packet);
 		}
-
+		
+		if ($packet instanceof ProxyPacket) {
+			$this->interface->putPacket($this, $packet->getBuffer(), true);
+			return;
+		}
+		
 		switch($packet->pname()){
 			case 'CONTAINER_SET_CONTENT_PACKET':
 				$winId = $packet->windowid;
@@ -1092,6 +1097,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		if ($this->subClientId > 0 && $this->parent != null) {
 			$packet->senderSubClientID = $this->subClientId;
 			return $this->parent->dataPacket($packet);
+		}
+		
+		if ($packet instanceof ProxyPacket) {
+			$this->interface->putPacket($this, $packet->getBuffer(), true);
+			return;
 		}
 		
 		$packet->encode($this->protocol);
@@ -3554,7 +3564,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function handleProxyDataPacket($packet) {
-		var_dump("in proxyPacket...PID = ".$packet->pid());
+//		var_dump("in proxyPacket...PID = ".$packet->pid());
 		if ($packet->pid() === ProtocolProxyInfo::CONNECT_PACKET) {
 			if ($this->loggedIn === true) {
 				return;
@@ -3575,7 +3585,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->rawUUID = $this->uuid->toBinary();
 			$this->clientSecret = $packet->clientSecret;
 			$this->protocol = $packet->protocol;
-			$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $pakcet->skinGeometryData);
+			$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData);
 			$this->setViewRadius((int) ($packet->viewDistance / 2));
 			$this->ip = $packet->ip;
 			$this->port = $packet->port;
@@ -3583,8 +3593,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->deviceType = $packet->deviceOSType;
 			$this->inventoryType = $packet->inventoryType;
 			$this->xuid = $packet->XUID;
+			$this->inventory = Multiversion::getPlayerInventory($this);
 			$this->processLogin();
-			$this->completeLogin();
+//			$this->completeLogin();
 		} elseif ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
 			$this->removeAllEffects();
 //			$this->server->clearPlayerList($this);

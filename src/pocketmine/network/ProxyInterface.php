@@ -103,7 +103,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 				$type = ord($buffer{0});
 				$buffer = substr($buffer, 1);
 				if ($type == self::STANDART_PACKET_ID) {
-					$pk = $this->getPacket($buffer, $player->getPlayerProtocol());
+					$pk = $this->getPacket($buffer, $player);
 					if ($pk === false) {
 						return;
 					}
@@ -192,19 +192,14 @@ class ProxyInterface implements AdvancedSourceInterface {
 		$player->setIdentifier($identifier, $id, $sessionId);
 		$this->server->addPlayer($identifier, $player);
 	}
-
-	public function putPacket(Player $player, DataPacket $packet, $needACK = false, $immediate = false) {
+	
+	public function putPacket(Player $player, $buffer, $isProxyPacket = false) {
 		if (isset($this->session[$player->getIdentifier()])) {
-			if (!$packet->isEncoded) {
-				$packet->encode($player->getPlayerProtocol());
-			}
-			if ($packet instanceof ProxyPacket) {
-				$type = chr(self::PROXY_PACKET_ID);
+			if ($isProxyPacket) {
+				$infoData =  chr(static::PLAYER_PACKET_ID) . pack('N', $player->proxySessionId) . chr(self::PROXY_PACKET_ID) . $buffer;	
 			} else {
-				$type = chr(self::STANDART_PACKET_ID);
-			}
-
-			$infoData =  chr(static::PLAYER_PACKET_ID) . pack('N', $player->proxySessionId) . $type . $packet->buffer;			
+				$infoData =  chr(static::PLAYER_PACKET_ID) . pack('N', $player->proxySessionId) . chr(self::STANDART_PACKET_ID) . zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);	
+			}		
 			$info = chr(strlen($player->proxyId)) . $player->proxyId . $infoData;
 			
 			$this->proxyServer->writeToProxyServer($info);
@@ -223,7 +218,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 		}
 	}
 
-	private function getPacket($buffer, $playerProtocol) {
+	private function getPacket($buffer, $player) {
 		if (ord($buffer{0}) == 0xfe) {
 			$buffer = substr($buffer, 1);
 			if (empty($buffer)) {
@@ -233,12 +228,16 @@ class ProxyInterface implements AdvancedSourceInterface {
 		} else {
 			return false;
 		}
-
-		if (($data = $this->server->getNetwork()->getPacket($pid, $playerProtocol)) === null) {
+		if ($pid == 0x13) { //speed hack
+			$player->setLastMovePacket($buffer);
 			return null;
 		}
 
-		$data->setBuffer($buffer, 1);
+		if (($data = $this->server->getNetwork()->getPacket($pid, $player->getPlayerProtocol())) === null) {
+			return null;
+		}
+
+		$data->setBuffer($buffer);
 
 		return $data;
 	}

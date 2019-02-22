@@ -66,8 +66,10 @@ class ProxyServer extends Worker {
 		$this->externalQueue[] = $data;
 	}
 
-	public function writeToProxyServer($data) {
-		$this->internalQueue[] = $data;
+	public function writeToProxyServer($str) {
+		$this->internalQueue->synchronized(function($queue, $str) {
+			$queue[] = $str;
+		}, $this->internalQueue, $str);
 	}
 
 	public function readFromInternaQueue() {

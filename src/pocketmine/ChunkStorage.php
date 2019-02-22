@@ -51,7 +51,7 @@ class ChunkStorage {
 
 	protected function sendFromCache($data) {
 		$buffer = $this->getCache(Level::chunkHash($data['chunkX'], $data['chunkZ']), ($data['protocol'] << 4) | $data['subClientId']);
-		$this->server->sendData($data['identifier'], $buffer);
+		$this->server->sendData($data, $buffer);
 	}
 
 	protected function doChunk($data) {
@@ -137,7 +137,7 @@ class ChunkStorage {
 		$pk->encode($protocol);
 		$buffer = $pk->getBuffer();
 		$buffer = zlib_encode(Binary::writeVarInt(strlen($buffer)) . $buffer, ZLIB_ENCODING_DEFLATE, 7);
-		$this->server->sendData($data['identifier'], $buffer);
+		$this->server->sendData($data, $buffer);
 		$this->setCache(Level::chunkHash($data['chunkX'], $data['chunkZ']), ($protocol << 4) | $subClientId, $buffer);
 	}
 
