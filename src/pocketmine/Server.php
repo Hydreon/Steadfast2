@@ -2326,7 +2326,7 @@ class Server{
 				}elseif($recipe instanceof FurnaceRecipe) {
 					$pk->addFurnaceRecipe($recipe);
 				}
-			}		
+			}
 			
 			$pk->encode($p->getPlayerProtocol(), $p->getSubClientId());
 			$bpk = new BatchPacket();
@@ -2335,7 +2335,7 @@ class Server{
 			$bpk->encode($p->getPlayerProtocol());
 			$this->craftList[$p->getPlayerProtocol()] = $bpk->getBuffer();
 		}
-		// $p->getInterface()->putReadyPacket($p, $this->craftList[$p->getPlayerProtocol()]);
+		$p->getInterface()->putReadyPacket($p, $this->craftList[$p->getPlayerProtocol()]);
 	}
 
 	public function addPlayer($identifier, Player $player){

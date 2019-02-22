@@ -155,6 +155,9 @@ class CraftingDataPacket extends PEPacket{
 			if($entryType >= 0){
 				$this->putSignedVarInt($entryType);
 				$this->put($writer->getBuffer());
+				if ($playerProtocol >= Info::PROTOCOL_350) {
+					$this->putString("crafting_table"); // hack for 350. here should by name of crafting instrument
+				}
 			}else{
 				$this->putSignedVarInt(-1);
 			}
