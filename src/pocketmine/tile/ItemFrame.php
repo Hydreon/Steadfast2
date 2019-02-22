@@ -33,12 +33,15 @@ use pocketmine\nbt\tag\StringTag;
 class ItemFrame extends Spawnable {
 
 	/** @var Item */
-	private $item;
+	private $item = null;
 
 	public function __construct(FullChunk $chunk, Compound $nbt) {
 		parent::__construct($chunk, $nbt);
-
-		$this->item = NBT::getItemHelper($this->namedtag->Item);
+		if (isset($this->namedtag->Item)) {
+			$this->item = NBT::getItemHelper($this->namedtag["Item"]);
+		} else {
+			$this->item = Item::get(Item::AIR);
+		}
 	}
 
 	public function getSpawnCompound() {
