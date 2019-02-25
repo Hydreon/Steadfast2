@@ -24,6 +24,7 @@ class ConnectPacket extends ProxyPacket {
 	public $isValidProtocol = true;
     public $deviceOSType = -1;
     public $inventoryType = -1;
+	public $isFirst = true;
 	public $XUID = "";
 	
 
@@ -44,7 +45,7 @@ class ConnectPacket extends ProxyPacket {
 		$this->viewDistance = $this->getInt();
 		$this->ip = $this->getString();
 		$this->port = $this->getInt();
-		$this->isFirst = (bool) @$this->getByte();
+		$this->isFirst = (bool) $this->getByte();
         $this->deviceOSType = $this->getInt();
         $this->inventoryType = $this->getInt();
 		$this->XUID = $this->getString();

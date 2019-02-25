@@ -860,10 +860,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->started = $this->level->stopTime == false;
 			$this->dataPacket($pk);
 
-			$pk = new PlayStatusPacket();
-			$pk->status = PlayStatusPacket::PLAYER_SPAWN;
-			$this->dataPacket($pk);
-
+			if ($this->isFirstConnect) {
+				$pk = new PlayStatusPacket();
+				$pk->status = PlayStatusPacket::PLAYER_SPAWN;
+				$this->dataPacket($pk);
+			}
 			$this->noDamageTicks = 60;
 			$this->spawned = true;
 			$chunkX = $chunkZ = null;
@@ -964,6 +965,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		if ($packet instanceof ProxyPacket) {
+			$packet->encode();
 			$this->interface->putPacket($this, $packet->getBuffer(), true);
 			return;
 		}
@@ -1100,6 +1102,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 		
 		if ($packet instanceof ProxyPacket) {
+			$packet->encode();
 			$this->interface->putPacket($this, $packet->getBuffer(), true);
 			return;
 		}
@@ -2823,6 +2826,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if (!$this->closeFromProxy) {
 				if ($this->interface instanceof ProxyInterface) {
 					$pk = new ProxyDisconnectPacket();
+					$pk->reason = $reason;
 					$this->dataPacket($pk);
 					$this->connected = false;
 				} else {
@@ -3513,21 +3517,25 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $spawnPosition));
 		$this->setPosition($ev->getRespawnPosition());
 		
-		$pk = new StartGamePacket();
-		$pk->seed = -1;
-		$pk->dimension = 0;
-		$pk->x = $this->x;
-		$pk->y = $this->y + $this->getEyeHeight();
-		$pk->z = $this->z;
-		$pk->spawnX = (int) $spawnPosition->x;
-		$pk->spawnY = (int) ($spawnPosition->y + $this->getEyeHeight());
-		$pk->spawnZ = (int) $spawnPosition->z;
-		$pk->generator = 1; //0 old, 1 infinite, 2 flat
-		$pk->gamemode = $this->gamemode & 0x01;
-		$pk->eid = $this->id;
-		$pk->stringClientVersion = $this->clientVersion;
-		$pk->multiplayerCorrelationId = $this->uuid->toString();
-		$this->directDataPacket($pk);
+		if ($this->isFirstConnect) {
+			$pk = new StartGamePacket();
+			$pk->seed = -1;
+			$pk->dimension = 0;
+			$pk->x = $this->x;
+			$pk->y = $this->y + $this->getEyeHeight();
+			$pk->z = $this->z;
+			$pk->spawnX = (int) $spawnPosition->x;
+			$pk->spawnY = (int) ($spawnPosition->y + $this->getEyeHeight());
+			$pk->spawnZ = (int) $spawnPosition->z;
+			$pk->generator = 1; //0 old, 1 infinite, 2 flat
+			$pk->gamemode = $this->gamemode & 0x01;
+			$pk->eid = $this->id;
+			$pk->stringClientVersion = $this->clientVersion;
+			$pk->multiplayerCorrelationId = $this->uuid->toString();
+			$this->directDataPacket($pk);
+		} else {
+			$this->sendPosition($this);
+		}
 
 		$pk = new SetTimePacket();
 		$pk->time = $this->level->getTime();
@@ -3594,8 +3602,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->inventoryType = $packet->inventoryType;
 			$this->xuid = $packet->XUID;
 			$this->inventory = Multiversion::getPlayerInventory($this);
-			$this->processLogin();
-//			$this->completeLogin();
+			if ($this->isFirstConnect) {
+				$this->processLogin();
+			} else {
+				$this->completeLogin();
+				$this->loggedIn = true;
+				$this->scheduleUpdate();
+				$this->justCreated = false;	
+			}
 		} elseif ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
 			$this->removeAllEffects();
 //			$this->server->clearPlayerList($this);
@@ -3613,17 +3627,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function transfer($address, $port = false) {
-		if ($this->isAvailableTansferPacket()) {
-			$pk = new TransferPacket();
-			$pk->ip = $address;
-			$pk->port = ($port === false ? 19132 : $port);
-			$this->dataPacket($pk);
-		} else {
+//		if ($this->isAvailableTansferPacket()) {
+//			$pk = new TransferPacket();
+//			$pk->ip = $address;
+//			$pk->port = ($port === false ? 19132 : $port);
+//			$this->dataPacket($pk);
+//		} else {
 			$pk = new RedirectPacket();
 			$pk->ip = $address;
 			$pk->port = ($port === false ? 10305 : $port);
 			$this->dataPacket($pk);
-		}
+//		}
 	}
 
 	public function isAvailableTansferPacket() {

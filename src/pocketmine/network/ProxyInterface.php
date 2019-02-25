@@ -6,25 +6,17 @@ use pocketmine\Server;
 use pocketmine\network\proxylib\ProxyServer;
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\Player;
-use pocketmine\network\protocol\DataPacket;
-use pocketmine\network\proxy\ProxyPacket;
-use raklib\Binary;
-use raklib\RakLib;
 use pocketmine\network\AdvancedSourceInterface;
 use pocketmine\network\Network;
 use pocketmine\utils\TextFormat;
-use pocketmine\network\protocol\Info;
-use pocketmine\event\server\QueryRegenerateEvent;
 use pocketmine\network\proxy\Info as ProtocolProxyInfo;
+use pocketmine\network\proxylib\RemoteProxyServer;
 
 //class ProxyInterface implements SourceInterface {
 class ProxyInterface implements AdvancedSourceInterface {
 
 	const STANDART_PACKET_ID = 0x01;
 	const PROXY_PACKET_ID = 0x02;
-	const PLAYER_PACKET_ID = 0x03;
-	const SYSTEM_PACKET_ID = 0x04;
-	const SYSTEM_DATA_PACKET_ID = 0x05;
 
 	private $identifiers;
 	private $server;
@@ -32,8 +24,6 @@ class ProxyInterface implements AdvancedSourceInterface {
 	private $proxyServer;
 	private $session = array();
 	private $network;
-	// for raw packets. key - response recipient identifier , value - session iddentifier
-	private $nonPlayerSessionMap = array();
 	
 	public $count = 0;
 	public $maxcount = 200;
@@ -86,94 +76,45 @@ class ProxyInterface implements AdvancedSourceInterface {
 			}
 			return;
 		}
-		$offset = 0;
-		$packetType = ord($data{0});
-		if ($packetType == static::PLAYER_PACKET_ID) {
-			$sessionId = unpack('N', substr($data, 1, 4));
-			$sessionId = $sessionId[1];
-			$buffer = substr($data, 5);
-			$identifier = $dataIdentifier . $sessionId;
-			if (!isset($this->session[$identifier])) {
-				if(ord($buffer{0}) == self::PROXY_PACKET_ID && ord($buffer{1}) == ProtocolProxyInfo::CONNECT_PACKET) {
-					$this->openSession($dataIdentifier, $sessionId);
-				}
+		$sessionId = unpack('N', substr($data, 0, 4));
+		$sessionId = $sessionId[1];
+		$buffer = substr($data, 4);
+		$identifier = $dataIdentifier . $sessionId;
+		if (!isset($this->session[$identifier])) {
+			if(ord($buffer{0}) == self::PROXY_PACKET_ID && ord($buffer{1}) == ProtocolProxyInfo::CONNECT_PACKET) {
+				$this->openSession($dataIdentifier, $sessionId);
 			}
-			if (isset($this->session[$identifier])) {
-				$player = $this->session[$identifier];
-				$type = ord($buffer{0});
-				$buffer = substr($buffer, 1);
-				if ($type == self::STANDART_PACKET_ID) {
-					$pk = $this->getPacket($buffer, $player);
-					if ($pk === false) {
-						return;
-					}
-					if (!is_null($pk)) {
-						try {
-							$pk->decode($player->getPlayerProtocol());
-							$player->handleDataPacket($pk);
-						} catch (\Exception $e) {
-							echo "DECODE ERROR: " . $e->getMessage() . ", PACKET ID: " . $pk->pid();
-						}
-					}
-				} elseif ($type == self::PROXY_PACKET_ID) {
-					$pk = $this->getProxyPacket($buffer);
-					if ($pk === false) {
-						return;
-					}
-					if (!is_null($pk)) {
-						try {
-							$pk->decode($player->getPlayerProtocol());
-							$player->handleProxyDataPacket($pk);
-						} catch (\Exception $e) {
-							echo "DECODE ERROR: " . $e->getMessage() . ", PROXY PACKET ID: " . $pk->pid();
-						}
+		}
+		if (isset($this->session[$identifier])) {
+			$player = $this->session[$identifier];
+			$type = ord($buffer{0});
+			$buffer = substr($buffer, 1);
+			if ($type == self::STANDART_PACKET_ID) {
+				$pk = $this->getPacket($buffer, $player);
+				if ($pk === false) {
+					return;
+				}
+				if (!is_null($pk)) {
+					try {
+						$pk->decode($player->getPlayerProtocol());
+						$player->handleDataPacket($pk);
+					} catch (\Exception $e) {
+						echo "DECODE ERROR: " . $e->getMessage() . ", PACKET ID: " . $pk->pid();
 					}
 				}
-			}
-		} else if ($packetType == static::SYSTEM_PACKET_ID) {
-			$packet = substr($data, 1);
-			$id = ord($packet{0});
-			$offset = 1;
-			if ($id === RakLib::PACKET_RAW) {
-				$len = ord($packet{$offset++});
-				$address = substr($packet, $offset, $len);
-				$offset += $len;
-				$port = Binary::readShort(substr($packet, $offset, 2));
-				$offset += 2;
-				$payload = substr($packet, $offset);
-
-				$endPointId = $address . ':' . $port;
-				if (isset($this->nonPlayerSessionMap[$endPointId]) &&
-						$this->nonPlayerSessionMap[$endPointId] != $dataIdentifier) {
-
-					return true;
-				} else if (!isset($this->nonPlayerSessionMap[$endPointId])) {
-					$this->nonPlayerSessionMap[$endPointId] = $dataIdentifier;
+			} elseif ($type == self::PROXY_PACKET_ID) {
+				$pk = $this->getProxyPacket($buffer);
+				if ($pk === false) {
+					return;
 				}
-
-				Server::getInstance()->handlePacket($address, $port, $payload);
-			}
-		} else if ($packetType == self::SYSTEM_DATA_PACKET_ID) {
-			$packet = substr($data, 1);
-			$id = ord($packet{0});
-			if ($id = 0x01) {
-				$this->server->getPluginManager()->callEvent($ev = new QueryRegenerateEvent($this->server, 5));
-				$outputData = array();
-				$outputData['longData'] = $ev->getLongQuery();
-				$outputData['shortData'] = $ev->getShortQuery();
-				$outputData['name'] = "MCPE;" . addcslashes($this->name, ";") . ";" .
-						(Info::CURRENT_PROTOCOL) . ";" .
-						\pocketmine\MINECRAFT_VERSION_NETWORK . ";" .
-						$this->count . ";" . $this->maxcount;
-
-				
-				$info = chr(strlen($dataIdentifier)) . $dataIdentifier . 'close';
-				$infoData =  chr(self::SYSTEM_DATA_PACKET_ID) . chr(0x02) .
-					pack('N', strlen($outputData['name'])) . $outputData['name'] .
-					pack('N', strlen($outputData['longData'])) . $outputData['longData'] .
-					pack('N', strlen($outputData['shortData'])) . $outputData['shortData'];
-				$info = chr(strlen($dataIdentifier)) . $dataIdentifier . $infoData;
-				$this->proxyServer->writeToProxyServer($info);
+				if (!is_null($pk)) {
+					try {
+						$pk->decode($player->getPlayerProtocol());
+						$player->handleProxyDataPacket($pk);
+					} catch (\Exception $e) {
+						echo "DECODE ERROR: " . $e->getMessage() . ", PROXY PACKET ID: " . $pk->pid();
+					}
+				}
 			}
 		}
 	}
@@ -196,9 +137,9 @@ class ProxyInterface implements AdvancedSourceInterface {
 	public function putPacket(Player $player, $buffer, $isProxyPacket = false) {
 		if (isset($this->session[$player->getIdentifier()])) {
 			if ($isProxyPacket) {
-				$infoData =  chr(static::PLAYER_PACKET_ID) . pack('N', $player->proxySessionId) . chr(self::PROXY_PACKET_ID) . $buffer;	
+				$infoData = pack('N', $player->proxySessionId) . chr(self::PROXY_PACKET_ID | RemoteProxyServer::FLAG_NEED_ZLIB) . $buffer;	
 			} else {
-				$infoData =  chr(static::PLAYER_PACKET_ID) . pack('N', $player->proxySessionId) . chr(self::STANDART_PACKET_ID) . zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);	
+				$infoData = pack('N', $player->proxySessionId) . chr(self::STANDART_PACKET_ID | RemoteProxyServer::FLAG_NEED_ZLIB) . $buffer;	
 			}		
 			$info = chr(strlen($player->proxyId)) . $player->proxyId . $infoData;
 			
@@ -212,7 +153,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 
 	public function putReadyPacket($player, $buffer) {
 		if (isset($this->session[$player->getIdentifier()])) {	
-			$infoData = chr(static::PLAYER_PACKET_ID) . pack('N', $player->proxySessionId) . chr(self::STANDART_PACKET_ID) . $buffer;
+			$infoData = pack('N', $player->proxySessionId) . chr(self::STANDART_PACKET_ID) . $buffer;
 			$info = chr(strlen($player->proxyId)) . $player->proxyId . $infoData;
 			$this->proxyServer->writeToProxyServer($info);
 		}

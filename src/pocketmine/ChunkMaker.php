@@ -42,7 +42,7 @@ class ChunkMaker extends Thread {
 
 	public function sendData($data, $buffer) {
 		if ($this->raklib instanceof ProxyServer) {
-			$infoData = chr(ProxyInterface::PLAYER_PACKET_ID) . pack('N', $data['proxySessionId']) . chr(ProxyInterface::STANDART_PACKET_ID) . $buffer;
+			$infoData = pack('N', $data['proxySessionId']) . chr(ProxyInterface::STANDART_PACKET_ID) . $buffer;
 			$info = chr(strlen($data['proxyId'])) . $data['proxyId'] . $infoData;
 			$this->raklib->writeToProxyServer($info);
 		} else {

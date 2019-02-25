@@ -121,7 +121,7 @@ class PacketMaker extends Thread {
 
 	protected function sendData($identifier, $buffer, $data) {
 		if ($this->raklib instanceof ProxyServer) {
-			$infoData = chr(ProxyInterface::PLAYER_PACKET_ID) . pack('N', $data['proxySessionId']) . chr(ProxyInterface::STANDART_PACKET_ID) . $buffer;
+			$infoData = pack('N', $data['proxySessionId']) . chr(ProxyInterface::STANDART_PACKET_ID) . $buffer;
 			$info = chr(strlen($data['proxyId'])) . $data['proxyId'] . $infoData;
 			$this->raklib->writeToProxyServer($info);
 		} else {

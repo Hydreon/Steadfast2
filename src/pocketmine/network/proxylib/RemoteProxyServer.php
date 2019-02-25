@@ -3,6 +3,8 @@
 namespace pocketmine\network\proxylib;
 
 class RemoteProxyServer {
+	
+	const FLAG_NEED_ZLIB = 0x80;
 
 	private $proxyManager;
 	private $socket;
@@ -62,8 +64,16 @@ class RemoteProxyServer {
 	}
 
 	public function putPacket($buffer) {
-		$data = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
-		$this->writeQueue[] = pack('N',  strlen($data)) . $data;
+		$flags = ord($buffer{4});
+		if (($flags & self::FLAG_NEED_ZLIB) > 0) {
+			$flags = $flags ^ self::FLAG_NEED_ZLIB;
+			$data = zlib_encode(substr($buffer, 5), ZLIB_ENCODING_DEFLATE, 7);
+			$data = substr($buffer, 0, 4) . chr($flags) . $data;
+			$this->writeQueue[] = pack('N',  strlen($data)) . $data;
+		} else {
+			$this->writeQueue[] = pack('N',  strlen($buffer)) . $buffer;
+		}
+	
 	}
 
 	private function checkWriteQueue() {
@@ -127,12 +137,6 @@ class RemoteProxyServer {
 				$offset += $len;
 			}
 		}
-	}
-
-	public function sendRawData($buffer) {
-		$data = zlib_encode($buffer, ZLIB_ENCODING_DEFLATE, 7);
-		$data = pack('N', strlen($data)) . $data;
-		socket_sendto($this->socket, $data, strlen($data), 0, $this->ip, $this->port);
 	}
 
 }
