@@ -1322,7 +1322,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::BUCKET, 1));
 		self::addCreativeItem(Item::get(Item::BUCKET, 8));
 		self::addCreativeItem(Item::get(Item::BUCKET, 10));
-		self::addCreativeItem(Item::get(Item::STONECUTTER, 0));
+		// self::addCreativeItem(Item::get(Item::STONECUTTER, 0)); // crash 1.11.0.1
 		self::addCreativeItem(Item::get(Item::END_PORTAL, 0));
 		
 		self::addCreativeItem(Item::get(Item::COAL, 0));
