@@ -3641,23 +3641,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function transfer($address, $port = false) {
-//		if ($this->isAvailableTansferPacket()) {
-//			$pk = new TransferPacket();
-//			$pk->ip = $address;
-//			$pk->port = ($port === false ? 19132 : $port);
-//			$this->dataPacket($pk);
-//		} else {
+		if ($this->interface instanceof ProxyInterface) {
 			$pk = new RedirectPacket();
 			$pk->ip = $address;
 			$pk->port = ($port === false ? 10305 : $port);
 			$this->dataPacket($pk);
-//		}
+		} else {
+			$pk = new TransferPacket();
+			$pk->ip = $address;
+			$pk->port = ($port === false ? 19132 : $port);
+			$this->dataPacket($pk);
+		}
+		$this->isTransfered = true;
 	}
 
-	public function isAvailableTansferPacket() {
-		return ($this->protocol >= 101);
-	}
-	
 	public function sendSelfData() {
 		$pk = new SetEntityDataPacket();
 		$pk->eid = $this->id;
