@@ -5,6 +5,7 @@ namespace pocketmine\network\proxy;
 use pocketmine\network\proxy\Info;
 use pocketmine\utils\UUID;
 use pocketmine\network\protocol\Info as ProtocolInfo;
+use pocketmine\network\protocol\PEPacket;
 
 class ConnectPacket extends ProxyPacket {
 
@@ -26,6 +27,14 @@ class ConnectPacket extends ProxyPacket {
     public $inventoryType = -1;
 	public $isFirst = true;
 	public $XUID = "";
+	public $originalProtocol;
+	public $capeData = "";
+	public $premiunSkin = "";
+	public $languageCode = 'unknown';
+	public $serverAddress = "";
+	public $clientVersion = 'unknown';
+	public $platformChatId = "";
+	public $identityPublicKey = "";
 	
 
 	public function decode() {
@@ -49,6 +58,15 @@ class ConnectPacket extends ProxyPacket {
         $this->deviceOSType = $this->getInt();
         $this->inventoryType = $this->getInt();
 		$this->XUID = $this->getString();
+		$this->originalProtocol = $this->protocol;
+		$this->protocol = PEPacket::convertProtocol($this->protocol);		
+		$this->capeData = $this->getString();
+		$this->premiunSkin = $this->getString();
+		$this->languageCode = $this->getString();
+		$this->serverAddress = $this->getString();
+		$this->clientVersion = $this->getString();
+		$this->platformChatId = $this->getString();
+		$this->identityPublicKey = $this->getString();
 	}
 
 	public function encode() {

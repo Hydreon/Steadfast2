@@ -160,15 +160,7 @@ class ProxyInterface implements AdvancedSourceInterface {
 	}
 
 	private function getPacket($buffer, $player) {
-		if (ord($buffer{0}) == 0xfe) {
-			$buffer = substr($buffer, 1);
-			if (empty($buffer)) {
-				return false;
-			}
-			$pid = ord($buffer{0});
-		} else {
-			return false;
-		}
+		$pid = ord($buffer{0});
 		if ($pid == 0x13) { //speed hack
 			$player->setLastMovePacket($buffer);
 			return null;

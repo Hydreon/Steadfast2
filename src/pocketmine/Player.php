@@ -3572,17 +3572,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function handleProxyDataPacket($packet) {
-//		var_dump("in proxyPacket...PID = ".$packet->pid());
 		if ($packet->pid() === ProtocolProxyInfo::CONNECT_PACKET) {
 			if ($this->loggedIn === true) {
 				return;
 			}
+			$this->protocol = $packet->protocol;
 			if ($packet->isValidProtocol === false) {
 				$this->close("", TextFormat::RED . "Please switch to Minecraft: PE " . TextFormat::GREEN . $this->getServer()->getVersion() . TextFormat::RED . " to join.");
 				return;
 			}
 
 			$this->username = TextFormat::clean($packet->username);
+			$this->xblName = $this->username;
 			$this->displayName = $this->username;
 			$this->setNameTag($this->username);
 			$this->iusername = strtolower($this->username);
@@ -3591,9 +3592,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
 			$this->uuid = $packet->clientUUID;
 			$this->rawUUID = $this->uuid->toBinary();
-			$this->clientSecret = $packet->clientSecret;
-			$this->protocol = $packet->protocol;
-			$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData);
+			$this->clientSecret = $packet->clientSecret;			
+			$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData, $packet->premiunSkin);
 			$this->setViewRadius((int) ($packet->viewDistance / 2));
 			$this->ip = $packet->ip;
 			$this->port = $packet->port;
@@ -3602,6 +3602,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->inventoryType = $packet->inventoryType;
 			$this->xuid = $packet->XUID;
 			$this->inventory = Multiversion::getPlayerInventory($this);
+			$this->originalProtocol = $packet->originalProtocol;
+			$this->languageCode = $packet->languageCode;
+			$this->serverAddress = $packet->serverAddress;
+			$this->clientVersion = $packet->clientVersion;
+			$this->identityPublicKey = $packet->identityPublicKey;
+			$this->platformChatId = $packet->platformChatId;
 			if ($this->isFirstConnect) {
 				$this->processLogin();
 			} else {
