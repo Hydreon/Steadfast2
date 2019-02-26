@@ -426,6 +426,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $commandsData = [];
 	protected $joinCompleted = false;
 	protected $platformChatId = "";
+	protected $forcedPlayerId = false;
 
 	public function getLeaveMessage(){
 		return "";
@@ -3608,6 +3609,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->clientVersion = $packet->clientVersion;
 			$this->identityPublicKey = $packet->identityPublicKey;
 			$this->platformChatId = $packet->platformChatId;
+			$this->forcedPlayerId = $packet->playerId;
 			if ($this->isFirstConnect) {
 				$this->processLogin();
 			} else {
@@ -3625,8 +3627,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->setPing($packet->ping);
 		}
 	}
-
-
+	
+	protected function generateId() {
+		if ($this->forcedPlayerId !== false) {
+			$this->id = $this->forcedPlayerId;
+		} else {
+			parent::generateId();
+		}
+	}
 
 	public function getInterface() {
 		return $this->interface;

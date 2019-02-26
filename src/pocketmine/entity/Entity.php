@@ -288,7 +288,7 @@ abstract class Entity extends Location implements Metadatable{
 		if($this->eyeHeight === null){
 			$this->eyeHeight = $this->height / 2 + 0.1;
 		}
-		$this->id = Entity::$entityCount++;		
+		$this->generateId();		
 		$this->justCreated = true;	
 		$this->namedtag = $nbt;
 		
@@ -349,6 +349,10 @@ abstract class Entity extends Location implements Metadatable{
 		$this->server->getPluginManager()->callEvent(new EntitySpawnEvent($this));
 		$this->scheduleUpdate();
 
+	}
+	
+	protected function generateId() {
+		$this->id = Entity::$entityCount++;	
 	}
 
 	/**
