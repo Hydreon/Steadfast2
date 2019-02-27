@@ -5278,7 +5278,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	
 	public function clearFullPlayerList() {
 		$players = $this->server->getOnlinePlayers();
-		$players[] = $this;
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_REMOVE;
 		foreach ($players as $player) {
