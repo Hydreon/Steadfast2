@@ -14,6 +14,7 @@ class ProxyServer extends Worker {
 	private $remoteProxyServerManager;
 	private $externalQueue;
 	private $internalQueue;
+	private $closed = false;
 
 	public function __construct(\ThreadedLogger $logger, \ClassLoader $loader, $port = 10305, $interface = "0.0.0.0") {
 		$this->logger = $logger;
@@ -51,7 +52,7 @@ class ProxyServer extends Worker {
 		$this->remoteProxyServerManager = new RemoteProxyServerManager($this);
 		$this->remoteProxyServerManager->tickProcessor();
 		socket_close($this->socket);
-		var_dump("ProxyServer thread shutdown!");
+		$this->closed = true;
 	}
 
 	public function getNewServer() {
@@ -160,7 +161,9 @@ class ProxyServer extends Worker {
 		if ($this->shutdown !== true) {
 			var_dump("ProxyServer thread crashed!");
 		}
-		socket_close($this->socket);
+		if (!$this->closed) {
+			socket_close($this->socket);
+		}
 	}
 
 }
