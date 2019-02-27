@@ -19,7 +19,7 @@ class ConnectPacket extends ProxyPacket {
 	public $username;
 	public $skinName;
 	public $skin;
-	public $viewDistance;
+	public $viewRadius;
 	public $ip;
 	public $port;
 	public $isValidProtocol = true;
@@ -52,7 +52,7 @@ class ConnectPacket extends ProxyPacket {
 		$this->username = $this->getString();
 		$this->skinName = $this->getString();
 		$this->skin = $this->getString();
-		$this->viewDistance = $this->getInt();
+		$this->viewRadius = $this->getInt();
 		$this->ip = $this->getString();
 		$this->port = $this->getInt();
 		$this->isFirst = (bool) $this->getByte();

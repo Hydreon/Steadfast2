@@ -861,13 +861,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->started = $this->level->stopTime == false;
 			$this->dataPacket($pk);
 
+			$this->noDamageTicks = 60;
+			$this->spawned = true;
 			if ($this->isFirstConnect) {
 				$pk = new PlayStatusPacket();
 				$pk->status = PlayStatusPacket::PLAYER_SPAWN;
 				$this->dataPacket($pk);
+			} else {
+				$this->setHealth($this->getHealth());
+				$this->setFood($this->getFood());
 			}
-			$this->noDamageTicks = 60;
-			$this->spawned = true;
+			
 			$chunkX = $chunkZ = null;
 			foreach ($this->usedChunks as $index => $c) {
 				Level::getXZ($index, $chunkX, $chunkZ);
@@ -2808,6 +2812,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 * @param string $reason  Reason showed in console
 	 */
 	public function close($message = "", $reason = "generic reason"){
+		if ($this->closed) {
+			return;
+		}
 		if ($this->isTransfered) {
 			$reason = 'transfered';
 		}
@@ -2823,7 +2830,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$task->cancel();
 		}
 		$this->tasks = [];
-		if($this->connected and !$this->closed){
+		if($this->connected){
 			if (!$this->closeFromProxy) {
 				if ($this->interface instanceof ProxyInterface) {
 					$pk = new ProxyDisconnectPacket();
@@ -2857,22 +2864,25 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if (!is_null($this->currentWindow)) {
 				$this->removeWindow($this->currentWindow);
 			}
+			
+			$this->freeChunks();			
+			parent::close();
+			$this->server->removeOnlinePlayer($this);
+			if ($this->closeFromProxy) {
+				$this->clearFullPlayerList();
+				foreach ($this->entitiesPacketsQueue as $packets) {
+					$this->sendEntityPackets($packets);
+				}
+				$this->sendPacketQueue();
+			}
 
 			$this->interface->close($this, $reason);
-
-			$chunkX = $chunkZ = null;
-			$this->freeChunks();
-
-			parent::close();
-
-			$this->server->removeOnlinePlayer($this);
-
 			$this->loggedIn = false;
 
 //			if(isset($ev) and $this->username != "" and $this->spawned !== false and $ev->getQuitMessage() != ""){
 //				$this->server->broadcastMessage($ev->getQuitMessage());
 //			}
-
+			
 			$this->server->getPluginManager()->unsubscribeFromPermission(Server::BROADCAST_CHANNEL_USERS, $this);
 			$this->spawned = false;
 			$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . $this->ip . " logged out due to " . str_replace(["\n", "\r"], [" ", ""], $reason));
@@ -2890,6 +2900,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			if (!is_null($this->scoreboard)) {
 				$this->scoreboard->removePlayer($this);
 			}
+			$this->connected = false;
 		}			
 		$this->perm->clearPermissions();
 		$this->server->removePlayer($this);
@@ -3588,7 +3599,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->rawUUID = $this->uuid->toBinary();
 			$this->clientSecret = $packet->clientSecret;			
 			$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData, $packet->premiunSkin);
-			$this->setViewRadius((int) ($packet->viewDistance / 2));
+			if ($packet->viewRadius > 12) {
+				$packet->viewRadius = 12;
+			} elseif ($packet->viewRadius < 3) {
+				$packet->viewRadius = 3;
+			}
+			$this->setViewRadius($packet->viewRadius);
 			$this->ip = $packet->ip;
 			$this->port = $packet->port;
 			$this->isFirstConnect = $packet->isFirst;
@@ -5258,6 +5274,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->getSkinName(), $this->getSkinData(), $this->getCapeData(), $this->getSkinGeometryName(), $this->getSkinGeometryData()];
 			$this->server->batchPackets($otherPlayers, [$pk]);
 		}
+	}
+	
+	public function clearFullPlayerList() {
+		$players = $this->server->getOnlinePlayers();
+		$players[] = $this;
+		$pk = new PlayerListPacket();
+		$pk->type = PlayerListPacket::TYPE_REMOVE;
+		foreach ($players as $player) {
+			$pk->entries[] = [$player->getUniqueId()];
+		}
+		$this->dataPacket($pk);
 	}
 	
 	public function setInteractButtonText($text, $force = false) {
