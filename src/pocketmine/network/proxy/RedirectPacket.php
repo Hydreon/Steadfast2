@@ -10,16 +10,19 @@ class RedirectPacket extends ProxyPacket {
 
 	public $ip;
 	public $port;
+	public $data;
 
 	public function decode() {
 		$this->ip = $this->getString();
 		$this->port = $this->getInt();
+		$this->data = $this->getString();
 	}
 
 	public function encode() {
 		$this->reset();
 		$this->putString($this->ip);
 		$this->putInt($this->port);
+		$this->putString($this->data);
 	}
 
 }

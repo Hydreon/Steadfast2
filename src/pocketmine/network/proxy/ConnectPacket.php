@@ -36,6 +36,7 @@ class ConnectPacket extends ProxyPacket {
 	public $platformChatId = "";
 	public $identityPublicKey = "";
 	public $playerId;
+	public $transferData = "";
 	
 
 	public function decode() {
@@ -69,6 +70,7 @@ class ConnectPacket extends ProxyPacket {
 		$this->platformChatId = $this->getString();
 		$this->identityPublicKey = $this->getString();
 		$this->playerId = $this->getInt();
+		$this->transferData = $this->getString();
 	}
 
 	public function encode() {

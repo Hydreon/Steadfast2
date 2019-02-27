@@ -427,6 +427,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $joinCompleted = false;
 	protected $platformChatId = "";
 	protected $forcedPlayerId = false;
+	protected $incomingTransferData = "";
 
 	public function getLeaveMessage(){
 		return "";
@@ -3619,6 +3620,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->identityPublicKey = $packet->identityPublicKey;
 			$this->platformChatId = $packet->platformChatId;
 			$this->forcedPlayerId = $packet->playerId;
+			$this->incomingTransferData = $packet->transferData;
 			if ($this->isFirstConnect) {
 				$this->processLogin();
 			} else {
@@ -3649,11 +3651,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		return $this->interface;
 	}
 	
-	public function transfer($address, $port = false) {
+	public function transfer($address, $port = false, $transferData = '') {
 		if ($this->interface instanceof ProxyInterface) {
 			$pk = new RedirectPacket();
 			$pk->ip = $address;
 			$pk->port = ($port === false ? 10305 : $port);
+			$pk->data = $transferData;
 			$this->dataPacket($pk);
 		} else {
 			$pk = new TransferPacket();
