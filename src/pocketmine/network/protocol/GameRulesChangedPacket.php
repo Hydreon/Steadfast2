@@ -53,7 +53,7 @@ class GameRulesChangedPacket extends PEPacket{
 			$this->putVarInt($rule[0]);
 			switch($rule[0]){
 				case 1:
-					$this->putBool($rule[1]);
+					$this->putByte($rule[1]);
 					break;
 				case 2:
 					$this->putVarInt($rule[1]);
