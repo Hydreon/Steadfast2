@@ -172,7 +172,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_PLAYER_FLAG_SLEEP = 1;
 	const DATA_PLAYER_FLAG_DEAD = 2;
 	
-	public static $entityCount = 2;
+	public static $entityCount = 10000000;
 	/** @var Entity[] */
 	private static $knownEntities = [];
 	private static $shortNames = [];

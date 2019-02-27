@@ -2861,14 +2861,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->interface->close($this, $reason);
 
 			$chunkX = $chunkZ = null;
-			foreach($this->usedChunks as $index => $d){
-				Level::getXZ($index, $chunkX, $chunkZ);
-				$this->level->freeChunk($chunkX, $chunkZ, $this);
-				unset($this->usedChunks[$index]);
-				foreach($this->level->getChunkEntities($chunkX, $chunkZ) as $entity){
-					$entity->removeClosedViewer($this);
-				}
-			}
+			$this->freeChunks();
 
 			parent::close();
 
