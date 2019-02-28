@@ -4,6 +4,7 @@ namespace pocketmine\utils;
 
 use pocketmine\item\Item;
 use pocketmine\nbt\NBT;
+use pocketmine\network\protocol\Info;
 
 class BinaryStream {
 	
@@ -200,8 +201,8 @@ class BinaryStream {
 		$this->putLInt($uuid->getPart(2));
 	}
 
-	public function getSlot($playerProtocol) {		
-		$id = $this->getSignedVarInt();		
+	public function getSlot($playerProtocol) {
+		$id = $this->getSignedVarInt();
 		if ($id <= 0) {
 			return Item::get(Item::AIR, 0, 0);
 		}
@@ -274,6 +275,10 @@ class BinaryStream {
 
 	public function putVarInt($v) {
 		$this->put(Binary::writeVarInt($v));
+	}
+	
+	public function putBool($v) {
+		$this->put(Binary::writeBool($v));
 	}
 
 	public function getString(){
