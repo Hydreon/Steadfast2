@@ -4114,6 +4114,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			
 			case 0xff:
 			case -1:  // -1 for 0.16
+				$face = -1;
 				if ($this->isSpectator()) {
 					$this->inventory->sendHeldItem($this);
 					if ($this->inventory->getHeldItemSlot() !== -1) {
