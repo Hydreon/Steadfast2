@@ -292,6 +292,9 @@ class Server{
 	private $isUseEncrypt = false;
 	
 	private $modsManager = null;
+	
+	private $raklibServer = null;
+	private $proxyServer = null;
 
 	public function addSpawnedEntity($entity) {
 		if ($entity instanceof Player) {
@@ -1635,9 +1638,11 @@ class Server{
 		$useProxy = $this->getConfigBoolean("use-proxy", false);
 		if ($useRaklib) {
 			$this->addInterface($this->mainInterface = new RakLibInterface($this));
+			$this->raklibServer = $this->mainInterface->getRaklib();
 		}
 		if ($useProxy) {
-			$this->addInterface($proxyInterface= new ProxyInterface($this));
+			$this->addInterface($proxyInterface = new ProxyInterface($this));
+			$this->proxyServer = $proxyInterface->getRaklib();
 			if (!$useRaklib) {
 				$this->mainInterface = $proxyInterface;
 			}
@@ -2152,7 +2157,7 @@ class Server{
 
 		$this->logger->info("Done (" . round(microtime(true) - \pocketmine\START_TIME, 3) . 's)! For help, type "help" or "?"');
 
-		$this->packetMaker = new PacketMaker($this->getLoader(), $this->mainInterface->getRakLib());
+		$this->packetMaker = new PacketMaker($this->getLoader(), $this->getRaklibServer(), $this->getProxyServer());
 		
 		$this->tickAverage = array();
 		$this->useAverage = array();
@@ -2626,5 +2631,13 @@ class Server{
 	
 	public function getServerToken() {	
 		return $this->serverToken;
+	}
+	
+	public function getRaklibServer() {
+		return $this->raklibServer;
+	}
+	
+	public function getProxyServer() {
+		return $this->proxyServer;
 	}
 }

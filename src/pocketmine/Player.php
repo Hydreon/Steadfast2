@@ -3358,7 +3358,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 	
 	public function processLogin() {
-		if ($this->server->isUseEncrypt() && $this->needEncrypt()) {
+		if (!($this->interface instanceof ProxyInterface) && $this->server->isUseEncrypt() && $this->needEncrypt()) {
 			$privateKey = $this->server->getServerPrivateKey();
 			$token = $this->server->getServerToken();
 			$pk = new ServerToClientHandshakePacket();

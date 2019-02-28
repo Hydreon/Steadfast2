@@ -337,7 +337,7 @@ class Level implements ChunkManager, Metadatable{
 		$this->timings = new LevelTimings($this);
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
-		$this->chunkMaker = new ChunkMaker($this->server->getLoader(), $this->server->getMainInterface()->getRakLib());
+		$this->chunkMaker = new ChunkMaker($this->server->getLoader(), $this->server->getRaklibServer(), $this->server->getProxyServer());
 		if ($this->server->getAutoGenerate()) {
 			$this->generator = Generator::getGenerator($this->provider->getGenerator());
 		}

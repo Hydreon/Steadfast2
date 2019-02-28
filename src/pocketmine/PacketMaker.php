@@ -19,12 +19,14 @@ class PacketMaker extends Thread {
 	protected $shutdown;
 	protected $internalQueue;
 	protected $raklib;
+	protected $proxy;
 
-	public function __construct(\ClassLoader $loader, $raklib) {
+	public function __construct(\ClassLoader $loader, $raklib, $proxy) {
 		$this->internalQueue = new \Threaded;
 		$this->shutdown = false;
 		$this->classLoader = $loader;
 		$this->raklib = $raklib;
+		$this->proxy = $proxy;
 		$this->start(PTHREADS_INHERIT_CONSTANTS);
 	}
 
@@ -120,11 +122,11 @@ class PacketMaker extends Thread {
 	}
 
 	protected function sendData($identifier, $buffer, $data) {
-		if ($this->raklib instanceof ProxyServer) {
+		if (!is_null($this->proxy) && !empty($data['proxySessionId']) && !empty($data['proxyId'])) {
 			$infoData = pack('N', $data['proxySessionId']) . chr(ProxyInterface::STANDART_PACKET_ID) . $buffer;
 			$info = chr(strlen($data['proxyId'])) . $data['proxyId'] . $infoData;
-			$this->raklib->writeToProxyServer($info);
-		} else {
+			$this->proxy->writeToProxyServer($info);
+		} elseif(!is_null($this->raklib)) {
 			$pk = new EncapsulatedPacket();
 			$pk->buffer = $buffer;
 			$pk->reliability = 3;
