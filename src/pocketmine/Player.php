@@ -173,7 +173,6 @@ use pocketmine\network\protocol\v120\PlayerSkinPacket;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\v120\SubClientLoginPacket;
-use pocketmine\tile\SignEntity;
 use pocketmine\utils\Binary;
 use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
 use pocketmine\network\multiversion\Entity as MultiversionEntity;
