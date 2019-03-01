@@ -276,6 +276,10 @@ class BinaryStream {
 	public function putVarInt($v) {
 		$this->put(Binary::writeVarInt($v));
 	}
+	
+	public function putBool($v) {
+		$this->put(Binary::writeBool($v));
+	}
 
 	public function getString(){
 		return $this->get($this->getVarInt());
