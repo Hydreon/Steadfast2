@@ -173,11 +173,10 @@ use pocketmine\network\protocol\v120\PlayerSkinPacket;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\v120\SubClientLoginPacket;
-use pocketmine\entity\Vehicle;
-use pocketmine\tile\SignEntity;
 use pocketmine\utils\Binary;
 use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
 use pocketmine\network\multiversion\Entity as MultiversionEntity;
+use pocketmine\entity\Vehicle;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part

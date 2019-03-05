@@ -41,6 +41,9 @@ class CraftingDataPacket extends PEPacket{
 	const ENTRY_FURNACE_DATA = 3;
 	const ENTRY_ENCHANT_LIST = 4;
 
+	const RECIPE_TAG_CRAFTING_TABLE = "crafting_table";
+	const RECIPE_TAG_FURNACE = "furnace";
+
 	/** @var object[] */
 	public $entries = [];
 	public $cleanRecipes = false;
@@ -69,6 +72,9 @@ class CraftingDataPacket extends PEPacket{
 		$stream->putSlot($recipe->getResult(), $playerProtocol);
 
 		$stream->putUUID($recipe->getId());
+		if ($playerProtocol >= Info::PROTOCOL_350) {
+			$stream->putString(self::RECIPE_TAG_CRAFTING_TABLE);
+		}
 
 		return CraftingDataPacket::ENTRY_SHAPELESS;
 	}
@@ -86,19 +92,28 @@ class CraftingDataPacket extends PEPacket{
 		$stream->putSlot($recipe->getResult(), $playerProtocol);
 
 		$stream->putUUID($recipe->getId());
+		if ($playerProtocol >= Info::PROTOCOL_350) {
+			$stream->putString(self::RECIPE_TAG_CRAFTING_TABLE);
+		}
 
 		return CraftingDataPacket::ENTRY_SHAPED;
 	}
 
-	private static function writeFurnaceRecipe(FurnaceRecipe $recipe, BinaryStream $stream, $playerProtocol){		
+	private static function writeFurnaceRecipe(FurnaceRecipe $recipe, BinaryStream $stream, $playerProtocol){
 		if($recipe->getInput()->getDamage() !== 0){ //Data recipe
-			$stream->putSignedVarInt($recipe->getInput()->getId());		
-			$stream->putSignedVarInt($recipe->getInput()->getDamage());				
+			$stream->putSignedVarInt($recipe->getInput()->getId());
+			$stream->putSignedVarInt($recipe->getInput()->getDamage());
 			$stream->putSlot($recipe->getResult(), $playerProtocol);
+			if ($playerProtocol >= Info::PROTOCOL_350) {
+				$stream->putString(self::RECIPE_TAG_FURNACE);
+			}
 			return CraftingDataPacket::ENTRY_FURNACE_DATA;
 		}else{
 			$stream->putSignedVarInt($recipe->getInput()->getId());
 			$stream->putSlot($recipe->getResult(), $playerProtocol);
+			if ($playerProtocol >= Info::PROTOCOL_350) {
+				$stream->putString(self::RECIPE_TAG_FURNACE);
+			}
 			return CraftingDataPacket::ENTRY_FURNACE;
 		}
 	}
@@ -155,9 +170,6 @@ class CraftingDataPacket extends PEPacket{
 			if($entryType >= 0){
 				$this->putSignedVarInt($entryType);
 				$this->put($writer->getBuffer());
-				if ($playerProtocol >= Info::PROTOCOL_350) {
-					$this->putString("crafting_table"); // hack for 350. here should by name of crafting instrument
-				}
 			}else{
 				$this->putSignedVarInt(-1);
 			}
