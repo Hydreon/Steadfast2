@@ -79,7 +79,7 @@ interface Info{
 	const PROTOCOL_340 = 340; // 1.10.0.3
 	const PROTOCOL_342 = 342; // 1.10.0
 	const PROTOCOL_350 = 350; // 1.11.0.1
-	const PROTOCOL_351 = 351; // 1.11.0.4
+	const PROTOCOL_351 = 351; // 1.11.0.3
 	
 	/** OUTDATED (supporting will be removed with next release, may didn't work properly)*/
 	const PROTOCOL_120 = 120; // 1.2.0.xx (beta)
