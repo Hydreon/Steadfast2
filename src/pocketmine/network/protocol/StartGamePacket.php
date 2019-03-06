@@ -132,8 +132,7 @@ class StartGamePacket extends PEPacket{
 					case 3:
 						$this->putLFloat($rule['value']);
 						break;
-				}
-				
+				}	
 			}
 
 			$this->putByte(0); // is bonus chest enabled
