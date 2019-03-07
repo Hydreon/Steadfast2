@@ -337,7 +337,7 @@ class Level implements ChunkManager, Metadatable{
 		$this->timings = new LevelTimings($this);
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
-		$this->chunkMaker = new ChunkMaker($this->server->getLoader(), $this->server->getMainInterface()->getRakLib());
+		$this->chunkMaker = new ChunkMaker($this->server->getLoader(), $this->server->getRaklibServer(), $this->server->getProxyServer());
 		if ($this->server->getAutoGenerate()) {
 			$this->generator = Generator::getGenerator($this->provider->getGenerator());
 		}
@@ -2038,6 +2038,8 @@ class Level implements ChunkManager, Metadatable{
 		$data['subClientId'] = $subClientId;
 		$data['protocol'] = $protocol;
 		$data['identifier'] = $playerIdentifier;
+		$data['proxySessionId'] = $player->proxySessionId;
+		$data['proxyId'] = $player->proxyId;
 		$this->chunkMaker->pushMainToThreadPacket(serialize($data));
 	}
 	
@@ -2512,7 +2514,9 @@ class Level implements ChunkManager, Metadatable{
 			if(!isset($this->motionToSend[$playerIdentifier])){
 				$this->motionToSend[$playerIdentifier] = [
 					'data' => [],
-					'playerProtocol' => $p->getPlayerProtocol()
+					'playerProtocol' => $p->getPlayerProtocol(),
+					'proxySessionId' =>	$p->proxySessionId,
+					'proxyId' => $p->proxyId
 				];
 			}
 			$motion[4] = $subClientId;
@@ -2532,7 +2536,9 @@ class Level implements ChunkManager, Metadatable{
 			if (!isset($this->moveToSend[$playerIdentifier])) {
 				$this->moveToSend[$playerIdentifier] = [
 					'data' => [],
-					'playerProtocol' => $p->getPlayerProtocol()
+					'playerProtocol' => $p->getPlayerProtocol(),
+					'proxySessionId' =>	$p->proxySessionId,
+					'proxyId' => $p->proxyId
 				];
 			}
 			$move[8] = $subClientId;

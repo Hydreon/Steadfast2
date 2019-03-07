@@ -105,6 +105,11 @@ use pocketmine\network\protocol\ResourcePackChunkRequestPacket;
 use pocketmine\network\protocol\v310\AvailableEntityIdentifiersPacket;
 use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
 use pocketmine\network\protocol\v310\SpawnParticleEffectPacket;
+use pocketmine\utils\Binary;
+use pocketmine\network\proxy\ConnectPacket;
+use pocketmine\network\proxy\DisconnectPacket as ProxyDisconnectPacket;
+use pocketmine\network\proxy\Info as ProtocolProxyInfo;
+use pocketmine\network\proxy\PingPacket;
 
 class Network {	
 	
@@ -118,6 +123,9 @@ class Network {
 	private $packetPool310;
 	/** @var \SplFixedArray */
 	private $packetPool331;
+	/** @var \SplFixedArray */
+	private $proxyPacketPool;
+
 
 	/** @var Server */
 	private $server;
@@ -138,6 +146,7 @@ class Network {
 		$this->registerPackets120();
 		$this->registerPackets310();
 		$this->registerPackets331();
+		$this->registerProxyPackets();
 		$this->server = $server;
 	}
 
@@ -261,7 +270,15 @@ class Network {
 	public function registerPacket331($id, $class){
 		$this->packetPool331[$id] = new $class;
 	}
-	
+
+	/**
+	 * @param int        $id 0-255
+	 * @param DataPacket $class
+	 */
+	public function registerProxyPacket($id, $class){
+		$this->proxyPacketPool[$id] = new $class;
+	}
+
 	public function getServer(){
 		return $this->server;
 	}
@@ -310,7 +327,21 @@ class Network {
 		}
 		return null;
 	}
-	
+
+	/**
+	 * @param $id
+	 *
+	 * @return DataPacket
+	 */
+	public function getProxyPacket($id){
+		/** @var DataPacket $class */
+		$class = $this->proxyPacketPool[$id];
+		if($class !== null){
+			return clone $class;
+		}
+		return null;
+	}
+
 	public static function getChunkPacketProtocol($playerProtocol){
 		switch ($playerProtocol) {
 			case Info::PROTOCOL_351:
@@ -632,4 +663,12 @@ class Network {
 		$this->registerPacket331(ProtocolInfo331::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
 		$this->registerPacket331(ProtocolInfo331::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
 	}
+
+	private function registerProxyPackets(){
+		$this->proxyPacketPool = new \SplFixedArray(256);
+		$this->registerProxyPacket(ProtocolProxyInfo::CONNECT_PACKET, ConnectPacket::class);
+		$this->registerProxyPacket(ProtocolProxyInfo::DISCONNECT_PACKET, ProxyDisconnectPacket::class);
+		$this->registerProxyPacket(ProtocolProxyInfo::PING_PACKET, PingPacket::class);
+	}
+
 }
