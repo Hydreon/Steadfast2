@@ -3657,12 +3657,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->port = ($port === false ? 10305 : $port);
 			$pk->data = $transferData;
 			$this->dataPacket($pk);
+			$this->isTransfered = true;
 		} else {
-			$pk = new TransferPacket();
-			$pk->ip = $address;
-			$pk->port = ($port === false ? 19132 : $port);
-			$this->dataPacket($pk);
+			$this->hardTransfer($address, $port);
 		}
+	}
+	
+	public function hardTransfer($address, $port = false) {
+		$pk = new TransferPacket();
+		$pk->ip = $address;
+		$pk->port = ($port === false ? 19132 : $port);
+		$this->dataPacket($pk);
 		$this->isTransfered = true;
 	}
 
