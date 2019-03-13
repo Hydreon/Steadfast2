@@ -20,6 +20,7 @@ class MapItemDataPacket extends PEPacket {
 	public $data;
 	public $pointners = [];
 	public $entityIds = [];
+	public $isLockedMap = false;
 
 	public function decode($playerProtocol) {
 		
@@ -31,6 +32,9 @@ class MapItemDataPacket extends PEPacket {
 		$this->putVarInt($this->flags);
 		if ($playerProtocol >= Info::PROTOCOL_120) {
 			$this->putByte(0); // dimension
+		}
+		if ($playerProtocol >= Info::PROTOCOL_351) {
+			$this->putByte($this->isLockedMap);
 		}
 		switch ($this->flags) {
 			case 2:
