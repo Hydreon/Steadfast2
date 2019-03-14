@@ -4588,7 +4588,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			} else {
 				$projectile->setMotion($projectile->getMotion()->multiply($ev->getForce()));
 				if ($this->isSurvival()) {
-					$this->inventory->removeItemWithCheckOffHand(Item::get(Item::ARROW, 0, 1));
+					if ($bow->hasEnchantments(Enchantment::TYPE_BOW_INFINITY) === null) {
+						$this->inventory->removeItemWithCheckOffHand(Item::get(Item::ARROW, 0, 1));
+					}
+
 					$bow->setDamage($bow->getDamage() + 1);
 					if ($bow->getDamage() >= 385) {
 						$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 0));
