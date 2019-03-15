@@ -9,4 +9,5 @@ interface Info {
 	const DISCONNECT_PACKET = 0x02;
 	const REDIRECT_PACKET = 0x03;
 	const PING_PACKET = 0x04;
+	const DISCONNECT_COMPLETE_PACKET = 0x05;
 }

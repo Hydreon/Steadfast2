@@ -17,7 +17,7 @@ abstract class ProxyPacket extends DataPacket {
 	abstract public function decode();
 
 	public function reset() {
-		$this->buffer = chr($this::NETWORK_ID);
-		$this->offset = 0;
+		parent::reset();
+		$this->putByte($this::NETWORK_ID);
 	}
 }

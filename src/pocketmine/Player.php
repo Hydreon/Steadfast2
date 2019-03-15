@@ -183,6 +183,7 @@ use pocketmine\network\protocol\v120\SubClientLoginPacket;
 use pocketmine\utils\Binary;
 use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
 use pocketmine\network\multiversion\Entity as MultiversionEntity;
+use pocketmine\network\proxy\DisconnectCompletePacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -2874,8 +2875,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					$this->sendEntityPackets($packets);
 				}
 				$this->sendPacketQueue();
+				$pk = new DisconnectCompletePacket();
+				$this->dataPacket($pk);
 			}
-
 			$this->interface->close($this, $reason);
 			$this->loggedIn = false;
 
