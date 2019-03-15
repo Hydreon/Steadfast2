@@ -37,7 +37,8 @@ class ConnectPacket extends ProxyPacket {
 	public $identityPublicKey = "";
 	public $playerId;
 	public $transferData = "";
-	
+	public $skinGeometryName = "";
+	public $skinGeometryData = "";
 
 	public function decode() {
 		$this->identifier = $this->getString();
@@ -71,6 +72,10 @@ class ConnectPacket extends ProxyPacket {
 		$this->identityPublicKey = $this->getString();
 		$this->playerId = $this->getInt();
 		$this->transferData = $this->getString();
+		if (!$this->feof()) {
+			$this->skinGeometryName = $this->getString();
+			$this->skinGeometryData = $this->getString();
+		}
 	}
 
 	public function encode() {
