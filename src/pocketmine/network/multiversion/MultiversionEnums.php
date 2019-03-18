@@ -765,6 +765,7 @@ abstract class MultiversionEnums {
 			"ARG_TYPE_TARGET" => 0x06,
 			"ARG_TYPE_WILDCARD_TARGET" => 0x07,
 			"ARG_TYPE_STRING" => 0x18,
+			"ARG_TYPE_POSITION" => 0x1a,
 			"ARG_TYPE_MESSAGE" => 0x1d,
 			"ARG_TYPE_RAWTEXT" => 0x1f,
 			"ARG_TYPE_JSON" => 0x22,
@@ -777,6 +778,7 @@ abstract class MultiversionEnums {
 			"ARG_TYPE_WILDCARD_INT" => 0x04,
 			"ARG_TYPE_TARGET" => 0x05,
 			"ARG_TYPE_WILDCARD_TARGET" => 0x06,
+			//WILDCARD_TARGET: https://github.com/pmmp/PocketMine-MP/blob/3.1.0/src/pocketmine/network/mcpe/protocol/AvailableCommandsPacket.php#L52
 			"ARG_TYPE_STRING" => 0x0f,
 			"ARG_TYPE_POSITION" => 0x10,
 			"ARG_TYPE_MESSAGE" => 0x13,
