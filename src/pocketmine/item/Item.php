@@ -472,6 +472,7 @@ class Item{
 	const BOTTLE_ENCHANTING = 384;
 	const FIRE_CHARGE = 385;
 	const EMERALD = 388;
+	const WRITABLE_BOOK = 386;
 	const WRITTEN_BOOK = 387;
 	const ITEM_FRAME = 389;
 	const FLOWER_POT = 390;
@@ -820,6 +821,7 @@ class Item{
 		377 => "Blaze powder",
 		378 => "Magma Cream",
 		383 => "Spawn Egg",
+		self::WRITABLE_BOOK => "Book & Quill",
 		self::WRITTEN_BOOK => "Written Book",
 		388 => "Emerald",
 		390 => "Flower Pot",
@@ -975,6 +977,7 @@ class Item{
 			self::$list[self::PRISMARINE_CRYSTAL] = PrismarineCrystal::class;
 			self::$list[self::POTION] = Potion::class;
 			self::$list[self::BOTTLE_ENCHANTING] = BottleOEnchanting::class;
+			self::$list[self::WRITABLE_BOOK] = WritableBook::class;
 			
 			self::$list[self::SPRUCE_DOOR] = SpruceDoor::class;
 			self::$list[self::BIRCH_DOOR] = BirchDoor::class;
