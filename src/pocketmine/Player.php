@@ -2887,7 +2887,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 			}
 
-			//$this->server->despawnEntitiesForPlayer($this);
 			foreach($this->server->getOnlinePlayers() as $player){
 				if(!$player->canSee($this)){
 					$player->showPlayer($this);
@@ -2905,6 +2904,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			parent::close();
 			$this->server->removeOnlinePlayer($this);
 			if ($this->closeFromProxy) {
+				$this->removeAllEffects();
 				$this->clearFullPlayerList();
 				foreach ($this->entitiesPacketsQueue as $packets) {
 					$this->sendEntityPackets($packets);
@@ -3668,8 +3668,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->justCreated = false;	
 			}
 		} elseif ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
-			$this->removeAllEffects();
-//			$this->server->clearPlayerList($this);
 			$this->closeFromProxy = true;
 			$this->close('', $packet->reason);
 		} elseif ($packet->pid() === ProtocolProxyInfo::PING_PACKET) {
