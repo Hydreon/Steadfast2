@@ -306,19 +306,7 @@ class Server{
 	public function removeSpawnedEntity($entity) {
 		unset($this->spawnedEntity[$entity->getId()]);
 	}
-	public function despawnEntitiesForPlayer($player) {
-		foreach ($this->spawnedEntity as $entity) {
-			if ($entity->isSpawned($player)) {
-				$entity->despawnFrom($player);
-			}
-		}
-		foreach ($this->playerList as $p) {
-			if ($p->isSpawned($player)) {
-				$p->despawnFrom($player);
-			}
-		}
-	}
-
+	
 	public function isUseAnimal() {
 		return $this->useAnimal;
 	}
