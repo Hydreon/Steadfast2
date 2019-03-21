@@ -1281,6 +1281,28 @@ class Server{
 
 	/**
 	 * @param string $variable
+	 * @param float    $value
+	 */
+	public function setConfigFloat($variable, $value){
+		$this->properties->set($variable, (float) $value);
+	}
+
+	/**
+	 * @param string $variable
+	 * @param float    $defaultValue
+	 *
+	 * @return float
+	 */
+	public function getConfigFloat($variable, $defaultValue = 0) {
+		$v = getopt("", ["$variable::"]);
+		if (isset($v[$variable])) {
+			return (float) $v[$variable];
+		}
+		return $this->properties->exists($variable) ? (float) $this->properties->get($variable) : (float) $defaultValue;
+	}
+
+	/**
+	 * @param string $variable
 	 * @param int    $value
 	 */
 	public function setConfigInt($variable, $value){
