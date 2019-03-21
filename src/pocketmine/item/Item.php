@@ -884,6 +884,8 @@ class Item{
 	protected $durability = 0;
 	protected $name;
 	protected $obtainTime = 0;
+	protected $canPlaceOnBlocks = [];
+	protected $canDestroyBlocks = [];
 
 	public function canBeActivated(){
 		return false;
@@ -2019,6 +2021,22 @@ class Item{
 		if (is_a($className, ItemBlock::class, true)) {
 			self::$itemBlockClass = $className;
 		}
+	}
+	
+	public function getCanPlaceOnBlocks() {
+		return $this->canPlaceOnBlocks;
+	}
+	
+	public function getCanDestroyBlocks() {
+		return $this->canDestroyBlocks;
+	}
+	
+	public function addCanPlaceOnBlocks($blockName) {
+		$this->canPlaceOnBlocks[$blockName] = $blockName;
+	}
+	
+	public function addCanDestroyBlocks($blockName) {
+		$this->canDestroyBlocks[$blockName] = $blockName;
 	}
 
 }
