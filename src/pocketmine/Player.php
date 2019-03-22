@@ -1253,7 +1253,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 
 		$this->namedtag->playerGameType = new IntTag("playerGameType", $this->gamemode);
 		$pk = new SetPlayerGameTypePacket();
-		$pk->gamemode = $this->gamemode & 0x01;
+		$pk->gamemode = $this->gamemode == 3 ? 1 : $this->gamemode;
 		$this->dataPacket($pk);
 		$this->sendSettings();
 
@@ -1269,9 +1269,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 */
 	public function sendSettings() {
 		$flags = AdventureSettingsPacket::FLAG_NO_PVM | AdventureSettingsPacket::FLAG_NO_MVP;
-		if ($this->isAdventure()) {
-			$flags |= AdventureSettingsPacket::FLAG_WORLD_IMMUTABLE; //Do not allow placing/breaking blocks, adventure mode
-		}
 		if ($this->autoJump) {
 			$flags |= AdventureSettingsPacket::FLAG_AUTO_JUMP;
 		}
@@ -1279,6 +1276,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$flags |= AdventureSettingsPacket::FLAG_PLAYER_MAY_FLY;
 		}
 		if ($this->isSpectator()) {
+			$flags |= AdventureSettingsPacket::FLAG_WORLD_IMMUTABLE;
 			$flags |= AdventureSettingsPacket::FLAG_PLAYER_NO_CLIP;
 		}
 		
@@ -1499,14 +1497,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$expectedVelocity = (-$this->gravity) / $this->drag - ((-$this->gravity) / $this->drag) * exp(-$this->drag * ($this->inAirTicks - $this->startAirTicks));
 						$diff = ($this->speed->y - $expectedVelocity) ** 2;
 
-						if(!$this->hasEffect(Effect::JUMP) and $diff > 0.6 and $expectedVelocity < $this->speed->y and !$this->server->getAllowFlight()){
-							if($this->inAirTicks < 301){
-//								$this->setMotion(new Vector3(0, $expectedVelocity, 0));
-							}elseif($this->kick("Flying is not enabled on this server")){
-								//$this->timings->stopTiming();
-								return false;
-							}
-						}
+//						if(!$this->hasEffect(Effect::JUMP) and $diff > 0.6 and $expectedVelocity < $this->speed->y and !$this->server->getAllowFlight()){
+//							if($this->inAirTicks < 301){
+////								$this->setMotion(new Vector3(0, $expectedVelocity, 0));
+//							}elseif($this->kick("Flying is not enabled on this server")){
+//								//$this->timings->stopTiming();
+//								return false;
+//							}
+//						}
 						++$this->inAirTicks;
 					}	
 				}
@@ -3560,7 +3558,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$spawnPosition = $this->getSpawn();
 		$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $spawnPosition));
 		$this->setPosition($ev->getRespawnPosition());
-		
+
 		if ($this->isFirstConnect) {
 			$pk = new StartGamePacket();
 			$pk->seed = -1;
@@ -4247,7 +4245,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 
 				$itemInHand = $this->inventory->getItemInHand();
-				if ($blockVector->distance($this) > 10 || ($this->isCreative() && $this->isAdventure())) {
+				if ($blockVector->distance($this) > 10 || $this->isSpectator()) {
 
 				} else if ($this->isCreative() && !$this->isSpectator()) {
 					if ($this->level->useItemOn($blockVector, $itemInHand, $face, $clickPosition['x'], $clickPosition['y'], $clickPosition['z'], $this) === true) {
