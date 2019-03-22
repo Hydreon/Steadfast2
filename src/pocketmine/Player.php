@@ -1458,14 +1458,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 						$expectedVelocity = (-$this->gravity) / $this->drag - ((-$this->gravity) / $this->drag) * exp(-$this->drag * ($this->inAirTicks - $this->startAirTicks));
 						$diff = ($this->speed->y - $expectedVelocity) ** 2;
 
-						if(!$this->hasEffect(Effect::JUMP) and $diff > 0.6 and $expectedVelocity < $this->speed->y and !$this->server->getAllowFlight()){
-							if($this->inAirTicks < 301){
-//								$this->setMotion(new Vector3(0, $expectedVelocity, 0));
-							}elseif($this->kick("Flying is not enabled on this server")){
-								//$this->timings->stopTiming();
-								return false;
-							}
-						}
+//						if(!$this->hasEffect(Effect::JUMP) and $diff > 0.6 and $expectedVelocity < $this->speed->y and !$this->server->getAllowFlight()){
+//							if($this->inAirTicks < 301){
+////								$this->setMotion(new Vector3(0, $expectedVelocity, 0));
+//							}elseif($this->kick("Flying is not enabled on this server")){
+//								//$this->timings->stopTiming();
+//								return false;
+//							}
+//						}
 						++$this->inAirTicks;
 					}	
 				}
