@@ -21,9 +21,6 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\Server;
-
-
 #include <rules/DataPacket.h>
 
 class StartGamePacket extends PEPacket{
@@ -97,9 +94,9 @@ class StartGamePacket extends PEPacket{
 			$this->putByte(0); // Are education features enabled?
 		}
 
-		$server = Server::getInstance();
-		$this->putLFloat($server->getConfigFloat("rain-level", 0)); //rain level
-		$this->putLFloat($server->getConfigFloat("lightning-level", 0)); //lightning level
+		$this->putLFloat(0); //rain level
+
+		$this->putLFloat(0); //lightning level
 
 		if ($playerProtocol >= Info::PROTOCOL_332) {
 			$this->putByte(0); // ???
