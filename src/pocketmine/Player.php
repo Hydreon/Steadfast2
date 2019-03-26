@@ -3540,6 +3540,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->directDataPacket($pk);
 		} else {
 			$this->sendPosition($this);
+			$this->setGamemode($this->gamemode);
 		}
 
 		$pk = new SetTimePacket();
