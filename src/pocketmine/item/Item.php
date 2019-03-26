@@ -472,6 +472,7 @@ class Item{
 	const BOTTLE_ENCHANTING = 384;
 	const FIRE_CHARGE = 385;
 	const EMERALD = 388;
+	const WRITABLE_BOOK = 386;
 	const WRITTEN_BOOK = 387;
 	const ITEM_FRAME = 389;
 	const FLOWER_POT = 390;
@@ -820,6 +821,7 @@ class Item{
 		377 => "Blaze powder",
 		378 => "Magma Cream",
 		383 => "Spawn Egg",
+		self::WRITABLE_BOOK => "Book & Quill",
 		self::WRITTEN_BOOK => "Written Book",
 		388 => "Emerald",
 		390 => "Flower Pot",
@@ -882,6 +884,8 @@ class Item{
 	protected $durability = 0;
 	protected $name;
 	protected $obtainTime = 0;
+	protected $canPlaceOnBlocks = [];
+	protected $canDestroyBlocks = [];
 
 	public function canBeActivated(){
 		return false;
@@ -975,6 +979,7 @@ class Item{
 			self::$list[self::PRISMARINE_CRYSTAL] = PrismarineCrystal::class;
 			self::$list[self::POTION] = Potion::class;
 			self::$list[self::BOTTLE_ENCHANTING] = BottleOEnchanting::class;
+			self::$list[self::WRITABLE_BOOK] = WritableBook::class;
 			
 			self::$list[self::SPRUCE_DOOR] = SpruceDoor::class;
 			self::$list[self::BIRCH_DOOR] = BirchDoor::class;
@@ -2016,6 +2021,22 @@ class Item{
 		if (is_a($className, ItemBlock::class, true)) {
 			self::$itemBlockClass = $className;
 		}
+	}
+	
+	public function getCanPlaceOnBlocks() {
+		return $this->canPlaceOnBlocks;
+	}
+	
+	public function getCanDestroyBlocks() {
+		return $this->canDestroyBlocks;
+	}
+	
+	public function addCanPlaceOnBlocks($blockName) {
+		$this->canPlaceOnBlocks[$blockName] = $blockName;
+	}
+	
+	public function addCanDestroyBlocks($blockName) {
+		$this->canDestroyBlocks[$blockName] = $blockName;
 	}
 
 }
