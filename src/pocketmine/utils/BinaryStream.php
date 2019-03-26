@@ -79,8 +79,16 @@ class BinaryStream extends \MCBinaryStream {
 				$this->setOffset($offset + $nbtTag->getOffset());
 			}
 		}
-		$this->get(2);
-		return Item::get($id, $meta, $count, $nbt);
+		$item = Item::get($id, $meta, $count, $nbt);
+		$canPlaceOnBlocksCount = $this->getSignedVarInt();
+		for ($i = 0; $i < $canPlaceOnBlocksCount; $i++) {
+			$item->addCanPlaceOnBlocks($this->getString());
+		}
+		$canDestroyBlocksCount = $this->getSignedVarInt();
+		for ($i = 0; $i < $canDestroyBlocksCount; $i++) {
+			$item->addCanDestroyBlocks($this->getString());
+		}
+		return $item;
 	}
 
 	public function putSlot(Item $item, $playerProtocol) {
@@ -93,8 +101,16 @@ class BinaryStream extends \MCBinaryStream {
 		$nbt = $item->getCompound();	
 		$this->putLShort(strlen($nbt));
 		$this->put($nbt);
-		$this->putByte(0);
-		$this->putByte(0);
+		$canPlaceOnBlocks = $item->getCanPlaceOnBlocks();
+		$canDestroyBlocks = $item->getCanDestroyBlocks();
+		$this->putSignedVarInt(count($canPlaceOnBlocks));
+		foreach ($canPlaceOnBlocks as $blockName) {
+			$this->putString($blockName);
+		}
+		$this->putSignedVarInt(count($canDestroyBlocks));
+		foreach ($canDestroyBlocks as $blockName) {
+			$this->putString($blockName);
+		}
 	}
 	
 }
