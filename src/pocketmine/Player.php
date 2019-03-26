@@ -1228,22 +1228,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	 *
 	 * @return bool
 	 */
-	public function setGamemode($gm){
-		if($gm < 0 or $gm > 3 or $this->gamemode === $gm){
+	public function setGamemode($gm, $isForce = false){
+		if ($gm < 0 || $gm > 3 || ($this->gamemode === $gm && !$isForce)) {
 			return false;
 		}
-
 		$this->server->getPluginManager()->callEvent($ev = new PlayerGameModeChangeEvent($this, (int) $gm));
-		if($ev->isCancelled()){
+		if ($ev->isCancelled()) {
 			return false;
 		}
-
-
 		$this->gamemode = $gm;
-
 		$this->allowFlight = $this->isCreative();
-		
-		if($this->isSpectator()){
+		if ($this->isSpectator()) {
 			$this->despawnFromAll();
 		}
 
@@ -3540,7 +3535,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->directDataPacket($pk);
 		} else {
 			$this->sendPosition($this);
-			$this->setGamemode($this->gamemode);
+			$this->setGamemode($this->gamemode, true);
 		}
 
 		$pk = new SetTimePacket();
