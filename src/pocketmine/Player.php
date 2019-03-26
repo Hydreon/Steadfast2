@@ -870,9 +870,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$this->dataPacket($pk);
 			} else {
 				$this->setHealth($this->getHealth());
-				$this->setFood($this->getFood());
+				Player::setFood($this->getFood());
 			}
-			
 			$chunkX = $chunkZ = null;
 			foreach ($this->usedChunks as $index => $c) {
 				Level::getXZ($index, $chunkX, $chunkZ);
