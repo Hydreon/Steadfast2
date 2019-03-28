@@ -4307,7 +4307,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 		$item = $inventory->getItem($transaction->getSlot());
-		if ($item == null || !$item->equals($dropItem) || $item->count < $dropItem->count) {
+		if ($item == null || !$item->deepEquals($dropItem) || $item->count < $dropItem->count) {
 			$inventory->sendContents($this);
 			return;
 		}
