@@ -3869,18 +3869,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function clearTitle() {
-		$pk = new SetTitlePacket();
-		$pk->type = SetTitlePacket::TITLE_TYPE_TIMES;
-		$pk->text = "";
-		$pk->fadeInTime = 0;
-		$pk->fadeOutTime = 0;
-		$pk->stayTime = 0;
-		$this->dataPacket($pk);
-		
-		$pk = new SetTitlePacket();
-		$pk->type = SetTitlePacket::TITLE_TYPE_CLEAR;
-		$pk->text = "";
-		$this->dataPacket($pk);
+		if ($this->getPlayerProtocol() >= Info::PROTOCOL_340) {
+			$this->titleData = [];
+			$this->sendTitle(" ", "", 0);
+		} else {
+			$pk = new SetTitlePacket();
+			$pk->type = SetTitlePacket::TITLE_TYPE_TIMES;
+			$pk->text = "";
+			$pk->fadeInTime = 0;
+			$pk->fadeOutTime = 0;
+			$pk->stayTime = 0;
+			$this->dataPacket($pk);
+
+			$pk = new SetTitlePacket();
+			$pk->type = SetTitlePacket::TITLE_TYPE_CLEAR;
+			$pk->text = "";
+			$this->dataPacket($pk);
+		}
 	}
 
 	public function setActionBar($text, $time = 36000){
@@ -4307,7 +4312,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			return;
 		}
 		$item = $inventory->getItem($transaction->getSlot());
-		if ($item == null || !$item->equals($dropItem) || $item->count < $dropItem->count) {
+		if ($item == null || !$item->deepEquals($dropItem) || $item->count < $dropItem->count) {
 			$inventory->sendContents($this);
 			return;
 		}
