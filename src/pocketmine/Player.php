@@ -3869,7 +3869,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	}
 
 	public function clearTitle() {
-		if ($this->getPlayerProtocol() >= Info::PROTOCOL_350) {
+		if ($this->getPlayerProtocol() >= Info::PROTOCOL_340) {
 			$this->titleData = [];
 			$this->sendTitle(" ", "", 0);
 		} else {
