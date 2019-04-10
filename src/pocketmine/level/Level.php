@@ -1446,8 +1446,10 @@ class Level implements ChunkManager, Metadatable{
 			}
 			if(!$ev->isCancelled()){
 				$target->onUpdate(self::BLOCK_UPDATE_TOUCH);
-				if($target->canBeActivated() === true and $target->onActivate($item, $player) === true){
-					return true;
+				if (!$player->isSneaking()) {
+					if($target->canBeActivated() === true and $target->onActivate($item, $player) === true){
+						return true;
+					}
 				}
 
 				if($item->canBeActivated() and $item->onActivate($this, $player, $block, $target, $face, $fx, $fy, $fz)){
