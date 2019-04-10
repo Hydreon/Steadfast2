@@ -1346,7 +1346,9 @@ class Level implements ChunkManager, Metadatable{
 				return false;
 			}
 			
-			$this->server->getPluginManager()->callEvent($ev);
+			if (!$ev->isCancelled()) {
+				$this->server->getPluginManager()->callEvent($ev);
+			}
 			if ($ev->isCancelled()) {
 				$player->lastBreak = microtime(true);
 				return false;
@@ -1444,8 +1446,10 @@ class Level implements ChunkManager, Metadatable{
 			}
 			if(!$ev->isCancelled()){
 				$target->onUpdate(self::BLOCK_UPDATE_TOUCH);
-				if($target->canBeActivated() === true and $target->onActivate($item, $player) === true){
-					return true;
+				if (!$player->isSneaking()) {
+					if($target->canBeActivated() === true and $target->onActivate($item, $player) === true){
+						return true;
+					}
 				}
 
 				if($item->canBeActivated() and $item->onActivate($this, $player, $block, $target, $face, $fx, $fy, $fz)){
