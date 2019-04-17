@@ -2370,6 +2370,9 @@ class Level implements ChunkManager, Metadatable{
 	public function stopTime(){
 		$this->stopTime = true;
 		$this->sendTime();
+		foreach ($this->players as $player) {
+			$player->setDaylightCycle(!$this->stopTime);
+		}
 	}
 
 	/**
@@ -2378,6 +2381,9 @@ class Level implements ChunkManager, Metadatable{
 	public function startTime(){
 		$this->stopTime = false;
 		$this->sendTime();
+		foreach ($this->players as $player) {
+			$player->setDaylightCycle(!$this->stopTime);
+		}
 	}
 
 	/**
