@@ -550,8 +550,6 @@ abstract class MultiversionEnums {
 
 	private static function getSoundKeyByProtocol($protocol) {
 		switch ($protocol) {
-			case Info::PROTOCOL_110:
-				return self::GROUP_1;
 			case Info::PROTOCOL_120:
 			case Info::PROTOCOL_200:
 				return self::GROUP_2;
@@ -625,8 +623,6 @@ abstract class MultiversionEnums {
 
 	private static function getTextKeyByProtocol($protocol) {
 		switch ($protocol) {
-			case Info::PROTOCOL_110:
-				return self::GROUP_1;
 			case Info::PROTOCOL_354:
 			case Info::PROTOCOL_351:
 			case Info::PROTOCOL_350:
@@ -728,8 +724,6 @@ abstract class MultiversionEnums {
 
 	private static function getActionKeyByProtocol($protocol) {
 		switch ($protocol) {
-			case Info::PROTOCOL_110:
-				return self::GROUP_1;
 			case Info::PROTOCOL_354:
 			case Info::PROTOCOL_351:
 			case Info::PROTOCOL_350:

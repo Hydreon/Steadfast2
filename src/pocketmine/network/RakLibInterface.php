@@ -230,7 +230,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	private function getPacket($buffer, $player){	
 		$tmpStream = new BinaryStream($buffer);
 		$header = $tmpStream->getVarInt();
-		$pid = $header & 0x3FF;		
+		$pid = $header & 0x3FF;
 		if ($pid == 0x13) { //speed hack
 			$player->setLastMovePacket($buffer);
 			return null;

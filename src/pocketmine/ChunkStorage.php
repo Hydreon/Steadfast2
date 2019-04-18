@@ -4,7 +4,6 @@ namespace pocketmine;
 
 use pocketmine\utils\Binary;
 use pocketmine\network\protocol\FullChunkDataPacket;
-use pocketmine\network\protocol\Info;
 use pocketmine\level\Level;
 
 class ChunkStorage {
@@ -61,69 +60,31 @@ class ChunkStorage {
 			foreach ($data['chunk']['sections'] as $y => $sections) {
 				$chunkData .= chr(0);
 				if ($sections['empty'] == true) {
-					if ($protocol >= Info::PROTOCOL_120) {
-						$chunkData .= str_repeat("\x00", 6144);
-					} else {
-						$chunkData .= str_repeat("\x00", 10240);
-					}
+					$chunkData .= str_repeat("\x00", 6144);
 				} else {
-					if ($protocol >= Info::PROTOCOL_120) {
-						if (isset($data['isSorted']) && $data['isSorted'] == true) {
-							$blockData = $sections['blocks'] . $sections['data'];
-						} else {
-							$blockData = $this->sortData($sections['blocks']) . $this->sortHalfData($sections['data']);
-						}
-						$chunkData .= $blockData;
+					if (isset($data['isSorted']) && $data['isSorted'] == true) {
+						$blockData = $sections['blocks'] . $sections['data'];
 					} else {
-						if (isset($data['isSorted']) && $data['isSorted'] == true) {
-							$blockData = $sections['blocks'] . $sections['data'];
-							$lightData = $sections['skyLight'] . $sections['blockLight'];
-						} else {
-							$blockData = $this->sortData($sections['blocks']) . $this->sortHalfData($sections['data']);
-							$lightData = $this->sortHalfData($sections['skyLight']) . $this->sortHalfData($sections['blockLight']);
-						}
-						$chunkData .= $blockData . $lightData;
+						$blockData = $this->sortData($sections['blocks']) . $this->sortHalfData($sections['data']);
 					}
+					$chunkData .= $blockData;
 				}
 			}
 			$chunkData .= $data['chunk']['heightMap'] . $data['chunk']['biomeColor'] . Binary::writeLInt(0) . $data['tiles'];
 		} else {
-			if ($protocol >= Info::PROTOCOL_120) {
-				$blockIdArray = $data['blocks'];
-				$blockDataArray = $data['data'];
-				$countBlocksInChunk = 8;
-				$chunkData = chr($countBlocksInChunk);
-				for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
-					$blockIdData = '';
-					$blockDataData = '';
-					for ($i = 0; $i < 256; $i++) {
-						$startIndex = ($blockIndex + ($i << 3)) << 3;
-						$blockIdData .= substr($blockIdArray, $startIndex << 1, 16);
-						$blockDataData .= substr($blockDataArray, $startIndex, 8);
-					}
-					$chunkData .= chr(0) . $blockIdData . $blockDataData;
+			$blockIdArray = $data['blocks'];
+			$blockDataArray = $data['data'];
+			$countBlocksInChunk = 8;
+			$chunkData = chr($countBlocksInChunk);
+			for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
+				$blockIdData = '';
+				$blockDataData = '';
+				for ($i = 0; $i < 256; $i++) {
+					$startIndex = ($blockIndex + ($i << 3)) << 3;
+					$blockIdData .= substr($blockIdArray, $startIndex << 1, 16);
+					$blockDataData .= substr($blockDataArray, $startIndex, 8);
 				}
-			} else {
-				$blockIdArray = $data['blocks'];
-				$blockDataArray = $data['data'];
-				$skyLightArray = $data['skyLight'];
-				$blockLightArray = $data['blockLight'];
-				$countBlocksInChunk = 8;
-				$chunkData = chr($countBlocksInChunk);
-				for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
-					$blockIdData = '';
-					$blockDataData = '';
-					$skyLightData = '';
-					$blockLightData = '';
-					for ($i = 0; $i < 256; $i++) {
-						$startIndex = ($blockIndex + ($i << 3)) << 3;
-						$blockIdData .= substr($blockIdArray, $startIndex << 1, 16);
-						$blockDataData .= substr($blockDataArray, $startIndex, 8);
-						$skyLightData .= substr($skyLightArray, $startIndex, 8);
-						$blockLightData .= substr($blockLightArray, $startIndex, 8);
-					}
-					$chunkData .= chr(0) . $blockIdData . $blockDataData . $skyLightData . $blockLightData;
-				}
+				$chunkData .= chr(0) . $blockIdData . $blockDataData;
 			}
 			$chunkData .= $data['heightMap'] . $data['biomeColor'] . Binary::writeLInt(0) . $data['tiles'];
 		}

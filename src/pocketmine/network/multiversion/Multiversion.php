@@ -65,16 +65,9 @@ abstract class Multiversion {
 	 */
 	public static function sendContainer($player, $windowId, $items) {
 		$protocol = $player->getPlayerProtocol();
-		if ($protocol >= ProtocolInfo::PROTOCOL_120) {
-			$pk = new InventoryContentPacket();
-			$pk->inventoryID = $windowId;
-			$pk->items = $items;
-		} else {
-			$pk = new ContainerSetContentPacket();			
-			$pk->windowid = $windowId;
-			$pk->slots = $items;
-			$pk->eid = $player->getId();
-		}
+		$pk = new InventoryContentPacket();
+		$pk->inventoryID = $windowId;
+		$pk->items = $items;
 		$player->dataPacket($pk);
 	}
 	
@@ -88,17 +81,10 @@ abstract class Multiversion {
 	 */
 	public static function sendContainerSlot($player, $windowId, $item, $slot) {
 		$protocol = $player->getPlayerProtocol();
-		if ($protocol >= ProtocolInfo::PROTOCOL_120) {
-			$pk = new InventorySlotPacket();
-			$pk->containerId = $windowId;
-			$pk->item = $item;
-			$pk->slot = $slot;
-		} else {
-			$pk = new ContainerSetSlotPacket();			
-			$pk->windowid = $windowId;
-			$pk->item = $item;
-			$pk->slot = $slot;
-		}
+		$pk = new InventorySlotPacket();
+		$pk->containerId = $windowId;
+		$pk->item = $item;
+		$pk->slot = $slot;
 		$player->dataPacket($pk);
 	}
 	
