@@ -185,6 +185,7 @@ use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
 use pocketmine\network\multiversion\Entity as MultiversionEntity;
 use pocketmine\entity\Vehicle;
 use pocketmine\network\proxy\DisconnectCompletePacket;
+use pocketmine\network\protocol\GameRulesChangedPacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -432,6 +433,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	protected $platformChatId = "";
 	protected $forcedPlayerId = false;
 	protected $incomingTransferData = "";
+	protected $doDaylightCycle = true;
+
 
 	public function getLeaveMessage(){
 		return "";
@@ -864,7 +867,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk = new SetTimePacket();
 			$pk->time = $this->level->getTime();
 			$pk->started = $this->level->stopTime == false;
-			$this->dataPacket($pk);
+			$this->dataPacket($pk);			
+			$this->setDaylightCycle(!$this->level->stopTime);
 
 			$this->noDamageTicks = 60;
 			$this->spawned = true;
@@ -5517,6 +5521,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$pk->time = $this->level->getTime();
 			$pk->started = $this->level->stopTime == false;
 			$this->dataPacket($pk);
+			$this->setDaylightCycle(!$this->level->stopTime);
 		}
 		$this->scheduleUpdate();
 		return true;
@@ -5620,6 +5625,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 			$this->server->getPluginManager()->callEvent($commandPostprocessEvent);
 		} catch (\Exception $ex) {
 			error_log($ex->getMessage());
+		}
+	}
+
+	public function setDaylightCycle($val) {
+		if ($this->doDaylightCycle != $val) {
+			$this->doDaylightCycle = $val;
+			$pk = new GameRulesChangedPacket();
+			$pk->gameRules = ["doDaylightCycle" => [1, $val]];
+			$this->dataPacket($pk);
 		}
 	}
 }

@@ -454,6 +454,7 @@ class Item{
 	const RAW_CHICKEN = 365;
 	const COOKED_CHICKEN = 366;
 	const ROTTEN_FLESH = 367;
+	const ENDER_PERL = 368;
 	const BLAZE_ROD = 369;
 	const GHAST_TEAR = 370;
 	const GOLD_NUGGET = 371;
@@ -472,9 +473,9 @@ class Item{
 	const SPAWN_EGG = 383;
 	const BOTTLE_ENCHANTING = 384;
 	const FIRE_CHARGE = 385;
-	const EMERALD = 388;
 	const WRITABLE_BOOK = 386;
 	const WRITTEN_BOOK = 387;
+	const EMERALD = 388;
 	const ITEM_FRAME = 389;
 	const FLOWER_POT = 390;
 	const CARROT = 391;
@@ -488,6 +489,7 @@ class Item{
 	const GOLDEN_CARROT = 396;
 	const MOB_HEAD = 397;
 	const CARROT_ON_STICK = 398;
+	const NETHER_STAR = 399;
 	const PUMPKIN_PIE = 400;
 	const ENCHANTING_BOOK = 403;
 	const REDSTONE_COMPARATOR = 404;
@@ -496,6 +498,7 @@ class Item{
 	const NETHER_QUARTZ = 406;
 	const MINECART_WITH_TNT = 407;
 	const MINECART_WITH_HOPPER = 408;
+	const PRISMARINE_SHARD = 409;
 	const HOPPER = 410;
 	const RAW_RABBIT = 411;
 	const COOKED_RABBIT = 412;
@@ -524,6 +527,8 @@ class Item{
 	const LINGERING_POTION = 441;
 	const ELYTRA = 444;
 	const SHULKER_SHELL = 445;
+	const TOTEM_OF_UNDYING = 450;
+	const IRON_NUGGET = 452;
 	const BEETROOT = 457;
 	const BEETROOT_SEEDS = 458;
 	const BEETROOT_SEED = 458;
@@ -535,6 +540,18 @@ class Item{
 	const ENCHANTED_GOLDEN_APPLE = 466;
 	const END_PEARL = 468;
 	const CAMERA = 498;
+	const RECORD_13 = 500;
+	const RECORD_CAT = 501;
+	const RECORD_BLOCKS = 502;
+	const RECORD_CHIRP = 503;
+	const RECORD_FAR = 504;
+	const RECORD_MALL = 505;
+	const RECORD_MELLOHI = 506;
+	const RECORD_STAL = 507;
+	const RECORD_STRAD = 508;
+	const RECORD_WARD = 509;
+	const RECORD_11 = 510;
+	const RECORD_WAIT = 511;
 	
 	protected static $names = [
 		0 => "Air",
@@ -995,6 +1012,7 @@ class Item{
             // update for 1.0
 			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;			
 			self::$list[self::REDSTONE_DUST] = Redstone::class;
+			self::$list[self::TOTEM_OF_UNDYING] = TotemOfUndying::class;
 		}
 
 		self::initCreativeItems();
