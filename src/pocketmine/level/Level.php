@@ -1347,7 +1347,9 @@ class Level implements ChunkManager, Metadatable{
 				return false;
 			}
 			
-			$this->server->getPluginManager()->callEvent($ev);
+			if (!$ev->isCancelled()) {
+				$this->server->getPluginManager()->callEvent($ev);
+			}
 			if ($ev->isCancelled()) {
 				$player->lastBreak = microtime(true);
 				return false;
@@ -1445,8 +1447,10 @@ class Level implements ChunkManager, Metadatable{
 			}
 			if(!$ev->isCancelled()){
 				$target->onUpdate(self::BLOCK_UPDATE_TOUCH, 0);
-				if($target->canBeActivated() === true and $target->onActivate($item, $player) === true){
-					return true;
+				if (!$player->isSneaking()) {
+					if($target->canBeActivated() === true and $target->onActivate($item, $player) === true){
+						return true;
+					}
 				}
 
 				if($item->canBeActivated() and $item->onActivate($this, $player, $block, $target, $face, $fx, $fy, $fz)){
@@ -2367,6 +2371,9 @@ class Level implements ChunkManager, Metadatable{
 	public function stopTime(){
 		$this->stopTime = true;
 		$this->sendTime();
+		foreach ($this->players as $player) {
+			$player->setDaylightCycle(!$this->stopTime);
+		}
 	}
 
 	/**
@@ -2375,6 +2382,9 @@ class Level implements ChunkManager, Metadatable{
 	public function startTime(){
 		$this->stopTime = false;
 		$this->sendTime();
+		foreach ($this->players as $player) {
+			$player->setDaylightCycle(!$this->stopTime);
+		}
 	}
 
 	/**
