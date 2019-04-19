@@ -19,7 +19,7 @@ class SpeedEffect extends Effect {
 	public function remove(Entity $entity) {
 		parent::remove($entity);
 		if ($entity instanceof Player) {
-			$entity->updateSpeed($entity::DEFAULT_SPEED);
+			$entity->updateSpeed($entity->isSprinting() ? $entity::DEFAULT_SPEED * 1.3 : $entity::DEFAULT_SPEED);
 		}
 	}
 
