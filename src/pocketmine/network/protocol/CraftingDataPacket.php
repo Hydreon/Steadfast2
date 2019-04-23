@@ -63,9 +63,20 @@ class CraftingDataPacket extends PEPacket{
 	}
 
 	private static function writeShapelessRecipe(ShapelessRecipe $recipe, BinaryStream $stream, $playerProtocol){
+		if ($playerProtocol >= Info::PROTOCOL_360) {
+			$stream->putString("recipe" . $recipe->getId());
+		}
 		$stream->putVarInt($recipe->getIngredientCount());
-		foreach($recipe->getIngredientList() as $item){
-			$stream->putSlot($item, $playerProtocol);
+		foreach($recipe->getIngredientList() as $item){	
+			if ($playerProtocol >= Info::PROTOCOL_360) {
+				$stream->putSignedVarInt($item->getId());
+				if ($item->getId() !== 0) {
+					$stream->putSignedVarInt($item->getDamage());
+					$stream->putSignedVarInt($item->getCount());
+				}
+			} else {
+				$stream->putSlot($item, $playerProtocol);
+			}
 		}
 
 		$stream->putVarInt(1);
@@ -80,11 +91,23 @@ class CraftingDataPacket extends PEPacket{
 	}
 
 	private static function writeShapedRecipe(ShapedRecipe $recipe, BinaryStream $stream, $playerProtocol){
+		if ($playerProtocol >= Info::PROTOCOL_360) {
+			$stream->putString("recipe" . $recipe->getId());
+		}
 		$stream->putSignedVarInt($recipe->getWidth());
 		$stream->putSignedVarInt($recipe->getHeight());
 		for($z = 0; $z < $recipe->getWidth(); ++$z){
 			for($x = 0; $x < $recipe->getHeight(); ++$x){
-				$stream->putSlot($recipe->getIngredient($x, $z), $playerProtocol);
+				$slot = $recipe->getIngredient($x, $z);
+				if ($playerProtocol >= Info::PROTOCOL_360) {
+					$stream->putSignedVarInt($slot->getId());
+					if ($slot->getId() !== 0) {
+						$stream->putSignedVarInt($slot->getDamage());
+						$stream->putSignedVarInt($slot->getCount());
+					}
+				} else {
+					$stream->putSlot($slot, $playerProtocol);	
+				}
 			}
 		}
 

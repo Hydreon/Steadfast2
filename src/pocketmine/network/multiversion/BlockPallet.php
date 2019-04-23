@@ -3,6 +3,7 @@
 namespace pocketmine\network\multiversion;
 
 use pocketmine\utils\BinaryStream;
+use pocketmine\network\protocol\Info;
 
 class BlockPallet {
 	
@@ -11,10 +12,10 @@ class BlockPallet {
 		$folderPath = __DIR__ . "/data/";
 		$palletFiles = array_diff(scandir($folderPath), ['..', '.']);
 		foreach ($palletFiles as $fileName) {
-			$pallet = new BlockPallet($folderPath . $fileName);
 			$parts = explode(".", $fileName);
-			$protocolNumber = substr($parts[0], 11);
-			$result[(int) $protocolNumber] = $pallet;
+			$protocolNumber = (int) substr($parts[0], 11);
+			$pallet = new BlockPallet($folderPath . $fileName, $protocolNumber);
+			$result[$protocolNumber] = $pallet;
 		}
 		krsort($result);
 		return $result;
@@ -24,7 +25,7 @@ class BlockPallet {
 	private $palletReverted = [];
 	private $dataForPackets = "";
 
-	public function __construct($path) {
+	public function __construct($path, $protocolNumber) {
 		$palletData = json_decode(file_get_contents($path), true);
 		$bs = new BinaryStream();
 		$bs->putVarInt(count($palletData));
@@ -38,6 +39,9 @@ class BlockPallet {
 			}
 			$bs->putString($blockInfo['name']);
 			$bs->putLShort($blockInfo['data']);
+			if ($protocolNumber >= Info::PROTOCOL_360) {
+				$bs->putLShort($blockInfo['id']);
+			}
 		}
 		$this->dataForPackets = $bs->getBuffer();
 	}
