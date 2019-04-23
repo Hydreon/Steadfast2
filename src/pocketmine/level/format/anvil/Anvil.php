@@ -60,12 +60,12 @@ class Anvil extends McRegion {
 		if(!($chunk instanceof $this->chunkClass)){
 			throw new ChunkException("Invalid Chunk sent");
 		}
-		$tiles = "";
+		$tiles = [];
 		$nbt = new NBT(NBT::LITTLE_ENDIAN);
 		foreach ($chunk->getTiles() as $tile) {
 			if ($tile instanceof Spawnable) {
 				$nbt->setData($tile->getSpawnCompound());
-				$tiles .= $nbt->write();
+				$tiles[] = $nbt->write();
 			}
 		}		
 		$data = [];

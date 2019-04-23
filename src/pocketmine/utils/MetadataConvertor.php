@@ -227,6 +227,7 @@ class MetadataConvertor {
 
 	private static function updateMetaIds($meta, $protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_360:
 			case Info::PROTOCOL_354:
 				$protocolMeta = self::$entityMetaIds354;
 				break;
@@ -281,6 +282,7 @@ class MetadataConvertor {
 			return $meta;
 		}
 		switch ($protocol) {
+			case Info::PROTOCOL_360:
 			case Info::PROTOCOL_354:
 			case Info::PROTOCOL_351:
 			case Info::PROTOCOL_350:
