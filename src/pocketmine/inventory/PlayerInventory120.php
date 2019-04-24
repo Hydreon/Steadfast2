@@ -118,15 +118,6 @@ class PlayerInventory120 extends PlayerInventory {
 		}
 	}
 	
-	public function setHotbarSlotIndex($index, $slot) {
-		if ($index == $slot || $slot < 0) {
-			return;
-		}
-		$tmp = $this->getItem($index);
-		$this->setItem($index, $this->getItem($slot));
-		$this->setItem($slot, $tmp);
-	}
-	
 	public function sendSlot($index, $target) {
 		$pk = new InventorySlotPacket();
 		$pk->containerId = Protocol120::CONTAINER_ID_INVENTORY;
@@ -223,7 +214,7 @@ class PlayerInventory120 extends PlayerInventory {
 		$pk = new MobEquipmentPacket();
 		$pk->eid = $this->getHolder()->getId();
 		$pk->item = $this->getItem($this->getSize() + self::OFFHAND_ARMOR_SLOT_ID);
-		$pk->slot = $this->getHeldItemSlot();
+		$pk->slot = $this->getHeldItemIndex();
 		$pk->selectedSlot = $this->getHeldItemIndex();
 		$pk->windowId = MobEquipmentPacket::WINDOW_ID_PLAYER_OFFHAND;
 		foreach ($targets as $player) {

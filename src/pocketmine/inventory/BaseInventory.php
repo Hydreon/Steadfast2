@@ -226,7 +226,7 @@ abstract class BaseInventory implements Inventory{
 		$item = clone $item;
 		$checkDamage = $item->getDamage() === null ? false : true;
 		$checkTags = $item->getCompound() === null ? false : true;
-		for($i = 0; $i < $this->getSize(); ++$i){
+		for($i = 0; $i < $this->size; ++$i){
 			$slot = $this->getItem($i);
 			if($item->equals($slot, $checkDamage, $checkTags)){
 				if(($diff = $slot->getMaxStackSize() - $slot->getCount()) > 0){

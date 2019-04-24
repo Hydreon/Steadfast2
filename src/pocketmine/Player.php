@@ -1820,16 +1820,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				break;
 			case 'MOB_EQUIPMENT_PACKET':
-				//Timings::$timerMobEqipmentPacket->startTiming();
-				if($this->spawned === false or $this->dead === true){
-					//Timings::$timerMobEqipmentPacket->stopTiming();
+				if ($this->spawned === false || $this->dead === true) {
 					break;
 				}
 
 				if ($this->protocol < ProtocolInfo::PROTOCOL_200) {
-					if($packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
+					if ($packet->slot === 0 || $packet->slot === 255) { //0 for 0.8.0 compatibility
 						$packet->slot = -1; //Air
-					}else{
+					} else {
 						$packet->slot -= 9; //Get real block slot
 					}
 				}
@@ -1837,35 +1835,29 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				$item = $this->inventory->getItem($packet->slot);
 				$slot = $packet->slot;
 				
-				if($packet->slot === -1){ //Air
+				if ($packet->slot === -1) { //Air
 					if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
 						$this->changeHeldItem($packet->item, $packet->selectedSlot, $packet->slot);
 						break;
 					} else {
 						$this->inventory->sendContents($this);
-						//Timings::$timerMobEqipmentPacket->stopTiming();
 						break;
 					}								
-				}elseif($item === null || $slot === -1 || ($item->getId() != Item::FILLED_MAP && !$item->deepEquals($packet->item) || !$item->deepEquals($packet->item, true, false))){ // packet error or not implemented
+				} else if ($item === null || $slot === -1 || ($item->getId() != Item::FILLED_MAP && !$item->deepEquals($packet->item) || !$item->deepEquals($packet->item, true, false))) { // packet error or not implemented
 					// hack for map was added because type of map_uuid is different in various versions
 					$this->inventory->sendContents($this);
-					//Timings::$timerMobEqipmentPacket->stopTiming();
 					break;
-				}else{
+				} else {
 					if ($packet->selectedSlot >= 0 and $packet->selectedSlot < 9) {
 						$this->changeHeldItem($packet->item, $packet->selectedSlot, $slot);
 						break;
 					} else {
 						$this->inventory->sendContents($this);
-						//Timings::$timerMobEqipmentPacket->stopTiming();
 						break;
 					}
 				}
-				
 				$this->inventory->sendHeldItem($this->hasSpawned);
-
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
-				//Timings::$timerMobEqipmentPacket->stopTiming();
 				break;
 			case 'LEVEL_SOUND_EVENT_PACKET':
 				if ($packet->eventId == LevelSoundEventPacket::SOUND_UNDEFINED) {
@@ -2078,49 +2070,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				//Timings::$timerEntityEventPacket->stopTiming();
 				break;
-			case 'DROP_ITEM_PACKET':
-				//Timings::$timerDropItemPacket->startTiming();
-				if($this->spawned === false or $this->blocked === true or $this->dead === true){
-					//Timings::$timerDropItemPacket->stopTiming();
-					break;
-				}
-
-				$slot = $this->inventory->first($packet->item);
-				if ($slot == -1) {
-					$this->inventory->sendContents($this);
-					//Timings::$timerDropItemPacket->stopTiming();
-					break;
-				}
-				if ($this->isSpectator()) {
-					$this->inventory->sendSlot($slot, $this);
-					//Timings::$timerDropItemPacket->stopTiming();
-					break;
-				}
-				$item = $this->inventory->getItem($slot);
-				$ev = new PlayerDropItemEvent($this, $packet->item);
-				$this->server->getPluginManager()->callEvent($ev);
-				if($ev->isCancelled()){
-					$this->inventory->sendSlot($slot, $this);
-					$this->inventory->setHotbarSlotIndex($slot, $slot);
-					$this->inventory->sendContents($this);
-					//Timings::$timerDropItemPacket->stopTiming();
-					break;
-				}
 				
-				$remainingCount = $item->getCount() - $packet->item->getCount();
-				if ($remainingCount > 0) {
-					$item->setCount($remainingCount);
-					$this->inventory->setItem($slot, $item);
-				} else {
-					$this->inventory->setItem($slot, Item::get(Item::AIR));
-				}
-				
-				$motion = $this->getDirectionVector()->multiply(0.4);
-				$this->level->dropItem($this->add(0, 1.3, 0), $packet->item, $motion, 40);
-				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
-				$this->inventory->sendContents($this);
-				//Timings::$timerDropItemPacket->stopTiming();
-				break;
 			case 'TEXT_PACKET':
 				//Timings::$timerTextPacket->startTiming();
 				if($this->spawned === false or $this->dead === true){
@@ -2222,59 +2172,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 				}
 				break;
 
-			case 'CONTAINER_SET_SLOT_PACKET':
-				//Timings::$timerConteinerSetSlotPacket->startTiming();
-				$isPlayerNotNormal = $this->spawned === false || $this->blocked === true || !$this->isAlive();
-				if ($isPlayerNotNormal || $packet->slot < 0) {
-					//Timings::$timerConteinerSetSlotPacket->stopTiming();
-					break;
-				}
-				
-				if ($packet->windowid === 0) { //Our inventory
-					if ($packet->slot >= $this->inventory->getSize()) {
-						//Timings::$timerConteinerSetSlotPacket->stopTiming();
-						break;
-					}
-					if ($this->isCreative() && !$this->isSpectator() && Item::getCreativeItemIndex($packet->item) !== -1) {
-						$this->inventory->setItem($packet->slot, $packet->item);
-						$this->inventory->setHotbarSlotIndex($packet->slot, $packet->slot); //links $hotbar[$packet->slot] to $slots[$packet->slot]
-					}
-					$transaction = new BaseTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
-				} else if ($packet->windowid === ContainerSetContentPacket::SPECIAL_ARMOR) { //Our armor
-					if ($packet->slot >= 4) {
-						//Timings::$timerConteinerSetSlotPacket->stopTiming();
-						break;
-					}
-					
-					$currentArmor = $this->inventory->getArmorItem($packet->slot);
-					$slot = $packet->slot + $this->inventory->getSize();
-					$transaction = new BaseTransaction($this->inventory, $slot, $currentArmor, $packet->item);
-				} else if ($packet->windowid === $this->currentWindowId) {
-//					$this->craftingType = self::CRAFTING_DEFAULT;
-					$inv = $this->currentWindow;
-					$transaction = new BaseTransaction($inv, $packet->slot, $inv->getItem($packet->slot), $packet->item);
-				}else{
-					//Timings::$timerConteinerSetSlotPacket->stopTiming();
-					break;
-				}
-
-				$oldItem = $transaction->getSourceItem();
-				$newItem = $transaction->getTargetItem();
-				if ($oldItem->deepEquals($newItem) && $oldItem->getCount() === $newItem->getCount()) { //No changes!
-					//No changes, just a local inventory update sent by the server
-					//Timings::$timerConteinerSetSlotPacket->stopTiming();
-					break;
-				}
-				
-				if ($this->craftingType === self::CRAFTING_ENCHANT) {
-					if ($this->currentWindow instanceof EnchantInventory) {
-						$this->enchantTransaction($transaction);
-					}
-				} else {
-					$this->addTransaction($transaction);
-				}
-				//Timings::$timerConteinerSetSlotPacket->stopTiming();
-				break;
 			case 'TILE_ENTITY_DATA_PACKET':
 				//Timings::$timerTileEntityPacket->startTiming();
 				if($this->spawned === false or $this->blocked === true or $this->dead === true){

@@ -70,7 +70,7 @@ class PlayerInteractEvent extends PlayerEvent implements Cancellable{
 		$this->action = (int) $action;
 		if($item instanceof Armor){
 			if($player->getInventory()->getArmorItem($item::SLOT_NUMBER)->getId() == Item::AIR){
-				$player->getInventory()->setItem($player->getInventory()->getHeldItemSlot(), Item::get(Item::AIR));
+				$player->getInventory()->setItem($player->getInventory()->getHeldItemIndex(), Item::get(Item::AIR));
 				$player->getInventory()->setArmorItem($item::SLOT_NUMBER, $item);
 				$player->getInventory()->sendArmorContents($player);
 				$player->getInventory()->sendContents($player);

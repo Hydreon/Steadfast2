@@ -2,6 +2,7 @@
 
 namespace pocketmine\network\protocol\v120;
 
+use pocketmine\item\Item;
 use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
 

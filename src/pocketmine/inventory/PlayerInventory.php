@@ -1,24 +1,5 @@
 <?php
 
-/*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
- *
- *
-*/
-
 namespace pocketmine\inventory;
 
 use pocketmine\entity\Human;
@@ -41,72 +22,49 @@ class PlayerInventory extends BaseInventory{
 	const OFFHAND_ARMOR_SLOT_ID = 4;
 
 	protected $itemInHandIndex = 0;
-	/** @var int[] */
-	protected $hotbar;
 
-	public function __construct(Human $player){
-		for ($i = 0; $i < $this->getHotbarSize(); $i++) {
-			$this->hotbar[$i] = $i;
-		}
-//		$this->hotbar = array_fill(0, $this->getHotbarSize(), -1);
+	public function __construct(Human $player) {
 		parent::__construct($player, InventoryType::get(InventoryType::PLAYER));
 	}
 
-	public function getSize(){
+	public function getSize() {
 		return parent::getSize() - 5; //Remove armor slots
 	}
 
-	public function setSize($size){
+	public function setSize($size) {
 		parent::setSize($size + 5);
 	}
 	
 	/**
+	 * @deprecated
 	 * 
 	 * @param int $index
 	 * @return Item
 	 */
 	public function getHotbatSlotItem($index) {
-		$slot = $this->getHotbarSlotIndex($index);
-		return $this->getItem($slot);
+		return $this->getItem($index);
 	}
 
-	public function getHotbarSlotIndex($index){
-		return ($index >= 0 and $index < $this->getHotbarSize()) ? $this->hotbar[$index] : -1;
+	public function getHotbarSlotIndex($index) {
+		return ($index >= 0 && $index < $this->getHotbarSize()) ? $index : -1;
 	}
 
-	public function setHotbarSlotIndex($index, $slot){
-		if ($this->holder instanceof Player && $this->holder->getInventoryType() == Player::INVENTORY_CLASSIC) {
-			if ($index == $slot || $slot < 0) {
-				return;
-			}
-			$tmp = $this->getItem($index);
-			$this->setItem($index, $this->getItem($slot));
-			$this->setItem($slot, $tmp);
-		} else {
-			if($index >= 0 and $index < $this->getHotbarSize() and $slot >= -1 and $slot < $this->getSize()){
-				$this->hotbar[$index] = $slot;
-			}
+	public function setHotbarSlotIndex($index, $slot) {
+		if ($index == $slot || $slot < 0) {
+			return;
 		}
+		$tmp = $this->getItem($index);
+		$this->setItem($index, $this->getItem($slot));
+		$this->setItem($slot, $tmp);
 	}
 
-	public function getHeldItemIndex(){
+	public function getHeldItemIndex() {
 		return $this->itemInHandIndex;
 	}
-	
-	/**
-	 * @impportant For win10 inventory only
-	 * @param int $index
-	 */
-	public function justSetHeldItemIndex($index) {
-		if($index >= 0 and $index < $this->getHotbarSize()){
-			$this->itemInHandIndex = $index;
-		}
-	}
 
-	public function setHeldItemIndex($index, $isNeedSendToHolder = true){
-		if($index >= 0 and $index < $this->getHotbarSize()){
+	public function setHeldItemIndex($index, $isNeedSendToHolder = true) {
+		if ($index >= 0 and $index < $this->getHotbarSize()) {
 			$this->itemInHandIndex = $index;
-			
 			if ($isNeedSendToHolder === true && $this->getHolder() instanceof Player) {
 				$this->sendHeldItem($this->getHolder());
 			}
@@ -114,13 +72,8 @@ class PlayerInventory extends BaseInventory{
 		}
 	}
 
-	public function getItemInHand(){
-		$item = $this->getItem($this->getHeldItemSlot());
-		if($item instanceof Item){
-			return $item;
-		}else{
-			return clone $this->air;
-		}
+	public function getItemInHand() {
+		return $this->getItem($this->getHeldItemSlot());
 	}
 
 	/**
@@ -128,16 +81,22 @@ class PlayerInventory extends BaseInventory{
 	 *
 	 * @return bool
 	 */
-	public function setItemInHand(Item $item){
+	public function setItemInHand(Item $item) {
 		return $this->setItem($this->getHeldItemSlot(), $item);
 	}
 
-	public function getHeldItemSlot(){
-		return $this->getHotbarSlotIndex($this->itemInHandIndex);
+	/**
+	 * @deprecated No longer used by internal code and not recommended.
+	 */
+	public function getHeldItemSlot() {
+		return $this->itemInHandIndex;
 	}
 
-	public function setHeldItemSlot($slot){
-		if($slot >= -1 and $slot < $this->getSize()){
+	/**
+	 * @deprecated No longer used by internal code and not recommended.
+	 */
+	public function setHeldItemSlot($slot) {
+		if ($slot >= -1 && $slot < $this->getSize()) {
 			$item = $this->getItem($slot);
 
 			$itemIndex = $this->getHeldItemIndex();
