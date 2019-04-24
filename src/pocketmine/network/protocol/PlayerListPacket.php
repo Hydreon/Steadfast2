@@ -77,7 +77,13 @@ class PlayerListPacket extends PEPacket{
 						if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
 							$this->putLInt(1); // num skins, always 1
 						}
-						$this->putString(!empty($d[4]) ? $d[4] : $emptySkin); // Skin Data
+						$skinData = !empty($d[4]) ? $d[4] : $emptySkin;
+						if ($playerProtocol >= Info::PROTOCOL_360) {
+							if (empty($d[7]) && strlen($skinData) == 8192) {
+								$skinData = $this->duplicateArmAndLeg($skinData);
+							}
+						}
+						$this->putString($skinData); // Skin Data
 						$capeData = isset($d[5]) ? $d[5] : '';
 						if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
 							if (!empty($capeData)) {
@@ -124,6 +130,43 @@ class PlayerListPacket extends PEPacket{
 				break;
 		} 
 			
+	}
+	
+	private function duplicateArmAndLeg($skinData) {
+		static $parts = [
+			["baseXOffset" => 4, "baseZOffset" => 16, "targetXOffset" => 20, "targetZOffset" => 48, "width" => 4, "height" => 4, "isRevers" => true],
+			["baseXOffset" => 8, "baseZOffset" => 16, "targetXOffset" => 24, "targetZOffset" => 48, "width" => 4, "height" => 4, "isRevers" => true],
+			["baseXOffset" => 0, "baseZOffset" => 20, "targetXOffset" => 24, "targetZOffset" => 52, "width" => 4, "height" => 12, "isRevers" => true],
+			["baseXOffset" => 4, "baseZOffset" => 20, "targetXOffset" => 20, "targetZOffset" => 52, "width" => 4, "height" => 12, "isRevers" => true],
+			["baseXOffset" => 8, "baseZOffset" => 20, "targetXOffset" => 16, "targetZOffset" => 52, "width" => 4, "height" => 12, "isRevers" => true],
+			["baseXOffset" => 12, "baseZOffset" => 20, "targetXOffset" => 28, "targetZOffset" => 52, "width" => 4, "height" => 12, "isRevers" => true],
+			["baseXOffset" => 44, "baseZOffset" => 16, "targetXOffset" => 36, "targetZOffset" => 48, "width" => 4, "height" => 4, "isRevers" => true],
+			["baseXOffset" => 48, "baseZOffset" => 16, "targetXOffset" => 40, "targetZOffset" => 48, "width" => 4, "height" => 4, "isRevers" => true],
+			["baseXOffset" => 40, "baseZOffset" => 20, "targetXOffset" => 40, "targetZOffset" => 52, "width" => 4, "height" => 12, "isRevers" => true],
+			["baseXOffset" => 44, "baseZOffset" => 20, "targetXOffset" => 36, "targetZOffset" => 52, "width" => 4, "height" => 12, "isRevers" => true],
+			["baseXOffset" => 48, "baseZOffset" => 20, "targetXOffset" => 32, "targetZOffset" => 52, "width" => 4, "height" => 12, "isRevers" => true],
+			["baseXOffset" => 52, "baseZOffset" => 20, "targetXOffset" => 44, "targetZOffset" => 52, "width" => 4, "height" => 12, "isRevers" => true]
+		];
+		$skinData .= str_repeat("\x00", 8192);
+		foreach ($parts as $part) {
+			for ($z = 0; $z < $part["height"]; $z++) {
+				$baseZOffset = ($part["baseZOffset"] + $z) * 64 * 4;
+				$targetZOffset = ($part["targetZOffset"] + $z) * 64 * 4;
+				for ($x = 0; $x < $part["width"]; $x++) {
+					$baseOffset = $baseZOffset + ($part["baseXOffset"] + $x) * 4;
+					if ($part["isRevers"]) {
+						$targetOffset = $targetZOffset + ($part["targetXOffset"] + ($part["width"] - $x - 1)) * 4;
+					} else {
+						$targetOffset = $targetZOffset + ($part["targetXOffset"] + $x) * 4;
+					}
+					$skinData[$targetOffset] = $skinData[$baseOffset];
+					$skinData[$targetOffset + 1] = $skinData[$baseOffset + 1];
+					$skinData[$targetOffset + 2] = $skinData[$baseOffset + 2];
+					$skinData[$targetOffset + 3] = $skinData[$baseOffset + 3];
+				}
+			}
+		}
+		return $skinData;
 	}
 
 }
