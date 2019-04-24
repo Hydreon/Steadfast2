@@ -40,7 +40,11 @@ class FullChunkDataPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putSignedVarInt($this->chunkX);
 		$this->putSignedVarInt($this->chunkZ);
-		$this->putString($this->data);
+		if ($playerProtocol >= Info::PROTOCOL_360) {
+			$this->put($this->data);
+		} else {
+			$this->putString($this->data);
+		}
 	}
 
 }

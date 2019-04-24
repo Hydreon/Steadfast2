@@ -27,7 +27,6 @@ use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\ProjectileHitEvent;
 use pocketmine\level\format\FullChunk;
-use pocketmine\level\MovingObjectPosition;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\ShortTag;
@@ -88,7 +87,7 @@ abstract class Projectile extends Entity {
 		$hasUpdate = $this->entityBaseTick($tickDiff);
 		if ($this->isAlive()) {
 			if (!$this->isCollided) {
-				$this->motionY -= $this->gravity;
+				$this->motionY -= $this->isInsideOfWater() ? $this->gravity * 10 : $this->gravity;
 			}
 			$moveVector = new Vector3($this->x + $this->motionX, $this->y + $this->motionY, $this->z + $this->motionZ);
 			$itersectionPoint = new Vector3();
@@ -100,7 +99,6 @@ abstract class Projectile extends Entity {
 				if (($entity === $this->shootingEntity && $this->ticksLived < 5)) {
 					continue;
 				}
-//                $axisalignedbb = $entity->boundingBox->grow(0.3, 0.3, 0.3); // ???
 				$axisalignedbb = $entity->boundingBox;
 				if (!$axisalignedbb->getIntersectionWithLine($this, $moveVector, $itersectionPoint)) {
 					continue;
@@ -117,14 +115,9 @@ abstract class Projectile extends Entity {
 			$nearBlock = null;
 			foreach ($blockList as $block) {
 				$axisalignedbb = $block->boundingBox;
-				if (is_null($axisalignedbb)) {
+				if (is_null($axisalignedbb) || $block->isLiquid()) {
 					continue;
 				}
-//                $ob = $axisalignedbb->calculateIntercept($this, $moveVector);
-//                if ($ob === null) {
-//                    continue;
-//                }
-//                $distance = $this->distanceSquared($ob->hitVector);
 				if (!$axisalignedbb->getIntersectionWithLine($this, $moveVector, $itersectionPoint)) {
 					continue;
 				}
@@ -166,7 +159,7 @@ abstract class Projectile extends Entity {
 			}
 			// if doesnt hit neither entity nor block
 			$this->move($this->motionX, $this->motionY, $this->motionZ);
-			if ($this->isCollided and ! $this->hadCollision) {
+			if ($this->isCollided && !$this->hadCollision) {
 				$this->hadCollision = true;
 				$this->motionX = 0;
 				$this->motionY = 0;
@@ -174,7 +167,7 @@ abstract class Projectile extends Entity {
 				$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
 				$this->kill();
 				return true;
-			} elseif (!$this->isCollided and $this->hadCollision) {
+			} else if (!$this->isCollided && $this->hadCollision) {
 				$this->hadCollision = false;
 			}
 			if (!$this->onGround or abs($this->motionX) > 0.00001 or abs($this->motionY) > 0.00001 or abs($this->motionZ) > 0.00001) {
@@ -204,7 +197,6 @@ abstract class Projectile extends Entity {
 			$pk->speedX = $this->motionX;
 			$pk->speedY = $this->motionY;
 			$pk->speedZ = $this->motionZ;
-//			$pk->metadata = $this->dataProperties;
 			$player->dataPacket($pk);
 		}
 	}
