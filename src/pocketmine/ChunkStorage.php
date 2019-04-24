@@ -119,6 +119,9 @@ class ChunkStorage {
 				$blockDataArray = $data['data'];
 				$countBlocksInChunk = 8;
 				$chunkData = chr($countBlocksInChunk);
+				if ($protocol >= Info::PROTOCOL_360) {
+					$chunkData .= chr(1) . chr($countBlocksInChunk + 1);
+				}
 				for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
 					$blockIdData = '';
 					$blockDataData = '';
