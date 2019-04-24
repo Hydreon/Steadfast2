@@ -4,9 +4,6 @@ namespace pocketmine\network\multiversion;
 
 use pocketmine\event\inventory\InventoryCreationEvent;
 use pocketmine\inventory\PlayerInventory;
-use pocketmine\inventory\PlayerInventory120;
-use pocketmine\network\protocol\ContainerSetContentPacket;
-use pocketmine\network\protocol\ContainerSetSlotPacket;
 use pocketmine\network\protocol\Info as ProtocolInfo;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventorySlotPacket;
@@ -47,7 +44,7 @@ abstract class Multiversion {
 			case ProtocolInfo::PROTOCOL_350:
 			case ProtocolInfo::PROTOCOL_351:
 			case ProtocolInfo::PROTOCOL_354:
-				$inventoryClass = PlayerInventory120::class;
+				$inventoryClass = PlayerInventory::class;
 				break;
 		}
 		$event = new InventoryCreationEvent(PlayerInventory::class, $inventoryClass, $player);

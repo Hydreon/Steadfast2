@@ -107,7 +107,6 @@ use pocketmine\network\protocol\AdventureSettingsPacket;
 use pocketmine\network\protocol\AnimatePacket;
 use pocketmine\network\protocol\BatchPacket;
 use pocketmine\network\protocol\ContainerClosePacket;
-use pocketmine\network\protocol\ContainerSetContentPacket;
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\DisconnectPacket;
 use pocketmine\network\protocol\EntityEventPacket;
@@ -161,7 +160,6 @@ use pocketmine\network\protocol\LevelSoundEventPacket;
 
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\Protocol120;
-use pocketmine\inventory\PlayerInventory120;
 use pocketmine\network\multiversion\Multiversion;
 use pocketmine\network\multiversion\MultiversionEnums;
 use pocketmine\network\protocol\LevelEventPacket;
@@ -2153,21 +2151,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 					if ($this->inventory->isQuickCraftEnabled()) {
 						$craftSlots = $this->inventory->getQuckCraftContents();
 						$this->tryApplyQuickCraft($craftSlots, $recipe);
-						$this->inventory->setItem(PlayerInventory120::CRAFT_RESULT_INDEX, $recipe->getResult());
+						$this->inventory->setItem(PlayerInventory::CRAFT_RESULT_INDEX, $recipe->getResult());
 						foreach ($craftSlots as $slot => $item) {
-							$this->inventory->setItem(PlayerInventory120::QUICK_CRAFT_INDEX_OFFSET - $slot, $item);
+							$this->inventory->setItem(PlayerInventory::QUICK_CRAFT_INDEX_OFFSET - $slot, $item);
 						}
 					} else {
 						$craftSlots = $this->inventory->getCraftContents();
 						$this->tryApplyCraft($craftSlots, $recipe);
-						$this->inventory->setItem(PlayerInventory120::CRAFT_RESULT_INDEX, $recipe->getResult());
+						$this->inventory->setItem(PlayerInventory::CRAFT_RESULT_INDEX, $recipe->getResult());
 						foreach ($craftSlots as $slot => $item) {
-							$this->inventory->setItem(PlayerInventory120::CRAFT_INDEX_0 - $slot, $item);
+							$this->inventory->setItem(PlayerInventory::CRAFT_INDEX_0 - $slot, $item);
 						}
 					}
 				} catch (\Exception $e) {
 					$pk = new ContainerClosePacket();
-					$pk->windowid = ContainerSetContentPacket::SPECIAL_INVENTORY;
+					$pk->windowid = Protocol120::CONTAINER_ID_INVENTORY;
 					$this->dataPacket($pk);
 				}
 				break;
