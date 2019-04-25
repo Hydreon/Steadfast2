@@ -5,7 +5,7 @@ namespace pocketmine\network\protocol\v360;
 use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\PEPacket;
 
-class ClietntCacheMissResponsePacket extends PEPacket {
+class ClientCacheMissResponsePacket extends PEPacket {
 
 	const NETWORK_ID = Info331::CLIENT_CACHE_MISS_RESPONSE_PACKET;
 	const PACKET_NAME = "CLIENT_CACHE_MISS_RESPONSE_PACKET";

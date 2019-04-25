@@ -8,11 +8,22 @@ class ResourcePackDataInfoPacket extends PEPacket {
 	const PACKET_NAME = "RESOURCE_PACK_DATA_INFO_PACKET";
 
 	const MAX_CHUNK_SIZE = 1048576; // 1MB
+
+	const TYPE_INVALID = 0;
+	const TYPE_RESOURCE = 1;
+	const TYPE_BEHAVIOR = 2;
+	const TYPE_WORLD_TEMPLATE = 3;
+	const TYPE_ADDON = 4;
+	const TYPE_SKINS = 5;
+	const TYPE_CACHED = 6;
+	const TYPE_COPY_PROTECTED = 7;
+	const TYPE_COUNT = 8;
 	
 	public $modId = "";
 	public $fileSize = 0;
 	public $modFileHash = "";
-
+	public $isPremium = false;
+	public $type = self::TYPE_RESOURCE;
 
 	// read
 	public function decode($playerProtocol) {
@@ -28,7 +39,8 @@ class ResourcePackDataInfoPacket extends PEPacket {
 		$this->putLLong($this->fileSize);
 		$this->putString($this->modFileHash);
 		if ($playerProtocol >= Info::PROTOCOL_360) {
-			$this->put("\x00\x01"); //unknown
+			$this->putByte($this->isPremium);
+			$this->putByte($this->type);
 		}
 	}
 

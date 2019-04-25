@@ -6,7 +6,7 @@ use pocketmine\utils\Binary;
 use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\Info;
 use pocketmine\level\Level;
-use pocketmine\network\protocol\v360\ClietntCacheMissResponsePacket;
+use pocketmine\network\protocol\v360\ClientCacheMissResponsePacket;
 
 class ChunkStorage {
 
@@ -180,7 +180,7 @@ class ChunkStorage {
 		$buffer = $pk->getBuffer();
 		$decodedBuffer = Binary::writeVarInt(strlen($buffer)) . $buffer;
 		if ($protocol >= Info::PROTOCOL_360) {
-			$pk = new ClietntCacheMissResponsePacket();
+			$pk = new ClientCacheMissResponsePacket();
 			$pk->data = $sectionsData;
 			$pk->encode($protocol);
 			$buffer = $pk->getBuffer();
