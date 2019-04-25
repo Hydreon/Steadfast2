@@ -191,6 +191,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	}
 
 	public function saveNBT() {
+		/** @todo Rewrite it */
 		parent::saveNBT();
 		$this->namedtag->Inventory = new Enum("Inventory", []);
 		$this->namedtag->Inventory->setTagType(NBT::TAG_Compound);
@@ -210,7 +211,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			}
 
 			//Normal inventory
-			$slotCount = Player::SURVIVAL_SLOTS + 9;
+			$slotCount = 36 + 9;
 			for($slot = 9; $slot < $slotCount; ++$slot){
 				$item = $this->inventory->getItem($slot - 9);
 				$this->namedtag->Inventory[$slot] = NBT::putItemHelper($item, $slot);
