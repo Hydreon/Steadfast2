@@ -6,7 +6,6 @@ use pocketmine\utils\Binary;
 use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\Info;
 use pocketmine\level\Level;
-use pocketmine\network\protocol\v360\ClietntCacheMissResponsePacket;
 
 class ChunkStorage {
 
@@ -59,23 +58,12 @@ class ChunkStorage {
 		$protocol = $data['protocol'];
 		$sectionsData = [];
 		if (isset($data['isAnvil']) && $data['isAnvil'] == true) {
-			if ($protocol >= Info::PROTOCOL_360) {
-				$sectionCount = count($data['chunk']['sections']);
-				$chunkData = chr($sectionCount) . chr(1) . chr($sectionCount + 1);
-			} else {
-				$chunkData = chr(count($data['chunk']['sections']));
-			}
+			$chunkData = chr(count($data['chunk']['sections']));
 			foreach ($data['chunk']['sections'] as $y => $sections) {
 				if ($sections['empty'] == true) {
 					if ($protocol >= Info::PROTOCOL_120) {
 						$blockData = "\x00" . str_repeat("\x00", 6144);						
-						if ($protocol >= Info::PROTOCOL_360) {
-							$hash = $this->getSectionHash($blockData);
-							$sectionsData[$hash] = $blockData;
-							$chunkData .= $hash;
-						} else {
-							$chunkData .= $blockData;
-						}
+						$chunkData .= $blockData;
 					} else {
 						$chunkData .= "\x00" . str_repeat("\x00", 10240);
 					}
@@ -86,13 +74,7 @@ class ChunkStorage {
 						} else {
 							$blockData = "\x00" . $this->sortData($sections['blocks']) . $this->sortHalfData($sections['data']);
 						}
-						if ($protocol >= Info::PROTOCOL_360) {
-							$hash = $this->getSectionHash($blockData);
-							$sectionsData[$hash] = $blockData;
-							$chunkData .= $hash;
-						} else {
-							$chunkData .= $blockData;
-						}
+						$chunkData .= $blockData;
 					} else {
 						if (isset($data['isSorted']) && $data['isSorted'] == true) {
 							$blockData = "\x00" . $sections['blocks'] . $sections['data'];
@@ -105,23 +87,13 @@ class ChunkStorage {
 					}
 				}
 			}
-			if ($protocol >= Info::PROTOCOL_360) {
-				$hash = $this->getSectionHash($data['chunk']['biomeColor']);
-				$sectionsData[$hash] = $data['chunk']['biomeColor'];
-				$tiles = "\x00" . implode("\x00", $data['tiles']) . "\x00";
-				$chunkData .= $hash . Binary::writeVarInt(strlen($tiles)) . $tiles;
-			} else {
-				$chunkData .= $data['chunk']['heightMap'] . $data['chunk']['biomeColor'] . Binary::writeLInt(0) . implode('', $data['tiles']);
-			}
+			$chunkData .= $data['chunk']['heightMap'] . $data['chunk']['biomeColor'] . Binary::writeLInt(0) . implode('', $data['tiles']);
 		} else {
 			if ($protocol >= Info::PROTOCOL_120) {
 				$blockIdArray = $data['blocks'];
 				$blockDataArray = $data['data'];
 				$countBlocksInChunk = 8;
 				$chunkData = chr($countBlocksInChunk);
-				if ($protocol >= Info::PROTOCOL_360) {
-					$chunkData .= chr(1) . chr($countBlocksInChunk + 1);
-				}
 				for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
 					$blockIdData = '';
 					$blockDataData = '';
@@ -131,13 +103,7 @@ class ChunkStorage {
 						$blockDataData .= substr($blockDataArray, $startIndex, 8);
 					}
 					$blockData = "\x00" . $blockIdData . $blockDataData;
-					if ($protocol >= Info::PROTOCOL_360) {
-						$hash = $this->getSectionHash($blockData);
-						$sectionsData[$hash] = $blockData;
-						$chunkData .= $hash;
-					} else {
-						$chunkData .= $blockData;
-					}
+					$chunkData .= $blockData;
 				}
 			} else {
 				$blockIdArray = $data['blocks'];
@@ -161,14 +127,7 @@ class ChunkStorage {
 					$chunkData .= "\x00" . $blockIdData . $blockDataData . $skyLightData . $blockLightData;
 				}
 			}
-			if ($protocol >= Info::PROTOCOL_360) {
-				$hash = $this->getSectionHash($data['heightMap']);
-				$sectionsData[$hash] = $data['heightMap'];
-				$tiles = "\x00" . implode("\x00", $data['tiles']) . "\x00";
-				$chunkData .= $hash . Binary::writeVarInt(strlen($tiles)) . $tiles;
-			} else {
-				$chunkData .= $data['heightMap'] . $data['biomeColor'] . Binary::writeLInt(0) . implode('', $data['tiles']);
-			}
+			$chunkData .= $data['heightMap'] . $data['biomeColor'] . Binary::writeLInt(0) . implode('', $data['tiles']);
 		}
 		$subClientId = $data['subClientId'];
 		$pk = new FullChunkDataPacket();
@@ -179,13 +138,6 @@ class ChunkStorage {
 		$pk->encode($protocol);
 		$buffer = $pk->getBuffer();
 		$decodedBuffer = Binary::writeVarInt(strlen($buffer)) . $buffer;
-		if ($protocol >= Info::PROTOCOL_360) {
-			$pk = new ClietntCacheMissResponsePacket();
-			$pk->data = $sectionsData;
-			$pk->encode($protocol);
-			$buffer = $pk->getBuffer();
-			$decodedBuffer .= Binary::writeVarInt(strlen($buffer)) . $buffer;
-		}
 		$buffer = zlib_encode($decodedBuffer, ZLIB_ENCODING_DEFLATE, 7);
 		$this->server->sendData($data['identifier'], $buffer);
 		$this->setCache(Level::chunkHash($data['chunkX'], $data['chunkZ']), ($protocol << 4) | $subClientId, $buffer);
