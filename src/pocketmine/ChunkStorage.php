@@ -90,7 +90,7 @@ class ChunkStorage {
 			if ($protocol < Info::PROTOCOL_360) {
 				$chunkData .= $data['chunk']['heightMap'];
 			}
-			$chunkData .= $data['chunk']['biomeColor'] . Binary::writeLInt(0) . implode('', $data['tiles']);
+			$chunkData .= $data['chunk']['biomeColor'] . Binary::writeByte(0) . Binary::writeSignedVarInt(0) . implode('', $data['tiles']);
 		} else {
 			if ($protocol >= Info::PROTOCOL_120) {
 				$blockIdArray = $data['blocks'];
