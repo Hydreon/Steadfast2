@@ -15,7 +15,7 @@ class Painting extends Entity {
 	const NETWORK_ID = Multiversion::ID_PAINTING;
 
 	/** @var string */
-	private $motive = "";
+	protected $motive = "";
 	/** @var integer */
 	private $direction = 0;
 	/** @var integer */
