@@ -9,21 +9,23 @@ use pocketmine\nbt\tag\Compound;
 use pocketmine\network\multiversion\Entity as Multiversion;
 use pocketmine\network\protocol\AddPaintingPacket;
 use pocketmine\Player;
+use pocketmine\network\protocol\Info;
 
 class Painting extends Entity {
 
 	const NETWORK_ID = Multiversion::ID_PAINTING;
+	
+	const COORD_TYPE_1 = 1;
+	const COORD_TYPE_2 = 2;
 
 	/** @var string */
-	private $motive = "";
+	protected $motive = "";
 	/** @var integer */
 	private $direction = 0;
-	/** @var integer */
-	private $tileX = 0;
-	/** @var integer */
-	private $tileY = 0;
-	/** @var integer */
-	private $tileZ = 0;
+	private $coords = [
+		self::COORD_TYPE_1 => ['x' => 0, 'y' => 0, 'z' => 0],
+		self::COORD_TYPE_2 => ['x' => 0, 'y' => 0, 'z' => 0]
+	];
 
 	public function __construct(FullChunk $chunk, Compound $nbt) {
 		if (isset($nbt->Facing)) {
@@ -33,28 +35,40 @@ class Painting extends Entity {
 			$this->motive = $nbt->Motive->getValue();
 		}
 		if (isset($nbt->TileX)) {
-			$this->tileX = $nbt->TileX->getValue();
+			$x = $nbt->TileX->getValue();
+			$this->coords[self::COORD_TYPE_1]['x'] = $x;
+			$this->coords[self::COORD_TYPE_2]['x'] = $x;
 		}
 		if (isset($nbt->TileY)) {
-			$this->tileY = $nbt->TileY->getValue();
+			$y = $nbt->TileY->getValue();
+			$this->coords[self::COORD_TYPE_1]['y'] = $y;
+			$this->coords[self::COORD_TYPE_2]['y'] = $y + 1;
 		}
 		if (isset($nbt->TileZ)) {
-			$this->tileZ = $nbt->TileZ->getValue();
+			$z = $nbt->TileZ->getValue();
+			$this->coords[self::COORD_TYPE_1]['z'] = $z;
+			$this->coords[self::COORD_TYPE_2]['z'] = $z;
 		}
 		parent::__construct($chunk, $nbt);
 		$this->fireTicks = 0;
 		switch($this->direction) {
 			case 0:
-				$this->tileZ -= 1;
+				$this->coords[self::COORD_TYPE_2]['x'] += 1;
+				$this->coords[self::COORD_TYPE_2]['z'] += 0.05;
+				$this->coords[self::COORD_TYPE_1]['z'] -= 1;
 				break;
 			case 1:
-				$this->tileX += 1;
+				$this->coords[self::COORD_TYPE_2]['x'] += 0.95;
+				$this->coords[self::COORD_TYPE_2]['z'] += 1;
+				$this->coords[self::COORD_TYPE_1]['x'] += 1;
 				break;
 			case 2:
-				$this->tileZ += 1;
+				$this->coords[self::COORD_TYPE_2]['z'] += 0.95;
+				$this->coords[self::COORD_TYPE_1]['z'] += 1;
 				break;
 			case 3:
-				$this->tileX -= 1;
+				$this->coords[self::COORD_TYPE_2]['x'] += 0.05;
+				$this->coords[self::COORD_TYPE_1]['x'] -= 1;
 				break;
 		}
 	}
@@ -64,9 +78,14 @@ class Painting extends Entity {
 			$this->hasSpawned[$player->getId()] = $player;
 			$pk = new AddPaintingPacket();
 			$pk->eid = $this->getId();
-			$pk->x = $this->tileX;
-			$pk->y = $this->tileY;
-			$pk->z = $this->tileZ;
+			if ($player->getPlayerProtocol() >= Info::PROTOCOL_360) {
+				$type = self::COORD_TYPE_2;
+			} else {
+				$type = self::COORD_TYPE_1;
+			}
+			$pk->x = $this->coords[$type]['x'];
+			$pk->y = $this->coords[$type]['y'];
+			$pk->z = $this->coords[$type]['z'];
 			$pk->direction = $this->direction;
 			$pk->title = $this->motive;
 			$player->dataPacket($pk);
