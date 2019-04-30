@@ -19,7 +19,7 @@ class Painting extends Entity {
 	const COORD_TYPE_2 = 2;
 
 	/** @var string */
-	private $motive = "";
+	protected $motive = "";
 	/** @var integer */
 	private $direction = 0;
 	private $coords = [
