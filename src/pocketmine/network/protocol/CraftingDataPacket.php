@@ -86,6 +86,9 @@ class CraftingDataPacket extends PEPacket{
 		if ($playerProtocol >= Info::PROTOCOL_350) {
 			$stream->putString(self::RECIPE_TAG_CRAFTING_TABLE);
 		}
+		if ($playerProtocol >= Info::PROTOCOL_361) {
+			$stream->putSignedVarInt(0); // priority
+		}
 
 		return CraftingDataPacket::ENTRY_SHAPELESS;
 	}
@@ -117,6 +120,9 @@ class CraftingDataPacket extends PEPacket{
 		$stream->putUUID($recipe->getId());
 		if ($playerProtocol >= Info::PROTOCOL_350) {
 			$stream->putString(self::RECIPE_TAG_CRAFTING_TABLE);
+		}
+		if ($playerProtocol >= Info::PROTOCOL_361) {
+			$stream->putSignedVarInt(0); // priority
 		}
 
 		return CraftingDataPacket::ENTRY_SHAPED;
