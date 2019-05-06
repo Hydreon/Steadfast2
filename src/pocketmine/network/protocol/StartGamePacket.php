@@ -161,6 +161,9 @@ class StartGamePacket extends PEPacket{
 					$this->putByte(0); // Is From World Template?
 					$this->putByte(0); // Is World Template Option Locked?
 				}
+				if ($playerProtocol >= Info::PROTOCOL_361) {
+					$this->putByte(1); // Only spawn v1 villagers
+				}
 			}
 			// level settings end
 			$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
