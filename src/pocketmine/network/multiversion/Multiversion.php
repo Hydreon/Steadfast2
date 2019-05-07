@@ -48,6 +48,7 @@ abstract class Multiversion {
 			case ProtocolInfo::PROTOCOL_351:
 			case ProtocolInfo::PROTOCOL_354:
 			case ProtocolInfo::PROTOCOL_360:
+			case ProtocolInfo::PROTOCOL_361:
 				$inventoryClass = PlayerInventory120::class;
 				break;
 		}
