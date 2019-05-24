@@ -3964,12 +3964,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 
 		$target = $this->level->getEntity($targetId);
-		if ($target instanceof Player && ($this->server->getConfigBoolean("pvp", true) === false || ($target->getGamemode() & 0x01) > 0)) {
+		if ($target instanceof Player && ($this->server->getConfigBoolean("pvp", true) === false || ($target->getGamemode() & 0x01) > 0) || !$this->canAttackPlayers()) {
 			$target->attackInCreative($this);
 			return;
 		}
 
-		if (!($target instanceof Entity) || $this->isSpectator() || $target->dead === true) {
+		if (!($target instanceof Entity) || $this->isSpectator() || $target->dead === true || !$this->canAttackMobs()) {
 			return;
 		}
 
@@ -4547,7 +4547,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 	
 	protected function onJump() {
-		
+
  	}
 	
 	protected function releaseUseItem() {

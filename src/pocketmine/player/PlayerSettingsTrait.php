@@ -10,8 +10,8 @@ trait PlayerSettingsTrait {
 	private $canBuildBlocks = true;
 	private $canAttackPlayers = true;
 	private $canAttackMobs = true;
-	private $canOpenContainers = true;
-	private $canUseDoorsAndSwitches = true;
+	private $canOpenContainers = true; // not integrated yet
+	private $canUseDoorsAndSwitches = true; // not integrated yet
 
 	public function canBreakBlocks() {
 		return $this->canBreakBlocks;
