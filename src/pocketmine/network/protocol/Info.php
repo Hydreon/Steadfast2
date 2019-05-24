@@ -84,7 +84,7 @@ interface Info{
 	const PROTOCOL_353 = 353; // 1.11.0.5
 	const PROTOCOL_354 = 354; // 1.11.0.7, 1.11.1, 1.11.2, 1.11.3
 	const PROTOCOL_360 = 360; // 1.12.0.2
-	const PROTOCOL_361 = 361; // 1.12.0.3, 1.12.0.4, 1.12.0.5
+	const PROTOCOL_361 = 361; // 1.12.0.3, 1.12.0.4, 1.12.0.5, 1.12.0.6
 	
 	/** OUTDATED (supporting will be removed with next release, may didn't work properly)*/
 	const PROTOCOL_120 = 120; // 1.2.0.xx (beta)
