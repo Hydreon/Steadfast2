@@ -1314,34 +1314,31 @@ class Level implements ChunkManager, Metadatable{
 	 *
 	 * @return boolean
 	 */
-	public function useBreakOn(Vector3 $vector, Item &$item = null, Player $player = null){
-		$target = $this->getBlock($vector);
-		//TODO: Adventure mode checks
-
-		if($item === null){
+	public function useBreakOn(Vector3 $vector, Item &$item = null, Player $player = null) {
+		if ($item === null) {
 			$item = Item::get(Item::AIR, 0, 0);
 		}
+		$target = $this->getBlock($vector);
 		$drops = $target->getDrops($item); 
-		if($player instanceof Player){
-			if($player->isSpectator()){
+		if ($player instanceof Player) {
+			if ($player->isSpectator() || !$player->canBreakBlocks()) {
 				return false;
 			}
 			$ev = new BlockBreakEvent($player, $target, $item, ($player->getGamemode() & 0x01) === 1 ? true : false, $drops);
 
-			if($player->isSurvival() and $item instanceof Item and !$target->isBreakable($item)){
+			if ($player->isSurvival() && $item instanceof Item && !$target->isBreakable($item)) {
 				$ev->setCancelled();
 			}
 
-			if(!$player->isOp() and ($distance = $this->server->getConfigInt("spawn-protection", 16)) > -1){
+			if (!$player->isOp() && ($distance = $this->server->getConfigInt("spawn-protection", 16)) > -1) {
 				$t = new Vector2($target->x, $target->z);
 				$s = new Vector2($this->getSpawnLocation()->x, $this->getSpawnLocation()->z);
-				if($t->distance($s) <= $distance){ //set it to cancelled so plugins can bypass this
+				if ($t->distance($s) <= $distance) { //set it to cancelled so plugins can bypass this
 					$ev->setCancelled();
 				}
 			}
 			
 			$breakTime = $player->isCreative() ? 0.15 : $target->getBreakTime($item);
-			$delta = 0.1;
 			if (!$ev->getInstaBreak() && ($player->lastBreak + $breakTime) >= microtime(true)) {
 				return false;
 			}
@@ -1358,46 +1355,44 @@ class Level implements ChunkManager, Metadatable{
 			$player->lastBreak = microtime(true);
 			
 			$this->addParticle(new DestroyBlockParticle($target->add(0.5, 0.5, 0.5), $target));
-		}elseif($item instanceof Item and !$target->isBreakable($item)){
+		} else if ($item instanceof Item && !$target->isBreakable($item)) {
 			return false;
 		}
 
 		$level = $target->getLevel();
 
-		if($level instanceof Level){
+		if ($level instanceof Level) {
 			$above = $level->getBlock(new Vector3($target->x, $target->y + 1, $target->z));
-			if($above instanceof Block){
-				if($above->getId() === Item::FIRE){
+			if ($above instanceof Block) {
+				if ($above->getId() === Item::FIRE) {
 					$level->setBlock($above, new Air(), true);
 				}
 			}
 		}		
 		$target->onBreak($item);
 		$tile = $this->getTile($target);
-		if($tile instanceof Tile){
-			if($tile instanceof InventoryHolder){
-				if($tile instanceof Chest){
+		if ($tile instanceof Tile) {
+			if ($tile instanceof InventoryHolder) {
+				if ($tile instanceof Chest) {
 					$tile->unpair();
 				}
-
-				foreach($tile->getInventory()->getContents() as $chestItem){
+				foreach ($tile->getInventory()->getContents() as $chestItem) {
 					$this->dropItem($target, $chestItem);
 				}
 			}
-
 			$tile->close();
 		}
 
-		if($item instanceof Item){
+		if ($item instanceof Item) {
 			$item->useOn($target);
-			if($item->isTool() and $item->getDamage() >= $item->getMaxDurability()){
+			if ($item->isTool() && $item->getDamage() >= $item->getMaxDurability()) {
 				$item = Item::get(Item::AIR, 0, 0);
 			}
 		}
 
-		if(!($player instanceof Player) or $player->isSurvival()){
-			foreach($drops as $drop){
-				if($drop[2] > 0){
+		if (!($player instanceof Player) || $player->isSurvival()) {
+			foreach ($drops as $drop) {
+				if ($drop[2] > 0) {
 					$this->dropItem($vector->add(0.5, 0.5, 0.5), Item::get(...$drop));
 				}
 			}
@@ -1419,43 +1414,33 @@ class Level implements ChunkManager, Metadatable{
 	 *
 	 * @return boolean
 	 */
-	public function useItemOn(Vector3 $vector, Item &$item, $face, $fx = 0.0, $fy = 0.0, $fz = 0.0, Player $player = null){
+	public function useItemOn(Vector3 $vector, Item &$item, $face, $fx = 0.0, $fy = 0.0, $fz = 0.0, Player $player = null) {
 		$target = $this->getBlock($vector);
+		if ($target->getId() === Item::AIR) {
+			return false;
+		}
+		
 		$block = $target->getSide($face);
-
-		if($block->y >= $this->getMaxY() or $block->y < 0){
+		if ($block->y >= $this->getMaxY() || $block->y < 0) {
 			return false;
 		}
 
-		if($target->getId() === Item::AIR){
-			return false;
-		}
-
-		if($player instanceof Player){
+		if ($player instanceof Player) {
 			$ev = new PlayerInteractEvent($player, $item, $target, $face);
-//			if(!$player->isOp() and ($distance = $this->server->getConfigInt("spawn-protection", 16)) > -1){
-//				$t = new Vector2($target->x, $target->z);
-//				$s = new Vector2($this->getSpawnLocation()->x, $this->getSpawnLocation()->z);
-//				if($t->distance($s) <= $distance){ //set it to cancelled so plugins can bypass this
-//					$ev->setCancelled();
-//				}
-//			}
 			$this->server->getPluginManager()->callEvent($ev);
-			if($player->isSpectator()){
+			if ($player->isSpectator()) {
 				$ev->setCancelled(true);
 			}
-			if(!$ev->isCancelled()){
+			if (!$ev->isCancelled()) {
 				$target->onUpdate(self::BLOCK_UPDATE_TOUCH);
 				if (!$player->isSneaking()) {
-					if($target->canBeActivated() === true and $target->onActivate($item, $player) === true){
+					if ($target->canBeActivated() === true && $target->onActivate($item, $player) === true) {
 						return true;
 					}
 				}
-
-				if($item->canBeActivated() and $item->onActivate($this, $player, $block, $target, $face, $fx, $fy, $fz)){
-					if($item->getCount() <= 0){
+				if ($item->canBeActivated() && $item->onActivate($this, $player, $block, $target, $face, $fx, $fy, $fz)) {
+					if ($item->getCount() <= 0) {
 						$item = Item::get(Item::AIR, 0, 0);
-
 						return true;
 					}
 				}
@@ -1465,31 +1450,31 @@ class Level implements ChunkManager, Metadatable{
 					$player->getInventory()->sendContents($player);
 				}
 			}
-		}elseif($target->canBeActivated() === true and $target->onActivate($item, $player) === true){
+		} else if ($target->canBeActivated() === true && $target->onActivate($item, $player) === true) {
 			return true;
 		}
 
-		if($item->isPlaceable()){
+		if ($item->isPlaceable()) {
 			$hand = $item->getBlock();
 			$hand->position($block);
-		}elseif($block->getId() === Item::FIRE){
+		} else if ($block->getId() === Item::FIRE) {
 			$block->onUpdate(self::BLOCK_UPDATE_TOUCH);
 			return false;
-		}else{
+		} else {
 			return false;
 		}
 
-		if(!($block->canBeReplaced() === true or ($hand->getId() === Item::SLAB and $block->getId() === Item::SLAB))){
+		if (!($block->canBeReplaced() === true || ($hand->getId() === Item::SLAB && $block->getId() === Item::SLAB))) {
 			return false;
 		}
 
-		if($target->canBeReplaced() === true){
+		if ($target->canBeReplaced() === true) {
 			$block = $target;
 			$hand->position($block);
 			//$face = -1;
 		}
 
-		if($hand->isSolid() === true and $hand->getBoundingBox() !== null){
+		if ($hand->isSolid() === true && $hand->getBoundingBox() !== null) {
 			$entities = $this->getCollidingEntities($hand->getBoundingBox());
 			$realCount = 0;
 			foreach ($entities as $e) {
@@ -1504,24 +1489,22 @@ class Level implements ChunkManager, Metadatable{
 						continue;
 					}
 				}
-				
 				++$realCount;
 			}
-
-			if($realCount > 0){
+			if ($realCount > 0) {
 				return false; //Entity in block
 			}
 		}
 
-		if($player instanceof Player){
-			if($player->isSpectator()){
+		if ($player instanceof Player) {
+			if ($player->isSpectator() || !$player->canBuildBlocks()) {
 				return false;
 			}
 			$ev = new BlockPlaceEvent($player, $hand, $block, $target, $item);
-			if(!$player->isOp() and ($distance = $this->server->getConfigInt("spawn-protection", 16)) > -1){
+			if (!$player->isOp() && ($distance = $this->server->getConfigInt("spawn-protection", 16)) > -1) {
 				$t = new Vector2($target->x, $target->z);
 				$s = new Vector2($this->getSpawnLocation()->x, $this->getSpawnLocation()->z);
-				if($t->distance($s) <= $distance){ //set it to cancelled so plugins can bypass this
+				if ($t->distance($s) <= $distance) { //set it to cancelled so plugins can bypass this
 					$ev->setCancelled();
 				}
 			}
@@ -1531,7 +1514,7 @@ class Level implements ChunkManager, Metadatable{
 			}
 		}
 
-		if($hand->place($item, $block, $target, $face, $fx, $fy, $fz, $player) === false){
+		if ($hand->place($item, $block, $target, $face, $fx, $fy, $fz, $player) === false) {
 			return false;
 		}
 		$position = [ 'x' => $target->x, 'y' => $target->y, 'z' => $target->z ];
@@ -1540,7 +1523,7 @@ class Level implements ChunkManager, Metadatable{
 		$viewers[] = $player;
 		$player->sendSound(LevelSoundEventPacket::SOUND_PLACE, $position, MultiversionEntity::ID_NONE, $blockId, $viewers);
 
-		if($hand->getId() === Item::SIGN_POST or $hand->getId() === Item::WALL_SIGN){
+		if ($hand->getId() === Item::SIGN_POST or $hand->getId() === Item::WALL_SIGN) {
 			$tile = Tile::createTile("Sign", $this->getChunk($block->x >> 4, $block->z >> 4), new Compound(false, [
 				"id" => new StringTag("id", Tile::SIGN),
 				"x" => new IntTag("x", $block->x),
@@ -1551,12 +1534,12 @@ class Level implements ChunkManager, Metadatable{
 				"Text3" => new StringTag("Text3", ""),
 				"Text4" => new StringTag("Text4", "")
 			]));
-			if($player instanceof Player){
+			if ($player instanceof Player) {
 				$tile->namedtag->Creator = new StringTag("Creator", $player->getName());
 			}
 		}
 		$item->setCount($item->getCount() - 1);
-		if($item->getCount() <= 0){
+		if ($item->getCount() <= 0) {
 			$item = Item::get(Item::AIR, 0, 0);
 		}
 
