@@ -3964,7 +3964,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 
 		$target = $this->level->getEntity($targetId);
-		if ($target instanceof Player && ($this->server->getConfigBoolean("pvp", true) === false || ($target->getGamemode() & 0x01) > 0) || !$this->canAttackPlayers()) {
+		if ($target instanceof Player && ($this->server->getConfigBoolean("pvp", true) === false || ($target->getGamemode() & 0x01) > 0 || !$this->canAttackPlayers())) {
 			$target->attackInCreative($this);
 			return;
 		}
