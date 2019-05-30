@@ -38,7 +38,7 @@ class AdventureSettingsPacket extends PEPacket{
 	const FLAG_PLAYER_MUTED = 0x0400;
 
 	const ACTION_FLAG_PROHIBIT_ALL = 0x00;
-	const ACTION_FLAG_BUILD_AND_MINE = 0x01;
+	const ACTION_FLAG_MINE = 0x01;
 	const ACTION_FLAG_DOORS_AND_SWITCHES = 0x02;
 	const ACTION_FLAG_OPEN_CONTAINERS = 0x04;
 	const ACTION_FLAG_ATTACK_PLAYERS = 0x08;
@@ -46,6 +46,7 @@ class AdventureSettingsPacket extends PEPacket{
 	const ACTION_FLAG_OP = 0x20;
 	const ACTION_FLAG_TELEPORT = 0x40;
 	const ACTION_FLAG_DEFAULT_LEVEL_PERMISSIONS = 0x80;
+	const ACTION_FLAG_BUILD = 0x0100;
 	const ACTION_FLAG_ALLOW_ALL = 0x01FF;
 	
 	const PERMISSION_LEVEL_VISITOR = 0;
@@ -59,6 +60,9 @@ class AdventureSettingsPacket extends PEPacket{
 	const COMMAND_PERMISSION_LEVEL_HOST = 3;
 	const COMMAND_PERMISSION_LEVEL_OWNER = 4;
 	const COMMAND_PERMISSION_LEVEL_INTERNAL = 5;
+
+	/** @deprecated Prohibits only mining */
+	const ACTION_FLAG_BUILD_AND_MINE = 0x01;
 	
 	public $flags = 0;
 	public $actionPermissions = self::ACTION_FLAG_DEFAULT_LEVEL_PERMISSIONS;
