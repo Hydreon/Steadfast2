@@ -186,11 +186,14 @@ use pocketmine\network\multiversion\Entity as MultiversionEntity;
 use pocketmine\entity\Vehicle;
 use pocketmine\network\proxy\DisconnectCompletePacket;
 use pocketmine\network\protocol\GameRulesChangedPacket;
+use pocketmine\player\PlayerSettingsTrait;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
  */
-class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
+class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
+
+	use PlayerSettingsTrait;
 
     const OS_ANDROID = 1;
     const OS_IOS = 2;
@@ -1224,7 +1227,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 	/**
 	 * @return int
 	 */
-	public function getGamemode(){
+	public function getGamemode() {
 		return $this->gamemode;
 	}
 
@@ -1282,6 +1285,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		$pk->flags = $flags;
 		$pk->userId = $this->getId();
 		$pk->commandPermissions = $this->commandPermissions;
+		$pk->permissionLevel = AdventureSettingsPacket::PERMISSION_LEVEL_CUSTOM;
+		$pk->actionPermissions = $this->getActionFlags();
 		$this->dataPacket($pk);
 	}
 
@@ -4128,12 +4133,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer{
 		}
 
 		$target = $this->level->getEntity($targetId);
-		if ($target instanceof Player && ($this->server->getConfigBoolean("pvp", true) === false || ($target->getGamemode() & 0x01) > 0)) {
+		if ($target instanceof Player && ($this->server->getConfigBoolean("pvp", true) === false || ($target->getGamemode() & 0x01) > 0 || !$this->canAttackPlayers())) {
 			$target->attackInCreative($this);
 			return;
 		}
 
-		if (!($target instanceof Entity) || $this->isSpectator() || $target->dead === true) {
+		if (!($target instanceof Entity) || $this->isSpectator() || $target->dead === true || !$this->canAttackMobs()) {
 			return;
 		}
 
