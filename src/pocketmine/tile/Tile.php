@@ -53,6 +53,7 @@ abstract class Tile extends Position{
 	const DROPPER = "Dropper";
 	const HOPPER = "Hopper";
 	const BEACON = "Beacon";
+	const BANNER = "Banner";
 
 	public static $tileCount = 1;
 
