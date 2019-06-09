@@ -178,6 +178,7 @@ use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
 use pocketmine\network\multiversion\Entity as MultiversionEntity;
 use pocketmine\network\protocol\GameRulesChangedPacket;
 use pocketmine\player\PlayerSettingsTrait;
+use pocketmine\event\entity\EntityLevelChangeEvent;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -5240,6 +5241,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	protected function switchLevel(Level $targetLevel) {
+		$this->server->getPluginManager()->callEvent($ev = new EntityLevelChangeEvent($this, $this->level, $targetLevel));
+		if ($ev->isCancelled()) {
+			return false;
+		}
 		$this->despawnFromAll();
 		$this->level->removeEntity($this);
 		if ($this->chunk !== null) {
