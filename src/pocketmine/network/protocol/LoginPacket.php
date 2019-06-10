@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-use pocketmine\network\protocol\Info;
 use pocketmine\Server;
 use pocketmine\utils\Binary;
 use pocketmine\utils\JWT;
