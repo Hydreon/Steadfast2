@@ -186,6 +186,7 @@ use pocketmine\network\multiversion\Entity as MultiversionEntity;
 use pocketmine\network\proxy\DisconnectCompletePacket;
 use pocketmine\network\protocol\GameRulesChangedPacket;
 use pocketmine\player\PlayerSettingsTrait;
+use pocketmine\event\entity\EntityLevelChangeEvent;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -1422,10 +1423,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	public function setMotion(Vector3 $mot){
 		if(parent::setMotion($mot)){
 			if($this->chunk !== null){
-				$this->level->addEntityMotion($this->getViewers(), $this->getId(), $this->motionX, $this->motionY, $this->motionZ);
 				$pk = new SetEntityMotionPacket();
 				$pk->entities[] = [$this->id, $mot->x, $mot->y, $mot->z];
 				$this->dataPacket($pk);
+				$viewers = $this->getViewers();
+				$viewers[$this->getId()] = $this;
+				Server::broadcastPacket($viewers, $pk);
 			}
 
 			if($this->motionY > 0){
@@ -5385,6 +5388,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	protected function switchLevel(Level $targetLevel) {
+		$this->server->getPluginManager()->callEvent($ev = new EntityLevelChangeEvent($this, $this->level, $targetLevel));
+		if ($ev->isCancelled()) {
+			return false;
+		}
 		$this->despawnFromAll();
 		$this->level->removeEntity($this);
 		if ($this->chunk !== null) {
