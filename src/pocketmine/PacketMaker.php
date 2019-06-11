@@ -110,7 +110,7 @@ class PacketMaker extends Thread {
 			}
 			if (!empty($moveStr)) {
 				$buffer = zlib_encode($moveStr, ZLIB_ENCODING_DEFLATE, 7);
-				$this->sendData($identifier, $buffer, $playersData);
+				$this->sendData($identifier, $buffer, $playerData);
 			}
 		}
 	}
