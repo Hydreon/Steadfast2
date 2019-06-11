@@ -141,7 +141,6 @@ class Level implements ChunkManager, Metadatable{
 	/** @var Tile[] */
 	protected $tiles = [];
 
-	private $motionToSend = [];
 	private $moveToSend = [];
 
 	/** @var Player[] */
@@ -656,12 +655,7 @@ class Level implements ChunkManager, Metadatable{
 
 		}
 
-		$data = array();
-		$data['moveData'] = $this->moveToSend;
-		$data['motionData'] = $this->motionToSend;
-		$this->server->packetMaker->pushMainToThreadPacket(serialize($data));
-		$this->moveToSend = [];
-		$this->motionToSend = [];
+		$this->sendMove();
 
 		foreach ($this->playerHandItemQueue as $senderId => $playerList) {
 			foreach ($playerList as $recipientId => $data) {
@@ -677,6 +671,13 @@ class Level implements ChunkManager, Metadatable{
 			}
 		}
 		//$this->timings->doTick->stopTiming();
+	}
+	
+	protected function sendMove() {
+		if (!empty($this->moveToSend)) {
+			$this->server->packetMaker->pushMainToThreadPacket(serialize($this->moveToSend));
+			$this->moveToSend = [];
+		}
 	}
 
 	/**
@@ -2491,29 +2492,18 @@ class Level implements ChunkManager, Metadatable{
 		$this->server->getLevelMetadata()->removeMetadata($this, $metadataKey, $plugin);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function addEntityMotion($viewers, $entityId, $x, $y, $z){	
-		$motion = [$entityId, $x, $y, $z];
-		foreach ($viewers as $p) {
-			$subClientId = $p->getSubClientId();
-			if ($subClientId > 0 && ($parent = $p->getParent()) !== null) {
-				$playerIdentifier = $parent->getIdentifier();
-			} else {
-				$playerIdentifier = $p->getIdentifier();
-			}
-			
-			if(!isset($this->motionToSend[$playerIdentifier])){
-				$this->motionToSend[$playerIdentifier] = [
-					'data' => [],
-					'playerProtocol' => $p->getPlayerProtocol()
-				];
-			}
-			$motion[4] = $subClientId;
-			$this->motionToSend[$playerIdentifier]['data'][] = $motion;
-		}
+
 	}
 
 	public function addEntityMovement($viewers, $entityId, $x, $y, $z, $yaw, $pitch, $headYaw = null, $isPlayer = false){
-		$move = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch, $isPlayer];
+		if (empty($viewers)) {
+			return;
+		}
+		$this->moveToSend['data'][$entityId] = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch, $isPlayer];
 		foreach ($viewers as $p) {
 			$subClientId = $p->getSubClientId();
 			if ($subClientId > 0 && ($parent = $p->getParent()) !== null) {
@@ -2521,14 +2511,16 @@ class Level implements ChunkManager, Metadatable{
 			} else {
 				$playerIdentifier = $p->getIdentifier();
 			}
-			if (!isset($this->moveToSend[$playerIdentifier])) {
-				$this->moveToSend[$playerIdentifier] = [
-					'data' => [],
-					'playerProtocol' => $p->getPlayerProtocol()
+			if (!isset($this->moveToSend['player'][$playerIdentifier])) {
+				$this->moveToSend['player'][$playerIdentifier] = [
+					'playerProtocol' => $p->getPlayerProtocol(),
+					'subIds' => []
 				];
 			}
-			$move[8] = $subClientId;
-			$this->moveToSend[$playerIdentifier]['data'][] = $move;
+			if (!isset($this->moveToSend['player'][$playerIdentifier]['subIds'][$subClientId])) {
+				$this->moveToSend['player'][$playerIdentifier]['subIds'][$subClientId] = [];
+			}
+			$this->moveToSend['player'][$playerIdentifier]['subIds'][$subClientId][] = $entityId;
 		}
 	}
 		

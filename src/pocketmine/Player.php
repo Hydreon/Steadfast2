@@ -1388,10 +1388,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	public function setMotion(Vector3 $mot){
 		if(parent::setMotion($mot)){
 			if($this->chunk !== null){
-				$this->level->addEntityMotion($this->getViewers(), $this->getId(), $this->motionX, $this->motionY, $this->motionZ);
 				$pk = new SetEntityMotionPacket();
 				$pk->entities[] = [$this->id, $mot->x, $mot->y, $mot->z];
 				$this->dataPacket($pk);
+				$viewers = $this->getViewers();
+				$viewers[$this->getId()] = $this;
+				Server::broadcastPacket($viewers, $pk);
 			}
 
 			if($this->motionY > 0){
