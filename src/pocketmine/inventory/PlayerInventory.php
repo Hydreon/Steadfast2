@@ -451,6 +451,9 @@ class PlayerInventory extends BaseInventory{
 	 * @param Player|Player[] $target
 	 */
 	public function sendContents($target) {
+		if (!($this->holder instanceof Player)) {
+			return;
+		}
 		$pk = new InventoryContentPacket();
 		$pk->inventoryID = Protocol120::CONTAINER_ID_INVENTORY;
 		$pk->items = [];
@@ -469,6 +472,9 @@ class PlayerInventory extends BaseInventory{
 	 * @param Player|Player[] $target
 	 */
 	public function sendSlot($index, $target){
+		if (!($this->holder instanceof Player)) {
+			return;
+		}
 		$pk = new InventorySlotPacket();
 		$pk->containerId = Protocol120::CONTAINER_ID_INVENTORY;
 		$pk->slot = $index;

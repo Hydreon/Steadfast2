@@ -29,15 +29,13 @@ abstract class PEPacket extends DataPacket {
 			$subclientIds = $header >> 10;
 			$this->senderSubClientID = $subclientIds & 0x03;
 			$this->targetSubClientID = ($subclientIds >> 2) & 0x03;
-		} else if ($playerProtocol >= Info::PROTOCOL_120) {
+		} else {
 			$this->getByte(); // packetID
 			$this->senderSubClientID = $this->getByte();
 			$this->targetSubClientID = $this->getByte();
 			if ($this->senderSubClientID > 4 || $this->targetSubClientID > 4) {
 				throw new \Exception(get_class($this) . ": Packet decode headers error");
 			}
-		} else {
-			$this->getByte(); // packetID
 		}
 	}
 
@@ -49,10 +47,8 @@ abstract class PEPacket extends DataPacket {
 		if ($playerProtocol < Info::PROTOCOL_280) {
 			parent::reset();
 			$this->putByte(self::$packetsIds[$playerProtocol][$this::PACKET_NAME]);	
-			if ($playerProtocol >= Info::PROTOCOL_120) {
-				$this->putByte($this->senderSubClientID);
-				$this->putByte($this->targetSubClientID);
-			}
+			$this->putByte($this->senderSubClientID);
+			$this->putByte($this->targetSubClientID);
 		} else {
 			parent::reset();
 			$packetID = self::$packetsIds[$playerProtocol][$this::PACKET_NAME];
