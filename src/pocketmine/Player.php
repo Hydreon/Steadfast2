@@ -273,7 +273,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	protected $iusername = '';
 	protected $displayName = '';
 	protected $startAction = -1;
-	public $protocol = ProtocolInfo::PROTOCOL_110;
+	public $protocol = ProtocolInfo::PROTOCOL_120;
 	/** @var Vector3 */
 	protected $sleeping = null;
 	protected $clientID = null;

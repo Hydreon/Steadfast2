@@ -27,20 +27,9 @@ namespace pocketmine\network\protocol;
 
 interface Info{
 
-	/**
-	 * Minecraft: PE protocol versions
-	 */
-	const CURRENT_PROTOCOL = 101;
-//	const NEWEST_PROTOCOL = 82;
-//	const OLDEST_PROTOCOL = 81;
-	const ACCEPTED_PROTOCOLS = [110, 111, 112, 113, 134, 135, 136, 137, 140, 141, 150, 160, 200, 201, 220, 221, 222, 224, 223, 240, 250, 260, 261, 270, 271, 273, 274, 280, 281, 282, 290, 291, 310, 311, 312, 313, 330, 331, 332, 342, 340, 350, 351, 352, 353, 354, 360, 361];
+	const CURRENT_PROTOCOL = 120;
+	const ACCEPTED_PROTOCOLS = [134, 135, 136, 137, 140, 141, 150, 160, 200, 201, 220, 221, 222, 224, 223, 240, 250, 260, 261, 270, 271, 273, 274, 280, 281, 282, 290, 291, 310, 311, 312, 313, 330, 331, 332, 342, 340, 350, 351, 352, 353, 354, 360, 361];
 	
-
-	const PROTOCOL_110 = 110;
-	const PROTOCOL_111 = 111;
-	const PROTOCOL_112 = 112;
-	const PROTOCOL_113 = 113;
-	/** 1.2 BETAS */
 	const PROTOCOL_134 = 134; // 1.2.0.20, 1.2.0.22
 	const PROTOCOL_135 = 135; // 1.2.0.24, 1.2.0.25
 	const PROTOCOL_136 = 136; // 1.2.0.31
