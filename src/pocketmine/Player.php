@@ -5195,35 +5195,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 	}
 	
-	//hack for display name 200+ protocol
-	public function setNameTag($name){
-		if ($this->getDataProperty(self::DATA_NAMETAG) != $name) {
-			$this->dataProperties[self::DATA_NAMETAG] = [self::DATA_TYPE_STRING, $name];
-			$players = $this->getViewers();
-			$viewers200 = [];
-			$viewers = [];
-			foreach ($players as $viewer) {
-				if ($viewer->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_200) {
-					$viewers200[] = $viewer;
-				} else {
-					$viewers[] = $viewer;
-				}
-			}
-			if (!empty($viewers)) {
-				$pk = new SetEntityDataPacket();
-				$pk->eid = $this->id;
-				$pk->metadata = [self::DATA_NAMETAG => self::DATA_TYPE_STRING, $name];
-				Server::broadcastPacket($viewers, $pk);
-			} 
-			if (!empty($viewers200)) {
-				foreach ($viewers200 as $viewer) {
-					$this->despawnFrom($viewer);
-					$this->spawnTo($viewer);
-				}
-			}
-		}
-	}
-	
 	public function setCompassDestination($x, $y, $z) {
 		$packet = new SetSpawnPositionPacket();
 		$packet->spawnType = SetSpawnPositionPacket::SPAWN_TYPE_WORLD_SPAWN;
