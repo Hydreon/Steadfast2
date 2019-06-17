@@ -506,8 +506,8 @@ class PlayerInventory extends BaseInventory{
 	
 	public function openSelfInventory() {
 		$pk = new ContainerOpenPacket();
-		$pk->windowid = ContainerSetContentPacket::SPECIAL_INVENTORY;
-		$pk->type = InventoryType::TYPE_INVENTORY;
+		$pk->windowid = Protocol120::CONTAINER_ID_INVENTORY;
+		$pk->type = -1;
 		$pk->slots = $this->getSize();
 		$pk->x = $this->getHolder()->getX();
 		$pk->y = $this->getHolder()->getY();
