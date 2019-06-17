@@ -109,7 +109,6 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		$nbt->xPos = new IntTag("xPos", ($this->getX() * 32) + $x);
 		$nbt->zPos = new IntTag("zPos", ($this->getZ() * 32) + $z);
 		$nbt->LastUpdate = new LongTag("LastUpdate", 0);
-		$nbt->LightPopulated = new ByteTag("LightPopulated", 0);
 		$nbt->TerrainPopulated = new ByteTag("TerrainPopulated", 0);
 		$nbt->V = new ByteTag("V", self::VERSION);
 		$nbt->InhabitedTime = new LongTag("InhabitedTime", 0);

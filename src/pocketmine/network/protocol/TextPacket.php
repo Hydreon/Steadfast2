@@ -52,9 +52,7 @@ class TextPacket extends PEPacket{
 	public function decode($playerProtocol){
 		$this->getHeader($playerProtocol);
 		$this->type = $this->getByte();
-		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->isLocolize = $this->getByte();
-		}
+		$this->isLocolize = $this->getByte();
 		$this->type = MultiversionEnums::getMessageType($playerProtocol, $this->type);
 		switch ($this->type) {
 			case self::TYPE_CHAT:
@@ -84,11 +82,9 @@ class TextPacket extends PEPacket{
 				}
 				break;
 		}
-		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->xuid = $this->getString();
-			if ($playerProtocol >= Info::PROTOCOL_200) {
-				$this->platformChatId = $this->getString(); // platform id
-			}
+		$this->xuid = $this->getString();
+		if ($playerProtocol >= Info::PROTOCOL_200) {
+			$this->platformChatId = $this->getString(); // platform id
 		}
 	}
 
@@ -96,9 +92,7 @@ class TextPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$typeId = MultiversionEnums::getMessageTypeId($playerProtocol, $this->type);
 		$this->putByte($typeId);
-		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->putByte($this->isLocolize);
-		}
+		$this->putByte($this->isLocolize);
 		switch ($this->type) {
 			case self::TYPE_CHAT:
 			case self::TYPE_WHISPER:
@@ -129,11 +123,9 @@ class TextPacket extends PEPacket{
 				}
 				break;
 		}
-		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->putString($this->xuid);
-			if ($playerProtocol >= Info::PROTOCOL_200) {
-				$this->putString($this->platformChatId); // platform id
-			}
+		$this->putString($this->xuid);
+		if ($playerProtocol >= Info::PROTOCOL_200) {
+			$this->putString($this->platformChatId); // platform id
 		}
 	}
 
