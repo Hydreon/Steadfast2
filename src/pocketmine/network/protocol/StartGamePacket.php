@@ -102,86 +102,82 @@ class StartGamePacket extends PEPacket{
 			$this->putByte(0); // ???
 		}
 		
-		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->putByte(1); // is multiplayer game
-			$this->putByte(1); // Broadcast to LAN?
-			if ($playerProtocol >= Info::PROTOCOL_330) {
-				$this->putSignedVarInt(self::BROADCAST_SETTINGS_FRIENDS_OF_FRIENDS); // XBox Live Broadcast setting
-				$this->putSignedVarInt(self::BROADCAST_SETTINGS_FRIENDS_OF_FRIENDS); // Platform Broadcast setting
-			} else {
-				$this->putByte(1); // Broadcast to XBL?
-			}
+		$this->putByte(1); // is multiplayer game
+		$this->putByte(1); // Broadcast to LAN?
+		if ($playerProtocol >= Info::PROTOCOL_330) {
+			$this->putSignedVarInt(self::BROADCAST_SETTINGS_FRIENDS_OF_FRIENDS); // XBox Live Broadcast setting
+			$this->putSignedVarInt(self::BROADCAST_SETTINGS_FRIENDS_OF_FRIENDS); // Platform Broadcast setting
+		} else {
+			$this->putByte(1); // Broadcast to XBL?
 		}
 				
 		$this->putByte(1);	// commands enabled
 		
 		$this->putByte(0); // isTexturepacksRequired 1x Byte
 		
-		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->putVarInt(count(self::$defaultRules)); // rules count
-			foreach (self::$defaultRules as $rule) {
-				$this->putString($rule['name']);
-				$this->putVarInt($rule['type']);
-				switch ($rule['type']) {
-					case 1:
-						$this->putByte($rule['value']);
-						break;
-					case 2:
-						$this->putSignedVarInt($rule['value']);
-						break;
-					case 3:
-						$this->putLFloat($rule['value']);
-						break;
-				}	
-			}
+		$this->putVarInt(count(self::$defaultRules)); // rules count
+		foreach (self::$defaultRules as $rule) {
+			$this->putString($rule['name']);
+			$this->putVarInt($rule['type']);
+			switch ($rule['type']) {
+				case 1:
+					$this->putByte($rule['value']);
+					break;
+				case 2:
+					$this->putSignedVarInt($rule['value']);
+					break;
+				case 3:
+					$this->putLFloat($rule['value']);
+					break;
+			}	
+		}
 
-			$this->putByte(0); // is bonus chest enabled
-			$this->putByte(0); // is start with map enabled
-			if ($playerProtocol < Info::PROTOCOL_330) {
-				$this->putByte(0); // has trust players enabled
+		$this->putByte(0); // is bonus chest enabled
+		$this->putByte(0); // is start with map enabled
+		if ($playerProtocol < Info::PROTOCOL_330) {
+			$this->putByte(0); // has trust players enabled
+		}
+		$this->putSignedVarInt(1); // permission level
+		if ($playerProtocol < Info::PROTOCOL_330) {
+			$this->putSignedVarInt(4); // game publish setting
+		}
+		$this->putLInt(0); // server chunk tick range
+		if ($playerProtocol < Info::PROTOCOL_330) {
+			$this->putByte(0); // can platform broadcast
+			$this->putSignedVarInt(0); // Broadcast mode
+			$this->putByte(0); // XBL Broadcast intent
+		}
+		if ($playerProtocol >= Info::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
+			$this->putByte(0); // Has locked behavior pack?
+			$this->putByte(0); // Has locked resource pack?
+			$this->putByte(0); // Is from locked template?
+			if ($playerProtocol >= Info::PROTOCOL_290) {
+				$this->putByte(0); // Use Msa Gamertags Only?
 			}
-			$this->putSignedVarInt(1); // permission level
-			if ($playerProtocol < Info::PROTOCOL_330) {
-				$this->putSignedVarInt(4); // game publish setting
+			if ($playerProtocol >= Info::PROTOCOL_311) {
+				$this->putByte(0); // Is From World Template?
+				$this->putByte(0); // Is World Template Option Locked?
 			}
-			$this->putLInt(0); // server chunk tick range
-			if ($playerProtocol < Info::PROTOCOL_330) {
-				$this->putByte(0); // can platform broadcast
-				$this->putSignedVarInt(0); // Broadcast mode
-				$this->putByte(0); // XBL Broadcast intent
+			if ($playerProtocol >= Info::PROTOCOL_361) {
+				$this->putByte(1); // Only spawn v1 villagers
 			}
-			if ($playerProtocol >= Info::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
-				$this->putByte(0); // Has locked behavior pack?
-				$this->putByte(0); // Has locked resource pack?
-				$this->putByte(0); // Is from locked template?
-				if ($playerProtocol >= Info::PROTOCOL_290) {
-					$this->putByte(0); // Use Msa Gamertags Only?
-				}
-				if ($playerProtocol >= Info::PROTOCOL_311) {
-					$this->putByte(0); // Is From World Template?
-					$this->putByte(0); // Is World Template Option Locked?
-				}
-				if ($playerProtocol >= Info::PROTOCOL_361) {
-					$this->putByte(1); // Only spawn v1 villagers
-				}
-			}
-			// level settings end
-			$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
-			$this->putString(''); // level name
-			$this->putString(''); // template pack id
-			$this->putByte(0); // is trial?
-			$this->putLong(0); // current level time
-			$this->putSignedVarInt(0); // enchantment seed
-			
-			if ($playerProtocol >= Info::PROTOCOL_280) {
-				$this->put(self::getBlockPalletData($playerProtocol));
-			}
-			if ($playerProtocol >= Info::PROTOCOL_360) {
-				$this->putVarInt(0); // item list size
-			}
-			if ($playerProtocol >= Info::PROTOCOL_282) {
-				$this->putString($this->multiplayerCorrelationId);
-			}
+		}
+		// level settings end
+		$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
+		$this->putString(''); // level name
+		$this->putString(''); // template pack id
+		$this->putByte(0); // is trial?
+		$this->putLong(0); // current level time
+		$this->putSignedVarInt(0); // enchantment seed
+
+		if ($playerProtocol >= Info::PROTOCOL_280) {
+			$this->put(self::getBlockPalletData($playerProtocol));
+		}
+		if ($playerProtocol >= Info::PROTOCOL_360) {
+			$this->putVarInt(0); // item list size
+		}
+		if ($playerProtocol >= Info::PROTOCOL_282) {
+			$this->putString($this->multiplayerCorrelationId);
 		}
 	}
 

@@ -45,13 +45,11 @@ class InteractPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putByte($this->action);
 		$this->putVarInt($this->target);
-		if ($playerProtocol >= Info::PROTOCOL_120) {
-			/** @todo do it right */
-			if ($this->action == self::ACTION_SEE) {
-				$this->putLFloat(0); // position X
-				$this->putLFloat(0); // position Y
-				$this->putLFloat(0); // position Z
-			}
+		/** @todo do it right */
+		if ($this->action == self::ACTION_SEE) {
+			$this->putLFloat(0); // position X
+			$this->putLFloat(0); // position Y
+			$this->putLFloat(0); // position Z
 		}
 	}
 

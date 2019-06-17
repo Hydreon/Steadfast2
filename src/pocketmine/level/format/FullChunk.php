@@ -121,40 +121,6 @@ interface FullChunk{
 
 	/**
 	 * @param int $x 0-15
-	 * @param int $y 0-127
-	 * @param int $z 0-15
-	 *
-	 * @return int 0-15
-	 */
-	public function getBlockSkyLight($x, $y, $z);
-
-	/**
-	 * @param int $x     0-15
-	 * @param int $y     0-127
-	 * @param int $z     0-15
-	 * @param int $level 0-15
-	 */
-	public function setBlockSkyLight($x, $y, $z, $level);
-
-	/**
-	 * @param int $x 0-15
-	 * @param int $y 0-127
-	 * @param int $z 0-15
-	 *
-	 * @return int 0-15
-	 */
-	public function getBlockLight($x, $y, $z);
-
-	/**
-	 * @param int $x     0-15
-	 * @param int $y     0-127
-	 * @param int $z     0-15
-	 * @param int $level 0-15
-	 */
-	public function setBlockLight($x, $y, $z, $level);
-
-	/**
-	 * @param int $x 0-15
 	 * @param int $z 0-15
 	 *
 	 * @return int 0-127
@@ -202,10 +168,6 @@ interface FullChunk{
 	public function getBlockIdColumn($x, $z);
 
 	public function getBlockDataColumn($x, $z);
-
-	public function getBlockSkyLightColumn($x, $z);
-
-	public function getBlockLightColumn($x, $z);
 
 	/**
 	 * @param int $x 0-15
@@ -334,6 +296,4 @@ interface FullChunk{
 	
 	public function recalculateHeightMap();
 	
-	public function populateSkyLight();
-
 }
