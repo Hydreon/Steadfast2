@@ -3351,7 +3351,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$this->deviceType = $packet->deviceOSType;
 			$this->inventoryType = $packet->inventoryType;
 			$this->xuid = $packet->XUID;
-			$this->inventory = Multiversion::getPlayerInventory($this);
 			$this->originalProtocol = $packet->originalProtocol;
 			$this->languageCode = $packet->languageCode;
 			$this->serverAddress = $packet->serverAddress;
