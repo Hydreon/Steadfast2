@@ -80,42 +80,15 @@ class AdventureSettingsPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->flags);
 		$this->putVarInt($this->commandPermissions);
-		switch ($playerProtocol) {
-			case Info::PROTOCOL_120:
-			case Info::PROTOCOL_200:
-			case Info::PROTOCOL_220:
-			case Info::PROTOCOL_221:
-			case Info::PROTOCOL_240:
-			case Info::PROTOCOL_260:
-			case Info::PROTOCOL_271:
-			case Info::PROTOCOL_273:
-			case Info::PROTOCOL_274:
-			case Info::PROTOCOL_280:
-			case Info::PROTOCOL_282:	
-			case Info::PROTOCOL_290:
-			case Info::PROTOCOL_310:
-			case Info::PROTOCOL_311:
-			case Info::PROTOCOL_330:
-			case Info::PROTOCOL_331:
-			case Info::PROTOCOL_332:
-			case Info::PROTOCOL_340:
-			case Info::PROTOCOL_342:
-			case Info::PROTOCOL_350:
-			case Info::PROTOCOL_351:
-			case Info::PROTOCOL_354:
-			case Info::PROTOCOL_360:
-			case Info::PROTOCOL_361:
-				$this->putVarInt($this->actionPermissions);
-				$this->putVarInt($this->permissionLevel);
-				$this->putVarInt($this->customStoredPermissions);
-				// we should put eid as long but in signed varint format
-				// maybe i'm wrong but it works
-				if ($this->userId & 1) { // userId is odd
-					$this->putLLong(-1 * (($this->userId + 1) >> 1));
-				} else { // userId is even
-					$this->putLLong($this->userId >> 1);
-				}
-				break;
+		$this->putVarInt($this->actionPermissions);
+		$this->putVarInt($this->permissionLevel);
+		$this->putVarInt($this->customStoredPermissions);
+		// we should put eid as long but in signed varint format
+		// maybe i'm wrong but it works
+		if ($this->userId & 1) { // userId is odd
+			$this->putLLong(-1 * (($this->userId + 1) >> 1));
+		} else { // userId is even
+			$this->putLLong($this->userId >> 1);
 		}
 	}
 

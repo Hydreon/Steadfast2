@@ -38,8 +38,6 @@ use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\Player;
 use pocketmine\level\Level;
 
-use pocketmine\network\multiversion\Multiversion;
-
 class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	protected $nameTag = "TESTIFICATE";

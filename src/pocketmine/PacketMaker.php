@@ -70,50 +70,44 @@ class PacketMaker extends Thread {
 	}
 
 	protected function checkPacket($data) {
-		foreach ($data['moveData'] as $identifier => $moveData) {
-			$moveStr = "";
-			foreach ($moveData['data'] as $singleMoveData) {
-				if ($singleMoveData[7]) {
-					$pk = new MovePlayerPacket();
-					$pk->eid = $singleMoveData[0];
-					$pk->x = $singleMoveData[1];
-					$pk->y = $singleMoveData[2];
-					$pk->z = $singleMoveData[3];
-					$pk->pitch = $singleMoveData[6];
-					$pk->yaw = $singleMoveData[5];
-					$pk->bodyYaw = $singleMoveData[4];
-				} else {
-					$pk = new MoveEntityPacket();
-					$pk->entities = [$singleMoveData];
+		$moveData = $data['data'];
+		$playersData = $data['player'];
+		$encodedPackets = [];
+		foreach ($playersData as $identifier => $playerData) {	
+			$moveStr = '';
+			foreach ($playerData['subIds'] as $subClientId => $entityIds) {
+				$playerIndex = ($playerData['playerProtocol'] << 4) | $subClientId;
+				foreach ($entityIds as $eid) {
+					if (!isset($encodedPackets[$eid][$playerIndex])) {
+						if (!isset($moveData[$eid])) {
+							continue;
+						}
+						$singleMoveData = $moveData[$eid];
+						if ($singleMoveData[7]) {
+							$pk = new MovePlayerPacket();
+							$pk->eid = $singleMoveData[0];
+							$pk->x = $singleMoveData[1];
+							$pk->y = $singleMoveData[2];
+							$pk->z = $singleMoveData[3];
+							$pk->pitch = $singleMoveData[6];
+							$pk->yaw = $singleMoveData[5];
+							$pk->bodyYaw = $singleMoveData[4];
+						} else {
+							$pk = new MoveEntityPacket();
+							$pk->entities = [$singleMoveData];
+						}
+						$pk->senderSubClientID = $subClientId;
+						$pk->encode($playerData['playerProtocol']);
+						$buffer = $pk->getBuffer();
+						$encodedPackets[$eid][$playerIndex] = Binary::writeVarInt(strlen($buffer)) . $buffer;
+					}
+					$moveStr .= $encodedPackets[$eid][$playerIndex];
 				}
-				$pk->senderSubClientID = $singleMoveData[8];
-				$pk->encode($moveData['playerProtocol']);
-				$buffer = $pk->getBuffer();
-				$moveStr .= Binary::writeVarInt(strlen($buffer)) . $buffer;
 			}
-			$buffer = zlib_encode($moveStr, ZLIB_ENCODING_DEFLATE, 7);
-			$pkBatch = new BatchPacket();
-			$pkBatch->payload = $buffer;
-			$pkBatch->encode($moveData['playerProtocol']);
-			$pkBatch->isEncoded = true;
-			$this->sendData($identifier, $pkBatch->getBuffer());
-		}
-		foreach ($data['motionData'] as $identifier => $motionData) {
-			$motionStr = "";
-			foreach ($motionData['data'] as $singleMotionData) {
-				$pk = new SetEntityMotionPacket();
-				$pk->entities = [$singleMotionData];
-				$pk->senderSubClientID = $singleMotionData[4];
-				$pk->encode($motionData['playerProtocol']);
-				$buffer = $pk->getBuffer();
-				$motionStr .= Binary::writeVarInt(strlen($buffer)) . $buffer;
+			if (!empty($moveStr)) {
+				$buffer = zlib_encode($moveStr, ZLIB_ENCODING_DEFLATE, 7);
+				$this->sendData($identifier, $buffer);
 			}
-			$buffer = zlib_encode($motionStr, ZLIB_ENCODING_DEFLATE, 7);
-			$pkBatch = new BatchPacket();
-			$pkBatch->payload = $buffer;
-			$pkBatch->encode($motionData['playerProtocol']);
-			$pkBatch->isEncoded = true;
-			$this->sendData($identifier, $pkBatch->getBuffer());
 		}
 	}
 
