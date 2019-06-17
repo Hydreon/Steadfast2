@@ -90,8 +90,6 @@ class Anvil extends McRegion {
 			$chunkData['empty'] = false;
 			$chunkData['blocks'] = $section->getIdArray();
 			$chunkData['data'] = $section->getDataArray();
-			$chunkData['blockLight'] = $section->getLightArray();
-			$chunkData['skyLight'] = $section->getSkyLightArray();
 			$sections[$section->getY()] = $chunkData;
 		}
 		$sortedSections = [];

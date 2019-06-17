@@ -3,7 +3,7 @@
 namespace pocketmine\inventory\transactions;
 
 use pocketmine\inventory\BaseTransaction;
-use pocketmine\inventory\PlayerInventory120;
+use pocketmine\inventory\PlayerInventory;
 use pocketmine\item\Item;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\Protocol120;
@@ -80,7 +80,7 @@ class SimpleTransactionData {
 				break;
 			case Protocol120::CONTAINER_ID_CURSOR_SELECTED:
 				$inventory = $player->getInventory();
-				$slot = PlayerInventory120::CURSOR_INDEX;
+				$slot = PlayerInventory::CURSOR_INDEX;
 				break;
 			case Protocol120::CONTAINER_ID_OFFHAND:
 				$inventory = $player->getInventory();
@@ -110,7 +110,7 @@ class SimpleTransactionData {
 				$inventory = $player->getInventory();
 				switch ($this->action) {
 					case self::ACTION_CRAFT_GET_RESULT:
-						$slot = PlayerInventory120::CRAFT_RESULT_INDEX;
+						$slot = PlayerInventory::CRAFT_RESULT_INDEX;
 						if ($inventory->isQuickCraftEnabled()) {
 							$inventory->setQuickCraftMode(false);
 						}
@@ -118,7 +118,7 @@ class SimpleTransactionData {
 					// client send slot 0 for all craft transactions by quick craft, so we need manage it manually
 					case self::ACTION_CRAFT_USE:
 						if ($this->slot == 0) {
-							$item = $inventory->getItem(PlayerInventory120::CRAFT_INDEX_0);
+							$item = $inventory->getItem(PlayerInventory::CRAFT_INDEX_0);
 							if (!$this->newItem->equals($item) || $item->getCount() < $this->newItem->getCount()) {
 								if (!$inventory->isQuickCraftEnabled()) {
 									$inventory->setQuickCraftMode(true);
@@ -128,7 +128,7 @@ class SimpleTransactionData {
 							}
 						}
 					default:						
-						$slot = PlayerInventory120::CRAFT_INDEX_0 - $this->slot;
+						$slot = PlayerInventory::CRAFT_INDEX_0 - $this->slot;
 						break;
 				}
 				break;
@@ -137,7 +137,7 @@ class SimpleTransactionData {
 					return null;
 				}
 				$inventory = $player->getInventory();
-				$slot = PlayerInventory120::CREATIVE_INDEX;
+				$slot = PlayerInventory::CREATIVE_INDEX;
 				break;
 			default:
 				$currentWindowId = $player->getCurrentWindowId();

@@ -126,15 +126,6 @@ class Chunk extends BaseChunk {
 		unset($this->nbt->ExtraData);
 	}
 
-	public function isLightPopulated() {
-		return $this->nbt["LightPopulated"] > 0;
-	}
-
-	public function setLightPopulated($value = 1) {
-		$this->nbt->LightPopulated = new ByteTag("LightPopulated", $value);
-		$this->hasChanged = true;
-	}
-
 	/**
 	 * @return bool
 	 */
@@ -354,7 +345,6 @@ class Chunk extends BaseChunk {
 			$chunk->nbt->InhabitedTime = new LongTag("InhabitedTime", 0);
 			$chunk->nbt->TerrainGenerated = new ByteTag("TerrainGenerated", 0);
 			$chunk->nbt->TerrainPopulated = new ByteTag("TerrainPopulated", 0);
-			$chunk->nbt->LightPopulated = new ByteTag("LightPopulated", 0);
 
 			return $chunk;
 		} catch (\Throwable $e) {

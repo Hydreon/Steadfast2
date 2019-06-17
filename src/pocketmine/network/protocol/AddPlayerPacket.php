@@ -89,26 +89,24 @@ class AddPlayerPacket extends PEPacket{
 
 		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
-		if ($playerProtocol >= Info::PROTOCOL_120) {
-			$this->putVarInt($this->flags);
-			$this->putVarInt($this->commandPermission);
-			$this->putVarInt($this->actionPermissions);
-			$this->putVarInt($this->permissionLevel);
-			$this->putVarInt($this->storedCustomPermissions);
-			// we should put eid as long but in signed varint format
-			// maybe i'm wrong but it works
-			if ($this->eid & 1) { // userId is odd
-				$this->putLLong(-1 * (($this->eid + 1) >> 1));
-			} else { // userId is even
-				$this->putLLong($this->eid >> 1);
-			}
-			$this->putVarInt(count($this->links));
-			foreach ($this->links as $link) {
-				$this->putVarInt($link['from']);
-				$this->putVarInt($link['to']);
-				$this->putByte($link['type']);
-				$this->putByte(0);
-			}
+		$this->putVarInt($this->flags);
+		$this->putVarInt($this->commandPermission);
+		$this->putVarInt($this->actionPermissions);
+		$this->putVarInt($this->permissionLevel);
+		$this->putVarInt($this->storedCustomPermissions);
+		// we should put eid as long but in signed varint format
+		// maybe i'm wrong but it works
+		if ($this->eid & 1) { // userId is odd
+			$this->putLLong(-1 * (($this->eid + 1) >> 1));
+		} else { // userId is even
+			$this->putLLong($this->eid >> 1);
+		}
+		$this->putVarInt(count($this->links));
+		foreach ($this->links as $link) {
+			$this->putVarInt($link['from']);
+			$this->putVarInt($link['to']);
+			$this->putByte($link['type']);
+			$this->putByte(0);
 		}
 		if ($playerProtocol >= Info::PROTOCOL_282) {
 			$this->putString($this->uuid->toString());

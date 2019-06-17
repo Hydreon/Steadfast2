@@ -117,44 +117,6 @@ class ChunkSection implements \pocketmine\level\format\ChunkSection {
 		return $changed;
 	}
 
-	public function getBlockSkyLight($x, $y, $z) {
-		$sl = ord($this->skyLight{($y << 7) + ($z << 3) + ($x >> 1)});
-		if (($x & 1) === 0) {
-			return $sl & 0x0F;
-		} else {
-			return $sl >> 4;
-		}
-	}
-
-	public function setBlockSkyLight($x, $y, $z, $level) {
-		$i = ($y << 7) + ($z << 3) + ($x >> 1);
-		$old_sl = ord($this->skyLight{$i});
-		if (($x & 1) === 0) {
-			$this->skyLight{$i} = chr(($old_sl & 0xf0) | ($level & 0x0f));
-		} else {
-			$this->skyLight{$i} = chr((($level & 0x0f) << 4) | ($old_sl & 0x0f));
-		}
-	}
-
-	public function getBlockLight($x, $y, $z) {
-		$l = ord($this->blockLight{($y << 7) + ($z << 3) + ($x >> 1)});
-		if (($x & 1) === 0) {
-			return $l & 0x0F;
-		} else {
-			return $l >> 4;
-		}
-	}
-
-	public function setBlockLight($x, $y, $z, $level) {
-		$i = ($y << 7) + ($z << 3) + ($x >> 1);
-		$old_l = ord($this->blockLight{$i});
-		if (($x & 1) === 0) {
-			$this->blockLight{$i} = chr(($old_l & 0xf0) | ($level & 0x0f));
-		} else {
-			$this->blockLight{$i} = chr((($level & 0x0f) << 4) | ($old_l & 0x0f));
-		}
-	}
-
 	public function getBlockIdColumn($x, $z) {
 		$i = ($z << 4) + $x;
 		$column = "";
@@ -175,38 +137,6 @@ class ChunkSection implements \pocketmine\level\format\ChunkSection {
 		} else {
 			for ($y = 0; $y < 16; $y += 2) {
 				$column .= chr((ord($this->data{($y << 7) + $i}) & 0xf0) >> 4) | ($this->data{(($y + 1) << 7) + $i} & "\xf0");
-			}
-		}
-
-		return $column;
-	}
-
-	public function getBlockSkyLightColumn($x, $z) {
-		$i = ($z << 3) + ($x >> 1);
-		$column = "";
-		if (($x & 1) === 0) {
-			for ($y = 0; $y < 16; $y += 2) {
-				$column .= ($this->skyLight{($y << 7) + $i} & "\x0f") | chr((ord($this->skyLight{(($y + 1) << 7) + $i}) & 0x0f) << 4);
-			}
-		} else {
-			for ($y = 0; $y < 16; $y += 2) {
-				$column .= chr((ord($this->skyLight{($y << 7) + $i}) & 0xf0) >> 4) | ($this->skyLight{(($y + 1) << 7) + $i} & "\xf0");
-			}
-		}
-
-		return $column;
-	}
-
-	public function getBlockLightColumn($x, $z) {
-		$i = ($z << 3) + ($x >> 1);
-		$column = "";
-		if (($x & 1) === 0) {
-			for ($y = 0; $y < 16; $y += 2) {
-				$column .= ($this->blockLight{($y << 7) + $i} & "\x0f") | chr((ord($this->blockLight{(($y + 1) << 7) + $i}) & 0x0f) << 4);
-			}
-		} else {
-			for ($y = 0; $y < 16; $y += 2) {
-				$column .= chr((ord($this->blockLight{($y << 7) + $i}) & 0xf0) >> 4) | ($this->blockLight{(($y + 1) << 7) + $i} & "\xf0");
 			}
 		}
 
