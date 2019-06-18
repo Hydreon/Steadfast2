@@ -2324,7 +2324,9 @@ class Level implements ChunkManager, Metadatable{
 	/**
 	 * @deprecated
 	 */
-	public function addEntityMotion($viewers, $entityId, $x, $y, $z){
+
+	public function addEntityMotion($viewers, $entityId, $x, $y, $z){	
+
 	}
 
 	public function addEntityMovement($viewers, $entityId, $x, $y, $z, $yaw, $pitch, $headYaw = null, $isPlayer = false){
@@ -2342,6 +2344,8 @@ class Level implements ChunkManager, Metadatable{
 			if (!isset($this->moveToSend['player'][$playerIdentifier])) {
 				$this->moveToSend['player'][$playerIdentifier] = [
 					'playerProtocol' => $p->getPlayerProtocol(),
+					'proxySessionId' =>	$p->proxySessionId,
+					'proxyId' => $p->proxyId,
 					'subIds' => []
 				];
 			}

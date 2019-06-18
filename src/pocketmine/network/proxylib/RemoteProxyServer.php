@@ -2,8 +2,10 @@
 
 namespace pocketmine\network\proxylib;
 
+use pocketmine\utils\Binary;
+
 class RemoteProxyServer {
-	
+
 	const FLAG_NEED_ZLIB = 0x80;
 
 	private $proxyManager;
@@ -57,7 +59,7 @@ class RemoteProxyServer {
 		$data = zlib_decode($data);
 		if ($data === false) {
 			return false;
-		}	
+		}
 		$info = chr(strlen($this->getIdentifier())) . $this->getIdentifier() . $data;
 		$this->proxyManager->getProxyServer()->pushToExternalQueue($info);
 		return true;
@@ -67,13 +69,23 @@ class RemoteProxyServer {
 		$flags = ord($buffer{4});
 		if (($flags & self::FLAG_NEED_ZLIB) > 0) {
 			$flags = $flags ^ self::FLAG_NEED_ZLIB;
-			$data = zlib_encode(substr($buffer, 5), ZLIB_ENCODING_DEFLATE, 7);
+			$buff = substr($buffer, 5);		
+			if (strlen($buffer) > 512) {
+				$data = zlib_encode($buff, ZLIB_ENCODING_DEFLATE, -1);
+			} else {
+				$data = $this->fakeZlib($buff);
+			}
 			$data = substr($buffer, 0, 4) . chr($flags) . $data;
-			$this->writeQueue[] = pack('N',  strlen($data)) . $data;
+			$this->writeQueue[] = pack('N', strlen($data)) . $data;
 		} else {
-			$this->writeQueue[] = pack('N',  strlen($buffer)) . $buffer;
+			$this->writeQueue[] = pack('N', strlen($buffer)) . $buffer;
 		}
-	
+	}
+
+	private function fakeZlib($buffer) {
+		static $startBytes = "\x78\x01\x01";
+		$len = strlen($buffer);
+		return $startBytes . Binary::writeLShort($len) . Binary::writeLShort($len ^ 0xffff) . $buffer . hex2bin(hash('adler32', $buffer, false));
 	}
 
 	private function checkWriteQueue() {
@@ -113,7 +125,7 @@ class RemoteProxyServer {
 			}
 			return;
 		}
-		
+
 		$this->lastBuffer = '';
 		if (($dataLen = strlen($data)) > 0) {
 			$offset = 0;
