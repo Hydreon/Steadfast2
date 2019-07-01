@@ -31,34 +31,29 @@ use pocketmine\block\Lava;
 class Arrow extends Projectile {
 
 	const NETWORK_ID = 80;
-	
+
 	public $width = 0.5;
 	public $length = 0.5;
 	public $height = 0.5;
 	protected $gravity = 0.03;
 	protected $drag = 0.01;
 	protected $damage = 2;
-	public $isCritical;
-	
+
 	public function __construct(FullChunk $chunk, Compound $nbt, Entity $shootingEntity = null, $critical = false) {
-		$this->isCritical = (bool) $critical;
 		parent::__construct($chunk, $nbt, $shootingEntity);
+		$this->setCritical($critical);
 	}
-	
+
 	public function onUpdate($currentTick) {
 		if ($this->closed) {
 			return false;
 		}
 		$hasUpdate = parent::onUpdate($currentTick);
-		if (!$this->hadCollision and $this->isCritical) {
-			$this->level->addParticle(new CriticalParticle($this->add(
-				$this->width / 2 + mt_rand(-100, 100) / 500,
-				$this->height / 2 + mt_rand(-100, 100) / 500,
-				$this->width / 2 + mt_rand(-100, 100) / 500
-			)));
-		} else if ($this->onGround) {
-			$this->isCritical = false;
+
+		if ($this->onGround || $this->hadCollision) {
+		    $this->setCritical(false);
 		}
+
 		if ($this->age > 1200) {
 			$this->kill();
 			$hasUpdate = true;
@@ -68,6 +63,15 @@ class Arrow extends Projectile {
 		}
 		return $hasUpdate;
 	}
+
+	public function isCritical(){
+	    return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_CRITICAL);
+    }
+
+    public function setCritical($critical){
+        $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_CRITICAL, $critical);
+    }
+
 	public function spawnTo(Player $player) {
 		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
 			$this->hasSpawned[$player->getId()] = $player;
