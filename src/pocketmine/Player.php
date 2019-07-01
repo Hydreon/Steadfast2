@@ -21,6 +21,7 @@
 
 namespace pocketmine;
 
+use const M_SQRT3;
 use function max;
 use pocketmine\block\Block;
 use pocketmine\command\CommandSender;
@@ -1534,6 +1535,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
         if ($this->getFoodEnabled()) {
             $foodLevel = $this->foodLevel;
 
+            $this->foodTick++;
+            if($this->foodTick >= 80){
+                $this->foodTick = 0;
+            }
+
             if ($this->exhaustion >= self::EXHAUSTION_NEEDS_FOR_ACTION) {
                 $this->exhaustion = 0;
                 --$this->saturation;
@@ -1545,7 +1551,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
             if($this->getHealth() < $this->getMaxHealth()){
                 if($this->saturation > 0 && $this->getFood() > 18){
-                    if($this->foodTick === 10){
+                    if($this->foodTick % 10 === 0){
                         $ev = new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_EATING);
                         $this->heal(1, $ev);
                         if (!$ev->isCancelled()) {
@@ -1553,7 +1559,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
                         }
                         $this->foodTick = -1;
                     }
-                } elseif($this->foodTick === 80){
+                } elseif($this->foodTick % 80 === 0){
                     if($this->getFood() > 17){
                         $ev = new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_EATING);
                         $this->heal(1, $ev);
@@ -1568,11 +1574,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
                     }
                 }
                 //todo: difficulty support?
-                $this->foodTick++;
             }
 
             if($this->foodLevel !== $foodLevel){ //fixes packet spam
                 $this->setFood($this->foodLevel);
+
+                if($this->foodLevel < 6){
+                    $this->setSprinting(false);
+                }
             }
         }
     }
@@ -3739,7 +3748,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			EntityDamageEvent::MODIFIER_BASE => isset($damageTable[$item->getId()]) ? $damageTable[$item->getId()] : 1,
 		];
 
-		if ($this->distance($target) > 4) {
+		if ($this->add(0, $this->getEyeHeight())->distanceSquared($target) > 34.81) { //5.9 ** 2
 			return;
 		} elseif ($target instanceof Player) {
 			$armorValues = [
