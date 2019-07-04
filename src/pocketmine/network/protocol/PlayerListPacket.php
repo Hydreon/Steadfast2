@@ -118,43 +118,11 @@ class PlayerListPacket extends PEPacket{
 						$this->putString(""); // platform chat id
 					}		
 					if ($playerProtocol >= Info::PROTOCOL_370) {
-						$this->putString($d[3]); // Skin ID
-						$this->putString('{"geometry" : {"default" : "' . (isset($d[6]) ? $d[6] : '') . '"}}'); // Skin Resource Path
 						$skinData = !empty($d[4]) ? $d[4] : $emptySkin;
-						$width = 64;
-						$height = strlen($skinData) >> 8;
-						while ($height > $width) {
-							$width <<= 1;
-							$height >>= 1;
-						}
-						$this->putLInt($width);
-						$this->putLInt($height);
-						$this->putString($skinData);
-						$this->putVarInt(0); //Animation Count
+						$skinGeomtryName = isset($d[6]) ? $d[6] : '';
+						$skinGeomtryData = isset($d[7]) ? $d[7] : '';
 						$capeData = isset($d[5]) ? $d[5] : '';
-						if (empty($capeData)) {
-							$this->putLInt(0);
-							$this->putLInt(0);
-							$this->putString('');
-						} else {
-							$width = 1;
-							$height = strlen($skinData) >> 2;
-							while ($height > $width) {
-								$width <<= 1;
-								$height >>= 1;
-							}
-							$this->putLInt($width);
-							$this->putLInt($height);
-							$this->putString($skinData);
-						}
-						$this->putString(isset($d[7]) ? $d[7] : ''); // Skin Geometry Data
-						$this->putString(''); // Serialized Animation Data
-						$this->put(hex2bin('00056e756c6c0a00010000')); //TODO 370
-//						$this->putByte(0); // Is Premium Skin 
-//						$this->putByte(0); // Is Persona Skin 
-//						$this->putByte(0); // Is Persona Cape on Classic Skin 
-						$this->putString(''); // Cape Id
-						$this->putString($d[3]); // Full Skin ID						
+						$this->putSerializedSkin($d[3], $skinData, $skinGeomtryName, $skinGeomtryData, $capeData);
 					}
 				}
 				break;
