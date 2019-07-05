@@ -141,6 +141,12 @@ abstract class Projectile extends Entity {
 					$ev = new EntityDamageByChildEntityEvent($this->shootingEntity, $this, $nearEntity, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
 				}
 				$nearEntity->attack($ev->getFinalDamage(), $ev);
+
+
+				if($this->shootingEntity instanceof Player && !$ev->isCancelled()){
+                    $this->shootingEntity->sendSound('successful_hit', ['x' => $this->shootingEntity->getX(), 'y' => $this->shootingEntity->getY(), 'z' => $this->shootingEntity->getZ()]);
+                }
+
 				$this->hadCollision = true;
 				if ($this->fireTicks > 0) {
 					$ev = new EntityCombustByEntityEvent($this, $nearEntity, 5);
