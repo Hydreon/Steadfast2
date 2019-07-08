@@ -18,11 +18,13 @@ class SubClientLoginPacket extends PEPacket {
 	public $clientId;
 	public $clientUUID;
 	public $clientSecret;
+	public $skin = "";
 	public $skinName;
 	public $chainsDataLength;
 	public $chains;
 	public $playerDataLength;
 	public $playerData;
+	public $isValidProtocol = true;
 	public $inventoryType = -1;
 	public $xuid = '';
 	public $skinGeometryName = "";
@@ -30,6 +32,7 @@ class SubClientLoginPacket extends PEPacket {
 	public $capeData = "";
 	public $isVerified = true;
 	public $premiumSkin = "";
+	public $identityPublicKey = "";
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);

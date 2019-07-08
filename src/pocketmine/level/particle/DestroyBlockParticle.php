@@ -24,6 +24,7 @@ namespace pocketmine\level\particle;
 use pocketmine\network\protocol\LevelEventPacket;
 use pocketmine\block\Block;
 use pocketmine\math\Vector3;
+use pocketmine\Server;
 
 class DestroyBlockParticle extends Particle{
 	
@@ -34,14 +35,13 @@ class DestroyBlockParticle extends Particle{
 		$this->data = $b->getId() + ($b->getDamage() << 8);
 	}
 	
-	public function encode(){
+	public function spawnFor($players) {
 		$pk = new LevelEventPacket;
 		$pk->evid = LevelEventPacket::EVENT_PARTICLE_DESTROY;
 		$pk->x = $this->x;
 		$pk->y = $this->y;
 		$pk->z = $this->z;
 		$pk->data = $this->data;
-		
-		return $pk;
+		Server::broadcastPacket($players, $pk);
 	}
 }

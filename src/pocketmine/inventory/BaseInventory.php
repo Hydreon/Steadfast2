@@ -162,7 +162,7 @@ abstract class BaseInventory implements Inventory{
 	public function contains(Item $item){
 		$count = max(1, $item->getCount());
 		$checkDamage = $item->getDamage() === null ? false : true;
-		$checkTags = ($item->getId() == Item::ARROW || $item->hasCompound());
+		$checkTags = $item->getId() != Item::ARROW && $item->hasCompound();
 		foreach($this->getContents() as $i){
 			if($item->equals($i, $checkDamage, $checkTags)){
 				$count -= $i->getCount();
@@ -328,7 +328,7 @@ abstract class BaseInventory implements Inventory{
 			}
 
 			$checkDamage = $slot->getDamage() === null ? false : true;
-			$checkCompound = $slot->getId() == Item::ARROW || $slot->hasCompound();
+			$checkCompound = $slot->getId() != Item::ARROW && $slot->hasCompound();
 			foreach($itemSlots as $index => $slot){
 				if($slot->equals($item, $checkDamage, $checkCompound)){
 					$amount = min($item->getCount(), $slot->getCount());
