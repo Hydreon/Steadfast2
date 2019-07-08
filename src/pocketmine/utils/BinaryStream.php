@@ -306,6 +306,9 @@ class BinaryStream {
 	}
 	
 	public function putSerializedSkin($skinId, $skinData, $skinGeomtryName, $skinGeomtryData, $capeData) {
+		if (empty($skinGeomtryName)) {
+			$skinGeomtryName = "geometry.humanoid.custom";
+		}
 		$this->putString($skinId);
 		$this->putString('{"geometry" : {"default" : "' . $skinGeomtryName . '"}}');
 		$width = 64;
