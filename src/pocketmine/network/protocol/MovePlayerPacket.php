@@ -32,7 +32,7 @@ class MovePlayerPacket extends PEPacket{
 	const MODE_RESET = 1;
 	const MODE_TELEPORT = 2;
 	const MODE_ROTATION = 3;
-	
+
 	const TELEPORTATION_CAUSE_UNKNOWN = 0;
 	const TELEPORTATION_CAUSE_PROJECTILE = 1;
 	const TELEPORTATION_CAUSE_CHORUS_FRUIT = 2;
@@ -50,22 +50,17 @@ class MovePlayerPacket extends PEPacket{
 	public $mode = self::MODE_NORMAL;
 	public $onGround;
 
-	public function clean(){
-		$this->teleport = false;
-		return parent::clean();
-	}
-
 	public function decode($playerProtocol){
 		$this->getHeader($playerProtocol);
 		$this->eid = $this->getVarInt();
-		
+
 		$this->x = $this->getLFloat();
 		$this->y = $this->getLFloat();
 		$this->z = $this->getLFloat();
-		
+
 		$this->pitch = $this->getLFloat();
 		$this->yaw = $this->getLFloat();
-		
+
 		$this->bodyYaw = $this->getLFloat();
 		$this->mode = $this->getByte();
 		$this->onGround = $this->getByte() > 0;
@@ -74,14 +69,14 @@ class MovePlayerPacket extends PEPacket{
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->eid);
-		
+
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
-		
+
 		$this->putLFloat($this->pitch);
 		$this->putLFloat($this->yaw);
-		
+
 		$this->putLFloat($this->bodyYaw);
 		$this->putByte($this->mode);
 		$this->putByte($this->onGround > 0);
