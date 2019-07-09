@@ -35,7 +35,6 @@ class BlockPallet {
 	public function __construct($path, $protocolNumber) {
 		$palletData = json_decode(file_get_contents($path), true);
 		if ($protocolNumber >= Info::PROTOCOL_370) {
-			//TODO 370 meta in pallet file
 			$palletTag =  new Enum("", []);
 			foreach ($palletData as $runtimeID => $blockInfo) {
 				$this->pallet[$blockInfo['id']][$blockInfo['data']] = $runtimeID;
