@@ -22,52 +22,44 @@
 namespace pocketmine\level\particle;
 
 use pocketmine\math\Vector3;
-use pocketmine\network\protocol\DataPacket;
 
-abstract class Particle extends Vector3{	
-	
-	const TYPE_BUBBLE = 1;
-	const TYPE_CRITICAL = 2;
-	// 3 weird half transparent blinking block
-	const TYPE_SMOKE = 4;
-	const TYPE_EXPLODE = 5;
-	const TYPE_WHITE_SMOKE = 6;
-	const TYPE_FLAME = 7;
-	const TYPE_LAVA = 8;
-	const TYPE_LARGE_SMOKE = 9;
-	const TYPE_REDSTONE = 10;
-	// 11 the red thing ???
-	const TYPE_ITEM_BREAK = 19; // actualy 12 | client crash 
-	const TYPE_SNOWBALL_POOF = 13;
-	const TYPE_LARGE_EXPLODE = 14;
-	const TYPE_HUGE_EXPLODE = 15;
-	const TYPE_MOB_FLAME = 16;
-	const TYPE_HEART = 17;
-	const TYPE_TERRAIN = 19; // actualy 18 | client crash
-	const TYPE_TOWN_AURA = 19; // не увидел
-	const TYPE_PORTAL = 20;
-	const TYPE_WATER_SPLASH = 21;
-	const TYPE_WATER_WAKE = 22;
-	const TYPE_DRIP_WATER = 23;
-	const TYPE_DRIP_LAVA = 24;
-	const TYPE_DUST = 25; // meta: color
-	const TYPE_MOB_SPELL = 26; // meta: color
-	const TYPE_MOB_SPELL_AMBIENT = 27; // meta: color
-	const TYPE_MOB_SPELL_INSTANTANEOUS = 28; // meta: color 
-	const TYPE_INK = 29;
-	const TYPE_SLIME = 30;
-	const TYPE_RAIN_SPLASH = 31;
-	const TYPE_VILLAGER_ANGRY = 32;
-	const TYPE_VILLAGER_HAPPY = 33;
-	const TYPE_ENCHANTMENT_TABLE = 34;
-	// 35 ???
-	const TYPE_NOTE = 36;
-	const TYPE_WITCH_MAGIC = 37;
-	
-	const TYPE_ICE_CRYSTAL = 40;
-	/**
-	 * @return DataPacket|DataPacket[]
-	 */
-	abstract public function encode();
+abstract class Particle extends Vector3 {
 
+	const TYPE_BUBBLE = 'TYPE_BUBBLE';
+	const TYPE_CRITICAL = 'TYPE_CRITICAL';
+	const TYPE_SMOKE = 'TYPE_SMOKE';
+	const TYPE_EXPLODE = 'TYPE_EXPLODE';
+	const TYPE_WHITE_SMOKE = 'TYPE_WHITE_SMOKE';
+	const TYPE_FLAME = 'TYPE_FLAME';
+	const TYPE_LAVA = 'TYPE_LAVA';
+	const TYPE_LARGE_SMOKE = 'TYPE_LARGE_SMOKE';
+	const TYPE_REDSTONE = 'TYPE_REDSTONE';
+	const TYPE_ITEM_BREAK = 'TYPE_ITEM_BREAK';
+	const TYPE_SNOWBALL_POOF = 'TYPE_SNOWBALL_POOF';
+	const TYPE_LARGE_EXPLODE = 'TYPE_LARGE_EXPLODE';
+	const TYPE_HUGE_EXPLODE = 'TYPE_HUGE_EXPLODE';
+	const TYPE_MOB_FLAME = 'TYPE_MOB_FLAME';
+	const TYPE_HEART = 'TYPE_HEART';
+	const TYPE_TERRAIN = 'TYPE_TERRAIN';
+	const TYPE_TOWN_AURA = 'TYPE_TOWN_AURA';
+	const TYPE_PORTAL = 'TYPE_PORTAL';
+	const TYPE_WATER_SPLASH = 'TYPE_WATER_SPLASH';
+	const TYPE_WATER_WAKE = 'TYPE_WATER_WAKE';
+	const TYPE_DRIP_WATER = 'TYPE_DRIP_WATER';
+	const TYPE_DRIP_LAVA = 'TYPE_DRIP_LAVA';
+	const TYPE_DUST = 'TYPE_DUST'; // meta: color
+	const TYPE_MOB_SPELL = 'TYPE_MOB_SPELL'; // meta: color
+	const TYPE_MOB_SPELL_AMBIENT = 'TYPE_MOB_SPELL_AMBIENT'; // meta: color
+	const TYPE_MOB_SPELL_INSTANTANEOUS = 'TYPE_MOB_SPELL_INSTANTANEOUS'; // meta: color 
+	const TYPE_INK = 'TYPE_INK';
+	const TYPE_SLIME = 'TYPE_SLIME';
+	const TYPE_RAIN_SPLASH = 'TYPE_RAIN_SPLASH';
+	const TYPE_VILLAGER_ANGRY = 'TYPE_VILLAGER_ANGRY';
+	const TYPE_VILLAGER_HAPPY = 'TYPE_VILLAGER_HAPPY';
+	const TYPE_ENCHANTMENT_TABLE = 'TYPE_ENCHANTMENT_TABLE';
+	const TYPE_NOTE = 'TYPE_NOTE';
+	const TYPE_WITCH_MAGIC = 'TYPE_WITCH_MAGIC';
+	const TYPE_ICE_CRYSTAL = 'TYPE_ICE_CRYSTAL';
+
+	abstract public function spawnFor($players);
 }
