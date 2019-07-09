@@ -160,6 +160,9 @@ class StartGamePacket extends PEPacket{
 			}
 			if ($playerProtocol >= Info::PROTOCOL_361) {
 				$this->putByte(1); // Only spawn v1 villagers
+			}			
+			if ($playerProtocol >= Info::PROTOCOL_370) {
+				$this->putString(''); // Vanila version
 			}
 		}
 		// level settings end

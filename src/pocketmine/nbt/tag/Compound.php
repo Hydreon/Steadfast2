@@ -26,16 +26,26 @@ use pocketmine\nbt\NBT;
 #include <rules/NBT.h>
 
 class Compound extends NamedTag implements \ArrayAccess{
+	
+	private $customCompoudTagName;
 
 	/**
 	 * @param string     $name
 	 * @param NamedTag[] $value
 	 */
 	public function __construct($name = "", $value = []){
-		$this->name = $name;
+		$this->customCompoudTagName = $name;
 		foreach($value as $tag){
 			$this->{$tag->getName()} = $tag;
 		}
+	}
+	
+	public function getName(){
+		return $this->customCompoudTagName === false ? "" : $this->customCompoudTagName;
+	}
+
+	public function setName($name){
+		$this->customCompoudTagName = $name;
 	}
 
 	public function getCount(){
