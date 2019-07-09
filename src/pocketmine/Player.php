@@ -1540,9 +1540,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
             if ($this->exhaustion >= self::EXHAUSTION_NEEDS_FOR_ACTION) {
                 $this->exhaustion = 0;
-                --$this->saturation;
 
-                if($this->saturation === 0 && $this->foodLevel > 0){
+                if($this->saturation > 0){
+                    $this->saturation--;
+                }
+
+                if ($this->saturation <= 0 && $this->foodLevel > 0){
                     $this->foodLevel--;
                 }
             }
@@ -1555,7 +1558,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
                         if (!$ev->isCancelled()) {
                             $this->saturation -= 6;
                         }
-                        $this->foodTick = -1;
                     }
                 } elseif($this->foodTick % 80 === 0){
                     if($this->getFood() > 17){
@@ -1564,11 +1566,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
                         if (!$ev->isCancelled()) {
                             $this->saturation -= 6;
                         }
-                        $this->foodTick = -1;
                     } elseif($this->getFood() === 0){
                         $ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_HUNGER, 1);
                         $this->attack(1, $ev);
-                        $this->foodTick = -1;
                     }
                 }
                 //todo: difficulty support?
@@ -4285,8 +4285,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				return;
 			}
 
-			$yawRad = $this->yaw / 180 * M_PI;
-			$pitchRad = $this->pitch / 180 * M_PI;
+            $yawRad = $this->yaw / 180 * M_PI;
+            $pitchRad = $this->pitch / 180 * M_PI;
 			$nbt = new Compound("", [
 				"Pos" => new Enum("Pos", [
 					new DoubleTag("", $this->x),
@@ -4294,13 +4294,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					new DoubleTag("", $this->z)
 						]),
 				"Motion" => new Enum("Motion", [
-					new DoubleTag("", -sin($yawRad) * cos($pitchRad)),
-					new DoubleTag("", -sin($pitchRad)),
-					new DoubleTag("", cos($yawRad) * cos($pitchRad))
+                    new DoubleTag("", -sin($yawRad) * cos($pitchRad)),
+                    new DoubleTag("", -sin($pitchRad)),
+                    new DoubleTag("", cos($yawRad) * cos($pitchRad))
 						]),
 				"Rotation" => new Enum("Rotation", [
-					new FloatTag("", $this->yaw),
-					new FloatTag("", $this->pitch)
+                    new FloatTag("", $this->yaw),
+                    new FloatTag("", $this->pitch)
 						]),
 				"Fire" => new ShortTag("Fire", $this->isOnFire() ? 45 * 60 : 0)
 			]);
@@ -4308,7 +4308,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$diff = ($this->server->getTick() - $this->startAction);
 			$p = $diff / 20;
 			$f = min((($p ** 2) + $p * 2) / 3, 1) * 2;
-			$ev = new EntityShootBowEvent($this, $bow, Entity::createEntity("Arrow", $this->chunk, $nbt, $this, $f == 2 ? true : false), $f);
+			$ev = new EntityShootBowEvent($this, $bow, Entity::createEntity("Arrow", $this->chunk, $nbt, $this, $f >= 1), $f);
 
 			if ($f < 0.1 or $diff < 5) {
 				$ev->setCancelled();
