@@ -25,50 +25,62 @@ class PlayerSkinPacket extends PEPacket {
 	public function decode($playerProtocol) {
 		$this->getHeader($playerProtocol);
 		$this->uuid = $this->getUUID();
-		$this->newSkinId = $this->getString();
-		$this->newSkinName = $this->getString();
-		$this->oldSkinName = $this->getString();
-		if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
-			$this->getLInt(); // num skin data, always 1
-			$this->getLInt();
-		}
-		$this->newSkinByteData = $this->getString();
-		if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
-			$this->getLInt();
-			$this->getLInt();
-			$this->newCapeByteData = $this->getString();
+		if ($playerProtocol < Info::PROTOCOL_370) {
+			$this->newSkinId = $this->getString();
+			$this->newSkinName = $this->getString();
+			$this->oldSkinName = $this->getString();
+			if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
+				$this->getLInt(); // num skin data, always 1
+				$this->getLInt();
+			}
+			$this->newSkinByteData = $this->getString();
+			if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
+				$this->getLInt();
+				$this->getLInt();
+				$this->newCapeByteData = $this->getString();
+			} else {
+				$this->newCapeByteData = $this->getString();
+			}
+			$this->newSkinGeometryName = $this->getString();
+			$this->newSkinGeometryData = $this->getString();
+			if ($playerProtocol >= Info::PROTOCOL_260 && !$this->feof()) {
+				$this->isPremiumSkin = $this->getByte();
+			}
 		} else {
-			$this->newCapeByteData = $this->getString();
-		}
-		$this->newSkinGeometryName = $this->getString();
-		$this->newSkinGeometryData = $this->getString();
-		if ($playerProtocol >= Info::PROTOCOL_260 && !$this->feof()) {
-			$this->isPremiumSkin = $this->getByte();
+			$this->getSerializedSkin($this->newSkinId, $this->newSkinByteData, $this->newSkinGeometryName, $this->newSkinGeometryData, $this->newCapeByteData);
+			$this->newSkinName = $this->getString();
+			$this->oldSkinName = $this->getString(); 
 		}
 	}
 
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
 		$this->putUUID($this->uuid);
-		$this->putString($this->newSkinId);
-		$this->putString($this->newSkinName);
-		$this->putString($this->oldSkinName);
-		if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
-			$this->putLInt(1); // num skin data, always 1
-			$this->putLInt(strlen($this->newSkinByteData));
-		}
-		$this->putString($this->newSkinByteData);
-		if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
-			$this->putLInt(empty($this->newCapeByteData));
-			$this->putLInt(strlen($this->newCapeByteData));
-			$this->putString($this->newCapeByteData);
+		if ($playerProtocol < Info::PROTOCOL_370) {
+			$this->putString($this->newSkinId);
+			$this->putString($this->newSkinName);
+			$this->putString($this->oldSkinName);
+			if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
+				$this->putLInt(1); // num skin data, always 1
+				$this->putLInt(strlen($this->newSkinByteData));
+			}
+			$this->putString($this->newSkinByteData);
+			if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
+				$this->putLInt(empty($this->newCapeByteData));
+				$this->putLInt(strlen($this->newCapeByteData));
+				$this->putString($this->newCapeByteData);
+			} else {
+				$this->putString($this->newCapeByteData);
+			}
+			$this->putString($this->newSkinGeometryName);
+			$this->putString($this->newSkinGeometryData);
+			if ($playerProtocol >= Info::PROTOCOL_260) {
+				$this->putByte($this->isPremiumSkin);
+			}
 		} else {
-			$this->putString($this->newCapeByteData);
-		}
-		$this->putString($this->newSkinGeometryName);
-		$this->putString($this->newSkinGeometryData);
-		if ($playerProtocol >= Info::PROTOCOL_260) {
-			$this->putByte($this->isPremiumSkin);
+			$this->putSerializedSkin($this->newSkinId, $this->newSkinByteData, $this->newSkinGeometryName, $this->newSkinGeometryData, $this->newCapeByteData);
+			$this->putString($this->newSkinName);
+			$this->putString($this->oldSkinName);
 		}
 	}
 }
