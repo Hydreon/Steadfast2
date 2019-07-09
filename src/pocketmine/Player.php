@@ -185,6 +185,8 @@ use pocketmine\player\PlayerSettingsTrait;
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\inventory\InventoryCreationEvent;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
+use pocketmine\network\protocol\v331\BiomeDefinitionListPacket;
+use pocketmine\network\protocol\v310\AvailableEntityIdentifiersPacket;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -3274,6 +3276,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$pk->stringClientVersion = $this->clientVersion;
 			$pk->multiplayerCorrelationId = $this->uuid->toString();
 			$this->directDataPacket($pk);
+			if ($this->protocol >= ProtocolInfo::PROTOCOL_331) {
+				$this->directDataPacket(new AvailableEntityIdentifiersPacket());
+				$this->directDataPacket(new BiomeDefinitionListPacket());
+			}
 		} else {
 			$this->sendPosition($this);
 			$this->setGamemode($this->gamemode, true);
