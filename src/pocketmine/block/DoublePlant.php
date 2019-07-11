@@ -61,18 +61,21 @@ class DoublePlant extends Flowable {
 		return false;
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
+	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null) {
 		if ($this->getDamage() < 0x08) {
-			$blockAbove = $this->level->getBlockIdAt($this->x, $this->y + 1, $this->z);
-			if ($blockAbove == Block::AIR) {
-				if ($this->level->setBlock($this, $this, true, true)) {
-					$upperPart = clone $this;
-					$upperPart->y++;
-					$upperPart->setDamage($this->getDamage() | 0x08);
-					if ($this->level->setBlock($upperPart, $upperPart, true, true)) {
-						return true;
+			$down = $this->getSide(0);
+			if ($down->getId() === self::GRASS) {
+				$blockAbove = $this->level->getBlockIdAt($this->x, $this->y + 1, $this->z);
+				if ($blockAbove == Block::AIR) {
+					if ($this->level->setBlock($this, $this, true, true)) {
+						$upperPart = clone $this;
+						$upperPart->y++;
+						$upperPart->setDamage($this->getDamage() | 0x08);
+						if ($this->level->setBlock($upperPart, $upperPart, true, true)) {
+							return true;
+						}
+						$this->level->setBlock($this, Block::get(Block::AIR), true, true);
 					}
-					$this->level->setBlock($this, Block::get(Block::AIR), true, true);
 				}
 			}
 		}
