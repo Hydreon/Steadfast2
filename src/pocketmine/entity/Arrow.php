@@ -27,6 +27,7 @@ use pocketmine\Player;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\block\Lava;
+use function var_dump;
 
 class Arrow extends Projectile {
 
@@ -68,7 +69,7 @@ class Arrow extends Projectile {
 	    return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_CRITICAL);
     }
 
-    public function setCritical($critical){
+    public function setCritical($critical = true){
         $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_CRITICAL, $critical);
     }
 
@@ -84,6 +85,7 @@ class Arrow extends Projectile {
 			$pk->speedX = $this->motionX;
 			$pk->speedY = $this->motionY;
 			$pk->speedZ = $this->motionZ;
+            $pk->metadata = $this->dataProperties;
 			$player->dataPacket($pk);
 		}
 	}
