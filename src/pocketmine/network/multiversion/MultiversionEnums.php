@@ -662,4 +662,39 @@ abstract class MultiversionEnums {
 		]
 	];
 	
+	private static $packTypes = [
+		Info::PROTOCOL_120 => [
+			"TYPE_INVALID" => 0,
+			"TYPE_RESOURCE" => 1,
+			"TYPE_BEHAVIOR" => 2,
+			"TYPE_WORLD_TEMPLATE" => 3,
+			"TYPE_ADDON" => 4,
+			"TYPE_SKINS" => 5,
+			"TYPE_CACHED" => 6,
+			"TYPE_COPY_PROTECTED" => 7,
+			"TYPE_COUNT" => 8,
+		],
+		Info::PROTOCOL_370 => [
+			"TYPE_INVALID" => 0,
+			"TYPE_ADDON" => 1,
+			"TYPE_CACHED" => 2,
+			"TYPE_COPY_PROTECTED" => 3,
+			"TYPE_BEHAVIOR" => 4,
+			"TYPE_PERSONA_PIECE" => 5,
+			"TYPE_RESOURCE" => 6,
+			"TYPE_SKINS" => 7,
+			"TYPE_WORLD_TEMPLATE" => 8,
+			"TYPE_COUNT" => 9,
+		]
+	];
+	
+	public static function getPackTypeId($playerProtocol, $typeName) {
+		if ($playerProtocol >= Info::PROTOCOL_370) {
+			$key = Info::PROTOCOL_370;
+		} else {
+			$key = Info::PROTOCOL_120;
+		}
+		return self::$packTypes[$key][$typeName] ?? 0;
+	}
+
 }
