@@ -23,6 +23,7 @@ namespace pocketmine;
 
 use const M_SQRT3;
 use function max;
+use function mt_rand;
 use pocketmine\block\Block;
 use pocketmine\command\CommandSender;
 use pocketmine\customUI\CustomUI;
@@ -181,6 +182,8 @@ use pocketmine\event\inventory\InventoryCreationEvent;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v331\BiomeDefinitionListPacket;
 use pocketmine\network\protocol\v310\AvailableEntityIdentifiersPacket;
+use function rand;
+use function random_int;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -3803,6 +3806,29 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			}
 			return;
 		}
+
+        $damage = 0;
+        foreach($target->getInventory()->getArmorContents() as $key => $item){
+            if($item instanceof Armor && ($thornsLevel = $item->getEnchantment(Enchantment::getEnchantment(Enchantment::TYPE_ARMOR_THORNS))) > 0){
+                if(mt_rand(1, 100) < $thornsLevel * 15){
+                    $item->setDamage($item->getDamage() + 3);
+                    $damage += ($thornsLevel > 10 ? $thornsLevel - 10 : random_int(0, 4));
+                }else{
+                    $item->setDamage($item->getDamage() + 1);
+                }
+
+                if($item->getDamage() >= $item->getMaxDurability()) {
+                    $target->getInventory()->setArmorItem($key, Item::get(Item::AIR));
+                }
+
+
+                $this->getInventory()->setArmorItem($key, $item);
+            }
+        }
+
+        if($damage > 0){
+            $target->attack($damage, new EntityDamageByEntityEvent($target, $this, EntityDamageEvent::CAUSE_MAGIC, $damage));
+        }
 
 		if ($item->isTool() && $this->isSurvival()) {
 			if ($item->useOn($target) && $item->getDamage() >= $item->getMaxDurability()) {
