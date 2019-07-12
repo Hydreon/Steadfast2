@@ -1699,6 +1699,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	 * @param DataPacket $packet
 	 */
 	public function handleDataPacket(DataPacket $packet){
+		$this->server->getPluginManager()->callEvent(new DataPacketReceiveEvent($this, $packet));
 		if($this->connected === false){
 			return;
 		}
@@ -1711,7 +1712,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$this->subClients[$packet->targetSubClientID]->handleDataPacket($packet);
 			return;
 		}
-		$this->server->getPluginManager()->callEvent(new DataPacketReceiveEvent($this, $packet));
 		switch($packet->pname()){
             case 'SET_PLAYER_GAMETYPE_PACKET':
                 file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " SET_PLAYER_GAMETYPE_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
