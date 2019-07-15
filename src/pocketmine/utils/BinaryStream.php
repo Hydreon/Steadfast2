@@ -82,11 +82,11 @@ class BinaryStream {
                 
 		$rem = strlen($this->buffer) - $this->offset;
 		if($rem < $len){
-			throw new ErrorException("Запрошено слишком много байтов");
+			throw new \ErrorException("Запрошено слишком много байтов");
 		}
 		
 		if(!isset($this->buffer{$this->offset})){
-			throw new ErrorException("Выход за границы буфера");
+			throw new \ErrorException("Выход за границы буфера");
 		}
 
 		return $len === 1 ? $this->buffer{$this->offset++} : substr($this->buffer, ($this->offset += $len) - $len, $len);
