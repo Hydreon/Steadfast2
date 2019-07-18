@@ -488,7 +488,10 @@ class Session{
                         if(isset($this->recoveryQueue[$seq])){
 							$pk = $this->recoveryQueue[$seq];
 							$pk->seqNumber = $this->sendSeqNumber++;
-                            $this->packetToSend[] = $pk;
+							$pk->sendTime = microtime(true);
+							$pk->encode();
+							$this->sendPacket($pk);
+							$this->recoveryQueue[$pk->seqNumber] = $pk;
 							unset($this->recoveryQueue[$seq]);
                         }
                     }

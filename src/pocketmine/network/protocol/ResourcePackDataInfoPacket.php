@@ -2,6 +2,8 @@
 
 namespace pocketmine\network\protocol;
 
+use pocketmine\network\multiversion\MultiversionEnums;
+
 class ResourcePackDataInfoPacket extends PEPacket {
 
 	const NETWORK_ID = Info::RESOURCE_PACK_DATA_INFO_PACKET;
@@ -9,15 +11,16 @@ class ResourcePackDataInfoPacket extends PEPacket {
 
 	const MAX_CHUNK_SIZE = 1048576; // 1MB
 
-	const TYPE_INVALID = 0;
-	const TYPE_RESOURCE = 1;
-	const TYPE_BEHAVIOR = 2;
-	const TYPE_WORLD_TEMPLATE = 3;
-	const TYPE_ADDON = 4;
-	const TYPE_SKINS = 5;
-	const TYPE_CACHED = 6;
-	const TYPE_COPY_PROTECTED = 7;
-	const TYPE_COUNT = 8;
+	const TYPE_INVALID = 'TYPE_INVALID';
+	const TYPE_ADDON = 'TYPE_ADDON';
+	const TYPE_CACHED = 'TYPE_CACHED';
+	const TYPE_COPY_PROTECTED = 'TYPE_COPY_PROTECTED';
+	const TYPE_BEHAVIOR = 'TYPE_BEHAVIOR';
+	const TYPE_PERSONA_PIECE = 'TYPE_PERSONA_PIECE';
+	const TYPE_RESOURCE = 'TYPE_RESOURCE';
+	const TYPE_SKINS = 'TYPE_SKINS';
+	const TYPE_WORLD_TEMPLATE = 'TYPE_WORLD_TEMPLATE';
+	const TYPE_COUNT = 'TYPE_COUNT';	
 	
 	public $modId = "";
 	public $fileSize = 0;
@@ -40,7 +43,7 @@ class ResourcePackDataInfoPacket extends PEPacket {
 		$this->putString($this->modFileHash);
 		if ($playerProtocol >= Info::PROTOCOL_360) {
 			$this->putByte($this->isPremium);
-			$this->putByte($this->type);
+			$this->putByte(MultiversionEnums::getPackTypeId($playerProtocol, $this->type));
 		}
 	}
 

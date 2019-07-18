@@ -3,9 +3,15 @@
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\item\Tool;
 
 class MonsterEgg extends Solid {
+
+	const STONE = 0;
+	const COBBLESTONE = 1;
+	const STONE_BRICKS = 2;
+	const MOSSY_STONE_BRICKS = 3;
+	const CRACKED_STONE_BRICKS = 4;
+	const CHISELED_STONE_BRICKS = 5;
 
 	protected $id = self::MONSTER_EGG;
 
@@ -14,21 +20,23 @@ class MonsterEgg extends Solid {
 	}
 
 	public function getHardness() {
-		return 2;
+		return 0.75;
 	}
 
 	public function getName() {
-		return "Monster Egg";
+		static $names = [
+			self::STONE => "Infested Stone",
+			self::COBBLESTONE => "Cobblestone",
+			self::STONE_BRICK => "Stone Bricks",
+			self::MOSSY_STONE_BRICKS => "Mossy Stone Bricks",
+			self::CRACKED_STONE_BRICKS => "Cracked Stone Bricks",
+			self::CHISELED_STONE_BRICKS => "Chiseled Stone Bricks",
+		];
+		return $names[$this->meta & 0x05];
 	}
 
 	public function getDrops(Item $item) {
-		return [
-			[$this->id, $this->meta, 1],
-		];
-	}
-
-	public function getToolType() {
-		return Tool::TYPE_PICKAXE;
+		return [];
 	}
 
 }

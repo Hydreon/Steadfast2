@@ -18,8 +18,12 @@ class ResourcePackChunkDataPacket extends PEPacket {
 		$this->putString($this->resourcePackId);
 		$this->putLInt($this->chunkIndex);
 		$this->putLLong(ResourcePackDataInfoPacket::MAX_CHUNK_SIZE * $this->chunkIndex);
-		$this->putLInt(strlen($this->chunkData));
-		$this->put($this->chunkData);
+		if ($playerProtocol >= Info::PROTOCOL_370) {
+			$this->putString($this->chunkData);
+		} else {
+			$this->putLInt(strlen($this->chunkData));
+			$this->put($this->chunkData);
+		}
 	}
 
 }
