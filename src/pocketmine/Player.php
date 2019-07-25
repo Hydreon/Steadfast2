@@ -1490,7 +1490,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					$this->inAirTicks = 0;
 					if ($this->elytraIsActivated) {
 						$this->setFlyingFlag(false);
-						$this->elytraIsActivated = false;
+						$this->setElytraActivated(false);
 					}
 				}else{
 					if($this->needAntihackCheck() && !$this->isUseElytra() && !$this->allowFlight && !$this->isSleeping() && !$this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NOT_MOVE)){
@@ -2020,12 +2020,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					case 'START_GLIDING':
 						if ($this->isHaveElytra()) {
 							$this->setFlyingFlag(true);
-							$this->elytraIsActivated = true;
+							$this->setElytraActivated(true);
+							$this->resetFallDistance();
 						}
 						break;
 					case 'STOP_GLIDING':
 						$this->setFlyingFlag(false);
-						$this->elytraIsActivated = false;
+						$this->setElytraActivated(false);
 						break;
 					case 'CRACK_BLOCK':
 						$this->crackBlock($packet);
@@ -3718,7 +3719,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	public function setTitle($text, $subtext = '', $time = 36000) {		
 		if ($this->protocol >= Info::PROTOCOL_290) { //hack for 1.7.x
 			$this->clearTitle();
-			$this->titleData = ['text' => $text, 'subtext' => $subtext, 'time' => $time, 'holdTickCount' => 5];
+			$this->titleData = ['text' => !empty($text) ? $text : ' ', 'subtext' => $subtext, 'time' => $time, 'holdTickCount' => 5];
 		} else {
 			$this->sendTitle($text, $subtext, $time);
 		}
@@ -4405,7 +4406,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 	
 	public function fall($fallDistance) {
-		if (!$this->allowFlight) {
+		if (!$this->allowFlight && !$this->elytraIsActivated) {
 			parent::fall($fallDistance);
 		}
 	}
@@ -5168,6 +5169,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$pk = new GameRulesChangedPacket();
 			$pk->gameRules = ["doDaylightCycle" => [1, $val]];
 			$this->dataPacket($pk);
+		}
+	}
+	
+	protected function updateFallState($distanceThisTick, $onGround) {
+		if ($onGround || !$this->allowFlight && !$this->elytraIsActivated) {
+			parent::updateFallState($distanceThisTick, $onGround);
 		}
 	}
 }
