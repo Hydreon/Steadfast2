@@ -308,9 +308,6 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function unload($save = true, $safe = true){
 		$level = $this->getProvider();
-		if(!$this->allowUnload){
-			return false;
-		}
 		if($level === null){
 			return true;
 		}
