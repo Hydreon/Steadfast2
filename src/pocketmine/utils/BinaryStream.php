@@ -305,4 +305,77 @@ class BinaryStream {
 		$this->put($v);
 	}
 	
+	public function putSerializedSkin($skinId, $skinData, $skinGeomtryName, $skinGeomtryData, $capeData) {
+		if (empty($skinGeomtryName)) {
+			$skinGeomtryName = "geometry.humanoid.custom";
+		}
+		$this->putString($skinId);
+		$this->putString('{"geometry" : {"default" : "' . $skinGeomtryName . '"}}');
+		$width = 64;
+		$height = strlen($skinData) >> 8;
+		while ($height > $width) {
+			$width <<= 1;
+			$height >>= 1;
+		}
+		$this->putLInt($width);
+		$this->putLInt($height);
+		$this->putString($skinData);
+		$this->putVarInt(0); //Animation Count
+		$this->putByte(0); // Is Premium Skin 
+		$this->putByte(0); // Is Persona Skin 
+		$this->putByte(0); // Is Persona Cape on Classic Skin 
+		if (empty($capeData)) {
+			$this->putLInt(0);
+			$this->putLInt(0);
+			$this->putString('');
+		} else {
+			$width = 1;
+			$height = strlen($capeData) >> 2;
+			while ($height > $width) {
+				$width <<= 1;
+				$height >>= 1;
+			}
+			$this->putLInt($width);
+			$this->putLInt($height);
+			$this->putString($capeData);
+		}
+		$this->putString($skinGeomtryData); // Skin Geometry Data
+		$this->putString(''); // Serialized Animation Data
+		$this->putLInt(1);
+		$uniqId = $skinId . $skinGeomtryName . "-" . microtime(true);
+		$this->putString($uniqId); // Full Skin ID			
+	}
+	
+	
+	public function getSerializedSkin(&$skinId, &$skinData, &$skinGeomtryName, &$skinGeomtryData, &$capeData) {
+		$skinId = $this->getString();
+		$geometryData = json_decode($this->getString(), true);
+		$skinGeomtryName = isset($geometryData['geometry']['default']) ? $geometryData['geometry']['default'] : '';
+		$this->getLInt();
+		$this->getLInt();
+		$skinData = $this->getString();
+		
+		$animationCount = $this->getVarInt();
+		for ($i = 0; $i < $animationCount; $i++) {
+			$this->getLInt();
+			$this->getLInt();
+			$this->getString();
+			$this->getLInt();
+			$this->getLFloat();
+		}
+		
+		$this->getByte();
+		$this->getByte();
+		$this->getByte();
+		
+		$this->getLInt();
+		$this->getLInt();
+		$capeData = $this->getString();
+		
+		$skinGeomtryData = $this->getString();
+		$this->getString();		
+		$this->getLInt();
+		$this->getString();			
+	}
+
 }

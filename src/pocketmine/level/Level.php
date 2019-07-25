@@ -408,21 +408,12 @@ class Level implements ChunkManager, Metadatable{
 		}
 	}
 
-	public function addParticle(Particle $particle, array $players = null){
-		$pk = $particle->encode();
-
-		if($players === null){
+	public function addParticle(Particle $particle, array $players = null) {
+		if ($players === null) {
 			$players = $this->getUsingChunk($particle->x >> 4, $particle->z >> 4);
 		}
-
-		if($pk !== null){
-			if(!is_array($pk)){
-				Server::broadcastPacket($players, $pk);
-			}else{
-				foreach ($pk as $p) {
-					Server::broadcastPacket($players, $p);
-				}
-			}
+		if (!empty($players)) {
+			$particle->spawnFor($players);
 		}
 	}
 
@@ -1362,7 +1353,8 @@ class Level implements ChunkManager, Metadatable{
 					continue;
 				}
 				if ($e === $player) {
-					if (round($player->getY()) != round($hand->getY()) && round($player->getY() + 1) != round($hand->getY())) {
+					$dy = $player->getY() - $hand->getY();
+					if ($dy > 0.75 || $dy < - 1.5) {
 						continue;
 					}
 				}
