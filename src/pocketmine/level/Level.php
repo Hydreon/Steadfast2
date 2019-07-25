@@ -327,7 +327,7 @@ class Level implements ChunkManager, Metadatable{
 			$this->generator = Generator::getGenerator($this->provider->getGenerator());
 		}
 	}
-
+	
 	public function initLevel(){
 		if (!is_null($this->generator)) {
 			$generator = $this->generator;
@@ -375,13 +375,12 @@ class Level implements ChunkManager, Metadatable{
 			$this->save();
 		}
 
+		$this->closed = true;
 		foreach($this->chunks as $chunk){
 			$this->unloadChunk($chunk->getX(), $chunk->getZ(), false);
 		}
 		
-		$this->unregisterGenerator();
-
-		$this->closed = true;
+		$this->unregisterGenerator();	
 		$this->chunkMaker->quit();
 		$this->provider->close();
 		$this->provider = null;
@@ -1313,10 +1312,7 @@ class Level implements ChunkManager, Metadatable{
 					}
 				}
 			} else {
-				$player->getInventory()->sendHeldItem($player);
-				if ($player->getInventory()->getHeldItemSlot() !== -1) {
-					$player->getInventory()->sendContents($player);
-				}
+				return false;
 			}
 		} else if ($target->canBeActivated() === true && $target->onActivate($item, $player) === true) {
 			return true;
@@ -2009,7 +2005,7 @@ class Level implements ChunkManager, Metadatable{
 		
 		if($chunk !== null){
 			/* @var BaseFullChunk $chunk */
-			if(!$chunk->isAllowUnload()) {
+			if(!$chunk->isAllowUnload() && !$this->closed) {
 				//$this->timings->doChunkUnload->stopTiming();
 				return false;
 			}
