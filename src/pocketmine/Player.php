@@ -3918,7 +3918,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					return;
 				}
 
-				if($itemInHand->getId() === Item::SNOWBALL || $itemInHand->getId() === Item::EGG || $itemInHand->getId() === Item::BOTTLE_ENCHANTING){
+				if($itemInHand->getId() === Item::SNOWBALL || $itemInHand->getId() === Item::SPLASH_POTION || $itemInHand->getId() === Item::EGG || $itemInHand->getId() === Item::BOTTLE_ENCHANTING){
 					$yawRad = $this->yaw / 180 * M_PI;
 					$pitchRad = $this->pitch / 180 * M_PI;
 					$nbt = new Compound("", [
@@ -3950,6 +3950,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 							$f = .3;
 							$projectile = Entity::createEntity("BottleOEnchanting", $this->chunk, $nbt, $this);
 							break;
+                        case Item::SPLASH_POTION:
+                            $projectile = Entity::createEntity("SplashPotion", $this->chunk, $nbt, $this, $itemInHand->getDamage());
+                            break;
 					}
 					$projectile->setMotion($projectile->getMotion()->multiply($f));
 					if ($this->isSurvival()) {
