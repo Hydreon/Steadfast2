@@ -3808,36 +3808,38 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			return;
 		}
 
-        $damage = 0;
-        foreach($target->getInventory()->getArmorContents() as $key => $item){
-            if($item instanceof Armor && ($thornsLevel = $item->getEnchantment(Enchantment::getEnchantment(Enchantment::TYPE_ARMOR_THORNS))) > 0){
-                if(mt_rand(1, 100) < $thornsLevel * 15){
-                    $item->setDamage($item->getDamage() + 3);
-                    $damage += ($thornsLevel > 10 ? $thornsLevel - 10 : random_int(0, 4));
-                }else{
-                    $item->setDamage($item->getDamage() + 1);
+		if($target instanceof Player){
+            $damage = 0;
+            foreach($target->getInventory()->getArmorContents() as $key => $item){
+                if($item instanceof Armor && ($thornsLevel = $item->getEnchantment(Enchantment::getEnchantment(Enchantment::TYPE_ARMOR_THORNS))) > 0){
+                    if(mt_rand(1, 100) < $thornsLevel * 15){
+                        $item->setDamage($item->getDamage() + 3);
+                        $damage += ($thornsLevel > 10 ? $thornsLevel - 10 : random_int(0, 4));
+                    }else{
+                        $item->setDamage($item->getDamage() + 1);
+                    }
+
+                    if($item->getDamage() >= $item->getMaxDurability()) {
+                        $target->getInventory()->setArmorItem($key, Item::get(Item::AIR));
+                    }
+
+
+                    $this->getInventory()->setArmorItem($key, $item);
                 }
+            }
 
-                if($item->getDamage() >= $item->getMaxDurability()) {
-                    $target->getInventory()->setArmorItem($key, Item::get(Item::AIR));
-                }
-
-
-                $this->getInventory()->setArmorItem($key, $item);
+            if($damage > 0){
+                $target->attack($damage, new EntityDamageByEntityEvent($target, $this, EntityDamageEvent::CAUSE_MAGIC, $damage));
             }
         }
 
-        if($damage > 0){
-            $target->attack($damage, new EntityDamageByEntityEvent($target, $this, EntityDamageEvent::CAUSE_MAGIC, $damage));
+        if ($item->isTool() && $this->isSurvival()) {
+            if ($item->useOn($target) && $item->getDamage() >= $item->getMaxDurability()) {
+                $this->inventory->setItemInHand(Item::get(Item::AIR));
+            } elseif ($this->inventory->getItemInHand()->getId() === $item->getId()) {
+                $this->inventory->setItemInHand($item);
+            }
         }
-
-		if ($item->isTool() && $this->isSurvival()) {
-			if ($item->useOn($target) && $item->getDamage() >= $item->getMaxDurability()) {
-				$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 1), $this);
-			} elseif ($this->inventory->getItemInHand()->getId() == $item->getId()) {
-				$this->inventory->setItemInHand($item, $this);
-			}
-		}
 	}
 
 	protected function useItem($item, $slot, $face, $blockPosition, $clickPosition) {
