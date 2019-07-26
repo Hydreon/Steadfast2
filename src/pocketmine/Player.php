@@ -3798,6 +3798,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				break;
 			}
 		}
+
+        if($this->fallDistance > 0 && !$this->isOnGround() && !$this->isInsideOfWater() && !$this->hasEffect(Effect::BLINDNESS)){
+            $damage[EntityDamageEvent::MODIFIER_CRITICAL] = $damage[EntityDamageEvent::MODIFIER_BASE] / 2;
+        }
+
 		$ev = new EntityDamageByEntityEvent($this, $target, EntityDamageEvent::CAUSE_ENTITY_ATTACK, $damage);
 		$target->attack($ev->getFinalDamage(), $ev);
 
