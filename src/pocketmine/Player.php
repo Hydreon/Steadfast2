@@ -3813,7 +3813,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			return;
 		}
 
-		if($target instanceof Human){
+		if($target instanceof Player){
             $damage = 0;
             foreach($target->getInventory()->getArmorContents() as $key => $item){
                 if($item instanceof Armor && ($thornsLevel = $item->getEnchantment(Enchantment::getEnchantment(Enchantment::TYPE_ARMOR_THORNS))) > 0){
