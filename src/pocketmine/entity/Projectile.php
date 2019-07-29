@@ -147,7 +147,8 @@ abstract class Projectile extends Entity {
 				$nearEntity->attack($ev->getFinalDamage(), $ev);
 
 				if($this->shootingEntity instanceof Player && !$ev->isCancelled()){
-                    $this->shootingEntity->sendSound('successful_hit', ['x' => $this->shootingEntity->getX(), 'y' => $this->shootingEntity->getY(), 'z' => $this->shootingEntity->getZ()]);
+					//$this->shootingEntity->sendSound('successful_hit', ['x' => $this->shootingEntity->getX(), 'y' => $this->shootingEntity->getY(), 'z' => $this->shootingEntity->getZ()]);
+					$this->getLevel()->addSound(new GenericSound($this->shootingEntity->getPosition(), 1051));
                 }
 
 				$this->hadCollision = true;
