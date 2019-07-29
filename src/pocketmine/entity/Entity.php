@@ -98,6 +98,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_ENDERMAN_BLOCK_META = 24; // type:short
 	const DATA_PLAYER_FLAGS = 27;
 	const DATA_PLAYER_BED_POSITION = 29;
+    const DATA_POTION_AUX_VALUE = 36; //short
 	const DATA_LEAD_HOLDER = 38; // type: long
 	const DATA_SCALE = 39; // type: float
 	const DATA_BUTTON_TEXT = 40; // type: string !IMPORTANT! Send to player
