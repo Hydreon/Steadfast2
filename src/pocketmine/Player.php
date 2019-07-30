@@ -1756,7 +1756,29 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					$this->close("", "Invalid Identity Public Key");
 					// error_log("Invalid Identity Public Key " . $packet->username);
 					break;
-				}			
+				}
+				
+				$valid = true;
+				$len = strlen($packet->username);
+				if($len > 16 or $len < 3){
+					$valid = false;
+				}
+				for($i = 0; $i < $len and $valid; ++$i){
+					$c = ord($packet->username{$i});
+					if(($c >= ord("a") and $c <= ord("z")) or ($c >= ord("A") and $c <= ord("Z")) or ($c >= ord("0") and $c <= ord("9")) or $c === ord("_")){
+						continue;
+					}
+
+					$valid = false;
+					break;
+				}
+
+				if(!$valid or $this->iusername === "rcon" or $this->iusername === "console"){
+					$this->close("", "Please choose a correct username");
+
+					break;
+				}
+				
 				$this->username = TextFormat::clean($packet->username);
                 $this->xblName = $this->username;
 				$this->displayName = $this->username;
@@ -3081,24 +3103,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			return;
 		}
 		$this->loginCompleted = true;
-		$valid = true;
-		$len = strlen($this->username);
-		if ($len > 16 or $len < 3) {
-			$valid = false;
-		}
-		for ($i = 0; $i < $len and $valid; ++$i) {
-			$c = ord($this->username{$i});
-			if (($c >= ord("a") and $c <= ord("z")) or ( $c >= ord("A") and $c <= ord("Z")) or ( $c >= ord("0") and $c <= ord("9")) or $c === ord("_") or $c === ord(" ")
-			) {
-				continue;
-			}
-			$valid = false;
-			break;
-		}
-		if (!$valid or $this->iusername === "rcon" or $this->iusername === "console") {
-			$this->close("", "Please choose a valid username.");
-			return;
-		}
 
 		static $allowedSkinSize = [
 			8192, // argb 64x32
