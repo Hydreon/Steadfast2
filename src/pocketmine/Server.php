@@ -41,6 +41,7 @@ use pocketmine\entity\Item as DroppedItem;
 use pocketmine\entity\Painting;
 use pocketmine\entity\PrimedTNT;
 use pocketmine\entity\projectile\BottleOEnchanting;
+use pocketmine\entity\projectile\SplashPotion;
 use pocketmine\entity\Snowball;
 use pocketmine\entity\Egg;
 use pocketmine\entity\Squid;
@@ -2508,6 +2509,7 @@ class Server{
 
 	private function registerEntities(){
 		Entity::registerEntity(Arrow::class);
+		Entity::registerEntity(SplashPotion::class);
 		Entity::registerEntity(DroppedItem::class);
 		Entity::registerEntity(FallingSand::class);
 		Entity::registerEntity(PrimedTNT::class);
