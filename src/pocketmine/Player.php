@@ -993,7 +993,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$packet->senderSubClientID = $this->subClientId;
 			return $this->parent->dataPacket($packet);
 		}
-		
 		if ($packet instanceof ProxyPacket) {
 			$packet->encode();
 			$this->interface->putPacket($this, $packet->getBuffer(), true);
@@ -1121,6 +1120,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$packet->senderSubClientID = $this->subClientId;
 			return $this->parent->dataPacket($packet);
 		}
+
 		if ($packet instanceof ProxyPacket) {
 			$packet->encode();
 			$this->interface->putPacket($this, $packet->getBuffer(), true);
@@ -3157,7 +3157,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$pk->status = PlayStatusPacket::LOGIN_SUCCESS;
 			$this->dataPacket($pk);
 		}
-		
+
 		$modsManager = $this->server->getModsManager();
 		$pk = new ResourcePacksInfoPacket();
 		$pk->isRequired = $modsManager->isModsRequired();
@@ -3433,7 +3433,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	public function getInterface() {
 		return $this->interface;
 	}
-	
+
 	public function transfer($address, $port = false, $transferData = '') {
 		if ($this->interface instanceof ProxyInterface) {
 			$pk = new RedirectPacket();
