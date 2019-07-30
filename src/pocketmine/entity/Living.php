@@ -32,6 +32,7 @@ use pocketmine\item\Item as ItemItem;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\network\Network;
+use pocketmine\network\protocol\AnimatePacket;
 use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\Player;
 use pocketmine\Server;
@@ -107,6 +108,14 @@ abstract class Living extends Entity implements Damageable{
 		if($source->isCancelled()){
 			return;
 		}
+
+		if(isset($damage[EntityDamageByEntityEvent::MODIFIER_CRITICAL])){
+		    $pk = new AnimatePacket();
+		    $pk->action = AnimatePacket::ACTION_CRITICAL_HIT;
+		    $pk->eid = $this->getId();
+
+		    Server::broadcastPacket($this->getViewers(), $pk);
+        }
 
 		if($source instanceof EntityDamageByEntityEvent){
 			$e = $source->getDamager();
@@ -245,7 +254,7 @@ abstract class Living extends Entity implements Damageable{
 		}
 		$blocks = [];
 		$nextIndex = 0;
-		
+
 		$itr = new BlockIterator($this->level, $this->getPosition(), $this->getDirectionVector(), $this->getEyeHeight(), $maxDistance);
 		while ($itr->valid()) {
 			$itr->next();
