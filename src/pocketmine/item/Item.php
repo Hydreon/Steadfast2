@@ -1003,6 +1003,8 @@ class Item{
 			self::$list[self::JUNGLE_DOOR] = JungleDoor::class;
 			self::$list[self::ACACIA_DOOR] = AcaciaDoor::class;
 			self::$list[self::DARK_OAK_DOOR] = DarkOakDoor::class;
+
+			self::$list[self::SPLASH_POTION] = SplashPotion::class;
             
             // update for 1.0
 			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;

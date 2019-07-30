@@ -45,6 +45,7 @@ class EntityEventPacket extends PEPacket{
 	const AMBIENT_SOUND = 17;
 	const RESPAWN = 18;
 	const ENCHANT = 34;
+	const ARROW_SHAKE = 39;
 	const FEED = 57;
 
 	//TODO add new events

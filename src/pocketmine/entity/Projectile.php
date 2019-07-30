@@ -21,18 +21,24 @@
 
 namespace pocketmine\entity;
 
+use function mt_rand;
+use pocketmine\block\Block;
 use pocketmine\event\entity\EntityCombustByEntityEvent;
 use pocketmine\event\entity\EntityDamageByChildEntityEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\ProjectileHitEvent;
 use pocketmine\level\format\FullChunk;
+use pocketmine\level\sound\GenericSound;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\network\protocol\AddEntityPacket;
+use pocketmine\network\protocol\EntityEventPacket;
+use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\Player;
 use pocketmine\level\Level;
+use pocketmine\Server;
 
 abstract class Projectile extends Entity {
 
@@ -85,10 +91,8 @@ abstract class Projectile extends Entity {
 		}
 		$this->lastUpdate = $currentTick;
 		$hasUpdate = $this->entityBaseTick($tickDiff);
-		if ($this->isAlive()) {
-			if (!$this->isCollided) {
-				$this->motionY -= $this->isInsideOfWater() ? $this->gravity * 10 : $this->gravity;
-			}
+		if ($this->isAlive() && !$this->isCollided) {
+		    $this->motionY -= $this->isInsideOfWater() ? $this->gravity * 10 : $this->gravity;
 			$moveVector = new Vector3($this->x + $this->motionX, $this->y + $this->motionY, $this->z + $this->motionZ);
 			$itersectionPoint = new Vector3();
 			// find nearest collided entity
@@ -132,8 +136,8 @@ abstract class Projectile extends Entity {
 				$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
 				$motion = sqrt($this->motionX ** 2 + $this->motionY ** 2 + $this->motionZ ** 2);
 				$damage = ceil($motion * $this->damage);
-				if ($this instanceof Arrow and $this->isCritical) {
-					$damage += mt_rand(0, (int) ($damage / 2) + 1);
+				if ($this instanceof Arrow && $this->isCritical()) {
+				    $damage += mt_rand(0, (int) ($damage / 2) + 1);
 				}
 				if ($this->shootingEntity === null) {
 					$ev = new EntityDamageByEntityEvent($this, $nearEntity, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
@@ -141,6 +145,12 @@ abstract class Projectile extends Entity {
 					$ev = new EntityDamageByChildEntityEvent($this->shootingEntity, $this, $nearEntity, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
 				}
 				$nearEntity->attack($ev->getFinalDamage(), $ev);
+
+				if($this->shootingEntity instanceof Player && !$ev->isCancelled()){
+					//$this->shootingEntity->sendSound('successful_hit', ['x' => $this->shootingEntity->getX(), 'y' => $this->shootingEntity->getY(), 'z' => $this->shootingEntity->getZ()]);
+					$this->getLevel()->addSound(new GenericSound($this->shootingEntity->getPosition(), 1051));
+                }
+
 				$this->hadCollision = true;
 				if ($this->fireTicks > 0) {
 					$ev = new EntityCombustByEntityEvent($this, $nearEntity, 5);
@@ -152,24 +162,35 @@ abstract class Projectile extends Entity {
 				$this->kill();
 				return true;
 			}
+
 			if ($nearBlock !== null && $nearBlockDistance < 0.3) {
 				$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
-				$this->onShootBlock();
+
+				if($this instanceof Arrow){
+                    $this->motionX = 0;
+                    $this->motionY = 0;
+                    $this->motionZ = 0;
+                } else {
+				    $this->kill();
+                }
+
+                $this->isCollided = true;
+				$this->hadCollision = true;
 				return true;
 			}
+
 			// if doesnt hit neither entity nor block
 			$this->move($this->motionX, $this->motionY, $this->motionZ);
-			if ($this->isCollided && !$this->hadCollision) {
+
+			if ($this->isCollided && !$this->hadCollision) { //whyyyy there's no difference lol
 				$this->hadCollision = true;
-				$this->motionX = 0;
-				$this->motionY = 0;
-				$this->motionZ = 0;
-				$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
-				$this->kill();
-				return true;
-			} else if (!$this->isCollided && $this->hadCollision) {
+                return true;
+			}
+
+			if (!$this->isCollided && $this->hadCollision) {
 				$this->hadCollision = false;
 			}
+
 			if (!$this->onGround or abs($this->motionX) > 0.00001 or abs($this->motionY) > 0.00001 or abs($this->motionZ) > 0.00001) {
 				$f = sqrt(($this->motionX ** 2) + ($this->motionZ ** 2));
 				$this->yaw = (atan2($this->motionX, $this->motionZ) * 180 / M_PI);
@@ -179,10 +200,6 @@ abstract class Projectile extends Entity {
 			$this->updateMovement();
 		}
 		return $hasUpdate;
-	}
-	
-	protected function onShootBlock() {
-		$this->kill();
 	}
 
 	public function spawnTo(Player $player) {
@@ -200,5 +217,4 @@ abstract class Projectile extends Entity {
 			$player->dataPacket($pk);
 		}
 	}
-
 }
