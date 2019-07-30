@@ -330,6 +330,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 	public $proxyId = '';
 	public $proxySessionId = '';
+
 	protected $closeFromProxy = false;
 
 	protected static $availableCommands = [];
@@ -978,11 +979,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	 * @return int|bool
 	 */
 	public function dataPacket(DataPacket $packet){
-
 		if (!($this->interface instanceof ProxyInterface) && ($packet instanceof ProxyPacket)) {
 			return;
 		}
-
 		if($this->connected === false){
 			return false;
 		}
@@ -997,7 +996,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			return;
 		}
 		
-
 		switch($packet->pname()){
 			case 'INVENTORY_CONTENT_PACKET':
 				$winId = $packet->inventoryID;
@@ -2644,10 +2642,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			if (!is_null($this->scoreboard)) {
 				$this->scoreboard->removePlayer($this);
 			}
-
 			$this->connected = false;
 		}			
-
 		$this->perm->clearPermissions();
 		$this->server->removePlayer($this);
 	}
@@ -3292,7 +3288,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		} else {
 			$this->sendPosition($this);
 			$this->setGamemode($this->gamemode, true);
-
 		}
 
 		$pk = new SetTimePacket();
@@ -3398,7 +3393,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			parent::generateId();
 		}
 	}
-
 
 	public function getInterface() {
 		return $this->interface;
@@ -5033,7 +5027,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		$this->dataPacket($pk);
 	}
 	
-
 	public function setInteractButtonText($text, $force = false) {
 		if ($force || $this->interactButtonText != $text) {
 			$this->interactButtonText = $text;
