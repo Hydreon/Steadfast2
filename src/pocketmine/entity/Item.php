@@ -54,6 +54,14 @@ class Item extends Entity{
 
 	public $canCollide = false;
 	
+	protected static $transparentBlocks = [
+		Block::AIR, Block::WATER, Block::STILL_WATER, Block::LAVA, Block::STILL_LAVA,
+		Block::BROWN_MUSHROOM, Block::CARPET, Block::COBWEB, Block::DANDELION,
+		Block::FIRE, Block::RED_FLOWER, Block::FLOWER_POT_BLOCK, Block::RED_MUSHROOM,
+		Block::SAPLING, Block::SNOW_LAYER, Block::TALL_GRASS, Block::TORCH, Block::DOUBLE_PLANT,
+		Block::NETHER_WART_BLOCK, Block::WHEAT_BLOCK
+	];
+	
 	public function __construct(FullChunk $chunk, Compound $nbt) {
 		parent::__construct($chunk, $nbt);
 		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_NO_AI, true, self::DATA_TYPE_LONG, false);
@@ -259,17 +267,18 @@ class Item extends Entity{
 		$this->boundingBox->offset($dx, $dy, $dz);
 		$this->setComponents($this->x + $dx, $this->y + $dy, $this->z + $dz);
 		$this->checkChunks();
-		$blockY = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y - 0.5), floor($this->z)));
-		$this->onGround = !$blockY->isTransparent();
-		$blockX = $this->level->getBlock(new Vector3(floor($this->x + $this->motionX), floor($this->y), floor($this->z)));
-		if (!$blockX->isTransparent()) {
+		$this->onGround = !$this->isTransparentBlock(floor($this->x), floor($this->y - 0.5), floor($this->z));
+		if (!$this->isTransparentBlock(floor($this->x + $this->motionX), floor($this->y), floor($this->z))) {
 			$this->motionX = 0;
 		}
-		$blockZ = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y), floor($this->z + $this->motionZ)));
-		if (!$blockZ->isTransparent()) {
+		if (!$this->isTransparentBlock(floor($this->x), floor($this->y), floor($this->z + $this->motionZ))) {
 			$this->motionZ = 0;
 		}
 		return true;
+	}
+
+	protected function isTransparentBlock($x, $y, $z) {
+		return in_array($this->level->getBlockIdAt($x, $y, $z), static::$transparentBlocks);
 	}
 
 }
