@@ -73,9 +73,9 @@ class MovePlayerPacket extends PEPacket{
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
-
+	
 		$this->putLFloat($this->pitch);
-		$this->putLFloat($this->yaw);
+		$this->putLFloat($this->yaw == 0 ? 0.1 : $this->yaw); //hack for 1.13 if send 0 client rotate to -180
 
 		$this->putLFloat($this->bodyYaw);
 		$this->putByte($this->mode);
