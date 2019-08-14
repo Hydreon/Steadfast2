@@ -3852,8 +3852,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 
 		if ($target instanceof DroppedItem || $target instanceof Arrow) {
-			$this->kick("Attempting to attack an invalid entity");
-			$this->server->getLogger()->warning("Player " . $this->getName() . " tried to attack an invalid entity");
 			return;
 		}
 
