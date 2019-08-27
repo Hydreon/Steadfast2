@@ -306,9 +306,6 @@ class BinaryStream {
 	}
 	
 	public function putSerializedSkin($playerProtocol, $skinId, $skinData, $skinGeomtryName, $skinGeomtryData, $capeData) {
-		if ($playerProtocol >= Info::PROTOCOL_385) {
-			$this->putLInt(7);
-		}
 		if (empty($skinGeomtryName)) {
 			$skinGeomtryName = "geometry.humanoid.custom";
 		}
@@ -346,18 +343,11 @@ class BinaryStream {
 		$this->putString(''); // Serialized Animation Data
 		$this->putLInt(1);
 		$uniqId = $skinId . $skinGeomtryName . "-" . microtime(true);
-		$this->putString($uniqId); // Full Skin ID	
-		if ($playerProtocol >= Info::PROTOCOL_385) {
-			$this->putByte(0);
-			$this->putByte(0);
-		}		
+		$this->putString($uniqId); // Full Skin ID		
 	}
 	
 	
 	public function getSerializedSkin($playerProtocol, &$skinId, &$skinData, &$skinGeomtryName, &$skinGeomtryData, &$capeData) {
-		if ($playerProtocol >= Info::PROTOCOL_385) {
-			$this->getLInt();
-		}
 		$skinId = $this->getString();
 		$geometryData = json_decode($this->getString(), true);
 		$skinGeomtryName = isset($geometryData['geometry']['default']) ? $geometryData['geometry']['default'] : '';
@@ -383,13 +373,12 @@ class BinaryStream {
 		$capeData = $this->getString();
 		
 		$skinGeomtryData = $this->getString();
+		if (strpos($skinGeomtryData, 'null') === 0) {
+			$skinGeomtryData = '';
+		}
 		$this->getString();		
 		$this->getLInt();
 		$this->getString();		
-		if ($playerProtocol >= Info::PROTOCOL_385) {
-			$this->getByte();
-			$this->getByte();
-		}
 	}
 
 }
