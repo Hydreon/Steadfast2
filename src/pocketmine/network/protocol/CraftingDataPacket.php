@@ -205,7 +205,10 @@ class CraftingDataPacket extends PEPacket{
 
 			$writer->reset();
 		}
-
+		if ($playerProtocol >= Info::PROTOCOL_385) {
+			$this->putVarInt(0);
+			$this->putVarInt(0);
+		}
 		$this->putByte($this->cleanRecipes ? 1 : 0);
 	}
 

@@ -106,10 +106,19 @@ class DoublePlant extends Flowable {
 		}
 		return true;
 	}
+	
+	public function getBreakTime(Item $item) {
+		return 0.05;
+	}
 
 	public function getDrops(Item $item) {
+		if ($this->meta >= 0x08 && $this->level->getBlockIdAt($this->x, $this->y - 1, $this->z) == $this->id) {
+			$meta = $this->level->getBlockDataAt($this->x, $this->y - 1, $this->z);
+		} else {
+			$meta = $this->meta;
+		}
 		return [
-			[$this->id, $this->getDamage() & 0x07, 1]
+			[$this->id, $meta & 0x07, 1]
 		];
 	}
 

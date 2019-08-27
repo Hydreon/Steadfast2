@@ -541,7 +541,7 @@ class NBT{
 				break;
 			case NBT::TAG_ByteArray:
 				$tag = new ByteArray($this->checkGetString($new));
-				$tag->read($this);
+				$tag->read($this, $new);
 				break;
 			case NBT::TAG_String:
 				$tag = new StringTag($this->checkGetString($new));
@@ -557,7 +557,7 @@ class NBT{
 				break;
 			case NBT::TAG_IntArray:
 				$tag = new IntArray($this->checkGetString($new));
-				$tag->read($this);
+				$tag->read($this, $new);
 				break;
 
 			case NBT::TAG_End: //No named tag
