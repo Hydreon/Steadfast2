@@ -425,6 +425,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	protected $joinCompleted = false;
 	protected $platformChatId = "";
 	protected $doDaylightCycle = true;
+	private $lastQuickCraftTransactionGroup = [];
 
 	public function getLeaveMessage(){
 		return "";
@@ -2165,6 +2166,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 						foreach ($craftSlots as $slot => $item) {
 							$this->inventory->setItem(PlayerInventory::QUICK_CRAFT_INDEX_OFFSET - $slot, $item);
 						}
+						$this->inventory->setQuickCraftMode(false);
 					} else {
 						$craftSlots = $this->inventory->getCraftContents();
 						$this->tryApplyCraft($craftSlots, $recipe);
@@ -2173,10 +2175,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 							$this->inventory->setItem(PlayerInventory::CRAFT_INDEX_0 - $slot, $item);
 						}
 					}
+					if (!empty($this->lastQuickCraftTransactionGroup)) {
+						foreach ($this->lastQuickCraftTransactionGroup as $trGroup) {
+							if (!$trGroup->execute()) {
+								$trGroup->sendInventories();
+							}
+						}
+						$this->lastQuickCraftTransactionGroup = [];
+					}
 				} catch (\Exception $e) {
 					$pk = new ContainerClosePacket();
 					$pk->windowid = Protocol120::CONTAINER_ID_INVENTORY;
 					$this->dataPacket($pk);
+					$this->lastQuickCraftTransactionGroup = [];
 				}
 				break;
 			case 'TILE_ENTITY_DATA_PACKET':
@@ -4026,6 +4037,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	 */
 	private function normalTransactionLogic($packet) {
 		$trGroup = new SimpleTransactionGroup($this);
+		$isCraftResultTransaction = false;
 		foreach ($packet->transactions as $trData) {
 //			echo $trData . PHP_EOL;
 			if ($trData->isDropItemTransaction()) {
@@ -4042,18 +4054,26 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				$trGroup->sendInventories();
 				return;
 			}
+			if ($trData->isCraftResultTransaction()) {
+				$isCraftResultTransaction = true;
+			}
 //			echo " ---------- " . $transaction . PHP_EOL;
 			$trGroup->addTransaction($transaction);
 		}
 		try {
 			if (!$trGroup->execute()) {
-//				echo '[INFO] Transaction execute fail.'.PHP_EOL;
-				$trGroup->sendInventories();
+				if ($isCraftResultTransaction) {
+					$this->lastQuickCraftTransactionGroup[] = $trGroup;
+//						echo '[INFO] Transaction execute holded. ' . count($packet->transactions) .PHP_EOL.PHP_EOL;
+				} else {
+//					echo '[INFO] Transaction execute fail. ' . count($packet->transactions) .PHP_EOL.PHP_EOL;
+					$trGroup->sendInventories();
+				}
 			} else {
-//				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
+//				echo '[INFO] Transaction successfully executed.' . count($packet->transactions) .PHP_EOL.PHP_EOL;
 			}
 		} catch (\Exception $ex) {
-//			echo '[INFO] Transaction execute exception. ' . $ex->getMessage() .PHP_EOL;
+//			echo '[INFO] Transaction execute exception. ' . $ex->getMessage() .PHP_EOL.PHP_EOL;
 		}
 	}
 

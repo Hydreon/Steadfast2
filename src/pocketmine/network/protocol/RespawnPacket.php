@@ -44,6 +44,7 @@ class RespawnPacket extends PEPacket{
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
+		$this->putLInt(7); //TODO
 	}
 
 }
