@@ -2416,6 +2416,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				break;
 			case 'MAP_INFO_REQUEST_PACKET':
 				$this->onPlayerRequestMap($packet->mapId);
+				break;
+			case "RESPAWN_PACKET":
+				$pk = new RespawnPacket();
+				$pos = $this->getSpawn();
+				$pk->x = $pos->x;
+				$pk->y = $pos->y +  $this->getEyeHeight();
+				$pk->z = $pos->z;
+				$this->dataPacket($pk);
+				break;
 			default:
 				break;
 		}
@@ -4064,16 +4073,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			if (!$trGroup->execute()) {
 				if ($isCraftResultTransaction) {
 					$this->lastQuickCraftTransactionGroup[] = $trGroup;
-//						echo '[INFO] Transaction execute holded. ' . count($packet->transactions) .PHP_EOL.PHP_EOL;
+//					echo '[INFO] Transaction execute holded.'.PHP_EOL;
 				} else {
-//					echo '[INFO] Transaction execute fail. ' . count($packet->transactions) .PHP_EOL.PHP_EOL;
+//					echo '[INFO] Transaction execute fail.'.PHP_EOL;
 					$trGroup->sendInventories();
 				}
 			} else {
-//				echo '[INFO] Transaction successfully executed.' . count($packet->transactions) .PHP_EOL.PHP_EOL;
+//				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
 			}
 		} catch (\Exception $ex) {
-//			echo '[INFO] Transaction execute exception. ' . $ex->getMessage() .PHP_EOL.PHP_EOL;
+//			echo '[INFO] Transaction execute exception. ' . $ex->getMessage() .PHP_EOL;
 		}
 	}
 
