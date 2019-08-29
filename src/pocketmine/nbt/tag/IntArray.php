@@ -30,14 +30,28 @@ class IntArray extends NamedTag{
 		return NBT::TAG_IntArray;
 	}
 
-	public function read(NBT $nbt){
+	public function read(NBT $nbt, $new = false){
 		$this->value = [];
-		$size = $nbt->endianness === 1 ? Binary::readInt($nbt->get(4)) : Binary::readLInt($nbt->get(4));
-		$this->value = array_values(unpack($nbt->endianness === NBT::LITTLE_ENDIAN ? "V*" : "N*", $nbt->get($size * 4)));
+		if ($new) {
+			$size = $nbt->getNewInt();
+			for ($i = 0; $i < $size; $i++) {
+				$this->value[] = $nbt->getNewInt();
+			}
+		} else {
+			$size = $nbt->endianness === 1 ? Binary::readInt($nbt->get(4)) : Binary::readLInt($nbt->get(4));
+			$this->value = array_values(unpack($nbt->endianness === NBT::LITTLE_ENDIAN ? "V*" : "N*", $nbt->get($size * 4)));
+		}
 	}
 
-	public function write(NBT $nbt){
-		$nbt->buffer .= $nbt->endianness === 1 ? pack("N", \count($this->value)) : pack("V", \count($this->value));
-		$nbt->buffer .= pack($nbt->endianness === NBT::LITTLE_ENDIAN ? "V*" : "N*", ...$this->value);
+	public function write(NBT $nbt, $old = false){
+		if ($old) {
+			$nbt->buffer .= $nbt->endianness === 1 ? pack("N", \count($this->value)) : pack("V", \count($this->value));
+			$nbt->buffer .= pack($nbt->endianness === NBT::LITTLE_ENDIAN ? "V*" : "N*", ...$this->value);
+		} else {
+			$nbt->putInt(count($this->value));
+			foreach ($this->value as $value) {
+				$nbt->putInt($value);
+			}
+		}
 	}
 }

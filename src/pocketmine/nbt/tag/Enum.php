@@ -137,7 +137,7 @@ class Enum extends NamedTag implements \ArrayAccess, \Countable{
 					break;
 				case NBT::TAG_Long:
 					$tag = new LongTag("");
-					$tag->read($nbt);
+					$tag->read($nbt, $new);
 					$this->{$i} = $tag;
 					break;
 				case NBT::TAG_Float:
@@ -152,7 +152,7 @@ class Enum extends NamedTag implements \ArrayAccess, \Countable{
 					break;
 				case NBT::TAG_ByteArray:
 					$tag = new ByteArray("");
-					$tag->read($nbt);
+					$tag->read($nbt, $new);
 					$this->{$i} = $tag;
 					break;
 				case NBT::TAG_String:
@@ -172,7 +172,7 @@ class Enum extends NamedTag implements \ArrayAccess, \Countable{
 					break;
 				case NBT::TAG_IntArray:
 					$tag = new IntArray("");
-					$tag->read($nbt);
+					$tag->read($nbt, $new);
 					$this->{$i} = $tag;
 					break;
 			}
