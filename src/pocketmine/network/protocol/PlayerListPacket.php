@@ -118,11 +118,18 @@ class PlayerListPacket extends PEPacket{
 						$this->putString(""); // platform chat id
 					}		
 					if ($playerProtocol >= Info::PROTOCOL_370) {
+						if ($playerProtocol >= Info::PROTOCOL_385) {
+							$this->putLInt(7);
+						}
 						$skinData = !empty($d[4]) ? $d[4] : $emptySkin;
 						$skinGeomtryName = isset($d[6]) ? $d[6] : '';
 						$skinGeomtryData = isset($d[7]) ? $d[7] : '';
 						$capeData = isset($d[5]) ? $d[5] : '';
-						$this->putSerializedSkin($d[3], $skinData, $skinGeomtryName, $skinGeomtryData, $capeData);
+						$this->putSerializedSkin($playerProtocol, $d[3], $skinData, $skinGeomtryName, $skinGeomtryData, $capeData);
+						if ($playerProtocol >= Info::PROTOCOL_385) {
+							$this->putByte(0);
+							$this->putByte(0);
+						}
 					}
 				}
 				break;
