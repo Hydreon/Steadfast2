@@ -37,6 +37,10 @@ class RespawnPacket extends PEPacket{
 		$this->x = $this->getLFloat();
 		$this->y = $this->getLFloat();
 		$this->z = $this->getLFloat();
+		if ($playerProtocol >= Info::PROTOCOL_385) {
+			$this->getByte();
+			$this->getByte();
+		}
 	}
 
 	public function encode($playerProtocol){
@@ -44,6 +48,10 @@ class RespawnPacket extends PEPacket{
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
+		if ($playerProtocol >= Info::PROTOCOL_385) {
+			$this->putByte(1);
+			$this->putByte(0);
+		}
 	}
 
 }

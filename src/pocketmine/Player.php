@@ -440,6 +440,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	protected $forcedPlayerId = false;
 	protected $incomingTransferData = "";
 	protected $doDaylightCycle = true;
+	private $lastQuickCraftTransactionGroup = [];
 
 
 	public function getLeaveMessage(){
@@ -2199,6 +2200,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 						foreach ($craftSlots as $slot => $item) {
 							$this->inventory->setItem(PlayerInventory::QUICK_CRAFT_INDEX_OFFSET - $slot, $item);
 						}
+						$this->inventory->setQuickCraftMode(false);
 					} else {
 						$craftSlots = $this->inventory->getCraftContents();
 						$this->tryApplyCraft($craftSlots, $recipe);
@@ -2207,10 +2209,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 							$this->inventory->setItem(PlayerInventory::CRAFT_INDEX_0 - $slot, $item);
 						}
 					}
+					if (!empty($this->lastQuickCraftTransactionGroup)) {
+						foreach ($this->lastQuickCraftTransactionGroup as $trGroup) {
+							if (!$trGroup->execute()) {
+								$trGroup->sendInventories();
+							}
+						}
+						$this->lastQuickCraftTransactionGroup = [];
+					}
 				} catch (\Exception $e) {
 					$pk = new ContainerClosePacket();
 					$pk->windowid = Protocol120::CONTAINER_ID_INVENTORY;
 					$this->dataPacket($pk);
+					$this->lastQuickCraftTransactionGroup = [];
 				}
 				break;
 			case 'TILE_ENTITY_DATA_PACKET':
@@ -2439,6 +2450,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				break;
 			case 'MAP_INFO_REQUEST_PACKET':
 				$this->onPlayerRequestMap($packet->mapId);
+				break;
+			case "RESPAWN_PACKET":
+				$pk = new RespawnPacket();
+				$pos = $this->getSpawn();
+				$pk->x = $pos->x;
+				$pk->y = $pos->y +  $this->getEyeHeight();
+				$pk->z = $pos->z;
+				$this->dataPacket($pk);
+				break;
 			default:
 				break;
 		}
@@ -4159,6 +4179,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	 */
 	private function normalTransactionLogic($packet) {
 		$trGroup = new SimpleTransactionGroup($this);
+		$isCraftResultTransaction = false;
 		foreach ($packet->transactions as $trData) {
 //			echo $trData . PHP_EOL;
 			if ($trData->isDropItemTransaction()) {
@@ -4175,13 +4196,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				$trGroup->sendInventories();
 				return;
 			}
+			if ($trData->isCraftResultTransaction()) {
+				$isCraftResultTransaction = true;
+			}
 //			echo " ---------- " . $transaction . PHP_EOL;
 			$trGroup->addTransaction($transaction);
 		}
 		try {
 			if (!$trGroup->execute()) {
-//				echo '[INFO] Transaction execute fail.'.PHP_EOL;
-				$trGroup->sendInventories();
+				if ($isCraftResultTransaction) {
+					$this->lastQuickCraftTransactionGroup[] = $trGroup;
+//					echo '[INFO] Transaction execute holded.'.PHP_EOL;
+				} else {
+//					echo '[INFO] Transaction execute fail.'.PHP_EOL;
+					$trGroup->sendInventories();
+				}
 			} else {
 //				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
 			}
