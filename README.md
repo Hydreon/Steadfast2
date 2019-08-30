@@ -13,7 +13,7 @@ Steadfast2 is a project for backporting new Minecraft: Pocket Edition changes to
 
 ### Installing On Linux/MacOS
 
-To install SteadyFast on Linux OS/MAC OS please follow the instructions below.
+To install SteadFast on Linux OS/MAC OS please follow the instructions below.
 
 1)  `git clone git@github.com:Hydreon/Steadfast2.git` or `https://github.com/Hydreon/Steadfast2.git` in directory of your choosing. Or download and extract the zip into the directory of your choosing. 
 
