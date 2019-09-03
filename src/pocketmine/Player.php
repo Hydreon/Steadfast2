@@ -972,7 +972,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		switch($packet->pname()){
 			case 'INVENTORY_CONTENT_PACKET':
 				$winId = $packet->inventoryID;
-				$this->inventoryPacketQueue[$winId] = $packet;
+				$this->inventoryPacketQueue[$packet->pname() . $winId] = $packet;
+				return;
+			case 'INVENTORY_SLOT_PACKET':
+				$winId = $packet->containerId;
+				$this->inventoryPacketQueue[$packet->pname() . $winId] = $packet;
+				return;
+			case 'CONTAINER_OPEN_PACKET':
+			case 'CONTAINER_CLOSE_PACKET':
+				$winId = $packet->windowid;
+				$this->inventoryPacketQueue[$packet->pname() . $winId] = $packet;
 				return;
 			case 'BATCH_PACKET':
 				$packet->encode($this->protocol);
