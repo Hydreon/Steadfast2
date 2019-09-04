@@ -3,6 +3,8 @@
 
 ## Introduction
 
+Turn into PocketMine-Network 1.5.1 hybrid
+
 Steadfast2 is a project for backporting new Minecraft: Bedrock Edition changes to older Pocketmine versions for better stability and performance, while retaining as many features from the new versions as possible. It's currently in production on Lifeboat Survival Games' main servers.
 
 ## Known bugs
