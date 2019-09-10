@@ -972,17 +972,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		
 		switch($packet->pname()){
 			case 'INVENTORY_CONTENT_PACKET':
-				$winId = $packet->inventoryID;
-				$this->inventoryPacketQueue[$packet->pname() . $winId] = $packet;
+				$queueKey = $packet->pname() . $packet->inventoryID;
+				unset($this->inventoryPacketQueue[$queueKey]);
+				$this->inventoryPacketQueue[$queueKey] = $packet;
 				return;
 			case 'INVENTORY_SLOT_PACKET':
-				$winId = $packet->containerId;
-				$this->inventoryPacketQueue[$packet->pname() . $winId] = $packet;
+				$queueKey = $packet->pname() . $packet->containerId . ':' . $packet->slot;
+				unset($this->inventoryPacketQueue[$queueKey]);
+				$this->inventoryPacketQueue[$queueKey] = $packet;
 				return;
 			case 'CONTAINER_OPEN_PACKET':
 			case 'CONTAINER_CLOSE_PACKET':
-				$winId = $packet->windowid;
-				$this->inventoryPacketQueue[$packet->pname() . $winId] = $packet;
+				$queueKey = $packet->pname() . $packet->windowid;
+				unset($this->inventoryPacketQueue[$queueKey]);
+				$this->inventoryPacketQueue[$queueKey] = $packet;
 				return;
 			case 'BATCH_PACKET':
 				$packet->encode($this->protocol);
@@ -1063,7 +1066,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	public function sendPacketQueue() {
-		if (count($this->packetQueue) <= 0) {
+		if (count($this->packetQueue) <= 0 && count($this->inventoryPacketQueue) <= 0) {
 			return;
 		}
 		$buffer = '';
