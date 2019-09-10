@@ -62,6 +62,7 @@ class LoginPacket extends PEPacket {
 	public $premiunSkin = "";
 	public $identityPublicKey = "";
 	public $platformChatId = "";
+	public $additionalSkinData = [];
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -177,6 +178,11 @@ class LoginPacket extends PEPacket {
 		}
 		if (isset($this->playerData['SkinGeometry'])) {
 			$this->skinGeometryData = base64_decode($this->playerData['SkinGeometry']);
+		} elseif (isset($this->playerData['SkinGeometryData'])) {
+			$this->skinGeometryData = base64_decode($this->playerData['SkinGeometryData']);
+			if (strpos($this->skinGeometryData, 'null') === 0) {
+				$this->skinGeometryData = '';
+			}
 		}
 		$this->clientSecret = $this->playerData['ClientRandomId'];
 		if (isset($this->playerData['DeviceOS'])) {
@@ -201,7 +207,26 @@ class LoginPacket extends PEPacket {
 			$this->platformChatId = $this->playerData["PlatformOnlineId"];
 		}
 		$this->originalProtocol = $this->protocol1;
-		$this->protocol1 = self::convertProtocol($this->protocol1);
+		$this->protocol1 = self::convertProtocol($this->protocol1);		
+		$additionalSkinDataList = [
+			'AnimatedImageData', 'CapeId', 'CapeImageHeight', 'CapeImageWidth', 'CapeOnClassicSkin', 'PersonaSkin', 'PremiumSkin', 'SkinAnimationData', 'SkinImageHeight', 'SkinImageWidth', 'SkinResourcePatch'	
+		];
+		$additionalSkinData = [];
+		foreach ($additionalSkinDataList as $propertyName) {
+			if (isset($this->playerData[$propertyName])) {
+				$additionalSkinData[$propertyName] = $this->playerData[$propertyName];
+			}
+		}
+		if (isset($additionalSkinData['AnimatedImageData'])) {
+			foreach ($additionalSkinData['AnimatedImageData'] as &$animation) {
+				$animation['Image'] = base64_decode($animation['Image']);
+			}
+		}
+		if (isset($additionalSkinData['SkinResourcePatch'])) {
+			$additionalSkinData['SkinResourcePatch'] = base64_decode($additionalSkinData['SkinResourcePatch']);
+		}
+		$this->additionalSkinData = $additionalSkinData;
+		$this->checkSkinData($this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->additionalSkinData);
 	}
 
 	public static function load($jwsTokenString) {
