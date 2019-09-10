@@ -585,6 +585,13 @@ class PlayerInventory extends BaseInventory{
 				$isChanged = true;
 			}
 		}
+		foreach ($this->quickCraftSlots as $slot) {
+			if ($slot->getId() != Item::AIR) {
+				$this->addItem($slot);
+				$isChanged = true;
+			}
+		}
+		$this->setQuickCraftMode(false);	
 		if ($isChanged) {
 			$this->sendContents($this->holder);
 		}
@@ -598,7 +605,7 @@ class PlayerInventory extends BaseInventory{
 		return $result;
 	}
 	
-		public function setQuickCraftMode($value) {
+	public function setQuickCraftMode($value) {
 		$this->isQuickCraftEnabled = $value;
 		$this->quickCraftSlots = [];
 	}

@@ -39,6 +39,7 @@ class ConnectPacket extends ProxyPacket {
 	public $transferData = "";
 	public $skinGeometryName = "";
 	public $skinGeometryData = "";
+	public $additionalSkinData = [];
 
 	public function decode() {
 		$this->identifier = $this->getString();
@@ -72,10 +73,12 @@ class ConnectPacket extends ProxyPacket {
 		$this->identityPublicKey = $this->getString();
 		$this->playerId = $this->getInt();
 		$this->transferData = $this->getString();
+		$this->skinGeometryName = $this->getString();
+		$this->skinGeometryData = $this->getString();
 		if (!$this->feof()) {
-			$this->skinGeometryName = $this->getString();
-			$this->skinGeometryData = $this->getString();
+			$this->additionalSkinData = json_decode($this->getString(), true);
 		}
+		$this->checkSkinData($this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->additionalSkinData);
 	}
 
 	public function encode() {
