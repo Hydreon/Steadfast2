@@ -120,13 +120,13 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		if (is_string($skinName)) {
 			$this->skinName = $skinName;
 		}
-		if (!empty($skinGeometryName)) {
+		if (is_string($skinGeometryName)) {
 			$this->skinGeometryName = $skinGeometryName;
 		}
-		if (!empty($skinGeometryData)) {
+		if (is_string($skinGeometryData)) {
 			$this->skinGeometryData = $skinGeometryData;
 		}
-		if (!empty($capeData)) {
+		if (is_string($capeData)) {
 			$this->capeData = $capeData;
 		}
 
@@ -246,6 +246,9 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			$pk->pitch = $this->pitch;
 			$pk->item = $this->getInventory()->getItemInHand();
 			$pk->metadata = $this->dataProperties;
+			if ($this instanceof Player) {
+				$pk->buildPlatform = $this->getDeviceOS();
+			}
 			$player->dataPacket($pk);
 
 			$this->inventory->sendArmorContents($player);
