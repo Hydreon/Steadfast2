@@ -77,6 +77,11 @@ class ConnectPacket extends ProxyPacket {
 		$this->skinGeometryData = $this->getString();
 		if (!$this->feof()) {
 			$this->additionalSkinData = json_decode($this->getString(), true);
+			if (isset($this->additionalSkinData['AnimatedImageData'])) {
+				foreach ($this->additionalSkinData['AnimatedImageData'] as &$animation) {
+					$animation['Image'] = base64_decode($animation['Image']);
+				}
+			}
 		}
 		$this->checkSkinData($this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->additionalSkinData);
 	}
