@@ -3406,6 +3406,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$this->platformChatId = $packet->platformChatId;
 			$this->forcedPlayerId = $packet->playerId;
 			$this->incomingTransferData = $packet->transferData;
+			$this->additionalSkinData = $packet->additionalSkinData;		
 			if ($this->isFirstConnect) {
 				$this->processLogin();
 			} else {
