@@ -1,5 +1,4 @@
 <?php
-
 /*
  *
  *  ____            _        _   __  __ _                  __  __ ____  
@@ -18,22 +17,16 @@
  * 
  *
  */
-
 namespace pocketmine\network\protocol;
-
 #include <rules/DataPacket.h>
-
 use pocketmine\Server;
 use pocketmine\utils\Binary;
 use pocketmine\utils\JWT;
 use pocketmine\utils\UUID;
-
 class LoginPacket extends PEPacket {
-
 	const NETWORK_ID = Info::LOGIN_PACKET;
 	const PACKET_NAME = "LOGIN_PACKET";
 	const MOJANG_ROOT_KEY = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V";
-
 	public $username;
 	public $protocol1;
 	public $protocol2;
@@ -62,13 +55,12 @@ class LoginPacket extends PEPacket {
 	public $premiunSkin = "";
 	public $identityPublicKey = "";
 	public $platformChatId = "";
-
+	public $additionalSkinData = [];
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
 		$body = substr($body, $len);
 		return $res;
 	}
-
 	public function decode($playerProtocol) {
 		$acceptedProtocols = Info::ACCEPTED_PROTOCOLS;
 		// header: protocolID, Subclient Sender, Subclient Receiver
@@ -90,10 +82,8 @@ class LoginPacket extends PEPacket {
 		}
 		$this->chainsDataLength = Binary::readLInt($this->getFromString($body, 4));
 		$this->chains = json_decode($this->getFromString($body, $this->chainsDataLength), true);
-
 		$this->playerDataLength = Binary::readLInt($this->getFromString($body, 4));
 		$this->playerData = $this->getFromString($body, $this->playerDataLength);
-
 		$isNeedVerify = Server::getInstance()->isUseEncrypt();
 		$dataIndex = $this->findDataIndex($isNeedVerify);
 		if (is_null($dataIndex)) {
@@ -102,11 +92,9 @@ class LoginPacket extends PEPacket {
 		}
 		$this->getPlayerData($dataIndex, $isNeedVerify);
 	}
-
 	public function encode($playerProtocol) {
 		
 	}
-
 	private function findDataindex($isNeedVerify) {
 		$dataIndex = null;
 		$validationKey = null;
@@ -144,7 +132,6 @@ class LoginPacket extends PEPacket {
 		}
 		return $dataIndex;
 	}
-
 	private function getPlayerData($dataIndex, $isNeedVerify) {
 		if ($isNeedVerify) {
 			$this->playerData = JWT::parseJwt($this->playerData);
@@ -160,7 +147,6 @@ class LoginPacket extends PEPacket {
 		} else {
 			$this->playerData = self::load($this->playerData);
 		}
-
 		$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
 		$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
 		$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
@@ -177,6 +163,11 @@ class LoginPacket extends PEPacket {
 		}
 		if (isset($this->playerData['SkinGeometry'])) {
 			$this->skinGeometryData = base64_decode($this->playerData['SkinGeometry']);
+		} elseif (isset($this->playerData['SkinGeometryData'])) {
+			$this->skinGeometryData = base64_decode($this->playerData['SkinGeometryData']);
+			if (strpos($this->skinGeometryData, 'null') === 0) {
+				$this->skinGeometryData = '';
+			}
 		}
 		$this->clientSecret = $this->playerData['ClientRandomId'];
 		if (isset($this->playerData['DeviceOS'])) {
@@ -201,9 +192,27 @@ class LoginPacket extends PEPacket {
 			$this->platformChatId = $this->playerData["PlatformOnlineId"];
 		}
 		$this->originalProtocol = $this->protocol1;
-		$this->protocol1 = self::convertProtocol($this->protocol1);
+		$this->protocol1 = self::convertProtocol($this->protocol1);		
+		$additionalSkinDataList = [
+			'AnimatedImageData', 'CapeId', 'CapeImageHeight', 'CapeImageWidth', 'CapeOnClassicSkin', 'PersonaSkin', 'PremiumSkin', 'SkinAnimationData', 'SkinImageHeight', 'SkinImageWidth', 'SkinResourcePatch'	
+		];
+		$additionalSkinData = [];
+		foreach ($additionalSkinDataList as $propertyName) {
+			if (isset($this->playerData[$propertyName])) {
+				$additionalSkinData[$propertyName] = $this->playerData[$propertyName];
+			}
+		}
+		if (isset($additionalSkinData['AnimatedImageData'])) {
+			foreach ($additionalSkinData['AnimatedImageData'] as &$animation) {
+				$animation['Image'] = base64_decode($animation['Image']);
+			}
+		}
+		if (isset($additionalSkinData['SkinResourcePatch'])) {
+			$additionalSkinData['SkinResourcePatch'] = base64_decode($additionalSkinData['SkinResourcePatch']);
+		}
+		$this->additionalSkinData = $additionalSkinData;
+		$this->checkSkinData($this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->additionalSkinData);
 	}
-
 	public static function load($jwsTokenString) {
 		$parts = explode('.', $jwsTokenString);
 		if (isset($parts[1])) {
@@ -212,5 +221,4 @@ class LoginPacket extends PEPacket {
 		}
 		return "";
 	}
-
 }
