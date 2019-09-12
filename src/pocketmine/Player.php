@@ -3822,8 +3822,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				continue;
 			}
 			$transaction = $trData->convertToTransaction($this);
-			$inventory = $transaction->getInventory();
-			$inventory->setItem($transaction->getSlot(), $transaction->getTargetItem());
+			if (!is_null($transaction)) {
+				$inventory = $transaction->getInventory();
+				$inventory->setItem($transaction->getSlot(), $transaction->getTargetItem());
+			}
 		}
 	}
 	 /**
