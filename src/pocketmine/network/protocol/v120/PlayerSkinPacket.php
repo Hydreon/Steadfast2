@@ -1,16 +1,11 @@
 <?php
-
 namespace pocketmine\network\protocol\v120;
-
 use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
-
 class PlayerSkinPacket extends PEPacket {
-
 	const NETWORK_ID = Info120::PLAYER_SKIN_PACKET;
 	const PACKET_NAME = "PLAYER_SKIN_PACKET";
-
 	public $uuid;
 	public $newSkinId;
 	public $newSkinName;
@@ -20,8 +15,8 @@ class PlayerSkinPacket extends PEPacket {
 	public $newSkinGeometryName;
 	public $newSkinGeometryData;
 	public $isPremiumSkin = false;
-
-
+	public $additionalSkinData = [];
+	
 	public function decode($playerProtocol) {
 		$this->getHeader($playerProtocol);
 		$this->uuid = $this->getUUID();
@@ -47,12 +42,15 @@ class PlayerSkinPacket extends PEPacket {
 				$this->isPremiumSkin = $this->getByte();
 			}
 		} else {
-			$this->getSerializedSkin($playerProtocol, $this->newSkinId, $this->newSkinByteData, $this->newSkinGeometryName, $this->newSkinGeometryData, $this->newCapeByteData);
+			$this->getSerializedSkin($playerProtocol, $this->newSkinId, $this->newSkinByteData, $this->newSkinGeometryName, $this->newSkinGeometryData, $this->newCapeByteData, $this->additionalSkinData);
+			if (isset($this->additionalSkinData['PremiumSkin']) && $this->additionalSkinData['PremiumSkin']) {
+				$this->isPremiumSkin = true;
+			}
 			$this->newSkinName = $this->getString();
 			$this->oldSkinName = $this->getString(); 
 		}
+		$this->checkSkinData($this->newSkinByteData, $this->newSkinGeometryName, $this->newSkinGeometryData, $this->additionalSkinData);
 	}
-
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
 		$this->putUUID($this->uuid);
@@ -78,7 +76,7 @@ class PlayerSkinPacket extends PEPacket {
 				$this->putByte($this->isPremiumSkin);
 			}
 		} else {
-			$this->putSerializedSkin($playerProtocol, $this->newSkinId, $this->newSkinByteData, $this->newSkinGeometryName, $this->newSkinGeometryData, $this->newCapeByteData);
+			$this->putSerializedSkin($playerProtocol, $this->newSkinId, $this->newSkinByteData, $this->newSkinGeometryName, $this->newSkinGeometryData, $this->newCapeByteData, $this->additionalSkinData);
 			$this->putString($this->newSkinName);
 			$this->putString($this->oldSkinName);
 		}
