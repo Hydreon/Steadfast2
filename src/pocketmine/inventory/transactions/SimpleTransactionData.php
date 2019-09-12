@@ -1,14 +1,11 @@
 <?php
-
 namespace pocketmine\inventory\transactions;
-
 use pocketmine\inventory\BaseTransaction;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\item\Item;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\Protocol120;
 use pocketmine\Player;
-
 class SimpleTransactionData {
 	
 	const ACTION_CRAFT_PUT_SLOT = 3;
@@ -61,7 +58,6 @@ class SimpleTransactionData {
 	public function isCompleteEnchantTransaction() {
 		return $this->action == self::ACTION_ENCH_RESULT;
 	}
-
 	public function isUpdateEnchantSlotTransaction() {
 		return $this->action == self::ACTION_ENCH_ITEM || $this->action == self::ACTION_ENCH_LAPIS || ($this->inventoryId == Protocol120::CONTAINER_ID_CURSOR_SELECTED && ($this->slot == 14 || $this->slot == 15));
 	}
@@ -170,6 +166,9 @@ class SimpleTransactionData {
 				$slot = $this->slot;
 				break;
 			
+		}
+		if (is_null($inventory)) {
+			return null;
 		}
 		return new BaseTransaction($inventory, $slot, $this->oldItem, $this->newItem);
 	}
