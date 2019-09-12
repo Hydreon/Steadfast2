@@ -1,5 +1,4 @@
 <?php
-
 /*
  *
  *  ____            _        _   __  __ _                  __  __ ____  
@@ -18,9 +17,7 @@
  * 
  *
 */
-
 namespace pocketmine\entity;
-
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\item\Item as ItemItem;
@@ -37,33 +34,25 @@ use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\Player;
 use pocketmine\level\Level;
-
 class Human extends Creature implements ProjectileSource, InventoryHolder{
-
 	protected $nameTag = "TESTIFICATE";
 	/** @var PlayerInventory */
 	protected $inventory;
-
-
 	/** @var UUID */
 	protected $uuid;
 	protected $rawUUID;
-
 	public $width = 0.58;
 	public $length = 0.58;
 	public $height = 1.8;
 	public $eyeHeight = 1.62;
-
 	protected $skin;
 	protected $skinName = 'Standard_Custom';
 	protected $skinGeometryName = "geometry.humanoid.custom";
 	protected $skinGeometryData = "";
 	protected $capeData = "";
-
 	public function getSkinData(){
 		return $this->skin;
 	}
-
 	public function getSkinName(){
 		return $this->skinName;
 	}
@@ -79,21 +68,18 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	public function getCapeData(){
 		return $this->capeData;
 	}
-
 	/**
 	 * @return UUID|null
 	 */
 	public function getUniqueId(){
 		return $this->uuid;
 	}
-
 	/**
 	 * @return string
 	 */
 	public function getRawUniqueId(){
 		return $this->rawUUID;
 	}
-
 	/**
 	 * @param string $str
 	 * @param bool $skinName
@@ -111,7 +97,6 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			32768, // argb 128x64
 			65536, // argb 128x128
 		];
-
 		if (!in_array(strlen($str), $allowedSkinSize)) {
 			echo "Invalid skin size\n";
 			return false;
@@ -120,28 +105,24 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		if (is_string($skinName)) {
 			$this->skinName = $skinName;
 		}
-		if (!empty($skinGeometryName)) {
+		if (is_string($skinGeometryName)) {
 			$this->skinGeometryName = $skinGeometryName;
 		}
-		if (!empty($skinGeometryData)) {
+		if (is_string($skinGeometryData)) {
 			$this->skinGeometryData = $skinGeometryData;
 		}
-		if (!empty($capeData)) {
+		if (is_string($capeData)) {
 			$this->capeData = $capeData;
 		}
-
 		return true;
 	}
-
 	/**
 	 * @return PlayerInventory
 	 */
 	public function getInventory(){
 		return $this->inventory;
 	}
-
 	protected function initEntity(){
-
 		$this->setDataFlag(self::DATA_PLAYER_FLAGS, self::DATA_PLAYER_FLAG_SLEEP, false);
 		$this->setDataProperty(self::DATA_PLAYER_BED_POSITION, self::DATA_TYPE_POS, [0, 0, 0]);
 		
@@ -150,14 +131,11 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			if(isset($this->namedtag->NameTag)){
 				$this->setNameTag($this->namedtag["NameTag"]);
 			}
-
 			if(isset($this->namedtag->Skin) and $this->namedtag->Skin instanceof Compound){
 				$this->setSkin($this->namedtag->Skin["Data"], $this->namedtag->Skin["Slim"] > 0);
 			}
-
 			$this->uuid = UUID::fromData($this->getId(), $this->getSkinData(), $this->getNameTag());
 		}
-
 		if(isset($this->namedtag->Inventory) and $this->namedtag->Inventory instanceof Enum){
 			foreach($this->namedtag->Inventory as $item){
 				if($item["Slot"] >= 0 and $item["Slot"] < 9){ //Hotbar
@@ -169,14 +147,11 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 				}
 			}
 		}
-
 		parent::initEntity();
 	}
-
 	public function getName(){
 		return $this->getNameTag();
 	}
-
 	public function getDrops(){
 		$drops = [];
 		if($this->inventory !== null){
@@ -184,10 +159,8 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 				$drops[] = $item;
 			}
 		}
-
 		return $drops;
 	}
-
 	public function saveNBT() {
 		parent::saveNBT();
 		$this->namedtag->Inventory = new Enum("Inventory", []);
@@ -206,14 +179,12 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 				$this->namedtag->Inventory[$slot] = NBT::putItemHelper(ItemItem::get(ItemItem::AIR), $slot);
 				$this->namedtag->Inventory[$slot]->TrueSlot = new ByteTag("TrueSlot", -1);
 			}
-
 			//Normal inventory
 			$slotCount = Player::SURVIVAL_SLOTS + 9;
 			for($slot = 9; $slot < $slotCount; ++$slot){
 				$item = $this->inventory->getItem($slot - 9);
 				$this->namedtag->Inventory[$slot] = NBT::putItemHelper($item, $slot);
 			}
-
 			//Armor
 			for($slot = 100; $slot < 104; ++$slot){
 				$item = $this->inventory->getItem($this->inventory->getSize() + $slot - 100);
@@ -223,15 +194,12 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			}
 		}
 	}
-
 	public function spawnTo(Player $player){
 		if($player !== $this and !isset($this->hasSpawned[$player->getId()])  and isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])){
 			$this->hasSpawned[$player->getId()] = $player;
-
 			if(!($this instanceof Player)) {
 				$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, "", [$player]);
 			}
-
 			$pk = new AddPlayerPacket();
 			$pk->uuid = $this->getUniqueId();
 			$pk->username = $this->getName();
@@ -246,17 +214,17 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			$pk->pitch = $this->pitch;
 			$pk->item = $this->getInventory()->getItemInHand();
 			$pk->metadata = $this->dataProperties;
+			if ($this instanceof Player) {
+				$pk->buildPlatform = $this->getDeviceOS();
+			}
 			$player->dataPacket($pk);
-
 			$this->inventory->sendArmorContents($player);
 			$this->level->addPlayerHandItem($this, $player);
-
 			if(!($this instanceof Player)) {
 				$this->server->removePlayerListData($this->getUniqueId(), [$player]);
 			}
 		}
 	}
-
 	public function despawnFrom(Player $player){
 		if(isset($this->hasSpawned[$player->getId()])){
 			$pk = new RemoveEntityPacket();
@@ -265,7 +233,6 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			unset($this->hasSpawned[$player->getId()]);
 		}
 	}
-
 	public function close(){
 		if(!$this->closed){
 			if(!($this instanceof Player) or $this->loggedIn){
@@ -280,5 +247,4 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	public function isNeedSaveOnChunkUnload() {
 		return false;
 	}
-
 }
