@@ -1,5 +1,4 @@
 <?php
-
 /*
  *
  *  ____            _        _   __  __ _                  __  __ ____  
@@ -18,21 +17,16 @@
  * 
  *
 */
-
 namespace pocketmine\network\protocol;
-
 #include <rules/DataPacket.h>
-
 #ifndef COMPILE
 use pocketmine\utils\Binary;
 use pocketmine\entity\Entity;
-
+use pocketmine\Player;
 #endif
-
 class AddPlayerPacket extends PEPacket{
 	const NETWORK_ID = Info::ADD_PLAYER_PACKET;
 	const PACKET_NAME = "ADD_PLAYER_PACKET";
-
 	public $uuid;
 	public $username = "";
 	public $eid = 0;
@@ -52,11 +46,9 @@ class AddPlayerPacket extends PEPacket{
 	public $actionPermissions = AdventureSettingsPacket::ACTION_FLAG_DEFAULT_LEVEL_PERMISSIONS;
 	public $permissionLevel = AdventureSettingsPacket::PERMISSION_LEVEL_MEMBER;
 	public $storedCustomPermissions = 0;
-
+	public $buildPlatform = Player::OS_UNKNOWN;
 	public function decode($playerProtocol){
-
 	}
-
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putUUID($this->uuid);
@@ -86,7 +78,6 @@ class AddPlayerPacket extends PEPacket{
 		$this->putLFloat($this->yaw);//TODO headrot	
 		$this->putSignedVarInt(0);
 //		$this->putSlot($this->item, $playerProtocol);
-
 		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
 		$this->putVarInt($this->flags);
@@ -112,8 +103,7 @@ class AddPlayerPacket extends PEPacket{
 			$this->putString($this->uuid->toString());
 		}
 		if ($playerProtocol >= Info::PROTOCOL_385) {
-			$this->putLInt(7);
+			$this->putLInt($this->buildPlatform);
 		}
 	}
-
 }
