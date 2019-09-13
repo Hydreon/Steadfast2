@@ -164,6 +164,11 @@ class StartGamePacket extends PEPacket{
 			if ($playerProtocol >= Info::PROTOCOL_370) {
 				$this->putString(''); // Vanila version
 			}
+			if ($playerProtocol >= Info::PROTOCOL_386) {
+				$this->putByte(0); // unknown
+				$this->putByte(1); // unknown
+				$this->putLFloat(0); // unknown
+			}
 		}
 		// level settings end
 		$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
