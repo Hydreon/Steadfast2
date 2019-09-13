@@ -1602,54 +1602,54 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
             }
         }
     }
+	
+	protected static $foodData = [
+		Item::APPLE => ['food' => 4, 'saturation' => 2.4],
+		Item::BAKED_POTATO => ['food' => 5, 'saturation' => 6],
+		Item::BEETROOT => ['food' => 1, 'saturation' => 1.2],
+		Item::BEETROOT_SOUP => ['food' => 6, 'saturation' => 7.2],
+		Item::BREAD => ['food' => 5, 'saturation' => 6],
+		/** @todo cake slice and whole */
+		Item::CARROT => ['food' => 3, 'saturation' => 3.6],
+		Item::CHORUS_FRUIT => ['food' => 4, 'saturation' => 2.4],
+		Item::COOKED_CHICKEN => ['food' => 6, 'saturation' => 7.2],
+		Item::COOKED_FISH => ['food' => 5, 'saturation' => 6],
+		Item::COOKED_MUTTON => ['food' => 6, 'saturation' => 9.6],
+		Item::COOKED_PORKCHOP => ['food' => 8, 'saturation' => 12.8],
+		Item::COOKED_RABBIT => ['food' => 5, 'saturation' => 6],
+		Item::COOKED_SALMON => ['food' => 6, 'saturation' => 9.6],
+		Item::COOKIE => ['food' => 2, 'saturation' => 0.4],
+		Item::GOLDEN_APPLE => ['food' => 4, 'saturation' => 9.6],
+		Item::GOLDEN_CARROT => ['food' => 6, 'saturation' => 14.4],
+		Item::MELON => ['food' => 2, 'saturation' => 1.2],
+		Item::MUSHROOM_STEW => ['food' => 6, 'saturation' => 7.2],
+		Item::POISONOUS_POTATO => ['food' => 2, 'saturation' => 1.2],
+		Item::POTATO => ['food' => 1, 'saturation' => 0.6],
+		Item::PUMPKIN_PIE => ['food' => 8, 'saturation' => 4.8],
+		Item::RABBIT_STEW => ['food' => 10, 'saturation' => 12],
+		Item::RAW_BEEF => ['food' => 3, 'saturation' => 1.8],
+		Item::RAW_CHICKEN => ['food' => 2, 'saturation' => 1.2],
+		Item::RAW_FISH => [
+			0 => ['food' => 2, 'saturation' => 0.4], // raw fish
+			1 => ['food' => 2, 'saturation' => 0.4], // raw salmon
+			2 => ['food' => 1, 'saturation' => 0.2], // clownfish
+			3 => ['food' => 1, 'saturation' => 0.2], // pufferfish
+		],
+		Item::RAW_MUTTON => ['food' => 2, 'saturation' => 1.2],
+		Item::RAW_PORKCHOP => ['food' => 3, 'saturation' => 1.8],
+		Item::RAW_RABBIT => ['food' => 3, 'saturation' => 1.8],
+		Item::ROTTEN_FLESH => ['food' => 4, 'saturation' => 0.8],
+		Item::SPIDER_EYE => ['food' => 2, 'saturation' => 3.2],
+		Item::STEAK => ['food' => 8, 'saturation' => 12.8],
+	];
 
 	public function eatFoodInHand() {
 		if (!$this->spawned) {
 			return;
 		}
 
-		static $food = [
-			Item::APPLE => [ 'food' => 4, 'saturation' => 2.4 ],
-			Item::BAKED_POTATO => [ 'food' => 5, 'saturation' => 6 ],
-			Item::BEETROOT => [ 'food' => 1, 'saturation' => 1.2 ],
-			Item::BEETROOT_SOUP => [ 'food' => 6, 'saturation' => 7.2 ],
-			Item::BREAD => [ 'food' => 5, 'saturation' => 6 ],
-			/** @todo cake slice and whole */
-			Item::CARROT => [ 'food' => 3, 'saturation' => 3.6 ],
-			Item::CHORUS_FRUIT => [ 'food' => 4, 'saturation' => 2.4 ],
-			Item::COOKED_CHICKEN => [ 'food' => 6, 'saturation' => 7.2 ],
-			Item::COOKED_FISH => [ 'food' => 5, 'saturation' => 6 ],
-			Item::COOKED_MUTTON => [ 'food' => 6, 'saturation' => 9.6 ],
-			Item::COOKED_PORKCHOP => [ 'food' => 8, 'saturation' => 12.8 ],
-			Item::COOKED_RABBIT => [ 'food' => 5, 'saturation' => 6 ],
-			Item::COOKED_SALMON => [ 'food' => 6, 'saturation' => 9.6 ],
-			Item::COOKIE => [ 'food' => 2, 'saturation' => 0.4 ],
-			Item::GOLDEN_APPLE => [ 'food' => 4, 'saturation' => 9.6 ],
-			Item::GOLDEN_CARROT => [ 'food' => 6, 'saturation' => 14.4 ],
-			Item::MELON => [ 'food' => 2, 'saturation' => 1.2 ],
-			Item::MUSHROOM_STEW => [ 'food' => 6, 'saturation' => 7.2 ],
-			Item::POISONOUS_POTATO => [ 'food' => 2, 'saturation' => 1.2 ],
-			Item::POTATO => [ 'food' => 1, 'saturation' => 0.6 ],
-			Item::PUMPKIN_PIE => [ 'food' => 8, 'saturation' => 4.8 ],
-			Item::RABBIT_STEW => [ 'food' => 10, 'saturation' => 12 ],
-			Item::RAW_BEEF => [ 'food' => 3, 'saturation' => 1.8 ],
-			Item::RAW_CHICKEN => [ 'food' => 2, 'saturation' => 1.2 ],
-			Item::RAW_FISH => [
-				0 => [ 'food' => 2, 'saturation' => 0.4 ], // raw fish
-				1 => [ 'food' => 2, 'saturation' => 0.4 ], // raw salmon
-				2 => [ 'food' => 1, 'saturation' => 0.2 ], // clownfish
-				3 => [ 'food' => 1, 'saturation' => 0.2 ], // pufferfish
-			],
-			Item::RAW_MUTTON => [ 'food' => 2, 'saturation' => 1.2 ],
-			Item::RAW_PORKCHOP => [ 'food' => 3, 'saturation' => 1.8 ],
-			Item::RAW_RABBIT => [ 'food' => 3, 'saturation' => 1.8 ],
-			Item::ROTTEN_FLESH => [ 'food' => 4, 'saturation' => 0.8 ],
-			Item::SPIDER_EYE => [ 'food' => 2, 'saturation' => 3.2 ],
-			Item::STEAK => [ 'food' => 8, 'saturation' => 12.8 ],
-		];
-
 		$slot = $this->inventory->getItemInHand();
-		if (isset($food[$slot->getId()])) {
+		if (isset(self::$foodData[$slot->getId()])) {
 			$this->server->getPluginManager()->callEvent($ev = new PlayerItemConsumeEvent($this, $slot));
 			if ($ev->isCancelled()) {
 				$this->inventory->sendContents($this);
@@ -1669,7 +1669,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 			// get food data
 			$foodId = $slot->getId();
-			$foodData = $food[$foodId];
+			$foodData = self::$foodData[$foodId];
 			if (!isset($foodData['food'])) { // is food data is array by meta
 				$foodMeta = $slot->getDamage();
 				if (isset($foodData[$foodMeta])) {
@@ -2364,9 +2364,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 						switch ($packet->actionType) {
 							case InventoryTransactionPacket::ITEM_RELEASE_ACTION_RELEASE:
 								$this->releaseUseItem();
+								$this->startAction = -1;
 								break;
 							case InventoryTransactionPacket::ITEM_RELEASE_ACTION_USE:
 								$this->useItem120();
+								$this->startAction = -1;
 								break;
 							default:
 								error_log('[TRANSACTION_TYPE_ITEM_RELEASE] Wrong actionType ' . $packet->actionType);
@@ -3958,8 +3960,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					}
 					return;
 				}
-
-				if($itemInHand->getId() === Item::SNOWBALL || $itemInHand->getId() === Item::SPLASH_POTION || $itemInHand->getId() === Item::EGG || $itemInHand->getId() === Item::BOTTLE_ENCHANTING){
+				if (isset(self::$foodData[$itemInHand->getId()])) {
+					if ($this->getFood() >= self::FOOD_LEVEL_MAX) {
+						$this->startAction = -1;
+						return;
+					} elseif ($this->startAction > -1) {
+						$diff = ($this->server->getTick() - $this->startAction);
+						if ($diff > 20 && $diff < 100) {
+							$this->eatFoodInHand();
+						}
+						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
+						$this->startAction = -1;
+						return;
+					}
+				} elseif ($itemInHand->getId() === Item::SNOWBALL || $itemInHand->getId() === Item::SPLASH_POTION || $itemInHand->getId() === Item::EGG || $itemInHand->getId() === Item::BOTTLE_ENCHANTING) {
 					$yawRad = $this->yaw / 180 * M_PI;
 					$pitchRad = $this->pitch / 180 * M_PI;
 					$nbt = new Compound("", [
