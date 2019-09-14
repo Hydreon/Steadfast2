@@ -1,12 +1,8 @@
 <?php
-
 namespace pocketmine\utils;
-
 use pocketmine\entity\Entity;
 use pocketmine\network\protocol\Info;
-
 class MetadataConvertor {
-
 	private static $initialMeta = [];
 	
 	private static $diffEntityFlags120 = [
@@ -72,7 +68,6 @@ class MetadataConvertor {
 	private static $diffEntityMetaIds120 = [
 		'DATA_MAX_AIR' => 43,
 	];
-
 	private static $diffEntityMetaIds220 = [
 		'DATA_PLAYER_FLAGS' => 26,
 		'DATA_PLAYER_BED_POSITION' => 28,
@@ -147,11 +142,9 @@ class MetadataConvertor {
 	private static $entityMetaIds340 = [];
 	private static $entityMetaIds354 = [];
 	private static $entityMetaIds360 = [];
-
 	public static function init() {
 		$oClass = new \ReflectionClass('pocketmine\entity\Entity');
 		self::$initialMeta = $oClass->getConstants();
-
 		foreach (self::$diffEntityFlags120 as $key => $value) {
 			if (isset(self::$initialMeta[$key])) {
 				self::$entityFlags120[self::$initialMeta[$key]] = $value;
@@ -206,15 +199,14 @@ class MetadataConvertor {
 			}
 		}
 	}
-
 	public static function updateMeta($meta, $protocol) {
 		$meta = self::updateEntityFlags($meta, $protocol);
 		$meta = self::updateMetaIds($meta, $protocol);
 		return $meta;
 	}
-
 	private static function updateMetaIds($meta, $protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_386:
 			case Info::PROTOCOL_385:
 			case Info::PROTOCOL_370:
 			case Info::PROTOCOL_361:
@@ -266,12 +258,12 @@ class MetadataConvertor {
 		}
 		return $newMeta;
 	}
-
 	private static function updateEntityFlags($meta, $protocol) {
 		if (!isset($meta[Entity::DATA_FLAGS])) {
 			return $meta;
 		}
 		switch ($protocol) {
+			case Info::PROTOCOL_386:
 			case Info::PROTOCOL_385:
 			case Info::PROTOCOL_370:
 			case Info::PROTOCOL_361:
@@ -321,5 +313,4 @@ class MetadataConvertor {
 		$meta[Entity::DATA_FLAGS][1] = $newflags;
 		return $meta;
 	}
-
 }
