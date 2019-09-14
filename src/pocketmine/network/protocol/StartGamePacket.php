@@ -1,5 +1,4 @@
 <?php
-
 /*
  *
  *  ____            _        _   __  __ _                  __  __ ____  
@@ -18,11 +17,8 @@
  * 
  *
 */
-
 namespace pocketmine\network\protocol;
-
 #include <rules/DataPacket.h>
-
 class StartGamePacket extends PEPacket{
 	const NETWORK_ID = Info::START_GAME_PACKET;
 	const PACKET_NAME = "START_GAME_PACKET";
@@ -32,7 +28,6 @@ class StartGamePacket extends PEPacket{
 	const BROADCAST_SETTINGS_FRIENDS_ONLY = 2;
 	const BROADCAST_SETTINGS_FRIENDS_OF_FRIENDS = 3;
 	const BROADCAST_SETTINGS_PUBLIC = 4;
-
 	public $seed;
 	public $dimension;
 	public $generator = 1;
@@ -50,11 +45,8 @@ class StartGamePacket extends PEPacket{
 //		['name' => 'showcoordinates', 'type' => 1, 'value' => 1]
 	];
 	public $multiplayerCorrelationId;
-
 	public function decode($playerProtocol){
-
 	}
-
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->eid); //EntityUniqueID
@@ -83,7 +75,6 @@ class StartGamePacket extends PEPacket{
 		$this->putSignedVarInt($this->spawnX);
 		$this->putVarInt($this->spawnY);
 		$this->putSignedVarInt($this->spawnZ);
-
 		$this->putByte(1); // hasAchievementsDisabled
 		
 		$this->putSignedVarInt(0); // DayCycleStopTyme 1x VarInt
@@ -93,11 +84,8 @@ class StartGamePacket extends PEPacket{
 		if ($playerProtocol >= Info::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
 			$this->putByte(0); // Are education features enabled?
 		}
-
 		$this->putLFloat(0); //rain level
-
 		$this->putLFloat(0); //lightning level
-
 		if ($playerProtocol >= Info::PROTOCOL_332) {
 			$this->putByte(0); // ???
 		}
@@ -131,7 +119,6 @@ class StartGamePacket extends PEPacket{
 					break;
 			}	
 		}
-
 		$this->putByte(0); // is bonus chest enabled
 		$this->putByte(0); // is start with map enabled
 		if ($playerProtocol < Info::PROTOCOL_330) {
@@ -164,6 +151,11 @@ class StartGamePacket extends PEPacket{
 			if ($playerProtocol >= Info::PROTOCOL_370) {
 				$this->putString(''); // Vanila version
 			}
+			if ($playerProtocol >= Info::PROTOCOL_386) {
+				$this->putByte(0); // unknown
+				$this->putByte(1); // unknown
+				$this->putLFloat(0); // unknown
+			}
 		}
 		// level settings end
 		$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
@@ -172,7 +164,6 @@ class StartGamePacket extends PEPacket{
 		$this->putByte(0); // is trial?
 		$this->putLong(0); // current level time
 		$this->putSignedVarInt(0); // enchantment seed
-
 		if ($playerProtocol >= Info::PROTOCOL_280) {
 			$this->put(self::getBlockPalletData($playerProtocol));
 		}
@@ -183,5 +174,4 @@ class StartGamePacket extends PEPacket{
 			$this->putString($this->multiplayerCorrelationId);
 		}
 	}
-
 }
