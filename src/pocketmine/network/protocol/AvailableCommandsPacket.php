@@ -1,5 +1,4 @@
 <?php
-
 /*
  *
  *  ____            _        _   __  __ _                  __  __ ____  
@@ -18,13 +17,10 @@
  * 
  *
  */
-
 namespace pocketmine\network\protocol;
-
 use pocketmine\network\multiversion\MultiversionEnums;
 use pocketmine\network\protocol\Info;
 use pocketmine\utils\BinaryStream;
-
 class AvailableCommandsPacket extends PEPacket{
 	const NETWORK_ID = Info::AVAILABLE_COMMANDS_PACKET;
 	const PACKET_NAME = "AVAILABLE_COMMANDS_PACKET";
@@ -82,6 +78,7 @@ class AvailableCommandsPacket extends PEPacket{
 			Info::PROTOCOL_361 => new BinaryStream(),
 			Info::PROTOCOL_370 => new BinaryStream(),
 			Info::PROTOCOL_385 => new BinaryStream(),
+			Info::PROTOCOL_386 => new BinaryStream(),
 		];
 		
 		foreach ($commands as $commandName => &$commandData) { // Replace &$commandData with $commandData when alises fix for 1.2 won't be needed anymore
