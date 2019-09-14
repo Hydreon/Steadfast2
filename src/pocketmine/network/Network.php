@@ -1,5 +1,4 @@
 <?php
-
 /*
  *
  *  ____            _        _   __  __ _                  __  __ ____
@@ -18,12 +17,10 @@
  *
  *
 */
-
 /**
  * Network-related classes
  */
 namespace pocketmine\network;
-
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\network\protocol\AddItemEntityPacket;
 use pocketmine\network\protocol\AddPaintingPacket;
@@ -99,7 +96,6 @@ use pocketmine\network\protocol\PlayerInputPacket;
 use pocketmine\network\protocol\v310\AvailableEntityIdentifiersPacket;
 use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
 use pocketmine\network\protocol\v310\SpawnParticleEffectPacket;
-
 class Network {	
 	
 	public static $BATCH_THRESHOLD = 512;
@@ -110,57 +106,44 @@ class Network {
 	private $packetPool310;
 	/** @var \SplFixedArray */
 	private $packetPool331;
-
 	/** @var Server */
 	private $server;
-
 	/** @var SourceInterface[] */
 	private $interfaces = [];
-
 	/** @var AdvancedSourceInterface[] */
 	private $advancedInterfaces = [];
-
 	private $upload = 0;
 	private $download = 0;
-
 	private $name;
-
 	public function __construct(Server $server){
 		$this->registerPackets120();
 		$this->registerPackets310();
 		$this->registerPackets331();
 		$this->server = $server;
 	}
-
 	public function addStatistics($upload, $download){
 		$this->upload += $upload;
 		$this->download += $download;
 	}
-
 	public function getUpload(){
 		return $this->upload;
 	}
-
 	public function getDownload(){
 		return $this->download;
 	}
-
 	public function resetStatistics(){
 		$this->upload = 0;
 		$this->download = 0;
 	}
-
 	/**
 	 * @return SourceInterface[]
 	 */
 	public function getInterfaces(){
 		return $this->interfaces;
 	}
-
 	public function setCount($count, $maxcount = 31360) {
 		$this->server->mainInterface->setCount($count, $maxcount);
 	}
-
 	public function processInterfaces() {
 		foreach($this->interfaces as $interface) {
 			try {
@@ -172,14 +155,12 @@ class Network {
 						$logger->logException($e);
 					}
 				}
-
 				$interface->emergencyShutdown();
 				$this->unregisterInterface($interface);
 				$logger->critical("Network error: ".$e->getMessage());
 			}
 		}
 	}
-
 	/**
 	 * @param SourceInterface $interface
 	 */
@@ -191,14 +172,12 @@ class Network {
 		}
 		$interface->setName($this->name);
 	}
-
 	/**
 	 * @param SourceInterface $interface
 	 */
 	public function unregisterInterface(SourceInterface $interface) {
 		unset($this->interfaces[$hash = spl_object_hash($interface)], $this->advancedInterfaces[$hash]);
 	}
-
 	/**
 	 * Sets the server name shown on each interface Query
 	 *
@@ -210,11 +189,9 @@ class Network {
 			$interface->setName($this->name);
 		}
 	}
-
 	public function getName(){
 		return $this->name;
 	}
-
 	public function updateName() {
 		foreach($this->interfaces as $interface) {
 			$interface->setName($this->name);
@@ -248,7 +225,6 @@ class Network {
 	public function getServer(){
 		return $this->server;
 	}
-
 	/**
 	 * @param $id
 	 *
@@ -268,6 +244,7 @@ class Network {
 			case Info::PROTOCOL_361:
 			case Info::PROTOCOL_370:
 			case Info::PROTOCOL_385:
+			case Info::PROTOCOL_386:
 				$class = $this->packetPool331[$id];
 				break;
 			case Info::PROTOCOL_310:
@@ -287,6 +264,7 @@ class Network {
 	
 	public static function getChunkPacketProtocol($playerProtocol){
 		switch ($playerProtocol) {
+			case Info::PROTOCOL_386:
 			case Info::PROTOCOL_385:
 			case Info::PROTOCOL_370:
 			case Info::PROTOCOL_361:
@@ -321,7 +299,6 @@ class Network {
 			$interface->sendRawPacket($address, $port, $payload);
 		}
 	}
-
 	/**
 	 * Blocks an IP address from the main interface. Setting timeout to -1 will block it forever
 	 *
@@ -470,7 +447,6 @@ class Network {
 		$this->registerPacket310(ProtocolInfo310::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET, NetworkChunkPublisherUpdatePacket::class);	
 		$this->registerPacket310(ProtocolInfo310::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
 		$this->registerPacket310(ProtocolInfo310::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
-
 	}
 	
 	private function registerPackets331() {
