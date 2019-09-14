@@ -1,11 +1,8 @@
 <?php
-
 namespace pocketmine\network\protocol;
-
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\Info;
 use pocketmine\network\multiversion\BlockPallet;
-
 abstract class PEPacket extends DataPacket {
 	
 	const CLIENT_ID_MAIN_PLAYER = 0;
@@ -14,11 +11,8 @@ abstract class PEPacket extends DataPacket {
 	public $senderSubClientID = self::CLIENT_ID_SERVER;
 	
 	public $targetSubClientID = self::CLIENT_ID_MAIN_PLAYER;
-
 	abstract public function encode($playerProtocol);
-
 	abstract public function decode($playerProtocol);
-
 	/**
 	 * !IMPORTANT! Should be called at first line in decode
 	 * @param integer $playerProtocol
@@ -38,7 +32,6 @@ abstract class PEPacket extends DataPacket {
 			}
 		}
 	}
-
 	/**
 	 * !IMPORTANT! Should be called at first line in encode
 	 * @param integer $playerProtocol
@@ -59,6 +52,8 @@ abstract class PEPacket extends DataPacket {
 	
 	public final static function convertProtocol($protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_386:
+				return Info::PROTOCOL_386;
 			case Info::PROTOCOL_385:
 				return Info::PROTOCOL_385;
 			case Info::PROTOCOL_371:
@@ -162,5 +157,4 @@ abstract class PEPacket extends DataPacket {
 		}
 		return null;
 	}
-
 }
