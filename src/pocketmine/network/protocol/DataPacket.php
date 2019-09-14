@@ -1,5 +1,4 @@
 <?php
-
 /*
  *
  *  ____            _        _   __  __ _                  __  __ ____  
@@ -18,30 +17,19 @@
  * 
  *
 */
-
 namespace pocketmine\network\protocol;
-
 #include <rules/DataPacket.h>
-
 #ifndef COMPILE
-
 #endif
-
-
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\Utils;
-
-
 abstract class DataPacket extends BinaryStream{
-
 	const NETWORK_ID = 0;
 	const PACKET_NAME = "";
-
 	public $isEncoded = false;
 	private $channel = 0;
 	
 	protected static $packetsIds = [];
-
 	public function pid(){
 		return $this::NETWORK_ID;
 	}
@@ -57,17 +45,14 @@ abstract class DataPacket extends BinaryStream{
 		$this->channel = (int) $channel;
 		return $this;
 	}
-
 	public function getChannel(){
 		return $this->channel;
 	}
-
 	public function clean(){
 		$this->reset();
 		$this->isEncoded = false;
 		return $this;
 	}
-
 	public function __debugInfo(){
 		$data = [];
 		foreach($this as $k => $v){
@@ -79,7 +64,6 @@ abstract class DataPacket extends BinaryStream{
 				$data[$k] = $v;
 			}
 		}
-
 		return $data;
 	}
 	
@@ -113,6 +97,7 @@ abstract class DataPacket extends BinaryStream{
 		self::$packetsIds[Info::PROTOCOL_361] = $oClass->getConstants();
 		self::$packetsIds[Info::PROTOCOL_370] = $oClass->getConstants();
 		self::$packetsIds[Info::PROTOCOL_385] = $oClass->getConstants();
+		self::$packetsIds[Info::PROTOCOL_386] = $oClass->getConstants();
 	}
 	
 }
