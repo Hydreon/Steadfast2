@@ -36,6 +36,8 @@ class ExperienceOrb extends Entity {
 	protected $angle;
 	protected $initialFinished = false;
 	protected $initialY;
+	protected $minExp = 3;
+	protected $maxExp = 11;
 
 	public function __construct(FullChunk $chunk, Compound $nbt) {
 		parent::__construct($chunk, $nbt);
@@ -101,7 +103,7 @@ class ExperienceOrb extends Entity {
 			}
 			if (!is_null($nearestPlayer)) {
 				if ($minDistanceSquare < 1.44) {
-					$nearestPlayer->addExperience(mt_rand(3, 11));
+					$nearestPlayer->addExperience(mt_rand($this->minExp, $this->maxExp));
 					$this->close();
 				} elseif ($minDistanceSquare < 64) {
 					$distanse = sqrt($minDistanceSquare);
@@ -124,6 +126,11 @@ class ExperienceOrb extends Entity {
 		$this->boundingBox->offset($dx, $dy, $dz);
 		$this->checkChunks();
 		$this->level->addEntityMovement($this->getViewers(), $this->id, $this->x, $this->y, $this->z, 0, 0);
+	}
+	
+	public function setExpInterval($minExp, $maxExp) {
+		$this->minExp = $minExp;
+		$this->maxExp = $maxExp;
 	}
 
 }
