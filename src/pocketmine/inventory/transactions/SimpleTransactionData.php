@@ -171,6 +171,9 @@ class SimpleTransactionData {
 				break;
 			
 		}
+		if (is_null($inventory)) {
+			return null;
+		}
 		return new BaseTransaction($inventory, $slot, $this->oldItem, $this->newItem);
 	}
 	
