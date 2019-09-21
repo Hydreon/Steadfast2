@@ -134,6 +134,8 @@ abstract class RakLib{
 	const PACKET_PING = 0x0a;
 	
 	const PACKET_ENABLE_ENCRYPT = 0x0b;
+	
+	const PACKET_KICK = 0x0c;
 
     /*
      * No payload
