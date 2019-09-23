@@ -218,13 +218,18 @@ class SessionManager{
 			$length = strlen($decoded);
 			static $spamPacket = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 			static $spamPacket2 = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+			$count = 0;
 			while ($stream->getOffset() < $length) {
+				$count++;
 				$buf = $stream->getString();
 				if (empty($buf) || $buf == $spamPacket || $buf == $spamPacket2) {
 					continue;
 				}
 				$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buf;
 				$this->server->pushThreadToMainPacket($buffer);
+			}
+			if ($count > 100) {				
+				$this->streamKick($session, "Hack mods are not permitted.");
 			}
 		}
     }
@@ -235,8 +240,14 @@ class SessionManager{
         $buffer = chr(RakLib::PACKET_PING) . chr(strlen($id)) . $id .  chr(strlen($ping)) . $ping;
         $this->server->pushThreadToMainPacket($buffer);
     }
+	
+	public function streamKick(Session $session, $reason) {
+		$id = $session->getAddress() . ":" . $session->getPort();
+		$buffer = chr(RakLib::PACKET_KICK) . chr(strlen($id)) . $id . chr(strlen($reason)) . $reason;
+		$this->server->pushThreadToMainPacket($buffer);
+	}
 
-    public function streamRaw($address, $port, $payload){
+	public function streamRaw($address, $port, $payload){
         $buffer = chr(RakLib::PACKET_RAW) . chr(strlen($address)) . $address . Binary::writeShort($port) . $payload;
         $this->server->pushThreadToMainPacket($buffer);
     }
