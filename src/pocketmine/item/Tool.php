@@ -166,6 +166,11 @@ abstract class Tool extends Item {
 	}
 	
 	public function setCompound($tags) {
+		if($tags instantof Compound){
+			if (isset($tags['Damage'])) {
+				$this->meta = $tags['Damage'];
+			}
+		}
 		parent::setCompound($tags);
 		$this->checkDamage();
 		return $this;
