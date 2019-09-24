@@ -1,8 +1,11 @@
 <?php
+
 namespace pocketmine\network\protocol;
+
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\Info;
 use pocketmine\network\multiversion\BlockPallet;
+
 abstract class PEPacket extends DataPacket {
 	
 	const CLIENT_ID_MAIN_PLAYER = 0;
@@ -158,4 +161,5 @@ abstract class PEPacket extends DataPacket {
 		}
 		return null;
 	}
+	
 }
