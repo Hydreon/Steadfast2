@@ -219,16 +219,18 @@ class SessionManager{
 			static $spamPacket = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 			static $spamPacket2 = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 			$count = 0;
-			while ($stream->getOffset() < $length) {
-				$count++;
+			while ($stream->getOffset() < $length) {				
 				$buf = $stream->getString();
 				if (empty($buf) || $buf == $spamPacket || $buf == $spamPacket2) {
 					continue;
 				}
+				if (ord($buf{0}) != 0x21) {
+					$count++;
+				}
 				$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buf;
 				$this->server->pushThreadToMainPacket($buffer);
 			}
-			if ($count > 200) {				
+			if ($count > 100) {				
 				$this->streamKick($session, "Hack mods are not permitted.");
 			}
 		}
