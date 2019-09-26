@@ -228,7 +228,7 @@ class SessionManager{
 				$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buf;
 				$this->server->pushThreadToMainPacket($buffer);
 			}
-			if ($count > 100) {				
+			if ($count > 200) {				
 				$this->streamKick($session, "Hack mods are not permitted.");
 			}
 		}
