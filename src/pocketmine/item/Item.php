@@ -1333,6 +1333,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::ANVIL, 0));
 		self::addCreativeItem(Item::get(Item::ANVIL, 4));
 		self::addCreativeItem(Item::get(Item::ANVIL, 8));
+		self::addCreativeItem(Item::get(Item::ENCHANT_TABLE, 0));
 		self::addCreativeItem(Item::get(Item::BOOKSHELF, 0));
 		self::addCreativeItem(Item::get(Item::CHEST, 0));
 		self::addCreativeItem(Item::get(Item::ENDER_CHEST, 0));

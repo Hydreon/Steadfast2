@@ -164,7 +164,7 @@ class StartGamePacket extends PEPacket{
 			if ($playerProtocol >= Info::PROTOCOL_370) {
 				$this->putString(''); // Vanila version
 			}
-			if ($playerProtocol >= Info::PROTOCOL_386) {
+			if ($playerProtocol == Info::PROTOCOL_386) {
 				$this->putByte(0); // unknown
 				$this->putByte(1); // unknown
 				$this->putLFloat(0); // unknown
@@ -175,6 +175,9 @@ class StartGamePacket extends PEPacket{
 		$this->putString(''); // level name
 		$this->putString(''); // template pack id
 		$this->putByte(0); // is trial?
+		if ($playerProtocol >= Info::PROTOCOL_389) {
+			$this->putByte(0); // is server authoritative over movement
+		}
 		$this->putLong(0); // current level time
 		$this->putSignedVarInt(0); // enchantment seed
 
