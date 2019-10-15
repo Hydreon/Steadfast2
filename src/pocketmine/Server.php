@@ -2596,4 +2596,8 @@ class Server{
 	public function getServerToken() {	
 		return $this->serverToken;
 	}
+	
+	public function addLevel($level) {
+		$this->levels[$level->getId()] = $level;
+	}
 }
