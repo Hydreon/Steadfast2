@@ -291,7 +291,7 @@ class Level implements ChunkManager, Metadatable{
 	 */
 	public function __construct(Server $server, $name, $path, $provider){
 		$this->blockStates = Block::$fullList;
-		$this->levelId = static::$levelIdCounter++;
+		$this->levelId = self::$levelIdCounter++;
 		$this->blockMetadata = new BlockMetadataStore($this);
 		$this->server = $server;
 		$this->autoSave = $server->getAutoSave();

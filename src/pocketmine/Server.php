@@ -2645,4 +2645,8 @@ class Server{
 	public function getProxyServer() {
 		return $this->proxyServer;
 	}
+	
+	public function addLevel($level) {
+		$this->levels[$level->getId()] = $level;
+	}
 }
