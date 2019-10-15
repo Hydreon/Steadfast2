@@ -1738,14 +1738,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
                 break;
             case 'ADVENTURE_SETTINGS_PACKET':
 				if ($this->allowFlight === false && (($packet->flags >> 9) & 0x01 === 1)) { // flying hack
-                    file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " ADVENTURE_SETTINGS_PACKET FLY" . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
+                    file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " ADVENTURE_SETTINGS_PACKET FLY " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
 //                    $this->kick("Sorry, hack mods are not permitted on Steadfast... at all.");
 					// it may be not safe
-					$this->setAllowFlight(false);
+					$this->sendSettings();
                 }
 				if (!$this->isSpectator() && (($packet->flags >> 7) & 0x01 === 1)) { // spectator hack
-                    file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " ADVENTURE_SETTINGS_PACKET SPC" . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
-                    $this->kick("Sorry, hack mods are not permitted on Steadfast... at all.");
+                    file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " ADVENTURE_SETTINGS_PACKET SPC " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
+//                    $this->kick("Sorry, hack mods are not permitted on Steadfast... at all.");
+					$this->sendSettings();
                 }
 				$isFlying = ($packet->flags >> 9) & 0x01 === 1;
 				if ($this->isFlying != $isFlying) {
