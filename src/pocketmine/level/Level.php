@@ -163,7 +163,7 @@ class Level implements ChunkManager, Metadatable{
 	private $folderName;
 
 	/** @var FullChunk[]|Chunk[] */
-	private $chunks = [];
+	protected $chunks = [];
 
 	/** @var Block[][] */
 	protected $changedBlocks = [];
@@ -681,7 +681,7 @@ class Level implements ChunkManager, Metadatable{
 		$this->blockCache = [];
 	}
 
-	private function tickChunks(){
+	protected function tickChunks(){
 		if($this->chunksPerTick <= 0 or count($this->players) === 0){
 			$this->chunkTickList = [];
 			return;
