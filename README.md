@@ -1,5 +1,4 @@
-#  <img src="https://lbsg.net/wp-content/themes/lifeboat/images/lbsg-logo-sm.png" alt="LBSG logo" title="Aimeos" align="center" height="120" />
-# Steadfast2 Minecraft PE Server Software
+# Steadfast3 Minecraft PE Server Software
 
 ## Introduction
 
