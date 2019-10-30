@@ -78,7 +78,7 @@ class PlayerSkinPacket extends PEPacket {
 				$this->putString($this->newCapeByteData);
 			}
 			$this->putString($this->newSkinGeometryName);
-			$this->putString($this->newSkinGeometryData);
+			$this->putString($this->prepareGeometryDataForOld($this->newSkinGeometryData));
 			if ($playerProtocol >= Info::PROTOCOL_260) {
 				$this->putByte($this->isPremiumSkin);
 			}

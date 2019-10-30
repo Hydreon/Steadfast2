@@ -1826,7 +1826,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				}
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
-				$this->checkSkinGeometry($packet->skinGeometryName, $packet->skinGeometryData);
+				$this->checkSkinGeometry($packet->skinGeometryName, $packet->additionalSkinData);
 				$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData, $packet->premiunSkin);
                 if ($packet->osType > 0) {
                     $this->deviceType = $packet->osType;
@@ -5007,7 +5007,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		$this->rawUUID = $this->uuid->toBinary();
 		$this->clientSecret = $packet->clientSecret;
 		$this->protocol = $parent->getPlayerProtocol();
-		$this->checkSkinGeometry($packet->skinGeometryName, $packet->skinGeometryData);
 		$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData, $packet->premiumSkin);
 		$this->subClientId = $packet->targetSubClientID;
 
@@ -5284,24 +5283,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 	}
 	
-	protected function checkSkinGeometry(&$skinGeometryName, $skinGeometryData) {
-		if (empty($skinGeometryName) && !empty($skinGeometryData)) {
-			if (($jsonSkinData = @json_decode($skinGeometryData, true))) {
-				if (isset($jsonSkinData["minecraft:geometry"])) {
-					foreach ($jsonSkinData["minecraft:geometry"] as $val) {
-						if (isset($val["description"]["identifier"])) {
-							$skinGeometryName = $val["description"]["identifier"];
-							break;
-						}
-					}
-				} else {
-					foreach ($jsonSkinData as $key => $val) {
-						if (stripos($key, 'geometry') === 0) {
-							$skinGeometryName = $key;
-							break;
-						}
-					}
-				}
+	protected function checkSkinGeometry(&$skinGeometryName, $additionalSkinData) {
+		if (empty($skinGeometryName) && !empty($additionalSkinData['SkinResourcePatch'])) {
+			if (($jsonSkinData = @json_decode($additionalSkinData['SkinResourcePatch'], true)) && isset($jsonSkinData['geometry']['default'])) {
+				$skinGeometryName = $jsonSkinData['geometry']['default'];
 			}
 		}
 	}
