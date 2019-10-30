@@ -3390,7 +3390,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$this->uuid = $packet->clientUUID;
 			$this->rawUUID = $this->uuid->toBinary();
 			$this->clientSecret = $packet->clientSecret;	
-			$this->checkSkinGeometry($packet->skinGeometryName, $packet->skinGeometryData);
+			$this->checkSkinGeometry($packet->skinGeometryName, $packet->additionalSkinData);
 			$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData, $packet->premiunSkin);
 			if ($packet->viewRadius > 12) {
 				$packet->viewRadius = 12;
