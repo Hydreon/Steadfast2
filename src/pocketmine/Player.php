@@ -1827,6 +1827,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				}
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
+				$this->checkSkinGeometry($packet->skinGeometryName, $packet->additionalSkinData);
 				$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData, $packet->premiunSkin);
                 if ($packet->osType > 0) {
                     $this->deviceType = $packet->osType;
@@ -3424,7 +3425,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$this->loginData = ["clientId" => $packet->clientId, "loginData" => null];
 			$this->uuid = $packet->clientUUID;
 			$this->rawUUID = $this->uuid->toBinary();
-			$this->clientSecret = $packet->clientSecret;			
+			$this->clientSecret = $packet->clientSecret;	
+			$this->checkSkinGeometry($packet->skinGeometryName, $packet->additionalSkinData);
 			$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData, $packet->premiunSkin);
 			if ($packet->viewRadius > 12) {
 				$packet->viewRadius = 12;
@@ -5404,4 +5406,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			parent::updateFallState($distanceThisTick, $onGround);
 		}
 	}
+	
+	protected function checkSkinGeometry(&$skinGeometryName, $additionalSkinData) {
+		if (empty($skinGeometryName) && !empty($additionalSkinData['SkinResourcePatch'])) {
+			if (($jsonSkinData = @json_decode($additionalSkinData['SkinResourcePatch'], true)) && isset($jsonSkinData['geometry']['default'])) {
+				$skinGeometryName = $jsonSkinData['geometry']['default'];
+			}
+		}
+	}
+
 }
