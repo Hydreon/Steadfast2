@@ -109,7 +109,7 @@ class PlayerListPacket extends PEPacket{
 							}
 						}
 						$this->putString(isset($d[6]) ? $d[6] : ''); // Skin Geometry Name
-						$this->putString(isset($d[7]) ? $d[7] : ''); // Skin Geometry Data
+						$this->putString(isset($d[7]) ? $this->prepareGeometryDataForOld($d[7]) : ''); // Skin Geometry Data
 					}
 					$this->putString(isset($d[8]) ? $d[8] : ''); // XUID
 					if ($playerProtocol >= Info::PROTOCOL_200) {
