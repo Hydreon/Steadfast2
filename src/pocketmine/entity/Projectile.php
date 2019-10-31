@@ -166,7 +166,7 @@ abstract class Projectile extends Entity {
 			if ($nearBlock !== null && $nearBlockDistance < 0.3) {
 				$this->server->getPluginManager()->callEvent(new ProjectileHitEvent($this));
 
-				if($this instanceof Arrow){
+				if(($this->shootingEntity instanceof Player) && ($this instanceof Arrow)){
                     $this->motionX = 0;
                     $this->motionY = 0;
                     $this->motionZ = 0;
