@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Steadfast2 is a project for backporting new Minecraft: Pocket Edition changes to older Pocketmine versions for better stability and performance, while retaining as many features from the new PocketMine-MP versions as possible.
+Steadfast3 is a project for backporting new Minecraft: Pocket Edition changes to older Pocketmine versions for better stability and performance, while retaining as many features from the new PocketMine-MP versions as possible.
 
 ## Todo-List
 
