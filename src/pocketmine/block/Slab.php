@@ -26,7 +26,7 @@ use pocketmine\item\Tool;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
 
-class Slab extends Transparent{
+class Slab extends Solid{
 
 	const STONE = 0;
 	const SANDSTONE = 1;

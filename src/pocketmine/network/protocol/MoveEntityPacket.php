@@ -32,14 +32,35 @@ class MoveEntityPacket extends PEPacket{
 	// eid, x, y, z, yaw, pitch
 	/** @var array[] */
 	public $entities = [];
-
+	public $eid;
+	public $x;
+	public $y;
+	public $z;
+	public $pitch;
+	public $yaw;
+	public $headYaw;
+	
 	public function clean(){
 		$this->entities = [];
 		return parent::clean();
 	}
 
 	public function decode($playerProtocol){
-
+		$this->getHeader($playerProtocol);
+		$this->eid = $this->getVarInt();
+		if ($playerProtocol >= Info::PROTOCOL_273) {
+			if ($playerProtocol >= Info::PROTOCOL_274) {
+				$this->getByte();
+			} else {
+				$this->getLShort();
+			}
+		} 		
+		$this->x = $this->getLFloat();
+		$this->y = $this->getLFloat();
+		$this->z = $this->getLFloat();
+		$this->pitch = $this->getByte() * 1.40625;
+		$this->headYaw = $this->getByte() * 1.40625;
+		$this->yaw = $this->getByte() * 1.40625;
 	}
 
 	public function encode($playerProtocol){

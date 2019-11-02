@@ -81,7 +81,7 @@ class MainLogger extends \AttachableThreadedLogger{
 	}
 
 	public function info($message){
-		$this->send($message, \LogLevel::INFO, "INFO", TextFormat::WHITE);
+		$this->send($message, \LogLevel::INFO, "INFO", TextFormat::AQUA);
 	}
 
 	public function debug($message){
@@ -186,7 +186,7 @@ class MainLogger extends \AttachableThreadedLogger{
 			$threadName = (new \ReflectionClass($thread))->getShortName() . " thread";
 		}
 
-		$message = TextFormat::toANSI(TextFormat::AQUA . "[" . date("H:i:s", $now) . "] ". TextFormat::RESET . $color ."[" . $threadName . "/" . $prefix . "]:" . " " . $message . TextFormat::RESET);
+		$message = TextFormat::toANSI(TextFormat::GOLD . "[" . date("H:i:s", $now) . "] ". TextFormat::RESET . TextFormat::GREEN ."[" . $threadName . "/" . $prefix . "]:" . TextFormat::RESET . $color . " " . $message . TextFormat::RESET);
 		$cleanMessage = TextFormat::clean($message);
 
 		if(!Terminal::hasFormattingCodes()){

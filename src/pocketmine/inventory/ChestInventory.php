@@ -21,13 +21,15 @@
 
 namespace pocketmine\inventory;
 
+use pocketmine\block\Block;
+use pocketmine\item\Item;
 use pocketmine\level\Level;
-use pocketmine\network\Network;
+use pocketmine\math\Vector3;
+use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\network\protocol\TileEventPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\tile\Chest;
-use pocketmine\network\protocol\LevelSoundEventPacket;
 
 class ChestInventory extends ContainerInventory {
 
@@ -75,6 +77,35 @@ class ChestInventory extends ContainerInventory {
 		parent::onClose($who);
 		$position = [ 'x' => $this->holder->x, 'y' => $this->holder->y, 'z' => $this->holder->z ];
  		$who->sendSound(LevelSoundEventPacket::SOUND_CHEST_CLOSED, $position);
+	}
+	
+	public function setItem($index, Item $item, $needCheckComporator = true) {		
+		if (parent::setItem($index, $item)) {	
+			if ($needCheckComporator) {
+				if (!is_null($this->holder->level)) {
+					$isShouldUpdateBlock = $item->getId() != Item::AIR && !$item->equals($this->getItem($index));
+					if ($isShouldUpdateBlock) {
+						$this->holder->getBlock()->onUpdate(Level::BLOCK_UPDATE_WEAK, 0);
+					}			
+					static $offsets = [
+						[1, 0, 0],
+						[-1, 0, 0],
+						[0, 0, -1],
+						[0, 0, 1],
+					];
+					$tmpVector = new Vector3(0, 0, 0);
+					foreach ($offsets as $offset) {
+						$tmpVector->setComponents($this->holder->x + $offset[0], $this->holder->y, $this->holder->z + $offset[2]);
+						if ($this->holder->level->getBlockIdAt($tmpVector->x, $tmpVector->y, $tmpVector->z) == Block::REDSTONE_COMPARATOR_BLOCK) {
+							$comparator = $this->holder->level->getBlock($tmpVector);
+							$comparator->onUpdate(Level::BLOCK_UPDATE_NORMAL,  0);
+						}
+					}
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
 }

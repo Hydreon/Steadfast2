@@ -46,6 +46,9 @@ use pocketmine\entity\Snowball;
 use pocketmine\entity\Egg;
 use pocketmine\entity\Squid;
 use pocketmine\entity\Villager;
+use pocketmine\entity\Minecart;
+use pocketmine\entity\Boat;
+use pocketmine\entity\FishingHook;
 use pocketmine\event\HandlerList;
 use pocketmine\event\level\LevelInitEvent;
 use pocketmine\event\level\LevelLoadEvent;
@@ -102,13 +105,17 @@ use pocketmine\scheduler\ServerScheduler;
 use pocketmine\tile\Bed;
 use pocketmine\tile\Cauldron;
 use pocketmine\tile\Chest;
+use pocketmine\tile\Dispenser;
+use pocketmine\tile\Dropper;
+use pocketmine\tile\Hopper;
 use pocketmine\tile\EnchantTable;
 use pocketmine\tile\EnderChest;
+use pocketmine\tile\FlowerPot;
 use pocketmine\tile\Furnace;
+use pocketmine\tile\PistonArm;
 use pocketmine\tile\ItemFrame;
 use pocketmine\tile\Sign;
 use pocketmine\tile\Skull;
-use pocketmine\tile\FlowerPot;
 use pocketmine\tile\Tile;
 use pocketmine\utils\Binary;
 use pocketmine\utils\Cache;
@@ -279,7 +286,6 @@ class Server{
 	private $useMonster ;
 	private $monsterLimit;
 		
-
 	public $packetMaker = null;
 	
 	private $jsonCommands = [];
@@ -325,7 +331,7 @@ class Server{
 	 * @return string
 	 */
 	public function getName(){
-		return "PocketMine-Steadfast";
+		return "Steadfast3";
 	}
 
 	/**
@@ -1610,7 +1616,7 @@ class Server{
 	
 		$this->addInterface($this->mainInterface = new RakLibInterface($this));
 
-		$this->logger->info("This server is running " . $this->getName() . " version " . ($version->isDev() ? TextFormat::YELLOW : "") . $version->get(true) . TextFormat::WHITE . " \"" . $this->getCodename() . "\" (API " . $this->getApiVersion() . ")");
+		$this->logger->info("This server is running " . $this->getName() . " version " . ($version->isDev() ?  : "") . $version->get(true) . " \"" . $this->getCodename() . "\" API: " . $this->getApiVersion() . "");
 		$this->logger->info($this->getName() . " is distributed under the LGPL License");
 
 		PluginManager::$pluginParentTimer = new TimingsHandler("** Plugins");
@@ -2508,6 +2514,9 @@ class Server{
 	}
 
 	private function registerEntities(){
+		Entity::registerEntity(Minecart::class);
+		Entity::registerEntity(Boat::class);
+		Entity::registerEntity(FishingHook::class);
 		Entity::registerEntity(Arrow::class);
 		Entity::registerEntity(SplashPotion::class);
 		Entity::registerEntity(DroppedItem::class);
@@ -2557,7 +2566,11 @@ class Server{
         Tile::registerTile(EnderChest::class);
 		Tile::registerTile(Bed::class);
 		Tile::registerTile(Cauldron::class);
+		Tile::registerTile(Dispenser::class);
+		Tile::registerTile(PistonArm::class);
 		Tile::registerTile(ItemFrame::class);
+		Tile::registerTile(Dropper::class);
+		Tile::registerTile(Hopper::class);
 		Tile::registerTile(Beacon::class);
 		Tile::registerTile(Banner::class);
 	}

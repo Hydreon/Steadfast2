@@ -72,11 +72,11 @@ namespace pocketmine {
 	use pocketmine\utils\Utils;
 	use pocketmine\wizard\Installer;
 
-	const VERSION = '1.5.1-hybrid';
-	const API_VERSION = "1.12.0";
-	const CODENAME = "刀 (Katana)";
+	const VERSION = '1.1.5';
+	const API_VERSION = "3.0.0";
+	const CODENAME = "ELITE";
 	const MINECRAFT_VERSION = "v1.x";
-	const MINECRAFT_VERSION_NETWORK = "1.2";
+	const MINECRAFT_VERSION_NETWORK = "1.12.1";
 
 	/*
 	 * Startup code. Do not look at it, it may harm you.
@@ -452,7 +452,7 @@ namespace pocketmine {
 	}
 
 	if(\Phar::running(true) === ""){
-		$logger->warning("Non-packaged PocketMine-Steadfast installation detected, do not use on production.");
+		$logger->warning("Non-packaged Steadfast3 installation detected, do not use on production.");
 	}
 
 	ThreadManager::init();

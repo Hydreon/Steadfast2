@@ -24,7 +24,7 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class StonePressurePlate extends Transparent{
+class StonePressurePlate extends WoodenPressurePlate {
 
 	protected $id = self::STONE_PRESSURE_PLATE;
 
@@ -34,18 +34,6 @@ class StonePressurePlate extends Transparent{
 
 	public function getName(){
 		return "Stone Pressure Plate";
-	}
-
-	public function canBeActivated(){
-		return true;
-	}
-
-	public function getHardness(){
-		return 2;
-	}
-	
-	public function canBeFlowedInto(){
-		return true;
 	}
 
 	public function getToolType(){
