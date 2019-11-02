@@ -6,9 +6,9 @@ Steadfast2 is a project for backporting new Minecraft: Pocket Edition changes to
 
 ## Todo-List
 
-- [ ] Forms
+- [x] Forms
 - [ ] Add items and blocks
-- [ ] addTitle
+- [x] addTitle
 - [ ] And more
 
 ## Known bugs
