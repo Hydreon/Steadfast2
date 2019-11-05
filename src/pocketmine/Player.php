@@ -831,7 +831,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 		$count = 0;
 		foreach($this->loadQueue as $index => $distance){
-			if($count >= 10){
+			if($count >= 10 or $count == 0){
 				break;
 			}
 			$X = null;
