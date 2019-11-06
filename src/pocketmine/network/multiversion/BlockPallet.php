@@ -37,8 +37,10 @@ class BlockPallet {
 		if ($protocolNumber >= Info::PROTOCOL_370) {
 			$palletTag =  new Enum("", []);
 			foreach ($palletData as $runtimeID => $blockInfo) {
-				$this->pallet[$blockInfo['id']][$blockInfo['data']] = $runtimeID;
-				$this->palletReverted[$runtimeID] = [$blockInfo['id'], $blockInfo['data'], $blockInfo['name']];
+				if (isset($blockInfo['data'])) {
+					$this->pallet[$blockInfo['id']][$blockInfo['data']] = $runtimeID;
+					$this->palletReverted[$runtimeID] = [$blockInfo['id'], $blockInfo['data'], $blockInfo['name']];
+				}
 				$states = new Compound("states", []);
 				foreach ($blockInfo['states'] as $stateName => $state) {
 					switch ($state['type']) {

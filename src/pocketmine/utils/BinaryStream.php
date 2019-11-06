@@ -440,4 +440,14 @@ class BinaryStream {
 		}
 	}
 	
+	public function prepareGeometryDataForOld($skinGeometryData) {
+		if (!empty($skinGeometryData)) {
+			if (($tempData = @json_decode($skinGeometryData, true))) {
+				unset($tempData["format_version"]);
+				return json_encode($tempData);
+			}
+		}
+		return $skinGeometryData;
+	}
+	
 }
