@@ -8,7 +8,8 @@ Steadfast3 is a project for backporting new Minecraft: Pocket Edition changes to
 
 - [x] Forms
 - [ ] Add items and blocks
-- [x] addTitle
+- [x] addTitle function
+- [ ] Api updates
 - [ ] And more
 
 ## Known bugs
