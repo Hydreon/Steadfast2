@@ -698,7 +698,7 @@ class Block extends Position implements Metadatable {
 			self::$list[self::WALL_BANNER] = WallBanner::class;
 			self::$list[self::RED_SANDSTONE] = RedSandstone::class;
 			self::$list[self::RED_SANDSTONE_STAIRS] = RedSandstoneStairs::class;
-			self::$list[self::ITEM_FRAME] = ItemFrame::class;
+			self::$list[self::ITEM_FRAME_BLOCK] = ItemFrame::class;
 			self::$list[self::PURPUR_STAIRS] = PurpurStairs::class;
 			self::$list[self::UNDYED_SHULKER_BOX] = UndyedShulkerBox::class;
 			self::$list[self::FROSTED_ICE] = FrostedIce::class;

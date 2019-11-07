@@ -34,6 +34,7 @@ use pocketmine\entity\Human;
 use pocketmine\entity\Item as DroppedItem;
 use pocketmine\entity\Living;
 use pocketmine\entity\Projectile;
+use pocketmine\event\block\ItemFrameDropItemEvent;
 use pocketmine\event\block\SignChangeEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
@@ -83,6 +84,7 @@ use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\inventory\SimpleTransactionGroup;
 use pocketmine\inventory\transactions\SimpleTransactionData;
+use pocketmine\item\GoldenApple;
 use pocketmine\item\Item;
 use pocketmine\item\Armor;
 use pocketmine\item\Tool;
@@ -124,7 +126,6 @@ use pocketmine\network\protocol\PlayStatusPacket;
 use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\network\protocol\RespawnPacket;
 use pocketmine\network\protocol\SetEntityDataPacket;
-use pocketmine\network\protocol\StrangePacket;
 use pocketmine\network\protocol\TextPacket;
 use pocketmine\network\protocol\MovePlayerPacket;
 use pocketmine\network\protocol\SetDifficultyPacket;
@@ -145,6 +146,7 @@ use pocketmine\permission\PermissibleBase;
 use pocketmine\permission\PermissionAttachment;
 use pocketmine\plugin\Plugin;
 use pocketmine\scheduler\CallbackTask;
+use pocketmine\tile\ItemFrame;
 use pocketmine\tile\Sign;
 use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
@@ -395,6 +397,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	private $foodLevel = 20.0;
 	/** @var float */
 	private $saturation = 5.0;
+
+	public function setSaturation(float $saturation) {
+	    $this->saturation = $saturation;
+    }
+
+    public function getSaturarion(): float {
+	    return $this->saturation;
+    }
 	/** @var float */
 	private $exhaustion = 0.0;
 	/** @var integer */
@@ -1741,7 +1751,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		Item::COOKED_RABBIT => ['food' => 5, 'saturation' => 6],
 		Item::COOKED_SALMON => ['food' => 6, 'saturation' => 9.6],
 		Item::COOKIE => ['food' => 2, 'saturation' => 0.4],
-		Item::GOLDEN_APPLE => ['food' => 4, 'saturation' => 9.6],
+		//Item::GOLDEN_APPLE => ['food' => 4, 'saturation' => 9.6],
 		Item::GOLDEN_CARROT => ['food' => 6, 'saturation' => 14.4],
 		Item::MELON => ['food' => 2, 'saturation' => 1.2],
 		Item::MUSHROOM_STEW => ['food' => 6, 'saturation' => 7.2],
@@ -1806,6 +1816,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$this->saturation = min ($this->foodLevel, $this->saturation + $foodData['saturation']);
 			$this->setFood($this->foodLevel);
 
+            $position = [ 'x' => $this->x, 'y' => $this->y, 'z' => $this->z ];
+            $this->sendSound("SOUND_BURP", $position, 63);
+
 			switch ($foodId) {
 				case Item::BEETROOT_SOUP:
 				case Item::MUSHROOM_STEW:
@@ -1852,6 +1865,42 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 
 		switch($packet->pname()){
+            case 'ITEM_FRAME_DROP_ITEM_PACKET':
+                $tile = null;
+
+                $tile = $this->getLevel()->getTile(new Vector3($packet->x, $packet->y, $packet->z));
+
+                if(!$tile instanceof ItemFrame){
+                    $nbt = new Compound("", [
+                        new StringTag("id", Tile::ITEM_FRAME),
+                        new IntTag("x", $this->x),
+                        new IntTag("y", $this->y),
+                        new IntTag("z", $this->z),
+                        new ByteTag("ItemRotation", 0),
+                        new FloatTag("ItemDropChance", 1.0)
+                    ]);
+                    $tile = Tile::createTile(Tile::ITEM_FRAME, $this->getLevel()->getChunk($this->x >> 4, $this->z >> 4), $nbt);
+                }
+                /*var_dump($packet->x);
+                var_dump($packet->y);
+                var_dump($packet->z);
+                var_dump(new Vector3($packet->x, $packet->y, $packet->z));
+                var_dump($tile);*/
+                if($tile instanceof ItemFrame){
+                    if($tile->getItem()->getId() !== Item::AIR){
+                        $this->getServer()->getPluginManager()->callEvent($ev = new ItemFrameDropItemEvent($this->getLevel()->getBlock($tile), $this, $tile->getItem(), $tile->getItemDropChance()));
+                        if(!$ev->isCancelled()){
+                            if((mt_rand(0, 10) / 10) <= $tile->getItemDropChance()){
+                                $this->level->dropItem($tile, $tile->getItem());
+                            }
+                            $tile->setItem(Item::get(Item::AIR));
+                            $tile->setItemRotation(0);
+                        }
+                    }
+                } else {
+                    //$this->sendMessage("Error");
+                }
+                break;
             case 'SET_PLAYER_GAMETYPE_PACKET':
                 file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " SET_PLAYER_GAMETYPE_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
                 break;
@@ -2207,18 +2256,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 				switch($packet->event){
 					case EntityEventPacket::USE_ITEM: //Eating
-						$slot = $this->inventory->getItemInHand();
-						if($slot instanceof Potion && $slot->canBeConsumed()){
-							$ev = new PlayerItemConsumeEvent($this, $slot);
-							$this->server->getPluginManager()->callEvent($ev);
-							if(!$ev->isCancelled()){
-								$slot->onConsume($this);
-							}else{
-								$this->inventory->sendContents($this);
-							}
-						} else {
-							$this->eatFoodInHand();
-						}
+						$this->eatFoodInHand();
 						break;
 					case EntityEventPacket::ENCHANT:
 						if ($this->currentWindow instanceof EnchantInventory) {
@@ -2235,8 +2273,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 						}
 						break;
 					case EntityEventPacket::FEED:
-						$position = [ 'x' => $this->x, 'y' => $this->y, 'z' => $this->z ];
-						$this->sendSound(LevelSoundEventPacket::SOUND_EAT, $position);
+                        $position = [ 'x' => $this->x, 'y' => $this->y, 'z' => $this->z ];
+
+                        $slot = $this->inventory->getItemInHand();
+                        if($slot instanceof Potion || $slot->getId() == Item::BUCKET && $slot->getDamage() == 1) {
+                            $this->sendSound('SOUND_DRINK', $position, 63);
+                        } else {
+                            $this->sendSound(LevelSoundEventPacket::SOUND_EAT, $position, 63);
+                        }
+
 						break;
 				}
 				//Timings::$timerEntityEventPacket->stopTiming();
@@ -4486,7 +4531,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$pk->z = $packet->z;
 			$pk->data = $block->getId() | ($block->getDamage() << 8);
 			Server::broadcastPacket($recipients, $pk);
-			$this->sendSound(LevelSoundEventPacket::SOUND_HIT, $blockPos, MultiversionEntity::ID_NONE, $block->getId(), $recipients);
+			$this->sendSound(LevelSoundEventPacket::SOUND_HIT, $blockPos, MultiversionEntity::ID_PLAYER, $block->getId(), $recipients);
 		}
 	}
 
@@ -4557,16 +4602,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					new DoubleTag("", $this->x),
 					new DoubleTag("", $this->y + $this->getEyeHeight()),
 					new DoubleTag("", $this->z)
-						]),
+				]),
 				"Motion" => new Enum("Motion", [
                     new DoubleTag("", -sin($yawRad) * cos($pitchRad)),
                     new DoubleTag("", -sin($pitchRad)),
                     new DoubleTag("", cos($yawRad) * cos($pitchRad))
-						]),
+				]),
 				"Rotation" => new Enum("Rotation", [
                     new FloatTag("", $this->yaw),
                     new FloatTag("", $this->pitch)
-						]),
+				]),
 				"Fire" => new ShortTag("Fire", $this->isOnFire() ? 45 * 60 : 0)
 			]);
 
@@ -4641,6 +4686,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			}
 
 			$this->removeAllEffects();
+        } else if($itemInHand instanceof GoldenApple) {
+            $ev = new PlayerItemConsumeEvent($this, $itemInHand);
+            $this->server->getPluginManager()->callEvent($ev);
+            if (!$ev->isCancelled()) {
+                $itemInHand->onConsume($this);
+            } else {
+                $this->setFood($this->foodLevel);
+                $this->inventory->sendContents($this);
+            }
+        } else if($itemInHand instanceof Potion && $itemInHand->canBeConsumed()) {
+            $ev = new PlayerItemConsumeEvent($this, $itemInHand);
+            $this->server->getPluginManager()->callEvent($ev);
+            if (!$ev->isCancelled()) {
+                $itemInHand->onConsume($this);
+            } else {
+                $this->inventory->sendContents($this);
+            }
 		} else {
 			$this->inventory->sendContents($this);
 		}
@@ -4648,14 +4710,22 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 	protected function useItem120() {
 		$slot = $this->inventory->getItemInHand();
-		if($slot instanceof Potion && $slot->canBeConsumed()){
-			$ev = new PlayerItemConsumeEvent($this, $slot);
-			$this->server->getPluginManager()->callEvent($ev);
-			if(!$ev->isCancelled()){
-				$slot->onConsume($this);
-			}else{
-				$this->inventory->sendContents($this);
-			}
+		if($slot instanceof Potion && $slot->canBeConsumed()) {
+            $ev = new PlayerItemConsumeEvent($this, $slot);
+            $this->server->getPluginManager()->callEvent($ev);
+            if (!$ev->isCancelled()) {
+                $slot->onConsume($this);
+            } else {
+                $this->inventory->sendContents($this);
+            }
+        }else if($slot instanceof GoldenApple && $slot->canBeConsumed()){
+            $ev = new PlayerItemConsumeEvent($this, $slot);
+            $this->server->getPluginManager()->callEvent($ev);
+            if(!$ev->isCancelled()){
+                $slot->onConsume($this);
+            }else{
+                $this->inventory->sendContents($this);
+            }
 		} else {
 			$this->eatFoodInHand();
 		}

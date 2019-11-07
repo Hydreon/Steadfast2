@@ -476,6 +476,36 @@ class Binary{
 		return self::writeVarInt($v);
 	}
 
+	public static function readUnsignedVarInt($stream){
+		$value = 0;
+		$i = 0;
+		do{
+			if($i > 63){
+				throw new \InvalidArgumentException("Varint did not terminate after 10 bytes!");
+			}
+			$value |= ((($b = $stream->getByte()) & 0x7f) << $i);
+			$i += 7;
+		}while($b & 0x80);
+
+		return $value;
+	}
+
+	public static function writeUnsignedVarInt($value){
+		$buf = "";
+		for($i = 0; $i < 10; ++$i){
+			if(($value >> 7) !== 0){
+				$buf .= chr($value | 0x80); //Let chr() take the last byte of this, it's faster than adding another & 0x7f.
+			}else{
+				$buf .= chr($value & 0x7f);
+				return $buf;
+			}
+
+			$value = (($value >> 7) & (PHP_INT_MAX >> 6)); //PHP really needs a logical right-shift operator
+		}
+
+		throw new \InvalidArgumentException("Value too large to be encoded as a varint");
+	}
+
 	
 	public static function writeVarInt($v){		
 		if ($v < 0x80) {

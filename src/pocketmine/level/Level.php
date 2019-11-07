@@ -682,6 +682,10 @@ class Level implements ChunkManager, Metadatable{
 		$this->blockCache = [];
 	}
 
+	public function clearChunkCache(int $chunkX, int $chunkZ){
+		unset($this->chunkCache[Level::chunkHash($chunkX, $chunkZ)]);
+	}
+
 	private function tickChunks(){
 		if($this->chunksPerTick <= 0 or count($this->players) === 0){
 			$this->chunkTickList = [];

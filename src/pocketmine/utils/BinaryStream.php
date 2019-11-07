@@ -259,8 +259,46 @@ class BinaryStream {
 		}
 	}
 
+	public function getBlockPosition(&$x, &$y, &$z){
+		$x = $this->getVarInt();
+		$y = $this->getUnsignedVarInt();
+		$z = $this->getVarInt();
+	}
+
+	public function putBlockPosition($x, $y, $z){
+		$this->putVarInt($x);
+		$this->putUnsignedVarInt($y);
+		$this->putVarInt($z);
+	}
+
+	public function getBlockCoords(&$x, &$y, &$z){
+		$x = $this->getVarInt();
+		$y = $this->getUnsignedVarInt();
+		$z = $this->getVarInt();
+	}
+
+	public function putBlockCoords($x, $y, $z){
+		$this->putVarInt($x);
+		$this->putUnsignedVarInt($y);
+		$this->putVarInt($z);
+	}
+
 	public function feof() {
 		return !isset($this->buffer{$this->offset});
+	}
+
+/**
+	 * Reads an unsigned varint from the stream.
+	 */
+	public function getUnsignedVarInt(){
+		return Binary::readUnsignedVarInt($this);
+	}
+
+	/**
+	 * Writes an unsigned varint to the stream.
+	 */
+	public function putUnsignedVarInt($v){
+		$this->put(Binary::writeUnsignedVarInt($v));
 	}
 	
 	

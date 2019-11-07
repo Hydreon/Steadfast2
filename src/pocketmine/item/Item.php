@@ -912,6 +912,7 @@ class Item{
 	public static function init(){
 		if(self::$list === null){
 			self::$list = new \SplFixedArray(65536);
+			self::$list[self::GOLDEN_APPLE] = GoldenApple::class;
 			self::$list[self::SUGARCANE] = Sugarcane::class;
 			self::$list[self::WHEAT_SEEDS] = WheatSeeds::class;
 			self::$list[self::PUMPKIN_SEEDS] = PumpkinSeeds::class;
@@ -942,6 +943,7 @@ class Item{
 			self::$list[self::FEATHER] = Feather::class;
 			self::$list[self::BRICK] = Brick::class;
 			self::$list[self::LEATHER_CAP] = LeatherCap::class;
+			self::$list[self::ITEM_FRAME] = ItemFrame::class;
 			self::$list[self::LEATHER_TUNIC] = LeatherTunic::class;
 			self::$list[self::LEATHER_PANTS] = LeatherPants::class;
 			self::$list[self::LEATHER_BOOTS] = LeatherBoots::class;
@@ -1342,6 +1344,8 @@ class Item{
 		self::addCreativeItem(Item::get(Item::REDSTONE_LAMP, 0)); 
 		self::addCreativeItem(Item::get(Item::SIGN, 0));
 		self::addCreativeItem(Item::get(Item::PAINTING, 0));
+
+        self::addCreativeItem(Item::get(Item::ITEM_FRAME, 0));
 		
 		self::addCreativeItem(Item::get(Item::BOWL, 0));
 		self::addCreativeItem(Item::get(Item::BUCKET, 0));

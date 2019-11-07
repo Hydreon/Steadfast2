@@ -93,7 +93,8 @@ class Effect{
 		self::$effects[Effect::WITHER] = new WitherEffect(Effect::WITHER, "%potion.wither", 53, 42, 39, true);
 		self::$effects[Effect::HEALTH_BOOST] = new Effect(Effect::HEALTH_BOOST, "%potion.healthBoost", 248, 125, 35);
 		//Absorption
-		//Saturation
+        self::$effects[Effect::ABSORPTION] = new Effect(Effect::ABSORPTION, "%potion.absorption", 36, 107, 251);
+        //Saturation
 		self::$effects[Effect::LEVITATION] = new LevitationEffect(Effect::LEVITATION, "%potion.levitation", 206, 255, 255);
 	}
 

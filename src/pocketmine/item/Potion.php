@@ -164,7 +164,15 @@ class Potion extends Item{
 		if($human instanceof Player && $human->getGamemode() === 1){
 			return;
 		}
-		$human->getInventory()->setItemInHand(Item::get(self::AIR));
+        if ($this->count == 1) {
+            $human->getInventory()->setItemInHand(Item::get(self::AIR));
+
+            $human->getInventory()->addItem(Item::get(374, 0, 1));
+        } else {
+            --$this->count;
+
+            $human->getInventory()->setItemInHand($this);
+        }
 	}
 	
 	public static function getNameByMeta(int $meta) : string{

@@ -49,6 +49,7 @@ use pocketmine\network\protocol\Info120 as ProtocolInfo120;
 use pocketmine\network\protocol\Info310 as ProtocolInfo310;
 use pocketmine\network\protocol\Info331 as ProtocolInfo331;
 use pocketmine\network\protocol\InteractPacket;
+use pocketmine\network\protocol\ItemFrameDropItemPacket;
 use pocketmine\network\protocol\LevelEventPacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\network\protocol\DisconnectPacket;
@@ -404,6 +405,7 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::PURCHASE_RECEIPT_PACKET, PurchaseReceiptPacket::class);
 		$this->registerPacket120(ProtocolInfo120::SUB_CLIENT_LOGIN_PACKET, SubClientLoginPacket::class);		
 		$this->registerPacket120(ProtocolInfo120::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
+		$this->registerPacket120(ProtocolInfo120::ITEM_FRAME_DROP_ITEM_PACKET, ItemFrameDropItemPacket::class);
 	}
 	
 	private function registerPackets310() {
@@ -474,6 +476,7 @@ class Network {
 		$this->registerPacket310(ProtocolInfo310::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET, NetworkChunkPublisherUpdatePacket::class);	
 		$this->registerPacket310(ProtocolInfo310::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
 		$this->registerPacket310(ProtocolInfo310::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
+		$this->registerPacket310(ProtocolInfo310::ITEM_FRAME_DROP_ITEM_PACKET, ItemFrameDropItemPacket::class);
 
 	}
 	
@@ -545,5 +548,6 @@ class Network {
 		$this->registerPacket331(ProtocolInfo331::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET, NetworkChunkPublisherUpdatePacket::class);	
 		$this->registerPacket331(ProtocolInfo331::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
 		$this->registerPacket331(ProtocolInfo331::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
+		$this->registerPacket331(ProtocolInfo331::ITEM_FRAME_DROP_ITEM_PACKET, ItemFrameDropItemPacket::class);
 	}
 }
