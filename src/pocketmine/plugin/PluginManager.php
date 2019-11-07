@@ -212,7 +212,7 @@ class PluginManager{
 								continue;
 							}
 
-							$compatible = false;
+							/*$compatible = false;
 							//Check multiple dependencies
 							foreach($description->getCompatibleApis() as $version){
 								//Format: majorVersion.minorVersion.patch
@@ -234,7 +234,7 @@ class PluginManager{
 							if($compatible === false){
 								$this->server->getLogger()->error("Could not load plugin '" . $name . "': API version not compatible");
 								continue;
-							}
+							}*/
 
 							$plugins[$name] = $file;
 
