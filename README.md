@@ -5,7 +5,7 @@
 # Links
 | Jenkins | TravisCI | Discord |
 | :---: | :---: | :---: |
-| [![Build Status]()]() | [![Travis branch]()]() | [![Discord](https://img.shields.io/discord/427472879072968714.svg?style=flat-square&label=discord&colorB=7289da)](https://discord.gg/fUhjt5n) |
+| [![Build Status]()]() | [![Travis branch]()]() | [![Discord](https://img.shields.io/badge/Chat-On%20Discord-738BD7.svg?style=flat-square&label=discord&colorB=7289da)](https://discord.gg/fUhjt5n) |
 
 ## Introduction
 
