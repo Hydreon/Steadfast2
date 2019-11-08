@@ -5,7 +5,7 @@
 # Links
 | Jenkins | TravisCI | Discord |
 | :---: | :---: | :---: |
-| [![Build Status](https://altay.minehub.de/job/Altay/badge/icon)]() | [![Travis branch](https://img.shields.io/travis/TuranicTeam/Altay/master.svg?style=flat-square)]() | [![Discord](https://img.shields.io/discord/427472879072968714.svg?style=flat-square&label=discord&colorB=7289da)]() |
+| [![Build Status]()]() | [![Travis branch]()]() | [![Discord](https://img.shields.io/discord/427472879072968714.svg?style=flat-square&label=discord&colorB=7289da)]() |
 
 ## Introduction
 
