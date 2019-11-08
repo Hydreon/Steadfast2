@@ -5,7 +5,6 @@
 # Links
 [![DISCORD](https://img.shields.io/badge/Chat-On%20Discord-738BD7.svg?style=for-the-badge)]()
 
-
 ## Introduction
 
 Steadfast3 is a project for backporting new Minecraft: Pocket Edition changes to older Pocketmine versions for better stability and performance, while retaining as many features from the new PocketMine-MP versions as possible.
