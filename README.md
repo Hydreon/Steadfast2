@@ -1,4 +1,4 @@
-#  <img src="https://github.com/MFDGaming/PocketMine-Steadfast3/Steadfast3.png" alt="Steadfast3 logo" title="Aimeos" align="center" height="120" />
+#  <img src="https://github.com/MFDGaming/PocketMine-Steadfast3/blob/master/Steadfast3.png" alt="Steadfast3 logo" title="Aimeos" align="center" height="120" />
 # Steadfast3 Minecraft PE Server Software
 
 ## Introduction
