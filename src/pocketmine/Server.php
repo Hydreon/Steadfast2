@@ -1541,7 +1541,7 @@ class Server{
 			"enable-rcon" => false,
 			"rcon.password" => substr(base64_encode(@Utils::getRandomBytes(20, false)), 3, 10),
 			"auto-save" => true,
-			"auto-generate" => false,
+			"auto-generate" => true,
 			"save-player-data" => false,
 			"time-update" => true,
 			"use-encrypt" => false
