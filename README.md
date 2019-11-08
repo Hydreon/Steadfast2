@@ -3,7 +3,9 @@
 # Steadfast3 Minecraft PE Server Software
 
 # Links
-[![DISCORD](https://img.shields.io/badge/Chat-On%20Discord-738BD7.svg?style=for-the-badge)]()
+| Jenkins | TravisCI | Discord | Twitter |
+| :---: | :---: | :---: | :---: |
+| [![Build Status](https://altay.minehub.de/job/Altay/badge/icon)](https://altay.minehub.de/job/Altay/) | [![Travis branch](https://img.shields.io/travis/TuranicTeam/Altay/master.svg?style=flat-square)](https://travis-ci.org/TuranicTeam/Altay) | [![Discord](https://img.shields.io/discord/427472879072968714.svg?style=flat-square&label=discord&colorB=7289da)](https://discord.gg/UsuhCFj) |
 
 ## Introduction
 
