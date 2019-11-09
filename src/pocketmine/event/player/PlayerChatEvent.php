@@ -72,9 +72,19 @@ class PlayerChatEvent extends PlayerEvent implements Cancellable{
 		}
 	}
 
-	public function getFormat(){
-		return $this->format;
-	}
+    public function getFormat(){
+        $format = $this->format;
+
+        $index = stripos($format, '%s');
+
+        if ($index !== false) $format = substr_replace($format, $this->getPlayer()->getName(), $index, $index + 1);
+
+        $index = stripos($format, '%s');
+
+        if ($index !== false) $format = substr_replace($format, $this->getMessage(), $index, $index + 1);
+
+        return $format;
+    }
 
 	public function setFormat($format){
 		$this->format = $format;

@@ -55,6 +55,7 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\protocol\MobEffectPacket;
+use pocketmine\network\protocol\PlaySoundPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\SetEntityDataPacket;
 use pocketmine\network\protocol\SetTimePacket;
@@ -720,7 +721,25 @@ abstract class Entity extends Location implements Metadatable{
 
 		$this->setLastDamageCause($source);
 
-		$this->setHealth($this->getHealth() - $source->getFinalDamage());
+		if ($this instanceof Player) {
+		    if ($this->getAbsorption() != 0.0) {
+                if ($source->getFinalDamage() > $this->getAbsorption()) {
+                    $damage = $source->getFinalDamage() - $this->getAbsorption();
+
+                    $this->setAbsorption(0.0);
+
+                    $this->setHealth($this->getHealth() - $damage);
+                } else if ($source->getFinalDamage() == $this->getAbsorption()) {
+                    $this->setAbsorption(0.0);
+                } else {
+                    $this->setAbsorption($this->getAbsorption() - $source->getFinalDamage());
+                }
+            } else {
+                $this->setHealth($this->getHealth() - $source->getFinalDamage());
+            }
+        } else {
+            $this->setHealth($this->getHealth() - $source->getFinalDamage());
+        }
 	}
 
 	/**

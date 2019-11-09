@@ -11,16 +11,16 @@ use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 
-class GoldenApple extends Item {
+class EnchantedGoldenApple extends Item {
     public function __construct($meta = 0, $count = 1){
-        parent::__construct(self::GOLDEN_APPLE, 0, $count, "Golden Apple");
+        parent::__construct(self::ENCHANTED_GOLDEN_APPLE, 0, $count, "Enchanted Golden Apple");
     }
 
     public function food(): int {
         return 4;
     }
 
-    public static $food = ['food' => 4, 'saturation' => 9.6];
+    public static $food = [ 'food' => 6, 'saturation' => 14.4 ];
 
     public function onConsume(Entity $human){
         $pk = new EntityEventPacket();
@@ -38,10 +38,12 @@ class GoldenApple extends Item {
         $position = [ 'x' => $human->getX(), 'y' => $human->getY(), 'z' => $human->getZ() ];
         $human->sendSound("SOUND_BURP", $position, 63);
 
-        $human->addEffect(Effect::getEffect(Effect::REGENERATION)->setAmplifier(1)->setDuration(5 * 20));
+        $human->addEffect(Effect::getEffect(Effect::REGENERATION)->setAmplifier(4)->setDuration(30 * 20));
         $human->addEffect(Effect::getEffect(Effect::ABSORPTION)->setAmplifier(0)->setDuration(120 * 20));
+        $human->addEffect(Effect::getEffect(Effect::DAMAGE_RESISTANCE)->setAmplifier(0)->setDuration(300 * 20));
+        $human->addEffect(Effect::getEffect(Effect::FIRE_RESISTANCE)->setAmplifier(0)->setDuration(300 * 20));
 
-        $human->setAbsorption(4);
+        $human->setAbsorption(20);
 
         if($human instanceof Player && $human->getGamemode() === 1){
             return;

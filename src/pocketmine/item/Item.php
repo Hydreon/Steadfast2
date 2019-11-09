@@ -913,6 +913,7 @@ class Item{
 		if(self::$list === null){
 			self::$list = new \SplFixedArray(65536);
 			self::$list[self::GOLDEN_APPLE] = GoldenApple::class;
+            self::$list[self::ENCHANTED_GOLDEN_APPLE] = EnchantedGoldenApple::class;
 			self::$list[self::SUGARCANE] = Sugarcane::class;
 			self::$list[self::WHEAT_SEEDS] = WheatSeeds::class;
 			self::$list[self::PUMPKIN_SEEDS] = PumpkinSeeds::class;

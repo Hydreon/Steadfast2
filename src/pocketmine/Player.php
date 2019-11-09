@@ -84,6 +84,7 @@ use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\inventory\SimpleTransactionGroup;
 use pocketmine\inventory\transactions\SimpleTransactionData;
+use pocketmine\item\EnchantedGoldenApple;
 use pocketmine\item\GoldenApple;
 use pocketmine\item\Item;
 use pocketmine\item\Armor;
@@ -397,6 +398,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	private $foodLevel = 20.0;
 	/** @var float */
 	private $saturation = 5.0;
+
+    /** @var float */
+    private $absorption = 0.0;
 
 	public function setSaturation(float $saturation) {
 	    $this->saturation = $saturation;
@@ -1825,7 +1829,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				case Item::RABBIT_STEW:
 					$this->inventory->addItem(Item::get(Item::BOWL, 0, 1));
 					break;
-				case Item::GOLDEN_APPLE:
+				/*case Item::GOLDEN_APPLE:
 					$this->addEffect(Effect::getEffect(Effect::REGENERATION)->setAmplifier(1)->setDuration(5 * 20));
 //						$this->addEffect(Effect::getEffect(Effect::ABSORPTION)->setAmplifier(0)->setDuration(120 * 20));
 					break;
@@ -1834,7 +1838,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 //						$this->addEffect(Effect::getEffect(Effect::ABSORPTION)->setAmplifier(0)->setDuration(120 * 20));
 					$this->addEffect(Effect::getEffect(Effect::DAMAGE_RESISTANCE)->setAmplifier(0)->setDuration(300 * 20));
 					$this->addEffect(Effect::getEffect(Effect::FIRE_RESISTANCE)->setAmplifier(0)->setDuration(300 * 20));
-					break;
+					break;*/
 			}
 		} else {
 			// error_log("Try to eat " . get_class($slot) . "(" . $slot->getId() . ")");
@@ -2300,7 +2304,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 						if($message != "" and strlen($message) <= 255 and $this->messageCounter-- > 0){
 							$this->server->getPluginManager()->callEvent($ev = new PlayerChatEvent($this, $message));
 							if(!$ev->isCancelled()){
-								$this->server->broadcastMessage($ev->getPlayer()->getDisplayName() . ": " . $ev->getMessage(), $ev->getRecipients());
+								$this->server->broadcastMessage($ev->getFormat(), $ev->getRecipients());
 							}
 						}
 					}
@@ -3095,6 +3099,20 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		if($this->foodLevel - $amount < 0) return;
 		$this->setFood($this->getFood() - $amount);
 	}
+
+    public function setAbsorption(float $absorption) {
+        $pk = new UpdateAttributesPacket();
+        $pk->entityId = $this->id;
+        $pk->value = $absorption;
+        $pk->name = UpdateAttributesPacket::ABSORPTION;
+        $pk->maxValue = 20;
+        $this->absorption = $absorption;
+        $this->dataPacket($pk);
+    }
+
+    public function getAbsorption() {
+        return $this->absorption;
+    }
 
 	public function attack($damage, EntityDamageEvent $source){
 		if($this->dead === true){
@@ -4695,6 +4713,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
                 $this->setFood($this->foodLevel);
                 $this->inventory->sendContents($this);
             }
+        } else if($itemInHand instanceof EnchantedGoldenApple) {
+            $ev = new PlayerItemConsumeEvent($this, $itemInHand);
+            $this->server->getPluginManager()->callEvent($ev);
+            if (!$ev->isCancelled()) {
+                $itemInHand->onConsume($this);
+            } else {
+                $this->setFood($this->foodLevel);
+                $this->inventory->sendContents($this);
+            }
         } else if($itemInHand instanceof Potion && $itemInHand->canBeConsumed()) {
             $ev = new PlayerItemConsumeEvent($this, $itemInHand);
             $this->server->getPluginManager()->callEvent($ev);
@@ -4718,7 +4745,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
             } else {
                 $this->inventory->sendContents($this);
             }
-        }else if($slot instanceof GoldenApple && $slot->canBeConsumed()){
+        }else if($slot instanceof GoldenApple){
+            $ev = new PlayerItemConsumeEvent($this, $slot);
+            $this->server->getPluginManager()->callEvent($ev);
+            if(!$ev->isCancelled()){
+                $slot->onConsume($this);
+            }else{
+                $this->inventory->sendContents($this);
+            }
+        }else if($slot instanceof EnchantedGoldenApple){
             $ev = new PlayerItemConsumeEvent($this, $slot);
             $this->server->getPluginManager()->callEvent($ev);
             if(!$ev->isCancelled()){
@@ -5428,7 +5463,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$commandPreprocessEvent = new PlayerCommandPreprocessEvent($this, $commandLine);
 			$this->server->getPluginManager()->callEvent($commandPreprocessEvent);
 			if ($commandPreprocessEvent->isCancelled()) {
-				return;
+				if ($commandLine !== 'version' && $commandLine !== 'ver') {
+				    return;
+                }
 			}
 			$this->server->dispatchCommand($this, $commandLine);
 			$commandPostprocessEvent = new PlayerCommandPostprocessEvent($this, $commandLine);
