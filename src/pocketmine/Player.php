@@ -2329,6 +2329,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			case 'INVENTORY_TRANSACTION_PACKET':
 				switch ($packet->transactionType) {
 					case InventoryTransactionPacket::TRANSACTION_TYPE_INVENTORY_MISMATCH:
+						$this->sendAllInventories();
 						break;
 					case InventoryTransactionPacket::TRANSACTION_TYPE_NORMAL:
 						$this->normalTransactionLogic($packet);
@@ -5144,6 +5145,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				$skinGeometryName = $jsonSkinData['geometry']['default'];
 			}
 		}
+	}
+	
+	protected function sendAllInventories(){
+		if (!is_null($this->currentWindow)) {
+			$this->currentWindow->sendContents($this);
+		}
+		$this->getInventory()->sendContents($this);
 	}
 
 }
