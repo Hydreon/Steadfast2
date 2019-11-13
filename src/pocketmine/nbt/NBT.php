@@ -440,7 +440,9 @@ class NBT{
 		}elseif($len === true){
 			return substr($this->buffer, $this->offset);
 		}
-
+		if (strlen($this->buffer) < $this->offset + $len) {
+			throw new \Exception('get nbt error');
+		}
 		return $len === 1 ? $this->buffer{$this->offset++} : substr($this->buffer, ($this->offset += $len) - $len, $len);
 	}
 
