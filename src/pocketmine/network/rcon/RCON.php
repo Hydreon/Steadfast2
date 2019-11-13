@@ -41,7 +41,7 @@ class RCON{
 		socket_set_block($this->socket);
 
 		for($n = 0; $n < $this->threads; ++$n){
-			$this->workers[$n] = new RCONInstance($this->socket, $this->password, $this->clientsPerThread);
+			$this->workers[$n] = new RCONInstance($this->socket, $this->password, $this->server->getLogger(), $this->clientsPerThread);
 		}
 		socket_getsockname($this->socket, $addr, $port);
 		$this->server->getLogger()->info("RCON running on $addr:$port");
