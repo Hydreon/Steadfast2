@@ -212,14 +212,20 @@ class BinaryStream {
 		$count = $aux & 0xff;
 		
 		$nbtLen = $this->getLShort();		
-		$nbt = "";		
+		$nbt = "";	
 		if ($nbtLen > 0) {
 			$nbt = $this->get($nbtLen);
 		} elseif($nbtLen == -1) {
 			$nbtCount = $this->getVarInt();
+			if ($nbtCount > 100) {
+				throw new \Exception('get slot nbt error, too many count');
+			}
 			for ($i = 0; $i < $nbtCount; $i++) {
 				$nbtTag = new NBT(NBT::LITTLE_ENDIAN);
 				$offset = $this->getOffset();
+				if ($offset > strlen($this->getBuffer())) {
+					throw new \Exception('get slot nbt error');
+				}
 				$nbtTag->read(substr($this->getBuffer(), $offset), false, true);
 				$nbt = $nbtTag->getData();
 				$this->setOffset($offset + $nbtTag->getOffset());
