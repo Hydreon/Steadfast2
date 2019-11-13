@@ -261,7 +261,6 @@ class Item extends Entity{
 			$this->hasSpawned[$player->getId()] = $player;
 		}
 	}
-
 	
 	protected function updateMovement() {
 		$diffPosition = ($this->x - $this->lastX) ** 2 + ($this->y - $this->lastY) ** 2 + ($this->z - $this->lastZ) ** 2;
