@@ -142,6 +142,7 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_ALWAYS_SHOW_NAMETAG = 15;
 	const DATA_FLAG_NOT_MOVE = 16;
 	const DATA_FLAG_NO_AI = 16;
+	const DATA_FLAG_IMMOBILE = 16;
 	const DATA_FLAG_SILENT = 17;
 	const DATA_FLAG_IS_CLIMBING = 18;
 	const DATA_FLAG_RESTING_BAT = 19;
@@ -381,6 +382,28 @@ abstract class Entity extends Location implements Metadatable{
 		$this->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_SHOW_NAMETAG, $value ? true : false);
 //		$this->setDataProperty(self::DATA_SHOW_NAMETAG, self::DATA_TYPE_BYTE, $value ? 1 : 0);
 	}
+	
+	 /**
+	  * @param bool $value
+	  */
+    	public function setImmobile($value = true){
+        	$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_IMMOBILE, $value);
+    	}
+
+	 /**
+	  * @param bool $value
+	  */
+	public function setInvisible($value = true) {
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_INVISIBLE, $value);
+	}
+
+	    /**
+	     * @return bool
+	     */
+        public function isInvisible(): bool {
+                return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_INVISIBLE);
+        }
+
 
 	public function isSneaking(){
 		return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SNEAKING);
