@@ -83,6 +83,7 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\network\CompressBatchedTask;
 use pocketmine\network\Network;
 use pocketmine\network\protocol\BatchPacket;
 use pocketmine\network\protocol\CraftingDataPacket;
@@ -1892,13 +1893,61 @@ class Server{
 		}
 	}
 
+    /**
+     * Broadcasts a list of packets in a batch to a list of players
+     *
+     * @param Player[]     $players
+     * @param DataPacket[] $packets
+     * @param bool         $forceSync
+     * @param bool         $immediate
+     */
+    public function batchPackets(array $players, array $packets, bool $forceSync = false, bool $immediate = false){
+        if(empty($packets)){
+            throw new \InvalidArgumentException("Cannot send empty batch");
+        }
+        Timings::$playerNetworkTimer->startTiming();
+
+        $targets = array_filter($players, function(Player $player) : bool{ return $player->isConnected(); });
+
+        if(!empty($targets)){
+            $pk = new BatchPacket();
+
+            foreach($packets as $p){
+                $pk->addPacket($p);
+            }
+
+            if(Network::$BATCH_THRESHOLD >= 0 and strlen($pk->payload) >= Network::$BATCH_THRESHOLD){
+                $pk->setCompressionLevel($this->networkCompressionLevel);
+            }else{
+                $pk->setCompressionLevel(0); //Do not compress packets under the threshold
+            }
+
+            $this->broadcastPacketsCallback($pk, $targets, $immediate);
+
+        }
+
+        Timings::$playerNetworkTimer->stopTiming();
+    }
+
+    /**
+     * @param BatchPacket $pk
+     * @param Player[]    $players
+     * @param bool        $immediate
+     */
+    public function broadcastPacketsCallback(BatchPacket $pk, array $players, bool $immediate = false){
+        foreach ($players as $i) {
+            $i->dataPacket($pk, false, $immediate);
+        }
+
+    }
+
 	/**
 	 * Broadcasts a list of packets in a batch to a list of players
 	 *
 	 * @param Player[]            $players
 	 * @param DataPacket[]|string $packets
 	 */
-	public function batchPackets(array $players, array $packets){
+	/*public function batchPackets(array $players, array $packets){
 		$playersCount = count($players);
 		foreach ($packets as $pk) {
 			if ($playersCount < 2) {
@@ -1909,7 +1958,7 @@ class Server{
 				Server::broadcastPacket($players, $pk);
 			}
 		}
-	}
+	}*/
 
 	/**
 	 * @param int $type

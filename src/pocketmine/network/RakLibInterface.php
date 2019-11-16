@@ -23,6 +23,7 @@ namespace pocketmine\network;
 
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\event\server\QueryRegenerateEvent;
+use pocketmine\network\protocol\BatchPacket;
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\Info as ProtocolInfo;
 use pocketmine\network\protocol\Info;
@@ -249,12 +250,23 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		return $data;
 	}
 
-	public function putReadyPacket($player, $buffer) {
-		if (isset($this->identifiers[$player])) {	
-			$pk = new EncapsulatedPacket();
-			$pk->buffer = $buffer;
-			$pk->reliability = 3;	
-			$this->interface->sendEncapsulated($player->getIdentifier(), $pk, RakLib::PRIORITY_NORMAL);			
+	public function putReadyPacket($player, $packet) {
+		if (isset($this->identifiers[$player])) {
+		    /*if(!isset($packet->__encapsulatedPacket)){
+		        $packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
+		        $packet->__encapsulatedPacket->identifierACK = null;
+		        $packet->__encapsulatedPacket->buffer = $packet->buffer;
+		        $packet->__encapsulatedPacket->reliability = 3;
+		        $packet->__encapsulatedPacket->orderChannel = 0;
+		    }
+		    $pk = $packet->__encapsulatedPacket;
+
+		    $this->interface->sendEncapsulated($this->identifiers[$player], $pk, RakLib::PRIORITY_NORMAL);
+		    return $pk->identifierACK;*/
+			$pk = new CachedEncapsulatedPacket();
+			$pk->buffer = $packet;
+			$pk->reliability = 3;
+			$this->interface->sendEncapsulated($player->getIdentifier(), $pk, RakLib::PRIORITY_NORMAL);
 		}
 	}
 	
@@ -266,6 +278,19 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$this->interface->sendEncapsulated($player->getIdentifier(), $pk,  RakLib::PRIORITY_NORMAL | RakLib::FLAG_NEED_ZLIB);
 		}
 	}
+
+    public function newputPacket(Player $player, DataPacket $packet){
+        if (isset($this->identifiers[$player])) {
+            if(!$packet->isEncoded){
+                $packet->encode($player->protocol);
+            }
+
+            $this->server->batchPackets([$player], [$packet]);
+            return null;
+        }
+
+        return null;
+    }
 	
 	public function enableEncryptForPlayer(Player $player, $token, $privateKey, $publicKey){
 		$identifier = $this->identifiers[$player];	

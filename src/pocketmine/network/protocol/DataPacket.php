@@ -28,6 +28,7 @@ namespace pocketmine\network\protocol;
 #endif
 
 
+use pocketmine\network\CachedEncapsulatedPacket;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\Utils;
 
@@ -39,6 +40,9 @@ abstract class DataPacket extends BinaryStream{
 
 	public $isEncoded = false;
 	private $channel = 0;
+
+    /** @var CachedEncapsulatedPacket */
+    public $__encapsulatedPacket = null;
 	
 	protected static $packetsIds = [];
 

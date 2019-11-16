@@ -30,6 +30,8 @@ use pocketmine\tile\Tile;
 
 abstract class Timings{
 
+    /** @var TimingsHandler */
+    public static $playerNetworkTimer;
 	/** @var TimingsHandler */
 	public static $serverTickTimer;
 	/** @var TimingsHandler */
@@ -95,6 +97,7 @@ abstract class Timings{
 			return;
 		}
 
+        self::$playerNetworkTimer = new TimingsHandler("Player Network Send");
 		self::$serverTickTimer = new TimingsHandler("** Full Server Tick");
 		self::$playerListTimer = new TimingsHandler("Player List");
 		self::$connectionTimer = new TimingsHandler("Connection Handler");

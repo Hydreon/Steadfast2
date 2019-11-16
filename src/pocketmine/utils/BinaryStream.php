@@ -9,7 +9,7 @@ use pocketmine\network\protocol\Info;
 class BinaryStream {
 	
 	private $offset;
-	private $buffer;
+	public $buffer;
 
 	private function writeErrorLog($depth = 3) {
 		$depth = max($depth, 3);
@@ -164,7 +164,7 @@ class BinaryStream {
 	}
 
 	public function getByte() {
-		return ord($this->buffer{$this->offset++});
+		return ord($this->buffer[$this->offset++]);
 	}
 
 	public function putByte($v) {
@@ -200,6 +200,15 @@ class BinaryStream {
 		$this->putLInt($uuid->getPart(3));
 		$this->putLInt($uuid->getPart(2));
 	}
+
+    public function getRemaining() : string{
+        $str = substr($this->buffer, $this->offset);
+        if($str === false){
+            throw new \Exception("No bytes left to read");
+        }
+        $this->offset = strlen($this->buffer);
+        return $str;
+    }
 
 	public function getSlot($playerProtocol) {
 		$id = $this->getSignedVarInt();

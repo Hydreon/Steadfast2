@@ -24,11 +24,17 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 
+use pocketmine\Player;
+use pocketmine\utils\Binary;
+use pocketmine\utils\BinaryStream;
+
 class BatchPacket extends PEPacket{
 	const NETWORK_ID = -1;
 	const PACKET_NAME = "BATCH_PACKET";
 
 	public $payload;
+    /** @var int */
+    protected $compressionLevel = 7;
 
 	public function decode($playerProtocol) {
 		$this->payload = $this->get(strlen($this->getBuffer()) - $this->getOffset());
@@ -38,4 +44,32 @@ class BatchPacket extends PEPacket{
 		$this->setBuffer($this->payload);
 	}
 
+    /**
+     * @param DataPacket $packet
+     */
+    public function addPacket(DataPacket $packet){
+        $this->payload .= Binary::writeUnsignedVarInt(strlen($packet->buffer)) . $packet->buffer;
+    }
+
+    /**
+     * @return \Generator
+     */
+    public function getPackets(){
+        $stream = new BinaryStream($this->payload);
+        $count = 0;
+        while(!$stream->feof()){
+            if($count++ >= 500){
+                throw new \UnexpectedValueException("Too many packets in a single batch");
+            }
+            yield $stream->getString();
+        }
+    }
+
+    public function getCompressionLevel() : int{
+        return $this->compressionLevel;
+    }
+
+    public function setCompressionLevel(int $level){
+        $this->compressionLevel = $level;
+    }
 }

@@ -476,6 +476,23 @@ class Binary{
 		return self::writeVarInt($v);
 	}
 
+    public static function newreadUnsignedVarInt(string $buffer, int &$offset) : int{
+        $value = 0;
+        for($i = 0; $i <= 28; $i += 7){
+            if(!isset($buffer[$offset])){
+                throw new \InvalidArgumentException("No bytes left in buffer");
+            }
+            $b = ord($buffer[$offset++]);
+            $value |= (($b & 0x7f) << $i);
+
+            if(($b & 0x80) === 0){
+                return $value;
+            }
+        }
+
+        throw new \InvalidArgumentException("VarInt did not terminate after 5 bytes!");
+    }
+
 	public static function readUnsignedVarInt($stream){
 		$value = 0;
 		$i = 0;

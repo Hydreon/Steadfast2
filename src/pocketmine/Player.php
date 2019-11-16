@@ -1128,6 +1128,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				$this->interface->putReadyPacket($this, $packet->getBuffer());
 				$packet->senderSubClientID = 0;
 				return;
+            case 'SCRIPT_CUSTOM_EVENT_PACKET':
+                $packet->encode($this->protocol);
+                $this->interface->newputPacket($this, $packet);
+                $packet->senderSubClientID = 0;
+                return;
 			case 'ADD_PLAYER_PACKET':
 			case 'ADD_ENTITY_PACKET':
 			case 'ADD_ITEM_ENTITY_PACKET':
