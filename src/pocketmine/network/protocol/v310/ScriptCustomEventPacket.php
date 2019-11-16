@@ -27,4 +27,5 @@ class ScriptCustomEventPacket extends PEPacket
         $this->eventName = $this->getString();
         $this->eventData = $this->getString();
     }
+
 }
