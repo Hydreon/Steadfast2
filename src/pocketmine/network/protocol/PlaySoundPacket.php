@@ -3,38 +3,33 @@
 
 namespace pocketmine\network\protocol;
 
-
 class PlaySoundPacket extends PEPacket {
-    const NETWORK_ID = Info::PLAY_SOUND_PACKET;
-    /** @var string */
-    public $soundName;
-    /** @var float */
+
+    const NETWORK_ID = Info120::PLAY_SOUND_PACKET;
+    const PACKET_NAME = "PLAY_SOUND_PACKET";
+
+    public $string1;
+
     public $x;
-    /** @var float */
     public $y;
-    /** @var float */
     public $z;
-    /** @var float */
-    public $volume;
-    /** @var float */
-    public $pitch;
+
+    public $float1;
+    public $float2;
+
     public function decode($playerProtocol){
-        $this->soundName = $this->getString();
+        $this->string1 = $this->getString();
         $this->getBlockPosition($this->x, $this->y, $this->z);
-        $this->x /= 8;
-        $this->y /= 8;
-        $this->z /= 8;
-        $this->volume = $this->getLFloat();
-        $this->pitch = $this->getLFloat();
+        $this->float1 = $this->getLFloat();
+        $this->float2 = $this->getLFloat();
     }
-    public function encode($playerProtocol = Info::PROTOCOL_388){
+
+    public function encode($playerProtocol){
         $this->reset($playerProtocol);
-        $this->putString($this->soundName);
-        $this->putBlockPosition((int) ($this->x * 8), (int) ($this->y * 8), (int) ($this->z * 8));
-        $this->putLFloat($this->volume);
-        $this->putLFloat($this->pitch);
+        $this->putString($this->string1);
+        $this->putBlockPosition($this->x, $this->y, $this->z);
+        $this->putLFloat($this->float1);
+        $this->putLFloat($this->float2);
     }
-    public function handle(NetworkSession $session) : bool{
-        return $session->handlePlaySound($this);
-    }
+
 }

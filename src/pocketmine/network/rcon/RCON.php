@@ -1,28 +1,10 @@
 <?php
 
-/*
- *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
- * 
- *
-*/
-
 /**
  * Implementation of the Source RCON Protocol to allow remote console commands
  * Source: https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
  */
+
 namespace pocketmine\network\rcon;
 
 use pocketmine\command\RemoteConsoleCommandSender;
@@ -71,7 +53,7 @@ class RCON{
 		for($n = 0; $n < $this->threads; ++$n){
 			$this->workers[$n]->close();
 			usleep(50000);
-			$this->workers[$n]->kill();
+			$this->workers[$n]->quit();
 		}
 		@socket_close($this->socket);
 		$this->threads = 0;
@@ -80,8 +62,7 @@ class RCON{
 	public function check(){
 		for($n = 0; $n < $this->threads; ++$n){
 			if($this->workers[$n]->isTerminated() === true){
-				$this->workers[$n] = new RCONInstance($this->socket, $this->password, $this->clientsPerThread);
-			}elseif($this->workers[$n]->isWaiting()){
+                $this->workers[$n] = new RCONInstance($this->socket, $this->password, $this->server->getLogger(), $this->clientsPerThread);			}elseif($this->workers[$n]->isWaiting()){
 				if($this->workers[$n]->response !== ""){
 					$this->server->getLogger()->info($this->workers[$n]->response);
 					$this->workers[$n]->synchronized(function (RCONInstance $thread){

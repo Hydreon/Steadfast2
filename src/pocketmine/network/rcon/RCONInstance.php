@@ -1,44 +1,33 @@
 <?php
 
-/*
- *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
- * 
- *
-*/
-
 namespace pocketmine\network\rcon;
 
 use pocketmine\Thread;
 use pocketmine\utils\Binary;
 
-class RCONInstance extends Thread{
+class RCONInstance extends Thread {
+
 	public $stop;
+
 	public $cmd;
+
 	public $response;
+
 	private $socket;
+
 	private $password;
+
+	private $logger;
+
 	private $maxClients;
 
-
-	public function __construct($socket, $password, $maxClients = 50){
+    public function __construct($socket, $password, $logger, $maxClients = 50){
 		$this->stop = false;
 		$this->cmd = "";
 		$this->response = "";
 		$this->socket = $socket;
 		$this->password = $password;
+		$this->logger = $logger;
 		$this->maxClients = (int) $maxClients;
 		for($n = 0; $n < $this->maxClients; ++$n){
 			$this->{"client" . $n} = null;
@@ -48,6 +37,10 @@ class RCONInstance extends Thread{
 
 		$this->start();
 	}
+
+    public function isWaiting(){
+        return $this->waiting === true;
+    }
 
 	private function writePacket($client, $requestID, $packetType, $payload){
 		$pk = Binary::writeLInt((int) $requestID)
@@ -59,22 +52,32 @@ class RCONInstance extends Thread{
 
 	private function readPacket($client, &$size, &$requestID, &$packetType, &$payload){
 		socket_set_nonblock($client);
-		$d = socket_read($client, 4);
+        $d = @socket_read($client, 4);
+        socket_getpeername($client, $ip, $port);
 		if($this->stop === true){
 			return false;
 		}elseif($d === false){
-			return null;
+            $err = socket_last_error($client);
+            if($err !== SOCKET_ECONNRESET){
+                $this->logger->debug("Connection error with $ip $port: " . trim(socket_strerror($err)));
+            }
+            return null;
 		}elseif($d === "" or strlen($d) < 4){
+            $this->logger->debug("Truncated packet from $ip $port (want 4 bytes, have " . strlen($d) . "), disconnecting");
 			return false;
 		}
+
 		socket_set_block($client);
 		$size = Binary::readLInt($d);
 		if($size < 0 or $size > 65535){
+            $this->logger->debug("Packet with too-large length header $size from $ip $port, disconnecting");
 			return false;
 		}
+
 		$requestID = Binary::readLInt(socket_read($client, 4));
 		$packetType = Binary::readLInt(socket_read($client, 4));
 		$payload = rtrim(socket_read($client, $size + 2)); //Strip two null bytes
+
 		return true;
 	}
 
@@ -83,7 +86,6 @@ class RCONInstance extends Thread{
 	}
 
 	public function run(){
-
 		while($this->stop !== true){
 			$this->synchronized(function(){
 							$this->wait(2000);
@@ -135,6 +137,7 @@ class RCONInstance extends Thread{
 								}
 								if($payload === $this->password){
 									socket_getpeername($client, $addr, $port);
+                                    $this->logger->info("[INFO] Successful Rcon connection from: /$addr:$port");
 									$this->response = "[INFO] Successful Rcon connection from: /$addr:$port";
 									$this->synchronized(function (){
 										$this->wait();
@@ -156,6 +159,7 @@ class RCONInstance extends Thread{
 								if(strlen($payload) > 0){
 									$this->cmd = ltrim($payload);
 									$this->synchronized(function (){
+                                        $this->waiting = true;
 										$this->wait();
 									});
 									$this->writePacket($client, $requestID, 0, str_replace("\n", "\r\n", trim($this->response)));
@@ -166,6 +170,7 @@ class RCONInstance extends Thread{
 						}
 						usleep(1);
 					}else{
+                        socket_getpeername($client, $ip, $port);
 						@socket_set_option($client, SOL_SOCKET, SO_LINGER, ["l_onoff" => 1, "l_linger" => 1]);
 						@socket_shutdown($client, 2);
 						@socket_set_block($client);
@@ -173,6 +178,7 @@ class RCONInstance extends Thread{
 						@socket_close($client);
 						$this->{"status" . $n} = 0;
 						$this->{"client" . $n} = null;
+                        $this->logger->info("[INFO] Disconnected client: /$ip:$port");
 					}
 				}
 			}

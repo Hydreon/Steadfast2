@@ -40,7 +40,9 @@ use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\MapInfoRequestPacket;
 use pocketmine\network\protocol\SetEntityLinkPacket;
+use pocketmine\network\protocol\PlaySoundPacket;
 use pocketmine\network\protocol\SpawnExperienceOrbPacket;
+use pocketmine\network\protocol\StopSoundPacket;
 use pocketmine\network\protocol\TileEntityDataPacket;
 use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\network\protocol\ExplodePacket;
@@ -51,6 +53,7 @@ use pocketmine\network\protocol\Info331 as ProtocolInfo331;
 use pocketmine\network\protocol\InteractPacket;
 use pocketmine\network\protocol\LevelEventPacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
+use pocketmine\network\protocol\ItemFrameDropItemPacket;
 use pocketmine\network\protocol\DisconnectPacket;
 use pocketmine\network\protocol\LoginPacket;
 use pocketmine\network\protocol\PlayStatusPacket;
@@ -74,8 +77,7 @@ use pocketmine\network\protocol\TransferPacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
 use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\network\protocol\v120\PlayerSkinPacket;
-use pocketmine\network\protocol\v120\PlaySoundPacket;
-use pocketmine\network\protocol\v120\StopSoundPacket;
+use pocketmine\network\protocol\v310\ScriptCustomEventPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\MainLogger;
@@ -413,6 +415,7 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::PURCHASE_RECEIPT_PACKET, PurchaseReceiptPacket::class);
 		$this->registerPacket120(ProtocolInfo120::SUB_CLIENT_LOGIN_PACKET, SubClientLoginPacket::class);		
 		$this->registerPacket120(ProtocolInfo120::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
+        $this->registerPacket120(ProtocolInfo120::ITEM_FRAME_DROP_ITEM_PACKET, ItemFrameDropItemPacket::class);
 	}
 	
 	private function registerPackets310() {
@@ -483,7 +486,10 @@ class Network {
 		$this->registerPacket310(ProtocolInfo310::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET, NetworkChunkPublisherUpdatePacket::class);	
 		$this->registerPacket310(ProtocolInfo310::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
 		$this->registerPacket310(ProtocolInfo310::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
-
+        $this->registerPacket310(ProtocolInfo310::ITEM_FRAME_DROP_ITEM_PACKET, ItemFrameDropItemPacket::class);
+        $this->registerPacket310(ProtocolInfo310::SCRIPT_CUSTOM_EVENT_PACKET, ScriptCustomEventPacket::class);
+        $this->registerPacket310(ProtocolInfo310::PLAY_SOUND_PACKET, PlaySoundPacket::class);
+        $this->registerPacket310(ProtocolInfo310::STOP_SOUND_PACKET, StopSoundPacket::class);
 	}
 	
 	private function registerPackets331() {
@@ -554,5 +560,9 @@ class Network {
 		$this->registerPacket331(ProtocolInfo331::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET, NetworkChunkPublisherUpdatePacket::class);	
 		$this->registerPacket331(ProtocolInfo331::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
 		$this->registerPacket331(ProtocolInfo331::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
+        $this->registerPacket331(ProtocolInfo331::ITEM_FRAME_DROP_ITEM_PACKET, ItemFrameDropItemPacket::class);
+        $this->registerPacket331(ProtocolInfo331::SCRIPT_CUSTOM_EVENT_PACKET, ScriptCustomEventPacket::class);
+        $this->registerPacket331(ProtocolInfo331::PLAY_SOUND_PACKET, PlaySoundPacket::class);
+        $this->registerPacket331(ProtocolInfo331::STOP_SOUND_PACKET, StopSoundPacket::class);
 	}
 }
