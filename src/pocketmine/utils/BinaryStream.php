@@ -5,11 +5,15 @@ namespace pocketmine\utils;
 use pocketmine\item\Item;
 use pocketmine\nbt\NBT;
 use pocketmine\network\protocol\Info;
+use function chr;
+use function ord;
+use function strlen;
+use function substr;
 
 class BinaryStream {
-	
-	private $offset;
-	public $buffer;
+
+    private $offset = 0;
+    public $buffer = "";
 
 	private function writeErrorLog($depth = 3) {
 		$depth = max($depth, 3);
@@ -48,8 +52,14 @@ class BinaryStream {
 	}
 
 	public function reset() {
-		$this->setBuffer();
-	}
+        $this->buffer = "";
+        $this->offset = 0;
+    }
+
+    public function rewind()
+    {
+        $this->offset = 0;
+    }
 
 	public function setBuffer($buffer = "", $offset = 0) {
 		$this->buffer = $buffer;
