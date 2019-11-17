@@ -21,6 +21,8 @@
 
 namespace pocketmine;
 
+use pocketmine\network\protocol\v120\PlaySoundPacket;
+use pocketmine\network\protocol\v120\StopSoundPacket;
 use const M_SQRT3;
 use function max;
 use function mt_rand;
@@ -3294,6 +3296,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	public function removeMetadata($metadataKey, Plugin $plugin){
 		$this->server->getPlayerMetadata()->removeMetadata($this, $metadataKey, $plugin);
 	}
+
+    public function handlePlaySound(network\protocol\v120\PlaySoundPacket $packet) : bool{
+        return false;
+    }
+
+    public function handleStopSound(StopSoundPacket $packet) : bool{
+        return false;
+    }
 
 	public function setLastMessageFrom($name) {
 		$this->lastMessageReceivedFrom = (string)$name;

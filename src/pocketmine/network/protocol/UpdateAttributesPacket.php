@@ -30,7 +30,6 @@ class UpdateAttributesPacket extends PEPacket{
     const EXPERIENCE = "minecraft:player.experience";
     const EXPERIENCE_LEVEL = "minecraft:player.level";
 	const SPEED = "minecraft:movement";
-    const ABSORPTION = "minecraft:absorption";
 
     public $entityId;
 
