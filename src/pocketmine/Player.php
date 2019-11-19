@@ -2238,9 +2238,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				$pk = new ChunkRadiusUpdatePacket();
 				$pk->radius = $packet->radius;
 				$this->dataPacket($pk);
-				$this->loggedIn = true;
-				$this->scheduleUpdate();
-				$this->justCreated = false;
+				if (!$this->loggedIn && $this->loginCompleted) {
+					$this->loggedIn = true;
+					$this->scheduleUpdate();
+					$this->justCreated = false;
+				}
 				//Timings::$timerChunkRudiusPacket->stopTiming();
 				break;
 			case 'COMMAND_STEP_PACKET':
