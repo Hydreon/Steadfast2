@@ -75,7 +75,9 @@ class BinaryStream {
 		} else if ($len === true) {
 			return substr($this->buffer, $this->offset);
 		}
-
+		if (strlen($this->buffer) < $this->offset + $len) {
+			throw new \Exception('binary stream get error');
+		}
 		return $len === 1 ? $this->buffer{$this->offset++} : substr($this->buffer, ($this->offset += $len) - $len, $len);
 	}
 
@@ -164,6 +166,9 @@ class BinaryStream {
 	}
 
 	public function getByte() {
+		if (strlen($this->buffer) < $this->offset + 1) {
+			throw new \Exception('binary stream getByte error');
+		}
 		return ord($this->buffer{$this->offset++});
 	}
 
