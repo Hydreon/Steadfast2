@@ -333,7 +333,7 @@ class BinaryStream {
 			$skinGeomtryName = "geometry.humanoid.custom";
 		}
 		$this->putString($skinId);
-		$this->putString(isset($additionalSkinData['SkinResourcePatch']) ? $additionalSkinData['SkinResourcePatch'] : '{"geometry" : {"default" : "' . $skinGeomtryName . '"}}');
+		$this->putString('{"geometry" : {"default" : "' . $skinGeomtryName . '"}}');
 		if (isset($additionalSkinData['SkinImageHeight']) && isset($additionalSkinData['SkinImageWidth'])) {
 			$width = $additionalSkinData['SkinImageWidth'];
 			$height = $additionalSkinData['SkinImageHeight'];
