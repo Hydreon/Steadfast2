@@ -1792,7 +1792,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				}
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
-				$this->checkSkinGeometry($packet->skinGeometryName, $packet->additionalSkinData);
+				$this->checkSkinGeometry($packet->skinGeometryName, $packet->additionalSkinData, $packet->skinGeometryData);
 				$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData, $packet->premiunSkin);
                 if ($packet->osType > 0) {
                     $this->deviceType = $packet->osType;
@@ -5141,10 +5141,23 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 	}
 	
-	protected function checkSkinGeometry(&$skinGeometryName, $additionalSkinData) {
+	protected function checkSkinGeometry(&$skinGeometryName, $additionalSkinData, &$skinGeometryData) {
 		if (empty($skinGeometryName) && !empty($additionalSkinData['SkinResourcePatch'])) {
 			if (($jsonSkinData = @json_decode($additionalSkinData['SkinResourcePatch'], true)) && isset($jsonSkinData['geometry']['default'])) {
 				$skinGeometryName = $jsonSkinData['geometry']['default'];
+			}
+		}
+		if (!empty($skinGeometryName) && stripos($skinGeometryName, 'geometry.') !== 0) {
+			if (!empty($skinGeometryData) && ($jsonSkinData = @json_decode($skinGeometryData, true))) {
+				foreach ($jsonSkinData as $key => $value) {
+					if ($key == $skinGeometryName) {
+						unset($jsonSkinData[$key]);
+						$jsonSkinData['geometry.' . $key] = $value;
+						$skinGeometryName = 'geometry.' . $skinGeometryName;
+						$skinGeometryData = json_encode($jsonSkinData);
+						break;
+					}
+				}
 			}
 		}
 	}
