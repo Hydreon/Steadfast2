@@ -328,12 +328,12 @@ class BinaryStream {
 		}
 		if (isset($additionalSkinData['skinGeomtryData'])) {
 			$skinGeomtryData = $additionalSkinData['skinGeomtryData'];
-		}
+		}		
 		if (empty($skinGeomtryName)) {
 			$skinGeomtryName = "geometry.humanoid.custom";
 		}
 		$this->putString($skinId);
-		$this->putString('{"geometry" : {"default" : "' . $skinGeomtryName . '"}}');
+		$this->putString(isset($additionalSkinData['SkinResourcePatch']) ? $additionalSkinData['SkinResourcePatch'] : '{"geometry" : {"default" : "' . $skinGeomtryName . '"}}');
 		if (isset($additionalSkinData['SkinImageHeight']) && isset($additionalSkinData['SkinImageWidth'])) {
 			$width = $additionalSkinData['SkinImageWidth'];
 			$height = $additionalSkinData['SkinImageHeight'];
@@ -436,6 +436,33 @@ class BinaryStream {
 	}
 
 	public function checkSkinData(&$skinData, &$skinGeomtryName, &$skinGeomtryData, &$additionalSkinData) {
+		if (empty($skinGeomtryName) && !empty($additionalSkinData['SkinResourcePatch'])) {
+			if (($jsonSkinResourcePatch = @json_decode($additionalSkinData['SkinResourcePatch'], true)) && isset($jsonSkinResourcePatch['geometry']['default'])) {
+				$skinGeomtryName = $jsonSkinResourcePatch['geometry']['default'];
+			}
+		} 
+		if (!empty($skinGeomtryName) && stripos($skinGeomtryName, 'geometry.') !== 0) {
+			if (!empty($skinGeomtryData) && ($jsonSkinData = @json_decode($skinGeomtryData, true))) {
+				foreach ($jsonSkinData as $key => $value) {
+					if ($key == $skinGeomtryName) {
+						unset($jsonSkinData[$key]);
+						$jsonSkinData['geometry.' . $key] = $value;
+						$skinGeomtryName = 'geometry.' . $key;
+						$skinGeomtryData = json_encode($jsonSkinData);
+						if (!empty($additionalSkinData['SkinResourcePatch']) && ($jsonSkinResourcePatch = @json_decode($additionalSkinData['SkinResourcePatch'], true)) && !empty($jsonSkinResourcePatch['geometry'])) {
+							foreach ($jsonSkinResourcePatch['geometry'] as &$geometryName) {
+								if ($geometryName == $key) {
+									$geometryName = $skinGeomtryName;
+									$additionalSkinData['SkinResourcePatch'] = json_encode($jsonSkinResourcePatch);
+									break;
+								}
+							}
+						}						
+						break;
+					}
+				}
+			}
+		}
 		if (isset($additionalSkinData['PersonaSkin']) && $additionalSkinData['PersonaSkin']) {
 			static $defaultSkins = [];
 			if (empty($defaultSkins)) {
