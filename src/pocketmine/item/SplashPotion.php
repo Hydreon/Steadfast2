@@ -41,7 +41,7 @@ class SplashPotion extends Item
         $effects = [];
 
         $potion = Potion::POTIONS[$id] ?? [];
-        if(count($potion) === 3){
+        if(!is_null($potion) && count($potion) === 3){
             $effect = Effect::getEffect($potion[0]);
             $effect->setDuration($potion[1]);
             $effect->setAmplifier($potion[2]);
