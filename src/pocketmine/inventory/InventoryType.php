@@ -71,6 +71,10 @@ class InventoryType{
  		static::$default[static::BREWING_STAND] = new InventoryType(4, "Brewing", 4); //1 INPUT, 3 POTION
  		static::$default[static::ANVIL] = new InventoryType(3, "Anvil", 5); //2 INPUT, 1 OUTPUT
 	}
+	
+	public static function registerInventoryType($id, $size, $name, $typeId) {
+		static::$default[$id] = new InventoryType($size, $name, $typeId);
+	}
 
 	/**
 	 * @param int    $defaultSize
