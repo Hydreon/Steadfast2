@@ -1974,7 +1974,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				}
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
-				$this->checkSkinGeometry($packet->skinGeometryName, $packet->additionalSkinData);
 				$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData, $packet->premiunSkin);
                 if ($packet->osType > 0) {
                     $this->deviceType = $packet->osType;
@@ -2437,9 +2436,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				$pk = new ChunkRadiusUpdatePacket();
 				$pk->radius = $packet->radius;
 				$this->dataPacket($pk);
-				$this->loggedIn = true;
-				$this->scheduleUpdate();
-				$this->justCreated = false;
+				if (!$this->loggedIn && $this->loginCompleted) {
+					$this->loggedIn = true;
+					$this->scheduleUpdate();
+					$this->justCreated = false;
+				}
 				//Timings::$timerChunkRudiusPacket->stopTiming();
 				break;
 			case 'COMMAND_STEP_PACKET':
@@ -5503,14 +5504,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	protected function updateFallState($distanceThisTick, $onGround) {
 		if ($onGround || !$this->allowFlight && !$this->elytraIsActivated) {
 			parent::updateFallState($distanceThisTick, $onGround);
-		}
-	}
-	
-	protected function checkSkinGeometry(&$skinGeometryName, $additionalSkinData) {
-		if (empty($skinGeometryName) && !empty($additionalSkinData['SkinResourcePatch'])) {
-			if (($jsonSkinData = @json_decode($additionalSkinData['SkinResourcePatch'], true)) && isset($jsonSkinData['geometry']['default'])) {
-				$skinGeometryName = $jsonSkinData['geometry']['default'];
-			}
 		}
 	}
 	
