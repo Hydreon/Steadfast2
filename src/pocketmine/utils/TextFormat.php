@@ -78,7 +78,7 @@ abstract class TextFormat{
 	 */
 	public static function clean($string, $removeFormat = true){
 		if($removeFormat){
-			return str_replace("§", "", preg_replace(["/§[0123456789abcdefklmnor]/", "/\x1b[\\(\\][[0-9;\\[\\(]+[Bm]/"], "", $string));
+			$string = str_replace("§", "", preg_replace("/§[0123456789abcdefklmnor]/", "", $string));
 		}
 		return str_replace("\x1b", "", preg_replace("/\x1b[\\(\\][[0-9;\\[\\(]+[Bm]/", "", $string));
 	}
