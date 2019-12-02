@@ -100,6 +100,10 @@ class InventoryType{
 		static::$default[static::DROPPER] = new InventoryType(9, "Dropper", self::TYPE_DROPPER); //9 INPUT
 		static::$default[static::HOPPER] = new InventoryType(5, "Hopper", self::TYPE_HOPPER); //5 INPUT
 	}
+	
+	public static function registerInventoryType($id, $size, $name, $typeId) {
+		static::$default[$id] = new InventoryType($size, $name, $typeId);
+	}
 
 	/**
 	 * @param int    $defaultSize
