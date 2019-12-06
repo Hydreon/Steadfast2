@@ -1795,7 +1795,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				}
 				$this->rawUUID = $this->uuid->toBinary();
 				$this->clientSecret = $packet->clientSecret;
-				$this->checkSkinGeometry($packet->skinGeometryName, $packet->additionalSkinData);
 				$this->setSkin($packet->skin, $packet->skinName, $packet->skinGeometryName, $packet->skinGeometryData, $packet->capeData, $packet->premiunSkin);
                 if ($packet->osType > 0) {
                     $this->deviceType = $packet->osType;
@@ -2262,9 +2261,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				$pk = new ChunkRadiusUpdatePacket();
 				$pk->radius = $packet->radius;
 				$this->dataPacket($pk);
-				$this->loggedIn = true;
-				$this->scheduleUpdate();
-				$this->justCreated = false;
+				if (!$this->loggedIn && $this->loginCompleted) {
+					$this->loggedIn = true;
+					$this->scheduleUpdate();
+					$this->justCreated = false;
+				}
 				//Timings::$timerChunkRudiusPacket->stopTiming();
 				break;
 			case 'COMMAND_STEP_PACKET':
@@ -2353,6 +2354,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			case 'INVENTORY_TRANSACTION_PACKET':
 				switch ($packet->transactionType) {
 					case InventoryTransactionPacket::TRANSACTION_TYPE_INVENTORY_MISMATCH:
+						$this->sendAllInventories();
 						break;
 					case InventoryTransactionPacket::TRANSACTION_TYPE_NORMAL:
 						$this->normalTransactionLogic($packet);
@@ -4861,17 +4863,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	public function updatePlayerSkin($oldSkinName, $newSkinName) {
-		$pk = new PlayerSkinPacket();
-		$pk->uuid = $this->getUniqueId();
-		$pk->newSkinId = $this->skinName;
-		$pk->newSkinName = $newSkinName;
-		$pk->oldSkinName = $oldSkinName;
-		$pk->newSkinByteData = $this->skin;
-		$pk->newCapeByteData = $this->capeData;
-		$pk->newSkinGeometryName = $this->skinGeometryName;
-		$pk->newSkinGeometryData = $this->skinGeometryData;
-		$pk->additionalSkinData = $this->additionalSkinData;
-		$this->server->batchPackets($this->server->getOnlinePlayers(), [$pk]);
+		if ($this->spawned) {
+			$pk = new PlayerSkinPacket();
+			$pk->uuid = $this->getUniqueId();
+			$pk->newSkinId = $this->skinName;
+			$pk->newSkinName = $newSkinName;
+			$pk->oldSkinName = $oldSkinName;
+			$pk->newSkinByteData = $this->skin;
+			$pk->newCapeByteData = $this->capeData;
+			$pk->newSkinGeometryName = $this->skinGeometryName;
+			$pk->newSkinGeometryData = $this->skinGeometryData;
+			$pk->additionalSkinData = $this->additionalSkinData;
+			$this->server->batchPackets($this->server->getOnlinePlayers(), [$pk]);
+		}
 	}
 
 	/**
@@ -5264,12 +5268,11 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 	}
 	
-	protected function checkSkinGeometry(&$skinGeometryName, $additionalSkinData) {
-		if (empty($skinGeometryName) && !empty($additionalSkinData['SkinResourcePatch'])) {
-			if (($jsonSkinData = @json_decode($additionalSkinData['SkinResourcePatch'], true)) && isset($jsonSkinData['geometry']['default'])) {
-				$skinGeometryName = $jsonSkinData['geometry']['default'];
-			}
+	protected function sendAllInventories(){
+		if (!is_null($this->currentWindow)) {
+			$this->currentWindow->sendContents($this);
 		}
+		$this->getInventory()->sendContents($this);
 	}
 
 }
