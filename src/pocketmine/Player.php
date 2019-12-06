@@ -4808,17 +4808,19 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	public function updatePlayerSkin($oldSkinName, $newSkinName) {
-		$pk = new PlayerSkinPacket();
-		$pk->uuid = $this->getUniqueId();
-		$pk->newSkinId = $this->skinName;
-		$pk->newSkinName = $newSkinName;
-		$pk->oldSkinName = $oldSkinName;
-		$pk->newSkinByteData = $this->skin;
-		$pk->newCapeByteData = $this->capeData;
-		$pk->newSkinGeometryName = $this->skinGeometryName;
-		$pk->newSkinGeometryData = $this->skinGeometryData;
-		$pk->additionalSkinData = $this->additionalSkinData;
-		$this->server->batchPackets($this->server->getOnlinePlayers(), [$pk]);
+		if ($this->spawned) {
+			$pk = new PlayerSkinPacket();
+			$pk->uuid = $this->getUniqueId();
+			$pk->newSkinId = $this->skinName;
+			$pk->newSkinName = $newSkinName;
+			$pk->oldSkinName = $oldSkinName;
+			$pk->newSkinByteData = $this->skin;
+			$pk->newCapeByteData = $this->capeData;
+			$pk->newSkinGeometryName = $this->skinGeometryName;
+			$pk->newSkinGeometryData = $this->skinGeometryData;
+			$pk->additionalSkinData = $this->additionalSkinData;
+			$this->server->batchPackets($this->server->getOnlinePlayers(), [$pk]);
+		}
 	}
 
 	/**
