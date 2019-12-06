@@ -1047,6 +1047,18 @@ class Item{
 		
 		self::addCreativeItem(Item::get(Item::COBBLESTONE_WALL, 0));
 		self::addCreativeItem(Item::get(Item::COBBLESTONE_WALL, 1));		
+		self::addCreativeItem(Item::get(Item::STONE_WALL, 2));		
+		self::addCreativeItem(Item::get(Item::STONE_WALL, 3));		
+		self::addCreativeItem(Item::get(Item::STONE_WALL, 4));		
+		self::addCreativeItem(Item::get(Item::STONE_WALL, 5));		
+		self::addCreativeItem(Item::get(Item::STONE_WALL, 6));		
+		self::addCreativeItem(Item::get(Item::STONE_WALL, 7));		
+		self::addCreativeItem(Item::get(Item::STONE_WALL, 8));		
+		self::addCreativeItem(Item::get(Item::STONE_WALL, 9));		
+		self::addCreativeItem(Item::get(Item::STONE_WALL, 10));		
+		self::addCreativeItem(Item::get(Item::STONE_WALL, 11));		
+		self::addCreativeItem(Item::get(Item::STONE_WALL, 12));		
+		self::addCreativeItem(Item::get(Item::STONE_WALL, 13));				
 		
 		self::addCreativeItem(Item::get(Item::FENCE, 0));
 		self::addCreativeItem(Item::get(Item::FENCE, 1));
@@ -1074,6 +1086,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::NETHER_BRICKS_STAIRS, 0));
 		self::addCreativeItem(Item::get(Item::SANDSTONE_STAIRS, 0));		
 		self::addCreativeItem(Item::get(Item::QUARTZ_STAIRS, 0));
+		self::addCreativeItem(Item::get(Item::RED_SANDSTONE_STAIRS, 0));
 
 		self::addCreativeItem(Item::get(Item::WOODEN_DOOR, 0));
 		self::addCreativeItem(Item::get(Item::TRAPDOOR, 0));
@@ -1373,6 +1386,7 @@ class Item{
 		
 		self::addCreativeItem(Item::get(Item::REDSTONE, 0));
 		self::addCreativeItem(Item::get(Item::REDSTONE_BLOCK, 0));
+		self::addCreativeItem(Item::get(Item::HOPPER, 0));
 		self::addCreativeItem(Item::get(Item::TNT, 0));
 		
 	}
