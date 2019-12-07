@@ -335,7 +335,7 @@ class Server{
 	 * @return string
 	 */
 	public function getName(){
-		return "Steadfast3";
+		return "Steadfast5";
 	}
 
 	/**
@@ -1528,7 +1528,7 @@ class Server{
 
 		$this->logger->info("Loading server properties...");
 		$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, [
-			"motd" => "A Steadfast3 Minecraft PE server",
+			"motd" => "A Steadfast5 Minecraft: Bedrock Edition server",
 			"server-port" => 19132,
 			"memory-limit" => "256M",
 			"white-list" => false,
