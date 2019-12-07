@@ -454,7 +454,7 @@ namespace pocketmine {
 	}
 
 	if(\Phar::running(true) === ""){
-		$logger->warning("Non-packaged Steadfast3 installation detected, do not use on production.");
+		$logger->warning("Non-packaged Steadfast5 installation detected, do not use on production.");
 	}
 
 	ThreadManager::init();
