@@ -2,6 +2,12 @@
 TITLE PocketMine-MP server software for Minecraft: Bedrock Edition
 cd /d %~dp0
 
+if exist %~dp0PocketMine-MP\ goto PMSTART
+
+where git >nul 2>nul || (powershell -command "& { iwr https://github.com/git-for-windows/git/releases/download/v2.20.1.windows.1/Git-2.20.1-64-bit.exe -OutFile Git-2.20.1-64-bit.exe }" & start Git-2.20.1-64-bit.exe & pause)
+
+git clone https://github.com/IceCruelStuff/bin.git --recursive
+
 if exist bin\php\php.exe (
 	set PHPRC=""
 	set PHP_BINARY=bin\php\php.exe
