@@ -1,6 +1,6 @@
   <img src="https://github.com/MFDGaming/PocketMine-Steadfast3/blob/master/Steadfast3.png" alt="Steadfast3 logo" title="Aimeos" align="center" />
 
-# Steadfast3 Minecraft PE Server Software
+# Steadfast5 Minecraft PE Server Software
 
 # Links
 | Jenkins | TravisCI | Discord |
@@ -9,7 +9,7 @@
 
 ## Introduction
 
-Steadfast3 is a project for backporting new Minecraft: Pocket Edition changes to older Pocketmine versions for better stability and performance, while retaining as many features from the new PocketMine-MP versions as possible.
+Steadfast5 is a project for backporting new Minecraft: Bedrock Edition changes to older Pocketmine versions for better stability and performance, while retaining as many features from the new PocketMine-MP versions as possible.
 
 ## Todo-List
 
