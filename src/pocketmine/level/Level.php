@@ -2416,4 +2416,8 @@ class Level implements ChunkManager, Metadatable{
 	public function getUpdateQueue() {
 		return $this->updateQueue;
 	}
+	
+	public function isClosed() {
+		return $this->closed;
+	}
 }
