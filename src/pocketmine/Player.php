@@ -5148,5 +5148,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 		$this->getInventory()->sendContents($this);
 	}
+	
+	public function getAdditionalSkinData() {
+		return $this->additionalSkinData;
+	}
 
 }
