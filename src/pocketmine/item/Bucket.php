@@ -48,11 +48,18 @@ class Bucket extends Item{
 			if($target instanceof Liquid and $target->getDamage() === 0){
 				$result = clone $this;
 				$result->setDamage($target->getId());
+				$result->setCount(1);
 				$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $block, $face, $this, $result));
 				if(!$ev->isCancelled()){
 					$player->getLevel()->setBlock($target, new Air(), true, true);
 					if($player->isSurvival()){
-						$player->getInventory()->setItemInHand($ev->getItem(), $player);
+						if ($this->count <= 1) {
+							$player->getInventory()->setItemInHand($ev->getItem(), $player);
+						} else {
+							$this->count--;
+							$player->getInventory()->addItem($ev->getItem());
+						}
+												
 					}
 					return true;
 				}else{
