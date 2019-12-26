@@ -44,6 +44,7 @@ class MetadataConvertor {
 		'DATA_FLAG_CAN_POWER_JUMP' => 44,
 		'DATA_FLAG_HAS_COLLISION' => 46,
 		'DATA_FLAG_AFFECTED_BY_GRAVITY' => 47,
+		'DATA_FLAG_FIRE_IMMUNE' => 48,
 	];
 	private static $diffEntityFlags290 = [
 		'DATA_FLAG_RESTING_BAT' => 23,
@@ -64,6 +65,7 @@ class MetadataConvertor {
 		'DATA_FLAG_CAN_POWER_JUMP' => 45,
 		'DATA_FLAG_HAS_COLLISION' => 47,
 		'DATA_FLAG_AFFECTED_BY_GRAVITY' => 48,
+		'DATA_FLAG_FIRE_IMMUNE' => 49,
 	];
 	private static $entityFlags120 = [];
 	private static $entityFlags221 = [];

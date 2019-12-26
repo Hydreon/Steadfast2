@@ -1330,6 +1330,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::COOKED_FISH, 0));
 		self::addCreativeItem(Item::get(Item::COOKED_FISH, 1));
 		self::addCreativeItem(Item::get(Item::CAKE, 0));
+		self::addCreativeItem(Item::get(Item::BREAD, 0));
 		
 		self::addCreativeItem(Item::get(Item::FISHING_ROD, 0));
 		self::addCreativeItem(Item::get(Item::SNOWBALL));

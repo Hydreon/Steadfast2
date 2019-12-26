@@ -42,7 +42,7 @@ class PlayerActionPacket extends PEPacket{
 		$this->x = $this->getSignedVarInt();
 		$this->y = $this->getVarInt();
 		$this->z = $this->getSignedVarInt();
-		$this->face = $this->getVarInt();
+		$this->face = $this->getSignedVarInt();
 	}
 
 	public function encode($playerProtocol){
@@ -52,7 +52,7 @@ class PlayerActionPacket extends PEPacket{
 		$this->putSignedVarInt($this->x);
 		$this->putVarInt($this->y);
 		$this->putSignedVarInt($this->z);
-		$this->putVarInt($this->face);
+		$this->putSignedVarInt($this->face);
 	}
 
 }
