@@ -224,8 +224,10 @@ class SessionManager{
 				if (empty($buf) || $buf == $spamPacket || $buf == $spamPacket2) {
 					continue;
 				}
-				if (ord($buf{0}) != 0x21) {
-					$count++;
+				if (ord($buf{0}) != 0x21 && ord($buf{0}) != 0x35) {
+					if (ord($buf{0}) != 0x1e || ord($buf{1}) != 0) {
+						$count++;
+					}
 				}
 				$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buf;
 				$this->server->pushThreadToMainPacket($buffer);

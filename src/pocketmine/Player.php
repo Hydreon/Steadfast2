@@ -1964,11 +1964,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 						if (!$this->isCreative()) {
 							$block = $this->level->getBlock(new Vector3($packet->x, $packet->y, $packet->z));
 							$breakTime = ceil($block->getBreakTime($this->inventory->getItemInHand()) * 20);
-							$up = $block->getSide(1);
-							if ($up->getId() === Block::FIRE) {
-								$pk = new UpdateBlockPacket();
-								$pk->records[] = [$up->getX(), $up->getZ(), $up->getY(), Block::FIRE, 0, UpdateBlockPacket::FLAG_ALL];
-								$this->dataPacket($pk);
+							$fireBlock = $block->getSide($packet->face);
+							if ($fireBlock->getId() === Block::FIRE) {
+								$fireBlock->onUpdate(Level::BLOCK_UPDATE_TOUCH);
 							}
 							if ($breakTime > 0) {
 								$pk = new LevelEventPacket();
@@ -4099,14 +4097,28 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					}
 					return;
 				}
-				if (isset(self::$foodData[$itemInHand->getId()])) {
-					if ($this->getFood() >= self::FOOD_LEVEL_MAX) {
+				if ($itemInHand instanceof Armor) {
+					$this->inventory->setItem($this->inventory->getHeldItemSlot(), $this->inventory->getArmorItem($itemInHand::SLOT_NUMBER));
+					$this->inventory->setArmorItem($itemInHand::SLOT_NUMBER, $itemInHand);
+				} elseif (($isPotion = ($itemInHand instanceof Potion)) || isset(self::$foodData[$itemInHand->getId()])) {
+					if ($isPotion && !$itemInHand->canBeConsumed() || !$isPotion && $this->getFood() >= self::FOOD_LEVEL_MAX) {
 						$this->startAction = -1;
 						return;
-					} elseif ($this->startAction > -1) {
+					}
+					if ($this->startAction > -1) {
 						$diff = ($this->server->getTick() - $this->startAction);
 						if ($diff > 20 && $diff < 100) {
-							$this->eatFoodInHand();
+							if ($isPotion) {
+								$ev = new PlayerItemConsumeEvent($this, $itemInHand);
+								$this->server->getPluginManager()->callEvent($ev);
+								if (!$ev->isCancelled()) {
+									$itemInHand->onConsume($this);
+								} else {
+									$this->inventory->sendContents($this);
+								}
+							} else {
+								$this->eatFoodInHand();
+							}
 						}
 						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 						$this->startAction = -1;
