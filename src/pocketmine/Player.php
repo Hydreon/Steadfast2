@@ -1930,11 +1930,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 						if (!$this->isCreative()) {
 							$block = $this->level->getBlock(new Vector3($packet->x, $packet->y, $packet->z));
 							$breakTime = ceil($block->getBreakTime($this->inventory->getItemInHand()) * 20);
-							$up = $block->getSide(1);
-							if ($up->getId() === Block::FIRE) {
-								$pk = new UpdateBlockPacket();
-								$pk->records[] = [$up->getX(), $up->getZ(), $up->getY(), Block::FIRE, 0, UpdateBlockPacket::FLAG_ALL];
-								$this->dataPacket($pk);
+							$fireBlock = $block->getSide($packet->face);
+							if ($fireBlock->getId() === Block::FIRE) {
+								$fireBlock->onUpdate(Level::BLOCK_UPDATE_TOUCH);
 							}
 							if ($breakTime > 0) {
 								$pk = new LevelEventPacket();
