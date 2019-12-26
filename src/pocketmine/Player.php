@@ -3966,14 +3966,25 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				if ($itemInHand instanceof Armor) {
 					$this->inventory->setItem($this->inventory->getHeldItemSlot(), $this->inventory->getArmorItem($itemInHand::SLOT_NUMBER));
 					$this->inventory->setArmorItem($itemInHand::SLOT_NUMBER, $itemInHand);
-				} elseif (isset(self::$foodData[$itemInHand->getId()])) {
-					if ($this->getFood() >= self::FOOD_LEVEL_MAX) {
+				} elseif (($isPotion = ($itemInHand instanceof Potion)) || isset(self::$foodData[$itemInHand->getId()])) {
+					if ($isPotion && !$itemInHand->canBeConsumed() || !$isPotion && $this->getFood() >= self::FOOD_LEVEL_MAX) {
 						$this->startAction = -1;
 						return;
-					} elseif ($this->startAction > -1) {
+					}
+					if ($this->startAction > -1) {
 						$diff = ($this->server->getTick() - $this->startAction);
 						if ($diff > 20 && $diff < 100) {
-							$this->eatFoodInHand();
+							if ($isPotion) {
+								$ev = new PlayerItemConsumeEvent($this, $itemInHand);
+								$this->server->getPluginManager()->callEvent($ev);
+								if (!$ev->isCancelled()) {
+									$itemInHand->onConsume($this);
+								} else {
+									$this->inventory->sendContents($this);
+								}
+							} else {
+								$this->eatFoodInHand();
+							}
 						}
 						$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 						$this->startAction = -1;
