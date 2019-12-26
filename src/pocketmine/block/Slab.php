@@ -42,6 +42,10 @@ class Slab extends Solid{
 	public function __construct($meta = 0){
 		$this->meta = $meta;
 	}
+	
+	public function isTransparent() {
+		return true;
+	}
 
 	public function getHardness(){
 		return 2;
