@@ -1567,7 +1567,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return int 0-255
 	 */
 	public function getBlockIdAt($x, $y, $z){
-		return $this->getChunk($x >> 4, $z >> 4, true)->getBlockId($x & 0x0f, $y & $this->getYMask(), $z & 0x0f);
+		return $y > $this->getYMask() ? 0 : $this->getChunk($x >> 4, $z >> 4, true)->getBlockId($x & 0x0f, $y & $this->getYMask(), $z & 0x0f);
 	}
 
 	/**
@@ -1593,7 +1593,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @return int 0-15
 	 */
 	public function getBlockDataAt($x, $y, $z){
-		return $this->getChunk($x >> 4, $z >> 4, true)->getBlockData($x & 0x0f, $y & $this->getYMask(), $z & 0x0f);
+		return $y > $this->getYMask() ? 0 : $this->getChunk($x >> 4, $z >> 4, true)->getBlockData($x & 0x0f, $y & $this->getYMask(), $z & 0x0f);
 	}
 
 	/**
