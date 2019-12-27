@@ -192,6 +192,7 @@ abstract class Entity extends Location implements Metadatable{
 	protected $dataFlags = 0;
 	protected $dataProperties = [	
 		self::DATA_FLAGS => [self::DATA_TYPE_LONG, 0],
+		self::DATA_COLOR => [self::DATA_TYPE_BYTE, 0],
 		self::DATA_AIR => [self::DATA_TYPE_SHORT, 300],
 		self::DATA_NAMETAG => [self::DATA_TYPE_STRING, ""],
 		self::DATA_LEAD_HOLDER => [self::DATA_TYPE_LONG, -1],
