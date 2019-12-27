@@ -476,6 +476,9 @@ class BinaryStream {
 			$skinData = $randomSkinData[0];
 			$skinGeomtryData = '';
 			$skinGeomtryName = $randomSkinData[1];
+		} elseif (in_array($skinGeomtryName, ['geometry.humanoid.customSlim', 'geometry.humanoid.custom'])) {
+			$skinGeomtryData = '';
+			$additionalSkinData = [];
 		}
 	}
 	

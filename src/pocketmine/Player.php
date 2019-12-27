@@ -430,6 +430,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	protected $doDaylightCycle = true;
 	private $lastQuickCraftTransactionGroup = [];
 	protected $additionalSkinData = [];
+	protected $playerListIsSent = false;
 
 	public function getLeaveMessage(){
 		return "";
@@ -4875,7 +4876,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	public function updatePlayerSkin($oldSkinName, $newSkinName) {
-		if ($this->spawned) {
+		if ($this->playerListIsSent) {
 			$pk = new PlayerSkinPacket();
 			$pk->uuid = $this->getUniqueId();
 			$pk->newSkinId = $this->skinName;
@@ -5019,6 +5020,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->getSkinName(), $this->getSkinData(), $this->getCapeData(), $this->getSkinGeometryName(), $this->getSkinGeometryData()];
 			$this->server->batchPackets($otherPlayers, [$pk]);
 		}
+		$this->playerListIsSent = true;
 	}
 
 	public function setVehicle($vehicle) {
