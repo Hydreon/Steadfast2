@@ -185,7 +185,7 @@ class Level implements ChunkManager, Metadatable{
 	private $temporalVector;
 
 	/** @var \SplFixedArray */
-	private $blockStates;
+	protected $blockStates;
 	protected $playerHandItemQueue = array();
 	
 	private $chunkGenerationQueue = [];
