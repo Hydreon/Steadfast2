@@ -47,7 +47,7 @@ class RedstoneOre extends Solid {
 		}
 		$deep++;
 		if ($type === Level::BLOCK_UPDATE_NORMAL or $type === Level::BLOCK_UPDATE_TOUCH) {
-			$this->getLevel()->setBlock($this, Block::get(Item::GLOWING_REDSTONE_ORE, $this->meta), false, true, $deep);
+			$this->getLevel()->setBlock($this, Block::get(Item::GLOWING_REDSTONE_ORE, $this->meta), false, false, $deep);
 
 			return Level::BLOCK_UPDATE_WEAK;
 		}
