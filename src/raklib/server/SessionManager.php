@@ -63,7 +63,7 @@ class SessionManager{
 
     protected $name = "";
 
-    protected $packetLimit = 1000;
+    protected $packetLimit = 500;
 
     protected $shutdown = false;
 
@@ -122,14 +122,7 @@ class SessionManager{
 			}
 		}
 
-		foreach($this->ipSec as $address => $count){
-			if($count >= $this->packetLimit){
-				$this->blockAddress($address);
-			}
-		}
 		$this->ipSec = [];
-
-
 
 		if(($this->ticks & 0b1111) === 0){
 			$diff = max(0.005, $time - $this->lastMeasure);
@@ -168,6 +161,14 @@ class SessionManager{
 
             if(isset($this->ipSec[$source])){
                 $this->ipSec[$source]++;
+				if ($this->ipSec[$source] > $this->packetLimit) {
+					$this->blockAddress($source, 30);
+					$sessionId = $source . ":" . $port;
+					if(isset($this->sessions[$sessionId])){
+						$this->streamKick($this->sessions[$sessionId], "Hack mods are not permitted.");
+					}		
+					return true;
+				}
             }else{
                 $this->ipSec[$source] = 1;
             }
@@ -219,10 +220,21 @@ class SessionManager{
 			static $spamPacket = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 			static $spamPacket2 = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 			$count = 0;
+			$source = $session->getAddress();
 			while ($stream->getOffset() < $length) {				
 				$buf = $stream->getString();
 				if (empty($buf) || $buf == $spamPacket || $buf == $spamPacket2) {
 					continue;
+				}
+				if (isset($this->ipSec[$source])) {
+					$this->ipSec[$source] ++;
+					if ($this->ipSec[$source] > $this->packetLimit) {
+						$this->blockAddress($source, 30);
+						$this->streamKick($session, "Hack mods are not permitted.");
+						return true;
+					}
+				} else {
+					$this->ipSec[$source] = 1;
 				}
 				if (ord($buf{0}) != 0x21 && ord($buf{0}) != 0x35) {
 					if (ord($buf{0}) != 0x1e || ord($buf{1}) != 0) {
@@ -232,7 +244,8 @@ class SessionManager{
 				$buffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($id)) . $id . $buf;
 				$this->server->pushThreadToMainPacket($buffer);
 			}
-			if ($count > 250) {				
+			if ($count > 250) {		
+				$this->blockAddress($source, 30);
 				$this->streamKick($session, "Hack mods are not permitted.");
 			}
 		}
