@@ -3897,26 +3897,28 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			case 4:
 			case 5:
 				$blockVector = new Vector3($blockPosition['x'], $blockPosition['y'], $blockPosition['z']);
-				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
+				if ($this->distanceSquared($blockVector) < 49) {
+					$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
 
-				$itemInHand = $this->inventory->getItemInHand();
-				if ($blockVector->distance($this) > 10 || $this->isSpectator()) {
+					$itemInHand = $this->inventory->getItemInHand();
+					if ($blockVector->distance($this) > 10 || $this->isSpectator()) {
 
-				} else if ($this->isCreative() && !$this->isSpectator()) {
-					if ($this->level->useItemOn($blockVector, $itemInHand, $face, $clickPosition['x'], $clickPosition['y'], $clickPosition['z'], $this) === true) {
-						return;
-					}
-				} else if (!$itemInHand->deepEquals($item)) {
-	//						$this->inventory->sendHeldItem($this);
-				} else {
-					$oldItem = clone $itemInHand;
-					//TODO: Implement adventure mode checks
-					if ($this->level->useItemOn($blockVector, $itemInHand, $face, $clickPosition['x'], $clickPosition['y'], $clickPosition['z'], $this)) {
-						if (!$itemInHand->deepEquals($oldItem) || $itemInHand->getCount() !== $oldItem->getCount()) {
-							$this->inventory->setItemInHand($itemInHand, $this);
-							$this->inventory->sendHeldItem($this->hasSpawned);
+					} else if ($this->isCreative() && !$this->isSpectator()) {
+						if ($this->level->useItemOn($blockVector, $itemInHand, $face, $clickPosition['x'], $clickPosition['y'], $clickPosition['z'], $this) === true) {
+							return;
 						}
-						return;
+					} else if (!$itemInHand->deepEquals($item)) {
+		//						$this->inventory->sendHeldItem($this);
+					} else {
+						$oldItem = clone $itemInHand;
+						//TODO: Implement adventure mode checks
+						if ($this->level->useItemOn($blockVector, $itemInHand, $face, $clickPosition['x'], $clickPosition['y'], $clickPosition['z'], $this)) {
+							if (!$itemInHand->deepEquals($oldItem) || $itemInHand->getCount() !== $oldItem->getCount()) {
+								$this->inventory->setItemInHand($itemInHand, $this);
+								$this->inventory->sendHeldItem($this->hasSpawned);
+							}
+							return;
+						}
 					}
 				}
 
@@ -4059,20 +4061,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		if($this->spawned === false or $this->blocked === true or $this->dead === true){
 			return;
 		}
-
+		
 		$vector = new Vector3($blockPosition['x'], $blockPosition['y'], $blockPosition['z']);
-		$item = $this->inventory->getItemInHand();
+		if ($this->distanceSquared($vector) < 49) {
+			$item = $this->inventory->getItemInHand();
+			$oldItem = clone $item;
 
-		$oldItem = clone $item;
-
-		if($this->level->useBreakOn($vector, $item, $this) === true){
-			if($this->isSurvival()){
-				if(!$item->equals($oldItem, true) or $item->getCount() !== $oldItem->getCount()){
-					$this->inventory->setItemInHand($item, $this);
-					$this->inventory->sendHeldItem($this->hasSpawned);
+			if ($this->level->useBreakOn($vector, $item, $this) === true) {
+				if ($this->isSurvival()) {
+					if (!$item->equals($oldItem, true) or $item->getCount() !== $oldItem->getCount()) {
+						$this->inventory->setItemInHand($item, $this);
+						$this->inventory->sendHeldItem($this->hasSpawned);
+					}
 				}
+				return;
 			}
-			return;
 		}
 
 		$this->inventory->sendContents($this);
@@ -4316,6 +4319,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$this->actionsNum['CRACK_BLOCK'] = 0;
 		}
 		$block = $this->level->getBlock(new Vector3($packet->x, $packet->y, $packet->z));
+		if ($this->distanceSquared($block) > 49) {
+			return;
+		}
 		$blockPos = [
 			'x' => $packet->x,
 			'y' => $packet->y,
