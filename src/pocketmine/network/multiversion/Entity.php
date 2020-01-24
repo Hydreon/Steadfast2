@@ -33,7 +33,7 @@ abstract class Entity {
 	const ID_EGG = 82; //egg
 	const ID_PAINTING = 83; //painting
 	const ID_MINECART = 84; //minecart
-	const ID_GHAST_FIREBALL = 85; //large_fireball
+	const ID_GHAST_FIREBALL = 85; //fireball
 	const ID_SPLASH_POTION = 86; //splash_potion
 	const ID_ENDER_PERL = 87; //ender_pearl
 	const ID_LEASH_KNOT = 88; //leash_knot
@@ -144,7 +144,7 @@ abstract class Entity {
 		self::ID_EGG => "minecraft:egg",
 		self::ID_PAINTING => "minecraft:painting",
 		self::ID_MINECART => "minecraft:minecart",
-		self::ID_GHAST_FIREBALL => "minecraft:large_fireball",
+		self::ID_GHAST_FIREBALL => "minecraft:fireball",
 		self::ID_SPLASH_POTION => "minecraft:splash_potion",
 		self::ID_ENDER_PERL => "minecraft:ender_pearl",
 		self::ID_LEASH_KNOT => "minecraft:leash_knot",
