@@ -2015,6 +2015,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					case 'CRACK_BLOCK':
 						$this->crackBlock($packet);
 						break;
+					case 'CHANGE_DIMENSION_ACK':
+						$this->onDimensionChanged();
+						break;
 				}
 
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
@@ -5171,6 +5174,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	
 	public function getAdditionalSkinData() {
 		return $this->additionalSkinData;
+	}
+	
+	protected function onDimensionChanged() {
+		
 	}
 
 }
