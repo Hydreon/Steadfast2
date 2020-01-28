@@ -35,7 +35,7 @@ class DoubleChestInventory extends ChestInventory implements InventoryHolder{
 	private $left;
 	/** @var ChestInventory */
 	private $right;
-
+	
 	public function __construct(Chest $left, Chest $right){
 		$this->left = $left->getRealInventory();
 		$this->right = $right->getRealInventory();
@@ -55,8 +55,13 @@ class DoubleChestInventory extends ChestInventory implements InventoryHolder{
 		return $index < $this->left->getSize() ? $this->left->getItem($index) : $this->right->getItem($index - $this->right->getSize());
 	}
 
-	public function setItem($index, Item $item){
-		return $index < $this->left->getSize() ? $this->left->setItem($index, $item) : $this->right->setItem($index - $this->right->getSize(), $item);
+	public function setItem($index, $item) {
+		$old = $this->getItem($index);
+		if ($index < $this->left->getSize() ? $this->left->setItem($index, $item) : $this->right->setItem($index - $this->right->getSize(), $item)) {
+			$this->onSlotChange($index, $old);
+			return true;
+		}
+		return false;
 	}
 
 	public function clear($index){
