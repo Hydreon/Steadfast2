@@ -1349,10 +1349,18 @@ class Level implements ChunkManager, Metadatable{
 					continue;
 				}
 				if ($e === $player) {
-					$dy = $player->getY() - $hand->getY();
-					if ($dy > 0.75 || $dy < - 1.5) {
-						continue;
-					}
+					if ($player->onGround) {
+						$dy = $player->getY() - $hand->getY();
+						if ($dy > 0.75 || $dy < - 1.5) {
+							continue;
+						}
+					} else {
+						$bb = clone $hand->getBoundingBox();
+						$bb->contract(0.2, 0.25, 0.2);
+						if (!$e->boundingBox->intersectsWith($bb)) {
+							continue;
+						}	
+					}								
 				}
 				++$realCount;
 			}
