@@ -173,10 +173,14 @@ class Chest extends Spawnable implements InventoryHolder, Container, Nameable{
 				$pair->checkPairing();
 			}
 			if($this->doubleInventory === null){
-				if(($pair->x + ($pair->z << 15)) > ($this->x + ($this->z << 15))){ //Order them correctly
+				if($pair->doubleInventory !== null){
+					$this->doubleInventory = $pair->doubleInventory;
+				} elseif(($pair->x + ($pair->z << 15)) > ($this->x + ($this->z << 15))){ //Order them correctly
 					$this->doubleInventory = new DoubleChestInventory($pair, $this);
+					$pair->doubleInventory = $this->doubleInventory;
 				}else{
 					$this->doubleInventory = new DoubleChestInventory($this, $pair);
+					$pair->doubleInventory = $this->doubleInventory;
 				}
 			}
 		}else{
