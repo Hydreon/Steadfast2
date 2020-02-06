@@ -427,7 +427,7 @@ class CraftingManager{
 		// @todo redstone
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::COAL, 1, 1), Item::get(Item::TRUNK, -1, 1)));
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::EMERALD, 0, 1), Item::get(Item::EMERALD_ORE, 0, 1)));
-		// @todo nether quartz
+		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::NETHER_QUARTZ, 0, 1), Item::get(Item::NETHER_QUARTZ_ORE, 0, 1)));
 		
 		// food
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::COOKED_FISH, 0, 1), Item::get(Item::RAW_FISH, 0, 1)));
@@ -529,7 +529,7 @@ class CraftingManager{
 			[Item::STONE,               Stone::POLISHED_GRANITE,    Item::STONE,                Stone::GRANITE,     "blockrecipe1",     4],
 			[Item::STONE,               Stone::POLISHED_DIORITE,    Item::STONE,                Stone::DIORITE,     "blockrecipe1",     4],
 			[Item::STONE,               Stone::POLISHED_ANDESITE,   Item::STONE,                Stone::ANDESITE,    "blockrecipe1",     4],
-			[Item::QUARTZ_BLOCK,        Quartz::QUARTZ_NORMAL,      Item::QUARTZ,               Stone::ANDESITE,    "blockrecipe1",     4],
+			[Item::QUARTZ_BLOCK,        Quartz::QUARTZ_NORMAL,      Item::QUARTZ,               0,					"blockrecipe1",     1],
 			[Item::QUARTZ_BLOCK,        Quartz::QUARTZ_CHISELED,    Item::SLAB,                 Slab::QUARTZ,       "blockrecipe2X1",   1],
 			[Item::SANDSTONE,           SandStone::CHISELED,        Item::SLAB,                 Slab::SANDSTONE,    "blockrecipe2X1",   1],
 			[Item::STONE_BRICK,         StoneBricks::CHISELED,      Item::SLAB,                 Slab::STONE_BRICK,  "blockrecipe2X1",   1],
