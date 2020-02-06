@@ -578,7 +578,8 @@ class Block extends Position implements Metadatable {
 			self::$list[self::ANVIL] = Anvil::class;
 
 			self::$list[self::REDSTONE_BLOCK] = Redstone::class;
-
+			
+			self::$list[self::NETHER_QUARTZ_ORE] = NetherQuartzOre::class;
 			self::$list[self::QUARTZ_BLOCK] = Quartz::class;
 			self::$list[self::QUARTZ_STAIRS] = QuartzStairs::class;
 			self::$list[self::DOUBLE_WOOD_SLAB] = DoubleWoodSlab::class;
