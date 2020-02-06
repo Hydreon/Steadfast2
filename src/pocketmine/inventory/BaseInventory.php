@@ -238,7 +238,7 @@ abstract class BaseInventory implements Inventory{
 		$checkTags = $item->hasCompound();
 		for($i = 0; $i < $this->getSize(); ++$i){
 			$slot = $this->getItem($i);
-			if($item->equals($slot, $checkDamage, $checkTags)){
+			if($item->deepEquals($slot, $checkDamage, $checkTags)){
 				if(($diff = $slot->getMaxStackSize() - $slot->getCount()) > 0){
 					$item->setCount($item->getCount() - $diff);
 				}
@@ -278,7 +278,7 @@ abstract class BaseInventory implements Inventory{
 
 			$itemCount = $item->getCount();
 			foreach($itemSlots as $index => $slot){
-				if($slot->equals($item) && $itemCount < $item->getMaxStackSize()){
+				if($slot->deepEquals($item) && $itemCount < $item->getMaxStackSize()){
 					$slotCount = $slot->getCount();
 					$amount = min($item->getMaxStackSize() - $itemCount, $slotCount, $this->getMaxStackSize());
 					if($amount > 0){
