@@ -26,6 +26,7 @@ use pocketmine\entity\Entity;
 use pocketmine\Server;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\item\enchantment\Enchantment;
 
 abstract class Tool extends Item {
 
@@ -63,6 +64,14 @@ abstract class Tool extends Item {
 			$isUnbreakable = Server::getInstance()->getConfigBoolean("unbreakable-tools", false);
 		}
 		if (!$isUnbreakable) {
+			$ench = $this->getEnchantment(Enchantment::TYPE_UNBREAKING);
+			if (!is_null($ench)) {
+				$enchLevel = $ench->getLevel();
+				$chance = 100 / ($enchLevel + 1);
+				if (mt_rand(1, 100) > $chance) {
+					return true;
+				}
+			}
 			if ($this->isHoe()) {
 				if (($object instanceof Block) and ( $object->getId() === self::GRASS or $object->getId() === self::DIRT)) {
 					$this->meta++;
