@@ -2930,7 +2930,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		$pk = new MovePlayerPacket();
 		$pk->eid = $this->getId();
 		$pk->x = $pos->x;
-		$pk->y = $pos->y + $this->getEyeHeight();
+		$pk->y = $pos->y + $this->getEyeHeight() + 0.0001; // hack for prevent fall into block
 		$pk->z = $pos->z;
 		$pk->bodyYaw = $yaw;
 		$pk->pitch = $pitch;
