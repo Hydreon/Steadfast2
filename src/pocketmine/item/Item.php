@@ -301,7 +301,9 @@ class Item{
 	const INVERTED_DAYLIGHT_SENSOR = 178;
 	const RED_SANDSTONE = 179;
 	const RED_SANDSTONE_STAIRS = 180;
+	const DOUBLE_STONE_SLAB2 = 181;
 	const DOUBLE_RED_SANDSTONE_SLAB = 181;
+	const STONE_SLAB2 = 182;
 	const RED_SANDSTONE_SLAB = 182;
 	const FENCE_GATE_SPRUCE = 183;
 	const FENCE_GATE_BIRCH = 184;
@@ -319,6 +321,8 @@ class Item{
 	const PURPUR_BLOCK = 201;
 	const END_BRICKS = 206;
 	const END_ROD = 208;
+	const MAGMA = 213;
+	const NETHER_WART_BLOCK_BLOCK = 214;
 	const RED_NETHER_BRICK = 215;
 	const BONE_BLOCK = 216;
 	const SHULKER_BOX = 218;
@@ -1066,6 +1070,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::FENCE, 3));
 		self::addCreativeItem(Item::get(Item::FENCE, 4));
 		self::addCreativeItem(Item::get(Item::FENCE, 5));
+		self::addCreativeItem(Item::get(Item::NETHER_BRICK_FENCE, 0));
 		
 		self::addCreativeItem(Item::get(Item::FENCE_GATE, 0));
 		self::addCreativeItem(Item::get(Item::FENCE_GATE_SPRUCE, 0));
@@ -1109,6 +1114,16 @@ class Item{
 		self::addCreativeItem(Item::get(Item::SLAB, 5));
 		self::addCreativeItem(Item::get(Item::SLAB, 6));
 		self::addCreativeItem(Item::get(Item::SLAB, 1));
+		self::addCreativeItem(Item::get(Item::SLAB, 7));
+		
+		self::addCreativeItem(Item::get(Item::STONE_SLAB2, 0));
+		self::addCreativeItem(Item::get(Item::STONE_SLAB2, 1));
+		self::addCreativeItem(Item::get(Item::STONE_SLAB2, 2));
+		self::addCreativeItem(Item::get(Item::STONE_SLAB2, 3));
+		self::addCreativeItem(Item::get(Item::STONE_SLAB2, 4));
+		self::addCreativeItem(Item::get(Item::STONE_SLAB2, 5));
+		self::addCreativeItem(Item::get(Item::STONE_SLAB2, 6));
+		self::addCreativeItem(Item::get(Item::STONE_SLAB2, 7));
 		
 		self::addCreativeItem(Item::get(Item::BRICKS, 0));
 		self::addCreativeItem(Item::get(Item::STONE_BRICKS, 0));
@@ -1137,6 +1152,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::HAY_BALE, 0));
 		self::addCreativeItem(Item::get(Item::BONE_BLOCK, 0));
 		self::addCreativeItem(Item::get(Item::NETHER_BRICKS, 0));
+		self::addCreativeItem(Item::get(Item::RED_NETHER_BRICK, 0));
 		
 		self::addColoredCreativeItem(Item::WOOL);
 		self::addColoredCreativeItem(Item::CARPET);
@@ -1264,6 +1280,8 @@ class Item{
 		self::addCreativeItem(Item::get(Item::OBSIDIAN, 0));
 		self::addCreativeItem(Item::get(Item::BEDROCK, 0));
 		self::addCreativeItem(Item::get(Item::NETHERRACK, 0));
+		self::addCreativeItem(Item::get(Item::NETHER_WART_BLOCK_BLOCK, 0));
+		self::addCreativeItem(Item::get(Item::MAGMA, 0));
 		self::addCreativeItem(Item::get(Item::END_STONE, 0));
 		
 		self::addCreativeItem(Item::get(Item::CHORUS_FLOWER, 0));
