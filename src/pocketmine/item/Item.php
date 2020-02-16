@@ -199,7 +199,7 @@ class Item{
 	const STONE_BRICKS = 98;
 	const STONE_BRICK = 98;
 	const BROWN_MUSHROOM_BLOCK = 99;
-	CONST RED_MUSHROOM_BLOCK = 100;
+	const RED_MUSHROOM_BLOCK = 100;
 	const IRON_BAR = 101;
 	const IRON_BARS = 101;
 	const GLASS_PANE = 102;
