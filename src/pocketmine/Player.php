@@ -182,6 +182,7 @@ use pocketmine\event\inventory\InventoryCreationEvent;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v331\BiomeDefinitionListPacket;
 use pocketmine\network\protocol\v310\AvailableEntityIdentifiersPacket;
+use pocketmine\network\protocol\v392\CreativeItemsListPacket;
 use function rand;
 use function random_int;
 
@@ -2026,7 +2027,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			case 'MOB_ARMOR_EQUIPMENT_PACKET':
 				break;
 			case 'INTERACT_PACKET':
-				if ($packet->action === InteractPacket::ACTION_DAMAGE) {
+				if ($packet->action === InteractPacket::ACTION_OPEN_INVENTORY && $this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_392) {
+					$this->addWindow($this->getInventory());
+				} elseif ($packet->action === InteractPacket::ACTION_DAMAGE) {
 					$this->attackByTargetId($packet->target);
 				} else {
 					$this->customInteract($packet);
@@ -3300,14 +3303,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 		$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . TextFormat::AQUA . $this->ip . " connected");
 
-		$slots = [];
-		foreach(Item::getCreativeItems() as $item){
-			$slots[] = clone $item;
+		if ($this->getPlayerProtocol() >= Info::PROTOCOL_392) {
+			$pk = new CreativeItemsListPacket();
+			$pk->groups = Item::getCreativeGroups();
+			$pk->items = Item::getCreativeItems();
+			$this->dataPacket($pk);			
+		} else {
+			$slots = [];
+			foreach(Item::getCreativeItems() as $item){
+				$slots[] = clone $item['item'];
+			}
+			$pk = new InventoryContentPacket();
+			$pk->inventoryID = Protocol120::CONTAINER_ID_CREATIVE;
+			$pk->items = $slots;
+			$this->dataPacket($pk);
 		}
-		$pk = new InventoryContentPacket();
-		$pk->inventoryID = Protocol120::CONTAINER_ID_CREATIVE;
-		$pk->items = $slots;
-		$this->dataPacket($pk);
 
 		$this->server->sendRecipeList($this);
 
@@ -4093,7 +4103,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$tile->spawnTo($this);
 		}
 	}
-
+	
 	/**
 	 * @minProtocolSupport 120
 	 * @param InventoryTransactionPacket $packet

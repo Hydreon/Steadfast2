@@ -4,6 +4,7 @@ namespace pocketmine\inventory\transactions;
 
 use pocketmine\inventory\BaseTransaction;
 use pocketmine\inventory\PlayerInventory;
+use pocketmine\inventory\EnchantInventory;
 use pocketmine\item\Item;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\Protocol120;
@@ -59,7 +60,7 @@ class SimpleTransactionData {
 	}
 	
 	public function isCompleteEnchantTransaction() {
-		return $this->action == self::ACTION_ENCH_RESULT;
+		return $this->action == self::ACTION_ENCH_RESULT || $this->sourceType == InventoryTransactionPacket::INV_SOURCE_TYPE_CRAFT && $this->action == self::ACTION_ENCH_LAPIS;
 	}
 
 	public function isUpdateEnchantSlotTransaction() {
@@ -116,10 +117,8 @@ class SimpleTransactionData {
 				$slot = $inventory->getSize() + $this->slot;
 				break;
 			case Protocol120::CONTAINER_ID_NONE:
-				$currentWindowId = $player->getCurrentWindowId();
-				if ($currentWindowId != $this->inventoryId) {
-					// enchanting almost 100%
-					$inventory = $player->getCurrentWindow();
+				$inventory = $player->getCurrentWindow();
+				if ($inventory instanceof EnchantInventory) {
 					switch ($this->action) {
 						case self::ACTION_ENCH_ITEM:
 							$slot = 0;

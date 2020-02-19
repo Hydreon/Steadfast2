@@ -30,6 +30,7 @@ class InteractPacket extends PEPacket{
 	
 	const ACTION_DAMAGE = 2;
 	const ACTION_SEE = 4;
+	const ACTION_OPEN_INVENTORY = 6;
 
 	public $action;
 	public $eid;
