@@ -321,8 +321,10 @@ class Block extends Position implements Metadatable {
 	const WALL_BANNER = 177;
 	const INVERTED_DAYLIGHT_SENSOR = 178;
 	const RED_SANDSTONE = 179;
-	const RED_SANDSTONE_STAIRS = 180;
+	const RED_SANDSTONE_STAIRS = 180;    
+	const DOUBLE_STONE_SLAB2 = 181;
 	const DOUBLE_RED_SANDSTONE_SLAB = 181;
+	const STONE_SLAB2 = 182;
 	const RED_SANDSTONE_SLAB = 182;
 	const FENCE_GATE_SPRUCE = 183;
 	const FENCE_GATE_BIRCH = 184;
@@ -644,6 +646,8 @@ class Block extends Position implements Metadatable {
 			
 			self::$list[self::MOB_HEAD_BLOCK] = MobHead::class;
 			self::$list[self::FLOWER_POT_BLOCK] = FlowerPot::class;
+			self::$list[self::DOUBLE_STONE_SLAB2] = DoubleSlab2::class;
+			self::$list[self::STONE_SLAB2] = Slab2::class;
             
 			// update 1.0
 			self::$list[self::CHORUS_FLOWER] = ChorusFlower::class;
@@ -703,6 +707,8 @@ class Block extends Position implements Metadatable {
 			self::$list[self::PURPUR_STAIRS] = PurpurStairs::class;
 			self::$list[self::UNDYED_SHULKER_BOX] = UndyedShulkerBox::class;
 			self::$list[self::FROSTED_ICE] = FrostedIce::class;
+			self::$list[self::MAGMA] = MagmaBlock::class;
+			self::$list[self::NETHER_WART_BLOCK_BLOCK] = NetherWartBlock::class;
 			self::$list[self::RED_NETHER_BRICK] = RedNetherBrick::class;
 			self::$list[self::BONE_BLOCK] = BoneBlock::class;
             

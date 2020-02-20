@@ -24,6 +24,7 @@ namespace pocketmine\item;
 
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\item\enchantment\Enchantment;
 
 abstract class Armor extends Item{
 	
@@ -37,6 +38,14 @@ abstract class Armor extends Item{
 	}
 	
 	public function removeDurability($count = 1) {
+		$ench = $this->getEnchantment(Enchantment::TYPE_UNBREAKING);
+		if (!is_null($ench)) {
+			$enchLevel = $ench->getLevel();
+			$chance = 60 + 40 / ($enchLevel + 1);
+			if (mt_rand(1, 100) > $chance) {
+				return;
+			}
+		}
 		$this->meta += $count;
 		$this->checkDamage();
 	}

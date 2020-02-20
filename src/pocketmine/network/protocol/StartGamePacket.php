@@ -110,10 +110,14 @@ class StartGamePacket extends PEPacket{
 		} else {
 			$this->putByte(1); // Broadcast to XBL?
 		}
+		
+		if ($playerProtocol >= Info::PROTOCOL_392) {
+			$this->putByte(0); // unknown
+		}
 				
 		$this->putByte(1);	// commands enabled
 		
-		$this->putByte(0); // isTexturepacksRequired 1x Byte
+		$this->putByte(0); // isTexturepacksRequired 1x Byte		
 		
 		$this->putVarInt(count(self::$defaultRules)); // rules count
 		foreach (self::$defaultRules as $rule) {
@@ -131,7 +135,7 @@ class StartGamePacket extends PEPacket{
 					break;
 			}	
 		}
-
+		
 		$this->putByte(0); // is bonus chest enabled
 		$this->putByte(0); // is start with map enabled
 		if ($playerProtocol < Info::PROTOCOL_330) {
@@ -160,7 +164,7 @@ class StartGamePacket extends PEPacket{
 			}
 			if ($playerProtocol >= Info::PROTOCOL_361) {
 				$this->putByte(1); // Only spawn v1 villagers
-			}			
+			}		
 			if ($playerProtocol >= Info::PROTOCOL_370) {
 				$this->putString(''); // Vanila version
 			}
@@ -169,7 +173,12 @@ class StartGamePacket extends PEPacket{
 				$this->putByte(1); // unknown
 				$this->putLFloat(0); // unknown
 			}
+		}		
+		if ($playerProtocol >= Info::PROTOCOL_392) {
+			$this->putLInt(16); //unknown
+			$this->putLInt(16); //unknown
 		}
+		
 		// level settings end
 		$this->putString('3138ee93-4a4a-479b-8dca-65ca5399e075'); // level id (random UUID)
 		$this->putString(''); // level name
@@ -189,6 +198,9 @@ class StartGamePacket extends PEPacket{
 		}
 		if ($playerProtocol >= Info::PROTOCOL_282) {
 			$this->putString($this->multiplayerCorrelationId);
+		}
+		if ($playerProtocol >= Info::PROTOCOL_392) {
+			$this->putByte(0); // unknown
 		}
 	}
 

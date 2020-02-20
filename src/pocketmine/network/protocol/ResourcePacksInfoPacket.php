@@ -26,6 +26,7 @@ class ResourcePacksInfoPacket extends PEPacket {
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
 		$this->putByte($this->isRequired);
+		$this->putByte($this->hasScripts);
 		$this->putLShort(count($this->addons));
 		foreach ($this->addons as $addon) {
 			$this->putString($addon->id);
@@ -34,11 +35,11 @@ class ResourcePacksInfoPacket extends PEPacket {
 			$this->putString($addon->contentKey);
 			$this->putString($addon->subPackName);
 			if ($playerProtocol >= Info::PROTOCOL_280) {
-				$this->putString('');
+				$this->putString(''); // content identity
 			}
-		}
-		if ($playerProtocol >= Info::PROTOCOL_331) {
-			$this->putByte(0); // ???
+			if ($playerProtocol >= Info::PROTOCOL_331) {
+				$this->putByte(0); // has scripts
+			}
 		}
 		$this->putLShort(count($this->resourcePacks));
 		foreach ($this->resourcePacks as $resourcePack) {
@@ -48,12 +49,12 @@ class ResourcePacksInfoPacket extends PEPacket {
 			$this->putString($resourcePack->contentKey);
 			$this->putString($resourcePack->subPackName);
 			if ($playerProtocol >= Info::PROTOCOL_280) {
-				$this->putString('');
+				$this->putString(''); // content identity
 			}
-		}
-		if ($playerProtocol >= Info::PROTOCOL_331) {
-			$this->putByte(0); // ???
-		}
+			if ($playerProtocol >= Info::PROTOCOL_331) {
+				$this->putByte(0); // has scripts
+			}
+		}		
 	}
 
 }
