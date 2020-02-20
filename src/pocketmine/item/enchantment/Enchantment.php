@@ -44,6 +44,7 @@ class Enchantment{
 	const TYPE_MINING_EFFICIENCY = 15;
 	const TYPE_MINING_SILK_TOUCH = 16;
 	const TYPE_MINING_DURABILITY = 17; // Unbreaking
+	const TYPE_UNBREAKING = 17; // Unbreaking
 	const TYPE_MINING_FORTUNE = 18;
 	const TYPE_BOW_POWER = 19;
 	const TYPE_BOW_KNOCKBACK = 20;

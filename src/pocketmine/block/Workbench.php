@@ -24,6 +24,8 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 use pocketmine\Player;
+use pocketmine\network\protocol\ContainerOpenPacket;
+use pocketmine\network\protocol\Info;
 
 //TODO: check orientation
 class Workbench extends Solid{
@@ -53,6 +55,17 @@ class Workbench extends Solid{
 	public function onActivate(Item $item, Player $player = null){
 		if($player instanceof Player){
 			$player->craftingType = 1;
+			if ($player->getPlayerProtocol() >= Info::PROTOCOL_392) {
+				$inv = $player->getInventory();
+				$player->addWindow($inv);
+				$pk = new ContainerOpenPacket();
+				$pk->windowid = $player->getWindowId($inv);
+				$pk->type = 1;
+				$pk->x = $this->x;
+				$pk->y = $this->y;
+				$pk->z = $this->z;
+				$player->dataPacket($pk);
+			}
 		}
 
 		return true;
