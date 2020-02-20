@@ -4,6 +4,7 @@ namespace pocketmine\network\protocol\v120;
 
 use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
+use pocketmine\network\protocol\Info;
 
 class InventorySlotPacket extends PEPacket {
 	
@@ -24,10 +25,16 @@ class InventorySlotPacket extends PEPacket {
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
 		$this->putVarInt($this->containerId);
-		$this->putVarInt($this->slot);
+		$this->putVarInt($this->slot);				
 		if ($this->item == null) {
+			if ($playerProtocol >= Info::PROTOCOL_392) {
+				$this->putSignedVarInt(0);
+			}
 			$this->putSignedVarInt(0);
 		} else {
+			if ($playerProtocol >= Info::PROTOCOL_392) {
+				$this->putSignedVarInt(1);
+			}
 			$this->putSlot($this->item, $playerProtocol);
 		}
 	}

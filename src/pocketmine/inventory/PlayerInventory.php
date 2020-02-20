@@ -9,6 +9,7 @@ use pocketmine\event\entity\EntityInventoryChangeEvent;
 use pocketmine\event\player\PlayerItemHeldEvent;
 use pocketmine\item\Item;
 use pocketmine\network\protocol\ContainerOpenPacket;
+use pocketmine\network\protocol\ContainerClosePacket;
 use pocketmine\network\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\Player;
@@ -16,6 +17,7 @@ use pocketmine\Server;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventorySlotPacket;
 use pocketmine\network\protocol\v120\Protocol120;
+use pocketmine\network\protocol\Info;
 
 class PlayerInventory extends BaseInventory{
 	
@@ -620,6 +622,37 @@ class PlayerInventory extends BaseInventory{
 	
 	public function getQuckCraftContents() {
 		return $this->quickCraftSlots;
+	}
+
+	public function onOpen(Player $who){
+		$holder = $this->getHolder();
+		if ($who === $holder) {
+			parent::onOpen($who);
+			if ($who->getPlayerProtocol() >= Info::PROTOCOL_392 && $who->craftingType <= 0) {
+				$pk = new ContainerOpenPacket();
+				$pk->windowid = $who->getWindowId($this);
+				$pk->type = -1;
+				$pk->slots = $this->getSize();
+				$pk->x = $holder->x;
+				$pk->y = $holder->y;
+				$pk->z = $holder->z;
+				$who->dataPacket($pk);
+			}
+		}
+	}
+
+	public function onClose(Player $who){
+		$holder = $this->getHolder();
+		if ($who === $holder) {
+			parent::onClose($who);
+			if ($who->getPlayerProtocol() >= Info::PROTOCOL_392) {
+				$pk = new ContainerClosePacket();
+				$pk->windowid = $who->getWindowId($this);
+				$who->dataPacket($pk);
+			}
+		}
+		
+	
 	}
 
 }
