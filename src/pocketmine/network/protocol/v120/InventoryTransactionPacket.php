@@ -53,7 +53,8 @@ class InventoryTransactionPacket extends PEPacket {
 		if ($playerProtocol >= Info::PROTOCOL_392) {
 			$unknown = $this->getVarInt();
 			if ($unknown != 0) {
-				$this->get(4);
+				$this->get(2);
+				$this->get($this->getVarInt());
 			}	
 		}
 		$this->transactionType = $this->getVarInt();

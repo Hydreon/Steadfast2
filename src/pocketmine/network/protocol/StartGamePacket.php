@@ -110,14 +110,14 @@ class StartGamePacket extends PEPacket{
 		} else {
 			$this->putByte(1); // Broadcast to XBL?
 		}
-				
-		$this->putByte(1);	// commands enabled
-		
-		$this->putByte(0); // isTexturepacksRequired 1x Byte
 		
 		if ($playerProtocol >= Info::PROTOCOL_392) {
 			$this->putByte(0); // unknown
 		}
+				
+		$this->putByte(1);	// commands enabled
+		
+		$this->putByte(0); // isTexturepacksRequired 1x Byte		
 		
 		$this->putVarInt(count(self::$defaultRules)); // rules count
 		foreach (self::$defaultRules as $rule) {
