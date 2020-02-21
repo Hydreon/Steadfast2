@@ -12,6 +12,7 @@ class ResourcePacksInfoPacket extends PEPacket {
 
 	/** @var boolean */
 	public $isRequired = false;
+	public $hasScripts = false;
 	/** @var Addon[] */
 	public $addons = [];
 	/** @var ResourcePack[] */
