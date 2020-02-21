@@ -64,7 +64,7 @@ class SimpleTransactionData {
 	}
 
 	public function isUpdateEnchantSlotTransaction() {
-		return $this->action == self::ACTION_ENCH_ITEM || $this->action == self::ACTION_ENCH_LAPIS || ($this->inventoryId == Protocol120::CONTAINER_ID_CURSOR_SELECTED && ($this->slot == 14 || $this->slot == 15));
+		return $this->sourceType != InventoryTransactionPacket::INV_SOURCE_TYPE_CRAFT && ($this->action == self::ACTION_ENCH_ITEM || $this->action == self::ACTION_ENCH_LAPIS || ($this->inventoryId == Protocol120::CONTAINER_ID_CURSOR_SELECTED && ($this->slot == 14 || $this->slot == 15)));
 	}
 	
 	/**
