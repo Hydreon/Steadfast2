@@ -1030,9 +1030,10 @@ class Item{
 			return;
 		}
 		self::$list[$id] = $class;
-		foreach (self::$creative as $index => $item) {
+		foreach (self::$creative as $index => $itemData) {
+			$item = $itemData['item'];
 			if ($item->getId() == $id) {
-				self::$creative[$index] = Item::get($id, $item->getDamage());
+				self::$creative[$index] = ['item' => Item::get($id, $item->getDamage()), 'group' => self::CREATIVE_GROUP_NONE];
 			}
 		}
 	}
