@@ -1154,29 +1154,22 @@ abstract class Entity extends Location implements Metadatable{
 		if($dx == 0 and $dz == 0 and $dy == 0){
 			return true;
 		}
-
-		if($this->keepMovement){
-			$this->boundingBox->offset($dx, $dy, $dz);
-			$this->setPosition(new Vector3(($this->boundingBox->minX + $this->boundingBox->maxX) / 2, $this->boundingBox->minY, ($this->boundingBox->minZ + $this->boundingBox->maxZ) / 2));
-			return true;
+		$pos = new Vector3($this->x + $dx, $this->y + $dy, $this->z + $dz);			
+		if(!$this->setPosition($pos)){
+			return false;
 		}else{
-			$pos = new Vector3($this->x + $dx, $this->y + $dy, $this->z + $dz);			
-			if(!$this->setPosition($pos)){
-				return false;
-			}else{
-				$bb = clone $this->boundingBox;
-				$bb->maxY = $bb->minY + 0.5;
-				$bb->minY -= 1;
-				if (count($this->level->getCollisionBlocks($bb)) > 0) {
-					$this->onGround = true;
-				} else {
-					$this->onGround = false;
-				}
-				$this->isCollided = $this->onGround;
-				$this->updateFallState($dy, $this->onGround);
+			$bb = clone $this->boundingBox;
+			$bb->maxY = $bb->minY + 0.5;
+			$bb->minY -= 1;
+			if (count($this->level->getCollisionBlocks($bb)) > 0) {
+				$this->onGround = true;
+			} else {
+				$this->onGround = false;
 			}
-			return true;
+			$this->isCollided = $this->onGround;
+			$this->updateFallState($dy, $this->onGround);
 		}
+		return true;
 	}
 
 

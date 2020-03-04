@@ -5189,5 +5189,27 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	protected function onDimensionChanged() {
 		
 	}
+	
+	public function move($dx, $dy, $dz) {
+		if ($dx == 0 && $dz == 0 && $dy == 0) {
+			return true;
+		}
+		$pos = new Vector3($this->x + $dx, $this->y + $dy, $this->z + $dz);
+		if ($this->setPosition($pos)) {
+			$bb = clone $this->boundingBox;
+			$bb->expand(0.1, 0, 0.1);
+			$bb->maxY = $bb->minY + 0.5;
+			$bb->minY -= 0.5;
+			if (count($this->level->getCollisionBlocks($bb)) > 0) {
+				$this->onGround = true;
+			} else {
+				$this->onGround = false;
+			}
+			$this->isCollided = $this->onGround;
+			$this->updateFallState($dy, $this->onGround);
+			return true;
+		}
+		return false;
+	}
 
 }
