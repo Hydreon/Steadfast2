@@ -83,13 +83,6 @@ class FishingHook extends Projectile{
 			$this->motionZ = 0;
 			$this->motionChanged = true;
 			$hasUpdate = true;
-		}elseif($this->isCollided && $this->keepMovement === true){
-			$this->motionX = 0;
-			$this->motionY = 0;
-			$this->motionZ = 0;
-			$this->motionChanged = true;
-			$this->keepMovement = false;
-			$hasUpdate = true;
 		}
 		if($this->attractTimer === 0 && mt_rand(0, 100) <= 30){ // chance, that a fish bites
 			$this->coughtTimer = mt_rand(5, 10) * 20; // random delay to catch fish
