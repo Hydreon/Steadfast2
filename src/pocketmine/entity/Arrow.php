@@ -102,11 +102,6 @@ class Arrow extends Projectile {
 		if ($dx == 0 && $dz == 0 && $dy == 0) {
 			return true;
 		}
-		if ($this->keepMovement) {
-			$this->boundingBox->offset($dx, $dy, $dz);
-			$this->setPosition(new Vector3(($this->boundingBox->minX + $this->boundingBox->maxX) / 2, $this->boundingBox->minY, ($this->boundingBox->minZ + $this->boundingBox->maxZ) / 2));
-			return true;
-		}
 		$pos = new Vector3($this->x + $dx, $this->y + $dy, $this->z + $dz);
 		if (!$this->setPosition($pos)) {
 			return false;
