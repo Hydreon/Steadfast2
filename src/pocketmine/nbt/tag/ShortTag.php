@@ -32,7 +32,7 @@ class ShortTag extends NamedTag{
 	}
 
 	public function read(NBT $nbt){
-		$this->value = $nbt->endianness === 1 ? unpack("n", $nbt->get(2))[1] : unpack("v", $nbt->get(2))[1];
+		$this->value = (($nbt->endianness === 1 ? unpack("n", $nbt->get(2))[1] : unpack("v", $nbt->get(2))[1]) << 48 >> 48);
 	}
 
 	public function write(NBT $nbt){

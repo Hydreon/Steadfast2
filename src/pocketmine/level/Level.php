@@ -2425,4 +2425,11 @@ class Level implements ChunkManager, Metadatable{
 	public function isClosed() {
 		return $this->closed;
 	}
+
+	public function isNight(){
+		if($this->time >= Level::TIME_NIGHT and $this->time < Level::TIME_SUNRISE){
+			return true;
+		}
+		return false;
+	}
 }
