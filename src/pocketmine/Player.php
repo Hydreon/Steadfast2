@@ -4416,8 +4416,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			}
 			$transaction = $trData->convertToTransaction($this);
 			if (!is_null($transaction)) {
-				$inventory = $transaction->getInventory();
-				$inventory->setItem($transaction->getSlot(), $transaction->getTargetItem());
+				$inventory = $transaction->getInventory();				
+
+				$item = $inventory->getItem($transaction->getSlot());
+				$oldItem = $transaction->getSourceItem();
+				if ($oldItem->equals($item, true, false)) {
+					$inventory->setItem($transaction->getSlot(), $transaction->getTargetItem());
+				} else {
+					$this->currentWindow->sendContents($this);
+					$this->inventory->sendContents($this);	
+					return;
+				}
 			}
 		}
 	}
@@ -5317,6 +5326,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 	
 	public function move($dx, $dy, $dz) {
+		$this->blocksAround = null;
 		if ($dx == 0 && $dz == 0 && $dy == 0) {
 			return true;
 		}
