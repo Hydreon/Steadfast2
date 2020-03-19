@@ -72,7 +72,9 @@ class StartGamePacket extends PEPacket{
 		$this->putSignedVarInt($this->seed);
 
 		if ($playerProtocol >= Info::PROTOCOL_400) {
-			$this->putByte(0);$this->putByte(0); $this->putString(0);
+			$this->putByte(0);
+			$this->putByte(0);
+			$this->putString('');
 		}
 
 		$this->putSignedVarInt($this->dimension);
