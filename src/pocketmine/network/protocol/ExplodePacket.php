@@ -45,18 +45,23 @@ class ExplodePacket extends PEPacket{
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		$this->putLFloat($this->x);
-		$this->putLFloat($this->y);
-		$this->putLFloat($this->z);
-		$this->putVarInt((int) ($this->radius * 100));
-		$this->putVarInt(count($this->records));
-		if(count($this->records) > 0){
-			foreach($this->records as $record){
-				$this->putSignedVarInt($record->x);
-				$this->putSignedVarInt($record->y);
-				$this->putSignedVarInt($record->z);
+		if ($playerProtocol < Info::PROTOCOL_386) {		
+			$this->putLFloat($this->x);
+			$this->putLFloat($this->y);
+			$this->putLFloat($this->z);
+			$this->putVarInt((int) ($this->radius * 100));
+			$this->putVarInt(count($this->records));
+			if(count($this->records) > 0){
+				foreach($this->records as $record){
+					$this->putSignedVarInt($record->x);
+					$this->putSignedVarInt($record->y);
+					$this->putSignedVarInt($record->z);
+				}
 			}
+		} else {
+			//Tick sync packet
+			$this->putLong(0);
+			$this->putLong(0);
 		}
 	}
-
 }
