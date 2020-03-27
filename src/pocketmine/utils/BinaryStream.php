@@ -392,7 +392,13 @@ class BinaryStream {
 		
 		$this->putString(isset($additionalSkinData['CapeId']) ? $additionalSkinData['CapeId'] : '');
 		$uniqId = $skinId . $skinGeomtryName . "-" . microtime(true);
-		$this->putString($uniqId); // Full Skin ID		
+		$this->putString($uniqId); // Full Skin ID	
+		if ($playerProtocol >= Info::PROTOCOL_389) {
+			$this->putString(''); //ArmSize
+			$this->putString(''); //SkinColor
+			$this->putLInt(0);
+			$this->putLInt(0);	
+		}	
 	}
 
 	public function getSerializedSkin($playerProtocol, &$skinId, &$skinData, &$skinGeomtryName, &$skinGeomtryData, &$capeData, &$additionalSkinData) {		
