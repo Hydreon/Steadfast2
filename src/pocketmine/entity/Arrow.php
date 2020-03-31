@@ -19,13 +19,15 @@
 */
 namespace pocketmine\entity;
 
+use pocketmine\block\WoodenButton;
+use pocketmine\item\Item;
 use pocketmine\level\format\FullChunk;
+use pocketmine\level\Level;
 use pocketmine\level\particle\CriticalParticle;
+use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
-use pocketmine\level\Level;
-use pocketmine\math\Vector3;
 use pocketmine\block\Lava;
 use function var_dump;
 
@@ -94,7 +96,7 @@ class Arrow extends Projectile {
 		$bb = clone parent::getBoundingBox();
 		return $bb;
 	}
-	
+		
 	public function move($dx, $dy, $dz) {
 		$this->blocksAround = null;
 		if ($dx == 0 && $dz == 0 && $dy == 0) {
@@ -117,4 +119,18 @@ class Arrow extends Projectile {
 		$this->updateFallState($dy, $this->onGround);
 		return true;
 	}
+
+	public function kill() {
+		if (!$this->dead) {
+			$bb = clone $this->boundingBox;
+			$collidedBlocks = $this->level->getCollisionBlocks($bb);
+			foreach ($collidedBlocks as $block) {
+				if ($block instanceof WoodenButton) {
+					$block->onActivate(Item::get(Item::AIR), null);
+				}
+			}
+		}
+		parent::kill();
+	}
+
 }

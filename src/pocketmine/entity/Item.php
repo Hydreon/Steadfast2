@@ -36,6 +36,7 @@ use pocketmine\nbt\NBT;
 use pocketmine\level\Level;
 use pocketmine\level\format\FullChunk;
 use pocketmine\block\Block;
+use pocketmine\block\Water;
 
 class Item extends Entity{
 	const NETWORK_ID = 64;
@@ -134,6 +135,15 @@ class Item extends Entity{
 			} else {
 				$this->kill();
 				return true;
+			}
+		}
+		$blockId = $this->level->getBlockIdAt(floor($this->x), floor($this->y), floor($this->z));
+		if ($blockId == Block::WATER || $blockId == Block::STILL_WATER) {
+			$water = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y), floor($this->z)));
+			if ($water instanceof Water) {
+				$flowVector = $water->getFlowVector();
+				$this->motionX = $flowVector->x * 0.1;
+				$this->motionZ = $flowVector->z * 0.1;
 			}
 		}
 		if (!$this->onGround || $this->motionX != 0 || $this->motionY != 0 || $this->motionZ != 0) {

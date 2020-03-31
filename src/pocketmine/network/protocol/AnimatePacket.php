@@ -33,16 +33,23 @@ class AnimatePacket extends PEPacket{
 	const ACTION_WAKE_UP = 3;
 	const ACTION_CRITICAL_HIT = 4;
 	const ACTION_MAGIC_CRITICAL_HIT = 5;
-	const ACTION_ROW_RIGHT = 128;	// for boat?
-	const ACTION_ROW_LEFT = 129;	// for boat?
+	const ACTION_ROW_RIGHT = 128;	// for boat
+	const ACTION_ROW_LEFT = 129;	// for boat
 	
 	public $action;
 	public $eid;
+	public $data = 0;
 
 	public function decode($playerProtocol){
 		$this->getHeader($playerProtocol);
 		$this->action = $this->getSignedVarInt();
 		$this->eid = $this->getVarInt();
+		switch ($this->action) {
+			case self::ACTION_ROW_RIGHT:
+			case self::ACTION_ROW_LEFT:
+				$this->data = $this->getLFloat();
+				break;
+		}
 	}
 
 	public function encode($playerProtocol){
@@ -52,8 +59,8 @@ class AnimatePacket extends PEPacket{
 		switch ($this->action) {
 			case self::ACTION_ROW_RIGHT:
 			case self::ACTION_ROW_LEFT:
-				/** @todo do it right */
-				$this->putLFloat(0);
+				$this->putLFloat($this->data);
+				break;
 		}
 	}
 

@@ -23,6 +23,7 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
+use pocketmine\Player;
 
 class IronDoor extends Door{
 
@@ -51,6 +52,21 @@ class IronDoor extends Door{
 			];
 		}else{
 			return [];
+		}
+	}
+	
+	public function onActivate(Item $item, Player $player = null) {
+		return true;
+	}
+	
+	public function onUpdate($type, $deep) {
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$isOpen = $this->isOpen();
+		$connectedWithChargedBlock = $this->isConnectedWithChargedBlock();
+		if ($connectedWithChargedBlock xor $isOpen) {
+			$this->toggleOpenState();
 		}
 	}
 }
