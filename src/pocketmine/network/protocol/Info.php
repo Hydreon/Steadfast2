@@ -80,8 +80,8 @@ interface Info{
 	const PROTOCOL_386 = 386; // 1.13.0.12
 	const PROTOCOL_387 = 387; // 1.13.0.15
 	const PROTOCOL_388 = 388; // 1.13.0.25
-	const PROTOCOL_389 = 389; // 1.13.0.18
-	const PROTOCOL_390 = 390; // 1.14.0.1
+	const PROTOCOL_389 = 389; // 1.14.x.x
+	const PROTOCOL_390 = 390; // 1.14.60
 	const PROTOCOL_392 = 392; // 1.15.0.51
 	const PROTOCOL_393 = 393; // 1.15.0.53
 	const PROTOCOL_394 = 394; // 1.15.0.54
