@@ -558,9 +558,10 @@ class Level implements ChunkManager, Metadatable{
 		//Do block updates
 		//$this->timings->doTickPending->startTiming();
 		while($this->updateQueue->count() > 0 and $this->updateQueue->current()["priority"] <= $currentTick){
-			$block = $this->getBlock($this->updateQueue->extract()["data"]);
+			$blockData = $this->updateQueue->extract()["data"];
+			$block = $this->getBlock($blockData["pos"]);
 			unset($this->updateQueueIndex[self::blockHash($block->x, $block->y, $block->z)]);
-			$block->onUpdate(self::BLOCK_UPDATE_SCHEDULED);
+			$block->onUpdate($blockData["type"], 0);
 		}
 		//$this->timings->doTickPending->stopTiming();
 
@@ -747,7 +748,7 @@ class Level implements ChunkManager, Metadatable{
 								$block->y = ($Y << 4) + $y;
 								$block->z = $chunkZ * 16 + $z;
 								$block->level = $this;
-								$block->onUpdate(self::BLOCK_UPDATE_RANDOM);
+								$block->onUpdate(self::BLOCK_UPDATE_RANDOM, 0);
 							}
 						}
 					}
@@ -770,7 +771,7 @@ class Level implements ChunkManager, Metadatable{
 							$block->y = ($Y << 4) + $y;
 							$block->z = $chunkZ * 16 + $z;
 							$block->level = $this;
-							$block->onUpdate(self::BLOCK_UPDATE_RANDOM);
+							$block->onUpdate(self::BLOCK_UPDATE_RANDOM, 0);
 						}
 					}
 				}
@@ -823,35 +824,35 @@ class Level implements ChunkManager, Metadatable{
 	/**
 	 * @param Vector3 $pos
 	 */
-	public function updateAround(Vector3 $pos){
+	public function updateAround(Vector3 $pos, $deep){
 		$this->server->getPluginManager()->callEvent($ev = new BlockUpdateEvent($this->getBlock($this->temporalVector->setComponents($pos->x - 1, $pos->y, $pos->z))));
 		if(!$ev->isCancelled()){
-			$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL);
+			$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL, $deep);
 		}
 
 		$this->server->getPluginManager()->callEvent($ev = new BlockUpdateEvent($this->getBlock($this->temporalVector->setComponents($pos->x + 1, $pos->y, $pos->z))));
 		if(!$ev->isCancelled()){
-			$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL);
+			$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL, $deep);
 		}
 
 		$this->server->getPluginManager()->callEvent($ev = new BlockUpdateEvent($this->getBlock($this->temporalVector->setComponents($pos->x, $pos->y - 1, $pos->z))));
 		if(!$ev->isCancelled()){
-			$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL);
+			$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL, $deep);
 		}
 
 		$this->server->getPluginManager()->callEvent($ev = new BlockUpdateEvent($this->getBlock($this->temporalVector->setComponents($pos->x, $pos->y + 1, $pos->z))));
 		if(!$ev->isCancelled()){
-			$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL);
+			$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL, $deep);
 		}
 
 		$this->server->getPluginManager()->callEvent($ev = new BlockUpdateEvent($this->getBlock($this->temporalVector->setComponents($pos->x, $pos->y, $pos->z - 1))));
 		if(!$ev->isCancelled()){
-			$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL);
+			$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL, $deep);
 		}
 
 		$this->server->getPluginManager()->callEvent($ev = new BlockUpdateEvent($this->getBlock($this->temporalVector->setComponents($pos->x, $pos->y, $pos->z + 1))));
 		if(!$ev->isCancelled()){
-			$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL);
+			$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL, $deep);
 		}
 	}
 
@@ -859,12 +860,12 @@ class Level implements ChunkManager, Metadatable{
 	 * @param Vector3 $pos
 	 * @param int     $delay
 	 */
-	public function scheduleUpdate(Vector3 $pos, $delay){
+	public function scheduleUpdate(Vector3 $pos, $delay, $type = self::BLOCK_UPDATE_SCHEDULED){
 		if(isset($this->updateQueueIndex[$index = self::blockHash($pos->x, $pos->y, $pos->z)]) and $this->updateQueueIndex[$index] <= $delay){
 			return;
 		}
 		$this->updateQueueIndex[$index] = $delay;
-		$this->updateQueue->insert(new Vector3((int) $pos->x, (int) $pos->y, (int) $pos->z), (int) $delay + $this->server->getTick());
+		$this->updateQueue->insert(['pos' => new Vector3((int) $pos->x, (int) $pos->y, (int) $pos->z), 'type' => $type], (int) $delay + $this->server->getTick());
 	}
 
 	/**
@@ -1080,7 +1081,7 @@ class Level implements ChunkManager, Metadatable{
 	 *
 	 * @return bool Whether the block has been updated or not
 	 */
-	public function setBlock(Vector3 $pos, Block $block, $direct = false, $update = true){
+	public function setBlock(Vector3 $pos, Block $block, $direct = false, $update = true, $deep = 0){
 		if($pos->y < 0 or $pos->y >= $this->getMaxY()){
 			return false;
 		}
@@ -1118,13 +1119,13 @@ class Level implements ChunkManager, Metadatable{
 			if($update === true){
 				$this->server->getPluginManager()->callEvent($ev = new BlockUpdateEvent($block));
 				if(!$ev->isCancelled()){
-					$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL);
+					$ev->getBlock()->onUpdate(self::BLOCK_UPDATE_NORMAL, $deep);
 					foreach($this->getNearbyEntities(new AxisAlignedBB($block->x - 1, $block->y - 1, $block->z - 1, $block->x + 2, $block->y + 2, $block->z + 2)) as $entity){
 						$entity->scheduleUpdate();
 					}
 				}
 
-				$this->updateAround($pos);
+				$this->updateAround($pos, $deep);
 			}
 
 			return true;
@@ -1299,7 +1300,7 @@ class Level implements ChunkManager, Metadatable{
 				$ev->setCancelled(true);
 			}
 			if (!$ev->isCancelled()) {
-				$target->onUpdate(self::BLOCK_UPDATE_TOUCH);
+				$target->onUpdate(self::BLOCK_UPDATE_TOUCH, 0);
 				if (!$player->isSneaking()) {
 					if ($target->canBeActivated() === true && $target->onActivate($item, $player) === true) {
 						return true;
@@ -1322,7 +1323,7 @@ class Level implements ChunkManager, Metadatable{
 			$hand = $item->getBlock();
 			$hand->position($block);
 		} else if ($block->getId() === Item::FIRE) {
-			$block->onUpdate(self::BLOCK_UPDATE_TOUCH);
+			$block->onUpdate(self::BLOCK_UPDATE_TOUCH, 0);
 			return false;
 		} else {
 			return false;

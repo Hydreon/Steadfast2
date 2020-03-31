@@ -57,7 +57,10 @@ class BaseTransaction implements Transaction {
 	}
 	
 	public function __toString() {
-		return "Inventory: " . get_class($this) . " Slot: " . $this->slot . " Old item: " . $this->sourceItem . " New item: " . $this->targetItem;
+		return get_class($this->inventory) . PHP_EOL .
+				'Slot: ' . $this->slot . PHP_EOL .
+				'Old item: ' . $this->sourceItem . PHP_EOL .
+				'New item: ' . $this->targetItem . PHP_EOL;
 	}
 
 	public function getCreationTime() {

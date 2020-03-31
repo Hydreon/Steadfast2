@@ -143,11 +143,15 @@ class Vine extends Transparent{
 		return false;
 	}
 
-	public function onUpdate($type){
+	public function onUpdate($type, $deep){
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			/*if($this->getSide(0)->getId() === self::AIR){ //Replace with common break method
 				Server::getInstance()->api->entity->drop($this, Item::get(LADDER, 0, 1));
-				$this->getLevel()->setBlock($this, new Air(), true, true, true);
+				$this->getLevel()->setBlock($this, new Air(), true, true, $deep);
 				return Level::BLOCK_UPDATE_NORMAL;
 			}*/
 		}

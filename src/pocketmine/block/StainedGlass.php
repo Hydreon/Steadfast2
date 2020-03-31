@@ -4,7 +4,7 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 
-class StainedGlass extends Solid {
+class StainedGlass extends Glass {
     
 	const WHITE = 0;
 	const ORANGE = 1;

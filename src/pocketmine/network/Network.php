@@ -73,6 +73,7 @@ use pocketmine\network\protocol\TileEventPacket;
 use pocketmine\network\protocol\TransferPacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
 use pocketmine\network\protocol\PlayerListPacket;
+use pocketmine\network\protocol\PlayerInputPacket;
 use pocketmine\network\protocol\v120\PlayerSkinPacket;
 use pocketmine\Player;
 use pocketmine\Server;
@@ -95,7 +96,6 @@ use pocketmine\network\protocol\v120\PurchaseReceiptPacket;
 use pocketmine\network\protocol\v120\ServerSettingsRequestPacket;
 use pocketmine\network\protocol\v120\SubClientLoginPacket;
 use pocketmine\network\protocol\ResourcePackChunkRequestPacket;
-use pocketmine\network\protocol\PlayerInputPacket;
 use pocketmine\network\protocol\v310\AvailableEntityIdentifiersPacket;
 use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
 use pocketmine\network\protocol\v310\SpawnParticleEffectPacket;
@@ -376,7 +376,7 @@ class Network {
 			$interface->blockAddress($address, $timeout);
 		}
 	}
-	
+
 	private function registerPackets120() {
 		$this->packetPool120 = new \SplFixedArray(256);
 		$this->registerPacket120(ProtocolInfo120::LOGIN_PACKET, LoginPacket::class);
@@ -429,8 +429,8 @@ class Network {
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACK_DATA_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACKS_INFO_PACKET, ResourcePackDataInfoPacket::class);
 		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACKS_CLIENT_RESPONSE_PACKET, ResourcePackClientResponsePacket::class);
-		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACK_CHUNK_REQUEST_PACKET, ResourcePackChunkRequestPacket::class);
 		$this->registerPacket120(ProtocolInfo120::PLAYER_INPUT_PACKET, PlayerInputPacket::class);
+		$this->registerPacket120(ProtocolInfo120::RESOURCE_PACK_CHUNK_REQUEST_PACKET, ResourcePackChunkRequestPacket::class);
 		$this->registerPacket120(ProtocolInfo120::MAP_INFO_REQUEST_PACKET, MapInfoRequestPacket::class);
 		// new
 		$this->registerPacket120(ProtocolInfo120::INVENTORY_TRANSACTION_PACKET, InventoryTransactionPacket::class);

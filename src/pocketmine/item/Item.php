@@ -115,6 +115,7 @@ class Item{
 	const TALL_GRASS = 31;
 	const BUSH = 32;
 	const DEAD_BUSH = 32;
+	const PISTON = 33;
 	const WOOL = 35;
 	const DANDELION = 37;
 	const POPPY = 38;
@@ -926,6 +927,9 @@ class Item{
 			self::$list[self::BEETROOT_SEEDS] = BeetrootSeeds::class;
 			self::$list[self::SIGN] = Sign::class;
 			self::$list[self::WOODEN_DOOR] = WoodenDoor::class;
+			self::$list[self::MINECART] = Minecart::class;
+			self::$list[self::BOAT] = Boat::class;
+			self::$list[self::FISHING_ROD] = FishingRod::class;
 			self::$list[self::BUCKET] = Bucket::class;
 			self::$list[self::IRON_DOOR] = IronDoor::class;
 			self::$list[self::CAKE] = Cake::class;
@@ -999,6 +1003,7 @@ class Item{
 			self::$list[self::ELYTRA] = Elytra::class;
 			self::$list[self::PRISMARINE_CRYSTAL] = PrismarineCrystal::class;
 			self::$list[self::POTION] = Potion::class;
+			self::$list[self::REDSTONE_REPEATER] = Repeater::class;
 			self::$list[self::BOTTLE_ENCHANTING] = BottleOEnchanting::class;
 			self::$list[self::WRITABLE_BOOK] = WritableBook::class;
 			
@@ -1011,14 +1016,9 @@ class Item{
 			self::$list[self::SPLASH_POTION] = SplashPotion::class;
             
             // update for 1.0
-			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;
+			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;			
+			self::$list[self::REDSTONE_DUST] = Redstone::class;
 			self::$list[self::TOTEM_OF_UNDYING] = TotemOfUndying::class;
-
-			// for($i = 0; $i < 256; ++$i){
-			// 	if(Block::$list[$i] !== null){
-			// 		self::$list[$i] = Block::$list[$i];
-			// 	}
-			// }
 		}
 
 		self::initCreativeItems();

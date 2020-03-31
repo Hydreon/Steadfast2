@@ -38,7 +38,11 @@ class MelonStem extends Crops{
 		$this->meta = $meta;
 	}
 
-	public function onUpdate($type){
+	public function onUpdate($type, $deep){
+		if (!Block::onUpdate($type, $deep)) {
+			return false;
+		}
+		$deep++;
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			if($this->getSide(0)->isTransparent() === true){
 				$this->getLevel()->useBreakOn($this);
@@ -51,7 +55,7 @@ class MelonStem extends Crops{
 					++$block->meta;
 					Server::getInstance()->getPluginManager()->callEvent($ev = new BlockGrowEvent($this, $block));
 					if(!$ev->isCancelled()){
-						$this->getLevel()->setBlock($this, $ev->getNewState(), true);
+						$this->getLevel()->setBlock($this, $ev->getNewState(), true, true, $deep);
 					}
 
 					return Level::BLOCK_UPDATE_RANDOM;
@@ -67,7 +71,7 @@ class MelonStem extends Crops{
 					if($side->getId() === self::AIR and ($d->getId() === self::FARMLAND or $d->getId() === self::GRASS or $d->getId() === self::DIRT)){
 						Server::getInstance()->getPluginManager()->callEvent($ev = new BlockGrowEvent($side, new Melon()));
 						if(!$ev->isCancelled()){
-							$this->getLevel()->setBlock($side, $ev->getNewState(), true);
+							$this->getLevel()->setBlock($side, $ev->getNewState(), true, true, $deep);
 						}
 					}
 				}
