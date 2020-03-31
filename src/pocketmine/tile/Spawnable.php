@@ -68,9 +68,4 @@ abstract class Spawnable extends Tile{
 			}
 		}
 	}
-	
-	public function updatePosition($x, $y, $z) {
-		parent::updatePosition($x, $y, $z);
-		$this->spawnToAll();
-	}
 }

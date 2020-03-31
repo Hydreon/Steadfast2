@@ -50,11 +50,7 @@ class DoublePlant extends Flowable {
 	}
 
 
-	public function onUpdate($type, $deep){
-		if (!Block::onUpdate($type, $deep)) {
-			return false;
-		}
-		$deep++;
+	public function onUpdate($type) {
 		if ($type === Level::BLOCK_UPDATE_NORMAL) {
 			$blockUnder = $this->getSide(0);
 			if ($blockUnder->isTransparent() === true && $blockUnder->getId() != $this->id) { //Replace with common break method

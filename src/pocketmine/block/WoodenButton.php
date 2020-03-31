@@ -30,13 +30,16 @@ class WoodenButton extends Button{
 
 	public function __construct($meta = 0){
 		$this->meta = $meta;
-		$this->activeTicks = 30; // 1.5 seconds
 	}
 
 	public function getName(){
 		return "Wooden Button";
 	}
 	
+	public function getHardness(){
+		return 1;
+	}
+
 	public function getToolType(){
 		return Tool::TYPE_AXE;
 	}

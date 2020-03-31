@@ -36,10 +36,7 @@ class DeadBush extends Flowable{
 	}
 
 
-	public function onUpdate($type, $deep){
-		if (!Block::onUpdate($type, $deep)) {
-			return false;
-		}
+	public function onUpdate($type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			if($this->getSide(0)->isTransparent() === true){
 				$this->getLevel()->useBreakOn($this);

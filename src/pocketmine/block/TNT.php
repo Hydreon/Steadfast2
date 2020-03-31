@@ -50,16 +50,6 @@ class TNT extends Solid{
 	public function canBeActivated(){
 		return true;
 	}
-	
-	public function onUpdate($type, $deep) {
-		if (!Block::onUpdate($type, $deep)) {
-			return false;
-		}
-		parent::onUpdate($type, $deep);
-		if ($this->getPoweredState() != self::POWERED_NONE) {
-			$this->onActivate(Item::get(Item::FLINT_STEEL));
-		}
-	}
 
 	public function onActivate(Item $item, Player $player = null){
 		if($item->getId() === Item::FLINT_STEEL){

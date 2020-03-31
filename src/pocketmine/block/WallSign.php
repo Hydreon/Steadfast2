@@ -30,10 +30,7 @@ class WallSign extends SignPost{
 		return "Wall Sign";
 	}
 
-	public function onUpdate($type, $deep){
-		if (!Block::onUpdate($type, $deep)) {
-			return false;
-		}
+	public function onUpdate($type){
 		return false;
 	}
 }

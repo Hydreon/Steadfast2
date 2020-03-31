@@ -38,11 +38,7 @@ class PumpkinStem extends Crops{
 		return "Pumpkin Stem";
 	}
 
-	public function onUpdate($type, $deep){
-		if (!Block::onUpdate($type, $deep)) {
-			return false;
-		}
-		$deep++;
+	public function onUpdate($type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			if($this->getSide(0)->isTransparent()){
 				$this->getLevel()->useBreakOn($this);
@@ -55,7 +51,7 @@ class PumpkinStem extends Crops{
 					++$block->meta;
 					Server::getInstance()->getPluginManager()->callEvent($ev = new BlockGrowEvent($this, $block));
 					if(!$ev->isCancelled()){
-						$this->getLevel()->setBlock($this, $ev->getNewState(), true, true, $deep);
+						$this->getLevel()->setBlock($this, $ev->getNewState(), true);
 					}
 
 					return Level::BLOCK_UPDATE_RANDOM;
@@ -71,7 +67,7 @@ class PumpkinStem extends Crops{
 					if($side->getId() === self::AIR and ($d->getId() === self::FARMLAND or $d->getId() === self::GRASS or $d->getId() === self::DIRT)){
 						Server::getInstance()->getPluginManager()->callEvent($ev = new BlockGrowEvent($side, new Pumpkin()));
 						if(!$ev->isCancelled()){
-							$this->getLevel()->setBlock($side, $ev->getNewState(), true, true, $deep);
+							$this->getLevel()->setBlock($side, $ev->getNewState(), true);
 						}
 					}
 				}

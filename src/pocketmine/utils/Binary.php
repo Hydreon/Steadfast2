@@ -92,16 +92,8 @@ class Binary{
 		$m = "";
 		$m .= self::writeVarInt(count($data));
 		foreach($data as $bottom => $d){
-			switch($d[0]){
-				case Entity::DATA_TYPE_UNSIGNED_LONG:
-					$type = Entity::DATA_TYPE_LONG;
-					break;
-				default:
-					$type = $d[0];
-					break;
-			}
 			$m .= self::writeVarInt($bottom);
-			$m .= self::writeVarInt($type);
+			$m .= self::writeVarInt($d[0]);
 			switch($d[0]){
 				case Entity::DATA_TYPE_BYTE:
 					$m .= self::writeByte($d[1]);
@@ -131,9 +123,6 @@ class Binary{
 					break;
 				case Entity::DATA_TYPE_LONG:
 					$m .= self::writeSignedVarInt($d[1]);
-					break;
-				case Entity::DATA_TYPE_UNSIGNED_LONG:
-					$m .= self::writeVarInt($d[1]);
 					break;
 				case Entity::DATA_TYPE_VECTOR3:
 					$m .= self::writeLFloat($d[1][0]);

@@ -21,8 +21,6 @@
 
 namespace pocketmine\block;
 
-use pocketmine\entity\Entity;
-use pocketmine\event\entity\EntityDamageByBlockEvent;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
@@ -48,15 +46,6 @@ class Magma extends Solid {
 	
 	public function getDrops(Item $item) {
 		return [];
-	}
-
-	public function hasEntityCollision(){
-		return true;
-	}
-
-	public function onEntityCollide(Entity $entity) {
-		$ev = new EntityDamageByBlockEvent($this, $entity, EntityDamageByBlockEvent::CAUSE_FIRE, 1);
-		$entity->attack($ev->getFinalDamage(), $ev);
 	}
 
 }

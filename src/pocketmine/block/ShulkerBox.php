@@ -49,4 +49,4 @@ class ShulkerBox extends Solid{
 			
 		];
 	}
-}
+} 

@@ -24,7 +24,7 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 
-class Redstone extends Solid {
+class Redstone extends Transparent{
 
 	protected $id = self::REDSTONE_BLOCK;
 

@@ -84,10 +84,7 @@ class WaterLily extends Flowable{
 		return false;
 	}
 
-	public function onUpdate($type, $deep){
-		if (!Block::onUpdate($type, $deep)) {
-			return false;
-		}
+	public function onUpdate($type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			if(!($this->getSide(0) instanceof Water)){
 				$this->getLevel()->useBreakOn($this);

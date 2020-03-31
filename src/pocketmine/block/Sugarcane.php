@@ -73,11 +73,7 @@ class Sugarcane extends Flowable{
 		return false;
 	}
 
-	public function onUpdate($type, $deep){
-		if (!Block::onUpdate($type, $deep)) {
-			return false;
-		}
-		$deep++;
+	public function onUpdate($type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			$down = $this->getSide(0);
 			if($down->isTransparent() === true and $down->getId() !== self::SUGARCANE_BLOCK){
@@ -91,15 +87,15 @@ class Sugarcane extends Flowable{
 					for($y = 1; $y < 3; ++$y){
 						$b = $this->getLevel()->getBlock(new Vector3($this->x, $this->y + $y, $this->z));
 						if($b->getId() === self::AIR){
-							$this->getLevel()->setBlock($b, new Sugarcane(), true, true, $deep);
+							$this->getLevel()->setBlock($b, new Sugarcane(), true);
 							break;
 						}
 					}
 					$this->meta = 0;
-					$this->getLevel()->setBlock($this, $this, true, true, $deep);
+					$this->getLevel()->setBlock($this, $this, true);
 				}else{
 					++$this->meta;
-					$this->getLevel()->setBlock($this, $this, true, true, $deep);
+					$this->getLevel()->setBlock($this, $this, true);
 				}
 
 				return Level::BLOCK_UPDATE_RANDOM;

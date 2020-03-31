@@ -73,14 +73,10 @@ class Cake extends Transparent{
 		return false;
 	}
 
-	public function onUpdate($type, $deep){
-		if (!Block::onUpdate($type, $deep)) {
-			return false;
-		}
-		$deep++;
+	public function onUpdate($type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			if($this->getSide(0)->getId() === self::AIR){ //Replace with common break method
-				$this->getLevel()->setBlock($this, new Air(), true, true, $deep);
+				$this->getLevel()->setBlock($this, new Air(), true);
 
 				return Level::BLOCK_UPDATE_NORMAL;
 			}

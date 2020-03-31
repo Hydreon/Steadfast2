@@ -65,15 +65,13 @@ class Cactus extends Transparent{
 	}
 
 	public function onEntityCollide(Entity $entity){
+		/*
 		$ev = new EntityDamageByBlockEvent($this, $entity, EntityDamageEvent::CAUSE_CONTACT, 1);
-		$entity->attack($ev->getFinalDamage(), $ev);
+		$entity->attack($ev->getFinalDamage(), $ev);]
+		*/
 	}
 
-	public function onUpdate($type, $deep){
-		if (!Block::onUpdate($type, $deep)) {
-			return false;
-		}
-		$deep++;
+	public function onUpdate($type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			$down = $this->getSide(0);
 			if($down->getId() !== self::SAND and $down->getId() !== self::CACTUS){
@@ -94,15 +92,15 @@ class Cactus extends Transparent{
 						if($b->getId() === self::AIR){
 							Server::getInstance()->getPluginManager()->callEvent($ev = new BlockGrowEvent($b, new Cactus()));
 							if(!$ev->isCancelled()){
-								$this->getLevel()->setBlock($b, $ev->getNewState(), true, true, $deep);
+								$this->getLevel()->setBlock($b, $ev->getNewState(), true);
 							}
 						}
 					}
 					$this->meta = 0;
-					$this->getLevel()->setBlock($this, $this, false, true, $deep);
+					$this->getLevel()->setBlock($this, $this);
 				}else{
 					++$this->meta;
-					$this->getLevel()->setBlock($this, $this, false, true, $deep);
+					$this->getLevel()->setBlock($this, $this);
 				}
 			}
 		}

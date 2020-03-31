@@ -26,7 +26,7 @@ use pocketmine\item\Tool;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
 
-class Slab extends Solid{
+class Slab extends Transparent{
 
 	const STONE = 0;
 	const SANDSTONE = 1;
@@ -41,10 +41,6 @@ class Slab extends Solid{
 
 	public function __construct($meta = 0){
 		$this->meta = $meta;
-	}
-	
-	public function isTransparent() {
-		return true;
 	}
 
 	public function getHardness(){

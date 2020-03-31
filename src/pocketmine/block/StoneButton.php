@@ -36,6 +36,10 @@ class StoneButton extends Button{
 		return "Stone Button";
 	}
 
+	public function getHardness(){
+		return 1;
+	}
+
 	public function getToolType(){
 		return Tool::TYPE_PICKAXE;
 	}
