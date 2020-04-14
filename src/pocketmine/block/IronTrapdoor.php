@@ -6,6 +6,8 @@ use pocketmine\item\Tool;
 class IronTrapdoor extends Trapdoor{
 	
 	protected $id = self::IRON_TRAPDOOR;
+
+	protected $newMaskOpened = 0x0d;
 	
 	public function getName(){
 		return "Iron Trapdoor";
