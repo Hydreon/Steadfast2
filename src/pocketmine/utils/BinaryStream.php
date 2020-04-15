@@ -394,10 +394,197 @@ class BinaryStream {
 		$uniqId = $skinId . $skinGeomtryName . "-" . microtime(true);
 		$this->putString($uniqId); // Full Skin ID	
 		if ($playerProtocol == Info::PROTOCOL_390) { // Right now this only applies for proto 390
+			/*
+			["ArmSize"]=>
+			string(4) "wide"
+			*/
 			$this->putString(''); //ArmSize
+			/*
+			["SkinColor"]=>
+			 string(7) "#b37b62"
+			 */
 			$this->putString(''); //SkinColor
-			$this->putLInt(0);   //Persona Pieces -> more info to come
-			$this->putLInt(0);	//PieceTintColors -> more info to come
+
+			$this->putLInt(0);   //Persona Pieces length
+			/*
+			 * ["PersonaPieces"]=>
+				  array(9) {
+					[0]=>
+					array(5) {
+					  ["IsDefault"]=>
+					  bool(true)
+					  ["PackId"]=>
+					  string(36) "00000000-0000-0000-0000-000000000000"
+					  ["PieceId"]=>
+					  string(36) "8f96d1f8-e9bb-40d2-acc8-eb79746c5d7c"
+					  ["PieceType"]=>
+					  string(16) "persona_skeleton"
+					  ["ProductId"]=>
+					  string(0) ""
+					}
+					[1]=>
+					array(5) {
+					  ["IsDefault"]=>
+					  bool(true)
+					  ["PackId"]=>
+					  string(36) "00000000-0000-0000-0000-000000000000"
+					  ["PieceId"]=>
+					  string(36) "1042557f-d1f9-44e3-ba78-f404e8fb7363"
+					  ["PieceType"]=>
+					  string(12) "persona_body"
+					  ["ProductId"]=>
+					  string(0) ""
+					}
+					[2]=>
+					array(5) {
+					  ["IsDefault"]=>
+					  bool(true)
+					  ["PackId"]=>
+					  string(36) "00000000-0000-0000-0000-000000000000"
+					  ["PieceId"]=>
+					  string(36) "f1e4c577-19ba-4d77-9222-47f145857f78"
+					  ["PieceType"]=>
+					  string(12) "persona_skin"
+					  ["ProductId"]=>
+					  string(0) ""
+					}
+					[3]=>
+					array(5) {
+					  ["IsDefault"]=>
+					  bool(true)
+					  ["PackId"]=>
+					  string(36) "00000000-0000-0000-0000-000000000000"
+					  ["PieceId"]=>
+					  string(36) "49f93789-a512-4c47-95cb-0606cdc1c2be"
+					  ["PieceType"]=>
+					  string(14) "persona_bottom"
+					  ["ProductId"]=>
+					  string(0) ""
+					}
+					[4]=>
+					array(5) {
+					  ["IsDefault"]=>
+					  bool(true)
+					  ["PackId"]=>
+					  string(36) "00000000-0000-0000-0000-000000000000"
+					  ["PieceId"]=>
+					  string(36) "68bfe60d-f30a-422f-b32c-72374ebdd057"
+					  ["PieceType"]=>
+					  string(12) "persona_feet"
+					  ["ProductId"]=>
+					  string(0) ""
+					}
+					[5]=>
+					array(5) {
+					  ["IsDefault"]=>
+					  bool(true)
+					  ["PackId"]=>
+					  string(36) "00000000-0000-0000-0000-000000000000"
+					  ["PieceId"]=>
+					  string(36) "b6702f0e-a4b5-497a-8820-6c8e3946bb55"
+					  ["PieceType"]=>
+					  string(11) "persona_top"
+					  ["ProductId"]=>
+					  string(0) ""
+					}
+					[6]=>
+					array(5) {
+					  ["IsDefault"]=>
+					  bool(true)
+					  ["PackId"]=>
+					  string(36) "00000000-0000-0000-0000-000000000000"
+					  ["PieceId"]=>
+					  string(36) "52dd0726-cd68-4d7d-8561-515a4866de39"
+					  ["PieceType"]=>
+					  string(13) "persona_mouth"
+					  ["ProductId"]=>
+					  string(0) ""
+					}
+					[7]=>
+					array(5) {
+					  ["IsDefault"]=>
+					  bool(true)
+					  ["PackId"]=>
+					  string(36) "00000000-0000-0000-0000-000000000000"
+					  ["PieceId"]=>
+					  string(36) "a0f263b3-e093-4c85-aadb-3759417898ff"
+					  ["PieceType"]=>
+					  string(12) "persona_eyes"
+					  ["ProductId"]=>
+					  string(0) ""
+					}
+					[8]=>
+					array(5) {
+					  ["IsDefault"]=>
+					  bool(true)
+					  ["PackId"]=>
+					  string(36) "00000000-0000-0000-0000-000000000000"
+					  ["PieceId"]=>
+					  string(36) "2bb1473b-9a5c-4eae-9fd5-82302a6aa3da"
+					  ["PieceType"]=>
+					  string(12) "persona_hair"
+					  ["ProductId"]=>
+					  string(0) ""
+					}
+				}
+			 */
+
+
+			$this->putLInt(0);	//PieceTintColors
+			/*
+			 ["PieceTintColors"]=>
+			  array(3) {
+				[0]=>
+				array(2) {
+				  ["Colors"]=>
+				  array(4) {
+					[0]=>
+					string(2) "#0"
+					[1]=>
+					string(2) "#0"
+					[2]=>
+					string(7) "#774235"
+					[3]=>
+					string(2) "#0"
+				  }
+				  ["PieceType"]=>
+				  string(13) "persona_mouth"
+				}
+				[1]=>
+				array(2) {
+				  ["Colors"]=>
+				  array(4) {
+					[0]=>
+					string(7) "#523d89"
+					[1]=>
+					string(2) "#0"
+					[2]=>
+					string(2) "#0"
+					[3]=>
+					string(2) "#0"
+				  }
+				  ["PieceType"]=>
+				  string(12) "persona_eyes"
+				}
+				[2]=>
+				array(2) {
+				  ["Colors"]=>
+				  array(4) {
+					[0]=>
+					string(7) "#2f1f0f"
+					[1]=>
+					string(2) "#0"
+					[2]=>
+					string(2) "#0"
+					[3]=>
+					string(2) "#0"
+				  }
+				  ["PieceType"]=>
+				  string(12) "persona_hair"
+				}
+			  }
+
+			 */
 		}	
 	}
 
