@@ -158,7 +158,7 @@ class Network {
 	}
 
 	public function setCount($count, $maxcount = 31360) {
-		$this->server->mainInterface->setCount($count, $maxcount);
+		$this->server->getMainInterface()->setCount($count, $maxcount);
 	}
 
 	public function processInterfaces() {
