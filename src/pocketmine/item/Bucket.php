@@ -24,6 +24,9 @@ namespace pocketmine\item;
 use pocketmine\block\Air;
 use pocketmine\block\Block;
 use pocketmine\block\Liquid;
+use pocketmine\block\Slab;
+use pocketmine\block\Slab2;
+use pocketmine\block\WoodSlab;
 use pocketmine\event\player\PlayerBucketFillEvent;
 use pocketmine\level\Level;
 use pocketmine\Player;
@@ -42,6 +45,9 @@ class Bucket extends Item{
 	}
 
 	public function onActivate(Level $level, Player $player, Block $block, Block $target, $face, $fx, $fy, $fz){
+		if ($block instanceof Slab || $block instanceof Slab2 || $block instanceof WoodSlab) {
+			return false;
+		}
 		$targetBlock = Block::get($this->meta);
 
 		if($targetBlock instanceof Air){
