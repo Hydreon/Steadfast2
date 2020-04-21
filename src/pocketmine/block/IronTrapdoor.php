@@ -11,7 +11,9 @@ class IronTrapdoor extends Trapdoor {
 
 	protected $id = self::IRON_TRAPDOOR;
 
-	public function getName() {
+	protected $newMaskOpened = 0x0d;
+	
+	public function getName(){
 		return "Iron Trapdoor";
 	}
 
