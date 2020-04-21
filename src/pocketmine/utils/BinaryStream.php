@@ -317,7 +317,8 @@ class BinaryStream {
 	}
 	
 	public function putSerializedSkin($playerProtocol, $skinId, $skinData, $skinGeomtryName, $skinGeomtryData, $capeData, $additionalSkinData) {
-		if (!isset($additionalSkinData['PersonaSkin']) || !$additionalSkinData['PersonaSkin']) {
+		//disable persona skins for all
+		if (true || !isset($additionalSkinData['PersonaSkin']) || !$additionalSkinData['PersonaSkin']) {
 			$additionalSkinData = [];
 		}
 		if (isset($additionalSkinData['skinData'])) {
