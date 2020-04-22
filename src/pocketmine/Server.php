@@ -1921,6 +1921,7 @@ class Server{
 		foreach ($packets as $pk) {
 			if ($playersCount < 2) {
 				foreach ($players as $p) {
+					$pk->setDeviceId($p->getDeviceOS());
 					$p->dataPacket($pk);
 				}
 			} else {
@@ -2320,6 +2321,7 @@ class Server{
 		foreach ($players as $p){
 			$protocol = $p->getPlayerProtocol();
 			if (!isset($readyPackets[$protocol])) {
+				$pk->setDeviceId($p->getDeviceOS());
 				$pk->encode($protocol, $p->getSubClientId());
 				$batch = new BatchPacket();
 				$batch->payload = zlib_encode(Binary::writeVarInt(strlen($pk->getBuffer())) . $pk->getBuffer(), ZLIB_ENCODING_DEFLATE, 7);
