@@ -2885,7 +2885,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		return $this->foodLevel;
 	}
 	
-	public functon getSaturation()
+	public function getSaturation()
 	{
 		return $this->satuartion;
 	}
