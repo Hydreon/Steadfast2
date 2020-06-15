@@ -1,6 +1,6 @@
 <?php
 
-namespace pocketmine\network\protocol\v392;
+namespace pocketmine\network\protocol\v406;
 
 use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\Info331;
