@@ -127,8 +127,11 @@ class PlayerListPacket extends PEPacket{
 						if ($playerProtocol >= Info::PROTOCOL_385) {
 							$this->putByte(0); // is teacher
 							$this->putByte(0); // is host
-						}
+						}						
 					}
+				}
+				if ($playerProtocol >= Info::PROTOCOL_406) {
+					$this->putByte(1); // is trusted skin                  
 				}
 				break;
 			case self::TYPE_REMOVE:
