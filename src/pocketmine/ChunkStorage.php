@@ -102,8 +102,13 @@ class ChunkStorage {
 		$pk->encode($protocol);
 		$buffer = $pk->getBuffer();
 		$decodedBuffer = Binary::writeVarInt(strlen($buffer)) . $buffer;
-		$buffer = zlib_encode($decodedBuffer, ZLIB_ENCODING_DEFLATE, 7);
-		$this->server->sendData($data, $buffer);
+
+//		$buffer = zlib_encode($decodedBuffer, ZLIB_ENCODING_DEFLATE, 7);
+//		$this->server->sendData($data, $buffer);
+
+		$buffer = zlib_encode($decodedBuffer, Player::getCompressAlg($protocol), 7);
+        $this->server->sendData($data, $buffer);
+
 		$this->setCache(Level::chunkHash($data['chunkX'], $data['chunkZ']), ($protocol << 4) | $subClientId, $buffer);
 	}
 	

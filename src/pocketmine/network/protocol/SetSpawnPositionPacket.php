@@ -47,7 +47,14 @@ class SetSpawnPositionPacket extends PEPacket{
 		$this->putSignedVarInt($this->x);
 		$this->putVarInt($this->y);
 		$this->putSignedVarInt($this->z);
-		$this->putByte($this->isForced); // forced spawn
+		if ($playerProtocol >= Info::PROTOCOL_406){
+			$this->putVarInt(0); //Dimension type
+			$this->putSignedVarInt($this->x);
+			$this->putVarInt($this->y);
+			$this->putSignedVarInt($this->z);
+		} else {
+			$this->putByte($this->isForced); // forced spawn
+		}
 	}
 
 }

@@ -1487,4 +1487,8 @@ abstract class Entity extends Location implements Metadatable{
 		unset($this->hasSpawned[$player->getId()]);
 	}
 
+	public function isBreakTool() {
+		return true;
+	} 
+
 }
