@@ -7,6 +7,7 @@ use pocketmine\utils\Binary;
 class RemoteProxyServer {
 
 	const FLAG_NEED_ZLIB = 0x80;
+	//TODO: FLAG_NEED_ZLIB
 
 	private $proxyManager;
 	private $socket;
