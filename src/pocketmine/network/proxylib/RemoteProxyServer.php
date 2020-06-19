@@ -7,7 +7,6 @@ use pocketmine\utils\Binary;
 class RemoteProxyServer {
 
 	const FLAG_NEED_ZLIB = 0x80;
-	//TODO: FLAG_NEED_ZLIB
 
 	private $proxyManager;
 	private $socket;
@@ -66,15 +65,18 @@ class RemoteProxyServer {
 		return true;
 	}
 
-	public function putPacket($buffer) {
+	public function putPacket($buffer, $needRaw = false) {
 		$flags = ord($buffer{4});
 		if (($flags & self::FLAG_NEED_ZLIB) > 0) {
 			$flags = $flags ^ self::FLAG_NEED_ZLIB;
-			$buff = substr($buffer, 5);		
+			$buff = substr($buffer, 5);
+			//TODO: This is a test
+			$zlibEncoding = ZLIB_ENCODING_RAW;
+			if(!$needRaw) $zlibEncoding = ZLIB_ENCODING_DEFLATE;
 			if (strlen($buffer) > 512) {
-				$data = zlib_encode($buff, ZLIB_ENCODING_DEFLATE, -1);
+				$data = zlib_encode($buff, $zlibEncoding, 7);
 			} else {
-				$data = $this->fakeZlib($buff);
+				$data = zlib_encode($buff, $zlibEncoding, 0);
 			}
 			$data = substr($buffer, 0, 4) . chr($flags) . $data;
 			$this->writeQueue[] = pack('N', strlen($data)) . $data;
