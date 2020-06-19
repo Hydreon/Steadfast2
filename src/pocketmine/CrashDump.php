@@ -79,7 +79,7 @@ class CrashDump{
 		$this->addLine("----------------------REPORT THE DATA BELOW THIS LINE-----------------------");
 		$this->addLine();
 		$this->addLine("===BEGIN CRASH DUMP===");
-		$this->encodedData = zlib_encode(json_encode($this->data, JSON_UNESCAPED_SLASHES), ZLIB_ENCODING_DEFLATE, 9);
+		$this->encodedData = zlib_encode(json_encode($this->data, JSON_UNESCAPED_SLASHES), ZLIB_ENCODING_RAW, 9);
 		foreach(str_split(base64_encode($this->encodedData), 76) as $line){
 			$this->addLine($line);
 		}

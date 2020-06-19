@@ -167,7 +167,7 @@ class RegionLoader{
 		$writer = new NBT(NBT::BIG_ENDIAN);
 		$nbt->setName("Level");
 		$writer->setData(new Compound("", ["Level" => $nbt]));
-		$chunkData = $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, self::$COMPRESSION_LEVEL);
+		$chunkData = $writer->writeCompressed(ZLIB_ENCODING_RAW, self::$COMPRESSION_LEVEL);
 
 		if($chunkData !== false){
 			$this->saveChunk($x, $z, $chunkData);
@@ -242,7 +242,7 @@ class RegionLoader{
 				continue;
 			}
 
-			$chunk = chr(self::COMPRESSION_ZLIB) . zlib_encode($chunk, ZLIB_ENCODING_DEFLATE, 9);
+			$chunk = chr(self::COMPRESSION_ZLIB) . zlib_encode($chunk, ZLIB_ENCODING_RAW, 9);
 			$chunk = Binary::writeInt(strlen($chunk)) . $chunk;
 			$sectors = (int) ceil(strlen($chunk) / 4096);
 			if($sectors > $this->locationTable[$i][1]){

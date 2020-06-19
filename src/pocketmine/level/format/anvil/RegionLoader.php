@@ -126,7 +126,7 @@ class RegionLoader extends \pocketmine\level\format\mcregion\RegionLoader{
 		$writer = new NBT(NBT::BIG_ENDIAN);
 		$nbt->setName("Level");
 		$writer->setData(new Compound("", ["Level" => $nbt]));
-		$chunkData = $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, RegionLoader::$COMPRESSION_LEVEL);
+		$chunkData = $writer->writeCompressed(ZLIB_ENCODING_RAW, RegionLoader::$COMPRESSION_LEVEL);
 		$this->saveChunk($x, $z, $chunkData);
 	}
 

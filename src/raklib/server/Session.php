@@ -247,7 +247,7 @@ class Session{
     public function addEncapsulatedToQueue(EncapsulatedPacket $packet, $flags = RakLib::PRIORITY_NORMAL){
 		if (($flags & RakLib::FLAG_NEED_ZLIB) > 0) {
 			if (strlen($packet->buffer) > 512) {
-				$packet->buffer = zlib_encode($packet->buffer, ZLIB_ENCODING_DEFLATE, 7);
+				$packet->buffer = zlib_encode($packet->buffer, ZLIB_ENCODING_RAW, 7);
 			} else {
 				$packet->buffer = $this->fakeZlib($packet->buffer);
 			}

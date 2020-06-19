@@ -57,13 +57,15 @@ class RemoteProxyServerManager {
 
 	public function getNewPacket() {
 		while (($info = $this->proxyServer->readFromInternaQueue())) {
-			$needRawCompression = $info{0};
-			$idlen = ord($info{1});
-			$dataIdentifier = substr($info, 2, $idlen);
-			$data = substr($info, 2 + $idlen);
+//			$needRawCompression = $info{0};
+			$idlen = ord($info{0});
+			$dataIdentifier = substr($info, 1, $idlen);
+			$data = substr($info, 1 + $idlen);
 			if (isset($this->remoteProxyServer[$dataIdentifier])) {
-				$this->remoteProxyServer[$dataIdentifier]->putPacket($data, $needRawCompression);
-			}
+				$this->remoteProxyServer[$dataIdentifier]->putPacket($data);
+			} else {
+    			var_dump(__FILE__ . " " . __LINE__ . " getNewPacket ");
+            }
 		}
 	}
 	
