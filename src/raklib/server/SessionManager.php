@@ -222,7 +222,7 @@ class SessionManager{
 			$count = 0;
 			$source = $session->getAddress();
 			while ($stream->getOffset() < $length) {				
-				$buf = $stream->getString();
+                $buf = $stream->getString();
 				if (empty($buf) || $buf == $spamPacket || $buf == $spamPacket2) {
 					continue;
 				}

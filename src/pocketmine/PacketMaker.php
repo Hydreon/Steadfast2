@@ -105,7 +105,7 @@ class PacketMaker extends Thread {
 				}
 			}
 			if (!empty($moveStr)) {
-				$buffer = zlib_encode($moveStr, ZLIB_ENCODING_DEFLATE, 7);
+				$buffer = zlib_encode($moveStr, Player::getCompressAlg($playerData['playerProtocol']), 7);
 				$this->sendData($identifier, $buffer);
 			}
 		}
