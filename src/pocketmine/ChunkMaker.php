@@ -46,7 +46,7 @@ class ChunkMaker extends Thread {
 		if (!is_null($this->proxy) && !empty($data['proxySessionId']) && !empty($data['proxyId'])) {
 			$infoData = pack('N', $data['proxySessionId']) . chr(ProxyInterface::STANDART_PACKET_ID) . $buffer;
 			$info = chr(strlen($data['proxyId'])) . $data['proxyId'] . $infoData;
-			var_dump(__FILE__ . " " . __LINE__ . " " . $data['proxyId']);
+			//var_dump(__FILE__ . " " . __LINE__ . " " . $data['proxyId']);
 			$this->proxy->writeToProxyServer($info);
 		} elseif(!is_null($this->raklib)) {
 			$identifier = $data['identifier'];

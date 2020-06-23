@@ -64,7 +64,7 @@ class RemoteProxyServerManager {
 			if (isset($this->remoteProxyServer[$dataIdentifier])) {
 				$this->remoteProxyServer[$dataIdentifier]->putPacket($data);
 			} else {
-    			var_dump(__FILE__ . " " . __LINE__ . " getNewPacket ");
+    			//var_dump(__FILE__ . " " . __LINE__ . " getNewPacket ");
             }
 		}
 	}

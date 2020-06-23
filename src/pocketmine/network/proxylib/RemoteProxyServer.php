@@ -67,7 +67,7 @@ class RemoteProxyServer {
 	}
 
 	public function putPacket($buffer) {
-	    var_dump(__FILE__ . " " . __LINE__ . " putPacket");
+	    //var_dump(__FILE__ . " " . __LINE__ . " putPacket");
 		$flags = ord($buffer{4});
 		if (($flags & self::FLAG_NEED_ZLIB) > 0) {
             $flags = $flags ^ self::FLAG_NEED_ZLIB;
@@ -93,7 +93,7 @@ class RemoteProxyServer {
             $this->writeQueue[] = pack('N', strlen($data)) . $data;
 		} else {
 
-            var_dump(__FILE__ . " " . __LINE__ . " ");
+            //var_dump(__FILE__ . " " . __LINE__ . " ");
 			$this->writeQueue[] = pack('N', strlen($buffer)) . $buffer;
 		}
 	}
