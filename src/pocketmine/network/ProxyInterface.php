@@ -136,11 +136,19 @@ class ProxyInterface implements AdvancedSourceInterface {
 	
 	public function putPacket(Player $player, $buffer, $isProxyPacket = false) {
 		if (isset($this->session[$player->getIdentifier()])) {
+			//TODO: testing something
+            $zlibFlag = RemoteProxyServer::FLAG_NEED_ZLIB_RAW;
+            if ($player->getPlayerProtocol() < 407) {
+                $zlibFlag = RemoteProxyServer::FLAG_NEED_ZLIB;
+            }
 			if ($isProxyPacket) {
-				$infoData = pack('N', $player->proxySessionId) . chr(self::PROXY_PACKET_ID | RemoteProxyServer::FLAG_NEED_ZLIB) . $buffer;	
+				$infoData = pack('N', $player->proxySessionId) . chr(self::PROXY_PACKET_ID | $zlibFlag) . $buffer;
 			} else {
-				$infoData = pack('N', $player->proxySessionId) . chr(self::STANDART_PACKET_ID | RemoteProxyServer::FLAG_NEED_ZLIB) . $buffer;	
-			}		
+				$infoData = pack('N', $player->proxySessionId) . chr(self::STANDART_PACKET_ID | $zlibFlag) . $buffer;
+			}
+//			$needRaw = 1;
+//			if($player->getPlayerProtocol() < 407) $needRaw = 0;
+
 			$info = chr(strlen($player->proxyId)) . $player->proxyId . $infoData;
 			
 			$this->proxyServer->writeToProxyServer($info);

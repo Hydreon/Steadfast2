@@ -29,7 +29,12 @@ class InventoryContentPacket extends PEPacket {
 				if ($this->items[$i]->getId() == 0) {
 					$this->putSignedVarInt(0);
 				} else {
-					$this->putSignedVarInt($index++);
+					if ($playerProtocol >= Info::PROTOCOL_406) {
+						$this->putSignedVarInt(1);
+					} else {
+						$this->putSignedVarInt($index++);
+					}
+					
 				}
 			}
 			$this->putSlot($this->items[$i], $playerProtocol);

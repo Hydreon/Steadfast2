@@ -59,6 +59,9 @@ abstract class Tool extends Item {
 	 * @return bool
 	 */
 	public function useOn($object) {
+		if ($object instanceof Entity && !$object->isBreakTool()) {			
+			return true;
+		}
 		static $isUnbreakable = null;
 		if (is_null($isUnbreakable)) {
 			$isUnbreakable = Server::getInstance()->getConfigBoolean("unbreakable-tools", false);

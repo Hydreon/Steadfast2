@@ -39,7 +39,7 @@ class CompressBatchedTask extends AsyncTask{
 
 	public function onRun(){
 		try{
-			$this->final = zlib_encode($this->data, ZLIB_ENCODING_DEFLATE, $this->level);
+			$this->final = zlib_encode($this->data, ZLIB_ENCODING_RAW, $this->level);
 			$this->data = null;
 		}catch(\Exception $e){
 

@@ -6,7 +6,8 @@ use pocketmine\utils\Binary;
 
 class RemoteProxyServer {
 
-	const FLAG_NEED_ZLIB = 0x80;
+	const FLAG_NEED_ZLIB = 0x40;
+	const FLAG_NEED_ZLIB_RAW = 0x80;
 
 	private $proxyManager;
 	private $socket;
@@ -66,18 +67,33 @@ class RemoteProxyServer {
 	}
 
 	public function putPacket($buffer) {
+	    //var_dump(__FILE__ . " " . __LINE__ . " putPacket");
 		$flags = ord($buffer{4});
 		if (($flags & self::FLAG_NEED_ZLIB) > 0) {
-			$flags = $flags ^ self::FLAG_NEED_ZLIB;
-			$buff = substr($buffer, 5);		
-			if (strlen($buffer) > 512) {
-				$data = zlib_encode($buff, ZLIB_ENCODING_DEFLATE, -1);
-			} else {
-				$data = $this->fakeZlib($buff);
-			}
-			$data = substr($buffer, 0, 4) . chr($flags) . $data;
-			$this->writeQueue[] = pack('N', strlen($data)) . $data;
+            $flags = $flags ^ self::FLAG_NEED_ZLIB;
+            $buff = substr($buffer, 5);
+
+            if (strlen($buffer) > 512) {
+                $data = zlib_encode($buff, ZLIB_ENCODING_DEFLATE, 7);
+            } else {
+                $data = zlib_encode($buff, ZLIB_ENCODING_DEFLATE, 0);
+            }
+            $data = substr($buffer, 0, 4) . chr($flags) . $data;
+            $this->writeQueue[] = pack('N', strlen($data)) . $data;
+        }else if (($flags & self::FLAG_NEED_ZLIB_RAW) > 0) {
+            $flags = $flags ^ self::FLAG_NEED_ZLIB_RAW;
+            $buff = substr($buffer, 5);
+
+            if (strlen($buffer) > 512) {
+                $data = zlib_encode($buff, ZLIB_ENCODING_RAW, 7);
+            } else {
+                $data = zlib_encode($buff, ZLIB_ENCODING_RAW, 0);
+            }
+            $data = substr($buffer, 0, 4) . chr($flags) . $data;
+            $this->writeQueue[] = pack('N', strlen($data)) . $data;
 		} else {
+
+            //var_dump(__FILE__ . " " . __LINE__ . " ");
 			$this->writeQueue[] = pack('N', strlen($buffer)) . $buffer;
 		}
 	}
