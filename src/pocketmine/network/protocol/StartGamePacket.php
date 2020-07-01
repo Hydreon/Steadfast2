@@ -184,7 +184,7 @@ class StartGamePacket extends PEPacket{
 			}
 			if ($playerProtocol >= Info::PROTOCOL_311) {
 				$this->putByte(0); // Is From World Template?
-				$this->putByte(0); // Is World Template Option Locked?
+				$this->putByte(1); // Is World Template Option Locked?
 			}
 			if ($playerProtocol >= Info::PROTOCOL_361) {
 				$this->putByte(1); // Only spawn v1 villagers
