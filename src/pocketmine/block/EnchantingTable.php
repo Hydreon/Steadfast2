@@ -86,10 +86,6 @@ class EnchantingTable extends Transparent {
 
 	public function onActivate(Item $item, Player $player = null) {
 		if ($player instanceof Player) {
-			if ($player->getPlayerProtocol() >= Info::PROTOCOL_407) {
-				$player->sendMessage(TextFormat::RED . 'Enchantments are temporarily not available for your version of the game!');
-				return;
-			}
 			if ($player->isCreative()) {
 				return true;
 			}
