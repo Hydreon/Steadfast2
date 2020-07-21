@@ -59,6 +59,7 @@ abstract class PEPacket extends DataPacket {
 	
 	public final static function convertProtocol($protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_408:
 			case Info::PROTOCOL_407:
 				return Info::PROTOCOL_407;
 			case Info::PROTOCOL_406:
