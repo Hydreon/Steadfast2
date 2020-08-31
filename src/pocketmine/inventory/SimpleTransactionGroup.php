@@ -148,7 +148,74 @@ class SimpleTransactionGroup implements TransactionGroup {
 		return true;
 	}
 
+	public function squashDuplicateSlotChanges() {
+		$slotChanges = [];		
+		$inventories = [];
+	
+		$slots = [];
+
+		foreach($this->transactions as $key => $tr) {
+			if (empty($this->getSource()->getCurrentWindow())) {
+				continue;
+			}
+			echo '--------------------------' . PHP_EOL;
+			// var_dump(is_null($this->getSource()->getCurrentWindow()));
+			// var_dump($tr->getSlot());
+			// var_dump($tr->__toString());
+			
+			$slotChanges[$h = (spl_object_hash($tr->getInventory()) . "@" . $tr->getSlot())][] = $tr;
+			$inventories[$h] = $tr->getInventory();
+			$slots[$h] = $tr->getSlot();			
+		}
+
+		foreach($slotChanges as $hash => $list) {
+			if(count($list) === 1) { 
+				continue;
+			}
+			$inventory = $inventories[$hash];
+			$slot = $slots[$hash];
+			
+			$sourceItem = $inventory->getItem($slot);
+
+			$targetItem = $this->findResultItem($sourceItem, $list);
+			if($targetItem === null){
+				return false;
+			}
+
+			foreach($list as $transaction){
+				unset($this->transactions[spl_object_hash($transaction)]);
+			}
+
+			if(!$targetItem->equalsExact($sourceItem)){
+				$this->addTransaction(new BaseTransaction($inventory, $slot, $sourceItem, $targetItem));
+			}
+		}
+		return true;
+	}
+
+	protected function findResultItem($needOrigin, array $possibleActions) : ?Item{
+		foreach($possibleActions as $i => $action){
+			if($action->getSourceItem()->equalsExact($needOrigin)){
+				$newList = $possibleActions;
+				unset($newList[$i]);
+				if(count($newList) === 0){
+					return $action->getTargetItem();
+				}
+				$result = $this->findResultItem($action->getTargetItem(), $newList);
+				if($result !== null){
+					return $result;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	public function canExecute() {
+		// if (!$this->squashDuplicateSlotChanges()) {
+		// 	return false;
+		// }
+
 		$haveItems = [];
 		$needItems = [];
 
