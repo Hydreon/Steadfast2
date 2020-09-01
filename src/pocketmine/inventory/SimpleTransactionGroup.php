@@ -158,11 +158,6 @@ class SimpleTransactionGroup implements TransactionGroup {
 			if (empty($this->getSource()->getCurrentWindow())) {
 				continue;
 			}
-			echo '--------------------------' . PHP_EOL;
-			// var_dump(is_null($this->getSource()->getCurrentWindow()));
-			// var_dump($tr->getSlot());
-			// var_dump($tr->__toString());
-			
 			$slotChanges[$h = (spl_object_hash($tr->getInventory()) . "@" . $tr->getSlot())][] = $tr;
 			$inventories[$h] = $tr->getInventory();
 			$slots[$h] = $tr->getSlot();			
