@@ -212,9 +212,9 @@ class SimpleTransactionGroup implements TransactionGroup {
 	}
 
 	public function canExecute() {
-		// if (!$this->squashDuplicateSlotChanges()) {
-		// 	return false;
-		// }
+		if (!$this->squashDuplicateSlotChanges()) {
+			return false;
+		}
 
 		$haveItems = [];
 		$needItems = [];
