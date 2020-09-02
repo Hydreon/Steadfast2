@@ -183,6 +183,7 @@ use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v331\BiomeDefinitionListPacket;
 use pocketmine\network\protocol\v310\AvailableEntityIdentifiersPacket;
 use pocketmine\network\protocol\v392\CreativeItemsListPacket;
+use pocketmine\scheduler\InventoryTransactionTask;
 use function rand;
 use function random_int;
 
@@ -4139,7 +4140,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 //					echo '[INFO] Transaction execute holded.'.PHP_EOL;
 				} else {
 //					echo '[INFO] Transaction execute fail.'.PHP_EOL;
-					$trGroup->sendInventories();
+					$trGroup->attempts = 0;
+					InventoryTransactionTask::$data[] = $trGroup;
+					//$trGroup->sendInventories();
 				}
 			} else {
 //				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
