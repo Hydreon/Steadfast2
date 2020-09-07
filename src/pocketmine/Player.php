@@ -180,6 +180,7 @@ use pocketmine\player\PlayerSettingsTrait;
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\inventory\InventoryCreationEvent;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
+use pocketmine\network\protocol\v120\InventorySlotPacket;
 use pocketmine\network\protocol\v331\BiomeDefinitionListPacket;
 use pocketmine\network\protocol\v310\AvailableEntityIdentifiersPacket;
 use pocketmine\network\protocol\v392\CreativeItemsListPacket;
@@ -430,6 +431,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	private $lastQuickCraftTransactionGroup = [];
 	protected $additionalSkinData = [];
 	protected $playerListIsSent = false;
+
+	/** @var SimpleTransactionGroup */
+	public $lastSuccesTransactionGroup;
 
 	public function getLeaveMessage(){
 		return "";
@@ -4134,22 +4138,42 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$trGroup->addTransaction($transaction);
 		}
 		try {
+			usleep(rand(1, 5) * 100000);
 			if (!$trGroup->execute()) {
 				if ($isCraftResultTransaction) {
 					$this->lastQuickCraftTransactionGroup[] = $trGroup;
 //					echo '[INFO] Transaction execute holded.'.PHP_EOL;
 				} else {
+					$this->addToLog($trGroup, 0);
 //					echo '[INFO] Transaction execute fail.'.PHP_EOL;
-					$trGroup->attempts = 0;
-					InventoryTransactionTask::$data[] = $trGroup;
-					//$trGroup->sendInventories();
+					//$trGroup->attempts = 0;
+					//InventoryTransactionTask::$data[] = $trGroup;
+					$trGroup->sendInventories();
+					//sendSlot($item);
 				}
 			} else {
+				$this->addToLog($trGroup);
+				$this->lastSuccesTransactionGroup = $trGroup;
 //				echo '[INFO] Transaction successfully executed.'.PHP_EOL;
 			}
 		} catch (\Exception $ex) {
 //			echo '[INFO] Transaction execute exception. ' . $ex->getMessage() .PHP_EOL;
 		}
+	}
+
+	function addToLog($trGroup, $succes = 1) {
+		var_dump($succes?'succes':'fail');
+		$fileopen=fopen("./logs/file.txt", "a+");
+		fwrite($fileopen,'-------------------------------------' . "\r\n");
+		$str = $succes?'succes':'fail';
+		$write="$str\r\n";
+		fwrite($fileopen,$write);
+		foreach ($trGroup->getTransactions() as $tr) {			
+			$str = $tr->__toString();
+			$write="$str\r\n";
+			fwrite($fileopen,$write);		
+		}
+		fclose($fileopen);
 	}
 
 	/**

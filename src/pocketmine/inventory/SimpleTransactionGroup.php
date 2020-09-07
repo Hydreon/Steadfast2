@@ -30,6 +30,7 @@ use pocketmine\Server;
  * This TransactionGroup only allows doing Transaction between one / two inventories
  */
 class SimpleTransactionGroup implements TransactionGroup {
+	const SLOT_INDEX = -1;
 
 	private $creationTime;
 	protected $hasExecuted = false;
@@ -247,11 +248,36 @@ class SimpleTransactionGroup implements TransactionGroup {
 
 	public function sendInventories() {
 		foreach ($this->inventories as $inventory) {
-			if ($inventory instanceof PlayerInventory) {
+			if ($inventory instanceof PlayerInventory) {				
 				$inventory->sendArmorContents($this->getSource());
+				if ($inventory->getCursor() instanceof Item && $inventory->getCursor()->getId() != Item::AIR) {	
+					$this->craftRevertTransaction($inventory);					
+				}
 			}
 			$inventory->sendContents($this->getSource());
 		}
+	}
+
+	protected function craftRevertTransaction(PlayerInventory $inventory) {
+		$slot = null;
+		$countCursor = null;
+		foreach ($this->getTransactions() as $tr) {
+			var_dump($tr->getSlot());
+
+			if ($tr->getSlot() == self::SLOT_INDEX && $tr->getSourceItem()->getCount() > $tr->getTargetItem()->getCount()) {	
+				echo array_shift($inventory->getHolder()->lastSuccesTransactionGroup->getTransactions());		
+				$countCursor = $tr->getSourceItem()->getCount() - 2;
+			}
+			if ($tr->getSlot() <= -3 && $tr->getSlot() >= -11){ 
+				$slot = $tr->getSlot();
+				$item = $tr->getSourceItem();
+			}
+		}
+		if ($slot !== null && $countCursor !== null) {					
+			$inventory->getCursor()->setCount($countCursor);
+		}
+		
+		return false;
 	}
 	
 	/**

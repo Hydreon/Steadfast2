@@ -560,6 +560,10 @@ class PlayerInventory extends BaseInventory{
 		$this->holder->dataPacket($pk);
 	}
 	
+	public function getCursor() {
+		return $this->cursor;
+	}
+
 	/**
 	 * 
 	 * @return Item[]
