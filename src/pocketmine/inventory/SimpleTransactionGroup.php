@@ -30,7 +30,7 @@ use pocketmine\Server;
  * This TransactionGroup only allows doing Transaction between one / two inventories
  */
 class SimpleTransactionGroup implements TransactionGroup {
-	const SLOT_INDEX = -1;
+	const CURSOR_INDEX = -1;
 
 	private $creationTime;
 	protected $hasExecuted = false;
@@ -149,68 +149,7 @@ class SimpleTransactionGroup implements TransactionGroup {
 		return true;
 	}
 
-	public function squashDuplicateSlotChanges() {
-		$slotChanges = [];		
-		$inventories = [];
-	
-		$slots = [];
-
-		foreach($this->transactions as $key => $tr) {
-			if (empty($this->getSource()->getCurrentWindow())) {
-				continue;
-			}
-			$slotChanges[$h = (spl_object_hash($tr->getInventory()) . "@" . $tr->getSlot())][] = $tr;
-			$inventories[$h] = $tr->getInventory();
-			$slots[$h] = $tr->getSlot();			
-		}
-
-		foreach($slotChanges as $hash => $list) {
-			if(count($list) === 1) { 
-				continue;
-			}
-			$inventory = $inventories[$hash];
-			$slot = $slots[$hash];
-			
-			$sourceItem = $inventory->getItem($slot);
-
-			$targetItem = $this->findResultItem($sourceItem, $list);
-			if($targetItem === null){
-				return false;
-			}
-
-			foreach($list as $transaction){
-				unset($this->transactions[spl_object_hash($transaction)]);
-			}
-
-			if(!$targetItem->equals($sourceItem) || $targetItem->getCount != $sourceItem->getCount()){
-				$this->addTransaction(new BaseTransaction($inventory, $slot, $sourceItem, $targetItem));
-			}
-		}
-		return true;
-	}
-
-	protected function findResultItem($needOrigin, array $possibleActions) : ?Item{
-		foreach($possibleActions as $i => $action){
-			if($action->getSourceItem()->equalsExact($needOrigin)){
-				$newList = $possibleActions;
-				unset($newList[$i]);
-				if(count($newList) === 0){
-					return $action->getTargetItem();
-				}
-				$result = $this->findResultItem($action->getTargetItem(), $newList);
-				if($result !== null){
-					return $result;
-				}
-			}
-		}
-
-		return null;
-	}
-
-	public function canExecute() {
-		// if (!$this->squashDuplicateSlotChanges()) {
-		// 	return false;
-		// }
+	public function canExecute() {	
 
 		$haveItems = [];
 		$needItems = [];
@@ -261,20 +200,42 @@ class SimpleTransactionGroup implements TransactionGroup {
 	protected function craftRevertTransaction(PlayerInventory $inventory) {
 		$slot = null;
 		$countCursor = null;
-		foreach ($this->getTransactions() as $tr) {
-			var_dump($tr->getSlot());
+		foreach ($this->getTransactions() as $tr) {		
 
-			if ($tr->getSlot() == self::SLOT_INDEX && $tr->getSourceItem()->getCount() > $tr->getTargetItem()->getCount()) {	
-				echo array_shift($inventory->getHolder()->lastSuccesTransactionGroup->getTransactions());		
-				$countCursor = $tr->getSourceItem()->getCount() - 2;
+			if ($tr->getSlot() == self::CURSOR_INDEX && $tr->getSourceItem()->getCount() > $tr->getTargetItem()->getCount()) {					
+				$newCursorTarget = $tr->getSourceItem();
 			}
 			if ($tr->getSlot() <= -3 && $tr->getSlot() >= -11){ 
 				$slot = $tr->getSlot();
-				$item = $tr->getSourceItem();
+				$newTargetItem = $tr->getTargetItem();
+				$countSlot = $newTargetItem->getCount();
 			}
 		}
-		if ($slot !== null && $countCursor !== null) {					
-			$inventory->getCursor()->setCount($countCursor);
+		
+		if ($slot !== null && $countCursor !== null) {
+			$countCursorOld = null;
+			$countSlotOld = null;
+			$oldTransactions = $inventory->getHolder()->lastSuccesTransactionGroup->getTransactions();	
+			foreach ($oldTransactions as $tr) {
+				if ($tr->getSlot() == self::CURSOR_INDEX && $tr->getSourceItem()->getCount() > $tr->getTargetItem()->getCount()) {
+					$countCursorOld = $tr->getTargetItem()->getCount();
+				}
+				if ($tr->getSlot() <= -3 && $tr->getSlot() >= -11){ 
+					$slot = $tr->getSlot();
+					$item = $tr->getTargetItem();
+					$countSlotOld = $item->getCount();
+				}
+			}
+			if ($countCursorOld !== null && $countSlotOld !== null) {
+				// var_dump($countSlotOld + $countCursorOld);
+				// var_dump($countSlot);
+				// $summ = $countSlotOld + $countCursorOld - $countSlot;
+				$newCursorTarget->setCount($countCursorOld - 1);
+				$inventory->setItem(self::CURSOR_INDEX, $newCursorTarget);
+				$inventory->setItem($slot, $newTargetItem);	
+				$inventory->getHolder()->lastSuccesTransactionGroup	= $this;	
+			}				
+			
 		}
 		
 		return false;
