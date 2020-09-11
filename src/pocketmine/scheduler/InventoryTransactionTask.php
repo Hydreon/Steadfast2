@@ -1,6 +1,8 @@
 <?php
 namespace pocketmine\scheduler;
 
+use pocketmine\inventory\SimpleTransactionGroup;
+
 class InventoryTransactionTask extends Task{
 
 	CONST MAX_ATTEMPTS = 20;
@@ -8,6 +10,7 @@ class InventoryTransactionTask extends Task{
 	static public $data = []; 
 
 	public function onRun($currentTicks){		
+		$allTrans = null;
 		foreach (self::$data as $k => $trGroup) {			
 			$trGroup->attempts++;			
 			try {
@@ -25,7 +28,16 @@ class InventoryTransactionTask extends Task{
 	//			echo '[INFO] Transaction execute exception. ' . $ex->getMessage() .PHP_EOL;
 			}
 		}
-
 	}
+
+	public function checkCraftSlots(SimpleTransactionGroup $trGroup) {
+		foreach ($trGroup->getTransactions as $tr) {
+			if ($tr->getSlot() <= -3 && $tr->getSlot() >= -11){ 
+				return true;
+			}		
+		}
+		return false;
+	} 
+
 
 }
