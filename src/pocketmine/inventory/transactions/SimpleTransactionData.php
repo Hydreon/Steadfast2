@@ -6,6 +6,7 @@ use pocketmine\inventory\BaseTransaction;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\EnchantInventory;
 use pocketmine\item\Item;
+use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v120\InventoryTransactionPacket;
 use pocketmine\network\protocol\v120\Protocol120;
 use pocketmine\Player;
@@ -23,6 +24,9 @@ class SimpleTransactionData {
 	
 	const ACTION_DROP = 199;
 	
+	const SOURCE_TYPE_CRAFTING_RESULT = -4;
+	const SOURCE_TYPE_CRAFTING_USE_INGREDIENT = -5;
+	const CREATED_ITEM_OUTPUT = 50;
 	/** @var integer */
 	/** @important for InventoryTransactionPacket */
 	public $sourceType = 0;
@@ -65,6 +69,11 @@ class SimpleTransactionData {
 
 	public function isUpdateEnchantSlotTransaction() {
 		return $this->sourceType != InventoryTransactionPacket::INV_SOURCE_TYPE_CRAFT && ($this->action == self::ACTION_ENCH_ITEM || $this->action == self::ACTION_ENCH_LAPIS || ($this->inventoryId == Protocol120::CONTAINER_ID_CURSOR_SELECTED && ($this->slot == 14 || $this->slot == 15)));
+	}
+
+	public function isCraftPart(Player $player) {
+		return $this->sourceType == InventoryTransactionPacket::INV_SOURCE_TYPE_CRAFT && ($this->inventoryId === self::SOURCE_TYPE_CRAFTING_RESULT || $this->inventoryId === self::SOURCE_TYPE_CRAFTING_RESULT )
+			|| ($player->craftingTransaction !== null && $this->sourceType == InventoryTransactionPacket::INV_SOURCE_TYPE_CONTAINER && $this->inventoryId == 124 || $this->slot == 50);
 	}
 	
 	/**
