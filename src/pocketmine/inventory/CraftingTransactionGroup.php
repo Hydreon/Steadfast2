@@ -108,4 +108,89 @@ class CraftingTransactionGroup extends SimpleTransactionGroup{
 
 		return true;
 	}
+
+	public function squashDuplicateSlotChanges() {
+		$slotChanges = [];		
+		$inventories = [];
+
+		$slots = [];
+
+		foreach($this->transactions as $key => $tr) {
+			if (empty($this->getSource()->getCurrentWindow())) {
+				continue;
+			}
+					
+			$slotChanges[$h = (spl_object_hash($tr->getInventory()) . "@" . $tr->getSlot())][] = $tr;
+			$inventories[$h] = $tr->getInventory();
+			$slots[$h] = $tr->getSlot();			
+		}
+
+		foreach($slotChanges as $hash => $list) {
+			if(count($list) === 1) { 
+				continue;
+			}
+			$inventory = $inventories[$hash];
+			$slot = $slots[$hash];
+
+			$sourceItem = $inventory->getItem($slot);
+
+			$targetItem = $this->findResultItem($sourceItem, $list);
+			if($targetItem === null){
+				return false;
+			}
+
+			foreach($list as $transaction){
+				unset($this->transactions[spl_object_hash($transaction)]);
+			}
+
+			if(!$targetItem->equals($sourceItem) || $targetItem->getCount != $sourceItem->getCount()) {
+				$this->addTransaction(new BaseTransaction($inventory, $slot, $sourceItem, $targetItem));
+			}
+		}
+		return true;
+	}
+
+	protected function findResultItem($needOrigin, array $possibleActions) : ?Item{
+		foreach($possibleActions as $i => $action){
+			if($action->getSourceItem()->equalsExact($needOrigin)){
+				$newList = $possibleActions;
+				unset($newList[$i]);
+				if(count($newList) === 0){
+					return $action->getTargetItem();
+				}
+				$result = $this->findResultItem($action->getTargetItem(), $newList);
+				if($result !== null){
+					return $result;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	//TODO - adaptive for SteadFast
+	public function validate() : void{
+		$this->matchItems($this->output, $this->input);
+
+		$failed = 0;
+		foreach($this->craftingManager->matchRecipeByOutputs($this->outputs) as $recipe){
+			try{
+				//compute number of times recipe was crafted
+				$this->repetitions = $this->matchRecipeItems($this->outputs, $recipe->getResultsFor($this->source->getCraftingGrid()), false);
+				//assert that $repetitions x recipe ingredients should be consumed
+				$this->matchRecipeItems($this->inputs, $recipe->getIngredientList(), true, $this->repetitions);
+
+				//Success!
+				$this->recipe = $recipe;
+				break;
+			}catch(TransactionValidationException $e){
+				//failed
+				++$failed;
+			}
+		}
+
+		if($this->recipe === null){
+			throw new TransactionValidationException("Unable to match a recipe to transaction (tried to match against $failed recipes)");
+		}
+	}
 }

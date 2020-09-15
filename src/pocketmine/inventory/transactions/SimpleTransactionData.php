@@ -73,7 +73,7 @@ class SimpleTransactionData {
 
 	public function isCraftPart(Player $player) {
 		return $this->sourceType == InventoryTransactionPacket::INV_SOURCE_TYPE_CRAFT && ($this->inventoryId === self::SOURCE_TYPE_CRAFTING_RESULT || $this->inventoryId === self::SOURCE_TYPE_CRAFTING_RESULT )
-			|| ($player->craftingTransaction !== null && $this->sourceType == InventoryTransactionPacket::INV_SOURCE_TYPE_CONTAINER && $this->inventoryId == 124 || $this->slot == 50);
+			|| (!$this->oldItem->equals($this->newItem) && $player->craftingTransaction !== null && $this->sourceType == InventoryTransactionPacket::INV_SOURCE_TYPE_CONTAINER && $this->inventoryId == 124 || $this->slot == 50);
 	}
 	
 	/**

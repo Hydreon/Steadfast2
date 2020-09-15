@@ -4157,14 +4157,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					$this->craftingTransaction->addTransaction($transaction);
 				}
 			}
+			if (!$this->craftingTransaction->validate()) {
+				return true;
+			}
 		} else {
+			var_dump('norm');
 			foreach($transactions as $transaction){
 				$trGroup->addTransaction($transaction);
 			}
 		}
 
 		try {
-			usleep(rand(1, 5) * 100000);
+			//usleep(rand(1, 5) * 100000);
 			if (!$trGroup->execute()) {
 				if ($isCraftResultTransaction) {
 					$this->lastQuickCraftTransactionGroup[] = $trGroup;
