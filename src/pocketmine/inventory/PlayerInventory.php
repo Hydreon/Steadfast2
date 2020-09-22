@@ -185,7 +185,16 @@ class PlayerInventory extends BaseInventory{
 			return;
 		}
 
-		parent::onSlotChange($index, $before, $sendPacket);
+		
+		if ($sendPacket) {			
+			if ($sendPacket == -1) {
+				$viewers = $this->getViewers();
+				unset($viewers[spl_object_hash($this->holder)]);
+				parent::sendSlot($index, $viewers);
+			} else {
+				parent::onSlotChange($index, $before, $sendPacket); 
+			}
+        }
 
 		if ($index >= $this->getSize() && $sendPacket === true) {
 			$this->sendArmorSlot($index, $this->getHolder()->getViewers());
@@ -243,7 +252,7 @@ class PlayerInventory extends BaseInventory{
 			switch ($index) {
 				case self::CURSOR_INDEX:
 					$this->cursor = clone $item;
-					if ($sendPacket) {
+					if ($sendPacket === true) {
 						$this->sendCursor();
 					}
 					break;
