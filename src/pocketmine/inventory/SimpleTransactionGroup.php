@@ -181,7 +181,7 @@ class SimpleTransactionGroup implements TransactionGroup {
 				unset($this->transactions[spl_object_hash($transaction)]);
 			}
 
-			if(!$targetItem->equals($sourceItem) || $targetItem->getCount != $sourceItem->getCount()){
+			if(!$targetItem->equalsExact($sourceItem)){
 				$this->addTransaction(new BaseTransaction($inventory, $slot, $sourceItem, $targetItem));
 			}
 		}
