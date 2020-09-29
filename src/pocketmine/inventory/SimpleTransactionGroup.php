@@ -168,7 +168,7 @@ class SimpleTransactionGroup implements TransactionGroup {
 		}
 		
 		foreach ($this->transactions as $transaction) {
-			$transaction->getInventory()->setItem($transaction->getSlot(), $transaction->getTargetItem());
+			$transaction->getInventory()->setItem($transaction->getSlot(), $transaction->getTargetItem(), -1);
 			if ($transaction->isNeedInventoryUpdate()) {
 				$this->sendInventories();
 			}

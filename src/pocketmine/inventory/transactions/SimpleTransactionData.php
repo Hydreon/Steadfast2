@@ -74,6 +74,12 @@ class SimpleTransactionData {
 	 * @return BaseTransaction
 	 */
 	public function convertToTransaction($player) {
+		$hack = false;
+		if ($this->action == self::ACTION_CRAFT_USE) {
+			$this->inventoryId = -1;
+			$this->slot = 0;
+			$hack = true;
+		}
 		switch ($this->inventoryId) {
 			case Protocol120::CONTAINER_ID_INVENTORY:
 				$inventory = $player->getInventory();
@@ -140,7 +146,7 @@ class SimpleTransactionData {
 					case self::ACTION_CRAFT_USE:
 						if ($this->slot == 0) {
 							$item = $inventory->getItem(PlayerInventory::CRAFT_INDEX_0);
-							if (!$this->newItem->equals($item) || $item->getCount() < $this->newItem->getCount()) {
+							if (!$this->newItem->equals($item) || $item->getCount() < $this->newItem->getCount() || $hack) {
 								if (!$inventory->isQuickCraftEnabled()) {
 									$inventory->setQuickCraftMode(true);
 								}
