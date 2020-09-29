@@ -75,7 +75,7 @@ class SimpleTransactionData {
 	 */
 	public function convertToTransaction($player) {
 		$hack = false;
-		if ($this->action == 9) {
+		if ($this->action == self::ACTION_CRAFT_USE) {
 			$this->inventoryId = -1;
 			$this->slot = 0;
 			$hack = true;
