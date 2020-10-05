@@ -159,7 +159,9 @@ class StartGamePacket extends PEPacket{
 					break;
 			}	
 		}
-		
+		if ($playerProtocol >= Info::PROTOCOL_415) {
+			$this->putByte(0);
+		}
 		$this->putByte(0); // is bonus chest enabled
 		$this->putByte(0); // is start with map enabled
 		if ($playerProtocol < Info::PROTOCOL_330) {
