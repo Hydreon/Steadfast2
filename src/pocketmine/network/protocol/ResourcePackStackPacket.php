@@ -37,12 +37,15 @@ class ResourcePackStackPacket extends PEPacket {
 			if ($playerProtocol < Info::PROTOCOL_415) {
 				$this->putVarInt(0); // ???
 			}			
-			$this->putString(''); // ???
+			$this->putString('*'); // ???
 		}
 		if ($playerProtocol >= Info::PROTOCOL_415) {
 			$this->putVarInt(0); //Experiments count
 			$this->putByte(0); //Were any Experiments toggled		
-		}
+			$this->putByte(0); //??	
+			$this->putByte(0); //??		
+			$this->putByte(0); //??		
+		}		
 	}
 
 }
