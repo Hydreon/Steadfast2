@@ -362,6 +362,9 @@ class BinaryStream {
 				$this->putString($animation['Image']);
 				$this->putLInt($animation['Type']);
 				$this->putLFloat($animation['Frames']);
+				if ($playerProtocol >= Info::PROTOCOL_415) {
+					$this->putLInt($animation['AnimationExpression']);
+				}
 			}
 		} else {
 			$this->putLInt(0);
@@ -421,11 +424,11 @@ class BinaryStream {
 					$this->putString($color);
 				}
 			}
-		} 	
+		}
 	}
 
 	public function getSerializedSkin($playerProtocol, &$skinId, &$skinData, &$skinGeomtryName, &$skinGeomtryData, &$capeData, &$additionalSkinData) {		
-		$skinId = $this->getString();
+		$skinId = $this->getString();		
 		$additionalSkinData['SkinResourcePatch'] = $this->getString();
 		$geometryData = json_decode($additionalSkinData['SkinResourcePatch'], true);
 		$skinGeomtryName = isset($geometryData['geometry']['default']) ? $geometryData['geometry']['default'] : '';
@@ -443,6 +446,7 @@ class BinaryStream {
 				'Image' => $this->getString(),
 				'Type' => $this->getLInt(),
 				'Frames' => $this->getLFloat(),
+				'AnimationExpression' => ($playerProtocol >= Info::PROTOCOL_415)?$this->getLInt():0
 			];
 		}
 
