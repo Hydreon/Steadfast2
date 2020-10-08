@@ -142,6 +142,12 @@ class StartGamePacket extends PEPacket{
 		$this->putByte(1);	// commands enabled
 		
 		$this->putByte(0); // isTexturepacksRequired 1x Byte		
+		if ($playerProtocol >= Info::PROTOCOL_415) {
+			$this->putByte(0);
+			$this->putByte(0);
+			$this->putByte(0);
+			$this->putByte(0);
+		}	
 		
 		$this->putVarInt(count(self::$defaultRules)); // rules count
 		foreach (self::$defaultRules as $rule) {
@@ -160,6 +166,7 @@ class StartGamePacket extends PEPacket{
 			}	
 		}
 		if ($playerProtocol >= Info::PROTOCOL_415) {
+			$this->putVarInt(0);
 			$this->putByte(0);
 		}
 		$this->putByte(0); // is bonus chest enabled
