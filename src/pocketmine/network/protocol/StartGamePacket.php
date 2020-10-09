@@ -166,8 +166,9 @@ class StartGamePacket extends PEPacket{
 			}	
 		}
 		if ($playerProtocol >= Info::PROTOCOL_415) {
-			$this->putVarInt(0);
-			$this->putByte(0);
+			//This is bad changes. Documentation has error
+			//$this->putVarInt(0);
+			//$this->putByte(0);
 		}
 		$this->putByte(0); // is bonus chest enabled
 		$this->putByte(0); // is start with map enabled
@@ -207,6 +208,11 @@ class StartGamePacket extends PEPacket{
 				$this->putLFloat(0); // unknown
 			}
 		}		
+		if ($playerProtocol >= Info::PROTOCOL_415) {
+			$this->putLInt(0);
+			$this->putByte(0);
+			$this->putByte(0);
+		}	
 		if ($playerProtocol >= Info::PROTOCOL_392) {
 			$this->putLInt(16); //Limited word width
 			$this->putLInt(16); //Limited word depth			
@@ -226,8 +232,12 @@ class StartGamePacket extends PEPacket{
 		$this->putString(''); // template pack id
 		$this->putByte(0); // is trial?
 		if ($playerProtocol >= Info::PROTOCOL_389) {
-			$this->putByte(0); // is server authoritative over movement
-		}
+			if ($playerProtocol >= Info::PROTOCOL_415) {
+				$this->putVarInt(2);
+			} else {
+				$this->putByte(0); // is server authoritative over movement
+			}
+		}		
 		$this->putLong(0); // current level time
 		$this->putSignedVarInt(0); // enchantment seed
 
