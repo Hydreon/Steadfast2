@@ -1195,7 +1195,6 @@ class Level implements ChunkManager, Metadatable{
 
 		//if chest has viewers return false on use break on
 		if ($tile instanceof Chest) {
-			print_r($tile instanceof Chest);
 			if (count($tile->getInventory()->getViewers()) > 0) {				
 				return false;
 			}
