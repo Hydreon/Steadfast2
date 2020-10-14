@@ -1187,6 +1187,19 @@ class Level implements ChunkManager, Metadatable{
 		}
 		$target = $this->getBlock($vector);
 		$drops = $target->getDrops($item); 
+
+		$tile = $this->getTile($target);
+
+		//if chest has viewers return false on use break on
+		if ($tile instanceof Chest) {
+			print_r($tile instanceof Chest);
+			if (count($tile->getInventory()->getViewers()) > 0) {				
+				return false;
+			}
+			
+		}		
+
+	
 		if ($player instanceof Player) {
 			if ($player->isSpectator() || !$player->canBreakBlocks()) {
 				return false;
@@ -2319,6 +2332,7 @@ class Level implements ChunkManager, Metadatable{
 	/**
 	 * @deprecated
 	 */
+
 	public function addEntityMotion($viewers, $entityId, $x, $y, $z){	
 
 	}
