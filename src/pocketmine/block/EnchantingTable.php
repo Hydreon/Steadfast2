@@ -41,6 +41,8 @@ class EnchantingTable extends Transparent {
 	}
 
 	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null) {
+		$player->sendMessage(TextFormat::RED . 'Enchanting tables disabled');
+		return;
 		$this->getLevel()->setBlock($block, $this, true, true);
 		$nbt = new Compound("", [
 			new StringTag("id", Tile::ENCHANT_TABLE),
@@ -85,6 +87,8 @@ class EnchantingTable extends Transparent {
 	}
 
 	public function onActivate(Item $item, Player $player = null) {
+		$player->sendMessage(TextFormat::RED . 'Enchanting tables disabled');
+		return;
 		if ($player instanceof Player) {
 			if ($player->getPlayerProtocol() <= Info::PROTOCOL_406) {
 				$player->sendMessage(TextFormat::RED . 'Enchantments not available for your version of the game! Please update!');
