@@ -194,6 +194,8 @@ use pocketmine\network\protocol\v392\CreativeItemsListPacket;
 use function rand;
 use function random_int;
 
+USE pocketmine\tile\chest;
+
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
  */
@@ -1967,6 +1969,17 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 						$this->actionsNum['CRACK_BLOCK'] = 0;
 						if (!$this->isCreative()) {
 							$block = $this->level->getBlock(new Vector3($packet->x, $packet->y, $packet->z));
+
+							$tile = $this->level->getTile($block);
+							//if it is an open chest cancel the visual of block breaking
+							if ($tile instanceof Chest) {
+								if (count($tile->getInventory()->getViewers()) > 0) {
+
+									break 2;
+								}
+							}
+							
+
 							$breakTime = ceil($this->getBreakTime($block) * 20);
 							$fireBlock = $block->getSide($packet->face);
 							if ($fireBlock->getId() === Block::FIRE) {
