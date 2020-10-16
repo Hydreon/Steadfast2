@@ -192,7 +192,11 @@ class StartGamePacket extends PEPacket{
 			}
 			if ($playerProtocol >= Info::PROTOCOL_361) {
 				$this->putByte(1); // Only spawn v1 villagers
-			}		
+			}	
+			if ($playerProtocol >= Info::PROTOCOL_415) {
+				$this->putLInt(0); // ?? 
+				$this->putByte(0); // ??
+			}	
 			if ($playerProtocol >= Info::PROTOCOL_370) {
 				$this->putString(''); // Vanila version
 			}
@@ -202,11 +206,6 @@ class StartGamePacket extends PEPacket{
 				$this->putLFloat(0); // unknown
 			}
 		}		
-		if ($playerProtocol >= Info::PROTOCOL_415) {
-			$this->putLInt(0);
-			$this->putByte(0);
-			$this->putByte(0);
-		}	
 		if ($playerProtocol >= Info::PROTOCOL_392) {
 			$this->putLInt(16); //Limited word width
 			$this->putLInt(16); //Limited word depth			
@@ -231,13 +230,18 @@ class StartGamePacket extends PEPacket{
 			} else {
 				$this->putByte(0); // is server authoritative over movement
 			}
-		}		
-		$this->putLong(0); // current level time
-		$this->putSignedVarInt(0); // enchantment seed
-
-		if ($playerProtocol >= Info::PROTOCOL_280) {
-			$this->put(self::getBlockPalletData($playerProtocol));
 		}
+		if ($playerProtocol >= Info::PROTOCOL_415) {
+		 	$this->put(hex2bin('3613000000000000f8'));
+		} else {
+			$this->putLong(0); // current level time
+			$this->putSignedVarInt(0); // enchantment seed
+		}		
+		
+
+		if ($playerProtocol >= Info::PROTOCOL_280 && $playerProtocol < Info::PROTOCOL_415) {
+			$this->put(self::getBlockPalletData($playerProtocol));
+		}		
 		if ($playerProtocol >= Info::PROTOCOL_360) {
 			$this->putVarInt(0); // item list size
 		}
