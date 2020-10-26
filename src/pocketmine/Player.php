@@ -21,6 +21,7 @@
 
 namespace pocketmine;
 
+use pocketmine\network\protocol\ItemComponentPacket;
 use const M_SQRT3;
 use function max;
 use function mt_rand;
@@ -971,6 +972,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$packet->senderSubClientID = $this->subClientId;
 			return $this->parent->dataPacket($packet);
 		}
+		var_dump($packet->pname());
 		switch($packet->pname()){
 			case 'INVENTORY_CONTENT_PACKET':
 				$queueKey = $packet->pname() . $packet->inventoryID;
@@ -1106,6 +1108,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$packet->senderSubClientID = $this->subClientId;
 			return $this->parent->dataPacket($packet);
 		}
+        var_dump($packet->pname());
 
 		$packet->encode($this->protocol);
 		$packet->senderSubClientID = 0;
@@ -3279,7 +3282,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		$pk->eid = $this->id;
 		$pk->stringClientVersion = $this->clientVersion;
 		$pk->multiplayerCorrelationId = $this->uuid->toString();
-		$this->directDataPacket($pk);	
+		$this->directDataPacket($pk);
+		if ($this->protocol >= ProtocolInfo::PROTOCOL_418) {
+			$this->directDataPacket(new ItemComponentPacket());
+		}
 		if ($this->protocol >= ProtocolInfo::PROTOCOL_331) {
 			$this->directDataPacket(new AvailableEntityIdentifiersPacket());
 			$this->directDataPacket(new BiomeDefinitionListPacket());

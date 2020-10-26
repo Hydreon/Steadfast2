@@ -38,6 +38,7 @@ use pocketmine\network\protocol\CraftingEventPacket;
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\FullChunkDataPacket;
 use pocketmine\network\protocol\Info;
+use pocketmine\network\protocol\ItemComponentPacket;
 use pocketmine\network\protocol\MapInfoRequestPacket;
 use pocketmine\network\protocol\SetEntityLinkPacket;
 use pocketmine\network\protocol\SpawnExperienceOrbPacket;
@@ -563,5 +564,6 @@ class Network {
 		$this->registerPacket331(ProtocolInfo331::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET, NetworkChunkPublisherUpdatePacket::class);	
 		$this->registerPacket331(ProtocolInfo331::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
 		$this->registerPacket331(ProtocolInfo331::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
+		$this->registerPacket331(ProtocolInfo331::ITEM_COMPONENT_PACKET, ItemComponentPacket::class);
 	}
 }

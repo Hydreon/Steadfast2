@@ -234,13 +234,8 @@ class StartGamePacket extends PEPacket{
 				$this->putByte(0); // is server authoritative over movement
 			}
 		}
-		if ($playerProtocol >= Info::PROTOCOL_418) {
-			$this->putVarInt(0);
-		}
 		$this->putLong(0); // current level time
-		if ($playerProtocol >= Info::PROTOCOL_418) {
-			$this->putVarInt(0);
-		} 
+
 		$this->putSignedVarInt(0); // enchantment seed
 
 		if ($playerProtocol >= Info::PROTOCOL_280 && $playerProtocol < Info::PROTOCOL_418) {
@@ -254,9 +249,9 @@ class StartGamePacket extends PEPacket{
 			if ($playerProtocol >= Info::PROTOCOL_418) {
 				$itemsData = self::getItemsList();
 				$this->putVarInt(count($itemsData));
-				foreach ($itemsData as $data) {
-					$this->putString($data['NetworkName']);
-					$this->putShort($data['NetworkID']);
+				foreach ($itemsData as $name => $id) {
+					$this->putString($name);
+					$this->putShort($id);
 					$this->putByte(0);
 				}
 			} else {
@@ -275,7 +270,9 @@ class StartGamePacket extends PEPacket{
 		if (!empty(self::$itemsList)) {
 			return self::$itemsList;
 		} else {
+//			$path = __DIR__ . "/data/1_16u1_items.json";
 			$path = __DIR__ . "/data/Items.json";
+
 			self::$itemsList = json_decode(file_get_contents($path), true);
 			return self::$itemsList;
 		}
