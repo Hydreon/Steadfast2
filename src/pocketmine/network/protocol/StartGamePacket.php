@@ -112,7 +112,7 @@ class StartGamePacket extends PEPacket{
 		
 		$this->putByte(0); //edu mode
 		
-		if ($playerProtocol < Info::PROTOCOL_418 && $playerProtocol >= Info::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
+		if ($playerProtocol < Info::PROTOCOL_419 && $playerProtocol >= Info::PROTOCOL_260 && $this->stringClientVersion != '1.2.20.1') {
 			$this->putByte(0); // Are education features enabled?
 		}
 
@@ -132,7 +132,7 @@ class StartGamePacket extends PEPacket{
 		$this->putByte(1); // Broadcast to LAN?
 		if ($playerProtocol >= Info::PROTOCOL_330) {
 			$this->putSignedVarInt(self::BROADCAST_SETTINGS_FRIENDS_OF_FRIENDS); // XBox Live Broadcast setting
-			if ($playerProtocol < Info::PROTOCOL_406 || $playerProtocol >= Info::PROTOCOL_418) {
+			if ($playerProtocol < Info::PROTOCOL_406 || $playerProtocol >= Info::PROTOCOL_419) {
 				$this->putSignedVarInt(self::BROADCAST_SETTINGS_FRIENDS_OF_FRIENDS); // Platform Broadcast setting
 			}	
 		} else {
@@ -192,7 +192,7 @@ class StartGamePacket extends PEPacket{
 			if ($playerProtocol >= Info::PROTOCOL_361) {
 				$this->putByte(1); // Only spawn v1 villagers
 			}	
-			if ($playerProtocol >= Info::PROTOCOL_418) {
+			if ($playerProtocol >= Info::PROTOCOL_419) {
 				$this->putLInt(0); // ?? 
 				$this->putByte(0); // ??
 			}	
@@ -224,31 +224,31 @@ class StartGamePacket extends PEPacket{
 		$this->putString(''); // template pack id
 		$this->putByte(0); // is trial?
 		if ($playerProtocol >= Info::PROTOCOL_389) {
-			if ($playerProtocol >= Info::PROTOCOL_418) {
+			if ($playerProtocol >= Info::PROTOCOL_419) {
 				$this->putVarInt(2);
 			} else {
 				$this->putByte(0); // is server authoritative over movement
 			}
 		}
-		if ($playerProtocol >= Info::PROTOCOL_418) {
+		if ($playerProtocol >= Info::PROTOCOL_419) {
 			$this->putVarInt(0);
 		} 		
 		$this->putLong(0); // current level time
-		if ($playerProtocol >= Info::PROTOCOL_418) {
+		if ($playerProtocol >= Info::PROTOCOL_419) {
 			$this->putVarInt(0);
 		} 
 		$this->putSignedVarInt(0); // enchantment seed
 
-		if ($playerProtocol >= Info::PROTOCOL_280 && $playerProtocol < Info::PROTOCOL_418) {
+		if ($playerProtocol >= Info::PROTOCOL_280 && $playerProtocol < Info::PROTOCOL_419) {
 			$this->put(self::getBlockPalletData($playerProtocol));
 		}		
 		if ($playerProtocol >= Info::PROTOCOL_360) {
-			if ($playerProtocol >= Info::PROTOCOL_418) {
+			if ($playerProtocol >= Info::PROTOCOL_419) {
 				$itemsData = self::getItemsList();
 				$this->putVarInt(count($itemsData));
-				foreach ($itemsData as $data) {
-					$this->putString($data['NetworkName']);
-					$this->putShort($data['NetworkID']);
+				foreach ($itemsData as $name => $id) {
+					$this->putString($name);
+					$this->putShort($id);
 					$this->putByte(0);
 				}			
 			} else {
