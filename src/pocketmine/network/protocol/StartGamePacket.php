@@ -242,6 +242,10 @@ class StartGamePacket extends PEPacket{
 		} 
 		$this->putSignedVarInt(0); // enchantment seed  ????????
 
+		if ($playerProtocol >= Info::PROTOCOL_280 && $playerProtocol < Info::PROTOCOL_419) {
+			$this->put(self::getBlockPalletData($playerProtocol));
+		}
+
         if ($playerProtocol >= Info::PROTOCOL_360) {
 			if ($playerProtocol >= Info::PROTOCOL_419) {
 				$itemsData = self::getItemsList();
