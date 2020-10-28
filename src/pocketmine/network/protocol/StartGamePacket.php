@@ -230,7 +230,7 @@ class StartGamePacket extends PEPacket{
 		$this->putByte(0); // is trial?
 		if ($playerProtocol >= Info::PROTOCOL_389) {
 			if ($playerProtocol >= Info::PROTOCOL_419) {
-				$this->putVarInt(2);
+				$this->putVarInt(0);
 			} else {
 				$this->putByte(0); // is server authoritative over movement
 			}
@@ -273,8 +273,7 @@ class StartGamePacket extends PEPacket{
 		if (!empty(self::$itemsList)) {
 			return self::$itemsList;
 		} else {
-//			$path = __DIR__ . "/data/Items.json";
-			$path = __DIR__ . "/data/1_16u1_items.json";
+			$path = __DIR__ . "/data/Items.json";
 			self::$itemsList = json_decode(file_get_contents($path), true);
 			return self::$itemsList;
 		}

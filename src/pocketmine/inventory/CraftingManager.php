@@ -435,7 +435,7 @@ class CraftingManager{
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::COAL, 1, 1), Item::get(Item::TRUNK, -1, 1)));
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::EMERALD, 0, 1), Item::get(Item::EMERALD_ORE, 0, 1)));
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::NETHER_QUARTZ, 0, 1), Item::get(Item::NETHER_QUARTZ_ORE, 0, 1)));
-		
+
 		// food
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::COOKED_FISH, 0, 1), Item::get(Item::RAW_FISH, 0, 1)));
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::COOKED_FISH, 1, 1), Item::get(Item::RAW_FISH, 1, 1))); // salmon
@@ -445,7 +445,7 @@ class CraftingManager{
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::COOKED_CHICKEN, 0, 1), Item::get(Item::RAW_CHICKEN, 0, 1)));
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::COOKED_MUTTON, 0, 1), Item::get(Item::RAW_MUTTON, 0, 1)));
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::COOKED_RABBIT, 0, 1), Item::get(Item::RAW_RABBIT, 0, 1)));
-		
+
 		// other
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::DYE, 2, 1), Item::get(Item::CACTUS, 0, 1)));
 		// @todo sponge
