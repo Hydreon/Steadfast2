@@ -214,7 +214,7 @@ interface Info{
 	const SHOW_PROFILE_PACKET = 0x68;						// NEW
 	const SET_DEFAULT_GAME_TYPE_PACKET = 0x69;				// NEW
 	const PLAYER_ENCHANT_OPTIONS_PACKET = 0x92;				// NEW 406 || 407
-
+	const ITEM_COMPONENT_PACKET = 0xA2; 					// NEW 419
 }
 
 
