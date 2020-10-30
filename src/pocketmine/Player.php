@@ -179,6 +179,7 @@ use pocketmine\network\protocol\GameRulesChangedPacket;
 use pocketmine\player\PlayerSettingsTrait;
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\inventory\InventoryCreationEvent;
+use pocketmine\network\protocol\CreativeContentPacket;
 use pocketmine\network\protocol\ItemComponentPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v331\BiomeDefinitionListPacket;
@@ -967,7 +968,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		if($this->connected === false){
 			return false;
 		}
-
+		$pks = ['INVENTORY_CONTENT_PACKET', 'INVENTORY_SLOT_PACKET'];
+		// if (in_array($packet->pname(), $pks)) {
+		// 	return;
+		// }
 		if ($this->subClientId > 0 && $this->parent != null) {
 			$packet->senderSubClientID = $this->subClientId;
 			return $this->parent->dataPacket($packet);
@@ -3284,6 +3288,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		$this->directDataPacket($pk);
 		if ($this->protocol >= ProtocolInfo::PROTOCOL_419) {
 			$this->directDataPacket(new ItemComponentPacket());
+			$this->directDataPacket(new CreativeContentPacket());
 		}
 		if ($this->protocol >= ProtocolInfo::PROTOCOL_331) {
 			$this->directDataPacket(new AvailableEntityIdentifiersPacket());
