@@ -1781,9 +1781,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					break;
 				}
 				if (!$packet->isVerified) {
-//					$this->close("", "Invalid Identity Public Key");
-//					// error_log("Invalid Identity Public Key " . $packet->username);
-//					break;
+					$this->close("", "Invalid Identity Public Key");
+					// error_log("Invalid Identity Public Key " . $packet->username);
+					break;
 				}
 				$this->username = TextFormat::clean($packet->username);
                 $this->xblName = $this->username;
@@ -3330,7 +3330,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . TextFormat::AQUA . $this->ip . " connected");
 
 
-		//$this->sendSelfData();
+		$this->sendSelfData();
 		$this->updateSpeed($this->movementSpeed);
 		$this->sendFullPlayerList();
 	}
