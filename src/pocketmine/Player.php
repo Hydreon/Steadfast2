@@ -2026,6 +2026,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					case 'CHANGE_DIMENSION_ACK':
 						$this->onDimensionChanged();
 						break;
+					case 'INTERACT_WITH_BLOCK':
+						//TODO:
+						break;
 				}
 
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
