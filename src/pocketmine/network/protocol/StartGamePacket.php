@@ -23,6 +23,8 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
+use pocketmine\item\Item;
+
 class StartGamePacket extends PEPacket{
 	const NETWORK_ID = Info::START_GAME_PACKET;
 	const PACKET_NAME = "START_GAME_PACKET";
@@ -249,11 +251,10 @@ class StartGamePacket extends PEPacket{
         if ($playerProtocol >= Info::PROTOCOL_360) {
 			if ($playerProtocol >= Info::PROTOCOL_419) {
 				$itemsData = self::getItemsList();
-
-				$this->putVarInt(count($itemsData));
+                $this->putVarInt(count($itemsData));
 				foreach ($itemsData as $name => $id) {
 					$this->putString($name);
-					$this->putShort($id);
+					$this->putLShort($id);
 					$this->putByte(0);
 				}
 			} else {
@@ -273,10 +274,9 @@ class StartGamePacket extends PEPacket{
 		if (!empty(self::$itemsList)) {
 			return self::$itemsList;
 		} else {
-			$path = __DIR__ . "/data/Items.json";
+			$path = __DIR__ . "/data/Items2.json";
 			self::$itemsList = json_decode(file_get_contents($path), true);
 			return self::$itemsList;
 		}
 	}
-
 }

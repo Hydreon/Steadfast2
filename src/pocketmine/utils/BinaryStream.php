@@ -257,10 +257,15 @@ class BinaryStream {
 			return;
 		}
 		$this->putSignedVarInt($item->getId());
-		$this->putSignedVarInt(($item->getDamage() === null ? 0  : ($item->getDamage() << 8)) + $item->getCount());	
-		$nbt = $item->getCompound();	
-		$this->putLShort(strlen($nbt));
-		$this->put($nbt);
+		if(is_null($item->getDamage())) $item->setDamage(0);
+        $auxValue = (($item->getDamage() << 8 &  0x7fff) | $item->getCount() & 0xff);
+		$this->putSignedVarInt($auxValue);
+		$nbt = $item->getCompound();
+        $this->putLShort(strlen($nbt));
+//      $this->putLShort(0xffff); //User Data Serialization Marker
+//      $this->putByte(1); //User Data Serialization Version
+
+        $this->put($nbt);
 		$canPlaceOnBlocks = $item->getCanPlaceOnBlocks();
 		$canDestroyBlocks = $item->getCanDestroyBlocks();
 		$this->putSignedVarInt(count($canPlaceOnBlocks));

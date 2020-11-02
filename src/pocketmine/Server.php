@@ -2335,7 +2335,7 @@ class Server{
 				}
 			}
 			
-			$pk->encode($p->getPlayerProtocol(), $p->getSubClientId());
+			$pk->encode($p->getPlayerProtocol());
 			$bpk = new BatchPacket();
 			$buffer = $pk->getBuffer();
         	$bpk->payload = zlib_encode(Binary::writeVarInt(strlen($buffer)) . $buffer, Player::getCompressAlg($p->getPlayerProtocol()), 7);

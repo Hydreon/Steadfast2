@@ -85,6 +85,7 @@ use pocketmine\network\protocol\CommandStepPacket;
 use pocketmine\network\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\protocol\ResourcePacksInfoPacket;
 use pocketmine\network\protocol\ClientToServerHandshakePacket;
+use pocketmine\network\protocol\CreativeContentPacket;
 use pocketmine\network\protocol\ItemComponentPacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\v120\CommandRequestPacket;
@@ -565,5 +566,6 @@ class Network {
 		$this->registerPacket331(ProtocolInfo331::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
 		$this->registerPacket331(ProtocolInfo331::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
 		$this->registerPacket331(ProtocolInfo331::ITEM_COMPONENT_PACKET, ItemComponentPacket::class);
+		$this->registerPacket331(ProtocolInfo331::CREATIVE_CONTENT_PACKET, CreativeContentPacket::class);
 	}
 }

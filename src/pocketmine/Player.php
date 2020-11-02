@@ -179,6 +179,7 @@ use pocketmine\network\protocol\GameRulesChangedPacket;
 use pocketmine\player\PlayerSettingsTrait;
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\inventory\InventoryCreationEvent;
+use pocketmine\network\protocol\CreativeContentPacket;
 use pocketmine\network\protocol\ItemComponentPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v331\BiomeDefinitionListPacket;
@@ -967,7 +968,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		if($this->connected === false){
 			return false;
 		}
-
+		$pks = ['INVENTORY_CONTENT_PACKET', 'INVENTORY_SLOT_PACKET'];
+		// if (in_array($packet->pname(), $pks)) {
+		// 	return;
+		// }
 		if ($this->subClientId > 0 && $this->parent != null) {
 			$packet->senderSubClientID = $this->subClientId;
 			return $this->parent->dataPacket($packet);
@@ -1777,9 +1781,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					break;
 				}
 				if (!$packet->isVerified) {
-					$this->close("", "Invalid Identity Public Key");
-					// error_log("Invalid Identity Public Key " . $packet->username);
-					break;
+//					$this->close("", "Invalid Identity Public Key");
+//					// error_log("Invalid Identity Public Key " . $packet->username);
+//					break;
 				}
 				$this->username = TextFormat::clean($packet->username);
                 $this->xblName = $this->username;
@@ -3282,18 +3286,30 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		$pk->stringClientVersion = $this->clientVersion;
 		$pk->multiplayerCorrelationId = $this->uuid->toString();
 		$this->directDataPacket($pk);
-		if ($this->protocol >= ProtocolInfo::PROTOCOL_419) {
-			$this->directDataPacket(new ItemComponentPacket());
-		}
-		if ($this->protocol >= ProtocolInfo::PROTOCOL_331) {
-			$this->directDataPacket(new AvailableEntityIdentifiersPacket());
-			$this->directDataPacket(new BiomeDefinitionListPacket());
-		}
+        if ($this->protocol >= ProtocolInfo::PROTOCOL_419) {
+            $this->directDataPacket(new ItemComponentPacket());
+        }
+        if ($this->protocol >= ProtocolInfo::PROTOCOL_331) {
+            $this->directDataPacket(new BiomeDefinitionListPacket());
+            $this->directDataPacket(new AvailableEntityIdentifiersPacket());
+        }
+        if ($this->getPlayerProtocol() >= Info::PROTOCOL_392) {
+            $pk = new CreativeContentPacket();
+            $pk->groups = Item::getCreativeGroups();
+            $pk->items = Item::getCreativeItems();
+            $this->directDataPacket($pk);
+        } else {
+            $slots = [];
+            foreach(Item::getCreativeItems() as $item){
+                $slots[] = clone $item['item'];
+            }
+            $pk = new InventoryContentPacket();
+            $pk->inventoryID = Protocol120::CONTAINER_ID_CREATIVE;
+            $pk->items = $slots;
+            $this->dataPacket($pk);
+        }
 
-		$pk = new SetTimePacket();
-		$pk->time = $this->level->getTime();
-		$pk->started = true;
-		$this->dataPacket($pk);
+        $this->server->sendRecipeList($this);
 
 		if ($this->getHealth() <= 0) {
 			$this->dead = true;
@@ -3306,28 +3322,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		if($this->getHealth() <= 0){
 			$this->dead = true;
 		}
+        $pk = new SetTimePacket();
+        $pk->time = $this->level->getTime();
+        $pk->started = true;
+        $this->dataPacket($pk);
 
 		$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . TextFormat::AQUA . $this->ip . " connected");
 
-		if ($this->getPlayerProtocol() >= Info::PROTOCOL_392) {
-			$pk = new CreativeItemsListPacket();
-			$pk->groups = Item::getCreativeGroups();
-			$pk->items = Item::getCreativeItems();
-			$this->dataPacket($pk);
-		} else {
-			$slots = [];
-			foreach(Item::getCreativeItems() as $item){
-				$slots[] = clone $item['item'];
-			}
-			$pk = new InventoryContentPacket();
-			$pk->inventoryID = Protocol120::CONTAINER_ID_CREATIVE;
-			$pk->items = $slots;
-			$this->dataPacket($pk);
-		}
 
-		$this->server->sendRecipeList($this);
-
-		$this->sendSelfData();
+		//$this->sendSelfData();
 		$this->updateSpeed($this->movementSpeed);
 		$this->sendFullPlayerList();
 	}
