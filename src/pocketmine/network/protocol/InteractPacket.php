@@ -27,30 +27,53 @@ namespace pocketmine\network\protocol;
 class InteractPacket extends PEPacket{
 	const NETWORK_ID = Info::INTERACT_PACKET;
 	const PACKET_NAME = "INTERACT_PACKET";
-	
+
+
+	/**
+	Invalid = 0
+	StopRiding = 3
+	InteractUpdate = 4
+	NpcOpen = 5
+	OpenInventory = 6
+	 */
+
+	const ACTION_INVALID = 0;
 	const ACTION_DAMAGE = 2;
-	const ACTION_SEE = 4;
+	const ACTION_STOP_RIDING = 3;
+	const ACTION_INTERACT_UPDATE = 4;
+	const ACTION_OPEN_NPC = 4;
 	const ACTION_OPEN_INVENTORY = 6;
 
 	public $action;
 	public $eid;
 	public $target;
+	/** @var float */
+	public $x;
+	/** @var float */
+	public $y;
+	/** @var float */
+	public $z;
 
 	public function decode($playerProtocol){
 		$this->getHeader($playerProtocol);
 		$this->action = $this->getByte();
-		$this->target = $this->getVarInt();
+		$this->target = $this->getVarInt(); // Runtime ID
+
+		if ($this->action == self::ACTION_INTERACT_UPDATE || $this->action == self::ACTION_STOP_RIDING) {
+			$this->getLFloat();
+			$this->getLFloat();
+			$this->getLFloat();
+		}
 	}
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putByte($this->action);
 		$this->putVarInt($this->target);
-		/** @todo do it right */
-		if ($this->action == self::ACTION_SEE) {
-			$this->putLFloat(0); // position X
-			$this->putLFloat(0); // position Y
-			$this->putLFloat(0); // position Z
+		if ($this->action == self::ACTION_INTERACT_UPDATE || $this->action == self::ACTION_STOP_RIDING) {
+			$this->putLFloat($this->x);
+			$this->putLFloat($this->y);
+			$this->putLFloat($this->z);
 		}
 	}
 

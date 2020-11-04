@@ -1337,7 +1337,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::RED_FLOWER, Flower::TYPE_PINK_TULIP), self::CREATIVE_GROUP_FLOWER);
 		self::addCreativeItem(Item::get(Item::RED_FLOWER, Flower::TYPE_OXEYE_DAISY), self::CREATIVE_GROUP_FLOWER);
 
-		self::addColoredCreativeItem(Item::DYE, self::CREATIVE_GROUP_DYE);
+		//self::addColoredCreativeItem(Item::DYE, self::CREATIVE_GROUP_DYE);
 		
 		self::addCreativeItem(Item::get(Item::VINES, 0));
 		self::addCreativeItem(Item::get(Item::WATER_LILY, 0));

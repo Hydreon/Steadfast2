@@ -274,9 +274,10 @@ class StartGamePacket extends PEPacket{
 		if (!empty(self::$itemsList)) {
 			return self::$itemsList;
 		} else {
-			$path = __DIR__ . "/data/Items3.json"; //TODO: A couple of these are wrong
+			$path = __DIR__ . "/data/Items.json";
 			self::$itemsList = json_decode(file_get_contents($path), true);
 			return self::$itemsList;
 		}
+
 	}
 }

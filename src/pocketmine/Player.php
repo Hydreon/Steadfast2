@@ -2038,10 +2038,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				break;
 			case 'INTERACT_PACKET':
 				if ($packet->action === InteractPacket::ACTION_OPEN_INVENTORY && $this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_392) {
+
+					//TODO:
 					$this->addWindow($this->getInventory());
 				} elseif ($packet->action === InteractPacket::ACTION_DAMAGE) {
 					$this->attackByTargetId($packet->target);
-				} else {
+				} elseif($packet->action === InteractPacket::ACTION_INTERACT_UPDATE){
+
 					$this->customInteract($packet);
 				}
 				break;
@@ -3054,6 +3057,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 		$this->currentWindow = $inventory;
 		$this->currentWindowId = !is_null($forceId) ? $forceId : rand(self::MIN_WINDOW_ID, 98);
+
+		//TODO: Not opening inventory
 		if (!$inventory->open($this)) {
 			$this->removeWindow($inventory);
 		}
