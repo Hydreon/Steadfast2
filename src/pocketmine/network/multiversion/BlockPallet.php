@@ -34,6 +34,9 @@ class BlockPallet {
 
 	public function __construct($path, $protocolNumber) {
 		$palletData = json_decode(file_get_contents($path), true);
+		if ($protocolNumber == Info::PROTOCOL_419) {
+			$palletData = $palletData['blocks'];
+		}
 		if ($protocolNumber >= Info::PROTOCOL_370) {
 			$palletTag =  new Enum("", []);
 			foreach ($palletData as $runtimeID => $blockInfo) {
@@ -45,11 +48,14 @@ class BlockPallet {
 				foreach ($blockInfo['states'] as $stateName => $state) {
 					switch ($state['type']) {
 						case NBT::TAG_Byte:
+						case 'byte':	
 							$states->{$stateName} = new ByteTag($stateName, $state['val']);
 							break;
+						case 'int';	
 						case NBT::TAG_Int:
 							$states->{$stateName} = new IntTag($stateName, $state['val']);
 							break;
+						case 'string':	
 						case NBT::TAG_String:
 							$states->{$stateName} = new StringTag($stateName, $state['val']);
 							break;
