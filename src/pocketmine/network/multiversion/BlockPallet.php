@@ -13,6 +13,8 @@ use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\NBT;
 
 class BlockPallet {
+
+	public static $blockNamesIds = [];
 	
 	public static function initAll() {
 		$result = [];
@@ -34,12 +36,29 @@ class BlockPallet {
 
 	public function __construct($path, $protocolNumber) {
 		$palletData = json_decode(file_get_contents($path), true);
+		//for 419 pallet
+		if ($protocolNumber == Info::PROTOCOL_370 && empty(self::$blockNamesIds)) {
+			foreach ($palletData as $blockInfo) {
+				self::$blockNamesIds[$blockInfo['name']] = $blockInfo['id'];
+			}
+		}
 		if ($protocolNumber == Info::PROTOCOL_419) {
 			$palletData = $palletData['blocks'];
 		}
 		if ($protocolNumber >= Info::PROTOCOL_370) {
 			$palletTag =  new Enum("", []);
+			$lastData = null;
+			$currentId = null;
 			foreach ($palletData as $runtimeID => $blockInfo) {
+				if ($protocolNumber == Info::PROTOCOL_419) {
+					$blockInfo['id'] = self::$blockNamesIds[$blockInfo['name']]??-1;
+					if ($blockInfo['id'] !== $currentId) {
+						$currentId = $blockInfo['id'];
+						$lastData = -1;
+						$blockInfo['data'] = -1;
+					}
+					$blockInfo['data'] = ++$lastData;
+				}
 				if (isset($blockInfo['data'])) {
 					$this->pallet[$blockInfo['id']][$blockInfo['data']] = $runtimeID;
 					$this->palletReverted[$runtimeID] = [$blockInfo['id'], $blockInfo['data'], $blockInfo['name']];
@@ -49,15 +68,15 @@ class BlockPallet {
 					switch ($state['type']) {
 						case NBT::TAG_Byte:
 						case 'byte':	
-							$states->{$stateName} = new ByteTag($stateName, $state['val']);
+							$states->{$stateName} = new ByteTag($stateName, $state['val']??$state['value']);
 							break;
 						case 'int';	
 						case NBT::TAG_Int:
-							$states->{$stateName} = new IntTag($stateName, $state['val']);
+							$states->{$stateName} = new IntTag($stateName, $state['val']??$state['value']);
 							break;
 						case 'string':	
 						case NBT::TAG_String:
-							$states->{$stateName} = new StringTag($stateName, $state['val']);
+							$states->{$stateName} = new StringTag($stateName, $state['val']??$state['value']);
 							break;
 						default:
 							var_dump("Block Pallet Initialization Error");
