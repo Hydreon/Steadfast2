@@ -1337,7 +1337,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::RED_FLOWER, Flower::TYPE_PINK_TULIP), self::CREATIVE_GROUP_FLOWER);
 		self::addCreativeItem(Item::get(Item::RED_FLOWER, Flower::TYPE_OXEYE_DAISY), self::CREATIVE_GROUP_FLOWER);
 
-		self::addColoredCreativeItem(Item::DYE, self::CREATIVE_GROUP_DYE);
+		//self::addColoredCreativeItem(Item::DYE, self::CREATIVE_GROUP_DYE);
 		
 		self::addCreativeItem(Item::get(Item::VINES, 0));
 		self::addCreativeItem(Item::get(Item::WATER_LILY, 0));
@@ -1406,19 +1406,19 @@ class Item{
 		self::addCreativeItem(Item::get(Item::IRON_LEGGINGS, 0), self::CREATIVE_GROUP_LEGGINGS);
 		self::addCreativeItem(Item::get(Item::DIAMOND_LEGGINGS, 0), self::CREATIVE_GROUP_LEGGINGS);
 		self::addCreativeItem(Item::get(Item::GOLD_LEGGINGS, 0), self::CREATIVE_GROUP_LEGGINGS);
-		
+
 		self::addCreativeItem(Item::get(Item::LEATHER_BOOTS, 0), self::CREATIVE_GROUP_BOOTS);
 		self::addCreativeItem(Item::get(Item::CHAIN_BOOTS, 0), self::CREATIVE_GROUP_BOOTS);
 		self::addCreativeItem(Item::get(Item::IRON_BOOTS, 0), self::CREATIVE_GROUP_BOOTS);
 		self::addCreativeItem(Item::get(Item::DIAMOND_BOOTS, 0), self::CREATIVE_GROUP_BOOTS);
 		self::addCreativeItem(Item::get(Item::GOLD_BOOTS, 0), self::CREATIVE_GROUP_BOOTS);
-		 
+
 		self::addCreativeItem(Item::get(Item::WOODEN_SWORD, 0), self::CREATIVE_GROUP_SWORD);
 		self::addCreativeItem(Item::get(Item::STONE_SWORD, 0), self::CREATIVE_GROUP_SWORD);
 		self::addCreativeItem(Item::get(Item::IRON_SWORD, 0), self::CREATIVE_GROUP_SWORD);
 		self::addCreativeItem(Item::get(Item::DIAMOND_SWORD, 0), self::CREATIVE_GROUP_SWORD);
 		self::addCreativeItem(Item::get(Item::GOLD_SWORD, 0), self::CREATIVE_GROUP_SWORD);
-		
+
 		self::addCreativeItem(Item::get(Item::WOODEN_AXE, 0), self::CREATIVE_GROUP_AXE);
 		self::addCreativeItem(Item::get(Item::STONE_AXE, 0), self::CREATIVE_GROUP_AXE);
 		self::addCreativeItem(Item::get(Item::IRON_AXE, 0), self::CREATIVE_GROUP_AXE);
@@ -1487,7 +1487,7 @@ class Item{
 		self::addCreativeItem(Item::get(Item::COAL, 0));
 		self::addCreativeItem(Item::get(Item::COAL, 1));
 		self::addCreativeItem(Item::get(Item::DIAMOND, 0));
-		self::addCreativeItem(Item::get(Item::IRON_INGOT, 0));
+		//self::addCreativeItem(Item::get(Item::IRON_INGOT, 0));
 		self::addCreativeItem(Item::get(Item::GOLD_INGOT, 0));
 		self::addCreativeItem(Item::get(Item::EMERALD, 0));
 		

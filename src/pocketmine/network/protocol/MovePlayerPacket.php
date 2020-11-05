@@ -86,6 +86,9 @@ class MovePlayerPacket extends PEPacket{
 			$this->putInt(self::TELEPORTATION_CAUSE_UNKNOWN);
 			$this->putInt(1);
 		}
+		if($playerProtocol >= Info::PROTOCOL_419){
+			$this->putVarInt(0); // which tick from PlayerAuthInputPacket its on //unsigned varint64
+		}
 	}
 
 }
