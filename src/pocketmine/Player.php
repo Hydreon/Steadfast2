@@ -187,6 +187,8 @@ use pocketmine\network\protocol\GameRulesChangedPacket;
 use pocketmine\player\PlayerSettingsTrait;
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\inventory\InventoryCreationEvent;
+use pocketmine\network\protocol\CreativeContentPacket;
+use pocketmine\network\protocol\ItemComponentPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v331\BiomeDefinitionListPacket;
 use pocketmine\network\protocol\v310\AvailableEntityIdentifiersPacket;
@@ -1265,10 +1267,12 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 			return false;
 		}
+
 		$this->server->getPluginManager()->callEvent($ev = new PlayerGameModeChangeEvent($this, (int) $gm));
 		if ($ev->isCancelled()) {
 			return false;
 		}
+
 		$this->gamemode = $gm;
 		$this->allowFlight = $this->isCreative();
 
@@ -1978,7 +1982,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 									break 2;
 								}
 							}
-							
+
 
 							$breakTime = ceil($this->getBreakTime($block) * 20);
 							$fireBlock = $block->getSide($packet->face);
@@ -2667,8 +2671,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			if (!is_null($this->currentWindow)) {
 				$this->removeWindow($this->currentWindow);
 			}
-			
-			$this->freeChunks();			
+
+			$this->freeChunks();
 			parent::close();
 			$this->server->removeOnlinePlayer($this);
 			if ($this->closeFromProxy) {
@@ -2687,7 +2691,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 //			if(isset($ev) and $this->username != "" and $this->spawned !== false and $ev->getQuitMessage() != ""){
 //				$this->server->broadcastMessage($ev->getQuitMessage());
 //			}
-			
+
 			$this->server->getPluginManager()->unsubscribeFromPermission(Server::BROADCAST_CHANNEL_USERS, $this);
 			$this->spawned = false;
 			$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . $this->ip . " logged out due to " . str_replace(["\n", "\r"], [" ", ""], $reason));
@@ -2706,7 +2710,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				$this->scoreboard->removePlayer($this);
 			}
 			$this->connected = false;
-		}			
+		}
 		$this->perm->clearPermissions();
 		$this->server->removePlayer($this);
 	}
@@ -3339,24 +3343,39 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$pk->spawnY = (int) ($spawnPosition->y + $this->getEyeHeight());
 			$pk->spawnZ = (int) $spawnPosition->z;
 			$pk->generator = 1; //0 old, 1 infinite, 2 flat
-			$pk->gamemode = $this->gamemode & 0x01;
+			$pk->gamemode = $this->gamemode == 3 ? 1 : $this->gamemode;
 			$pk->eid = $this->id;
 			$pk->stringClientVersion = $this->clientVersion;
 			$pk->multiplayerCorrelationId = $this->uuid->toString();
 			$this->directDataPacket($pk);
-			if ($this->protocol >= ProtocolInfo::PROTOCOL_331) {
-				$this->directDataPacket(new AvailableEntityIdentifiersPacket());
-				$this->directDataPacket(new BiomeDefinitionListPacket());
-			}
+            if ($this->protocol >= ProtocolInfo::PROTOCOL_419) {
+                $this->directDataPacket(new ItemComponentPacket());
+            }
+            if ($this->protocol >= ProtocolInfo::PROTOCOL_331) {
+                $this->directDataPacket(new BiomeDefinitionListPacket());
+                $this->directDataPacket(new AvailableEntityIdentifiersPacket());
+            }
 		} else {
 			$this->sendPosition($this);
 			$this->setGamemode($this->gamemode, true);
 		}
+        if ($this->getPlayerProtocol() >= Info::PROTOCOL_392) {
+            $pk = new CreativeContentPacket();
+            $pk->groups = Item::getCreativeGroups();
+            $pk->items = Item::getCreativeItems();
+            $this->directDataPacket($pk);
+        } else {
+            $slots = [];
+            foreach(Item::getCreativeItems() as $item){
+                $slots[] = clone $item['item'];
+            }
+            $pk = new InventoryContentPacket();
+            $pk->inventoryID = Protocol120::CONTAINER_ID_CREATIVE;
+            $pk->items = $slots;
+            $this->dataPacket($pk);
+        }
 
-		$pk = new SetTimePacket();
-		$pk->time = $this->level->getTime();
-		$pk->started = true;
-		$this->dataPacket($pk);
+        $this->server->sendRecipeList($this);
 
 		if ($this->getHealth() <= 0) {
 			$this->dead = true;
@@ -3369,26 +3388,13 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		if($this->getHealth() <= 0){
 			$this->dead = true;
 		}
+        $pk = new SetTimePacket();
+        $pk->time = $this->level->getTime();
+        $pk->started = true;
+        $this->dataPacket($pk);
 
 		$this->server->getLogger()->info(TextFormat::AQUA . $this->username . TextFormat::WHITE . "/" . TextFormat::AQUA . $this->ip . " connected");
 
-		if ($this->getPlayerProtocol() >= Info::PROTOCOL_392) {
-			$pk = new CreativeItemsListPacket();
-			$pk->groups = Item::getCreativeGroups();
-			$pk->items = Item::getCreativeItems();
-			$this->dataPacket($pk);
-		} else {
-			$slots = [];
-			foreach(Item::getCreativeItems() as $item){
-				$slots[] = clone $item['item'];
-			}
-			$pk = new InventoryContentPacket();
-			$pk->inventoryID = Protocol120::CONTAINER_ID_CREATIVE;
-			$pk->items = $slots;
-			$this->dataPacket($pk);
-		}
-
-		$this->server->sendRecipeList($this);
 
 		$this->sendSelfData();
 		$this->updateSpeed($this->movementSpeed);
@@ -3438,14 +3444,14 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$this->platformChatId = $packet->platformChatId;
 			$this->forcedPlayerId = $packet->playerId;
 			$this->incomingTransferData = $packet->transferData;
-			$this->additionalSkinData = $packet->additionalSkinData;		
+			$this->additionalSkinData = $packet->additionalSkinData;
 			if ($this->isFirstConnect) {
 				$this->processLogin();
 			} else {
 				$this->completeLogin();
 				$this->loggedIn = true;
 				$this->scheduleUpdate();
-				$this->justCreated = false;	
+				$this->justCreated = false;
 			}
 		} elseif ($packet->pid() === ProtocolProxyInfo::DISCONNECT_PACKET) {
 			$this->closeFromProxy = true;
@@ -3454,7 +3460,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$this->setPing($packet->ping);
 		}
 	}
-	
+
 	protected function generateId() {
 		if ($this->forcedPlayerId !== false) {
 			$this->id = $this->forcedPlayerId;
@@ -3479,7 +3485,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$this->hardTransfer($address, $port);
 		}
 	}
-	
+
 	public function hardTransfer($address, $port = false) {
 		$pk = new TransferPacket();
 		$pk->ip = $address;
@@ -5157,7 +5163,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 		$this->playerListIsSent = true;
 	}
-	
+
 	public function clearFullPlayerList() {
 		$players = $this->server->getOnlinePlayers();
 		$pk = new PlayerListPacket();
@@ -5167,7 +5173,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 		$this->dataPacket($pk);
 	}
-	
+
 	public function setInteractButtonText($text, $force = false) {
 		if ($force || $this->interactButtonText != $text) {
 			$this->interactButtonText = $text;

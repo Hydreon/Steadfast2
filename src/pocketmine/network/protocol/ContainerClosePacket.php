@@ -38,6 +38,9 @@ class ContainerClosePacket extends PEPacket{
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putByte($this->windowid);
+		if ($playerProtocol >= Info::PROTOCOL_419) {
+			$this->putByte(0);
+		}
 	}
 
 }

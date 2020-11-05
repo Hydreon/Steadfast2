@@ -28,7 +28,7 @@ namespace pocketmine\network\protocol;
 interface Info{
 
 	const CURRENT_PROTOCOL = 120;
-	const ACCEPTED_PROTOCOLS = [134, 135, 136, 137, 140, 141, 150, 160, 200, 201, 220, 221, 222, 224, 223, 240, 250, 260, 261, 270, 271, 273, 274, 280, 281, 282, 290, 291, 310, 311, 312, 313, 330, 331, 332, 342, 340, 350, 351, 352, 353, 354, 360, 361, 370, 371, 385, 386, 387, 388, 389, 390, 392, 393, 394, 395, 396, 400, 406, 407, 408];
+	const ACCEPTED_PROTOCOLS = [134, 135, 136, 137, 140, 141, 150, 160, 200, 201, 220, 221, 222, 224, 223, 240, 250, 260, 261, 270, 271, 273, 274, 280, 281, 282, 290, 291, 310, 311, 312, 313, 330, 331, 332, 342, 340, 350, 351, 352, 353, 354, 360, 361, 370, 371, 385, 386, 387, 388, 389, 390, 392, 393, 394, 395, 396, 400, 406, 407, 408, 419];
 	
 	const PROTOCOL_134 = 134; // 1.2.0.20, 1.2.0.22
 	const PROTOCOL_135 = 135; // 1.2.0.24, 1.2.0.25
@@ -91,6 +91,12 @@ interface Info{
 	const PROTOCOL_406 = 406; // 1.16.0.63
 	const PROTOCOL_407 = 407; // 1.16.0.64
 	const PROTOCOL_408 = 408; // ?
+	// const PROTOCOL_409 = 409; // ?
+	// const PROTOCOL_410 = 410; // 1.16.100.51
+	// const PROTOCOL_414 = 414; // 1.16.100.55
+	// const PROTOCOL_415 = 415; // 1.16.100.56
+	// const PROTOCOL_417 = 417; // 1.16.100.58
+	const PROTOCOL_419  = 419; // 1.16.100.59
 	/** OUTDATED (supporting will be removed with next release, may didn't work properly)*/
 	const PROTOCOL_120 = 120; // 1.2.0.xx (beta)
 //	const PROTOCOL_121 = 121; // 1.2.0.xx (beta)
@@ -208,7 +214,8 @@ interface Info{
 	const SHOW_PROFILE_PACKET = 0x68;						// NEW
 	const SET_DEFAULT_GAME_TYPE_PACKET = 0x69;				// NEW
 	const PLAYER_ENCHANT_OPTIONS_PACKET = 0x92;				// NEW 406 || 407
-
+	const ITEM_COMPONENT_PACKET = 0xA2; 					// NEW 419
+	const CREATIVE_CONTENT_PACKET = 0x91; 					// NEW 419
 }
 
 
