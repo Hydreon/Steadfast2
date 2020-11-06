@@ -173,7 +173,7 @@ abstract class PEPacket extends DataPacket {
 	}
 
 	private static function getActualMeta($id, $meta) {
-		if ($id = Item::ITEM_FRAME_BLOCK) {
+		if ($id == Item::ITEM_FRAME_BLOCK) {
 			$array = [3 => 8, 4 => 5, 5 => 4];
 			return $array[$meta]??$meta;
 		}
