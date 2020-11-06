@@ -177,6 +177,9 @@ abstract class PEPacket extends DataPacket {
 			$array = [3 => 8, 4 => 5, 5 => 4];
 			return $array[$meta]??$meta;
 		}
+		if ($id == Item::LEAVE2 && $meta > 7) {			
+			return 7;
+		}
 		return $meta;
 	}
 	
