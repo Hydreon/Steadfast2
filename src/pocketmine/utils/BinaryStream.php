@@ -368,7 +368,7 @@ class BinaryStream {
 				$this->putLInt($animation['Type']);
 				$this->putLFloat($animation['Frames']);
 				if ($playerProtocol >= Info::PROTOCOL_419) {
-					$this->putLInt($animation['AnimationExpression']);
+					//$this->putLInt($animation['AnimationExpression']);
 				}
 			}
 		} else {
@@ -451,7 +451,7 @@ class BinaryStream {
 				'Image' => $this->getString(),
 				'Type' => $this->getLInt(),
 				'Frames' => $this->getLFloat(),
-				'AnimationExpression' => ($playerProtocol >= Info::PROTOCOL_419)?$this->getLInt():0
+				//'AnimationExpression' => ($playerProtocol >= Info::PROTOCOL_419)?$this->getLInt():0
 			];
 		}
 
