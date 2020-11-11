@@ -120,10 +120,10 @@ class PlayerListPacket extends PEPacket{
 							$this->putLInt(isset($d[9]) ? $d[9] : Player::OS_UNKNOWN); // build platform
 						}
 						$skinData = !empty($d[4]) ? $d[4] : $emptySkin;
-						$skinGeomtryName = isset($d[6]) ? $d[6] : '';
-						$skinGeomtryData = isset($d[7]) ? $d[7] : '';
+						$skinGeometryName = isset($d[6]) ? $d[6] : '';
+						$skinGeometryData = isset($d[7]) ? $d[7] : '';
 						$capeData = isset($d[5]) ? $d[5] : '';
-						$this->putSerializedSkin($playerProtocol, $d[3], $skinData, $skinGeomtryName, $skinGeomtryData, $capeData, (isset($d[10]) ? $d[10] : []));
+						$this->putSerializedSkin($playerProtocol, $d[3], $skinData, $skinGeometryName, $skinGeometryData, $capeData, (isset($d[10]) ? $d[10] : []));
 						if ($playerProtocol >= Info::PROTOCOL_385) {
 							$this->putByte(0); // is teacher
 							$this->putByte(0); // is host
