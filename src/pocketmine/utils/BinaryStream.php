@@ -327,7 +327,7 @@ class BinaryStream {
 
 	public function putSerializedSkin($playerProtocol, $skinId, $skinData, $skinGeometryName, $skinGeometryData, $capeData, $additionalSkinData) {
 		
-		if (1 || $this->deviceId == Player::OS_NX || !isset($additionalSkinData['PersonaSkin']) || !$additionalSkinData['PersonaSkin']) {
+		if ($this->deviceId == Player::OS_NX || !isset($additionalSkinData['PersonaSkin']) || !$additionalSkinData['PersonaSkin']) {
 			$additionalSkinData = [];
 		}
 		if (isset($additionalSkinData['skinData'])) {
