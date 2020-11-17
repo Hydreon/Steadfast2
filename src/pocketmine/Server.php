@@ -2342,6 +2342,9 @@ class Server{
 			$recipies = [];
 			
 			foreach($this->getCraftingManager()->getRecipes() as $recipe){
+				if (in_array($recipe->getResult()->getId(), [Item::SUGAR, Item::PAPER, Item::MELON_BLOCK])) {
+					continue;
+				}
 				$recipies[] = $recipe;
 			}
 			//TODO: fix furnace recipes
