@@ -246,19 +246,18 @@ class StartGamePacket extends PEPacket{
 			$this->put(self::getBlockPalletData($playerProtocol));
 		}
 
-        if ($playerProtocol >= Info::PROTOCOL_360) {
-			if ($playerProtocol >= Info::PROTOCOL_419) {
-				$itemsData = self::getItemsList();
-                $this->putVarInt(count($itemsData));
-				foreach ($itemsData as $name => $id) {
-					$this->putString($name);
-					$this->putLShort($id);
-					$this->putByte(0);
-				}
-			} else {
-				$this->putVarInt(0); // item list size
+		if ($playerProtocol >= Info::PROTOCOL_419) {
+			$itemsData = self::getItemsList();
+                	$this->putVarInt(count($itemsData));
+			foreach ($itemsData as $name => $id) {
+				$this->putString($name);
+				$this->putLShort($id);
+				$this->putByte(0);
 			}
+		} else {
+			$this->putVarInt(0); // item list size
 		}
+	
 		if ($playerProtocol >= Info::PROTOCOL_282) {
 		   	$this->putString($this->multiplayerCorrelationId); //multiplayerCorrelationId
 		}
