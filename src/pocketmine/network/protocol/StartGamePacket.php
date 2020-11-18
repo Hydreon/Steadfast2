@@ -230,12 +230,10 @@ class StartGamePacket extends PEPacket{
 		$this->putString(''); // level name
 		$this->putString(''); // template pack id
 		$this->putByte(0); // is trial?
-		if ($playerProtocol >= Info::PROTOCOL_389) {
-			if ($playerProtocol >= Info::PROTOCOL_419) {
-				$this->putVarInt(0);
-			} else {
-				$this->putByte(0); // is server authoritative over movement
-			}
+		if ($playerProtocol >= Info::PROTOCOL_419) {
+			$this->putVarInt(0);
+		} else {
+			$this->putByte(0); // is server authoritative over movement
 		}
 
 		$this->putLong(0); // current level time
