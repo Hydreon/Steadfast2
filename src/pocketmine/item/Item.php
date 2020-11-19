@@ -438,7 +438,8 @@ class Item{
 	const GLOWSTONE_DUST = 348;
 	const RAW_FISH = 349;
 	const COOKED_FISH = 350;
-	const DYE = 351;
+	//test
+	const DYE = 412;
 	const BONE = 352;
 	const SUGAR = 353;
 	const CAKE = 354;
@@ -504,7 +505,8 @@ class Item{
 	const PRISMARINE_SHARD = 409;
 	const HOPPER = 410;
 	const RAW_RABBIT = 411;
-	const COOKED_RABBIT = 412;
+	//test
+	const COOKED_RABBIT = 1412;
 	const RABBIT_STEW = 413;
 	const RABBIT_FOOT = 414;
 	const RABBIT_HIDE = 415;
@@ -822,7 +824,8 @@ class Item{
 		348 => "Glowstone Dust",
 		349 => "Raw Fish",
 		350 => "Cooked Fish",
-		351 => "Dye",
+		//test
+		412 => "Dye",
 		352 => "Bone",
 		353 => "Sugar",
 		354 => "Cake",
@@ -863,7 +866,8 @@ class Item{
 		408 => "Minecart with Hopper",
 		410 => "Hopper",
 		411 => "Raw Rabbit",
-		412 => "Cooked Rabbit",
+		//test
+		1412 => "Cooked Rabbit",
 		414 => "Rabbit's Foot",
 		415 => "Rabbit Hide",
 		416 => "Leather Horse Armor",
