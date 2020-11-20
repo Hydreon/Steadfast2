@@ -445,7 +445,7 @@ class Item {
 	const PUFFERFISH = 267;
 	const COOKED_SALMON = 269;
 	const CAMERA = 583;
-	const AIR = -158;
+	const AIR = 0;
 	const SIGN = 358;
 	const SUGAR_CANES = 83;
 	const RAW_FISH = 264;
