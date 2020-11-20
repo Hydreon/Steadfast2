@@ -2341,11 +2341,11 @@ class Server{
 			
 			$recipies = [];
 			
-			foreach($this->getCraftingManager($p->getPlayerProtocol())->getRecipes() as $recipe){
+			foreach($this->getCraftingManager()->getRecipes() as $recipe){
 				$recipies[] = $recipe;
 			}
 			
-			foreach ($this->getCraftingManager($p->getPlayerProtocol())->getFurnaceRecipes() as $recipe) {
+			foreach ($this->getCraftingManager()->getFurnaceRecipes() as $recipe) {
 				$recipies[] = $recipe;
 			}
 			
