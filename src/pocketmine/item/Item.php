@@ -367,6 +367,12 @@ class Item {
 	const CLOCK = 391;
 	const GLOWSTONE_DUST = 392;
 	const DYE = 613;
+	const RED_DYE = 394;
+	const PINK_DYE = 402;
+	const LIME_DYE = 403;
+	const YELLOW_DYE = 404;
+	const BONE_MEAL = 409;
+	const LAPIS_LAZULI = 412;
 	const BONE = 413;
 	const SUGAR = 414;
 	const CAKE = 415;
@@ -839,6 +845,10 @@ class Item {
 		391 => "Clock",
 		392 => "Glowstone Dust",
 		613 => "Dye",
+		394 => "Red Dye",
+		404 => "Yellow Dye",
+		409 => "Bone Meal",
+		412 => "Lapis Lazuli",
 		413 => "Bone",
 		414 => "Sugar",
 		415 => "Cake",
