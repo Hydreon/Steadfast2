@@ -958,7 +958,7 @@ class Item {
 		-158 => "Air",
 		358 => "Sign",
 		83 => "Sugarcane",
-		264 => "Raw Fish",
+		264 => "Raw Cod ",
 		268 => "Cooked Fish",
 		272 => "Melon",
 		505 => "Empty Map",
@@ -969,7 +969,7 @@ class Item {
 		523 => "Diamond Horse Armor",
 		540 => "Raw Mutton",
 		541 => "Cooked Mutton",
-		266 => "Clownfish",
+		266 => "Tropical Fish",
 		259 => "Enchanted Golden Apple",
 	];
 
