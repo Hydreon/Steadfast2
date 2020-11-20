@@ -431,7 +431,12 @@ class CraftingManager{
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::STONE_BRICK, 2, 1), Item::get(Item::STONE_BRICK, 0, 1)));
 		// wasting ore
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::DIAMOND, 0, 1), Item::get(Item::DIAMOND_ORE, 0, 1)));
-		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::DYE, 4, 1), Item::get(Item::LAPIS_ORE, 0, 1)));
+		if (true) {
+			$this->registerRecipe(new FurnaceRecipe(Item::get(Item::INC_SAC, 0, 1), Item::get(Item::LAPIS_ORE, 0, 1)));
+		} else {
+			$this->registerRecipe(new FurnaceRecipe(Item::get(Item::DYE, 0, 1), Item::get(Item::LAPIS_ORE, 0, 1)));
+		}
+		
 		// @todo redstone
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::COAL, 1, 1), Item::get(Item::TRUNK, -1, 1)));
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::EMERALD, 0, 1), Item::get(Item::EMERALD_ORE, 0, 1)));
@@ -448,7 +453,11 @@ class CraftingManager{
 		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::COOKED_RABBIT, 0, 1), Item::get(Item::RAW_RABBIT, 0, 1)));
 
 		// other
-		$this->registerRecipe(new FurnaceRecipe(Item::get(Item::DYE, 2, 1), Item::get(Item::CACTUS, 0, 1)));
+		if(true) {
+			$this->registerRecipe(new FurnaceRecipe(Item::get(Item::GREEN_DYE, 0, 1), Item::get(Item::CACTUS, 0, 1)));
+		} else {
+			$this->registerRecipe(new FurnaceRecipe(Item::get(Item::DYE, 2, 1), Item::get(Item::CACTUS, 0, 1)));
+		}
 		// @todo sponge
 		// @todo popped chorus fruit
 	}
@@ -747,6 +756,7 @@ class CraftingManager{
 	}
 
 	protected function registerDyes(){
+		//TODO: change Item::DYE to Item::YELLOW_DYE etc
 		for($i = 0; $i < 16; ++$i){
 			if ($i != 15) {
 				$this->registerRecipe((new ShapelessRecipe(Item::get(Item::WOOL, 15 - $i, 1)))->addIngredient(Item::get(Item::WOOL, 0, 1))->addIngredient(Item::get(Item::DYE, $i, 1)));
@@ -761,37 +771,104 @@ class CraftingManager{
 		} else {
 			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 11, 2)))->addIngredient(Item::get(Item::DANDELION, 0, 1)));
 		}
+		
 		if(true) {
-			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::BONE_MEAL, 3)))->addIngredient(Item::get(Item::BONE, 0, 1)));
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::BONE_MEAL, 0, 3)))->addIngredient(Item::get(Item::BONE, 0, 1)));
 		} else {
 			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 15, 3)))->addIngredient(Item::get(Item::BONE, 0, 1)));
 		}
 		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 3, 2)))->addIngredient(Item::get(Item::DYE, 14, 1))->addIngredient(Item::get(Item::DYE, 0, 1)));
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 3, 3)))->addIngredient(Item::get(Item::DYE, 1, 1))->addIngredient(Item::get(Item::DYE, 0, 1))->addIngredient(Item::get(Item::DYE, 11, 1)));
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 9, 2)))->addIngredient(Item::get(Item::DYE, 15, 1))->addIngredient(Item::get(Item::DYE, 1, 1)));
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 14, 2)))->addIngredient(Item::get(Item::DYE, 11, 1))->addIngredient(Item::get(Item::DYE, 1, 1)));
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 10, 2)))->addIngredient(Item::get(Item::DYE, 2, 1))->addIngredient(Item::get(Item::DYE, 15, 1)));
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 12, 2)))->addIngredient(Item::get(Item::DYE, 4, 1))->addIngredient(Item::get(Item::DYE, 15, 1)));
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 6, 2)))->addIngredient(Item::get(Item::DYE, 4, 1))->addIngredient(Item::get(Item::DYE, 2, 1)));
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 5, 2)))->addIngredient(Item::get(Item::DYE, 4, 1))->addIngredient(Item::get(Item::DYE, 1, 1)));
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 13, 3)))->addIngredient(Item::get(Item::DYE, 4, 1))->addIngredient(Item::get(Item::DYE, 1, 1))->addIngredient(Item::get(Item::DYE, 15, 1)));
+		
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::COCOA_BEANS, 0, 3)))->addIngredient(Item::get(Item::RED_DYE, 0, 1))->addIngredient(Item::get(Item::INC_SAC, 0, 1))->addIngredient(Item::get(Item::YELLOW_DYE, 0, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 3, 3)))->addIngredient(Item::get(Item::DYE, 1, 1))->addIngredient(Item::get(Item::DYE, 0, 1))->addIngredient(Item::get(Item::DYE, 11, 1)));
+		}
+
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::COCOA_BEANS, 0, 3)))->addIngredient(Item::get(Item::RED_DYE, 0, 1))->addIngredient(Item::get(Item::INC_SAC, 0, 1))->addIngredient(Item::get(Item::YELLOW_DYE, 0, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 3, 3)))->addIngredient(Item::get(Item::DYE, 1, 1))->addIngredient(Item::get(Item::DYE, 0, 1))->addIngredient(Item::get(Item::DYE, 11, 1)));
+		}
+
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::PINK_DYE, 0, 2)))->addIngredient(Item::get(Item::BONE_MEAL, 0, 1))->addIngredient(Item::get(Item::RED_DYE, 0, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 9, 2)))->addIngredient(Item::get(Item::DYE, 15, 1))->addIngredient(Item::get(Item::DYE, 1, 1)));
+		}
+
+		
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::ORANGE_DYE, 0, 2)))->addIngredient(Item::get(Item::YELLOW_DYE, 0, 1))->addIngredient(Item::get(Item::RED_DYE, 0, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 14, 2)))->addIngredient(Item::get(Item::DYE, 11, 1))->addIngredient(Item::get(Item::DYE, 1, 1)));
+		}
+
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::LIME_DYE, 0, 2)))->addIngredient(Item::get(Item::GREEN_DYE, 0, 1))->addIngredient(Item::get(Item::BONE_MEAL, 0, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 10, 2)))->addIngredient(Item::get(Item::DYE, 2, 1))->addIngredient(Item::get(Item::DYE, 15, 1)));
+		}
+
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::LIGHT_BLUE_DYE, 0, 2)))->addIngredient(Item::get(Item::LAPIS_LAZULI, 0, 1))->addIngredient(Item::get(Item::BONE_MEAL, 0, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 12, 2)))->addIngredient(Item::get(Item::DYE, 4, 1))->addIngredient(Item::get(Item::DYE, 15, 1)));
+		}
+
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::CYAN_DYE, 0, 2)))->addIngredient(Item::get(Item::LAPIS_LAZULI, 0, 1))->addIngredient(Item::get(Item::GREEN_DYE, 0, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 6, 2)))->addIngredient(Item::get(Item::DYE, 4, 1))->addIngredient(Item::get(Item::DYE, 2, 1)));
+		}
+		
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::PURPLE_DYE, 0, 2)))->addIngredient(Item::get(Item::LAPIS_LAZULI, 0, 1))->addIngredient(Item::get(Item::RED_DYE, 0, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 5, 2)))->addIngredient(Item::get(Item::DYE, 4, 1))->addIngredient(Item::get(Item::DYE, 1, 1)));
+		}
+		
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::MAGENTA_DYE, 0, 3)))->addIngredient(Item::get(Item::LAPIS_LAZULI, 0, 1))->addIngredient(Item::get(Item::RED_DYE, 0, 1))->addIngredient(Item::get(Item::BONE_MEAL, 0, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 13, 3)))->addIngredient(Item::get(Item::DYE, 4, 1))->addIngredient(Item::get(Item::DYE, 1, 1))->addIngredient(Item::get(Item::DYE, 15, 1)));
+		}
 		
 		if(true) {
 			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::RED_DYE, 0, 1)))->addIngredient(Item::get(Item::BEETROOT, 0, 1)));
 		} else {
-			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 1, 1)))->addIngredient(Item::get(Item::BEETROOT, 0, 1)));	
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 1, 1)))->addIngredient(Item::get(Item::BEETROOT, 0, 1)));
-			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 1, 1)))->addIngredient(Item::get(Item::BEETROOT, 0, 1)));	
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 1, 1)))->addIngredient(Item::get(Item::BEETROOT, 0, 1)));
-			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 1, 1)))->addIngredient(Item::get(Item::BEETROOT, 0, 1)));	
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 1, 1)))->addIngredient(Item::get(Item::BEETROOT, 0, 1)));			
 		}
 
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 13, 4)))->addIngredient(Item::get(Item::DYE, 15, 1))->addIngredient(Item::get(Item::DYE, 1, 2))->addIngredient(Item::get(Item::DYE, 4, 1)));
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 13, 2)))->addIngredient(Item::get(Item::DYE, 5, 1))->addIngredient(Item::get(Item::DYE, 9, 1)));
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 8, 2)))->addIngredient(Item::get(Item::DYE, 0, 1))->addIngredient(Item::get(Item::DYE, 15, 1)));
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 7, 3)))->addIngredient(Item::get(Item::DYE, 0, 1))->addIngredient(Item::get(Item::DYE, 15, 2)));
-		$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 7, 2)))->addIngredient(Item::get(Item::DYE, 0, 1))->addIngredient(Item::get(Item::DYE, 8, 1)));
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::MAGENTA_DYE, 0, 4)))->addIngredient(Item::get(Item::BONE_MEAL, 0, 1))->addIngredient(Item::get(Item::RED_DYE, 0, 2))->addIngredient(Item::get(Item::DYE, 4, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 13, 4)))->addIngredient(Item::get(Item::DYE, 15, 1))->addIngredient(Item::get(Item::DYE, 1, 2))->addIngredient(Item::get(Item::DYE, 4, 1)));			
+		}
 
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::MAGENTA_DYE, 0, 2)))->addIngredient(Item::get(Item::PURPLE_DYE, 0, 1))->addIngredient(Item::get(Item::PINK_DYE, 0, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 13, 2)))->addIngredient(Item::get(Item::DYE, 5, 1))->addIngredient(Item::get(Item::DYE, 9, 1)));
+		}
+		
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::GRAY_DYE, 0, 2)))->addIngredient(Item::get(Item::INC_SAC, 0, 1))->addIngredient(Item::get(Item::BONE_MEAL, 0, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 8, 2)))->addIngredient(Item::get(Item::DYE, 0, 1))->addIngredient(Item::get(Item::DYE, 15, 1)));;
+		}
+
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::LIGHT_GRAY_DYE, 0, 3)))->addIngredient(Item::get(Item::INC_SAC, 0, 1))->addIngredient(Item::get(Item::BONE_MEAL, 0, 2)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 7, 3)))->addIngredient(Item::get(Item::DYE, 0, 1))->addIngredient(Item::get(Item::DYE, 15, 2)));
+		}
+
+		if(true) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::LIGHT_GRAY_DYE, 0, 2)))->addIngredient(Item::get(Item::INC_SAC, 0, 1))->addIngredient(Item::get(Item::GRAY_DYE, 0, 1)));
+		} else {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::DYE, 7, 2)))->addIngredient(Item::get(Item::DYE, 0, 1))->addIngredient(Item::get(Item::DYE, 8, 1)));
+		}
 	}
 
 	protected function registerIngots(){

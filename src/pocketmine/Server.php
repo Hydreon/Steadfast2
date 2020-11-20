@@ -2341,14 +2341,12 @@ class Server{
 			
 			$recipies = [];
 			
-			foreach($this->getCraftingManager()->getRecipes() as $recipe){
+			foreach($this->getCraftingManager($p->getPlayerProtocol())->getRecipes() as $recipe){
 				$recipies[] = $recipe;
 			}
-			//TODO: fix furnace recipes
-			if($p->getPlayerProtocol() < Info::PROTOCOL_419) {
-				foreach ($this->getCraftingManager()->getFurnaceRecipes() as $recipe) {
-					$recipies[] = $recipe;
-				}
+			
+			foreach ($this->getCraftingManager($p->getPlayerProtocol())->getFurnaceRecipes() as $recipe) {
+				$recipies[] = $recipe;
 			}
 			
 			$this->getPluginManager()->callEvent($ev = new SendRecipiesList($recipies));
