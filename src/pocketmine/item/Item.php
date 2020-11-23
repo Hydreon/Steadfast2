@@ -484,6 +484,7 @@ class Item {
 	const GLISTERING_MELON = 432;
 	CONST OAK_WOOD_STAIRS = 53;
 	const FILLED_MAP = 418;
+	const NETHER_STAR = 508;
 
 	const COBBLESTONE = self::COBBLE;
 
@@ -563,6 +564,7 @@ class Item {
 	CONST WOODEN_PLANK = self::WOODEN_PLANKS;
 	const WOOD = self::TRUNK;
 	const WOODEN_STAIRS = self::WOOD_STAIRS;
+	
 
 	
 
