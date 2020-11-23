@@ -270,14 +270,13 @@ class StartGamePacket extends PEPacket{
 
 	}
 
-	static protected function getItemsList() {
-		if (!empty(self::$itemsList)) {
-			return self::$itemsList;
-		} else {
-			$path = __DIR__ . "/data/Items.json";
-			self::$itemsList = json_decode(file_get_contents($path), true);
-			return self::$itemsList;
-		}
+	protected static function getItemsList() {
+        if (!empty(self::$itemsList)) {
+            return self::$itemsList;
+        }
 
-	}
+        $path = __DIR__ . "/data/Items.json";
+        self::$itemsList = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+        return self::$itemsList;
+    }
 }
