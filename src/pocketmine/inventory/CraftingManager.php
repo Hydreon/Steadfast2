@@ -775,17 +775,29 @@ class CraftingManager{
 			Item::RED_DYE,
 			Item::BLACK_DYE
 		];
-		foreach ($dyeAll as $K => $dye) {
-			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::WOOL, $K, 1)))->addIngredient(Item::get(Item::WOOL, 0, 1))->addIngredient(Item::get($dye, 0, 1)));
-		}
-		for($i = 0; $i < 16; ++$i){
-			if ($i != 15) {
-				$this->registerRecipe((new ShapelessRecipe(Item::get(Item::WOOL, 15 - $i, 1)))->addIngredient(Item::get(Item::WOOL, 0, 1))->addIngredient(Item::get(Item::DYE, $i, 1)));
+		if (true) {
+			foreach ($dyeAll as $k => $dye) {
+				$this->registerRecipe((new ShapelessRecipe(Item::get(Item::WOOL, $k, 1)))->addIngredient(Item::get(Item::WOOL, 0, 1))->addIngredient(Item::get($dye, 0, 1)));
+				$this->registerRecipe((new ShapelessRecipe(Item::get(Item::STAINED_CLAY, $k, 8)))
+						->addIngredient(Item::get(Item::HARDENED_CLAY, 0, 4))
+						->addIngredient(Item::get($dye, 0, 1))
+						->addIngredient(Item::get(Item::HARDENED_CLAY, 0, 4)));
+				$this->registerRecipe((new ShapelessRecipe(Item::get(Item::CARPET, $k, 3)))->addIngredient(Item::get(Item::WOOL, $k, 2)));
+				$this->registerRecipe((new ShapelessRecipe(Item::get(Item::STAINED_GLASS, $k, 8)))
+					->addIngredient(Item::get(Item::GLASS, 0, 4))
+					->addIngredient(Item::get($dye, 0, 1))
+					->addIngredient(Item::get(Item::GLASS, 0, 4)));
 			}
-			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::STAINED_CLAY, 15 - $i, 8)))->addIngredient(Item::get(Item::HARDENED_CLAY, 0, 4))->addIngredient(Item::get(Item::DYE, $i, 1))->addIngredient(Item::get(Item::HARDENED_CLAY, 0, 4)));
-			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::CARPET, $i, 3)))->addIngredient(Item::get(Item::WOOL, $i, 2)));
-			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::STAINED_CLAY, 15 - $i, 8)))->addIngredient(Item::get(Item::HARDENED_CLAY, 0, 4))->addIngredient(Item::get(Item::DYE, $i, 1))->addIngredient(Item::get(Item::HARDENED_CLAY, 0, 4)));
-			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::STAINED_GLASS, 15 - $i, 8)))->addIngredient(Item::get(Item::GLASS, 0, 4))->addIngredient(Item::get(Item::DYE, $i, 1))->addIngredient(Item::get(Item::GLASS, 0, 4)));
+		} else {
+			for($i = 0; $i < 16; ++$i){
+				if ($i != 15) {
+					$this->registerRecipe((new ShapelessRecipe(Item::get(Item::WOOL, 15 - $i, 1)))->addIngredient(Item::get(Item::WOOL, 0, 1))->addIngredient(Item::get(Item::DYE, $i, 1)));
+				}
+				$this->registerRecipe((new ShapelessRecipe(Item::get(Item::STAINED_CLAY, 15 - $i, 8)))->addIngredient(Item::get(Item::HARDENED_CLAY, 0, 4))->addIngredient(Item::get(Item::DYE, $i, 1))->addIngredient(Item::get(Item::HARDENED_CLAY, 0, 4)));
+				$this->registerRecipe((new ShapelessRecipe(Item::get(Item::CARPET, $i, 3)))->addIngredient(Item::get(Item::WOOL, $i, 2)));
+				$this->registerRecipe((new ShapelessRecipe(Item::get(Item::STAINED_CLAY, 15 - $i, 8)))->addIngredient(Item::get(Item::HARDENED_CLAY, 0, 4))->addIngredient(Item::get(Item::DYE, $i, 1))->addIngredient(Item::get(Item::HARDENED_CLAY, 0, 4)));
+				$this->registerRecipe((new ShapelessRecipe(Item::get(Item::STAINED_GLASS, 15 - $i, 8)))->addIngredient(Item::get(Item::GLASS, 0, 4))->addIngredient(Item::get(Item::DYE, $i, 1))->addIngredient(Item::get(Item::GLASS, 0, 4)));
+			}
 		}
 		if(true) {
 			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::YELLOW_DYE, 0, 2)))->addIngredient(Item::get(Item::DANDELION, 0, 1)));
