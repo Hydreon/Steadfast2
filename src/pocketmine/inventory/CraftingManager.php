@@ -757,6 +757,27 @@ class CraftingManager{
 
 	protected function registerDyes(){
 		//TODO: change Item::DYE to Item::YELLOW_DYE etc
+		$dyeAll = [
+			Item::WHITE_DYE, 
+			Item::ORANGE_DYE, 
+			Item::MAGENTA_DYE, 
+			Item::LIGHT_BLUE_DYE,
+			Item::YELLOW_DYE,
+			Item::LIME_DYE,
+			Item::PINK_DYE,
+			Item::GRAY_DYE,
+			Item::LIGHT_GRAY_DYE,
+			Item::CYAN_DYE,
+			Item::PURPLE_DYE,
+			Item::BLUE_DYE,
+			Item::BROWN_DYE,
+			Item::GREEN_DYE,
+			Item::RED_DYE,
+			Item::BLACK_DYE
+		];
+		foreach ($dyeAll as $K => $dye) {
+			$this->registerRecipe((new ShapelessRecipe(Item::get(Item::WOOL, $K, 1)))->addIngredient(Item::get(Item::WOOL, 0, 1))->addIngredient(Item::get($dye, 0, 1)));
+		}
 		for($i = 0; $i < 16; ++$i){
 			if ($i != 15) {
 				$this->registerRecipe((new ShapelessRecipe(Item::get(Item::WOOL, 15 - $i, 1)))->addIngredient(Item::get(Item::WOOL, 0, 1))->addIngredient(Item::get(Item::DYE, $i, 1)));
