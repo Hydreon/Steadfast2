@@ -2349,7 +2349,7 @@ class Server{
 				$recipies[] = $recipe;
 			}
 			if ($p->getPlayerProtocol() < Info::PROTOCOL_419) {
-				$recipies[] = $recipe;
+				$recipies = [];
 			}
 			$this->getPluginManager()->callEvent($ev = new SendRecipiesList($recipies));
 			

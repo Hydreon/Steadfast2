@@ -224,9 +224,35 @@ class ItemOld {
 	const OLD_RECORD_11 = 510;
 	const OLD_RECORD_WAIT = 511;
 
+	const DYE_ARRAY = [
+		Item::INC_SAC,
+		Item::RED_DYE,
+		Item::GREEN_DYE,
+		Item::COCOA_BEANS,
+		Item::LAPIS_LAZULI,
+		Item::PURPLE_DYE,
+		Item::CYAN_DYE,
+		Item::LIGHT_GRAY_DYE,
+		Item::GRAY_DYE,
+		Item::PINK_DYE,
+		Item::LIME_DYE,
+		Item::YELLOW_DYE,
+		Item::LIGHT_BLUE_DYE,
+		Item::MAGENTA_DYE, 
+		Item::ORANGE_DYE, 
+		Item::BONE_MEAL,
+		Item::BLACK_DYE,
+		Item::BROWN_DYE,
+		Item::BLUE_DYE,
+		Item::WHITE_DYE,
+	];
+
 	static public function getId($id) {
 		if ($id < 256) {
 			return $id;
+		}
+		if (in_array($id, self::DYE_ARRAY)) {
+			return self::OLD_DYE;
 		}
 		$oClass = new \ReflectionClass(__CLASS__);
 		$old = $oClass->getConstants();
@@ -236,6 +262,10 @@ class ItemOld {
 
 		return $old[$key]??$id;
 	}
+
+	static public function getDyeMeta($id) {
+		return array_search($id, self::DYE_ARRAY);
+	} 
 
 	static public function getNewByOld($id) {
 		if ($id < 256) {
