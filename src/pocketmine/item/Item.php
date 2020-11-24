@@ -485,6 +485,17 @@ class Item {
 	CONST OAK_WOOD_STAIRS = 53;
 	const FILLED_MAP = 418;
 	const NETHER_STAR = 508;
+	const DISC_CHIRP = 527;
+	const DISC_MALL = 529;
+	const CHEST_MINECART = 387;
+	const DISC_STRAD = 532;
+	const DISC_WAIT = 535;
+	const DISC_CAT = 525;	
+	const DISC_13 = 524;
+	const DISC_MELLOHI = 530;
+	const DISC_11 = 534;
+	
+	
 
 	const COBBLESTONE = self::COBBLE;
 
