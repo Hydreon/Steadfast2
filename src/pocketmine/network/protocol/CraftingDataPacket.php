@@ -29,6 +29,7 @@ use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\EnchantmentList;
+use pocketmine\item\ItemNew;
 use pocketmine\utils\BinaryStream;
 
 class CraftingDataPacket extends PEPacket{
@@ -70,9 +71,17 @@ class CraftingDataPacket extends PEPacket{
 		$stream->putVarInt($recipe->getIngredientCount());
 		foreach($recipe->getIngredientList() as $item){	
 			if ($playerProtocol >= Info::PROTOCOL_360) {
-				$stream->putSignedVarInt($item->getId());
+				$itemId = $item->getId();
+				if ($playerProtocol >= Info::PROTOCOL_419) {
+					$itemId = ItemNew::getNewByOld($item->getId(), $item->getDamage());
+				} 
+				$stream->putSignedVarInt($itemId);
 				if ($item->getId() !== 0) {
-					$stream->putSignedVarInt($item->getDamage());
+					$meta = $item->getDamage();
+					if ($playerProtocol >= Info::PROTOCOL_419 && in_array($itemId, ItemNew::DYE_ARRAY)) {
+						$meta = 0;
+					}
+					$stream->putSignedVarInt($meta);
 					$stream->putSignedVarInt($item->getCount());
 				}
 			} else {
@@ -106,10 +115,18 @@ class CraftingDataPacket extends PEPacket{
 		for($z = 0; $z < $recipe->getWidth(); ++$z){
 			for($x = 0; $x < $recipe->getHeight(); ++$x){
 				$slot = $recipe->getIngredient($x, $z);
+				$itemId = $slot->getId();
+				if ($playerProtocol >= Info::PROTOCOL_419) {
+					$itemId = ItemNew::getNewByOld($slot->getId(), $slot->getDamage());
+				} 
 				if ($playerProtocol >= Info::PROTOCOL_360) {
-					$stream->putSignedVarInt($slot->getId());
+					$stream->putSignedVarInt($itemId);
 					if ($slot->getId() !== 0) {
-						$stream->putSignedVarInt($slot->getDamage());
+						$meta = $slot->getDamage();
+						if ($playerProtocol >= Info::PROTOCOL_419 && in_array($itemId, ItemNew::DYE_ARRAY)) {
+							$meta = 0;
+						}
+						$stream->putSignedVarInt($meta);
 						$stream->putSignedVarInt($slot->getCount());
 					}
 				} else {
@@ -136,16 +153,25 @@ class CraftingDataPacket extends PEPacket{
 	}
 
 	private static function writeFurnaceRecipe(FurnaceRecipe $recipe, BinaryStream $stream, $playerProtocol){
-		if($recipe->getInput()->getDamage() !== 0){ //Data recipe
-			$stream->putSignedVarInt($recipe->getInput()->getId());
-			$stream->putSignedVarInt($recipe->getInput()->getDamage());
+		$item = $recipe->getInput();
+		$itemId = $item->getId();
+		if ($playerProtocol >= Info::PROTOCOL_419) {
+			$itemId = ItemNew::getNewByOld($item->getId(), $item->getDamage());
+		} 
+		$meta = $item->getDamage();
+		if ($playerProtocol >= Info::PROTOCOL_419 && in_array($itemId, ItemNew::DYE_ARRAY)) {
+			$meta = 0;
+		}
+		if($meta !== 0){ //Data recipe			
+			$stream->putSignedVarInt($itemId);			
+			$stream->putSignedVarInt($meta);
 			$stream->putSlot($recipe->getResult(), $playerProtocol);
 			if ($playerProtocol >= Info::PROTOCOL_350) {
 				$stream->putString(self::RECIPE_TAG_FURNACE);
 			}
 			return CraftingDataPacket::ENTRY_FURNACE_DATA;
 		}else{
-			$stream->putSignedVarInt($recipe->getInput()->getId());
+			$stream->putSignedVarInt($itemId);
 			$stream->putSlot($recipe->getResult(), $playerProtocol);
 			if ($playerProtocol >= Info::PROTOCOL_350) {
 				$stream->putString(self::RECIPE_TAG_FURNACE);

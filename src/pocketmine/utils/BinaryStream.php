@@ -271,7 +271,7 @@ class BinaryStream {
 		}
 		$this->putSignedVarInt($itemId);
 		if(is_null($item->getDamage())) $item->setDamage(0);
-		if ($playerProtocol >= Info::PROTOCOL_419 && $itemId == Item::DYE) {
+		if ($playerProtocol >= Info::PROTOCOL_419 && in_array($itemId, ItemNew::DYE_ARRAY)) {
 			$meta = 0;
 		} else {
 			$meta = $item->getDamage();
