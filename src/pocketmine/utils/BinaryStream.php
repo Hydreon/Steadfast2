@@ -3,6 +3,7 @@
 namespace pocketmine\utils;
 
 use pocketmine\item\Item;
+use pocketmine\item\ItemOld;
 use pocketmine\nbt\NBT;
 use pocketmine\network\protocol\Info;
 use pocketmine\Player;
@@ -214,11 +215,17 @@ class BinaryStream {
 		if ($id == 0) {
 			return Item::get(Item::AIR, 0, 0);
 		}
+
+		if ($playerProtocol < Info::PROTOCOL_419 && $playerProtocol < Info::PROTOCOL_419) {
+			$itemId = ItemOld::getNewByOld($id);						
+		}
 		
 		$aux = $this->getSignedVarInt();
 		$meta = $aux >> 8;
 		$count = $aux & 0xff;
-		
+		if (in_array($itemId, ItemOld::DYE_ARRAY)) {
+			$meta = 0;	
+		} 
 		$nbtLen = $this->getLShort();		
 		$nbt = "";	
 		if ($nbtLen > 0) {
@@ -256,9 +263,19 @@ class BinaryStream {
 			$this->putSignedVarInt(0);
 			return;
 		}
-		$this->putSignedVarInt($item->getId());
+		if ($playerProtocol < Info::PROTOCOL_419) {
+			$itemId = ItemOld::getId($item->getId());
+		} else {
+			$itemId = $item->getId();
+		}
+		$this->putSignedVarInt($itemId);
 		if(is_null($item->getDamage())) $item->setDamage(0);
-        $auxValue = (($item->getDamage() << 8 &  0x7fff) | $item->getCount() & 0xff);
+		if ($playerProtocol < Info::PROTOCOL_419 && $itemId == ItemOld::OLD_DYE) {
+			$meta = ItemOld::getDyeMeta($item->getId());
+		} else {
+			$meta = $item->getDamage();
+		}
+        $auxValue = (($meta << 8 &  0x7fff) | $item->getCount() & 0xff);
 		$this->putSignedVarInt($auxValue);
 		$nbt = $item->getCompound();
         $this->putLShort(strlen($nbt));
