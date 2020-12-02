@@ -87,6 +87,7 @@ use pocketmine\network\protocol\ResourcePacksInfoPacket;
 use pocketmine\network\protocol\ClientToServerHandshakePacket;
 use pocketmine\network\protocol\CreativeContentPacket;
 use pocketmine\network\protocol\ItemComponentPacket;
+use pocketmine\network\protocol\ItemStackResponsePacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\v120\CommandRequestPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
