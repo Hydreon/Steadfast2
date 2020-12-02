@@ -2348,9 +2348,6 @@ class Server{
 			foreach ($this->getCraftingManager()->getFurnaceRecipes() as $recipe) {
 				$recipies[] = $recipe;
 			}
-			if ($p->getPlayerProtocol() < Info::PROTOCOL_419) {
-				$recipies = [];
-			}
 			$this->getPluginManager()->callEvent($ev = new SendRecipiesList($recipies));
 			
 			foreach($ev->getRecipies() as $recipe){

@@ -385,7 +385,7 @@ class Item {
 	const WHITE_DYE = 408; // meta 19
 	const BONE_MEAL = 409; //meta 15
 	const COCOA_BEANS = 410; //meta 3
-	const INC_SAC = 411; // meta 11
+	const INC_SAC = 411; // meta 0
 	const LAPIS_LAZULI = 412; // meta 4
 	const BONE = 413;
 	const SUGAR = 414;
