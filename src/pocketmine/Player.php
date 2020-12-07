@@ -3305,11 +3305,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
             $pk = new CreativeContentPacket();
             $pk->groups = Item::getCreativeGroups();
 			$pk->items = Item::getCreativeItems();
-			//Temporally. Inventory not crash
-			if ($this->getPlayerProtocol() >= Info::PROTOCOL_422) {
-				$pk->items = [];
-			}
-            $this->directDataPacket($pk);
+			$this->directDataPacket($pk);
         } else {
             $slots = [];
             foreach(Item::getCreativeItems() as $item){
