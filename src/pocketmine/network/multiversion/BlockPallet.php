@@ -42,7 +42,7 @@ class BlockPallet {
 				self::$blockNamesIds[$blockInfo['name']] = $blockInfo['id'];
 			}
 		}
-		if ($protocolNumber == Info::PROTOCOL_419) {
+		if ($protocolNumber >= Info::PROTOCOL_419) {
 			$palletData = $palletData['blocks'];
 		}
 		if ($protocolNumber >= Info::PROTOCOL_370) {
@@ -50,7 +50,7 @@ class BlockPallet {
 			$lastData = null;
 			$currentId = null;
 			foreach ($palletData as $runtimeID => $blockInfo) {
-				if ($protocolNumber == Info::PROTOCOL_419) {
+				if ($protocolNumber >= Info::PROTOCOL_419) {
 					$blockInfo['id'] = self::$blockNamesIds[$blockInfo['name']]??-1;
 					if ($blockInfo['id'] !== $currentId) {
 						$currentId = $blockInfo['id'];

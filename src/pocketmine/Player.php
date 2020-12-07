@@ -197,7 +197,10 @@ use pocketmine\network\protocol\v392\CreativeItemsListPacket;
 use function rand;
 use function random_int;
 
+
 use pocketmine\tile\Chest;
+
+
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
  */
@@ -2083,9 +2086,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					case 'CHANGE_DIMENSION_ACK':
 						$this->onDimensionChanged();
 						break;
-					case 'INTERACT_WITH_BLOCK':
-						//TODO:
-						break;
 				}
 
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
@@ -2109,6 +2109,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 						if ($target instanceof Vehicle) {
 							$target->dissMount();
 						}
+
+				} else {
+					$this->customInteract($packet);
 				}
 				break;
 			case 'ANIMATE_PACKET':
@@ -3385,32 +3388,33 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$pk->stringClientVersion = $this->clientVersion;
 			$pk->multiplayerCorrelationId = $this->uuid->toString();
 			$this->directDataPacket($pk);
-			if ($this->protocol >= ProtocolInfo::PROTOCOL_419) {
-				$this->directDataPacket(new ItemComponentPacket());
-			}
-			if ($this->protocol >= ProtocolInfo::PROTOCOL_331) {
-				$this->directDataPacket(new AvailableEntityIdentifiersPacket());
-				$this->directDataPacket(new BiomeDefinitionListPacket());
-			}
+
+            if ($this->protocol >= ProtocolInfo::PROTOCOL_419) {
+                $this->directDataPacket(new ItemComponentPacket());
+            }
+            if ($this->protocol >= ProtocolInfo::PROTOCOL_331) {
+                $this->directDataPacket(new BiomeDefinitionListPacket());
+                $this->directDataPacket(new AvailableEntityIdentifiersPacket());
+            }
 		} else {
 			$this->sendPosition($this);
 			$this->setGamemode($this->gamemode, true);
 		}
-		if ($this->getPlayerProtocol() >= Info::PROTOCOL_392) {
-			$pk = new CreativeContentPacket();
-			$pk->groups = Item::getCreativeGroups();
+        if ($this->getPlayerProtocol() >= Info::PROTOCOL_392) {
+            $pk = new CreativeContentPacket();
+            $pk->groups = Item::getCreativeGroups();
 			$pk->items = Item::getCreativeItems();
 			$this->directDataPacket($pk);
-		} else {
-			$slots = [];
-			foreach(Item::getCreativeItems() as $item){
-				$slots[] = clone $item['item'];
-			}
-			$pk = new InventoryContentPacket();
-			$pk->inventoryID = Protocol120::CONTAINER_ID_CREATIVE;
-			$pk->items = $slots;
-			$this->dataPacket($pk);
-		}
+        } else {
+            $slots = [];
+            foreach(Item::getCreativeItems() as $item){
+                $slots[] = clone $item['item'];
+            }
+            $pk = new InventoryContentPacket();
+            $pk->inventoryID = Protocol120::CONTAINER_ID_CREATIVE;
+            $pk->items = $slots;
+            $this->dataPacket($pk);
+        }
 
 		$this->server->sendRecipeList($this);
 
@@ -5214,6 +5218,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 		$this->playerListIsSent = true;
 	}
+
 
 	public function setVehicle($vehicle) {
 		$this->currentVehicle = $vehicle;

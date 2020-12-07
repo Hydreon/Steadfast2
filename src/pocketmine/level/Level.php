@@ -1199,9 +1199,8 @@ class Level implements ChunkManager, Metadatable{
 				return false;
 			}
 			
-		}
-		
 
+		}		
 	
 		if ($player instanceof Player) {
 			if ($player->isSpectator() || !$player->canBreakBlocks()) {

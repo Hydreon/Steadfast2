@@ -88,6 +88,7 @@ use pocketmine\network\protocol\ResourcePacksInfoPacket;
 use pocketmine\network\protocol\ClientToServerHandshakePacket;
 use pocketmine\network\protocol\CreativeContentPacket;
 use pocketmine\network\protocol\ItemComponentPacket;
+use pocketmine\network\protocol\ItemStackResponsePacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\v120\CommandRequestPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
@@ -297,6 +298,7 @@ class Network {
 			case Info::PROTOCOL_407:	
 			case Info::PROTOCOL_408:	
 			case Info::PROTOCOL_419:	
+			case Info::PROTOCOL_422:	
 				$class = $this->packetPool331[$id];
 				break;
 			case Info::PROTOCOL_310:
@@ -330,6 +332,8 @@ class Network {
 
 	public static function getChunkPacketProtocol($playerProtocol){
 		switch ($playerProtocol) {
+			case Info::PROTOCOL_422:
+				return Info::PROTOCOL_422;
 			case Info::PROTOCOL_419:
 				return Info::PROTOCOL_419;
 			case Info::PROTOCOL_408:
@@ -597,7 +601,7 @@ class Network {
 		$this->registerPacket331(ProtocolInfo331::SPAWN_PARTICLE_EFFECT_PACKET, SpawnParticleEffectPacket::class);
 		$this->registerPacket331(ProtocolInfo331::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
 		$this->registerPacket331(ProtocolInfo331::ITEM_COMPONENT_PACKET, ItemComponentPacket::class);
-		$this->registerPacket331(ProtocolInfo331::CREATIVE_CONTENT_PACKET, CreativeContentPacket::class);
+		$this->registerPacket331(ProtocolInfo331::ITEM_STACK_RESPONSE_PACKET, ItemStackResponsePacket::class);
 	}
 
 	private function registerProxyPackets(){

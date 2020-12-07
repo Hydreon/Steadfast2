@@ -60,6 +60,8 @@ abstract class PEPacket extends DataPacket {
 	
 	public final static function convertProtocol($protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_422:
+				return Info::PROTOCOL_422;
 			case Info::PROTOCOL_419:
 				return Info::PROTOCOL_419;
 			case Info::PROTOCOL_408:
@@ -166,7 +168,7 @@ abstract class PEPacket extends DataPacket {
 	
 	public static function getBlockRuntimeID($id, $meta, $playerProtocol) {
 		$pallet = self::getPallet($playerProtocol);
-		if ($playerProtocol == Info::PROTOCOL_419) {
+		if ($playerProtocol >= Info::PROTOCOL_419) {
 			$meta = self::getActualMeta($id, $meta);
 		}
 		return is_null($pallet) ? 0 : $pallet->getBlockRuntimeIDByData($id, $meta);
