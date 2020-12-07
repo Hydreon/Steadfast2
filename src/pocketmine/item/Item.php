@@ -344,6 +344,7 @@ class Item {
 	const FLINT = 356;
 	const RAW_PORKCHOP = 262;
 	const COOKED_PORKCHOP = 263;
+	const SHIELD = 355;	
 	const PAINTING = 357;
 	const GOLDEN_APPLE = 258;
 	const WOODEN_DOOR = 359;
@@ -846,8 +847,6 @@ class Item {
 		352 => "Gold Chestplate",
 		353 => "Gold Leggins",
 		354 => "Gold Boots",
-		356 => "Flint",
-		262 => "Raw Porkchop",
 		263 => "Cooked Porkchop",
 		357 => "Painting",
 		258 => "Golden Apple",
