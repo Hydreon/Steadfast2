@@ -57,7 +57,7 @@ class InteractPacket extends PEPacket{
 	public function decode($playerProtocol){
 		$this->getHeader($playerProtocol);
 		$this->action = $this->getByte();
-		$this->target = $this->getVarInt(); // Runtime ID
+		$this->target = $this->getEntityRuntimeId();
 
 		if ($this->action == self::ACTION_INTERACT_UPDATE || $this->action == self::ACTION_STOP_RIDING) {
 			$this->getLFloat();
@@ -69,7 +69,7 @@ class InteractPacket extends PEPacket{
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$this->putByte($this->action);
-		$this->putVarInt($this->target);
+		$this->putEntityRuntimeId($this->target);
 		if ($this->action == self::ACTION_INTERACT_UPDATE || $this->action == self::ACTION_STOP_RIDING) {
 			$this->putLFloat($this->x);
 			$this->putLFloat($this->y);

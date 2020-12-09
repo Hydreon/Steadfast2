@@ -64,7 +64,7 @@ class PlayerListPacket extends PEPacket{
 			case self::TYPE_ADD:
 				foreach ($this->entries as $d) {
 					$this->putUUID($d[0]);
-					$this->putVarInt($d[1]); // Player ID
+					$this->putEntityUniqueId($d[1]); // Player ID
 					$this->putString(isset($d[2]) ? $d[2] : ""); // Player Name
 					if ($playerProtocol < Info::PROTOCOL_370) {
 						if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_290) {

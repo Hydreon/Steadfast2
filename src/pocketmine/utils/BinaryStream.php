@@ -570,6 +570,19 @@ class BinaryStream {
 		return $this->deviceId;
 	}
 
+	public function getEntityUniqueId() {
+		return $this->getSignedVarInt();
+	}
 
-	
+	public function putEntityUniqueId($id) {
+		$this->putSignedVarInt($id);
+	}
+
+	public function getEntityRuntimeId() {
+		return $this->getVarInt();
+	}
+
+	public function putEntityRuntimeId($id) {
+		$this->putVarInt($id);
+	}
 }

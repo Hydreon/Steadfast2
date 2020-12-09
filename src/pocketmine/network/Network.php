@@ -299,6 +299,7 @@ class Network {
 			case Info::PROTOCOL_408:	
 			case Info::PROTOCOL_419:	
 			case Info::PROTOCOL_422:	
+			case Info::PROTOCOL_423:	
 				$class = $this->packetPool331[$id];
 				break;
 			case Info::PROTOCOL_310:
@@ -332,6 +333,7 @@ class Network {
 
 	public static function getChunkPacketProtocol($playerProtocol){
 		switch ($playerProtocol) {
+			case Info::PROTOCOL_423:
 			case Info::PROTOCOL_422:
 				return Info::PROTOCOL_422;
 			case Info::PROTOCOL_419:
@@ -602,6 +604,7 @@ class Network {
 		$this->registerPacket331(ProtocolInfo331::SPAWN_EXPERIENCE_ORB_PACKET, SpawnExperienceOrbPacket::class);
 		$this->registerPacket331(ProtocolInfo331::ITEM_COMPONENT_PACKET, ItemComponentPacket::class);
 		$this->registerPacket331(ProtocolInfo331::ITEM_STACK_RESPONSE_PACKET, ItemStackResponsePacket::class);
+		$this->registerPacket331(ProtocolInfo331::CREATIVE_CONTENT_PACKET, CreativeContentPacket::class);
 	}
 
 	private function registerProxyPackets(){
