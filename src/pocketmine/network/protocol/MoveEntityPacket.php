@@ -46,7 +46,7 @@ class MoveEntityPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$data = array_shift($this->entities);
 		if ($playerProtocol >= Info::PROTOCOL_273) {
-			$this->putVarInt($data[0]); //eid
+			$this->putEntityRuntimeId($data[0]); //eid
 			$flags = 0;
 			$flags |= 1 << 7;// is on ground?
 //			$flags |= 0 << 6;// has teleported?
@@ -62,7 +62,7 @@ class MoveEntityPacket extends PEPacket{
 			$this->putByte($data[4] * 0.71111); //yaw
 			$this->putByte($data[5] * 0.71111); //headYaw	
 		} else {
-			$this->putVarInt($data[0]); //eid
+			$this->putEntityRuntimeId($data[0]); //eid
 			$this->putLFloat($data[1]); //x
 			$this->putLFloat($data[2]); //y
 			$this->putLFloat($data[3]); //z

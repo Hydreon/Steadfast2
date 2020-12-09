@@ -45,8 +45,8 @@ class AddItemEntityPacket extends PEPacket{
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		$this->putVarInt($this->eid);
-		$this->putVarInt($this->eid);
+		$this->putEntityUniqueId($this->eid);
+		$this->putEntityRuntimeId($this->eid);
 		$this->putSlot($this->item, $playerProtocol);
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);

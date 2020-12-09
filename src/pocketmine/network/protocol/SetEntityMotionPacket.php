@@ -23,7 +23,7 @@ class SetEntityMotionPacket extends PEPacket{
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		foreach($this->entities as $d){
-			$this->putVarInt($d[0]); //eid
+			$this->putEntityRuntimeId($d[0]); //eid
 			$this->putLFloat($d[1]); //motX
 			$this->putLFloat($d[2]); //motY
 			$this->putLFloat($d[3]); //motZ

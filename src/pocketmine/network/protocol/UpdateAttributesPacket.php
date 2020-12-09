@@ -46,7 +46,7 @@ class UpdateAttributesPacket extends PEPacket{
 
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
-		$this->putVarInt($this->entityId);
+		$this->putEntityRuntimeId($this->entityId);
 		if (empty($this->attributes)) {
 			$this->putVarInt(1);
 			$this->putLFloat($this->minValue);

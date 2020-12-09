@@ -22,7 +22,7 @@ class SpawnParticleEffectPacket extends PEPacket {
 		$this->getHeader($playerProtocol);
 		$this->dimensionId = $this->getByte();
 		if ($playerProtocol >= Info::PROTOCOL_330) {
-			$this->entityUniqueId = $this->getVarInt();
+			$this->entityUniqueId = $this->getEntityUniqueId();
 		}
 		$this->x = $this->getLFloat();
 		$this->y = $this->getLFloat();
@@ -34,7 +34,7 @@ class SpawnParticleEffectPacket extends PEPacket {
 		$this->reset($playerProtocol);
 		$this->putByte($this->dimensionId);
 		if ($playerProtocol >= Info::PROTOCOL_330) {
-			$this->putVarInt($this->entityUniqueId);
+			$this->putEntityUniqueId($this->entityUniqueId);
 		}
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);

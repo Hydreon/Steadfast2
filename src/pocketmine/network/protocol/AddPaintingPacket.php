@@ -39,8 +39,8 @@ class AddPaintingPacket extends PEPacket {
 
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
-		$this->putVarInt($this->eid);
-		$this->putVarInt($this->eid);
+		$this->putEntityUniqueId($this->eid);
+		$this->putEntityRuntimeId($this->eid);
 		if ($playerProtocol >= Info::PROTOCOL_360) {
 			$this->putLFloat($this->x);
 			$this->putLFloat($this->y);
