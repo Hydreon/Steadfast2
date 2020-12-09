@@ -187,7 +187,7 @@ class PlayerInventory extends BaseInventory{
 
 		
 		if ($sendPacket) {			
-			if ($sendPacket == -1) {
+			if ($sendPacket === -1) {
 				$viewers = $this->getViewers();
 				unset($viewers[spl_object_hash($this->holder)]);
 				parent::sendSlot($index, $viewers);
