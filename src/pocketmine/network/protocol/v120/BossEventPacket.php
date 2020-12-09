@@ -34,7 +34,7 @@ class BossEventPacket extends PEPacket {
 
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
-		$this->putVarInt($this->eid);
+		$this->putEntityUniqueId($this->eid);
 		$this->putVarInt($this->eventType);
 		switch ($this->eventType) {
 			case self::EVENT_TYPE_ADD:
@@ -46,7 +46,7 @@ class BossEventPacket extends PEPacket {
 				break;
 			case self::EVENT_TYPE_PLAYER_ADDED:
 			case self::EVENT_TYPE_PLAYER_REMOVED:
-				$this->putVarInt($this->playerID);
+				$this->putEntityUniqueId($this->playerID);
 				break;
 			case self::EVENT_TYPE_UPDATE_PERCENT:
 				$this->putLFloat($this->healthPercent);
