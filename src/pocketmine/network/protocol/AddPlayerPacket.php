@@ -72,8 +72,8 @@ class AddPlayerPacket extends PEPacket{
 			$this->putString(""); // third party name
 			$this->putSignedVarInt(0); // platform id
 		}
-		$this->putVarInt($this->eid);
-		$this->putVarInt($this->eid);
+		$this->putEntityUniqueId($this->eid);
+		$this->putEntityRuntimeId($this->eid);
 		if ($playerProtocol >= Info::PROTOCOL_200) {
 			$this->putString(""); // platform chat id
 		}
@@ -96,13 +96,8 @@ class AddPlayerPacket extends PEPacket{
 		$this->putVarInt($this->actionPermissions);
 		$this->putVarInt($this->permissionLevel);
 		$this->putVarInt($this->storedCustomPermissions);
-		// we should put eid as long but in signed varint format
-		// maybe i'm wrong but it works
-		if ($this->eid & 1) { // userId is odd
-			$this->putLLong(-1 * (($this->eid + 1) >> 1));
-		} else { // userId is even
-			$this->putLLong($this->eid >> 1);
-		}
+		$this->putLLong($this->eid); //entity unique id
+
 		$this->putVarInt(count($this->links));
 		foreach ($this->links as $link) {
 			$this->putVarInt($link['from']);
