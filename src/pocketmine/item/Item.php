@@ -496,6 +496,7 @@ class Item {
 	const DISC_MELLOHI = 530;
 	const RECORD_MELLOHI = 530;
 	const DISC_11 = 534;
+	const FIRE_CHARGE = 499;
 	
 	
 
