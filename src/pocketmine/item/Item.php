@@ -496,6 +496,7 @@ class Item {
 	const DISC_CAT = 525;	
 	const DISC_13 = 524;
 	const DISC_MELLOHI = 530;
+	const RECORD_MELLOHI = 530;
 	const DISC_11 = 534;
 	const POPPED_CHORUS_FRUIT = 549;
 	
