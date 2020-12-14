@@ -499,6 +499,7 @@ class Item {
 	const RECORD_MELLOHI = 530;
 	const DISC_11 = 534;
 	const POPPED_CHORUS_FRUIT = 549;
+	const FIRE_CHARGE = 499;
 	
 	
 	const COBBLESTONE = self::COBBLE;
