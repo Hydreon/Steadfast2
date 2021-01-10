@@ -32,8 +32,12 @@ use pocketmine\level\Level;
 use pocketmine\Player;
 
 class Bucket extends Item{
+
+	protected $itemIdBucket = self::WATER_BUCKET;
+	protected $targetBlock = Block::AIR;
+
 	public function __construct($meta = 0, $count = 1){
-		parent::__construct(self::BUCKET, $meta, $count, "Bucket");
+		parent::__construct($this->itemIdBucket, $meta, $count, "Bucket");
 	}
 
 	public function getMaxStackSize(){
@@ -48,7 +52,7 @@ class Bucket extends Item{
 		if ($block instanceof Slab || $block instanceof Slab2 || $block instanceof WoodSlab) {
 			return false;
 		}
-		$targetBlock = Block::get($this->meta);
+		$targetBlock = Block::get($this->targetBlock);
 
 		if($targetBlock instanceof Air){
 			if($target instanceof Liquid and $target->getDamage() === 0){
@@ -73,8 +77,7 @@ class Bucket extends Item{
 				}
 			}
 		}elseif($targetBlock instanceof Liquid){
-			$result = clone $this;
-			$result->setDamage(0);
+			$result = new self;
 			$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $block, $face, $this, $result));
 			if(!$ev->isCancelled()){
 				$player->getLevel()->setBlock($block, $targetBlock, true, true);
