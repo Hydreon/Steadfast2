@@ -39,7 +39,9 @@ class Bucket extends Item{
 	protected static $bucketByTarget = [
 		Block::AIR => Item::BUCKET,
 		Item::WATER => Item::WATER_BUCKET,
-		Item::LAVA => Item::LAVA_BUCKET
+		Item::LAVA => Item::LAVA_BUCKET,
+		Item::STILL_LAVA => Item::LAVA_BUCKET,
+		Item::STILL_WATER => Item::WATER_BUCKET
 	];
 
 	public function __construct($meta = 0, $count = 1){
@@ -81,8 +83,10 @@ class Bucket extends Item{
 				}
 			}
 		}elseif($targetBlock instanceof Liquid){
+			var_dump('test');
 			$result = Item::get(Item::BUCKET, 0, 1);
 			$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $block, $face, $this, $result));
+			var_dump($ev->isCancelled());
 			if(!$ev->isCancelled()){
 				$player->getLevel()->setBlock($block, $targetBlock, true, true);
 				if($player->isSurvival()){
