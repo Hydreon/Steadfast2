@@ -39,7 +39,9 @@ class Bucket extends Item{
 	protected static $bucketByTarget = [
 		Block::AIR => Item::BUCKET,
 		Item::WATER => Item::WATER_BUCKET,
-		Item::LAVA => Item::LAVA_BUCKET
+		Item::LAVA => Item::LAVA_BUCKET,
+		Item::STILL_LAVA => Item::LAVA_BUCKET,
+		Item::STILL_WATER => Item::WATER_BUCKET
 	];
 
 	public function __construct($meta = 0, $count = 1){
