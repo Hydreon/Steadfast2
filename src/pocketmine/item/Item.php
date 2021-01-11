@@ -1117,6 +1117,7 @@ class Item {
 			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;
 			self::$list[self::TOTEM_OF_UNDYING] = TotemOfUndying::class;
 			self::$list[self::WATER_BUCKET] = BucketWater::class;
+			self::$list[self::LAVA_BUCKET] = BucketLava::class;
 
 			// for($i = 0; $i < 256; ++$i){
 			// 	if(Block::$list[$i] !== null){

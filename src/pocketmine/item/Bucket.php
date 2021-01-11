@@ -33,8 +33,14 @@ use pocketmine\Player;
 
 class Bucket extends Item{
 
-	protected $itemIdBucket = self::WATER_BUCKET;
+	protected $itemIdBucket = self::BUCKET;
 	protected $targetBlock = Block::AIR;
+
+	protected static $bucketByTarget = [
+		Block::AIR => Item::BUCKET,
+		Item::WATER => Item::WATER_BUCKET,
+		Item::LAVA => Item::LAVA_BUCKET
+	];
 
 	public function __construct($meta = 0, $count = 1){
 		parent::__construct($this->itemIdBucket, $meta, $count, "Bucket");
@@ -56,9 +62,7 @@ class Bucket extends Item{
 
 		if($targetBlock instanceof Air){
 			if($target instanceof Liquid and $target->getDamage() === 0){
-				$result = clone $this;
-				$result->setDamage($target->getId());
-				$result->setCount(1);
+				$result = Item::get(self::$bucketByTarget[$target->getId()], 0, 1);;
 				$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $block, $face, $this, $result));
 				if(!$ev->isCancelled()){
 					$player->getLevel()->setBlock($target, new Air(), true, true);
@@ -77,7 +81,7 @@ class Bucket extends Item{
 				}
 			}
 		}elseif($targetBlock instanceof Liquid){
-			$result = new self;
+			$result = Item::get(Item::BUCKET, 0, 1);
 			$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $block, $face, $this, $result));
 			if(!$ev->isCancelled()){
 				$player->getLevel()->setBlock($block, $targetBlock, true, true);
