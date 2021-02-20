@@ -232,7 +232,10 @@ class StartGamePacket extends PEPacket{
 		$this->putByte(0); // is trial?
 		if ($playerProtocol >= Info::PROTOCOL_389) {
 			if ($playerProtocol >= Info::PROTOCOL_419) {
+				//$this->putVarInt(0);
 				$this->putVarInt(0);
+				$this->putSignedVarInt(0);
+				$this->putByte(0);
 			} else {
 				$this->putByte(0); // is server authoritative over movement
 			}
