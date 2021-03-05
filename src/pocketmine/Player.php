@@ -2103,16 +2103,15 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					if ($target instanceof Vehicle) {
 						$target->onNearPlayer($this);
 					}
-
 				} elseif($packet->action === InteractPacket::ACTION_STOP_RIDING) {
 						$target = $this->getLevel()->getEntity($packet->target);
 						if ($target instanceof Vehicle) {
 							$target->dissMount();
 						}
-
 				} else {
 					$this->customInteract($packet);
 				}
+				break;
 				break;
 			case 'ANIMATE_PACKET':
 				//Timings::$timerAnimatePacket->startTiming();
@@ -4708,7 +4707,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					$projectile->spawnToAll();
 				}
 			}
-		} else if ($itemInHand->getId() === Item::BUCKET && $itemInHand->getDamage() === 1) { //Milk!
+		} else if ($itemInHand->getId() === Item::MILK_BUCKET) { //Milk!
 			$this->server->getPluginManager()->callEvent($ev = new PlayerItemConsumeEvent($this, $itemInHand));
 			if ($ev->isCancelled()) {
 				$this->inventory->sendContents($this);

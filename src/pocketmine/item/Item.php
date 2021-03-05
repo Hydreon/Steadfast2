@@ -500,7 +500,13 @@ class Item {
 	const DISC_11 = 534;
 	const POPPED_CHORUS_FRUIT = 549;
 	const FIRE_CHARGE = 499;
-	
+	const MILK_BUCKET = 361;
+	const WATER_BUCKET = 362;
+	const LAVA_BUCKET = 363;
+	const COD_BUCKET = 364;
+	const SALMON_BUCKET = 365;
+	const TROPICAL_FISH_BUCKET = 366;
+	const PUFFERFISH_BUCKET = 367;
 	
 	const COBBLESTONE = self::COBBLE;
 
@@ -1111,11 +1117,17 @@ class Item {
 			self::$list[self::DARK_OAK_DOOR] = DarkOakDoor::class;
 
 			self::$list[self::SPLASH_POTION] = SplashPotion::class;
-            
-            // update for 1.0
+			// update for 1.0
 			self::$list[self::CHORUS_FRUIT] = ChorusFruit::class;			
 			self::$list[self::REDSTONE_DUST] = Redstone::class;
 			self::$list[self::TOTEM_OF_UNDYING] = TotemOfUndying::class;
+			self::$list[self::WATER_BUCKET] = BucketWater::class;
+			self::$list[self::LAVA_BUCKET] = BucketLava::class;
+			// for($i = 0; $i < 256; ++$i){
+			// 	if(Block::$list[$i] !== null){
+			// 		self::$list[$i] = Block::$list[$i];
+			// 	}
+			// }
 		}
 
 		self::initCreativeItems();
