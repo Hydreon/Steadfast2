@@ -55,6 +55,9 @@ class ResourcePacksInfoPacket extends PEPacket {
 			if ($playerProtocol >= Info::PROTOCOL_331) {
 				$this->putByte(0); // has scripts
 			}
+			if ($playerProtocol >= Info::PROTOCOL_422) {
+				$this->putByte(0);
+			}
 		}		
 	}
 

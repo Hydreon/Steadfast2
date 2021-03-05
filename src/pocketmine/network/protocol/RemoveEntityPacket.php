@@ -36,7 +36,7 @@ class RemoveEntityPacket extends PEPacket{
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		$this->putVarInt($this->eid);
+		$this->putEntityUniqueId($this->eid);
 	}
 
 }

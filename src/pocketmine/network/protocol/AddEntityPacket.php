@@ -47,8 +47,8 @@ class AddEntityPacket extends PEPacket{
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);		
-		$this->putVarInt($this->eid);
-		$this->putVarInt($this->eid);
+		$this->putEntityUniqueId($this->eid);
+		$this->putEntityRuntimeId($this->eid);
 		if ($playerProtocol >= Info::PROTOCOL_310) {
 			$this->putString(Entity::getNameByID($this->type));
 		} else {

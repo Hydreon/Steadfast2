@@ -31,15 +31,21 @@ use pocketmine\event\player\PlayerBucketFillEvent;
 use pocketmine\level\Level;
 use pocketmine\Player;
 
-class Bucket extends Item {
-	
-	const BUCKET_EMPTY = 0;
-	const BUCKET_MILK = 1;
-	const BUCKET_WATER = 8;
-	const BUCKET_LAVA = 10;
+class Bucket extends Item{
 
-	public function __construct($meta = 0, $count = 1) {
-		parent::__construct(self::BUCKET, $meta, $count, "Bucket");
+	protected $itemIdBucket = self::BUCKET;
+	protected $targetBlock = Block::AIR;
+
+	protected static $bucketByTarget = [
+		Block::AIR => Item::BUCKET,
+		Item::WATER => Item::WATER_BUCKET,
+		Item::LAVA => Item::LAVA_BUCKET,
+		Item::STILL_LAVA => Item::LAVA_BUCKET,
+		Item::STILL_WATER => Item::WATER_BUCKET
+	];
+
+	public function __construct($meta = 0, $count = 1){
+		parent::__construct($this->itemIdBucket, $meta, $count, "Bucket");
 	}
 
 	public function getMaxStackSize() {
@@ -54,13 +60,10 @@ class Bucket extends Item {
 		if ($block instanceof Slab || $block instanceof Slab2 || $block instanceof WoodSlab) {
 			return false;
 		}
-		$targetBlock = Block::get($this->meta);
-
-		if ($targetBlock instanceof Air) {
-			if ($target instanceof Liquid and $target->getDamage() === 0) {
-				$result = clone $this;
-				$result->setDamage($target->getId());
-				$result->setCount(1);
+		$targetBlock = Block::get($this->targetBlock);
+		if($targetBlock instanceof Air){
+			if($target instanceof Liquid and $target->getDamage() === 0){
+				$result = Item::get(self::$bucketByTarget[$target->getId()], 0, 1);;
 				$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $block, $face, $this, $result));
 				if (!$ev->isCancelled()) {
 					$player->getLevel()->setBlock($target, new Air(), true, true);
@@ -77,9 +80,8 @@ class Bucket extends Item {
 					$player->getInventory()->sendContents($player);
 				}
 			}
-		} elseif ($targetBlock instanceof Liquid) {
-			$result = clone $this;
-			$result->setDamage(0);
+		}elseif($targetBlock instanceof Liquid){
+			$result = Item::get(Item::BUCKET, 0, 1);
 			$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $block, $face, $this, $result));
 			if (!$ev->isCancelled()) {
 				$player->getLevel()->setBlock($block, $targetBlock, true, true);
