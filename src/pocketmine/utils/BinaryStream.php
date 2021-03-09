@@ -343,7 +343,7 @@ class BinaryStream {
 		}
 		$this->putString($skinId);
 		if ($playerProtocol >= Info::PROTOCOL_428) {
-			$this->putString($additionalSkinData['fabId']??'');
+			$this->putString($additionalSkinData['PlayFabId']??'');
 		}
 		$this->putString(isset($additionalSkinData['SkinResourcePatch']) ? $additionalSkinData['SkinResourcePatch'] : '{"geometry" : {"default" : "' . $skinGeometryName . '"}}');
 		if (isset($additionalSkinData['SkinImageHeight']) && isset($additionalSkinData['SkinImageWidth'])) {
@@ -437,7 +437,7 @@ class BinaryStream {
 	public function getSerializedSkin($playerProtocol, &$skinId, &$skinData, &$skinGeometryName, &$skinGeometryData, &$capeData, &$additionalSkinData) {
 		$skinId = $this->getString();
 		if ($playerProtocol >= Info::PROTOCOL_428) {
-			$additionalSkinData['fabId'] = $this->getString();
+			$additionalSkinData['PlayFabId'] = $this->getString();
 		}
 		$additionalSkinData['SkinResourcePatch'] = $this->getString();
 		$geometryData = json_decode($additionalSkinData['SkinResourcePatch'], true);
