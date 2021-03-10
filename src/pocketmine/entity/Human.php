@@ -59,6 +59,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	protected $skinGeometryName = "geometry.humanoid.custom";
 	protected $skinGeometryData = "";
 	protected $capeData = "";
+	protected $playFabId = '';
 
 	public function getSkinData(){
 		return $this->skin;
@@ -78,6 +79,10 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	
 	public function getCapeData(){
 		return $this->capeData;
+	}
+
+	public function getPlayFabId(){
+		return $this->playFabId;
 	}
 
 	/**
@@ -104,7 +109,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	 *
 	 * @return bool
 	 */
-	public function setSkin($str, $skinName, $skinGeometryName = "", $skinGeometryData = "", $capeData = "", $premium = false){
+	public function setSkin($str, $skinName, $skinGeometryName = "", $skinGeometryData = "", $capeData = "", $premium = false, $playFabId = ''){
 		static $allowedSkinSize = [
 			8192, // argb 64x32
 			16384, // argb 64x64
@@ -129,6 +134,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		if (is_string($capeData)) {
 			$this->capeData = $capeData;
 		}
+		$this->playFabId = $playFabId;
 
 		return true;
 	}
@@ -229,7 +235,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			$this->hasSpawned[$player->getId()] = $player;
 
 			if(!($this instanceof Player)) {
-				$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, "", [$player]);
+				$this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getName(), $this->skinName, $this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->capeData, "", [$player], $this->getPlayFabId());
 			}
 
 			$pk = new AddPlayerPacket();
