@@ -48,7 +48,7 @@ class StartGamePacket extends PEPacket{
 	public $z;	
 	public $stringClientVersion;
 	public static $defaultRules = [
-		['name' => 'naturalRegeneration', 'type' => 1, 'value' => 0],
+		['name' => 'naturalregeneration', 'type' => 1, 'value' => 0],
 //		['name' => 'showcoordinates', 'type' => 1, 'value' => 1]
 	];
 	public $multiplayerCorrelationId;
@@ -132,12 +132,11 @@ class StartGamePacket extends PEPacket{
 					break;
 			}
 		}
+		$this->putLInt(0); //Experiments
+		$this->putBool(0); //hasPreviouslyUsedExperiments
 
         $this->putByte(0); // is bonus chest enabled
 		$this->putByte(0); // is start with map enabled
-		if ($playerProtocol < Info::PROTOCOL_330) {
-			$this->putByte(0); // has trust players enabled
-		}
 		$this->putSignedVarInt(0); // permission level
 		$this->putLInt(0); // server chunk tick range
    		$this->putByte(0); // Has locked behavior pack?
@@ -149,12 +148,7 @@ class StartGamePacket extends PEPacket{
 		$this->putByte(0); // Only spawn v1 villagers
 		$this->putString(''); // Vanila version
 				
-		if ($playerProtocol >= Info::PROTOCOL_419) {
-			$this->putLInt(0); // ??
-			$this->putByte(1); // ??
-			$this->putByte(42); // ?? adddddddddddddddddddd
-		}
-				
+					
 		$this->putLInt(16); //Limited word width
 		$this->putLInt(16); //Limited word depth			
 		$this->putByte(0); //Nether type

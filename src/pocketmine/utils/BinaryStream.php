@@ -343,7 +343,7 @@ class BinaryStream {
 		}
 		$this->putString($skinId);
 		if ($playerProtocol >= Info::PROTOCOL_428) {
-			$this->putString($additionalSkinData['fabId']??'');
+			$this->putString($additionalSkinData['PlayFabId']??'');
 		}
 		$this->putString(isset($additionalSkinData['SkinResourcePatch']) ? $additionalSkinData['SkinResourcePatch'] : '{"geometry" : {"default" : "' . $skinGeometryName . '"}}');
 		if (isset($additionalSkinData['SkinImageHeight']) && isset($additionalSkinData['SkinImageWidth'])) {
@@ -370,7 +370,7 @@ class BinaryStream {
 				$this->putLInt($animation['Type']);
 				$this->putLFloat($animation['Frames']);
 				if ($playerProtocol >= Info::PROTOCOL_419) {
-					$this->putLInt($animation['AnimationExpression']);
+					$this->putLInt($animation['AnimationExpression']??0);
 				}
 			}
 		} else {
@@ -420,7 +420,7 @@ class BinaryStream {
 				$this->putString($piece['PieceId']);
 				$this->putString($piece['PieceType']);
 				$this->putString($piece['PackId']);
-				$this->putBool($piece['IsDefault']);
+				$this->putBool($piece['IsDefaultPiece']);
 				$this->putString($piece['ProductId']);
 			}
 			$this->putLInt(isset($additionalSkinData['PieceTintColors'])?count($additionalSkinData['PieceTintColors']):0); //PieceTintColors -> more info to come
@@ -437,7 +437,7 @@ class BinaryStream {
 	public function getSerializedSkin($playerProtocol, &$skinId, &$skinData, &$skinGeometryName, &$skinGeometryData, &$capeData, &$additionalSkinData) {
 		$skinId = $this->getString();
 		if ($playerProtocol >= Info::PROTOCOL_428) {
-			$additionalSkinData['fabId'] = $this->getString();
+			$additionalSkinData['PlayFabId'] = $this->getString();
 		}
 		$additionalSkinData['SkinResourcePatch'] = $this->getString();
 		$geometryData = json_decode($additionalSkinData['SkinResourcePatch'], true);
