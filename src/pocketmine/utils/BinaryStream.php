@@ -370,7 +370,7 @@ class BinaryStream {
 				$this->putLInt($animation['Type']);
 				$this->putLFloat($animation['Frames']);
 				if ($playerProtocol >= Info::PROTOCOL_419) {
-					$this->putLInt($animation['AnimationExpression']);
+					$this->putLInt($animation['AnimationExpression']??0);
 				}
 			}
 		} else {
@@ -420,7 +420,7 @@ class BinaryStream {
 				$this->putString($piece['PieceId']);
 				$this->putString($piece['PieceType']);
 				$this->putString($piece['PackId']);
-				$this->putBool($piece['IsDefault']);
+				$this->putBool($piece['IsDefaultPiece']);
 				$this->putString($piece['ProductId']);
 			}
 			$this->putLInt(isset($additionalSkinData['PieceTintColors'])?count($additionalSkinData['PieceTintColors']):0); //PieceTintColors -> more info to come
