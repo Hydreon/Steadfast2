@@ -63,7 +63,6 @@ class LoginPacket extends PEPacket {
 	public $identityPublicKey = "";
 	public $platformChatId = "";
 	public $additionalSkinData = [];
-	public $playFabId = '';
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -206,13 +205,10 @@ class LoginPacket extends PEPacket {
 		if (isset($this->playerData["PlatformOnlineId"])) {
 			$this->platformChatId = $this->playerData["PlatformOnlineId"];
 		}
-		if (isset($this->playerData["PlayFabId"])) {
-			$this->playFabId = $this->playerData["PlayFabId"];
-		}
 		$this->originalProtocol = $this->protocol1;
 		$this->protocol1 = self::convertProtocol($this->protocol1);		
 		$additionalSkinDataList = [
-			'AnimatedImageData', 'CapeId', 'CapeImageHeight', 'CapeImageWidth', 'CapeOnClassicSkin', 'PersonaSkin', 'PremiumSkin', 'SkinAnimationData', 'SkinImageHeight', 'SkinImageWidth', 'SkinResourcePatch'	
+			'PlayFabId','AnimatedImageData', 'CapeId', 'CapeImageHeight', 'CapeImageWidth', 'CapeOnClassicSkin', 'PersonaSkin', 'PremiumSkin', 'SkinAnimationData', 'SkinImageHeight', 'SkinImageWidth', 'SkinResourcePatch'	
 		];
 		$additionalSkinData = [];
 		foreach ($additionalSkinDataList as $propertyName) {
