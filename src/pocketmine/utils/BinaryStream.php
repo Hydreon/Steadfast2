@@ -5,6 +5,7 @@ namespace pocketmine\utils;
 use pocketmine\item\Item;
 use pocketmine\nbt\NBT;
 use pocketmine\network\protocol\Info;
+use pocketmine\network\protocol\PEPacket;
 use pocketmine\Player;
 
 class BinaryStream {
@@ -215,38 +216,36 @@ class BinaryStream {
 			return Item::get(Item::AIR, 0, 0);
 		}
 		
-		$aux = $this->getSignedVarInt();
-		$meta = $aux >> 8;
-		$count = $aux & 0xff;
+		$count = $this->getLShort();
+		$meta = $this->getVarInt();
+		$blockRuntimeId = $this->getSignedVarInt();
+
+		$buffer = new BinaryStream($this->getString());	
+		$nbtLen = $buffer->getLShort();
+		if($nbtLen === 0xffff) {
+			$nbtDataVersion = $buffer->getByte();
+			$nbtTag = new NBT(NBT::LITTLE_ENDIAN);
+			$offset = $buffer->getOffset();
+			if ($offset > strlen($this->getBuffer())) {
+				throw new \Exception('get slot nbt error');
+			}
+			//need cyrcle for???
+			$nbtTag->read(substr($buffer->getBuffer(), $offset), false, true);
+			$nbt = $nbtTag->getData();
+			$buffer->setOffset($offset + $nbtTag->getOffset());
+			
+		}else {
+			throw new \Exception("Unexpected fake NBT length $nbtLen");
+		}
 		
-		$nbtLen = $this->getLShort();		
-		$nbt = "";	
-		if ($nbtLen > 0) {
-			$nbt = $this->get($nbtLen);
-		} elseif($nbtLen == -1) {
-			$nbtCount = $this->getVarInt();
-			if ($nbtCount > 100) {
-				throw new \Exception('get slot nbt error, too many count');
-			}
-			for ($i = 0; $i < $nbtCount; $i++) {
-				$nbtTag = new NBT(NBT::LITTLE_ENDIAN);
-				$offset = $this->getOffset();
-				if ($offset > strlen($this->getBuffer())) {
-					throw new \Exception('get slot nbt error');
-				}
-				$nbtTag->read(substr($this->getBuffer(), $offset), false, true);
-				$nbt = $nbtTag->getData();
-				$this->setOffset($offset + $nbtTag->getOffset());
-			}
-		}
 		$item = Item::get($id, $meta, $count, $nbt);
-		$canPlaceOnBlocksCount = $this->getSignedVarInt();
-		for ($i = 0; $i < $canPlaceOnBlocksCount; $i++) {
-			$item->addCanPlaceOnBlocks($this->getString());
+		for($i = 0, $canPlaceOnCount = $buffer->getLInt(); $i < $canPlaceOnCount; ++$i){
+			$item->addCanPlaceOnBlocks($buffer->get($buffer->getLShort()));
 		}
-		$canDestroyBlocksCount = $this->getSignedVarInt();
-		for ($i = 0; $i < $canDestroyBlocksCount; $i++) {
-			$item->addCanDestroyBlocks($this->getString());
+
+		$canDestroy = [];
+		for($i = 0, $canDestroyCount = $buffer->getLInt(); $i < $canDestroyCount; ++$i){
+			$item->addCanDestroyBlocks($buffer->get($buffer->getLShort()));
 		}
 		return $item;
 	}
@@ -257,25 +256,42 @@ class BinaryStream {
 			return;
 		}
 		$this->putSignedVarInt($item->getId());
+		$this->putLShort($item->getCount());
+		
 		if(is_null($item->getDamage())) $item->setDamage(0);
-        $auxValue = (($item->getDamage() << 8 &  0x7fff) | $item->getCount() & 0xff);
-		$this->putSignedVarInt($auxValue);
-		$nbt = $item->getCompound();
-        $this->putLShort(strlen($nbt));
-//      $this->putLShort(0xffff); //User Data Serialization Marker
-//      $this->putByte(1); //User Data Serialization Version
+		$this->putVarInt($item->getDamage());
+       
+		$this->putSignedVarInt(PEPacket::getBlockRuntimeID($item->getId(), $item->getDamage(), $playerProtocol));
+		
+		$this->putString((static function() use ($item) {
+			$buffer = new BinaryStream();
+			$nbt = $item->getCompound();
+			if ($nbt !== null) {
+				$buffer->putLShort(0xffff);
+				$buffer->putByte(1);
+				$buffer->put($nbt);
+			}else {
+				$buffer->putLShort(0);
+			}
 
-        $this->put($nbt);
-		$canPlaceOnBlocks = $item->getCanPlaceOnBlocks();
-		$canDestroyBlocks = $item->getCanDestroyBlocks();
-		$this->putSignedVarInt(count($canPlaceOnBlocks));
-		foreach ($canPlaceOnBlocks as $blockName) {
-			$this->putString($blockName);
-		}
-		$this->putSignedVarInt(count($canDestroyBlocks));
-		foreach ($canDestroyBlocks as $blockName) {
-			$this->putString($blockName);
-		}
+			$canPlaceOnBlocks = $item->getCanPlaceOnBlocks();
+			$canDestroyBlocks = $item->getCanDestroyBlocks();
+			$buffer->putLInt(count($canPlaceOnBlocks));
+			foreach ($canPlaceOnBlocks as $blockName) {
+				$buffer->putLShort(strlen($blockName));
+				$buffer->put($blockName);
+			}
+			$buffer->putLInt(count($canDestroyBlocks));
+			foreach ($canDestroyBlocks as $blockName) {
+				$buffer->putLShort(strlen($blockName));
+				$buffer->put($blockName);
+			}
+			return $buffer->getBuffer();
+		})());
+
+        
+		
+		
 	}
 
 	public function feof() {
