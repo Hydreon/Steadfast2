@@ -210,7 +210,15 @@ class BinaryStream {
 		$this->putLInt($uuid->getPart(2));
 	}
 
-	public function getSlot($playerProtocol) {
+	public function getSlotWithoutStackId($playerProtocol) {
+		return $this->getSlot($playerProtocol, false);
+	}
+
+	public function putSlotWithoutStackId($playerProtocol) {
+		return $this->putSlot($item, $playerProtocol, false);
+	}
+
+	public function getSlot($playerProtocol, $withStackId = true) {
 		$id = $this->getSignedVarInt();
 		if ($id == 0) {
 			return Item::get(Item::AIR, 0, 0);
@@ -218,6 +226,14 @@ class BinaryStream {
 		
 		$count = $this->getLShort();
 		$meta = $this->getVarInt();
+
+		if ($withStackId) {
+			$includeNetId = $this->getByte();
+			if ($includeNetId) {
+				$this->getSignedVarInt();
+			}
+		}
+
 		$blockRuntimeId = $this->getSignedVarInt();
 
 		$buffer = new BinaryStream($this->getString());	
@@ -250,7 +266,7 @@ class BinaryStream {
 		return $item;
 	}
 
-	public function putSlot(Item $item, $playerProtocol) {
+	public function putSlot(Item $item, $playerProtocol, $withStackId = true) {
 		if ($item->getId() === 0) {
 			$this->putSignedVarInt(0);
 			return;
@@ -260,6 +276,9 @@ class BinaryStream {
 		
 		if(is_null($item->getDamage())) $item->setDamage(0);
 		$this->putVarInt($item->getDamage());
+		if ($withStackId) {
+			$this->putByte(0);
+		}
        
 		$this->putSignedVarInt(PEPacket::getBlockRuntimeID($item->getId(), $item->getDamage(), $playerProtocol));
 		
