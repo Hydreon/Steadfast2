@@ -314,7 +314,7 @@ class McRegion extends BaseLevelProvider{
 	public function convertBiomeColors($array){
 		$result = str_repeat("\x00", 256);
 		foreach($array as $i => $color){
-			$result{$i} = chr(($color >> 24) & 0xff);
+			$result[$i] = chr(($color >> 24) & 0xff);
 		}
 		return $result;
 	}

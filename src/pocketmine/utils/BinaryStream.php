@@ -81,7 +81,7 @@ class BinaryStream {
 		if (strlen($this->buffer) < $this->offset + $len) {
 			throw new \Exception('binary stream get error');
 		}
-		return $len === 1 ? $this->buffer{$this->offset++} : substr($this->buffer, ($this->offset += $len) - $len, $len);
+		return $len === 1 ? $this->buffer[$this->offset++] : substr($this->buffer, ($this->offset += $len) - $len, $len);
 	}
 
 	public function put($str) {
@@ -172,7 +172,7 @@ class BinaryStream {
 		if (strlen($this->buffer) < $this->offset + 1) {
 			throw new \Exception('binary stream getByte error');
 		}
-		return ord($this->buffer{$this->offset++});
+		return ord($this->buffer[$this->offset++]);
 	}
 
 	public function putByte($v) {
@@ -279,7 +279,7 @@ class BinaryStream {
 	}
 
 	public function feof() {
-		return !isset($this->buffer{$this->offset});
+		return !isset($this->buffer[$this->offset]);
 	}
 	
 	

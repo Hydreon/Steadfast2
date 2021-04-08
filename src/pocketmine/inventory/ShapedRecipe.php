@@ -61,12 +61,12 @@ class ShapedRecipe implements Recipe {
 			$this->ingredients[] = array_fill(0, strlen($row), null);
 			$len = strlen($row);
 			for ($i = 0; $i < $len; ++$i) {
-				$this->shape[$row{$i}] = null;
+				$this->shape[$row[$i]] = null;
 
-				if (!isset($this->shapeItems[$row{$i}])) {
-					$this->shapeItems[$row{$i}] = [new Vector2($i, $y)];
+				if (!isset($this->shapeItems[$row[$i]])) {
+					$this->shapeItems[$row[$i]] = [new Vector2($i, $y)];
 				} else {
-					$this->shapeItems[$row{$i}][] = new Vector2($i, $y);
+					$this->shapeItems[$row[$i]][] = new Vector2($i, $y);
 				}
 			}
 		}

@@ -185,10 +185,10 @@ class SimpleCommandMap implements CommandMap{
 			$needNewArg = false;
 
 			if ($state == 0) {
-				if ($arg{0} == '"') {
+				if ($arg[0] == '"') {
 					$state = 1;
 					$arg = substr($arg, 1);
-				} elseif ($arg{0} == '\'') {
+				} elseif ($arg[0] == '\'') {
 					$state = 2;
 					$arg = substr($arg, 1);
 				} else {
@@ -201,14 +201,14 @@ class SimpleCommandMap implements CommandMap{
 			}
 			
 			if ($state == 1) {
-				if ($arg{strlen($arg) - 1} == '"') {
+				if ($arg[strlen($arg) - 1] == '"') {
 					$state = 0;
 					$arg = substr($arg, 0, -1);
 					$needNewArg = true;
 				}
 			}
 			if ($state == 2) {
-				if ($arg{strlen($arg) - 1} == '\'') {
+				if ($arg[strlen($arg) - 1] == '\'') {
 					$needNewArg = true;
 					$state = 0;
 					$arg = substr($arg, 0, -1);
