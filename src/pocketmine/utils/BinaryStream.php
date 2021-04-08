@@ -214,7 +214,7 @@ class BinaryStream {
 		return $this->getSlot($playerProtocol, false);
 	}
 
-	public function putSlotWithoutStackId($playerProtocol) {
+	public function putSlotWithoutStackId($item, $playerProtocol) {
 		return $this->putSlot($item, $playerProtocol, false);
 	}
 
