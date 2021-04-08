@@ -84,7 +84,7 @@ class LoginPacket extends PEPacket {
 			return;
 		}
 		$data = $this->getString();
-		if (ord($data{0}) != 120 || (($decodedData = @zlib_decode($data)) === false)) {
+		if (ord($data[0]) != 120 || (($decodedData = @zlib_decode($data)) === false)) {
 			$body = $data;
 		} else {
 			$body = $decodedData;

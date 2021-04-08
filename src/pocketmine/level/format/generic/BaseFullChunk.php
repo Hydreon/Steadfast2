@@ -238,7 +238,7 @@ abstract class BaseFullChunk implements FullChunk{
 		$column = $this->getBlockIdColumn($x, $z);
 		$provider = $this->provider;
 		for($y = $provider::getMaxY() - 1; $y >= 0; --$y){
-			if($column{$y} !== "\x00"){
+			if($column[$y] !== "\x00"){
 				return $y;
 			}
 		}

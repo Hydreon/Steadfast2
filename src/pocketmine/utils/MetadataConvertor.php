@@ -344,7 +344,7 @@ class MetadataConvertor {
 		$flags = strrev(decbin($meta[Entity::DATA_FLAGS][1]));
 		$flagsLength = strlen($flags);
 		for ($i = 0; $i < $flagsLength; $i++) {
-			if ($flags{$i} === '1') {
+			if ($flags[$i] === '1') {
 				$newflags |= 1 << (isset($protocolFlags[$i]) ? $protocolFlags[$i] : $i);
 			}
 		}

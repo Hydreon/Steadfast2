@@ -241,7 +241,7 @@ class Binary{
 	 */
 	public static function readByte($c, $signed = true){
 		self::checkLength($c, 1);
-		$b = ord($c{0});
+		$b = ord($c[0]);
 
 		if($signed){
 			if(PHP_INT_SIZE === 8){

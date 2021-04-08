@@ -25,15 +25,15 @@ class ChunkSection implements \pocketmine\level\format\ChunkSection {
 	}
 
 	public function getBlockId($x, $y, $z) {
-		return ord($this->blocks{($x << 8) + ($z << 4) + $y});
+		return ord($this->blocks[($x << 8) + ($z << 4) + $y]);
 	}
 
 	public function setBlockId($x, $y, $z, $id) {
-		$this->blocks{($x << 8) + ($z << 4) + $y} = chr($id);
+		$this->blocks[($x << 8) + ($z << 4) + $y] = chr($id);
 	}
 
 	public function getBlockData($x, $y, $z) {
-		$m = ord($this->data{($x << 7) + ($z << 3) + ($y >> 1)});
+		$m = ord($this->data[($x << 7) + ($z << 3) + ($y >> 1)]);
 		if (($y & 1) === 0) {
 			return $m & 0x0F;
 		} else {
@@ -43,11 +43,11 @@ class ChunkSection implements \pocketmine\level\format\ChunkSection {
 
 	public function setBlockData($x, $y, $z, $data) {
 		$i = ($x << 7) + ($z << 3) + ($y >> 1);
-		$old_m = ord($this->data{$i});
+		$old_m = ord($this->data[$i]);
 		if (($y & 1) === 0) {
-			$this->data{$i} = chr(($old_m & 0xf0) | ($data & 0x0f));
+			$this->data[$i] = chr(($old_m & 0xf0) | ($data & 0x0f));
 		} else {
-			$this->data{$i} = chr((($data & 0x0f) << 4) | ($old_m & 0x0f));
+			$this->data[$i] = chr((($data & 0x0f) << 4) | ($old_m & 0x0f));
 		}
 	}
 
@@ -60,9 +60,9 @@ class ChunkSection implements \pocketmine\level\format\ChunkSection {
 	public function getFullBlock($x, $y, $z) {
 		$i = ($x << 8) + ($z << 4) + $y;
 		if (($y & 1) === 0) {
-			return (ord($this->blocks{$i}) << 4) | (ord($this->data{$i >> 1}) & 0x0F);
+			return (ord($this->blocks[$i]) << 4) | (ord($this->data[$i >> 1]) & 0x0F);
 		} else {
-			return (ord($this->blocks{$i}) << 4) | (ord($this->data{$i >> 1}) >> 4);
+			return (ord($this->blocks[$i]) << 4) | (ord($this->data[$i >> 1]) >> 4);
 		}
 	}
 
@@ -73,22 +73,22 @@ class ChunkSection implements \pocketmine\level\format\ChunkSection {
 
 		if ($blockId !== null) {
 			$blockId = chr($blockId);
-			if ($this->blocks{$i} !== $blockId) {
-				$this->blocks{$i} = $blockId;
+			if ($this->blocks[$i] !== $blockId) {
+				$this->blocks[$i] = $blockId;
 				$changed = true;
 			}
 		}
 
 		if ($meta !== null) {
 			$i >>= 1;
-			$old_m = ord($this->data{$i});
+			$old_m = ord($this->data[$i]);
 			if (($y & 1) === 0) {
-				$this->data{$i} = chr(($old_m & 0xf0) | ($meta & 0x0f));
+				$this->data[$i] = chr(($old_m & 0xf0) | ($meta & 0x0f));
 				if (($old_m & 0x0f) !== $meta) {
 					$changed = true;
 				}
 			} else {
-				$this->data{$i} = chr((($meta & 0x0f) << 4) | ($old_m & 0x0f));
+				$this->data[$i] = chr((($meta & 0x0f) << 4) | ($old_m & 0x0f));
 				if ((($old_m & 0xf0) >> 4) !== $meta) {
 					$changed = true;
 				}
