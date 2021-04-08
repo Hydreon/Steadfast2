@@ -285,7 +285,7 @@ class BinaryStream {
 		$this->putString((static function() use ($item) {
 			$buffer = new BinaryStream();
 			$nbt = $item->getCompound();
-			if ($nbt !== null) {
+			if ($nbt !== null && $nbt !== "") {
 				$buffer->putLShort(0xffff);
 				$buffer->putByte(1);
 				$buffer->put($nbt);
@@ -304,6 +304,9 @@ class BinaryStream {
 			foreach ($canDestroyBlocks as $blockName) {
 				$buffer->putLShort(strlen($blockName));
 				$buffer->put($blockName);
+			}
+			if($item->getId() === Item::SHIELD){
+				$buffer->putLLong(0);
 			}
 			return $buffer->getBuffer();
 		})());

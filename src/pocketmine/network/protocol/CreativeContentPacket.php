@@ -41,11 +41,11 @@ class CreativeContentPacket extends PEPacket {
 		$this->putVarInt(count($this->items));
 		$index = 1;
 		foreach ($this->items as $itemData) {
-			$this->putVarInt($index++);
+			$this->putSignedVarInt($index++);
 			if ($playerProtocol < Info::PROTOCOL_406) {
 				$this->putVarInt($itemData['group']);
 			}
-			$this->putSlot($itemData['item'], $playerProtocol);
+			$this->putSlotWithoutStackId($itemData['item'], $playerProtocol);
 		}
 	}
 
