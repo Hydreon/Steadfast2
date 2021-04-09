@@ -187,6 +187,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				}
 			}catch(\Exception $e){
 				error_log($e->getMessage());
+				error_log($e->getTraceAsString());
 			}
 		}
 	}

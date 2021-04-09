@@ -60,6 +60,8 @@ abstract class PEPacket extends DataPacket {
 	
 	public final static function convertProtocol($protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_431:
+				return Info::PROTOCOL_431;
 			case Info::PROTOCOL_428:
 				return Info::PROTOCOL_428;
 			case Info::PROTOCOL_423:
@@ -153,7 +155,7 @@ abstract class PEPacket extends DataPacket {
 			case Info::PROTOCOL_200:
 				return Info::PROTOCOL_200;
 			default:
-				return Info::PROTOCOL_120;
+				throw new \InvalidArgumentException("Unknown protocol $protocol");
 		}
 	}
 	

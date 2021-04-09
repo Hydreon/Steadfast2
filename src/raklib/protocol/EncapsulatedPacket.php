@@ -52,7 +52,7 @@ class EncapsulatedPacket{
 
 	    $packet = new EncapsulatedPacket();
 
-        $flags = ord($binary{0});
+        $flags = ord($binary[0]);
         $packet->reliability = $reliability = ($flags & 0b11100000) >> 5;
         $packet->hasSplit = $hasSplit = ($flags & 0b00010000) > 0;
         if($internal){
@@ -90,7 +90,7 @@ class EncapsulatedPacket{
 			if($reliability <= 4 and $reliability !== 2){
 				$packet->orderIndex = Binary::readLTriad(substr($binary, $offset, 3));
 				$offset += 3;
-				$packet->orderChannel = ord($binary{$offset++});
+				$packet->orderChannel = ord($binary[$offset++]);
 			}
 		}
 

@@ -87,24 +87,24 @@ class ServerHandler{
      */
     public function handlePacket(){
         if(strlen($packet = $this->server->readThreadToMainPacket()) > 0){
-            $id = ord($packet{0});
+            $id = ord($packet[0]);
             $offset = 1;
             if($id === RakLib::PACKET_ENCAPSULATED){
 //				var_dump(debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20));
-                $len = ord($packet{$offset++});
+                $len = ord($packet[$offset++]);
                 $identifier = substr($packet, $offset, $len);
                 $offset += $len;
                 $buffer = substr($packet, $offset);
                 $this->instance->handleEncapsulated($identifier, $buffer);
 			} elseif ($id === RakLib::PACKET_PING) {
-				$len = ord($packet{$offset++});
+				$len = ord($packet[$offset++]);
 				$identifier = substr($packet, $offset, $len);
 				$offset += $len;
-				$len = ord($packet{$offset++});
+				$len = ord($packet[$offset++]);
 				$ping = substr($packet, $offset, $len);
 				$this->instance->handlePing($identifier, $ping);
             }elseif($id === RakLib::PACKET_RAW){
-                $len = ord($packet{$offset++});
+                $len = ord($packet[$offset++]);
                 $address = substr($packet, $offset, $len);
                 $offset += $len;
                 $port = Binary::readShort(substr($packet, $offset, 2));
@@ -112,16 +112,16 @@ class ServerHandler{
                 $payload = substr($packet, $offset);
                 $this->instance->handleRaw($address, $port, $payload);
             }elseif($id === RakLib::PACKET_SET_OPTION){
-                $len = ord($packet{$offset++});
+                $len = ord($packet[$offset++]);
                 $name = substr($packet, $offset, $len);
                 $offset += $len;
                 $value = substr($packet, $offset);
                 $this->instance->handleOption($name, $value);
             }elseif($id === RakLib::PACKET_OPEN_SESSION){
-                $len = ord($packet{$offset++});
+                $len = ord($packet[$offset++]);
                 $identifier = substr($packet, $offset, $len);
                 $offset += $len;
-                $len = ord($packet{$offset++});
+                $len = ord($packet[$offset++]);
                 $address = substr($packet, $offset, $len);
                 $offset += $len;
                 $port = Binary::readShort(substr($packet, $offset, 2));
@@ -129,21 +129,21 @@ class ServerHandler{
                 $clientID = Binary::readLong(substr($packet, $offset, 8));
                 $this->instance->openSession($identifier, $address, $port, $clientID);
             }elseif($id === RakLib::PACKET_CLOSE_SESSION){
-                $len = ord($packet{$offset++});
+                $len = ord($packet[$offset++]);
                 $identifier = substr($packet, $offset, $len);
                 $offset += $len;
-                $len = ord($packet{$offset++});
+                $len = ord($packet[$offset++]);
                 $reason = substr($packet, $offset);
                 $this->instance->closeSession($identifier, $reason);
             }elseif($id === RakLib::PACKET_INVALID_SESSION){
-                $len = ord($packet{$offset++});
+                $len = ord($packet[$offset++]);
                 $identifier = substr($packet, $offset, $len);
                 $this->instance->closeSession($identifier, "Invalid session");
             } elseif ($id === RakLib::PACKET_KICK) {
-				$len = ord($packet{$offset++});
+				$len = ord($packet[$offset++]);
 				$identifier = substr($packet, $offset, $len);
 				$offset += $len;
-				$len = ord($packet{$offset++});
+				$len = ord($packet[$offset++]);
 				$reason = substr($packet, $offset, $len);
 				$this->instance->handleKick($identifier, $reason);
             }

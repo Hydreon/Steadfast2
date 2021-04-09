@@ -133,7 +133,7 @@ class BanList{
 		$fp = @fopen($this->file, "r");
 		if(is_resource($fp)){
 			while(($line = fgets($fp)) !== false){
-				if($line{0} !== "#"){
+				if($line[0] !== "#"){
 					$entry = BanEntry::fromString($line);
 					if($entry instanceof BanEntry){
 						$this->list[$entry->getName()] = $entry;

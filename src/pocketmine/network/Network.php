@@ -300,7 +300,8 @@ class Network {
 			case Info::PROTOCOL_419:	
 			case Info::PROTOCOL_422:	
 			case Info::PROTOCOL_423:	
-			case Info::PROTOCOL_428:	
+			case Info::PROTOCOL_428:
+			case Info::PROTOCOL_431:
 				$class = $this->packetPool331[$id];
 				break;
 			case Info::PROTOCOL_310:
@@ -309,8 +310,7 @@ class Network {
 				$class = $this->packetPool310[$id];
 				break;
 			default:
-				$class = $this->packetPool120[$id];
-				break;
+				throw new \InvalidArgumentException("Unknown protocol $playerProtocol");
 		}
 		if($class !== null){
 			return clone $class;
@@ -334,6 +334,7 @@ class Network {
 
 	public static function getChunkPacketProtocol($playerProtocol){
 		switch ($playerProtocol) {
+			case Info::PROTOCOL_431:
 			case Info::PROTOCOL_428:
 				return Info::PROTOCOL_428;
 			case Info::PROTOCOL_423:
@@ -371,7 +372,7 @@ class Network {
 			case Info::PROTOCOL_280:
 				return Info::PROTOCOL_280;
 			default:
-				return Info::PROTOCOL_120;
+				throw new \InvalidArgumentException("Unknown protocol $playerProtocol");
 		}
 	}
 	
