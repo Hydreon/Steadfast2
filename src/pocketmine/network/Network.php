@@ -293,8 +293,7 @@ class Network {
 				$class = $this->packetPool310[$id];
 				break;
 			default:
-				$class = $this->packetPool120[$id];
-				break;
+				throw new \InvalidArgumentException("Unknown protocol $playerProtocol");
 		}
 		if($class !== null){
 			return clone $class;
@@ -342,7 +341,7 @@ class Network {
 			case Info::PROTOCOL_280:
 				return Info::PROTOCOL_280;
 			default:
-				return Info::PROTOCOL_120;
+				throw new \InvalidArgumentException("Unknown protocol $playerProtocol");
 		}
 	}
 	

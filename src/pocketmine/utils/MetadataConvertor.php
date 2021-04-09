@@ -270,7 +270,7 @@ class MetadataConvertor {
 				$protocolMeta = self::$entityMetaIds120;
 				break;
 			default:
-				return $meta;
+				throw new \InvalidArgumentException("Unknown protocol $protocol");
 		}
 		$newMeta = [];
 		foreach ($meta as $key => $value) {
@@ -338,7 +338,7 @@ class MetadataConvertor {
 				$protocolFlags = self::$entityFlags120;
 				break;
 			default:
-				return $meta;
+				throw new \InvalidArgumentCountException("Unknown protocol $protocol");
 		}
 		
 		$flags = strrev(decbin($meta[Entity::DATA_FLAGS][1]));
