@@ -277,7 +277,12 @@ class BinaryStream {
 		if(is_null($item->getDamage())) $item->setDamage(0);
 		$this->putVarInt($item->getDamage());
 		if ($withStackId) {
-			$this->putByte(0);
+			if($item->getId() === 0){
+				$this->putBool(false);
+			}else{
+				$this->putBool(true);
+				$this->putSignedVarInt(1);
+			}
 		}
        
 		$this->putSignedVarInt(PEPacket::getBlockRuntimeID($item->getId(), $item->getDamage(), $playerProtocol));
