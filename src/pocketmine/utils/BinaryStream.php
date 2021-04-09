@@ -247,7 +247,7 @@ class BinaryStream {
 				throw new \Exception('get slot nbt error');
 			}
 			//need cyrcle for???
-			$nbtTag->read(substr($buffer->getBuffer(), $offset), false, true);
+			$nbtTag->read(substr($buffer->getBuffer(), $offset), false, false);
 			$nbt = $nbtTag->getData();
 			$buffer->setOffset($offset + $nbtTag->getOffset());
 			
