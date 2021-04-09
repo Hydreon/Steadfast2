@@ -25,7 +25,7 @@ class InventoryContentPacket extends PEPacket {
 		$this->putVarInt($itemsNum);
 		$index = 1;
 		for ($i = 0; $i < $itemsNum; $i++) {
-			if ($playerProtocol >= Info::PROTOCOL_392) {
+			if ($playerProtocol >= Info::PROTOCOL_392 && $playerProtocol <= Info::PROTOCOL_428) {
 				if ($this->items[$i]->getId() == 0) {
 					$this->putSignedVarInt(0);
 				} else {

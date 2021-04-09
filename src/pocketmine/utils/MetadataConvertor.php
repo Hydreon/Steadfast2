@@ -217,6 +217,7 @@ class MetadataConvertor {
 
 	private static function updateMetaIds($meta, $protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_431:
             case Info::PROTOCOL_428:
             case Info::PROTOCOL_423:
             case Info::PROTOCOL_422:
@@ -269,7 +270,7 @@ class MetadataConvertor {
 				$protocolMeta = self::$entityMetaIds120;
 				break;
 			default:
-				return $meta;
+				throw new \InvalidArgumentException("Unknown protocol $protocol");
 		}
 		$newMeta = [];
 		foreach ($meta as $key => $value) {
@@ -287,6 +288,7 @@ class MetadataConvertor {
 			return $meta;
 		}
 		switch ($protocol) {
+			case Info::PROTOCOL_431:
             case Info::PROTOCOL_428:
             case Info::PROTOCOL_423:
             case Info::PROTOCOL_422:
@@ -336,13 +338,13 @@ class MetadataConvertor {
 				$protocolFlags = self::$entityFlags120;
 				break;
 			default:
-				return $meta;
+				throw new \InvalidArgumentCountException("Unknown protocol $protocol");
 		}
 		
 		$flags = strrev(decbin($meta[Entity::DATA_FLAGS][1]));
 		$flagsLength = strlen($flags);
 		for ($i = 0; $i < $flagsLength; $i++) {
-			if ($flags{$i} === '1') {
+			if ($flags[$i] === '1') {
 				$newflags |= 1 << (isset($protocolFlags[$i]) ? $protocolFlags[$i] : $i);
 			}
 		}

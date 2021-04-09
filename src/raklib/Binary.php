@@ -99,7 +99,7 @@ class Binary{
      * @return int
      */
     public static function readByte($c, $signed = true){
-        $b = ord($c{0});
+        $b = ord($c[0]);
 
         if($signed){
             if(PHP_INT_SIZE === 8){
