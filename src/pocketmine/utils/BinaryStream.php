@@ -238,6 +238,7 @@ class BinaryStream {
 
 		$buffer = new BinaryStream($this->getString());	
 		$nbtLen = $buffer->getLShort(false);
+		$nbt = "";
 		if($nbtLen === 0xffff) {
 			$nbtDataVersion = $buffer->getByte();
 			$nbtTag = new NBT(NBT::LITTLE_ENDIAN);
