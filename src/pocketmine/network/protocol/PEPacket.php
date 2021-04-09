@@ -155,7 +155,7 @@ abstract class PEPacket extends DataPacket {
 			case Info::PROTOCOL_200:
 				return Info::PROTOCOL_200;
 			default:
-				return Info::PROTOCOL_120;
+				throw new \InvalidArgumentException("Unknown protocol $protocol");
 		}
 	}
 	

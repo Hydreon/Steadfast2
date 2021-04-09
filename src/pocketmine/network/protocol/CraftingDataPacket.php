@@ -76,12 +76,12 @@ class CraftingDataPacket extends PEPacket{
 					$stream->putSignedVarInt($item->getCount());
 				}
 			} else {
-				$stream->putSlot($item, $playerProtocol);
+				$stream->putSlotWithoutStackId($item, $playerProtocol);
 			}
 		}
 
 		$stream->putVarInt(1);
-		$stream->putSlot($recipe->getResult(), $playerProtocol);
+		$stream->putSlotWithoutStackId($recipe->getResult(), $playerProtocol);
 
 		$stream->putUUID($recipe->getId());
 		if ($playerProtocol >= Info::PROTOCOL_350) {
@@ -113,13 +113,13 @@ class CraftingDataPacket extends PEPacket{
 						$stream->putSignedVarInt($slot->getCount());
 					}
 				} else {
-					$stream->putSlot($slot, $playerProtocol);	
+					$stream->putSlotWithoutStackId($slot, $playerProtocol);	
 				}
 			}
 		}
 
 		$stream->putVarInt(1);
-		$stream->putSlot($recipe->getResult(), $playerProtocol);
+		$stream->putSlotWithoutStackId($recipe->getResult(), $playerProtocol);
 
 		$stream->putUUID($recipe->getId());
 		if ($playerProtocol >= Info::PROTOCOL_350) {
@@ -139,14 +139,14 @@ class CraftingDataPacket extends PEPacket{
 		if($recipe->getInput()->getDamage() !== 0){ //Data recipe
 			$stream->putSignedVarInt($recipe->getInput()->getId());
 			$stream->putSignedVarInt($recipe->getInput()->getDamage());
-			$stream->putSlot($recipe->getResult(), $playerProtocol);
+			$stream->putSlotWithoutStackId($recipe->getResult(), $playerProtocol);
 			if ($playerProtocol >= Info::PROTOCOL_350) {
 				$stream->putString(self::RECIPE_TAG_FURNACE);
 			}
 			return CraftingDataPacket::ENTRY_FURNACE_DATA;
 		}else{
 			$stream->putSignedVarInt($recipe->getInput()->getId());
-			$stream->putSlot($recipe->getResult(), $playerProtocol);
+			$stream->putSlotWithoutStackId($recipe->getResult(), $playerProtocol);
 			if ($playerProtocol >= Info::PROTOCOL_350) {
 				$stream->putString(self::RECIPE_TAG_FURNACE);
 			}
