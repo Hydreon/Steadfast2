@@ -237,7 +237,7 @@ class BinaryStream {
 		$blockRuntimeId = $this->getSignedVarInt();
 
 		$buffer = new BinaryStream($this->getString());	
-		$nbtLen = $buffer->getLShort();
+		$nbtLen = $buffer->getLShort(false);
 		if($nbtLen === 0xffff) {
 			$nbtDataVersion = $buffer->getByte();
 			$nbtTag = new NBT(NBT::LITTLE_ENDIAN);
@@ -250,7 +250,7 @@ class BinaryStream {
 			$nbt = $nbtTag->getData();
 			$buffer->setOffset($offset + $nbtTag->getOffset());
 			
-		}else {
+		}elseif($nbtLen !== 0){
 			throw new \Exception("Unexpected fake NBT length $nbtLen");
 		}
 		
