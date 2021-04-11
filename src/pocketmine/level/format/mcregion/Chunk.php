@@ -232,12 +232,7 @@ class Chunk extends BaseFullChunk{
 	 * @return bool
 	 */
 	public function isGenerated(){
-		if(isset($this->nbt->TerrainGenerated)){
-			return $this->nbt->TerrainGenerated->getValue() > 0;
-		}elseif(isset($this->nbt->TerrainPopulated)){
-			return $this->nbt->TerrainPopulated->getValue() > 0;
-		}
-		return false;
+		return !isset($this->nbt->TerrainGenerated) || $this->nbt["TerrainGenerated"] > 0;
 	}
 
 	/**
