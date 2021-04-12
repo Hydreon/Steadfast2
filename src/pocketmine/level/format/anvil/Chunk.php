@@ -145,7 +145,7 @@ class Chunk extends BaseChunk {
 	 * @return bool
 	 */
 	public function isGenerated() {
-		return $this->nbt["TerrainPopulated"] > 0 or ( isset($this->nbt->TerrainGenerated) and $this->nbt["TerrainGenerated"] > 0);
+		return !isset($this->nbt->TerrainGenerated) || $this->nbt["TerrainGenerated"] > 0;
 	}
 
 	/**

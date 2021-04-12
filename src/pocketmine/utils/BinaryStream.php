@@ -237,7 +237,8 @@ class BinaryStream {
 		$blockRuntimeId = $this->getSignedVarInt();
 
 		$buffer = new BinaryStream($this->getString());	
-		$nbtLen = $buffer->getLShort();
+		$nbtLen = $buffer->getLShort(false);
+		$nbt = "";
 		if($nbtLen === 0xffff) {
 			$nbtDataVersion = $buffer->getByte();
 			$nbtTag = new NBT(NBT::LITTLE_ENDIAN);
@@ -246,11 +247,11 @@ class BinaryStream {
 				throw new \Exception('get slot nbt error');
 			}
 			//need cyrcle for???
-			$nbtTag->read(substr($buffer->getBuffer(), $offset), false, true);
+			$nbtTag->read(substr($buffer->getBuffer(), $offset), false, false);
 			$nbt = $nbtTag->getData();
 			$buffer->setOffset($offset + $nbtTag->getOffset());
 			
-		}else {
+		}elseif($nbtLen !== 0){
 			throw new \Exception("Unexpected fake NBT length $nbtLen");
 		}
 		

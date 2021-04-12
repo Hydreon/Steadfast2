@@ -179,7 +179,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 						try {
 							$pk->decode($player->getPlayerProtocol());
 						}catch(\Exception $e){
-							file_put_contents("logs/" . date('Y.m.d') . "_decode_error.log", $e->getMessage() . "\n", FILE_APPEND | LOCK_EX);
+							file_put_contents("logs/" . date('Y.m.d') . "_decode_error.log", $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND | LOCK_EX);
 							return;
 						}
 						$player->handleDataPacket($pk);
