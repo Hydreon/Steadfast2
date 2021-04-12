@@ -27,88 +27,14 @@ namespace pocketmine\network\protocol;
 
 interface Info{
 
-	const CURRENT_PROTOCOL = 120;
+	const CURRENT_PROTOCOL = self::PROTOCOL_431;
 	const ACCEPTED_PROTOCOLS = [419, 422, 423, 428, 431];
 
-	
-	const PROTOCOL_134 = 134; // 1.2.0.20, 1.2.0.22
-	const PROTOCOL_135 = 135; // 1.2.0.24, 1.2.0.25
-	const PROTOCOL_136 = 136; // 1.2.0.31
-	const PROTOCOL_137 = 137; // 1.2.0
-	const PROTOCOL_140 = 140; // 1.2.5.11
-	const PROTOCOL_141 = 141; // 1.2.5.x
-	const PROTOCOL_150 = 150; // 1.2.6
-	const PROTOCOL_160 = 160; // 1.2.7
-	const PROTOCOL_200 = 200; // 1.2.10
-	const PROTOCOL_201 = 201; // 1.2.10.x
-	const PROTOCOL_220 = 220; // 1.2.13.5
-	const PROTOCOL_221 = 221; // 1.2.13.8
-	const PROTOCOL_222 = 222; // 1.2.13.10
-	const PROTOCOL_223 = 223; // 1.2.13.54
-	const PROTOCOL_224 = 224; // 1.2.13.11
-	const PROTOCOL_240 = 240; // 1.2.14.2
-	const PROTOCOL_250 = 250; // 1.2.15.1
-	const PROTOCOL_260 = 260; // 1.2.20.1, 1.2.20.2
-	const PROTOCOL_261 = 261; // 1.4.0
-	const PROTOCOL_270 = 270; // 1.5.0.0
-	const PROTOCOL_271 = 271; // 1.5.0.0, 1.5.0.4
-	const PROTOCOL_273 = 273; // 1.5.0.7
-	const PROTOCOL_274 = 274; // 1.5.0.10
-	const PROTOCOL_280 = 280; // 1.6.0.1
-	const PROTOCOL_281 = 281; // 1.6.0.5
-	const PROTOCOL_282 = 282; // 1.6.0.8
-	const PROTOCOL_290 = 290; // 1.7.0.2
-	const PROTOCOL_291 = 291; // 1.7.0.5
-	const PROTOCOL_310 = 310; // 1.8.0.4, 1.8.0.8
-	const PROTOCOL_311 = 311; // 1.8.0.9, 1.8.0.10
-	const PROTOCOL_312 = 312; // 1.8.0.11
-	const PROTOCOL_313 = 313; // 1.8.0 rc1
-	const PROTOCOL_330 = 330; // 1.9.0.0
-	const PROTOCOL_331 = 331; // 1.9.0.2
-	const PROTOCOL_332 = 332; // 1.9.0.3
-	const PROTOCOL_340 = 340; // 1.10.0.3
-	const PROTOCOL_342 = 342; // 1.10.0
-	const PROTOCOL_350 = 350; // 1.11.0.1
-	const PROTOCOL_351 = 351; // 1.11.0.3
-	const PROTOCOL_352 = 352; // 1.11.0.4
-	const PROTOCOL_353 = 353; // 1.11.0.5
-	const PROTOCOL_354 = 354; // 1.11.0.7, 1.11.1, 1.11.2, 1.11.3
-	const PROTOCOL_360 = 360; // 1.12.0.2
-	const PROTOCOL_361 = 361; // 1.12.0.3, 1.12.0.4, 1.12.0.5, 1.12.0.6
-	const PROTOCOL_370 = 370; // 1.13.0.1
-	const PROTOCOL_371 = 371; // 1.13.0.4, 1.13.0.5, 1.13.0.6
-	const PROTOCOL_385 = 385; // 1.13.0.7, 1.13.0.9, 1.13.0.10
-	const PROTOCOL_386 = 386; // 1.13.0.12
-	const PROTOCOL_387 = 387; // 1.13.0.15
-	const PROTOCOL_388 = 388; // 1.13.0.25
-	const PROTOCOL_389 = 389; // 1.14.x.x
-	const PROTOCOL_390 = 390; // 1.14.60
-	const PROTOCOL_392 = 392; // 1.15.0.51
-	const PROTOCOL_393 = 393; // 1.15.0.53
-	const PROTOCOL_394 = 394; // 1.15.0.54
-	const PROTOCOL_395 = 395; // 1.15.0.55
-	const PROTOCOL_396 = 396; // 1.15.0.56
-	const PROTOCOL_400 = 400; // 1.16.0.51
-	const PROTOCOL_406 = 406; // 1.16.0.63
-	const PROTOCOL_407 = 407; // 1.16.0.64
-	const PROTOCOL_408 = 408; // ?
-	// const PROTOCOL_409 = 409; // ?
-	// const PROTOCOL_410 = 410; // 1.16.100.51
-	// const PROTOCOL_414 = 414; // 1.16.100.55
-	// const PROTOCOL_415 = 415; // 1.16.100.56
-	// const PROTOCOL_417 = 417; // 1.16.100.58
 	const PROTOCOL_419  = 419; // 1.16.100.59
 	const PROTOCOL_422  = 422; // 1.16.200.56
 	const PROTOCOL_423  = 423; // 1.16.210.50
 	const PROTOCOL_428  = 428; // 1.16.210.50
 	const PROTOCOL_431  = 431; // 1.16.220.52
-	/** OUTDATED (supporting will be removed with next release, may didn't work properly)*/
-	const PROTOCOL_120 = 120; // 1.2.0.xx (beta)
-//	const PROTOCOL_121 = 121; // 1.2.0.xx (beta)
-//	const PROTOCOL_130 = 130; // 1.2.0.xx (beta)
-//	const PROTOCOL_131 = 131; // 1.2.0.xx (beta)
-//	const PROTOCOL_132 = 132; // 1.2.0.15 (beta)
-//	const PROTOCOL_133 = 133; // 1.2.0.18 (beta)
 
 	/**
 	 * Minecraft: PE packets
@@ -135,8 +61,8 @@ interface Info{
 	const RIDER_JUMP_PACKET = 0x14;
 	const UPDATE_BLOCK_PACKET = 0x15;
 	const ADD_PAINTING_PACKET = 0x16;
-	const EXPLODE_PACKET = 0x17;
-	const LEVEL_SOUND_EVENT_PACKET = 0x18;
+	const TICK_SYNC_PACKET = 0x17;
+
 	const LEVEL_EVENT_PACKET = 0x19;
 	const TILE_EVENT_PACKET = 0x1a;
 	const ENTITY_EVENT_PACKET = 0x1b;
@@ -218,6 +144,7 @@ interface Info{
 	const SERVER_SETTINGS_RESPONSE_PACKET = 0x67;			// NEW
 	const SHOW_PROFILE_PACKET = 0x68;						// NEW
 	const SET_DEFAULT_GAME_TYPE_PACKET = 0x69;				// NEW
+	const LEVEL_SOUND_EVENT_PACKET = 0x7b;
 	const PLAYER_ENCHANT_OPTIONS_PACKET = 0x92;				// NEW 406 || 407
 	const ITEM_COMPONENT_PACKET = 0xA2; 					// NEW 419
 	const CREATIVE_CONTENT_PACKET = 0x91; 					// NEW 419

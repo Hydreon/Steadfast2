@@ -456,24 +456,22 @@ class BinaryStream {
 			$uniqId = $skinId . $skinGeometryName . "-" . microtime(true);
 			$this->putString($uniqId); // Full Skin ID	
 		}
-		if ($playerProtocol == Info::PROTOCOL_390 || $playerProtocol >= Info::PROTOCOL_406) {
-			$this->putString($additionalSkinData['ArmSize']??''); //ArmSize
-			$this->putString($additionalSkinData['SkinColor']??''); //SkinColor			
-			$this->putLInt(isset($additionalSkinData['PersonaPieces'])?count($additionalSkinData['PersonaPieces']):0);   //Persona Pieces -> more info to come
-			foreach ($additionalSkinData['PersonaPieces']??[] as $piece) {
-				$this->putString($piece['PieceId']);
-				$this->putString($piece['PieceType']);
-				$this->putString($piece['PackId']);
-				$this->putBool($piece['IsDefaultPiece']);
-				$this->putString($piece['ProductId']);
-			}
-			$this->putLInt(isset($additionalSkinData['PieceTintColors'])?count($additionalSkinData['PieceTintColors']):0); //PieceTintColors -> more info to come
-			foreach ($additionalSkinData['PieceTintColors']??[] as $tint) {
-				$this->putString($tint['PieceType']);
-				$this->putLInt(count($tint['Colors']));
-				foreach($tint['Colors'] as $color){
-					$this->putString($color);
-				}
+		$this->putString($additionalSkinData['ArmSize']??''); //ArmSize
+		$this->putString($additionalSkinData['SkinColor']??''); //SkinColor
+		$this->putLInt(isset($additionalSkinData['PersonaPieces'])?count($additionalSkinData['PersonaPieces']):0);   //Persona Pieces -> more info to come
+		foreach ($additionalSkinData['PersonaPieces']??[] as $piece) {
+			$this->putString($piece['PieceId']);
+			$this->putString($piece['PieceType']);
+			$this->putString($piece['PackId']);
+			$this->putBool($piece['IsDefaultPiece']);
+			$this->putString($piece['ProductId']);
+		}
+		$this->putLInt(isset($additionalSkinData['PieceTintColors'])?count($additionalSkinData['PieceTintColors']):0); //PieceTintColors -> more info to come
+		foreach ($additionalSkinData['PieceTintColors']??[] as $tint) {
+			$this->putString($tint['PieceType']);
+			$this->putLInt(count($tint['Colors']));
+			foreach($tint['Colors'] as $color){
+				$this->putString($color);
 			}
 		}
 	}
@@ -520,38 +518,36 @@ class BinaryStream {
 		
 		$additionalSkinData['CapeId'] = $this->getString();
 		$additionalSkinData['FullSkinId'] = $this->getString(); // Full Skin ID
-		if ($playerProtocol == Info::PROTOCOL_390 || $playerProtocol >= Info::PROTOCOL_406) {
 
-			$additionalSkinData['ArmSize'] = $this->getString();
-			$additionalSkinData['SkinColor'] = $this->getString();
-			$personaPieceCount = $this->getLInt();
-			$personaPieces = [];
-			for($i = 0; $i < $personaPieceCount; ++$i){
-				$personaPieces[] = [
-					'PieceId' => $this->getString(),
-					'PieceType' => $this->getString(),
-					'PackId' => $this->getString(),
-					'IsDefaultPiece' => $this->getByte(),
-					'ProductId' => $this->getString()
-				];
+		$additionalSkinData['ArmSize'] = $this->getString();
+		$additionalSkinData['SkinColor'] = $this->getString();
+		$personaPieceCount = $this->getLInt();
+		$personaPieces = [];
+		for($i = 0; $i < $personaPieceCount; ++$i){
+			$personaPieces[] = [
+				'PieceId' => $this->getString(),
+				'PieceType' => $this->getString(),
+				'PackId' => $this->getString(),
+				'IsDefaultPiece' => $this->getByte(),
+				'ProductId' => $this->getString()
+			];
+		}
+		$additionalSkinData['PersonaPieces'] = $personaPieces;
+		$pieceTintColorCount = $this->getLInt();
+		$pieceTintColors = [];
+		for($i = 0; $i < $pieceTintColorCount; ++$i){
+			$pieceType = $this->getString();
+			$colorCount = $this->getLInt();
+			$colors = [];
+			for($j = 0; $j < $colorCount; ++$j){
+				$colors[] = $this->getString();
 			}
-			$additionalSkinData['PersonaPieces'] = $personaPieces;
-			$pieceTintColorCount = $this->getLInt();
-			$pieceTintColors = [];		
-			for($i = 0; $i < $pieceTintColorCount; ++$i){
-				$pieceType = $this->getString();
-				$colorCount = $this->getLInt();
-				$colors = [];
-				for($j = 0; $j < $colorCount; ++$j){
-					$colors[] = $this->getString();
-				}
-				$pieceTintColors[] = [
-					'PieceType' => $pieceType,
-					'Colors' => $colors
-				];
-			}
-			$additionalSkinData['PieceTintColors'] = $pieceTintColors;
-		}	
+			$pieceTintColors[] = [
+				'PieceType' => $pieceType,
+				'Colors' => $colors
+			];
+		}
+		$additionalSkinData['PieceTintColors'] = $pieceTintColors;
 	}
 
 	public function checkSkinData(&$skinData, &$skinGeometryName, &$skinGeometryData, &$additionalSkinData) {

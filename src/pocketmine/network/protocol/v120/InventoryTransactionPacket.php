@@ -3,13 +3,13 @@
 namespace pocketmine\network\protocol\v120;
 
 use pocketmine\inventory\transactions\SimpleTransactionData;
-use pocketmine\network\protocol\Info120;
-use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\Info;
+use pocketmine\network\protocol\Info331;
+use pocketmine\network\protocol\PEPacket;
 
 class InventoryTransactionPacket extends PEPacket {
 
-	const NETWORK_ID = Info120::INVENTORY_TRANSACTION_PACKET;
+	const NETWORK_ID = Info331::INVENTORY_TRANSACTION_PACKET;
 	const PACKET_NAME = "INVENTORY_TRANSACTION_PACKET";
 	
 	const TRANSACTION_TYPE_NORMAL = 0;
@@ -50,7 +50,7 @@ class InventoryTransactionPacket extends PEPacket {
 
 	public function decode($playerProtocol) {	
 		$this->getHeader($playerProtocol);
-		if ($playerProtocol >= Info::PROTOCOL_392) {
+		if ($playerProtocol >= Info::PROTOCOL_419) {
 			$unknown = $this->getVarInt();
 			if ($unknown != 0) {
 				$count = $this->getVarInt();
@@ -102,7 +102,7 @@ class InventoryTransactionPacket extends PEPacket {
 			$tr->slot = $this->getVarInt();
 			$tr->oldItem = $this->getSlot($playerProtocol);
 			$tr->newItem = $this->getSlot($playerProtocol);	
-			if ($playerProtocol == Info::PROTOCOL_392) {
+			if ($playerProtocol == Info::PROTOCOL_419) {
 				$this->getByte();
 			}
 			$transactions[] = $tr;

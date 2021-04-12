@@ -2,13 +2,13 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\network\protocol\Info120;
-use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\Info;
+use pocketmine\network\protocol\Info331;
+use pocketmine\network\protocol\PEPacket;
 
 class InventorySlotPacket extends PEPacket {
 	
-	const NETWORK_ID = Info120::INVENTORY_SLOT_PACKET;
+	const NETWORK_ID = Info331::INVENTORY_SLOT_PACKET;
 	const PACKET_NAME = "INVENTORY_SLOT_PACKET";
 	
 	/** @var integer */
@@ -27,12 +27,12 @@ class InventorySlotPacket extends PEPacket {
 		$this->putVarInt($this->containerId);
 		$this->putVarInt($this->slot);				
 		if ($this->item == null) {
-			if ($playerProtocol >= Info::PROTOCOL_392 && $playerProtocol <= Info::PROTOCOL_428) {
+			if ($playerProtocol >= Info::PROTOCOL_419 && $playerProtocol <= Info::PROTOCOL_428) {
 				$this->putSignedVarInt(0);
 			}
 			$this->putSignedVarInt(0);
 		} else {
-			if ($playerProtocol >= Info::PROTOCOL_392 && $playerProtocol <= Info::PROTOCOL_428) {
+			if ($playerProtocol >= Info::PROTOCOL_419 && $playerProtocol <= Info::PROTOCOL_428) {
 				$this->putSignedVarInt(1);
 			}
 			$this->putSlot($this->item, $playerProtocol);

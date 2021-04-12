@@ -2,12 +2,12 @@
 
 namespace pocketmine\network\protocol\v310;
 
-use pocketmine\network\protocol\Info310;
+use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\PEPacket;
 
 class SetDisplayObjectivePacket extends PEPacket {
 
-	const NETWORK_ID = Info310::SET_DISPLAY_OBJECTIVE_PACKET;
+	const NETWORK_ID = Info331::SET_DISPLAY_OBJECTIVE_PACKET;
 	const PACKET_NAME = "SET_DISPLAY_OBJECTIVE_PACKET";
 	const SORT_ASC = 0;
 	const SORT_DESC = 1;

@@ -24,9 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 #ifndef COMPILE
-use pocketmine\utils\Binary;
 use pocketmine\entity\Entity;
 use pocketmine\Player;
+use pocketmine\utils\Binary;
 
 #endif
 
@@ -63,20 +63,14 @@ class AddPlayerPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putUUID($this->uuid);
 		//hack for display name 200+ protocol
-		if ($playerProtocol >= Info::PROTOCOL_200 && !empty($this->metadata[Entity::DATA_NAMETAG])) {
+		if (!empty($this->metadata[Entity::DATA_NAMETAG])) {
 			$this->putString($this->metadata[Entity::DATA_NAMETAG][1]);
 		} else {
 			$this->putString($this->username);
 		}
-		if ($playerProtocol >= Info::PROTOCOL_200  && $playerProtocol < Info::PROTOCOL_290) {
-			$this->putString(""); // third party name
-			$this->putSignedVarInt(0); // platform id
-		}
 		$this->putEntityUniqueId($this->eid);
 		$this->putEntityRuntimeId($this->eid);
-		if ($playerProtocol >= Info::PROTOCOL_200) {
-			$this->putString(""); // platform chat id
-		}
+		$this->putString(""); // platform chat id
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
@@ -103,17 +97,11 @@ class AddPlayerPacket extends PEPacket{
 			$this->putVarInt($link['from']);
 			$this->putVarInt($link['to']);
 			$this->putByte($link['type']);
-			$this->putByte(0); //immediate 
-			if ($playerProtocol >= Info::PROTOCOL_406) {
-				$this->putByte(0);//whether the link was changes by the rider
-			}			
+			$this->putByte(0); //immediate
+			$this->putByte(0);//whether the link was changes by the rider
 		}
-		if ($playerProtocol >= Info::PROTOCOL_282) {
-			$this->putString($this->uuid->toString());
-		}
-		if ($playerProtocol >= Info::PROTOCOL_385) {
-			$this->putLInt($this->buildPlatform);
-		}
+		$this->putString($this->uuid->toString());
+		$this->putLInt($this->buildPlatform);
 	}
 
 }

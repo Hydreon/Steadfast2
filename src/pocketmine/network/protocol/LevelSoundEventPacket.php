@@ -2,8 +2,8 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\network\multiversion\MultiversionEnums;
 use pocketmine\network\multiversion\Entity;
+use pocketmine\network\multiversion\MultiversionEnums;
 
 class LevelSoundEventPacket extends PEPacket {
 
@@ -38,28 +38,20 @@ class LevelSoundEventPacket extends PEPacket {
 
 	public function decode($playerProtocol) {
 		$this->getHeader($playerProtocol);
-		$this->eventId = $this->getByte();
+		$this->eventId = $this->getVarInt();
 		$this->eventId = MultiversionEnums::getLevelSoundEventName($playerProtocol, $this->eventId);
 		$this->x = $this->getLFloat();
 		$this->y = $this->getLFloat();
 		$this->z = $this->getLFloat();
-		if ($playerProtocol >= Info::PROTOCOL_220) {
-			$runtimeId = $this->getSignedVarInt();
-			if ($runtimeId < 0) {
-				$this->blockId = -1;
-			} else {
-				$blockData = self::getBlockIDByRuntime($runtimeId, $playerProtocol);
-				$this->blockId = $blockData[0];
-			}
+		$runtimeId = $this->getSignedVarInt();
+		if ($runtimeId < 0) {
+			$this->blockId = -1;
 		} else {
-			$this->blockId = $this->getSignedVarInt();
-		}	
-		if ($playerProtocol >= Info::PROTOCOL_310) {
-			$entityName = $this->getString();
-			$this->entityType = Entity::getIDByName($entityName);
-		} else {
-			$this->entityType = $this->getSignedVarInt();
+			$blockData = self::getBlockIDByRuntime($runtimeId, $playerProtocol);
+			$this->blockId = $blockData[0];
 		}
+		$entityName = $this->getString();
+		$this->entityType = Entity::getIDByName($entityName);
 		$this->babyMob = $this->getByte();
 		$this->global = $this->getByte();
 	}
@@ -67,33 +59,21 @@ class LevelSoundEventPacket extends PEPacket {
 	public function encode($playerProtocol) {
 		$this->reset($playerProtocol);
 		$eventId = MultiversionEnums::getLevelSoundEventId($playerProtocol, $this->eventId);
-		if ($playerProtocol >= Info::PROTOCOL_332) {
-			$this->putVarInt($eventId);
-		} else {
-			$this->putByte($eventId);
-		}
+		$this->putVarInt($eventId);
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
 		if (is_null($this->customData)) {
-			if ($playerProtocol >= Info::PROTOCOL_220) {
-				if ($this->blockId < 0) {
-					$this->putSignedVarInt($this->blockId);
-				} else {
-					$runtimeId = self::getBlockRuntimeID($this->blockId, 0, $playerProtocol);
-					$this->putSignedVarInt($runtimeId);
-				}
-			} else {
+			if ($this->blockId < 0) {
 				$this->putSignedVarInt($this->blockId);
+			} else {
+				$runtimeId = self::getBlockRuntimeID($this->blockId, 0, $playerProtocol);
+				$this->putSignedVarInt($runtimeId);
 			}
 		} else {
 			$this->putSignedVarInt($this->customData);
 		}
-		if ($playerProtocol >= Info::PROTOCOL_310) {
-			$this->putString(Entity::getNameByID($this->entityType));
-		} else {
-			$this->putSignedVarInt($this->entityType);
-		}
+		$this->putString(Entity::getNameByID($this->entityType));
 		$this->putByte($this->babyMob);
 		$this->putByte($this->global);
 	}
