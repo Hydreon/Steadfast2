@@ -4,6 +4,8 @@ namespace pocketmine\utils;
 
 use pocketmine\item\Item;
 use pocketmine\nbt\NBT;
+use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\PEPacket;
 use pocketmine\Player;
@@ -250,7 +252,14 @@ class BinaryStream {
 			$nbtTag->read(substr($buffer->getBuffer(), $offset), false, false);
 			$nbt = $nbtTag->getData();
 			$buffer->setOffset($offset + $nbtTag->getOffset());
-			
+
+			if(isset($nbt->___Meta___) && $nbt->___Meta___ instanceof IntTag){
+				//TODO HACK: This foul-smelling code ensures that we can correctly deserialize an item when the
+				//client sends it back to us, because as of 1.16.220, blockitems quietly discard their metadata
+				//client-side. Aside from being very annoying, this also breaks various server-side behaviours.
+				$meta = $nbt->___Meta___->getValue();
+				unset($nbt->___Meta___);
+			}
 		}elseif($nbtLen !== 0){
 			throw new \Exception("Unexpected fake NBT length $nbtLen");
 		}
@@ -290,11 +299,25 @@ class BinaryStream {
 		
 		$this->putString((static function() use ($item) {
 			$buffer = new BinaryStream();
-			$nbt = $item->getCompound();
-			if ($nbt !== null && $nbt !== "") {
+			$nbt = $item->getNamedTag();
+			if($item->getDamage() !== 0){
+				//TODO HACK: This foul-smelling code ensures that we can correctly deserialize an item when the
+				//client sends it back to us, because as of 1.16.220, blockitems quietly discard their metadata
+				//client-side. Aside from being very annoying, this also breaks various server-side behaviours.
+				if($nbt === null){
+					$nbt = new Compound();
+				}
+				$nbt->___Meta___ = new IntTag("___Meta___", $item->getDamage());
+			}
+			if ($nbt !== null) {
 				$buffer->putLShort(0xffff);
 				$buffer->putByte(1);
-				$buffer->put($nbt);
+				$nbtWriter = new NBT(NBT::LITTLE_ENDIAN);
+				$nbtWriter->setData($nbt);
+				$buffer->put($nbtWriter->write(true));
+
+				//steadfast doesn't support deep-cloning of CompoundTags, so this might be the item's actual cachedNBT
+				unset($nbt->___Meta___);
 			}else {
 				$buffer->putLShort(0);
 			}
