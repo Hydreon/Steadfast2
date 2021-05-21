@@ -196,6 +196,9 @@ class StartGamePacket extends PEPacket{
 		
 		$this->putString($this->multiplayerCorrelationId); //multiplayerCorrelationId
 		$this->putByte(0); // Whether the new item stack net manager is enabled for server authoritative inventory
+		if ($playerProtocol >= Info::PROTOCOL_440) {
+			$this->putString(''); //server version
+		}
 	}
 
 	static protected function getItemsList() {
