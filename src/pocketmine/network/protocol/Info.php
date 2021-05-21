@@ -28,7 +28,7 @@ namespace pocketmine\network\protocol;
 interface Info{
 
 	const CURRENT_PROTOCOL = 120;
-	const ACCEPTED_PROTOCOLS = [419, 422, 423, 428, 431];
+	const ACCEPTED_PROTOCOLS = [419, 422, 423, 428, 431, 440];
 
 	
 	const PROTOCOL_134 = 134; // 1.2.0.20, 1.2.0.22
@@ -102,6 +102,7 @@ interface Info{
 	const PROTOCOL_423  = 423; // 1.16.210.50
 	const PROTOCOL_428  = 428; // 1.16.210.50
 	const PROTOCOL_431  = 431; // 1.16.220.52
+	const PROTOCOL_440  = 440;
 	/** OUTDATED (supporting will be removed with next release, may didn't work properly)*/
 	const PROTOCOL_120 = 120; // 1.2.0.xx (beta)
 //	const PROTOCOL_121 = 121; // 1.2.0.xx (beta)
