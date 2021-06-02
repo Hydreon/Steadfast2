@@ -119,6 +119,9 @@ class StartGamePacket extends PEPacket{
 		$this->putVarInt(count(self::$defaultRules)); // rules count
 		foreach (self::$defaultRules as $rule) {
 			$this->putString($rule['name']);
+			if ($playerProtocol >= Info::PROTOCOL_440) {
+				$this->putVarInt(0);
+			}
 			$this->putVarInt($rule['type']);
 			switch ($rule['type']) {
 				case 1:
