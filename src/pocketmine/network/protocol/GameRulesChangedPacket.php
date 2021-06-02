@@ -30,6 +30,7 @@ class GameRulesChangedPacket extends PEPacket{
 
 	/** @var array */
 	public $gameRules = [];
+	private $playerProtocol = 0;
 
 	public function decode($playerProtocol){
 		$this->getHeader($playerProtocol);
@@ -38,6 +39,7 @@ class GameRulesChangedPacket extends PEPacket{
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
+		$this->playerProtocol = $playerProtocol;
 		$this->putGameRules($this->gameRules);
 	}
 		/**
@@ -50,6 +52,9 @@ class GameRulesChangedPacket extends PEPacket{
 		$this->putVarInt(count($rules));
 		foreach($rules as $name => $rule){
 			$this->putString($name);
+			if ($this->playerProtocol >= Info::PROTOCOL_440) {
+				$this->putVarInt(0);
+			}
 			$this->putVarInt($rule[0]);
 			switch($rule[0]){
 				case 1:
