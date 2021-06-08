@@ -186,11 +186,11 @@ class StartGamePacket extends PEPacket{
 
         
 		if ($playerProtocol >= Info::PROTOCOL_419) {
-			$itemsData = self::getItemsList();
+			$itemsData = self::getItemsList($playerProtocol);
 			$this->putVarInt(count($itemsData));
 			foreach ($itemsData as $name => $id) {
 				$this->putString($name);
-				$this->putLShort($id);
+				$this->putLShort(is_array($id)?$id['runtime_id']:$id);
 				$this->putByte(0);
 			}
 		} else {
@@ -204,11 +204,15 @@ class StartGamePacket extends PEPacket{
 		}
 	}
 
-	static protected function getItemsList() {
+	static protected function getItemsList($playerProtocol) {
 		if (!empty(self::$itemsList)) {
 			return self::$itemsList;
 		} else {
 			$path = __DIR__ . "/data/Items.json";
+			if ($playerProtocol >= Info::PROTOCOL_440) {
+				$path = __DIR__ . "/data/Items440.json";
+			}
+			
 			self::$itemsList = json_decode(file_get_contents($path), true);
 			return self::$itemsList;
 		}
