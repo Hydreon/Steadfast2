@@ -119,6 +119,9 @@ class StartGamePacket extends PEPacket{
 		$this->putVarInt(count(self::$defaultRules)); // rules count
 		foreach (self::$defaultRules as $rule) {
 			$this->putString($rule['name']);
+			if ($playerProtocol >= Info::PROTOCOL_440) {
+				$this->putVarInt(0);
+			}
 			$this->putVarInt($rule['type']);
 			switch ($rule['type']) {
 				case 1:
@@ -183,11 +186,11 @@ class StartGamePacket extends PEPacket{
 
         
 		if ($playerProtocol >= Info::PROTOCOL_419) {
-			$itemsData = self::getItemsList();
+			$itemsData = self::getItemsList($playerProtocol);
 			$this->putVarInt(count($itemsData));
 			foreach ($itemsData as $name => $id) {
 				$this->putString($name);
-				$this->putLShort($id);
+				$this->putLShort(is_array($id)?$id['runtime_id']:$id);
 				$this->putByte(0);
 			}
 		} else {
@@ -196,9 +199,12 @@ class StartGamePacket extends PEPacket{
 		
 		$this->putString($this->multiplayerCorrelationId); //multiplayerCorrelationId
 		$this->putByte(0); // Whether the new item stack net manager is enabled for server authoritative inventory
+		if ($playerProtocol >= Info::PROTOCOL_440) {
+			$this->putString(''); //server version
+		}
 	}
 
-	static protected function getItemsList() {
+	static protected function getItemsList($playerProtocol) {
 		if (!empty(self::$itemsList)) {
 			return self::$itemsList;
 		} else {
