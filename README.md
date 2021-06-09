@@ -37,7 +37,7 @@ To install Steadfast2 on Windows OS please follow the instructions below.
 
 2) Next, you need to run the PocketMine installer then follow the instructions provide in the installer. 
 
-3) Then you need to navigate to your user's documents file, and delete PocketMine-MP.phar.
+3) Then you need to navigate to your user's documents file, and delete PocketMine-MP.phar
 
 4) Finally, you need to move Steadfast2.phar into the directory above and run start.cmd.
 
