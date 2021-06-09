@@ -45,32 +45,16 @@ class MoveEntityPacket extends PEPacket{
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$data = array_shift($this->entities);
-		if ($playerProtocol >= Info::PROTOCOL_273) {
-			$this->putEntityRuntimeId($data[0]); //eid
-			$flags = 0;
-			$flags |= 1 << 7;// is on ground?
-//			$flags |= 0 << 6;// has teleported?
-			if ($playerProtocol >= Info::PROTOCOL_274) {
-				$this->putByte($flags);
-			} else {
-				$this->putLShort($flags);
-			}
-			$this->putLFloat($data[1]); //x
-			$this->putLFloat($data[2]); //y
-			$this->putLFloat($data[3]); //z
-			$this->putByte($data[6] * 0.71111); //pitch
-			$this->putByte($data[4] * 0.71111); //yaw
-			$this->putByte($data[5] * 0.71111); //headYaw	
-		} else {
-			$this->putEntityRuntimeId($data[0]); //eid
-			$this->putLFloat($data[1]); //x
-			$this->putLFloat($data[2]); //y
-			$this->putLFloat($data[3]); //z
-			$this->putByte($data[6] * 0.71111); //pitch
-			$this->putByte($data[5] * 0.71111); //headYaw
-			$this->putByte($data[4] * 0.71111); //yaw
-			$this->putByte(true); // is on ground?
-			$this->putByte(false); // has teleported?
-		}
+		$this->putEntityRuntimeId($data[0]); //eid
+		$flags = 0;
+		$flags |= 1 << 7;// is on ground?
+//		$flags |= 0 << 6;// has teleported?
+		$this->putByte($flags);
+		$this->putLFloat($data[1]); //x
+		$this->putLFloat($data[2]); //y
+		$this->putLFloat($data[3]); //z
+		$this->putByte($data[6] * 0.71111); //pitch
+		$this->putByte($data[4] * 0.71111); //yaw
+		$this->putByte($data[5] * 0.71111); //headYaw
 	}
 }

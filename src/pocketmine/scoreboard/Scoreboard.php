@@ -2,11 +2,10 @@
 
 namespace pocketmine\scoreboard;
 
-use pocketmine\network\protocol\v310\SetDisplayObjectivePacket;
 use pocketmine\network\protocol\v310\RemoveObjectivePacket;
+use pocketmine\network\protocol\v310\SetDisplayObjectivePacket;
 use pocketmine\network\protocol\v310\SetScorePacket;
 use pocketmine\Server;
-use pocketmine\network\protocol\Info;
 
 class Scoreboard {
 
@@ -48,9 +47,6 @@ class Scoreboard {
 	}
 
 	public function addPlayer($player) {
-		if ($player->getPlayerProtocol() < Info::PROTOCOL_310) {
-			return;
-		}
 		if (!isset($this->players[$player->getId()])) {
 			if (!is_null($oldScoreboard = $player->getScoreboard())) {
 				$oldScoreboard->removePlayer($player);

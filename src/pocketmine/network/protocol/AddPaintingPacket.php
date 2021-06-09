@@ -41,15 +41,9 @@ class AddPaintingPacket extends PEPacket {
 		$this->reset($playerProtocol);
 		$this->putEntityUniqueId($this->eid);
 		$this->putEntityRuntimeId($this->eid);
-		if ($playerProtocol >= Info::PROTOCOL_360) {
-			$this->putLFloat($this->x);
-			$this->putLFloat($this->y);
-			$this->putLFloat($this->z);
-		} else {
-			$this->putSignedVarInt($this->x);
-			$this->putVarInt($this->y);
-			$this->putSignedVarInt($this->z);
-		}
+		$this->putLFloat($this->x);
+		$this->putLFloat($this->y);
+		$this->putLFloat($this->z);
 		$this->putSignedVarInt($this->direction);
 		$this->putString($this->title);
 	}

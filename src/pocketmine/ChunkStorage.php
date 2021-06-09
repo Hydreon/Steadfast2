@@ -2,10 +2,9 @@
 
 namespace pocketmine;
 
-use pocketmine\utils\Binary;
-use pocketmine\network\protocol\FullChunkDataPacket;
-use pocketmine\network\protocol\Info;
 use pocketmine\level\Level;
+use pocketmine\network\protocol\FullChunkDataPacket;
+use pocketmine\utils\Binary;
 
 class ChunkStorage {
 
@@ -70,9 +69,6 @@ class ChunkStorage {
 					}
 					$chunkData .= $blockData;
 				}
-			}
-			if ($protocol < Info::PROTOCOL_360) {
-				$chunkData .= $data['chunk']['heightMap'];
 			}
 			$chunkData .= $data['chunk']['biomeColor'] . Binary::writeByte(0) . Binary::writeSignedVarInt(0) . implode('', $data['tiles']);
 		} else {

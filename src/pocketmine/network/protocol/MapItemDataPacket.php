@@ -2,8 +2,6 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\network\protocol\Info;
-
 class MapItemDataPacket extends PEPacket {
 
 	const NETWORK_ID = Info::CLIENTBOUND_MAP_ITEM_DATA_PACKET;
@@ -31,9 +29,7 @@ class MapItemDataPacket extends PEPacket {
 		$this->putSignedVarInt($this->mapId);
 		$this->putVarInt($this->flags);
 		$this->putByte(0); // dimension
-		if ($playerProtocol >= Info::PROTOCOL_351) {
-			$this->putByte($this->isLockedMap);
-		}
+		$this->putByte($this->isLockedMap);
 		switch ($this->flags) {
 			case 2:
 				$this->putByte($this->scale);
@@ -55,9 +51,7 @@ class MapItemDataPacket extends PEPacket {
 				}
 				$this->putVarInt($entityCount);
 				foreach ($this->entityIds as $entityId) {
-					if ($playerProtocol >= Info::PROTOCOL_271) {
-						$this->putLInt(self::TRACKED_OBJECT_TYPE_ENTITY);
-					}
+					$this->putLInt(self::TRACKED_OBJECT_TYPE_ENTITY);
 					$this->putSignedVarInt($entityId);
 				}
 				$this->putVarInt(count($this->pointners));

@@ -223,52 +223,7 @@ class MetadataConvertor {
             case Info::PROTOCOL_423:
             case Info::PROTOCOL_422:
             case Info::PROTOCOL_419:
-            case Info::PROTOCOL_408:
-            case Info::PROTOCOL_407:
-            case Info::PROTOCOL_406:
-			case Info::PROTOCOL_400:
-			case Info::PROTOCOL_393:
-			case Info::PROTOCOL_392:
-			case Info::PROTOCOL_390:
-			case Info::PROTOCOL_389:
-			case Info::PROTOCOL_386:
-			case Info::PROTOCOL_385:
-			case Info::PROTOCOL_370:
-			case Info::PROTOCOL_361:
-			case Info::PROTOCOL_360:
 				$protocolMeta = self::$entityMetaIds360;
-				break;
-			case Info::PROTOCOL_354:
-				$protocolMeta = self::$entityMetaIds354;
-				break;
-			case Info::PROTOCOL_351:
-			case Info::PROTOCOL_350:
-			case Info::PROTOCOL_342:
-			case Info::PROTOCOL_340:
-				$protocolMeta = self::$entityMetaIds340;
-				break;
-			case Info::PROTOCOL_332:
-			case Info::PROTOCOL_331:
-			case Info::PROTOCOL_330:
-			case Info::PROTOCOL_311:
-			case Info::PROTOCOL_310:
-			case Info::PROTOCOL_290:
-			case Info::PROTOCOL_282:
-			case Info::PROTOCOL_280:
-			case Info::PROTOCOL_274:
-			case Info::PROTOCOL_273:
-			case Info::PROTOCOL_271:
-			case Info::PROTOCOL_260:
-			case Info::PROTOCOL_240:
-			case Info::PROTOCOL_221:
-				$protocolMeta = self::$entityMetaIds221;
-				break;
-			case Info::PROTOCOL_220:
-				$protocolMeta = self::$entityMetaIds220;
-				break;
-			case Info::PROTOCOL_120:
-			case Info::PROTOCOL_200:			
-				$protocolMeta = self::$entityMetaIds120;
 				break;
 			default:
 				throw new \InvalidArgumentException("Unknown protocol $protocol");
@@ -295,49 +250,8 @@ class MetadataConvertor {
             case Info::PROTOCOL_423:
             case Info::PROTOCOL_422:
             case Info::PROTOCOL_419:
-            case Info::PROTOCOL_408:
-            case Info::PROTOCOL_407:
-            case Info::PROTOCOL_406:
-			case Info::PROTOCOL_400:
-			case Info::PROTOCOL_393:
-			case Info::PROTOCOL_392:
-			case Info::PROTOCOL_390:
-			case Info::PROTOCOL_389:
-			case Info::PROTOCOL_386:
-			case Info::PROTOCOL_385:
-			case Info::PROTOCOL_370:
-			case Info::PROTOCOL_361:
-			case Info::PROTOCOL_360:
-			case Info::PROTOCOL_354:
-			case Info::PROTOCOL_351:
-			case Info::PROTOCOL_350:
-			case Info::PROTOCOL_342:
-			case Info::PROTOCOL_340:
-			case Info::PROTOCOL_332:
-			case Info::PROTOCOL_331:
-			case Info::PROTOCOL_330:
-			case Info::PROTOCOL_311:
-			case Info::PROTOCOL_310:
-			case Info::PROTOCOL_290:
 				$newflags = 1 << 19; //DATA_FLAG_CAN_CLIMBING
 				$protocolFlags = self::$entityFlags290;
-				break;
-			case Info::PROTOCOL_282:
-			case Info::PROTOCOL_280:
-			case Info::PROTOCOL_274:
-			case Info::PROTOCOL_273:
-			case Info::PROTOCOL_271:
-			case Info::PROTOCOL_260:
-			case Info::PROTOCOL_240:
-			case Info::PROTOCOL_221:
-				$newflags = 1 << 19; //DATA_FLAG_CAN_CLIMBING
-				$protocolFlags = self::$entityFlags221;
-				break;
-			case Info::PROTOCOL_120:
-			case Info::PROTOCOL_200:
-			case Info::PROTOCOL_220:
-				$newflags = 1 << 19; //DATA_FLAG_CAN_CLIMBING
-				$protocolFlags = self::$entityFlags120;
 				break;
 			default:
 				throw new \InvalidArgumentCountException("Unknown protocol $protocol");

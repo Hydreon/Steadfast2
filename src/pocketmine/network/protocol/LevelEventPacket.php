@@ -87,21 +87,17 @@ class LevelEventPacket extends PEPacket{
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
-		if ($playerProtocol >= Info::PROTOCOL_220) {
-			switch ($this->evid) {
-				case self::EVENT_PARTICLE_DESTROY:
-				case self::EVENT_PARTICLE_CRACK_BLOCK:
-					$id = $this->data & 0xff;
-					$meta = ($this->data >> 8) & 0x0f;
-					$runtimeId = self::getBlockRuntimeID($id, $meta, $playerProtocol);
-					$this->putSignedVarInt($runtimeId);
-					break;
-				default :
-					$this->putSignedVarInt($this->data);
-					break;
-			}
-		} else {		
-			$this->putSignedVarInt($this->data);
+		switch ($this->evid) {
+			case self::EVENT_PARTICLE_DESTROY:
+			case self::EVENT_PARTICLE_CRACK_BLOCK:
+				$id = $this->data & 0xff;
+				$meta = ($this->data >> 8) & 0x0f;
+				$runtimeId = self::getBlockRuntimeID($id, $meta, $playerProtocol);
+				$this->putSignedVarInt($runtimeId);
+				break;
+			default :
+				$this->putSignedVarInt($this->data);
+				break;
 		}
 	}
 

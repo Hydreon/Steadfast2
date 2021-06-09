@@ -2,12 +2,12 @@
 
 namespace pocketmine\network\protocol\v310;
 
-use pocketmine\network\protocol\Info310;
+use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\PEPacket;
 
 class SetScorePacket extends PEPacket {
 
-	const NETWORK_ID = Info310::SET_SCORE_PACKET;
+	const NETWORK_ID = Info331::SET_SCORE_PACKET;
 	const PACKET_NAME = "SET_SCORE_PACKET";
 	const TYPE_CHANGE = 0;
 	const TYPE_REMOVE = 1;

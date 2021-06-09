@@ -41,10 +41,8 @@ class ResourcePackDataInfoPacket extends PEPacket {
 		$this->putLInt(ceil($this->fileSize / self::MAX_CHUNK_SIZE)); // chunks count
 		$this->putLLong($this->fileSize);
 		$this->putString($this->modFileHash);
-		if ($playerProtocol >= Info::PROTOCOL_360) {
-			$this->putByte($this->isPremium);
-			$this->putByte(MultiversionEnums::getPackTypeId($playerProtocol, $this->type));
-		}
+		$this->putByte($this->isPremium);
+		$this->putByte(MultiversionEnums::getPackTypeId($playerProtocol, $this->type));
 	}
 
 }

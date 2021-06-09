@@ -22,7 +22,6 @@
 namespace pocketmine\network\protocol;
 
 use pocketmine\network\multiversion\MultiversionEnums;
-use pocketmine\network\protocol\Info;
 use pocketmine\utils\BinaryStream;
 
 class AvailableCommandsPacket extends PEPacket{
@@ -70,27 +69,6 @@ class AvailableCommandsPacket extends PEPacket{
 		$enums = [];
 		$enumsCount = 0;
 		$commandsStreams = [
-			Info::PROTOCOL_120 => new BinaryStream(),
-			Info::PROTOCOL_271 => new BinaryStream(),
-			Info::PROTOCOL_280 => new BinaryStream(),
-			Info::PROTOCOL_340 => new BinaryStream(),
-			Info::PROTOCOL_342 => new BinaryStream(),
-			Info::PROTOCOL_350 => new BinaryStream(),
-			Info::PROTOCOL_351 => new BinaryStream(),
-			Info::PROTOCOL_354 => new BinaryStream(),
-			Info::PROTOCOL_360 => new BinaryStream(),
-			Info::PROTOCOL_361 => new BinaryStream(),
-			Info::PROTOCOL_370 => new BinaryStream(),
-			Info::PROTOCOL_385 => new BinaryStream(),
-			Info::PROTOCOL_386 => new BinaryStream(),
-			Info::PROTOCOL_389 => new BinaryStream(),
-			Info::PROTOCOL_390 => new BinaryStream(),
-			Info::PROTOCOL_392 => new BinaryStream(),
-			Info::PROTOCOL_393 => new BinaryStream(),
-			Info::PROTOCOL_400 => new BinaryStream(),
-			Info::PROTOCOL_406 => new BinaryStream(),
-			Info::PROTOCOL_407 => new BinaryStream(),
-			Info::PROTOCOL_408 => new BinaryStream(),
 			Info::PROTOCOL_419 => new BinaryStream(),
 		];
 		
@@ -154,9 +132,7 @@ class AvailableCommandsPacket extends PEPacket{
 							$commandsStreams[$protocol]->putLInt(self::ARG_FLAG_VALID | self::getFlag($paramData['type'], $protocol));
                         }
 						$commandsStreams[$protocol]->putByte(isset($paramData['optional']) && $paramData['optional']);
-						if ($protocol == Info::PROTOCOL_340 || $protocol >= Info::PROTOCOL_350) {
-							$commandsStreams[$protocol]->putByte(0);
-						}
+						$commandsStreams[$protocol]->putByte(0);
 					}
 				}
 			}
@@ -186,15 +162,11 @@ class AvailableCommandsPacket extends PEPacket{
 		$additionalDataStream->putVarInt(count($commands));
 		
 		foreach ($commandsStreams as $protocol => $commandsStream) {
-			if ($protocol >= Info::PROTOCOL_280) {
-				$commandsStream->putVarInt(0);
-			}
-			if ($protocol >= Info::PROTOCOL_385) {
-				$commandsStream->putVarInt(0);
-			}
+			$commandsStream->putVarInt(0);
+			$commandsStream->putVarInt(0);
 			self::$commandsBuffer[$protocol] = $additionalDataStream->getBuffer() . $commandsStream->getBuffer();
 		}
-		
+
 		krsort(self::$commandsBuffer);
 	}
 	
