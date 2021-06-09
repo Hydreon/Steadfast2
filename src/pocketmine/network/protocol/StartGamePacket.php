@@ -209,10 +209,6 @@ class StartGamePacket extends PEPacket{
 			return self::$itemsList;
 		} else {
 			$path = __DIR__ . "/data/Items.json";
-			if ($playerProtocol >= Info::PROTOCOL_440) {
-				$path = __DIR__ . "/data/Items440.json";
-			}
-			
 			self::$itemsList = json_decode(file_get_contents($path), true);
 			return self::$itemsList;
 		}
