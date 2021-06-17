@@ -355,6 +355,12 @@ class Item {
 	const REDSTONE_DUST = 373;
 	const SNOWBALL = 374;
 	const BOAT = 626;
+	const OAK_BOAT = 375;
+	const BIRCH_BOAT = 376;
+	const JUNGLE_BOAT = 377;
+	const SPRUCE_BOAT = 378;
+	const ACACIA_BOAT = 379;
+	const DARK_OAK_BOAT = 380;
 	const LEATHER = 381;
 	const BRICK = 383;
 	const CLAY = 384;
@@ -584,9 +590,6 @@ class Item {
 	CONST WOODEN_PLANK = self::WOODEN_PLANKS;
 	const WOOD = self::TRUNK;
 	const WOODEN_STAIRS = self::WOOD_STAIRS;
-	
-
-	
 
 	protected static $names = [
 		1 => "Stone",
@@ -855,6 +858,9 @@ class Item {
 		352 => "Gold Chestplate",
 		353 => "Gold Leggins",
 		354 => "Gold Boots",
+		355 => "Shield",
+		356 => "Flint",
+		262 => "Raw Porkchop",
 		263 => "Cooked Porkchop",
 		357 => "Painting",
 		258 => "Golden Apple",
@@ -1007,6 +1013,8 @@ class Item {
 	protected $obtainTime = 0;
 	protected $canPlaceOnBlocks = [];
 	protected $canDestroyBlocks = [];
+
+	private static $maxStackSizeIsOne = [Item::ENDER_PERL, Item::SADDLE, Item::OAK_BOAT, Item::BIRCH_BOAT, Item::JUNGLE_BOAT, Item::SPRUCE_BOAT, Item::ACACIA_BOAT, Item::DARK_OAK_BOAT, Item::PUFFERFISH_BUCKET, Item::COD_BUCKET, Item::SALMON_BUCKET, Item::TROPICAL_FISH_BUCKET, Item::SHIELD, Item::MILK_BUCKET, Item::RABBIT_STEW, Item::MINECART_WITH_CHEST];
 
 	public function canBeActivated() {
 		return false;
@@ -1719,14 +1727,22 @@ class Item {
 			if (!isset(self::$list[$id])) {
 				if ($id < 256 && isset(Block::$list[$id]) && !is_null(Block::$list[$id])) {
 					$class = Block::$list[$id];
-					return (new self::$itemBlockClass(new $class($meta), $meta, $count))->setCompound($tags);
+					$item = (new self::$itemBlockClass(new $class($meta), $meta, $count))->setCompound($tags);
+					$item->setCount(min($count, $item->getMaxStackSize()));
+					return $item;
 				}
-				return (new Item($id, $meta, $count))->setCompound($tags);
+				$item = (new Item($id, $meta, $count))->setCompound($tags);
+				$item->setCount(min($count, $item->getMaxStackSize()));
+				return $item;
 			}
 			$class = self::$list[$id];
-			return (new $class($meta, $count))->setCompound($tags);
+			$item = (new $class($meta, $count))->setCompound($tags);
+			$item->setCount(min($count, $item->getMaxStackSize()));
+			return $item;
 		} catch (\RuntimeException $e) {
-			return (new Item($id, $meta, $count))->setCompound($tags);
+			$item = (new Item($id, $meta, $count))->setCompound($tags);
+			$item->setCount(min($count, $item->getMaxStackSize()));
+			return $item;
 		}
 	}
 
@@ -2117,6 +2133,9 @@ class Item {
 	}
 
 	public function getMaxStackSize() {
+		if (in_array($this->id, self::$maxStackSizeIsOne)) {
+			return 1;
+		}
 		return 64;
 	}
 
