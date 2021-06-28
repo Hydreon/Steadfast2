@@ -2,12 +2,12 @@
 
 namespace pocketmine\network\protocol\v310;
 
-use pocketmine\network\protocol\Info310;
+use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\PEPacket;
 
 class SetScoreboardIdentityPacket extends PEPacket {
 
-	const NETWORK_ID = Info310::SET_SCOREBOARD_IDENTITY_PACKET;
+	const NETWORK_ID = Info331::SET_SCOREBOARD_IDENTITY_PACKET;
 	const PACKET_NAME = "SET_SCOREBOARD_IDENTITY_PACKET";
 	const TYPE_UPDATE_IDENTITY = 0;
 	const TYPE_REMOVE_IDENTITY = 1;

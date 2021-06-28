@@ -2,12 +2,12 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\network\protocol\Info120;
+use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\PEPacket;
 
 class PurchaseReceiptPacket extends PEPacket {
 	
-	const NETWORK_ID = Info120::PURCHASE_RECEIPT_PACKET;
+	const NETWORK_ID = Info331::PURCHASE_RECEIPT_PACKET;
 	const PACKET_NAME = "PURCHASE_RECEIPT_PACKET";
 	
 	/** @var string[] */

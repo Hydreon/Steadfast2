@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-use pocketmine\network\protocol\Info;
 use pocketmine\network\multiversion\MultiversionEnums;
 
 class TextPacket extends PEPacket{
@@ -46,7 +45,6 @@ class TextPacket extends PEPacket{
 	public $parameters = [];
 	public $isLocolize = false;
 	public $xuid = '';
-	public $authorXUID = "";
 	public $platformChatId = "";
 
 	public function decode($playerProtocol){
@@ -59,10 +57,6 @@ class TextPacket extends PEPacket{
 			case self::TYPE_WHISPER:
 			case self::TYPE_ANNOUNCEMENT:
 				$this->source = $this->getString();
-				if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_290) {
-					$this->getString(); // third party name
-					$this->getSignedVarInt(); // platform id
-				}
 				$this->message = $this->getString();
 				break;
 			case self::TYPE_RAW:
@@ -77,15 +71,10 @@ class TextPacket extends PEPacket{
 				for ($i = 0; $i < $paramCount; $i++) {
 					$this->parameters[] = $this->getString();
 				}
-				if ($playerProtocol >= Info::PROTOCOL_221) {
-					$this->putString($this->authorXUID);
-				}
 				break;
 		}
 		$this->xuid = $this->getString();
-		if ($playerProtocol >= Info::PROTOCOL_200) {
-			$this->platformChatId = $this->getString(); // platform id
-		}
+		$this->platformChatId = $this->getString(); // platform id
 	}
 
 	public function encode($playerProtocol){
@@ -98,10 +87,6 @@ class TextPacket extends PEPacket{
 			case self::TYPE_WHISPER:
 			case self::TYPE_ANNOUNCEMENT:
 				$this->putString($this->source);
-				if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_290) {
-					$this->putString(""); // third party name
-					$this->putSignedVarInt(0); // platform id
-				}
 				$this->putString($this->message);
 				break;
 			case self::TYPE_RAW:
@@ -117,16 +102,10 @@ class TextPacket extends PEPacket{
 				foreach ($this->parameters as $p) {
 					$this->putString($p);
 				}
-				if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_290) { // it's not should be here, but it prevent client crushing
-					$this->putString(""); // third party name
-					$this->putSignedVarInt(0); // platform id
-				}
 				break;
 		}
 		$this->putString($this->xuid);
-		if ($playerProtocol >= Info::PROTOCOL_200) {
-			$this->putString($this->platformChatId); // platform id
-		}
+		$this->putString($this->platformChatId); // platform id
 	}
 
 }

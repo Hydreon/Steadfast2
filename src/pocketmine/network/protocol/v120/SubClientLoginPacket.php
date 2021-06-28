@@ -2,7 +2,7 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\network\protocol\Info120;
+use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\PEPacket;
 use pocketmine\Server;
 use pocketmine\utils\Binary;
@@ -11,7 +11,7 @@ use pocketmine\utils\UUID;
 
 class SubClientLoginPacket extends PEPacket {
 
-	const NETWORK_ID = Info120::SUB_CLIENT_LOGIN_PACKET;
+	const NETWORK_ID = Info331::SUB_CLIENT_LOGIN_PACKET;
 	const PACKET_NAME = "SUB_CLIENT_LOGIN_PACKET";
 
 	public $username;

@@ -2,9 +2,8 @@
 
 namespace pocketmine\network\protocol\v392;
 
-use pocketmine\network\protocol\PEPacket;
-use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\Info;
+use pocketmine\network\protocol\PEPacket;
 
 class PlayerEnchantOptionsPacket extends PEPacket {
 
@@ -25,7 +24,7 @@ class PlayerEnchantOptionsPacket extends PEPacket {
 
         foreach ($this->items as $item) {
             $this->putVarInt(0); // cost
-            $this->putSlot($item);;
+            $this->putSlot($item, $playerProtocol);
             $this->putString("name"); // enchant name
             $this->putVarInt(0);  // SimpleServerNetId<struct RecipeNetIdTag, unsinged int, 0>
         }

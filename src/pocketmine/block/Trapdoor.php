@@ -26,7 +26,6 @@ use pocketmine\item\Tool;
 use pocketmine\level\sound\DoorSound;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
-use pocketmine\network\protocol\Info;
 
 class Trapdoor extends Transparent{
 
@@ -161,11 +160,7 @@ class Trapdoor extends Transparent{
 	}
 
 	public function onActivate(Item $item, Player $player = null){
-		if ($player->getPlayerProtocol() >= Info::PROTOCOL_389) {
-			$this->meta ^= $this->newMaskOpened;
-		} else {
-			$this->meta ^= 0x08;
-		}
+		$this->meta ^= $this->newMaskOpened;
 		$this->getLevel()->setBlock($this, $this, true);
 		$this->level->addSound(new DoorSound($this));
 		return true;

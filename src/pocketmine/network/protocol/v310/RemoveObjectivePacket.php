@@ -1,13 +1,14 @@
 <?php
 
 namespace pocketmine\network\protocol\v310;
+;
 
-use pocketmine\network\protocol\Info310;
+use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\PEPacket;
 
 class RemoveObjectivePacket extends PEPacket {
 
-	const NETWORK_ID = Info310::REMOVE_OBJECTIVE_PACKET;
+	const NETWORK_ID = Info331::REMOVE_OBJECTIVE_PACKET;
 	const PACKET_NAME = "REMOVE_OBJECTIVE_PACKET";
 
 	public $objectiveName;

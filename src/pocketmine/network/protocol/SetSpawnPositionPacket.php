@@ -35,7 +35,6 @@ class SetSpawnPositionPacket extends PEPacket{
 	public $x;
 	public $y;
 	public $z;
-	public $isForced = false;
 
 	public function decode($playerProtocol){
 
@@ -47,14 +46,10 @@ class SetSpawnPositionPacket extends PEPacket{
 		$this->putSignedVarInt($this->x);
 		$this->putVarInt($this->y);
 		$this->putSignedVarInt($this->z);
-		if ($playerProtocol >= Info::PROTOCOL_406){
-			$this->putVarInt(0); //Dimension type
-			$this->putSignedVarInt($this->x);
-			$this->putVarInt($this->y);
-			$this->putSignedVarInt($this->z);
-		} else {
-			$this->putByte($this->isForced); // forced spawn
-		}
+		$this->putVarInt(0); //Dimension type
+		$this->putSignedVarInt($this->x);
+		$this->putVarInt($this->y);
+		$this->putSignedVarInt($this->z);
 	}
 
 }

@@ -2,12 +2,12 @@
 
 namespace pocketmine\network\protocol\v310;
 
-use pocketmine\network\protocol\Info310;
+use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\PEPacket;
 
 class NetworkChunkPublisherUpdatePacket extends PEPacket {
 	
-	const NETWORK_ID = Info310::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET;
+	const NETWORK_ID = Info331::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET;
 	const PACKET_NAME = "NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET";
 	
 	public $x;

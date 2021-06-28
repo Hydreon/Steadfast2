@@ -49,11 +49,7 @@ class AddEntityPacket extends PEPacket{
 		$this->reset($playerProtocol);		
 		$this->putEntityUniqueId($this->eid);
 		$this->putEntityRuntimeId($this->eid);
-		if ($playerProtocol >= Info::PROTOCOL_310) {
-			$this->putString(Entity::getNameByID($this->type));
-		} else {
-			$this->putVarInt($this->type);
-		}
+		$this->putString(Entity::getNameByID($this->type));
 		$this->putLFloat($this->x);
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
@@ -62,9 +58,7 @@ class AddEntityPacket extends PEPacket{
 		$this->putLFloat($this->speedZ);
 		$this->putLFloat($this->pitch);
 		$this->putLFloat($this->yaw);
-		if ($playerProtocol >= Info::PROTOCOL_273) {
-			$this->putLFloat($this->yaw); //headYaw
-		}
+		$this->putLFloat($this->yaw); //headYaw
 		$this->putVarInt(count($this->attributes));
 		foreach ($this->attributes as $attribute) {
 			$this->putString($attribute['name']);
@@ -80,10 +74,8 @@ class AddEntityPacket extends PEPacket{
 			$this->putVarInt($link['from']);
 			$this->putVarInt($link['to']);
 			$this->putByte($link['type']);
-			$this->putByte(0); //immediate 
-			if ($playerProtocol >= Info::PROTOCOL_406) {
-				$this->putByte(0);//whether the link was changes by the rider
-			}	
+			$this->putByte(0); //immediate
+			$this->putByte(0);//whether the link was changes by the rider
 		}
 	}
 }

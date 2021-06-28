@@ -27,10 +27,8 @@ namespace pocketmine\network\protocol;
 
 #endif
 
-
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\Utils;
-
 
 abstract class DataPacket extends BinaryStream{
 
@@ -84,44 +82,7 @@ abstract class DataPacket extends BinaryStream{
 	}
 	
 	public static function initPackets() {
-		$oClass = new \ReflectionClass ('pocketmine\network\protocol\Info120');
-		self::$packetsIds[Info::PROTOCOL_120] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_200] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_220] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_221] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_240] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_260] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_271] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_273] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_274] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_280] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_282] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_290] = $oClass->getConstants();
-		$oClass = new \ReflectionClass ('pocketmine\network\protocol\Info310');
-		self::$packetsIds[Info::PROTOCOL_310] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_311] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_330] = $oClass->getConstants();
 		$oClass = new \ReflectionClass ('pocketmine\network\protocol\Info331');
-		self::$packetsIds[Info::PROTOCOL_331] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_332] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_340] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_342] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_350] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_351] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_354] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_360] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_361] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_370] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_385] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_386] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_389] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_390] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_392] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_393] = $oClass->getConstants();
-		self::$packetsIds[Info::PROTOCOL_400] = $oClass->getConstants();		
-		self::$packetsIds[Info::PROTOCOL_406] = $oClass->getConstants();		
-		self::$packetsIds[Info::PROTOCOL_407] = $oClass->getConstants();		
-		self::$packetsIds[Info::PROTOCOL_408] = $oClass->getConstants();		
 		self::$packetsIds[Info::PROTOCOL_419] = $oClass->getConstants();		
 		self::$packetsIds[Info::PROTOCOL_422] = $oClass->getConstants();		
 		self::$packetsIds[Info::PROTOCOL_428] = $oClass->getConstants();		

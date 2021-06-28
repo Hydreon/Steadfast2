@@ -56,9 +56,7 @@ class AddItemEntityPacket extends PEPacket{
 		$this->putLFloat($this->speedZ);
 		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
-		if ($playerProtocol >= Info::PROTOCOL_200) {
-			$this->putByte(0); // isFromFishing
-		}
+		$this->putByte(0); // isFromFishing
 	}
 
 }
