@@ -2,12 +2,12 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\network\protocol\Info120;
+use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\PEPacket;
 
 class ModalFormResponsePacket extends PEPacket {
 
-	const NETWORK_ID = Info120::MODAL_FORM_RESPONSE_PACKET;
+	const NETWORK_ID = Info331::MODAL_FORM_RESPONSE_PACKET;
 	const PACKET_NAME = "MODAL_FORM_RESPONSE_PACKET";
 
 	public $formId;

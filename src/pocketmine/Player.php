@@ -21,10 +21,8 @@
 
 namespace pocketmine;
 
-use const M_SQRT3;
-use function max;
-use function mt_rand;
 use pocketmine\block\Block;
+use pocketmine\block\Liquid;
 use pocketmine\command\CommandSender;
 use pocketmine\customUI\CustomUI;
 use pocketmine\entity\Arrow;
@@ -37,20 +35,21 @@ use pocketmine\entity\Projectile;
 use pocketmine\event\block\SignChangeEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\entity\ProjectileLaunchEvent;
 use pocketmine\event\inventory\CraftItemEvent;
 use pocketmine\event\inventory\InventoryCloseEvent;
+use pocketmine\event\inventory\InventoryCreationEvent;
 use pocketmine\event\inventory\InventoryPickupArrowEvent;
 use pocketmine\event\inventory\InventoryPickupItemEvent;
 use pocketmine\event\player\PlayerAnimationEvent;
 use pocketmine\event\player\PlayerBedEnterEvent;
 use pocketmine\event\player\PlayerBedLeaveEvent;
 use pocketmine\event\player\PlayerChatEvent;
-use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\event\player\PlayerCommandPostprocessEvent;
-use pocketmine\event\player\PlayerCreationEvent;
+use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerGameModeChangeEvent;
@@ -63,16 +62,12 @@ use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerReceiptsReceivedEvent;
-use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\event\player\PlayerRespawnAfterEvent;
+use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\event\player\PlayerToggleSneakEvent;
 use pocketmine\event\player\PlayerToggleSprintEvent;
-use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\event\TextContainer;
-use pocketmine\event\Timings;
 use pocketmine\inventory\BaseTransaction;
-use pocketmine\inventory\BigShapedRecipe;
-use pocketmine\inventory\BigShapelessRecipe;
 use pocketmine\inventory\EnchantInventory;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\InventoryHolder;
@@ -81,22 +76,20 @@ use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\inventory\SimpleTransactionGroup;
 use pocketmine\inventory\transactions\SimpleTransactionData;
-use pocketmine\item\Item;
 use pocketmine\item\Armor;
-use pocketmine\item\Tool;
+use pocketmine\item\Elytra;
+use pocketmine\item\enchantment\Enchantment;
+use pocketmine\item\Item;
 use pocketmine\item\Potion;
-use pocketmine\level\format\FullChunk;
-use pocketmine\level\format\LevelProvider;
+use pocketmine\item\Tool;
 use pocketmine\level\Level;
 use pocketmine\level\Location;
 use pocketmine\level\Position;
 use pocketmine\level\sound\LaunchSound;
 use pocketmine\math\AxisAlignedBB;
-use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\metadata\MetadataValue;
 use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\Enum;
@@ -105,95 +98,84 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\Network;
+use pocketmine\network\multiversion\Entity as MultiversionEntity;
+use pocketmine\network\multiversion\MultiversionEnums;
 use pocketmine\network\protocol\AdventureSettingsPacket;
 use pocketmine\network\protocol\AnimatePacket;
+use pocketmine\network\protocol\AvailableCommandsPacket;
 use pocketmine\network\protocol\BatchPacket;
+use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
 use pocketmine\network\protocol\ContainerClosePacket;
+use pocketmine\network\protocol\CreativeContentPacket;
 use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\DisconnectPacket;
 use pocketmine\network\protocol\EntityEventPacket;
-use pocketmine\network\protocol\FullChunkDataPacket;
+use pocketmine\network\protocol\GameRulesChangedPacket;
 use pocketmine\network\protocol\Info as ProtocolInfo;
-use pocketmine\network\protocol\Info;
+use pocketmine\network\protocol\InteractPacket;
+use pocketmine\network\protocol\ItemComponentPacket;
+use pocketmine\network\protocol\LevelEventPacket;
+use pocketmine\network\protocol\LevelSoundEventPacket;
+use pocketmine\network\protocol\MovePlayerPacket;
 use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\PlayerActionPacket;
-use pocketmine\network\protocol\PlayStatusPacket;
 use pocketmine\network\protocol\PlayerListPacket;
+use pocketmine\network\protocol\PlayStatusPacket;
+use pocketmine\network\protocol\ResourcePackChunkDataPacket;
+use pocketmine\network\protocol\ResourcePackClientResponsePacket;
+use pocketmine\network\protocol\ResourcePackDataInfoPacket;
+use pocketmine\network\protocol\ResourcePacksInfoPacket;
+use pocketmine\network\protocol\ResourcePackStackPacket;
 use pocketmine\network\protocol\RespawnPacket;
+use pocketmine\network\protocol\ServerToClientHandshakePacket;
 use pocketmine\network\protocol\SetEntityDataPacket;
-use pocketmine\network\protocol\StrangePacket;
-use pocketmine\network\protocol\TextPacket;
-use pocketmine\network\protocol\MovePlayerPacket;
-use pocketmine\network\protocol\SetDifficultyPacket;
 use pocketmine\network\protocol\SetEntityMotionPacket;
+use pocketmine\network\protocol\SetPlayerGameTypePacket;
 use pocketmine\network\protocol\SetSpawnPositionPacket;
 use pocketmine\network\protocol\SetTimePacket;
+use pocketmine\network\protocol\SetTitlePacket;
 use pocketmine\network\protocol\StartGamePacket;
+use pocketmine\network\protocol\StrangePacket;
 use pocketmine\network\protocol\TakeItemEntityPacket;
+use pocketmine\network\protocol\TextPacket;
 use pocketmine\network\protocol\TransferPacket;
 use pocketmine\network\protocol\UpdateAttributesPacket;
-use pocketmine\network\protocol\SetHealthPacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
-use pocketmine\network\protocol\ChunkRadiusUpdatePacket;
-use pocketmine\network\protocol\InteractPacket;
-use pocketmine\network\protocol\ResourcePackChunkDataPacket;
+use pocketmine\network\protocol\v120\InventoryTransactionPacket;
+use pocketmine\network\protocol\v120\PlayerSkinPacket;
+use pocketmine\network\protocol\v120\Protocol120;
+use pocketmine\network\protocol\v120\ServerSettingsResponsetPacket;
+use pocketmine\network\protocol\v120\ShowModalFormPacket;
+use pocketmine\network\protocol\v120\SubClientLoginPacket;
+use pocketmine\network\protocol\v310\AvailableEntityIdentifiersPacket;
+use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
+use pocketmine\network\protocol\v331\BiomeDefinitionListPacket;
 use pocketmine\network\SourceInterface;
 use pocketmine\permission\PermissibleBase;
 use pocketmine\permission\PermissionAttachment;
+use pocketmine\player\PlayerSettingsTrait;
 use pocketmine\plugin\Plugin;
 use pocketmine\scheduler\CallbackTask;
 use pocketmine\tile\Sign;
 use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
-use pocketmine\utils\TextFormat;
-use pocketmine\network\protocol\SetPlayerGameTypePacket;
-use pocketmine\block\Liquid;
 use pocketmine\network\protocol\SetCommandsEnabledPacket;
-use pocketmine\network\protocol\AvailableCommandsPacket;
-use pocketmine\network\protocol\ResourcePackDataInfoPacket;
-use pocketmine\network\protocol\ResourcePacksInfoPacket;
-use pocketmine\network\protocol\ResourcePackStackPacket;
-use pocketmine\network\protocol\ServerToClientHandshakePacket;
-use pocketmine\item\enchantment\Enchantment;
-use pocketmine\item\Elytra;
-use pocketmine\network\protocol\SetTitlePacket;
-use pocketmine\network\protocol\ResourcePackClientResponsePacket;
-use pocketmine\network\protocol\LevelSoundEventPacket;
-
 use pocketmine\network\proxy\Info as ProtocolProxyInfo;
 use pocketmine\network\proxy\DisconnectPacket as ProxyDisconnectPacket;
 use pocketmine\network\ProxyInterface;
 use pocketmine\network\proxy\RedirectPacket;
 use pocketmine\network\proxy\ProxyPacket;
-
-
-use pocketmine\network\protocol\v120\InventoryTransactionPacket;
-use pocketmine\network\protocol\v120\Protocol120;
-use pocketmine\network\multiversion\MultiversionEnums;
-use pocketmine\network\protocol\LevelEventPacket;
-
-use pocketmine\network\protocol\v120\ShowModalFormPacket;
-use pocketmine\network\protocol\v120\ServerSettingsResponsetPacket;
-use pocketmine\network\protocol\v120\PlayerSkinPacket;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
-use pocketmine\network\protocol\v120\SubClientLoginPacket;
 use pocketmine\utils\Binary;
-use pocketmine\network\protocol\v310\NetworkChunkPublisherUpdatePacket;
-use pocketmine\network\multiversion\Entity as MultiversionEntity;
 use pocketmine\entity\Vehicle;
+
+
 use pocketmine\network\proxy\DisconnectCompletePacket;
-use pocketmine\network\protocol\GameRulesChangedPacket;
-use pocketmine\player\PlayerSettingsTrait;
-use pocketmine\event\entity\EntityLevelChangeEvent;
-use pocketmine\event\inventory\InventoryCreationEvent;
-use pocketmine\network\protocol\CreativeContentPacket;
-use pocketmine\network\protocol\ItemComponentPacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
-use pocketmine\network\protocol\v331\BiomeDefinitionListPacket;
-use pocketmine\network\protocol\v310\AvailableEntityIdentifiersPacket;
 use pocketmine\network\protocol\v392\CreativeItemsListPacket;
+use pocketmine\utils\TextFormat;
+use function mt_rand;
 use function rand;
 use function random_int;
 
@@ -973,7 +955,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 		$this->loadQueue = $newOrder;
 
-		if($this->protocol >= ProtocolInfo::PROTOCOL_310 && $this->spawned && !empty($newOrder)){
+		if($this->spawned && !empty($newOrder)){
 			$pk = new NetworkChunkPublisherUpdatePacket();
 			$pk->x = $this->getFloorX();
 			$pk->y = $this->getFloorY();
@@ -1911,14 +1893,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					break;
 				}
 
-				if ($this->protocol < ProtocolInfo::PROTOCOL_200) {
-					if($packet->slot === 0 or $packet->slot === 255){ //0 for 0.8.0 compatibility
-						$packet->slot = -1; //Air
-					}else{
-						$packet->slot -= 9; //Get real block slot
-					}
-				}
-
 				$item = $this->inventory->getItem($packet->slot);
 				$slot = $packet->slot;
 
@@ -2094,7 +2068,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			case 'MOB_ARMOR_EQUIPMENT_PACKET':
 				break;
 			case 'INTERACT_PACKET':
-				if ($packet->action === InteractPacket::ACTION_OPEN_INVENTORY && $this->getPlayerProtocol() >= ProtocolInfo::PROTOCOL_392) {
+				if ($packet->action === InteractPacket::ACTION_OPEN_INVENTORY) {
+					//TODO:
 					$this->addWindow($this->getInventory());
 				} elseif ($packet->action === InteractPacket::ACTION_DAMAGE) {
 					$this->attackByTargetId($packet->target);
@@ -2328,40 +2303,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				}
 				//Timings::$timerChunkRudiusPacket->stopTiming();
 				break;
-			case 'COMMAND_STEP_PACKET':
-				$commandName = $packet->name;
-				$commandOverload = $packet->overload;
-				$commandParams = json_decode($packet->outputFormat, true);
-				// trying to find command or her alias
-				if (!isset(self::$availableCommands[$commandName])) {
-					foreach(self::$availableCommands as $name => $data) {
-						if (isset($data['versions'][0]['aliases'])) {
-							if (in_array($commandName, $data['versions'][0]['aliases'])) {
-								$commandName = $name;
-								break;
-							}
-						}
-					}
-				}
-				if (!isset(self::$availableCommands[$commandName])) {
-					$this->sendMessage('Unknown command.');
-					break;
-				}
-
-				$commandLine = $commandName;
-				// facepalm : This needs for right params order
-				$params = self::$availableCommands[$commandName]['versions'][0]['overloads'][$commandOverload]['input']['parameters'];
-				foreach ($params as $param) {
-					if (!isset($commandParams[$param['name']]) && (!isset($param['optional']) || $param['optional'] == false)) {
-						$this->sendMessage('Bad arguments for ' . $commandName . ' command.');
-						break(2);
-					}
-					if (isset($commandParams[$param['name']])) {
-						$commandLine .= ' ' . $commandParams[$param['name']];
-					}
-				}
-				$this->processCommand($commandLine);
-				break;
 			case 'RESOURCE_PACKS_CLIENT_RESPONSE_PACKET':
 				switch ($packet->status) {
 					case ResourcePackClientResponsePacket::STATUS_REFUSED:
@@ -2481,11 +2422,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					break;
 				}
 				$commandLine = substr($packet->command, 1);
-				if ($this->getPlayerProtocol() >= Info::PROTOCOL_330) { //hack for 1.9+
-					$this->commandsData[] = ['command' => $commandLine, 'delay' => 2];
-				} else {
-					$this->processCommand($commandLine);
-				}
+				//hack for 1.9+
+				$this->commandsData[] = ['command' => $commandLine, 'delay' => 2];
 				break;
 			/** @minProtocol 120 */
 			case 'PLAYER_SKIN_PACKET':
@@ -2624,7 +2562,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		$pk->message = $message;
 		$pk->source = $senderName;
 		$sender = $this->server->getPlayer($senderName);
-		if ($sender !== null && $sender->getOriginalProtocol() >= ProtocolInfo::PROTOCOL_140) {
+		if ($sender !== null) {
 			$pk->xuid = $sender->getXUID();
 		}
 		$this->dataPacket($pk);
@@ -3387,34 +3325,18 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$pk->stringClientVersion = $this->clientVersion;
 			$pk->multiplayerCorrelationId = $this->uuid->toString();
 			$this->directDataPacket($pk);
-
-            if ($this->protocol >= ProtocolInfo::PROTOCOL_419) {
-                $this->directDataPacket(new ItemComponentPacket());
-            }
-            if ($this->protocol >= ProtocolInfo::PROTOCOL_331) {
-                $this->directDataPacket(new BiomeDefinitionListPacket());
-                $this->directDataPacket(new AvailableEntityIdentifiersPacket());
-            }
+			$this->directDataPacket(new ItemComponentPacket());
+			$this->directDataPacket(new BiomeDefinitionListPacket());
+			$this->directDataPacket(new AvailableEntityIdentifiersPacket());
 		} else {
 			$this->sendPosition($this);
 			$this->setGamemode($this->gamemode, true);
 		}
-        if ($this->getPlayerProtocol() >= Info::PROTOCOL_392) {
-            $pk = new CreativeContentPacket();
-            $pk->groups = Item::getCreativeGroups();
-			$pk->items = Item::getCreativeItems();
-			$this->directDataPacket($pk);
-        } else {
-            $slots = [];
-            foreach(Item::getCreativeItems() as $item){
-                $slots[] = clone $item['item'];
-            }
-            $pk = new InventoryContentPacket();
-            $pk->inventoryID = Protocol120::CONTAINER_ID_CREATIVE;
-            $pk->items = $slots;
-            $this->dataPacket($pk);
-        }
-
+				
+		$pk = new CreativeContentPacket();
+		$pk->groups = Item::getCreativeGroups();
+		$pk->items = Item::getCreativeItems();
+		$this->directDataPacket($pk);
 		$this->server->sendRecipeList($this);
 
 		if ($this->getHealth() <= 0) {
@@ -3836,12 +3758,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
     }
 
 	public function setTitle($text, $subtext = '', $time = 36000) {
-		if ($this->protocol >= Info::PROTOCOL_290) { //hack for 1.7.x
-			$this->clearTitle();
-			$this->titleData = ['text' => !empty($text) ? $text : ' ', 'subtext' => $subtext, 'time' => $time, 'holdTickCount' => 5];
-		} else {
-			$this->sendTitle($text, $subtext, $time);
-		}
+		//hack for 1.7.x
+		$this->clearTitle();
+		$this->titleData = ['text' => !empty($text) ? $text : ' ', 'subtext' => $subtext, 'time' => $time, 'holdTickCount' => 5];
 
 	}
 
@@ -3868,23 +3787,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	public function clearTitle() {
-		if ($this->getPlayerProtocol() >= Info::PROTOCOL_340) {
-			$this->titleData = [];
-			$this->sendTitle(" ", "", 0);
-		} else {
-			$pk = new SetTitlePacket();
-			$pk->type = SetTitlePacket::TITLE_TYPE_TIMES;
-			$pk->text = "";
-			$pk->fadeInTime = 0;
-			$pk->fadeOutTime = 0;
-			$pk->stayTime = 0;
-			$this->dataPacket($pk);
-
-			$pk = new SetTitlePacket();
-			$pk->type = SetTitlePacket::TITLE_TYPE_CLEAR;
-			$pk->text = "";
-			$this->dataPacket($pk);
-		}
+		$this->titleData = [];
+		$this->sendTitle(" ", "", 0);
 	}
 
 	public function setActionBar($text, $time = 36000){
@@ -3907,13 +3811,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		$pk->x = $this->x;
 		$pk->y = $this->y;
 		$pk->z = $this->z;
-		if ($this->getPlayerProtocol() >= Info::PROTOCOL_311) {
-			// for 1.9.x gap between instruments 256 (1-256 - piano, 257-512 - another one, etc)
-			$pk->customData = $noteId;
-			$pk->entityType = MultiversionEntity::ID_NONE;
-		} else {
-			$pk->entityType = $noteId;
-		}
+		// for 1.9.x gap between instruments 256 (1-256 - piano, 257-512 - another one, etc)
+		$pk->customData = $noteId;
+		$pk->entityType = MultiversionEntity::ID_NONE;
 		$this->directDataPacket($pk);
 	}
 
@@ -4996,9 +4896,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		// stop sprinting if not solid block under feets
 		$isInsideWater = $this->isInsideOfWater();
 		$blockIDUnderFeets = $this->level->getBlockIdAt(floor($this->x), floor($this->y), floor($this->z));
-		if ($this->protocol <= ProtocolInfo::PROTOCOL_201 && $this->isSprinting() && ((isset(Block::$liquid[$blockIDUnderFeets]) && Block::$liquid[$blockIDUnderFeets]) || $isInsideWater)) {
-			$this->setSprinting(false);
-		}
 		$isShouldResetAir = true;
 		if ($isInsideWater && !$this->hasEffect(Effect::WATER_BREATHING)) {
 			$airTicks = $this->getDataProperty(self::DATA_AIR) - $tickDiff;
@@ -5161,7 +5058,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	private function getNonValidProtocolMessage($protocol) {
-		if ($protocol > ProtocolInfo::PROTOCOL_160) {
+		if ($protocol > ProtocolInfo::PROTOCOL_431) {
 			$pk = new PlayStatusPacket();
 			$pk->status = PlayStatusPacket::LOGIN_FAILED_SERVER;
 			$this->dataPacket($pk);
@@ -5176,42 +5073,27 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 	public function sendFullPlayerList() {
 		$players = $this->server->getOnlinePlayers();
-		$isNeedSendXUID = $this->originalProtocol >= ProtocolInfo::PROTOCOL_140;
-		$playersWithProto140 = [];
 		$otherPlayers = [];
 		$pk = new PlayerListPacket();
 		$pk->type = PlayerListPacket::TYPE_ADD;
 		foreach ($players as $player) {
 			$entry = [$player->getUniqueId(), $player->getId(), $player->getName(), $player->getSkinName(), $player->getSkinData(), $player->getCapeData(), $player->getSkinGeometryName(), $player->getSkinGeometryData()];
-			if ($isNeedSendXUID) {
-				$entry[] = $player->getXUID();
-			}
+			$entry[8] = $player->getXUID();
 			$entry[9] = $player->getDeviceOS();
 			$entry[10] = $player->additionalSkinData;
 			$pk->entries[] = $entry;
 			$pk->setDeviceId($player->getDeviceOS());
 			// collect player with different packet logic
 			if ($player !== $this) {
-				if ($player->getOriginalProtocol() >= ProtocolInfo::PROTOCOL_140) {
-					$playersWithProto140[] = $player;
-				} else {
-					$otherPlayers[] = $player;
-				}
+				$otherPlayers[] = $player;
 			}
 		}
 		$this->server->batchPackets([$this], [$pk]);
 
-		if (count($playersWithProto140) > 0) {
-			$pk = new PlayerListPacket();
-			$pk->type = PlayerListPacket::TYPE_ADD;
-			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->getSkinName(), $this->getSkinData(), $this->getCapeData(), $this->getSkinGeometryName(), $this->getSkinGeometryData(), $this->getXUID(), $this->getDeviceOS(), $this->additionalSkinData];
-			$pk->setDeviceId($this->getDeviceOS());
-			$this->server->batchPackets($playersWithProto140, [$pk]);
-		}
 		if (count($otherPlayers) > 0) {
 			$pk = new PlayerListPacket();
 			$pk->type = PlayerListPacket::TYPE_ADD;
-			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->getSkinName(), $this->getSkinData(), $this->getCapeData(), $this->getSkinGeometryName(), $this->getSkinGeometryData()];
+			$pk->entries[] = [$this->getUniqueId(), $this->getId(), $this->getName(), $this->getSkinName(), $this->getSkinData(), $this->getCapeData(), $this->getSkinGeometryName(), $this->getSkinGeometryData(), $this->getXUID(), $this->getDeviceOS(), $this->additionalSkinData];
 			$pk->setDeviceId($this->getDeviceOS());
 			$this->server->batchPackets($otherPlayers, [$pk]);
 		}

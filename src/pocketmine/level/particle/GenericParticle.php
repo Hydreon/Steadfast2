@@ -21,12 +21,12 @@
 
 namespace pocketmine\level\particle;
 
+use pocketmine\math\Vector3;
+use pocketmine\network\multiversion\MultiversionEnums;
+use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\LevelEventPacket;
 use pocketmine\network\protocol\v310\SpawnParticleEffectPacket;
-use pocketmine\network\protocol\Info;
-use pocketmine\math\Vector3;
 use pocketmine\Server;
-use pocketmine\network\multiversion\MultiversionEnums;
 
 class GenericParticle extends Particle{
 	
@@ -41,39 +41,23 @@ class GenericParticle extends Particle{
 	}
 	
 	public function spawnFor($players) {
-		$newPlayers = [];
-		foreach ($players as $id => $player) {
-			if ($player->getPlayerProtocol() >= Info::PROTOCOL_360) {
-				$newPlayers[$id] = $player;
-				unset($players[$id]);
-			}
-		}
-		if (!empty($newPlayers)) {
+		if (!empty($players)) {
 			if (!is_null($this->customSpawnName)) {
 				$pk = new SpawnParticleEffectPacket();
 				$pk->x = $this->x;
 				$pk->y = $this->y;
 				$pk->z = $this->z;
 				$pk->particleName = $this->customSpawnName;
-				Server::broadcastPacket($newPlayers, $pk);
-			} elseif (isset(MultiversionEnums::$particleIds[Info::PROTOCOL_360][$this->id]) && MultiversionEnums::$particleIds[Info::PROTOCOL_360][$this->id] > 0) {
+				Server::broadcastPacket($players, $pk);
+			} elseif (isset(MultiversionEnums::$particleIds[Info::PROTOCOL_419][$this->id]) && MultiversionEnums::$particleIds[Info::PROTOCOL_419][$this->id] > 0) {
 				$pk = new LevelEventPacket();
-				$pk->evid = LevelEventPacket::EVENT_ADD_PARTICLE_MASK | MultiversionEnums::$particleIds[Info::PROTOCOL_360][$this->id];
+				$pk->evid = LevelEventPacket::EVENT_ADD_PARTICLE_MASK | MultiversionEnums::$particleIds[Info::PROTOCOL_419][$this->id];
 				$pk->x = $this->x;
 				$pk->y = $this->y;
 				$pk->z = $this->z;
 				$pk->data = $this->data;
-				Server::broadcastPacket($newPlayers, $pk);
+				Server::broadcastPacket($players, $pk);
 			}
-		}
-		if (!empty($players) && isset(MultiversionEnums::$particleIds[Info::PROTOCOL_120][$this->id])) {
-			$pk = new LevelEventPacket();
-			$pk->evid = LevelEventPacket::EVENT_ADD_PARTICLE_MASK | MultiversionEnums::$particleIds[Info::PROTOCOL_120][$this->id];
-			$pk->x = $this->x;
-			$pk->y = $this->y;
-			$pk->z = $this->z;
-			$pk->data = $this->data;
-			Server::broadcastPacket($players, $pk);
 		}
 	}
 }

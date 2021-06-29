@@ -2,12 +2,12 @@
 
 namespace pocketmine\network\protocol\v120;
 
-use pocketmine\network\protocol\Info120;
+use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\PEPacket;
 
 class BossEventPacket extends PEPacket {
 	
-	const NETWORK_ID = Info120::BOSS_EVENT_PACKET;
+	const NETWORK_ID = Info331::BOSS_EVENT_PACKET;
 	const PACKET_NAME = "BOSS_EVENT_PACKET";
 	
 	const EVENT_TYPE_ADD = 0; // from server to client only

@@ -66,73 +66,18 @@ class PlayerListPacket extends PEPacket{
 					$this->putUUID($d[0]);
 					$this->putEntityUniqueId($d[1]); // Player ID
 					$this->putString(isset($d[2]) ? $d[2] : ""); // Player Name
-					if ($playerProtocol < Info::PROTOCOL_370) {
-						if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_290) {
-							$this->putString(""); // third party name
-							$this->putSignedVarInt(0); // platform id
-						}
-						$this->putString($d[3]); // Skin ID
-						if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
-							$this->putLInt(1); // num skins, always 1
-						}
-						$skinData = !empty($d[4]) ? $d[4] : $emptySkin;
-						if ($playerProtocol >= Info::PROTOCOL_360) {
-							if (empty($d[7]) && strlen($skinData) == 8192) {
-								$skinData = $this->duplicateArmAndLeg($skinData);
-							}
-						}
-						$this->putString($skinData); // Skin Data
-						$capeData = isset($d[5]) ? $d[5] : '';
-						if ($playerProtocol >= Info::PROTOCOL_200 && $playerProtocol < Info::PROTOCOL_220) {
-							if (!empty($capeData)) {
-								$this->putLInt(1); // isNotEmpty
-								$this->putString($capeData); // Cape Data
-							} else {
-								$this->putLInt(0); // isEmpty
-							}
-						} else {
-							$this->putString($capeData); // Cape Data
-						}
-						if ($playerProtocol >= Info::PROTOCOL_310) { //temp hack for prevent client bug
-							if (isset($d[6])) {
-								$d[6] = strtolower($d[6]);
-							}
-							if (isset($d[7])) {
-								$tempData = json_decode($d[7], true);
-								if (is_array($tempData)) {
-									foreach ($tempData as $key => $value) {
-										unset($tempData[$key]);
-										$tempData[strtolower($key)] = $value;
-									}
-									$d[7] = json_encode($tempData);
-								}
-							}
-						}
-						$this->putString(isset($d[6]) ? $d[6] : ''); // Skin Geometry Name
-						$this->putString(isset($d[7]) ? $this->prepareGeometryDataForOld($d[7]) : ''); // Skin Geometry Data
-					}
 					$this->putString(isset($d[8]) ? $d[8] : ''); // XUID
-					if ($playerProtocol >= Info::PROTOCOL_200) {
-						$this->putString(""); // platform chat id
-					}		
-					if ($playerProtocol >= Info::PROTOCOL_370) {
-						if ($playerProtocol >= Info::PROTOCOL_385) {
-							$this->putLInt(isset($d[9]) ? $d[9] : Player::OS_UNKNOWN); // build platform
-						}
-						$skinData = !empty($d[4]) ? $d[4] : $emptySkin;
-						$skinGeometryName = isset($d[6]) ? $d[6] : '';
-						$skinGeometryData = isset($d[7]) ? $d[7] : '';
-						$capeData = isset($d[5]) ? $d[5] : '';
-						$this->putSerializedSkin($playerProtocol, $d[3], $skinData, $skinGeometryName, $skinGeometryData, $capeData, (isset($d[10]) ? $d[10] : []));
-						if ($playerProtocol >= Info::PROTOCOL_385) {
-							$this->putByte(0); // is teacher
-							$this->putByte(0); // is host
-						}						
-					}
+					$this->putString(""); // platform chat id
+					$this->putLInt(isset($d[9]) ? $d[9] : Player::OS_UNKNOWN); // build platform
+					$skinData = !empty($d[4]) ? $d[4] : $emptySkin;
+					$skinGeometryName = isset($d[6]) ? $d[6] : '';
+					$skinGeometryData = isset($d[7]) ? $d[7] : '';
+					$capeData = isset($d[5]) ? $d[5] : '';
+					$this->putSerializedSkin($playerProtocol, $d[3], $skinData, $skinGeometryName, $skinGeometryData, $capeData, (isset($d[10]) ? $d[10] : []));
+					$this->putByte(0); // is teacher
+					$this->putByte(0); // is host
 				}
-				if ($playerProtocol >= Info::PROTOCOL_406) {
-					$this->putByte(1); // is trusted skin                  
-				}
+				$this->putByte(1); // is trusted skin
 				break;
 			case self::TYPE_REMOVE:
 				foreach ($this->entries as $d) {

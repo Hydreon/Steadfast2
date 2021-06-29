@@ -90,10 +90,6 @@ class EnchantingTable extends Transparent {
 		$player->sendMessage(TextFormat::RED . 'Enchanting tables disabled');
 		return;
 		if ($player instanceof Player) {
-			if ($player->getPlayerProtocol() <= Info::PROTOCOL_406) {
-				$player->sendMessage(TextFormat::RED . 'Enchantments not available for your version of the game! Please update!');
-				return;
-			}
 			if ($player->isCreative()) {
 				return true;
 			}
