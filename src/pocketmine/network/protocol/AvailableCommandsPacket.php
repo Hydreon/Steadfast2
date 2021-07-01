@@ -81,11 +81,14 @@ class AvailableCommandsPacket extends PEPacket{
 			}
 			$commandsStream->putString($commandName);
 			$commandsStream->putString($commandData['versions'][0]['description']);
-			if ($playerProtocol >= Info::PROTOCOL_448) {
+
+			//????????????????????? PROBLEM
+
+			//if ($playerProtocol >= Info::PROTOCOL_448) {
 				$commandsStream->putShort(0); // flags
-			} else {
-				$commandsStream->putByte(0); // flags
-			}
+			// } else {
+			// 	$commandsStream->putByte(0); // flags
+			// }
 			
 			$permission = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
 			switch ($commandData['versions'][0]['permission']) {
