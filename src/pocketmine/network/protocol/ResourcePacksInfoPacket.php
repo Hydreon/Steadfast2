@@ -28,6 +28,9 @@ class ResourcePacksInfoPacket extends PEPacket {
 		$this->reset($playerProtocol);
 		$this->putByte($this->isRequired);
 		$this->putByte($this->hasScripts);
+		if ($playerProtocol >= Info::PROTOCOL_448) {
+			$this->putByte(0);
+		}
 		$this->putLShort(count($this->addons));
 		foreach ($this->addons as $addon) {
 			$this->putString($addon->id);

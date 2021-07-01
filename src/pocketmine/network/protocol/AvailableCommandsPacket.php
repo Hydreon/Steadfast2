@@ -70,6 +70,7 @@ class AvailableCommandsPacket extends PEPacket{
 		$enumsCount = 0;
 		$commandsStreams = [
 			Info::PROTOCOL_419 => new BinaryStream(),
+			Info::PROTOCOL_448 => new BinaryStream(),
 		];
 		
 		foreach ($commands as $commandName => &$commandData) { // Replace &$commandData with $commandData when alises fix for 1.2 won't be needed anymore
@@ -80,7 +81,12 @@ class AvailableCommandsPacket extends PEPacket{
 			}
 			$commandsStream->putString($commandName);
 			$commandsStream->putString($commandData['versions'][0]['description']);
-			$commandsStream->putByte(0); // flags
+			if ($playerProtocol >= Info::PROTOCOL_448) {
+				$commandsStream->putShort(0); // flags
+			} else {
+				$commandsStream->putByte(0); // flags
+			}
+			
 			$permission = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
 			switch ($commandData['versions'][0]['permission']) {
 				case "staff":
