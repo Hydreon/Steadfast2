@@ -82,7 +82,6 @@ class AvailableCommandsPacket extends PEPacket{
 			$commandsStream->putString($commandName);
 			$commandsStream->putString($commandData['versions'][0]['description']);
 
-			//????????????????????? PROBLEM
 			foreach ($commandsStreams as $protocol => $unused) {
 				/** @IMPORTANT $commandsStream doesn't should use after this line */
 			
