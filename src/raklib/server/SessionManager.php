@@ -214,7 +214,11 @@ class SessionManager{
 			if ($session->isEncryptEnable()) {
 				$buff = $session->getDecrypt($buff);
 			}
-			$decoded = zlib_decode($buff);
+            try{
+                $decoded = zlib_decode($buff, 1024 * 1024 * 2); //Max 2MB
+            }catch(\ErrorException $e){ //zlib decode error
+                $decoded = "";
+            }
 			$stream = new BinaryStream($decoded);
 			$length = strlen($decoded);
 			static $spamPacket = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
