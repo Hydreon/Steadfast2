@@ -70,6 +70,7 @@ class AvailableCommandsPacket extends PEPacket{
 		$enumsCount = 0;
 		$commandsStreams = [
 			Info::PROTOCOL_419 => new BinaryStream(),
+			Info::PROTOCOL_448 => new BinaryStream(),
 		];
 		
 		foreach ($commands as $commandName => &$commandData) { // Replace &$commandData with $commandData when alises fix for 1.2 won't be needed anymore
@@ -80,28 +81,36 @@ class AvailableCommandsPacket extends PEPacket{
 			}
 			$commandsStream->putString($commandName);
 			$commandsStream->putString($commandData['versions'][0]['description']);
-			$commandsStream->putByte(0); // flags
-			$permission = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
-			switch ($commandData['versions'][0]['permission']) {
-				case "staff":
-					$permission = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_GAME_MASTERS;
-					default;
-			}
-			$commandsStream->putByte($permission); // permission level
-			if (isset($commandData['versions'][0]['aliases']) && !empty($commandData['versions'][0]['aliases'])) {
-				foreach ($commandData['versions'][0]['aliases'] as $alias) {
-					$aliasAsCommand = $commandData;
-					$aliasAsCommand['versions'][0]['aliases'] = [];
-					$commands[$alias] = $aliasAsCommand;
-				}
-				$commandData['versions'][0]['aliases'] = [];
-			}
-			$aliasesEnumId = -1; // temp aliases fix for 1.2
-			$commandsStream->putLInt($aliasesEnumId);
-			$commandsStream->putVarInt(count($commandData['versions'][0]['overloads'])); // overloads
-			/** @IMPORTANT $commandsStream doesn't should use after this line */
+
 			foreach ($commandsStreams as $protocol => $unused) {
+				/** @IMPORTANT $commandsStream doesn't should use after this line */
+			
 				$commandsStreams[$protocol]->put($commandsStream->getBuffer());
+				if ($protocol >= Info::PROTOCOL_448) {
+					$commandsStreams[$protocol]->putShort(0); // flags
+				} else {
+					$commandsStreams[$protocol]->putByte(0); // flags
+				}
+				
+				$permission = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_ANY;
+				switch ($commandData['versions'][0]['permission']) {
+					case "staff":
+						$permission = AdventureSettingsPacket::COMMAND_PERMISSION_LEVEL_GAME_MASTERS;
+						default;
+				}
+				$commandsStreams[$protocol]->putByte($permission); // permission level
+				if (isset($commandData['versions'][0]['aliases']) && !empty($commandData['versions'][0]['aliases'])) {
+					foreach ($commandData['versions'][0]['aliases'] as $alias) {
+						$aliasAsCommand = $commandData;
+						$aliasAsCommand['versions'][0]['aliases'] = [];
+						$commands[$alias] = $aliasAsCommand;
+					}
+					$commandData['versions'][0]['aliases'] = [];
+				}
+				$aliasesEnumId = -1; // temp aliases fix for 1.2
+				$commandsStreams[$protocol]->putLInt($aliasesEnumId);
+				$commandsStreams[$protocol]->putVarInt(count($commandData['versions'][0]['overloads'])); // overloads
+				
 			}
 			foreach ($commandData['versions'][0]['overloads'] as $overloadData) {
 				$paramNum = count($overloadData['input']['parameters']);
