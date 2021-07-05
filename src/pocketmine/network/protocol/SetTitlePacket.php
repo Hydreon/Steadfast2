@@ -26,6 +26,10 @@ class SetTitlePacket extends PEPacket {
 		$this->putSignedVarInt($this->fadeInTime);
 		$this->putSignedVarInt($this->stayTime);
 		$this->putSignedVarInt($this->fadeOutTime);
+		if ($playerProtocol >= Info::PROTOCOL_448) {
+			$this->putString('');
+			$this->putString('');
+		}
 	}
 
 	public function decode($playerProtocol) {
