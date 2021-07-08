@@ -60,6 +60,9 @@ class Bucket extends Item{
 		if ($block instanceof Slab || $block instanceof Slab2 || $block instanceof WoodSlab) {
 			return false;
 		}
+		if ($target instanceof Slab || $target instanceof Slab2 || $target instanceof WoodSlab) {
+			return false;
+		}
 		$targetBlock = Block::get($this->targetBlock);
 
 		if($targetBlock instanceof Air){
