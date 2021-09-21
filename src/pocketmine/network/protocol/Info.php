@@ -37,7 +37,7 @@ interface Info{
 	const PROTOCOL_431  = 431; // 1.16.220.52
 	const PROTOCOL_440  = 440;
 	const PROTOCOL_448  = 448;
-	const PROTOCOL_465  = 465; // 1.17.30.25
+	const PROTOCOL_465  = 465;
 
 	/**
 	 * Minecraft: PE packets
