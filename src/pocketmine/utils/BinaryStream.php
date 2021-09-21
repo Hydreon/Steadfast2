@@ -466,11 +466,17 @@ class BinaryStream {
 		}
 
 		$this->putString($skinGeometryData); // Skin Geometry Data
+		if($playerProtocol >= Info::PROTOCOL_465){
+			$this->putString($additionalSkinData['SkinGeometryDataEngineVersion'] ?? "1.17.30");
+		}
+
 		$this->putString(isset($additionalSkinData['SkinAnimationData']) ? $additionalSkinData['SkinAnimationData'] : ''); // Serialized Animation Data
 
-		$this->putByte(isset($additionalSkinData['PremiumSkin']) ? $additionalSkinData['PremiumSkin'] : 0); // Is Premium Skin 
-		$this->putByte(isset($additionalSkinData['PersonaSkin']) ? $additionalSkinData['PersonaSkin'] : 0); // Is Persona Skin 
-		$this->putByte(isset($additionalSkinData['CapeOnClassicSkin']) ? $additionalSkinData['CapeOnClassicSkin'] : 0); // Is Persona Cape on Classic Skin 
+		if($playerProtocol < Info::PROTOCOL_465){
+			$this->putByte(isset($additionalSkinData['PremiumSkin']) ? $additionalSkinData['PremiumSkin'] : 0); // Is Premium Skin
+			$this->putByte(isset($additionalSkinData['PersonaSkin']) ? $additionalSkinData['PersonaSkin'] : 0); // Is Persona Skin
+			$this->putByte(isset($additionalSkinData['CapeOnClassicSkin']) ? $additionalSkinData['CapeOnClassicSkin'] : 0); // Is Persona Cape on Classic Skin
+		}
 
 		$this->putString(isset($additionalSkinData['CapeId']) ? $additionalSkinData['CapeId'] : '');
 		if (isset($additionalSkinData['FullSkinId'])) {
@@ -496,6 +502,13 @@ class BinaryStream {
 			foreach($tint['Colors'] as $color){
 				$this->putString($color);
 			}
+		}
+
+		if($playerProtocol >= Info::PROTOCOL_465){
+			$this->putByte(isset($additionalSkinData['PremiumSkin']) ? $additionalSkinData['PremiumSkin'] : 0); // Is Premium Skin
+			$this->putByte(isset($additionalSkinData['PersonaSkin']) ? $additionalSkinData['PersonaSkin'] : 0); // Is Persona Skin
+			$this->putByte(isset($additionalSkinData['CapeOnClassicSkin']) ? $additionalSkinData['CapeOnClassicSkin'] : 0); // Is Persona Cape on Classic Skin
+			$this->putByte($additionalSkinData['IsPrimaryUser'] ?? 1);
 		}
 	}
 
@@ -533,11 +546,16 @@ class BinaryStream {
 		if (strpos($skinGeometryData, 'null') === 0) {
 			$skinGeometryData = '';
 		}
+		if($playerProtocol >= Info::PROTOCOL_465){
+			$additionalSkinData['SkinGeometryDataEngineVersion'] = $this->getString();
+		}
 		$additionalSkinData['SkinAnimationData'] = $this->getString();
 
-		$additionalSkinData['PremiumSkin'] = $this->getByte();
-		$additionalSkinData['PersonaSkin'] = $this->getByte();
-		$additionalSkinData['CapeOnClassicSkin'] = $this->getByte();
+		if($playerProtocol < Info::PROTOCOL_465){
+			$additionalSkinData['PremiumSkin'] = $this->getByte();
+			$additionalSkinData['PersonaSkin'] = $this->getByte();
+			$additionalSkinData['CapeOnClassicSkin'] = $this->getByte();
+		}
 		
 		$additionalSkinData['CapeId'] = $this->getString();
 		$additionalSkinData['FullSkinId'] = $this->getString(); // Full Skin ID
@@ -571,6 +589,13 @@ class BinaryStream {
 			];
 		}
 		$additionalSkinData['PieceTintColors'] = $pieceTintColors;
+
+		if($playerProtocol >= Info::PROTOCOL_465){
+			$additionalSkinData['PremiumSkin'] = $this->getByte();
+			$additionalSkinData['PersonaSkin'] = $this->getByte();
+			$additionalSkinData['CapeOnClassicSkin'] = $this->getByte();
+			$additionalSkinData['IsPrimaryUser'] = $this->getByte();
+		}
 	}
 
 	public function checkSkinData(&$skinData, &$skinGeometryName, &$skinGeometryData, &$additionalSkinData) {
