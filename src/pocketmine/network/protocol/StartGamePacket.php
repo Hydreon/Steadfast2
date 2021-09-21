@@ -155,6 +155,10 @@ class StartGamePacket extends PEPacket{
 		$this->putLInt(16); //Limited word width
 		$this->putLInt(16); //Limited word depth			
 		$this->putByte(0); //Nether type
+		if($playerProtocol >= Info::PROTOCOL_465){
+			$this->putString(""); //Education URI resource -> buttonName
+			$this->putString(""); //Education URI resource -> link URI
+		}
 		$this->putByte(0); //exp gameplay
 		
 		

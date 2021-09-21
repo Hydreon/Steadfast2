@@ -185,6 +185,9 @@ class CraftingDataPacket extends PEPacket{
             }
             $this->putVarInt(0);
             $this->putVarInt(0);
+            if($playerProtocol >= Info::PROTOCOL_465){
+                $this->putVarInt(0); //material reducer recipe count
+            }
             $this->putByte($this->cleanRecipes ? 1 : 0);
 	}
 
