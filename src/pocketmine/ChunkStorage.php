@@ -70,7 +70,7 @@ class ChunkStorage {
 					$chunkData .= $blockData;
 				}
 			}
-			$chunkData .= $data['chunk']['biomeColor'] . Binary::writeByte(0) . Binary::writeSignedVarInt(0) . implode('', $data['tiles']);
+			$chunkData .= $data['chunk']['biomeColor'] . Binary::writeByte(0) . implode('', $data['tiles']);
 		} else {
 			$blockIdArray = $data['blocks'];
 			$blockDataArray = $data['data'];
@@ -87,7 +87,7 @@ class ChunkStorage {
 				$blockData = "\x00" . $blockIdData . $blockDataData;
 				$chunkData .= $blockData;
 			}
-			$chunkData .= $data['heightMap'] . $data['biomeColor'] . Binary::writeLInt(0) . implode('', $data['tiles']);
+			$chunkData .= $data['biomeColor'] . Binary::writeByte(0) . implode('', $data['tiles']);
 		}
 		$subClientId = $data['subClientId'];
 		$pk = new FullChunkDataPacket();
