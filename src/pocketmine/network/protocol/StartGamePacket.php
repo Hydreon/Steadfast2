@@ -206,6 +206,9 @@ class StartGamePacket extends PEPacket{
 		if ($playerProtocol >= Info::PROTOCOL_440) {
 			$this->putString(''); //server version
 		}
+		if($playerProtocol >= Info::PROTOCOL_475){
+			$this->putLLong(0); //block palette checksum
+		}
 	}
 
 	static protected function getItemsList($playerProtocol) {

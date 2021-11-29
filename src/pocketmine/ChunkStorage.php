@@ -2,15 +2,24 @@
 
 namespace pocketmine;
 
+use pocketmine\level\generator\biome\Biome;
 use pocketmine\level\Level;
 use pocketmine\network\protocol\FullChunkDataPacket;
+use pocketmine\network\protocol\Info;
 use pocketmine\utils\Binary;
+use function chr;
+use function count;
+use function implode;
 
 class ChunkStorage {
 
 	protected $cache = [];
+	/** @var ChunkMaker */
 	protected $server;
 
+	/**
+	 * @param ChunkMaker $server
+	 */
 	public function __construct($server) {
 		$this->server = $server;
 		$this->tickProcessor();
@@ -55,8 +64,21 @@ class ChunkStorage {
 
 	protected function doChunk($data) {
 		$protocol = $data['protocol'];
-		if (isset($data['isAnvil']) && $data['isAnvil'] == true) {
-			$chunkData = chr(count($data['chunk']['sections']));
+		$isAnvil = isset($data['isAnvil']) && $data['isAnvil'] == true;
+
+		$subChunkCount = $isAnvil ? count($data['chunk']['sections']) : 8;
+
+		$chunkData = "";
+
+		if($protocol >= Info::PROTOCOL_475){
+			//TODO: HACK! fill in fake subchunks to make up for the new negative space client-side
+			for($y = 0; $y < 4; $y++){
+				$subChunkCount++;
+				$chunkData .= chr(8); //subchunk version 8
+				$chunkData .= chr(0); //0 layers - client will treat this as all-air
+			}
+		}
+		if ($isAnvil) {
 			foreach ($data['chunk']['sections'] as $y => $sections) {
 				if ($sections['empty'] == true) {
 					$blockData = "\x00" . str_repeat("\x00", 6144);						
@@ -70,12 +92,11 @@ class ChunkStorage {
 					$chunkData .= $blockData;
 				}
 			}
-			$chunkData .= $data['chunk']['biomeColor'] . Binary::writeByte(0) . implode('', $data['tiles']);
+			$biomes = $data["chunk"]["biomeColor"];
 		} else {
 			$blockIdArray = $data['blocks'];
 			$blockDataArray = $data['data'];
 			$countBlocksInChunk = 8;
-			$chunkData = chr($countBlocksInChunk);
 			for ($blockIndex = 0; $blockIndex < $countBlocksInChunk; $blockIndex++) {
 				$blockIdData = '';
 				$blockDataData = '';
@@ -87,13 +108,23 @@ class ChunkStorage {
 				$blockData = "\x00" . $blockIdData . $blockDataData;
 				$chunkData .= $blockData;
 			}
-			$chunkData .= $data['biomeColor'] . Binary::writeByte(0) . implode('', $data['tiles']);
+			$biomes = $data["biomeColor"];
 		}
+		if($protocol >= Info::PROTOCOL_475){
+			for($i = 0; $i < 25; ++$i){
+				$chunkData .= chr(0); //fake biome palette - 0 bpb, non-persistent
+				$chunkData .= Binary::writeVarInt(Biome::PLAINS << 1); //fill plains for now
+			}
+		}else{
+			$chunkData .= $biomes;
+		}
+		$chunkData .= Binary::writeByte(0) . implode('', $data['tiles']);
 		$subClientId = $data['subClientId'];
 		$pk = new FullChunkDataPacket();
 		$pk->chunkX = $data['chunkX'];
 		$pk->chunkZ = $data['chunkZ'];
 		$pk->senderSubClientID = $subClientId;
+		$pk->subChunkCount = $subChunkCount;
 		$pk->data = $chunkData;
 		$pk->encode($protocol);
 		$buffer = $pk->getBuffer();
