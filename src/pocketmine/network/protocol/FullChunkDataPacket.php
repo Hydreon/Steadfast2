@@ -31,6 +31,8 @@ class FullChunkDataPacket extends PEPacket{
 	public $chunkX;
 	public $chunkZ;
 	public $data;
+	/** @var int */
+	public $subChunkCount;
 
 	public function decode($playerProtocol){
 
@@ -40,9 +42,9 @@ class FullChunkDataPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putSignedVarInt($this->chunkX);
 		$this->putSignedVarInt($this->chunkZ);
-		$this->putVarInt(ord($this->data[0]));
+		$this->putVarInt($this->subChunkCount);
 		$this->putByte(0);
-		$this->putString(substr($this->data, 1));
+		$this->putString($this->data);
 	}
 
 }
