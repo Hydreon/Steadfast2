@@ -1368,8 +1368,13 @@ class Server{
 	 * @param string $name
 	 */
 	public function removeOp($name){
-		$this->operators->remove(strtolower($name));
-
+		$lowercaseName = strtolower($name);
+		foreach($this->operators->getAll() as $operatorName => $_){
+			$operatorName = (string) $operatorName;
+			if($lowercaseName === strtolower($operatorName)){
+				$this->operators->remove($operatorName);
+			}
+		}
 		if(($player = $this->getPlayerExact($name)) instanceof Player){
 			$player->recalculatePermissions();
 		}
