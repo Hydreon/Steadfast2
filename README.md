@@ -1,4 +1,10 @@
-#  <img src="https://lbsg.net/wp-content/themes/lifeboat/images/lbsg-logo-sm.png" alt="LBSG logo" title="Aimeos" align="center" height="120" />
+# DEPRECATED
+
+Lifeboat Survival Games is migrating to [PocketMine-MP](https://github.com/pmmp/PocketMine-MP).
+
+Once this migration is completed, Steadfast2 will **no longer be updated**.
+This is expected to happen in the near future.
+
 # Steadfast2 Minecraft PE Server Software
 
 ## Introduction
