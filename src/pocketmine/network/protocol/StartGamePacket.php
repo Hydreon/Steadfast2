@@ -72,8 +72,12 @@ class StartGamePacket extends PEPacket{
 		$this->putLFloat(0);
 		
 		// Level settings
-		
-		$this->putSignedVarInt($this->seed);
+
+		if($playerProtocol >= Info::PROTOCOL_503){
+			$this->putLLong($this->seed);
+		}else{
+			$this->putSignedVarInt($this->seed);
+		}
 		
 		$this->putShort(0); //SpawnSettingsType
 
