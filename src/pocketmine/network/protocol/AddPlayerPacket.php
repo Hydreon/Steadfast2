@@ -82,7 +82,9 @@ class AddPlayerPacket extends PEPacket{
 		$this->putLFloat($this->yaw);//TODO headrot	
 		$this->putSignedVarInt(0);
 //		$this->putSlot($this->item, $playerProtocol);
-
+		if($playerProtocol >= Info::PROTOCOL_503){
+			$this->putSignedVarInt(0); //gamemode
+		}
 		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
 		$this->putVarInt($this->flags);
