@@ -2,6 +2,7 @@
 
 namespace pocketmine\network\protocol\v310;
 
+use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\PEPacket;
 
@@ -16,6 +17,7 @@ class SpawnParticleEffectPacket extends PEPacket {
 	public $y;
 	public $z;
 	public $particleName;
+	public $molangVariablesJson = "";
 
 	public function decode($playerProtocol) {
 		$this->getHeader($playerProtocol);
@@ -25,6 +27,11 @@ class SpawnParticleEffectPacket extends PEPacket {
 		$this->y = $this->getLFloat();
 		$this->z = $this->getLFloat();
 		$this->particleName = $this->getString();
+		if($playerProtocol >= Info::PROTOCOL_503){
+			$this->molangVariablesJson = $this->getString();
+		}else{
+			$this->molangVariablesJson = "";
+		}
 	}
 
 	public function encode($playerProtocol) {
@@ -35,6 +42,9 @@ class SpawnParticleEffectPacket extends PEPacket {
 		$this->putLFloat($this->y);
 		$this->putLFloat($this->z);
 		$this->putString($this->particleName);
+		if($playerProtocol >= Info::PROTOCOL_503){
+			$this->putString($this->molangVariablesJson);
+		}
 	}
 
 }

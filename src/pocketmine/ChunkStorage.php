@@ -111,7 +111,8 @@ class ChunkStorage {
 			$biomes = $data["biomeColor"];
 		}
 		if($protocol >= Info::PROTOCOL_475){
-			for($i = 0; $i < 25; ++$i){
+			$count = $protocol >= Info::PROTOCOL_503 ? 24 : 25;
+			for($i = 0; $i < $count; ++$i){
 				$chunkData .= chr(0); //fake biome palette - 0 bpb, non-persistent
 				$chunkData .= Binary::writeVarInt(Biome::PLAINS << 1); //fill plains for now
 			}
