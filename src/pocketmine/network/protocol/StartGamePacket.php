@@ -24,6 +24,9 @@ namespace pocketmine\network\protocol;
 #include <rules/DataPacket.h>
 
 use pocketmine\item\Item;
+use pocketmine\nbt\NBT;
+use pocketmine\nbt\tag\Compound;
+use pocketmine\utils\UUID;
 
 class StartGamePacket extends PEPacket{
 	const NETWORK_ID = Info::START_GAME_PACKET;
@@ -180,19 +183,15 @@ class StartGamePacket extends PEPacket{
 		} else {
 			$this->putByte(0); // is server authoritative over movement
 		}
-		
-
 		$this->putLong(0); // current level time
-		if ($playerProtocol >= Info::PROTOCOL_419) {
-			$this->putVarInt(0);
-		} 
 		$this->putSignedVarInt(0); // enchantment seed  ????????
 
 		if ($playerProtocol < Info::PROTOCOL_419) {
 			$this->put(self::getBlockPalletData($playerProtocol));
+		} else{
+			$this->putVarInt(0);
 		}
 
-        
 		if ($playerProtocol >= Info::PROTOCOL_419) {
 			$itemsData = self::getItemsList($playerProtocol);
 			$this->putVarInt(count($itemsData));
@@ -210,8 +209,16 @@ class StartGamePacket extends PEPacket{
 		if ($playerProtocol >= Info::PROTOCOL_440) {
 			$this->putString(''); //server version
 		}
+		if($playerProtocol >= Info::PROTOCOL_526) {
+			$nbt = new NBT();
+			$nbt->setData(new Compound(""));
+			$this->put($nbt->write(false));
+		}
 		if($playerProtocol >= Info::PROTOCOL_475){
 			$this->putLLong(0); //block palette checksum
+		}
+		if($playerProtocol >= Info::PROTOCOL_526){
+			$this->putUUID(UUID::fromBinary(str_repeat("\x00", 16), 0));
 		}
 	}
 
