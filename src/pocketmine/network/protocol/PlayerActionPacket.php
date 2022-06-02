@@ -42,6 +42,11 @@ class PlayerActionPacket extends PEPacket{
 		$this->x = $this->getSignedVarInt();
 		$this->y = $this->getVarInt();
 		$this->z = $this->getSignedVarInt();
+		if($playerProtocol >= Info::PROTOCOL_526) {
+			$this->getSignedVarInt();
+			$this->getVarInt();
+			$this->getSignedVarInt();
+		}
 		$this->face = $this->getSignedVarInt();
 	}
 
@@ -52,6 +57,11 @@ class PlayerActionPacket extends PEPacket{
 		$this->putSignedVarInt($this->x);
 		$this->putVarInt($this->y);
 		$this->putSignedVarInt($this->z);
+		if($playerProtocol >= Info::PROTOCOL_526){
+			$this->putSignedVarInt(0);
+			$this->putVarInt(0);
+			$this->putSignedVarInt(0);
+		}
 		$this->putSignedVarInt($this->face);
 	}
 
