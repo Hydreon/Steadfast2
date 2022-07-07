@@ -247,6 +247,7 @@ class Network {
 			case Info::PROTOCOL_503:
 			case Info::PROTOCOL_526:
 			case Info::PROTOCOL_527:
+			case Info::PROTOCOL_534:
 				$class = $this->packetPool331[$id];
 				break;
 			default:
@@ -260,6 +261,7 @@ class Network {
 	
 	public static function getChunkPacketProtocol($playerProtocol){
 		switch ($playerProtocol) {
+			case Info::PROTOCOL_534:
 			case Info::PROTOCOL_527:
 			case Info::PROTOCOL_526:
 				return Info::PROTOCOL_526;
