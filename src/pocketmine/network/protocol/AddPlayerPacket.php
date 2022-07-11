@@ -68,7 +68,9 @@ class AddPlayerPacket extends PEPacket{
 		} else {
 			$this->putString($this->username);
 		}
-		$this->putEntityUniqueId($this->eid);
+		if($playerProtocol < Info::PROTOCOL_534) {
+			$this->putEntityUniqueId($this->eid);
+		}
 		$this->putEntityRuntimeId($this->eid);
 		$this->putString(""); // platform chat id
 		$this->putLFloat($this->x);
@@ -87,12 +89,19 @@ class AddPlayerPacket extends PEPacket{
 		}
 		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
-		$this->putVarInt($this->flags);
-		$this->putVarInt($this->commandPermission);
-		$this->putVarInt($this->actionPermissions);
-		$this->putVarInt($this->permissionLevel);
-		$this->putVarInt($this->storedCustomPermissions);
-		$this->putLLong($this->eid); //entity unique id
+		if($playerProtocol >= Info::PROTOCOL_534) {
+			$this->putLLong($this->eid); //entity unique id
+			$this->putByte($this->commandPermission);
+			$this->putByte($this->permissionLevel);
+			$this->putByte(0); //number of ability layers
+		}else{
+			$this->putVarInt($this->flags);
+			$this->putVarInt($this->commandPermission);
+			$this->putVarInt($this->actionPermissions);
+			$this->putVarInt($this->permissionLevel);
+			$this->putVarInt($this->storedCustomPermissions);
+			$this->putLLong($this->eid); //entity unique id
+		}
 
 		$this->putVarInt(count($this->links));
 		foreach ($this->links as $link) {

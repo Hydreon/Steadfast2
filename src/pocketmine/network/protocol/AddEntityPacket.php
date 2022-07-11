@@ -59,6 +59,9 @@ class AddEntityPacket extends PEPacket{
 		$this->putLFloat($this->pitch);
 		$this->putLFloat($this->yaw);
 		$this->putLFloat($this->yaw); //headYaw
+		if($playerProtocol >= Info::PROTOCOL_534) {
+			$this->putLFloat($this->yaw); //bodyYaw
+		}
 		$this->putVarInt(count($this->attributes));
 		foreach ($this->attributes as $attribute) {
 			$this->putString($attribute['name']);
