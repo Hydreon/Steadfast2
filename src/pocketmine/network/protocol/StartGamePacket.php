@@ -100,6 +100,9 @@ class StartGamePacket extends PEPacket{
 		$this->putSignedVarInt($this->spawnZ);
 
 		$this->putByte(1); // hasAchievementsDisabled
+		if($playerProtocol >= Info::PROTOCOL_534) {
+			$this->putByte(0); // isEditorMode
+		}
 		
 		$this->putSignedVarInt(0); // DayCycleStopTyme 1x VarInt
 
