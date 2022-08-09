@@ -30,6 +30,11 @@ class MapItemDataPacket extends PEPacket {
 		$this->putVarInt($this->flags);
 		$this->putByte(0); // dimension
 		$this->putByte($this->isLockedMap);
+		if ($playerProtocol >= Info::PROTOCOL_544) {
+			$this->putVarInt(0);
+			$this->putVarInt(0);
+			$this->putVarInt(0);
+		}
 		switch ($this->flags) {
 			case 2:
 				$this->putByte($this->scale);
