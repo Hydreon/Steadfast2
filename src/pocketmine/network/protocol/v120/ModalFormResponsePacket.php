@@ -2,6 +2,7 @@
 
 namespace pocketmine\network\protocol\v120;
 
+use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\Info331;
 use pocketmine\network\protocol\PEPacket;
 
@@ -12,6 +13,7 @@ class ModalFormResponsePacket extends PEPacket {
 
 	public $formId;
 	public $data;
+	public $cancelReason;
 
 	public function encode($playerProtocol) {
 		
@@ -26,7 +28,13 @@ class ModalFormResponsePacket extends PEPacket {
 	public function decode($playerProtocol) {
 		$this->getHeader($playerProtocol);
 		$this->formId = $this->getVarInt();
-		$this->data = $this->getString();
+		if ($playerProtocol >= Info::PROTOCOL_544) {
+			$this->data = $this->getByte() === 1 ? $this->getString() : null;
+			$this->cancelReason = $this->getByte() === 1 ? $this->getByte() : null;
+		} else {
+			$this->data = $this->getString();
+			$this->cancelReason = null;
+		}
 	}
 
 }
