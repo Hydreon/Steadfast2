@@ -54,6 +54,9 @@ class UpdateAttributesPacket extends PEPacket{
 			$this->putLFloat($this->value);
 			$this->putLFloat($this->defaultValue);
 			$this->putString($this->name);
+			if ($playerProtocol >= Info::PROTOCOL_544) {
+				$this->putVarInt(0); //modifier count
+			}
 		} else {
 			$this->putVarInt(count($this->attributes));
 			foreach ($this->attributes as $attribute) {
@@ -62,6 +65,9 @@ class UpdateAttributesPacket extends PEPacket{
 				$this->putLFloat(isset($attribute['value']) ? $attribute['value'] : $attribute['default']);
 				$this->putLFloat($attribute['default']);
 				$this->putString($attribute['name']);
+				if ($playerProtocol >= Info::PROTOCOL_544) {
+					$this->putVarInt(0); //modifier count
+				}
 			}
 		}
 		if ($playerProtocol >= Info::PROTOCOL_419) {
