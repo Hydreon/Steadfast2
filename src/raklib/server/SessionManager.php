@@ -214,7 +214,12 @@ class SessionManager{
 			if ($session->isEncryptEnable()) {
 				$buff = $session->getDecrypt($buff);
 			}
-			$decoded = zlib_decode($buff);
+			$decoded = @zlib_decode($buff);
+			if ($decoded === false) {
+				//assume compression was not used if payload fails to decompress
+				//this is a bad hack, but it saves having to mess around with RakLib internals
+				$decoded = $buff;
+			}
 			$stream = new BinaryStream($decoded);
 			$length = strlen($decoded);
 			static $spamPacket = "\x39\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";

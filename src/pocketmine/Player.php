@@ -111,12 +111,14 @@ use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\DisconnectPacket;
 use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\network\protocol\GameRulesChangedPacket;
+use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\Info as ProtocolInfo;
 use pocketmine\network\protocol\InteractPacket;
 use pocketmine\network\protocol\ItemComponentPacket;
 use pocketmine\network\protocol\LevelEventPacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\network\protocol\MovePlayerPacket;
+use pocketmine\network\protocol\NetworkSettingsPacket;
 use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\PlayerActionPacket;
 use pocketmine\network\protocol\PlayerListPacket;
@@ -1238,25 +1240,29 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	 * Sends all the option flags
 	 */
 	public function sendSettings() {
-		$flags = AdventureSettingsPacket::FLAG_NO_PVM | AdventureSettingsPacket::FLAG_NO_MVP;
-		if ($this->autoJump) {
-			$flags |= AdventureSettingsPacket::FLAG_AUTO_JUMP;
-		}
-		if ($this->allowFlight) {
-			$flags |= AdventureSettingsPacket::FLAG_PLAYER_MAY_FLY;
-		}
-		if ($this->isSpectator()) {
-			$flags |= AdventureSettingsPacket::FLAG_WORLD_IMMUTABLE;
-			$flags |= AdventureSettingsPacket::FLAG_PLAYER_NO_CLIP;
-		}
+		if ($this->protocol < Info::PROTOCOL_553) {
+			$flags = AdventureSettingsPacket::FLAG_NO_PVM | AdventureSettingsPacket::FLAG_NO_MVP;
+			if ($this->autoJump) {
+				$flags |= AdventureSettingsPacket::FLAG_AUTO_JUMP;
+			}
+			if ($this->allowFlight) {
+				$flags |= AdventureSettingsPacket::FLAG_PLAYER_MAY_FLY;
+			}
+			if ($this->isSpectator()) {
+				$flags |= AdventureSettingsPacket::FLAG_WORLD_IMMUTABLE;
+				$flags |= AdventureSettingsPacket::FLAG_PLAYER_NO_CLIP;
+			}
 
-		$pk = new AdventureSettingsPacket();
-		$pk->flags = $flags;
-		$pk->userId = $this->getId();
-		$pk->commandPermissions = $this->commandPermissions;
-		$pk->permissionLevel = AdventureSettingsPacket::PERMISSION_LEVEL_CUSTOM;
-		$pk->actionPermissions = $this->getActionFlags();
-		$this->dataPacket($pk);
+			$pk = new AdventureSettingsPacket();
+			$pk->flags = $flags;
+			$pk->userId = $this->getId();
+			$pk->commandPermissions = $this->commandPermissions;
+			$pk->permissionLevel = AdventureSettingsPacket::PERMISSION_LEVEL_CUSTOM;
+			$pk->actionPermissions = $this->getActionFlags();
+			$this->dataPacket($pk);
+		} else {
+			//TODO: this requires the abilities packet and permissions packet to be implemented, which is a bunch of work
+		}
 	}
 
 	public function isSurvival(){
@@ -1705,7 +1711,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			return;
 		}
 
-		$beforeLoginAvailablePackets = ['LOGIN_PACKET', 'REQUEST_CHUNK_RADIUS_PACKET', 'RESOURCE_PACKS_CLIENT_RESPONSE_PACKET', 'CLIENT_TO_SERVER_HANDSHAKE_PACKET', 'RESOURCE_PACK_CHUNK_REQUEST_PACKET'];
+		$beforeLoginAvailablePackets = ['REQUEST_NETWORK_SETTINGS_PACKET', 'LOGIN_PACKET', 'REQUEST_CHUNK_RADIUS_PACKET', 'RESOURCE_PACKS_CLIENT_RESPONSE_PACKET', 'CLIENT_TO_SERVER_HANDSHAKE_PACKET', 'RESOURCE_PACK_CHUNK_REQUEST_PACKET'];
 		if (!$this->isOnline() && !in_array($packet->pname(), $beforeLoginAvailablePackets)) {
 			return;
 		}
@@ -1716,6 +1722,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 
 		switch($packet->pname()){
+			case 'REQUEST_NETWORK_SETTINGS_PACKET':
+				$this->protocol = $packet->protocolVersion;
+				if(in_array($this->protocol, ProtocolInfo::ACCEPTED_PROTOCOLS, true)) {
+					$networkSettings = new NetworkSettingsPacket();
+					$networkSettings->encode($this->protocol);
+					$batch = new BatchPacket();
+					$batch->payload = Binary::writeVarInt(strlen($networkSettings->buffer)) . $networkSettings->buffer;
+					$this->dataPacket($batch);
+				} else {
+					$this->close("", $this->getNonValidProtocolMessage($this->protocol));
+					error_log("Login from unsupported protocol " . $this->protocol);
+					//Timings::$timerLoginPacket->stopTiming();
+					break;
+				}
+				break;
             case 'SET_PLAYER_GAMETYPE_PACKET':
                 file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " SET_PLAYER_GAMETYPE_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
                 break;
@@ -4860,17 +4881,26 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	private function getNonValidProtocolMessage($protocol) {
-		if ($protocol > ProtocolInfo::PROTOCOL_431) {
+		if ($protocol > ProtocolInfo::CURRENT_PROTOCOL) {
 			$pk = new PlayStatusPacket();
 			$pk->status = PlayStatusPacket::LOGIN_FAILED_SERVER;
-			$this->dataPacket($pk);
-			return TextFormat::WHITE . "We don't support this client version yet.\n" . TextFormat::WHITE ."        The update is coming soon.";
+			$message = TextFormat::WHITE . "We don't support this client version yet.\n" . TextFormat::WHITE ."        The update is coming soon.";
 		} else {
 			$pk = new PlayStatusPacket();
 			$pk->status = PlayStatusPacket::LOGIN_FAILED_CLIENT;
-			$this->dataPacket($pk);
-			return TextFormat::WHITE . "Please update your client version to join";
+			$message = TextFormat::WHITE . "Please update your client version to join";
 		}
+
+		if($protocol >= Info::PROTOCOL_553){
+			$batch = new BatchPacket();
+			$pk->encode($protocol);
+			$batch->payload = Binary::writeVarInt(strlen($pk->getBuffer())) . $pk->getBuffer();
+			$this->dataPacket($batch);
+		} else {
+			$this->dataPacket($pk);
+		}
+
+		return $message;
 	}
 
 	public function sendFullPlayerList() {

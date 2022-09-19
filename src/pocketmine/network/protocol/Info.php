@@ -27,8 +27,8 @@ namespace pocketmine\network\protocol;
 
 interface Info{
 
-	const CURRENT_PROTOCOL = self::PROTOCOL_545;
-	const ACCEPTED_PROTOCOLS = [419, 422, 423, 428, 431, 440, 448, 465, 471, 475, 486, 503, 526, 527, 534, 544, 545];
+	const CURRENT_PROTOCOL = self::PROTOCOL_554;
+	const ACCEPTED_PROTOCOLS = [419, 422, 423, 428, 431, 440, 448, 465, 471, 475, 486, 503, 526, 527, 534, 544, 545, 553, 554];
 
 	const PROTOCOL_419  = 419; // 1.16.100.59
 	const PROTOCOL_422  = 422; // 1.16.200.56
@@ -47,6 +47,8 @@ interface Info{
 	const PROTOCOL_534  = 534; // 1.19.10.24
 	const PROTOCOL_544  = 544; // 1.19.20.2
 	const PROTOCOL_545  = 545; // 1.19.21.1
+	const PROTOCOL_553  = 553;
+	const PROTOCOL_554  = 554;
 
 	/**
 	 * Minecraft: PE packets
@@ -159,5 +161,10 @@ interface Info{
 	const LEVEL_SOUND_EVENT_PACKET = 0x7b;
 	const PLAYER_ENCHANT_OPTIONS_PACKET = 0x92;				// NEW 406 || 407
 	const ITEM_COMPONENT_PACKET = 0xA2; 					// NEW 419
+
+	const NETWORK_SETTINGS_PACKET = 0x8f;
+
 	const CREATIVE_CONTENT_PACKET = 0x91; 					// NEW 419
+
+	const REQUEST_NETWORK_SETTINGS_PACKET = 0xc1;
 }
