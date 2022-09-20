@@ -111,12 +111,14 @@ use pocketmine\network\protocol\DataPacket;
 use pocketmine\network\protocol\DisconnectPacket;
 use pocketmine\network\protocol\EntityEventPacket;
 use pocketmine\network\protocol\GameRulesChangedPacket;
+use pocketmine\network\protocol\Info;
 use pocketmine\network\protocol\Info as ProtocolInfo;
 use pocketmine\network\protocol\InteractPacket;
 use pocketmine\network\protocol\ItemComponentPacket;
 use pocketmine\network\protocol\LevelEventPacket;
 use pocketmine\network\protocol\LevelSoundEventPacket;
 use pocketmine\network\protocol\MovePlayerPacket;
+use pocketmine\network\protocol\NetworkSettingsPacket;
 use pocketmine\network\protocol\PEPacket;
 use pocketmine\network\protocol\PlayerActionPacket;
 use pocketmine\network\protocol\PlayerListPacket;
@@ -168,9 +170,6 @@ use pocketmine\network\proxy\ProxyPacket;
 use pocketmine\network\protocol\AddPlayerPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\utils\Binary;
-use pocketmine\entity\Vehicle;
-
-
 use pocketmine\network\proxy\DisconnectCompletePacket;
 use pocketmine\network\protocol\v120\InventoryContentPacket;
 use pocketmine\network\protocol\v392\CreativeItemsListPacket;
@@ -179,9 +178,7 @@ use function mt_rand;
 use function rand;
 use function random_int;
 
-
-use pocketmine\tile\Chest;
-
+USE pocketmine\tile\chest;
 
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
@@ -1248,8 +1245,10 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	 *
 	 * @return bool
 	 */
+
 	public function setGamemode($gm, $isForce = false){
 		if ($gm < 0 || $gm > 3 || ($this->gamemode === $gm && !$isForce)) {
+
 			return false;
 		}
 
@@ -1282,25 +1281,29 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	 * Sends all the option flags
 	 */
 	public function sendSettings() {
-		$flags = AdventureSettingsPacket::FLAG_NO_PVM | AdventureSettingsPacket::FLAG_NO_MVP;
-		if ($this->autoJump) {
-			$flags |= AdventureSettingsPacket::FLAG_AUTO_JUMP;
-		}
-		if ($this->allowFlight) {
-			$flags |= AdventureSettingsPacket::FLAG_PLAYER_MAY_FLY;
-		}
-		if ($this->isSpectator()) {
-			$flags |= AdventureSettingsPacket::FLAG_WORLD_IMMUTABLE;
-			$flags |= AdventureSettingsPacket::FLAG_PLAYER_NO_CLIP;
-		}
+		if ($this->protocol < Info::PROTOCOL_553) {
+			$flags = AdventureSettingsPacket::FLAG_NO_PVM | AdventureSettingsPacket::FLAG_NO_MVP;
+			if ($this->autoJump) {
+				$flags |= AdventureSettingsPacket::FLAG_AUTO_JUMP;
+			}
+			if ($this->allowFlight) {
+				$flags |= AdventureSettingsPacket::FLAG_PLAYER_MAY_FLY;
+			}
+			if ($this->isSpectator()) {
+				$flags |= AdventureSettingsPacket::FLAG_WORLD_IMMUTABLE;
+				$flags |= AdventureSettingsPacket::FLAG_PLAYER_NO_CLIP;
+			}
 
-		$pk = new AdventureSettingsPacket();
-		$pk->flags = $flags;
-		$pk->userId = $this->getId();
-		$pk->commandPermissions = $this->commandPermissions;
-		$pk->permissionLevel = AdventureSettingsPacket::PERMISSION_LEVEL_CUSTOM;
-		$pk->actionPermissions = $this->getActionFlags();
-		$this->dataPacket($pk);
+			$pk = new AdventureSettingsPacket();
+			$pk->flags = $flags;
+			$pk->userId = $this->getId();
+			$pk->commandPermissions = $this->commandPermissions;
+			$pk->permissionLevel = AdventureSettingsPacket::PERMISSION_LEVEL_CUSTOM;
+			$pk->actionPermissions = $this->getActionFlags();
+			$this->dataPacket($pk);
+		} else {
+			//TODO: this requires the abilities packet and permissions packet to be implemented, which is a bunch of work
+		}
 	}
 
 	public function isSurvival(){
@@ -1748,7 +1751,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		if($this->connected === false){
 			return;
 		}
-		$beforeLoginAvailablePackets = ['LOGIN_PACKET', 'REQUEST_CHUNK_RADIUS_PACKET', 'RESOURCE_PACKS_CLIENT_RESPONSE_PACKET', 'CLIENT_TO_SERVER_HANDSHAKE_PACKET', 'RESOURCE_PACK_CHUNK_REQUEST_PACKET'];
+
+		$beforeLoginAvailablePackets = ['REQUEST_NETWORK_SETTINGS_PACKET', 'LOGIN_PACKET', 'REQUEST_CHUNK_RADIUS_PACKET', 'RESOURCE_PACKS_CLIENT_RESPONSE_PACKET', 'CLIENT_TO_SERVER_HANDSHAKE_PACKET', 'RESOURCE_PACK_CHUNK_REQUEST_PACKET'];
 		if (!$this->isOnline() && !in_array($packet->pname(), $beforeLoginAvailablePackets)) {
 			return;
 		}
@@ -1759,6 +1763,21 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		}
 
 		switch($packet->pname()){
+			case 'REQUEST_NETWORK_SETTINGS_PACKET':
+				$this->protocol = $packet->protocolVersion;
+				if(in_array($this->protocol, ProtocolInfo::ACCEPTED_PROTOCOLS, true)) {
+					$networkSettings = new NetworkSettingsPacket();
+					$networkSettings->encode($this->protocol);
+					$batch = new BatchPacket();
+					$batch->payload = Binary::writeVarInt(strlen($networkSettings->buffer)) . $networkSettings->buffer;
+					$this->dataPacket($batch);
+				} else {
+					$this->close("", $this->getNonValidProtocolMessage($this->protocol));
+					error_log("Login from unsupported protocol " . $this->protocol);
+					//Timings::$timerLoginPacket->stopTiming();
+					break;
+				}
+				break;
             case 'SET_PLAYER_GAMETYPE_PACKET':
                 file_put_contents("./logs/possible_hacks.log", date('m/d/Y h:i:s a', time()) . " SET_PLAYER_GAMETYPE_PACKET " . $this->username . PHP_EOL, FILE_APPEND | LOCK_EX);
                 break;
@@ -2060,6 +2079,9 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					case 'CHANGE_DIMENSION_ACK':
 						$this->onDimensionChanged();
 						break;
+					case 'INTERACT_WITH_BLOCK':
+						//TODO:
+						break;
 				}
 
 				$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, false);
@@ -2069,6 +2091,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				break;
 			case 'INTERACT_PACKET':
 				if ($packet->action === InteractPacket::ACTION_OPEN_INVENTORY) {
+
 					//TODO:
 					$this->addWindow($this->getInventory());
 				} elseif ($packet->action === InteractPacket::ACTION_DAMAGE) {
@@ -2087,7 +2110,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 					$this->customInteract($packet);
 				}
 				break;
-				break;
 			case 'ANIMATE_PACKET':
 				//Timings::$timerAnimatePacket->startTiming();
 				if ($this->spawned === false or $this->dead === true) {
@@ -2096,7 +2118,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 				}
 
 				$this->server->getPluginManager()->callEvent($ev = new PlayerAnimationEvent($this, $packet->action));
-				if ($ev->isCancelled()) {
+				if($ev->isCancelled()){
 					//Timings::$timerAnimatePacket->stopTiming();
 					break;
 				}
@@ -2647,7 +2669,6 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 			$this->freeChunks();
 			parent::close();
-
 			$this->server->removeOnlinePlayer($this);
 			if ($this->closeFromProxy) {
 				$this->removeAllEffects();
@@ -3332,7 +3353,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			$this->sendPosition($this);
 			$this->setGamemode($this->gamemode, true);
 		}
-				
+
 		$pk = new CreativeContentPacket();
 		$pk->groups = Item::getCreativeGroups();
 		$pk->items = Item::getCreativeItems();
