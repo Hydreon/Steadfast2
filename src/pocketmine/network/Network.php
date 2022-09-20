@@ -58,12 +58,14 @@ use pocketmine\network\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\protocol\MobEquipmentPacket;
 use pocketmine\network\protocol\MoveEntityPacket;
 use pocketmine\network\protocol\MovePlayerPacket;
+use pocketmine\network\protocol\NetworkSettingsPacket;
 use pocketmine\network\protocol\PlayerActionPacket;
 use pocketmine\network\protocol\PlayerInputPacket;
 use pocketmine\network\protocol\PlayerListPacket;
 use pocketmine\network\protocol\PlayStatusPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\network\protocol\RequestChunkRadiusPacket;
+use pocketmine\network\protocol\RequestNetworkSettingsPacket;
 use pocketmine\network\protocol\ResourcePackChunkRequestPacket;
 use pocketmine\network\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\protocol\ResourcePackDataInfoPacket;
@@ -267,6 +269,9 @@ class Network {
 			case Info::PROTOCOL_527:
 			case Info::PROTOCOL_534:
 			case Info::PROTOCOL_544:
+			case Info::PROTOCOL_545:
+			case Info::PROTOCOL_553:
+			case Info::PROTOCOL_554:
 				$class = $this->packetPool331[$id];
 				break;
 			default:
@@ -294,6 +299,9 @@ class Network {
 
 	public static function getChunkPacketProtocol($playerProtocol){
 		switch ($playerProtocol) {
+			case Info::PROTOCOL_554:
+			case Info::PROTOCOL_553:
+			case Info::PROTOCOL_545:
 			case Info::PROTOCOL_544:
 				return Info::PROTOCOL_544;
 			case Info::PROTOCOL_534:
@@ -415,6 +423,8 @@ class Network {
 		$this->registerPacket331(ProtocolInfo331::ITEM_COMPONENT_PACKET, ItemComponentPacket::class);
 		$this->registerPacket331(ProtocolInfo331::ITEM_STACK_RESPONSE_PACKET, ItemStackResponsePacket::class);
 		$this->registerPacket331(ProtocolInfo331::CREATIVE_CONTENT_PACKET, CreativeContentPacket::class);
+		$this->registerPacket331(ProtocolInfo331::REQUEST_NETWORK_SETTINGS_PACKET, RequestNetworkSettingsPacket::class);
+		$this->registerPacket331(ProtocolInfo331::NETWORK_SETTINGS_PACKET, NetworkSettingsPacket::class);
 	}
 
 	private function registerProxyPackets(){

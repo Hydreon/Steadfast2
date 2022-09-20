@@ -65,9 +65,18 @@ class CraftingDataPacket extends PEPacket{
 		$stream->putString("recipe" . $recipe->getId());
 		$stream->putVarInt($recipe->getIngredientCount());
 		foreach($recipe->getIngredientList() as $item){
-			$stream->putSignedVarInt($item->getId());
-			if ($item->getId() !== 0) {
-				$stream->putSignedVarInt($item->getDamage());
+			if($playerProtocol < Info::PROTOCOL_553) {
+				$stream->putSignedVarInt($item->getId());
+				if ($item->getId() !== 0) {
+					$stream->putSignedVarInt($item->getDamage());
+					$stream->putSignedVarInt($item->getCount());
+				}
+			} else {
+				$stream->putByte(1); // internal item descriptor type
+				$stream->putLShort($item->getId());
+				if($item->getId() !== 0){
+					$stream->putLShort($item->getDamage());
+				}
 				$stream->putSignedVarInt($item->getCount());
 			}
 		}
@@ -90,9 +99,18 @@ class CraftingDataPacket extends PEPacket{
 		for($z = 0; $z < $recipe->getWidth(); ++$z){
 			for($x = 0; $x < $recipe->getHeight(); ++$x){
 				$slot = $recipe->getIngredient($x, $z);
-				$stream->putSignedVarInt($slot->getId());
-				if ($slot->getId() !== 0) {
-					$stream->putSignedVarInt($slot->getDamage());
+				if($playerProtocol < Info::PROTOCOL_553) {
+					$stream->putSignedVarInt($slot->getId());
+					if ($slot->getId() !== 0) {
+						$stream->putSignedVarInt($slot->getDamage());
+						$stream->putSignedVarInt($slot->getCount());
+					}
+				} else {
+					$stream->putByte(1); // internal item descriptor type
+					$stream->putLShort($slot->getId());
+					if($slot->getId() !== 0){
+						$stream->putLShort($slot->getDamage());
+					}
 					$stream->putSignedVarInt($slot->getCount());
 				}
 			}

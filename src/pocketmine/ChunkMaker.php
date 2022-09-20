@@ -53,6 +53,7 @@ class ChunkMaker extends Thread {
 			$pk = new EncapsulatedPacket();
 			$pk->buffer = $buffer;
 			$pk->reliability = 3;
+			$pk->orderChannel = 0;
 			$enBuffer = chr(RakLib::PACKET_ENCAPSULATED) . chr(strlen($identifier)) . $identifier . chr(RakLib::PRIORITY_NORMAL) . $pk->toBinary(true);
 			$this->raklib->pushMainToThreadPacket($enBuffer);
 		}
