@@ -44,6 +44,10 @@ class SetEntityDataPacket extends PEPacket{
 		$this->putEntityRuntimeId($this->eid);
 		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
+		if($playerProtocol >= Info::PROTOCOL_557){
+			$this->putVarInt(0); //int property sync data count
+			$this->putVarInt(0); //float property sync data count
+		}
 		if($playerProtocol >= Info::PROTOCOL_419){
 			$this->putVarInt(0); // which tick from PlayerAuthInputPacket its on //unsigned varint64
 		}
