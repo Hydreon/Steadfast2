@@ -71,6 +71,10 @@ class AddEntityPacket extends PEPacket{
 		}
 		$meta = Binary::writeMetadata($this->metadata, $playerProtocol);
 		$this->put($meta);
+		if ($playerProtocol >= Info::PROTOCOL_557) {
+			$this->putVarInt(0); //int property sync data count
+			$this->putVarInt(0); //float property sync data count
+		}
 
 		$this->putVarInt(count($this->links));
 		foreach ($this->links as $link) {
