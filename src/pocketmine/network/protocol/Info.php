@@ -27,8 +27,8 @@ namespace pocketmine\network\protocol;
 
 interface Info{
 
-	const CURRENT_PROTOCOL = self::PROTOCOL_557;
-	const ACCEPTED_PROTOCOLS = [419, 422, 423, 428, 431, 440, 448, 465, 471, 475, 486, 503, 526, 527, 534, 544, 545, 553, 554, 557];
+	const CURRENT_PROTOCOL = self::PROTOCOL_560;
+	const ACCEPTED_PROTOCOLS = [419, 422, 423, 428, 431, 440, 448, 465, 471, 475, 486, 503, 526, 527, 534, 544, 545, 553, 554, 557, 560];
 
 	const PROTOCOL_419  = 419; // 1.16.100.59
 	const PROTOCOL_422  = 422; // 1.16.200.56
@@ -50,6 +50,7 @@ interface Info{
 	const PROTOCOL_553  = 553;
 	const PROTOCOL_554  = 554;
 	const PROTOCOL_557  = 557; // 1.19.40
+	const PROTOCOL_560  = 560; // 1.19.50.23
 
 
 	/**

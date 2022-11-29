@@ -96,18 +96,18 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_HORSE_TYPE = 19; // type: byte
 	const DATA_ENDERMAN_BLOCK_ID = 23; // type: short
 	const DATA_ENDERMAN_BLOCK_META = 24; // type:short
-	const DATA_PLAYER_FLAGS = 27;
-	const DATA_PLAYER_BED_POSITION = 29;
+	const DATA_PLAYER_FLAGS = 26;
+	const DATA_PLAYER_BED_POSITION = 28;
     const DATA_POTION_AUX_VALUE = 36; //short
-	const DATA_LEAD_HOLDER = 38; // type: long
-	const DATA_SCALE = 39; // type: float
-	const DATA_BUTTON_TEXT = 40; // type: string !IMPORTANT! Send to player
-	const DATA_MAX_AIR = 44; // type: short
-	const DATA_WIDTH = 54;
-	const DATA_HEIGHT = 55; // type: float
-	const DATA_SEAT_RIDER_OFFSET = 57; // type: vector3
-	
-	const DATA_EXPLODE_TIMER = 56;
+	const DATA_LEAD_HOLDER = 37; // type: long
+	const DATA_SCALE = 38; // type: float
+	const DATA_BUTTON_TEXT = 41; // type: string !IMPORTANT! Send to player
+	const DATA_MAX_AIR = 42; // type: short
+	const DATA_WIDTH = 53;
+	const DATA_HEIGHT = 54; // type: float
+	const DATA_EXPLODE_TIMER = 55;
+	const DATA_SEAT_RIDER_OFFSET = 56; // type: vector3
+
 	const DATA_POSE_INDEX = 79;
 	
 	const DATA_SILENT = 4;
@@ -144,32 +144,28 @@ abstract class Entity extends Location implements Metadatable{
 	const DATA_FLAG_NO_AI = 16;
 	const DATA_FLAG_SILENT = 17;
 	const DATA_FLAG_IS_CLIMBING = 18;
-	const DATA_FLAG_RESTING_BAT = 19;
-	const DATA_FLAG_ANIMAL_SIT = 20;
-	const DATA_FLAG_ANGRY_WOLF = 21;
-	const DATA_FLAG_INTERESTED = 22; //for mobs following players with food?
-	const DATA_FLAG_ANGRY_BLAZE = 23;
-	const DATA_FLAG_TAME_WOLF = 24; //works with DATA_COLOR
-	const DATA_FLAG_LEASHED = 25;
-	const DATA_FLAG_SHAVED_SHIP = 26;
-	const DATA_FLAG_FALL_FLYING = 27;
-	const DATA_FLAG_ELDER_GUARDIAN = 28;
-	const DATA_FLAG_MOVING = 29; // ???
-	const DATA_FLAG_NOT_IN_WATER = 30;
-	const DATA_FLAG_CHESTED_MOUNT = 31;
-	const DATA_FLAG_STACKABLE = 32; //???	
-	
-	/* 1.1.0 new flags
-	const DATA_FLAG_CAN_CLIMBING = 19; 
-	const DATA_FLAG_IS_SWIMMER = 20; 
-	const DATA_FLAG_CAN_FLY = 21; 
-	const DATA_FLAG_IS_STAING = 37; 
-	 */
-	const DATA_FLAG_IS_WASD_CONTROLLED = 42; 
-	const DATA_FLAG_CAN_POWER_JUMP = 43;
-	const DATA_FLAG_HAS_COLLISION = 45;
-	const DATA_FLAG_AFFECTED_BY_GRAVITY = 46;
-	const DATA_FLAG_FIRE_IMMUNE = 47;
+	const DATA_FLAG_CAN_CLIMB = 19;
+
+	const DATA_FLAG_RESTING_BAT = 23;
+	const DATA_FLAG_ANIMAL_SIT = 24;
+	const DATA_FLAG_ANGRY_WOLF = 25;
+	const DATA_FLAG_INTERESTED = 26; //for mobs following players with food?
+	const DATA_FLAG_ANGRY_BLAZE = 27;
+	const DATA_FLAG_TAME_WOLF = 28; //works with DATA_COLOR
+	const DATA_FLAG_LEASHED = 30;
+	const DATA_FLAG_SHAVED_SHIP = 31;
+	const DATA_FLAG_FALL_FLYING = 32;
+	const DATA_FLAG_ELDER_GUARDIAN = 33;
+	const DATA_FLAG_MOVING = 34; // ???
+	const DATA_FLAG_NOT_IN_WATER = 35;
+	const DATA_FLAG_CHESTED_MOUNT = 36;
+	const DATA_FLAG_STACKABLE = 37; //???
+
+	const DATA_FLAG_IS_WASD_CONTROLLED = 44;
+	const DATA_FLAG_CAN_POWER_JUMP = 45;
+	const DATA_FLAG_HAS_COLLISION = 47;
+	const DATA_FLAG_AFFECTED_BY_GRAVITY = 48;
+	const DATA_FLAG_FIRE_IMMUNE = 49;
 	
 	const DATA_PLAYER_FLAG_SLEEP = 1;
 	const DATA_PLAYER_FLAG_DEAD = 2;

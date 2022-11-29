@@ -8,203 +8,24 @@ use pocketmine\network\protocol\Info;
 class MetadataConvertor {
 
 	private static $initialMeta = [];
-	
-	private static $diffEntityFlags120 = [
-		'DATA_FLAG_RESTING_BAT' => 22,
-		'DATA_FLAG_ANIMAL_SIT' => 23,
-		'DATA_FLAG_ANGRY_WOLF' => 24,
-		'DATA_FLAG_INTERESTED' => 25,
-		'DATA_FLAG_ANGRY_BLAZE' => 26,
-		'DATA_FLAG_TAME_WOLF' => 27,
-		'DATA_FLAG_LEASHED' => 28,
-		'DATA_FLAG_SHAVED_SHIP' => 29,
-		'DATA_FLAG_FALL_FLYING' => 30,
-		'DATA_FLAG_ELDER_GUARDIAN' => 31,
-		'DATA_FLAG_MOVING' => 32,
-		'DATA_FLAG_NOT_IN_WATER' => 33,
-		'DATA_FLAG_CHESTED_MOUNT' => 34,
-		'DATA_FLAG_STACKABLE' => 35,
-	];
-	private static $diffEntityFlags221 = [
-		'DATA_FLAG_RESTING_BAT' => 23,
-		'DATA_FLAG_ANIMAL_SIT' => 24,
-		'DATA_FLAG_ANGRY_WOLF' => 25,
-		'DATA_FLAG_INTERESTED' => 26,
-		'DATA_FLAG_ANGRY_BLAZE' => 27,
-		'DATA_FLAG_TAME_WOLF' => 28,
-		'DATA_FLAG_LEASHED' => 29,
-		'DATA_FLAG_SHAVED_SHIP' => 30,
-		'DATA_FLAG_FALL_FLYING' => 31,
-		'DATA_FLAG_ELDER_GUARDIAN' => 32,
-		'DATA_FLAG_MOVING' => 33,
-		'DATA_FLAG_NOT_IN_WATER' => 34,
-		'DATA_FLAG_CHESTED_MOUNT' => 35,
-		'DATA_FLAG_STACKABLE' => 36,
-		'DATA_FLAG_IS_WASD_CONTROLLED' => 43,
-		'DATA_FLAG_CAN_POWER_JUMP' => 44,
-		'DATA_FLAG_HAS_COLLISION' => 46,
-		'DATA_FLAG_AFFECTED_BY_GRAVITY' => 47,
-		'DATA_FLAG_FIRE_IMMUNE' => 48,
-	];
-	private static $diffEntityFlags290 = [
-		'DATA_FLAG_RESTING_BAT' => 23,
-		'DATA_FLAG_ANIMAL_SIT' => 24,
-		'DATA_FLAG_ANGRY_WOLF' => 25,
-		'DATA_FLAG_INTERESTED' => 26,
-		'DATA_FLAG_ANGRY_BLAZE' => 27,
-		'DATA_FLAG_TAME_WOLF' => 28,
-		'DATA_FLAG_LEASHED' => 30,
-		'DATA_FLAG_SHAVED_SHIP' => 31,
-		'DATA_FLAG_FALL_FLYING' => 32,
-		'DATA_FLAG_ELDER_GUARDIAN' => 33,
-		'DATA_FLAG_MOVING' => 34,
-		'DATA_FLAG_NOT_IN_WATER' => 35,
-		'DATA_FLAG_CHESTED_MOUNT' => 36,
-		'DATA_FLAG_STACKABLE' => 37,
-		'DATA_FLAG_IS_WASD_CONTROLLED' => 44,
-		'DATA_FLAG_CAN_POWER_JUMP' => 45,
-		'DATA_FLAG_HAS_COLLISION' => 47,
-		'DATA_FLAG_AFFECTED_BY_GRAVITY' => 48,
-		'DATA_FLAG_FIRE_IMMUNE' => 49,
-	];
-	private static $entityFlags120 = [];
-	private static $entityFlags221 = [];
-	private static $entityFlags290 = [];
-	
-	private static $diffEntityMetaIds120 = [
-		'DATA_MAX_AIR' => 43,
+
+	private const diffEntityFlags560 = [
+		'DATA_FLAG_HAS_COLLISION' => 48,
+		'DATA_FLAG_AFFECTED_BY_GRAVITY' => 49,
+		'DATA_FLAG_FIRE_IMMUNE' => 50,
 	];
 
-	private static $diffEntityMetaIds220 = [
-		'DATA_PLAYER_FLAGS' => 26,
-		'DATA_PLAYER_BED_POSITION' => 28,
-		'DATA_LEAD_HOLDER' => 37,
-		'DATA_SCALE' => 38,
-		'DATA_BUTTON_TEXT' => 39,
-		'DATA_MAX_AIR' => 42,
-		'DATA_WIDTH' => 53,
-		'DATA_HEIGHT' => 54,
-		'DATA_EXPLODE_TIMER' => 55,
-		'DATA_SEAT_RIDER_OFFSET' => 56,
-	];
-	private static $diffEntityMetaIds221 = [
-		'DATA_PLAYER_FLAGS' => 26,
-		'DATA_PLAYER_BED_POSITION' => 28,
-		'DATA_LEAD_HOLDER' => 37,
-		'DATA_SCALE' => 38,
-		'DATA_BUTTON_TEXT' => 39,
-		'DATA_MAX_AIR' => 42,
-		'DATA_WIDTH' => 53,
-		'DATA_HEIGHT' => 54,
-		'DATA_EXPLODE_TIMER' => 55,
-		'DATA_SEAT_RIDER_OFFSET' => 56,
-		'DATA_POSE_INDEX' => 78,
-	];
-	
-	private static $diffEntityMetaIds340 = [
-		'DATA_PLAYER_FLAGS' => 26,
-		'DATA_PLAYER_BED_POSITION' => 28,
-		'DATA_LEAD_HOLDER' => 37,
-		'DATA_SCALE' => 38,
-		'DATA_BUTTON_TEXT' => 99,
-		'DATA_MAX_AIR' => 42,
-		'DATA_WIDTH' => 53,
-		'DATA_HEIGHT' => 54,
-		'DATA_EXPLODE_TIMER' => 55,
-		'DATA_SEAT_RIDER_OFFSET' => 56,
-		'DATA_POSE_INDEX' => 78,
-	];
-	
-	private static $diffEntityMetaIds354 = [
-		'DATA_PLAYER_FLAGS' => 26,
-		'DATA_PLAYER_BED_POSITION' => 28,
-		'DATA_LEAD_HOLDER' => 37,
-		'DATA_SCALE' => 38,
-		'DATA_BUTTON_TEXT' => 99,
-		'DATA_MAX_AIR' => 42,
-		'DATA_WIDTH' => 54,
-		'DATA_HEIGHT' => 55,
-		'DATA_EXPLODE_TIMER' => 56,
-		'DATA_SEAT_RIDER_OFFSET' => 57,
-		'DATA_POSE_INDEX' => 79,
-	];
-	
-	private static $diffEntityMetaIds360 = [
-		'DATA_PLAYER_FLAGS' => 26,
-		'DATA_PLAYER_BED_POSITION' => 28,
-		'DATA_LEAD_HOLDER' => 37,
-		'DATA_SCALE' => 38,
-		'DATA_BUTTON_TEXT' => 99,
-		'DATA_MAX_AIR' => 42,
-		'DATA_WIDTH' => 53,
-		'DATA_HEIGHT' => 54,
-		'DATA_EXPLODE_TIMER' => 55,
-		'DATA_SEAT_RIDER_OFFSET' => 56,
-		'DATA_POSE_INDEX' => 78,
-	];
-	
-	private static $entityMetaIds120 = [];
-	private static $entityMetaIds220 = [];
-	private static $entityMetaIds221 = [];
-	private static $entityMetaIds340 = [];
-	private static $entityMetaIds354 = [];
-	private static $entityMetaIds360 = [];
+	private static array $entityFlags560 = [];
 
 	public static function init() {
 		$oClass = new \ReflectionClass('pocketmine\entity\Entity');
 		self::$initialMeta = $oClass->getConstants();
 
-		foreach (self::$diffEntityFlags120 as $key => $value) {
-			if (isset(self::$initialMeta[$key])) {
-				self::$entityFlags120[self::$initialMeta[$key]] = $value;
-			}
-		}
-		
-		foreach (self::$diffEntityFlags221 as $key => $value) {
-			if (isset(self::$initialMeta[$key])) {
-				self::$entityFlags221[self::$initialMeta[$key]] = $value;
-			}
-		}
-		
-		foreach (self::$diffEntityFlags290 as $key => $value) {
-			if (isset(self::$initialMeta[$key])) {
-				self::$entityFlags290[self::$initialMeta[$key]] = $value;
-			}
-		}
-		
-		foreach (self::$diffEntityMetaIds120 as $key => $value) {
-			if (isset(self::$initialMeta[$key])) {
-				self::$entityMetaIds120[self::$initialMeta[$key]] = $value;
-			}
-		}
-		
-		foreach (self::$diffEntityMetaIds220 as $key => $value) {
-			if (isset(self::$initialMeta[$key])) {
-				self::$entityMetaIds220[self::$initialMeta[$key]] = $value;
-			}
-		}
-		
-		foreach (self::$diffEntityMetaIds221 as $key => $value) {
-			if (isset(self::$initialMeta[$key])) {
-				self::$entityMetaIds221[self::$initialMeta[$key]] = $value;
-			}
-		}
-		
-		foreach (self::$diffEntityMetaIds340 as $key => $value) {
-			if (isset(self::$initialMeta[$key])) {
-				self::$entityMetaIds340[self::$initialMeta[$key]] = $value;
-			}
-		}
-		
-		foreach (self::$diffEntityMetaIds354 as $key => $value) {
-			if (isset(self::$initialMeta[$key])) {
-				self::$entityMetaIds354[self::$initialMeta[$key]] = $value;
-			}
-		}
-		
-		foreach (self::$diffEntityMetaIds360 as $key => $value) {
-			if (isset(self::$initialMeta[$key])) {
-				self::$entityMetaIds360[self::$initialMeta[$key]] = $value;
+		foreach(self::$initialMeta as $name => $value){
+			if(isset(self::diffEntityFlags560[$name])){
+				self::$entityFlags560[$value] = self::diffEntityFlags560[$name];
+			}else{
+				self::$entityFlags560[$value] = $value;
 			}
 		}
 	}
@@ -217,6 +38,7 @@ class MetadataConvertor {
 
 	private static function updateMetaIds($meta, $protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_560:
 			case Info::PROTOCOL_557:
 			case Info::PROTOCOL_554:
 			case Info::PROTOCOL_553:
@@ -237,7 +59,7 @@ class MetadataConvertor {
             case Info::PROTOCOL_423:
             case Info::PROTOCOL_422:
             case Info::PROTOCOL_419:
-				$protocolMeta = self::$entityMetaIds360;
+				$protocolMeta = [];
 				break;
 			default:
 				throw new \InvalidArgumentException("Unknown protocol $protocol");
@@ -258,6 +80,10 @@ class MetadataConvertor {
 			return $meta;
 		}
 		switch ($protocol) {
+			case Info::PROTOCOL_560:
+				$newflags = 0;
+				$changedFlagIds = self::$entityFlags560;
+				break;
 			case Info::PROTOCOL_557:
 			case Info::PROTOCOL_554:
 			case Info::PROTOCOL_553:
@@ -278,18 +104,18 @@ class MetadataConvertor {
             case Info::PROTOCOL_423:
             case Info::PROTOCOL_422:
             case Info::PROTOCOL_419:
-				$newflags = 1 << 19; //DATA_FLAG_CAN_CLIMBING
-				$protocolFlags = self::$entityFlags290;
+				$changedFlagIds = [];
+				$newflags = 0;
 				break;
 			default:
 				throw new \InvalidArgumentCountException("Unknown protocol $protocol");
 		}
-		
+
 		$flags = strrev(decbin($meta[Entity::DATA_FLAGS][1]));
 		$flagsLength = strlen($flags);
 		for ($i = 0; $i < $flagsLength; $i++) {
 			if ($flags[$i] === '1') {
-				$newflags |= 1 << (isset($protocolFlags[$i]) ? $protocolFlags[$i] : $i);
+				$newflags |= 1 << (isset($changedFlagIds[$i]) ? $changedFlagIds[$i] : $i);
 			}
 		}
 		$meta[Entity::DATA_FLAGS][1] = $newflags;
