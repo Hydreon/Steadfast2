@@ -150,7 +150,7 @@ class StartGamePacket extends PEPacket{
 
         $this->putByte(0); // is bonus chest enabled
 		$this->putByte(0); // is start with map enabled
-		$this->putSignedVarInt(0); // permission level
+		$this->putSignedVarInt(AdventureSettingsPacket::PERMISSION_LEVEL_MEMBER); // permission level
 		$this->putLInt(0); // server chunk tick range
    		$this->putByte(0); // Has locked behavior pack?
 		$this->putByte(0); // Has locked resource pack?
