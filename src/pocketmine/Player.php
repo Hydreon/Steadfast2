@@ -2918,8 +2918,8 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 	}
 
 	protected function checkChunks() {
-		$chunkX = $this->x >> 4;
-		$chunkZ = $this->z >> 4;
+		$chunkX = $this->getFloorX() >> 4;
+		$chunkZ = $this->getFloorZ() >> 4;
 		if ($this->chunk === null || $this->chunk->getX() !== $chunkX || $this->chunk->getZ() !== $chunkZ) {
 			if ($this->chunk !== null) {
 				$this->chunk->removeEntity($this);
@@ -2930,7 +2930,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 			}
 		}
 
-		$chunkViewers = $this->level->getUsingChunk($this->x >> 4, $this->z >> 4);
+		$chunkViewers = $this->level->getUsingChunk($this->getFloorX() >> 4, $this->getFloorZ() >> 4);
 		unset($chunkViewers[$this->getId()]);
 
 		foreach ($this->hasSpawned as $player) {
