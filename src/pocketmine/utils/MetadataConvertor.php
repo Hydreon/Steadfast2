@@ -38,6 +38,7 @@ class MetadataConvertor {
 
 	private static function updateMetaIds($meta, $protocol) {
 		switch ($protocol) {
+			case Info::PROTOCOL_567:
 			case Info::PROTOCOL_560:
 			case Info::PROTOCOL_557:
 			case Info::PROTOCOL_554:
@@ -80,6 +81,7 @@ class MetadataConvertor {
 			return $meta;
 		}
 		switch ($protocol) {
+			case Info::PROTOCOL_567:
 			case Info::PROTOCOL_560:
 				$newflags = 0;
 				$changedFlagIds = self::$entityFlags560;

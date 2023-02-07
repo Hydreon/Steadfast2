@@ -163,6 +163,9 @@ class StartGamePacket extends PEPacket{
 			$this->putByte(0); // disable persona skins
 			$this->putByte(0); // disable custom skins
 		}
+		if($playerProtocol >= Info::PROTOCOL_567){
+			$this->putByte(0); // mute emote announcements
+		}
 		$this->putString(''); // Vanila version
 				
 					
