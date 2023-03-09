@@ -74,12 +74,25 @@ class BinaryStream {
 		return $this->offset;
 	}
 
-	public function get($len) {
-		if ($len < 0) {
+	public function get($len){
+		if($len < 0){
 			$this->offset = strlen($this->buffer) - 1;
+
 			return "";
-		} else if ($len === true) {
-			return substr($this->buffer, $this->offset);
+		}elseif($len === true){
+			$str = substr($this->buffer, $this->offset);
+			$this->offset = strlen($this->buffer);
+
+			return $str;
+		}
+                
+		$rem = strlen($this->buffer) - $this->offset;
+		if($rem < $len){
+			throw new \ErrorException("Запрошено слишком много байтов");
+		}
+		
+		if(!isset($this->buffer{$this->offset})){
+			throw new \ErrorException("Выход за границы буфера");
 		}
 		if (strlen($this->buffer) < $this->offset + $len) {
 			throw new \Exception('binary stream get error');
