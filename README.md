@@ -1,9 +1,8 @@
 # DEPRECATED
 
-Lifeboat Survival Games is migrating to [PocketMine-MP](https://github.com/pmmp/PocketMine-MP).
+**Steadfast2 is no longer supported as of Minecraft: Bedrock Edition 1.19.70 and will receive no further updates.**
 
-Once this migration is completed, Steadfast2 will **no longer be updated**.
-This is expected to happen in the near future.
+Lifeboat Survival Games has now migrated to [PocketMine-MP](https://github.com/pmmp/PocketMine-MP).
 
 # Steadfast2 Minecraft PE Server Software
 
