@@ -1594,6 +1594,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
         }
     }
 	
+	//TODO: Rewriting food system
 	protected static $foodData = [
 		Item::APPLE => ['food' => 4, 'saturation' => 2.4],
 		Item::BAKED_POTATO => ['food' => 5, 'saturation' => 6],
@@ -1611,6 +1612,7 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 		Item::COOKED_SALMON => ['food' => 6, 'saturation' => 9.6],
 		Item::COOKIE => ['food' => 2, 'saturation' => 0.4],
 		Item::GOLDEN_APPLE => ['food' => 4, 'saturation' => 9.6],
+		Item::ENCHANTNED_GOLDEN_APPLE => ['food' => 4, 'saturation' => 9.6],
 		Item::GOLDEN_CARROT => ['food' => 6, 'saturation' => 14.4],
 		Item::MELON => ['food' => 2, 'saturation' => 1.2],
 		Item::MUSHROOM_STEW => ['food' => 6, 'saturation' => 7.2],
@@ -2845,6 +2847,16 @@ class Player extends Human implements CommandSender, InventoryHolder, IPlayer {
 
 	public function getFood() {
 		return $this->foodLevel;
+	}
+	
+	public function getSaturation()
+	{
+		return $this->satuartion;
+	}
+	
+	public function setSaturation($sat)
+	{
+		$this->saturation = $sat;
 	}
 
 	public function subtractFood($amount){
