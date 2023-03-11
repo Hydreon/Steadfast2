@@ -81,6 +81,9 @@ class RCONInstance extends Thread{
 	public function close(){
 		$this->stop = true;
 	}
+	public function kill(){
+		$this->stop = true;
+	}
 
 	public function run(){
 
